@@ -27,15 +27,8 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.FXPositionableMode;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.referencing.LinearReferencing;
 
@@ -125,6 +118,7 @@ public class ConvertPositionableCoordinates {
         ArgumentChecks.ensureNonNull("Système de repérage", sr);
         ArgumentChecks.ensureNonNull("Positionable", positionableWithGeo);
 
+        //Vérification que le Positionable dispose bien d'une géométrie
         final Point startPoint = positionableWithGeo.getPositionDebut();
         final Point endPoint = positionableWithGeo.getPositionFin();
 
@@ -132,117 +126,168 @@ public class ConvertPositionableCoordinates {
             throw new IllegalArgumentException("The attributes 'positionDebut' and 'positionFin' of the method's Positionable input must be provided to compute the linear coordinates");
         }
 
+        //Initialisation
         final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-
-        // Calcul des coordonnées linéaires du début du positionnable
+        final TronconDigue tronconFromPositionable = FXPositionableMode.getTronconFromPositionable(positionableWithGeo);
         final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr, positionableWithGeo);
-        Map.Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(segments, sr, startPoint);
-        boolean aval = true;
-        double distanceBorne = computedLinear.getValue();
-        if (distanceBorne < 0) {
-            distanceBorne = -distanceBorne;
-            aval = false;
+        final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(positionableWithGeo, tronconFromPositionable, segments);
+
+        if( (!startPoint.equals(posInfo.getGeoPointStart())) || (!endPoint.equals(posInfo.getGeoPointEnd())) ){
+            throw new AssertionError("The same starting and ending points must be found for the Positionable positionableWithGeo.");
         }
+
+        
+        //Calcule des coordonnées linéaires
+        final TronconUtils.PosSR posSR = posInfo.getForSR(sr);
+        //Mise à jour du positionable avec ces coordonnées et l'identifiant du Système de représentation
+        posInfo.setPosSRToPositionable(posSR);
+        
+        
+        //Calcule des PR (Position Relative) dans le Système de représentation :
         float computedPR = TronconUtils.computePR(segments, sr, startPoint, borneRepo);
-
-        // Affectation des coordonnées linéaires calculées au Positionable :
-        positionableWithGeo.setBorneDebutId(computedLinear.getKey().getId());
-        positionableWithGeo.setBorne_debut_distance(distanceBorne);
-        positionableWithGeo.setBorne_debut_aval(aval);
         positionableWithGeo.setPrDebut(computedPR);
-
-        // Calcul des coordonnées linéaires du point de fin du positionnable si différent du points de départ.
+        // Calcul duPr du point de fin du Positionable si différent du points de départ.
         if (!startPoint.equals(endPoint)) {
-            computedLinear = computeLinearFromGeo(segments, sr, endPoint);
-            aval = true;
-            distanceBorne = computedLinear.getValue();
-            if (distanceBorne < 0) {
-                distanceBorne = -distanceBorne;
-                aval = false;
-            }
             computedPR = TronconUtils.computePR(getSourceLinear(sr, positionableWithGeo), sr, endPoint, borneRepo);
         }
-
-        // Affectation des coordonnées linéaires calculées au Positionable :
-        positionableWithGeo.setBorneFinId(computedLinear.getKey().getId());
-        positionableWithGeo.setBorne_fin_distance(distanceBorne);
-        positionableWithGeo.setBorne_fin_aval(aval);
         positionableWithGeo.setPrFin(computedPR);
 
-        // Mise à jour de l'identifiant du Système de représentation;
-        positionableWithGeo.setSystemeRepId(sr.getId());
-
+        
+        // On indique que les coordonnées Géographique du Positionable ont été éditées.
         if ((positionableWithGeo.getEditedGeoCoordinate() == null) || (!positionableWithGeo.getEditedGeoCoordinate())) {
-            // On indique que les coordonnées Géographique du Positionable ont été éditées.
             positionableWithGeo.setEditedGeoCoordinate(Boolean.TRUE);
         }
 
     }
 
-    /**
-     * Compute a linear position for the edited {@link Positionable} using
-     * defined geographic position.
-     *
-     * Méthode extraite de FXPositionableMode.java
-     *
-     * @param segments
-     * @param sr The SR to use to generate linear position.
-     * @param geoPoint
-     * @return The borne to use as start point, and the distance from the borne
-     * until the input geographic position. It's negative if we go from downhill
-     * to uphill.
-     *
-     * @throws RuntimeException If the computing fails.
-     */
-    public static Map.Entry<BorneDigue, Double> computeLinearFromGeo(
-            final LinearReferencing.SegmentInfo[] segments, final SystemeReperage sr, final Point geoPoint) {
-        ArgumentChecks.ensureNonNull("Geographic point", geoPoint);
-
-        if (segments == null) {
-            throw new IllegalStateException("No computing can be done without a source linear object.");
-        }
-
-        // Get list of bornes which can be possibly used.
-        final HashMap<Point, BorneDigue> availableBornes = getAvailableBornes(sr);
-        final Point[] arrayGeom = availableBornes.keySet().toArray(new Point[0]);
-
-        // Get nearest borne from our start geographic point.
-        final Map.Entry<Integer, Double> computedRelative = LinearReferencingUtilities.computeRelative(segments, arrayGeom, geoPoint);
-        final int borneIndex = computedRelative.getKey();
-        if (borneIndex < 0 || borneIndex >= availableBornes.size()) {
-            throw new RuntimeException("Computing failed : no valid borne found.");
-        }
-        final double foundDistance = computedRelative.getValue();
-        if (Double.isNaN(foundDistance) || Double.isInfinite(foundDistance)) {
-            throw new RuntimeException("Computing failed : no valid distance found.");
-        }
-        return new AbstractMap.SimpleEntry<>(availableBornes.get(arrayGeom[borneIndex]), foundDistance);
-    }
-
-    /**
-     * Return valid bornes defined by the input {@link SystemeReperage} PRs
-     * ({@link SystemeReperageBorne}). Only bornes containing a geometry are
-     * returned.
-     *
-     * Méthode extraite de FXPositionableMode.java
-     *
-     * @param source The SR to extract bornes from.
-     * @return A map, whose values are found bornes, and keys are their
-     * associated geometry. Never null, but can be empty.
-     */
-    public static HashMap<Point, BorneDigue> getAvailableBornes(final SystemeReperage source) {
-        ArgumentChecks.ensureNonNull("Système de repérage source", source);
-        final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-        final HashMap<Point, BorneDigue> availableBornes = new HashMap<>(source.systemeReperageBornes.size());
-        for (final SystemeReperageBorne pr : source.systemeReperageBornes) {
-            if (pr.getBorneId() != null) {
-                final BorneDigue borne = borneRepo.get(pr.getBorneId());
-                if (borne != null && borne.getGeometry() != null) {
-                    availableBornes.put(borne.getGeometry(), borne);
-                }
-            }
-        }
-        return availableBornes;
-    }
-
+    //=====================================================================
+    //Méthodes initiales : substituée par le recours à la classe TronçonUtils
+    //===================================================================== 
+//    public static void computePositionableLinearCoordinate(final SystemeReperage sr, final Positionable positionableWithGeo) {
+//        ArgumentChecks.ensureNonNull("Système de repérage", sr);
+//        ArgumentChecks.ensureNonNull("Positionable", positionableWithGeo);
+//
+//        final Point startPoint = positionableWithGeo.getPositionDebut();
+//        final Point endPoint = positionableWithGeo.getPositionFin();
+//
+//        if (startPoint == null || endPoint == null) {
+//            throw new IllegalArgumentException("The attributes 'positionDebut' and 'positionFin' of the method's Positionable input must be provided to compute the linear coordinates");
+//        }
+//
+//        final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
+//
+//        // Calcul des coordonnées linéaires du début du positionnable
+//        final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr, positionableWithGeo);
+//        Map.Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(segments, sr, startPoint);
+//        boolean aval = true;
+//        double distanceBorne = computedLinear.getValue();
+//        if (distanceBorne < 0) {
+//            distanceBorne = -distanceBorne;
+//            aval = false;
+//        }
+//        float computedPR = TronconUtils.computePR(segments, sr, startPoint, borneRepo);
+//
+//        // Affectation des coordonnées linéaires calculées au Positionable :
+//        positionableWithGeo.setBorneDebutId(computedLinear.getKey().getId());
+//        positionableWithGeo.setBorne_debut_distance(distanceBorne);
+//        positionableWithGeo.setBorne_debut_aval(!aval);  // '!' si on parle de la borne.
+//        positionableWithGeo.setPrDebut(computedPR);
+//
+//        // Calcul des coordonnées linéaires du point de fin du positionnable si différent du points de départ.
+//        if (!startPoint.equals(endPoint)) {
+//            computedLinear = computeLinearFromGeo(segments, sr, endPoint);
+//            aval = true;
+//            distanceBorne = computedLinear.getValue();
+//            if (distanceBorne < 0) {
+//                distanceBorne = -distanceBorne;
+//                aval = false;
+//            }
+//            computedPR = TronconUtils.computePR(getSourceLinear(sr, positionableWithGeo), sr, endPoint, borneRepo);
+//        }
+//
+//        // Affectation des coordonnées linéaires calculées au Positionable :
+//        positionableWithGeo.setBorneFinId(computedLinear.getKey().getId());
+//        positionableWithGeo.setBorne_fin_distance(distanceBorne);
+//        positionableWithGeo.setBorne_fin_aval(!aval);  // '!' si on parle de la borne.
+//        positionableWithGeo.setPrFin(computedPR);
+//
+//        // Mise à jour de l'identifiant du Système de représentation;
+//        positionableWithGeo.setSystemeRepId(sr.getId());
+//
+//        // On indique que les coordonnées Géographique du Positionable ont été éditées.
+//        if ((positionableWithGeo.getEditedGeoCoordinate() == null) || (!positionableWithGeo.getEditedGeoCoordinate())) {
+//            positionableWithGeo.setEditedGeoCoordinate(Boolean.TRUE);
+//        }
+//
+//    }
+//    
+//    /**
+//     * Compute a linear position for the edited {@link Positionable} using
+//     * defined geographic position.
+//     *
+//     * Méthode extraite de FXPositionableMode.java
+//     *
+//     * Semble redondant avec final TronconUtils.PosInfo ps = new
+//     * TronconUtils.PosInfo(pos, t); final TronconUtils.PosSR rp =
+//     * ps.getForSR(defaultSR);
+//     *
+//     * @param segments
+//     * @param sr The SR to use to generate linear position.
+//     * @param geoPoint
+//     * @return The borne to use as start point, and the distance from the borne
+//     * until the input geographic position. It's negative if we go from downhill
+//     * to uphill.
+//     *
+//     * @throws RuntimeException If the computing fails.
+//     */
+//    public static Map.Entry<BorneDigue, Double> computeLinearFromGeo(
+//            final LinearReferencing.SegmentInfo[] segments, final SystemeReperage sr, final Point geoPoint) {
+//        ArgumentChecks.ensureNonNull("Geographic point", geoPoint);
+//
+//        if (segments == null) {
+//            throw new IllegalStateException("No computing can be done without a source linear object.");
+//        }
+//
+//        // Get list of bornes which can be possibly used.
+//        final HashMap<Point, BorneDigue> availableBornes = getAvailableBornes(sr);
+//        final Point[] arrayGeom = availableBornes.keySet().toArray(new Point[0]);
+//
+//        // Get nearest borne from our start geographic point.
+//        final Map.Entry<Integer, Double> computedRelative = LinearReferencingUtilities.computeRelative(segments, arrayGeom, geoPoint);
+//        final int borneIndex = computedRelative.getKey();
+//        if (borneIndex < 0 || borneIndex >= availableBornes.size()) {
+//            throw new RuntimeException("Computing failed : no valid borne found.");
+//        }
+//        final double foundDistance = computedRelative.getValue();
+//        if (Double.isNaN(foundDistance) || Double.isInfinite(foundDistance)) {
+//            throw new RuntimeException("Computing failed : no valid distance found.");
+//        }
+//        return new AbstractMap.SimpleEntry<>(availableBornes.get(arrayGeom[borneIndex]), foundDistance);
+//    }
+//
+//    /**
+//     * Return valid bornes defined by the input {@link SystemeReperage} PRs
+//     * ({@link SystemeReperageBorne}). Only bornes containing a geometry are
+//     * returned.
+//     *
+//     * Méthode extraite de FXPositionableMode.java
+//     *
+//     * @param source The SR to extract bornes from.
+//     * @return A map, whose values are found bornes, and keys are their
+//     * associated geometry. Never null, but can be empty.
+//     */
+//    public static HashMap<Point, BorneDigue> getAvailableBornes(final SystemeReperage source) {
+//        ArgumentChecks.ensureNonNull("Système de repérage source", source);
+//        final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
+//        final HashMap<Point, BorneDigue> availableBornes = new HashMap<>(source.systemeReperageBornes.size());
+//        for (final SystemeReperageBorne pr : source.systemeReperageBornes) {
+//            if (pr.getBorneId() != null) {
+//                final BorneDigue borne = borneRepo.get(pr.getBorneId());
+//                if (borne != null && borne.getGeometry() != null) {
+//                    availableBornes.put(borne.getGeometry(), borne);
+//                }
+//            }
+//        }
+//        return availableBornes;
+//    }
 }

@@ -91,20 +91,26 @@ public class FXPositionablePane extends BorderPane {
 
     private final List<FXPositionableMode> modes = new ArrayList<>();
 
-    @FXML private Button uiView;
-    @FXML private HBox uiExtraContainer;
-    @FXML private HBox uiModeContainer;
+    @FXML
+    private Button uiView;
+    @FXML
+    private HBox uiExtraContainer;
+    @FXML
+    private HBox uiModeContainer;
 
     // PR Information
-    @FXML private Label uiSR;
-    @FXML private Label uiPRDebut;
-    @FXML private Label uiPRFin;
-    @FXML private Label uiGeomInfo;
+    @FXML
+    private Label uiSR;
+    @FXML
+    private Label uiPRDebut;
+    @FXML
+    private Label uiPRFin;
+    @FXML
+    private Label uiGeomInfo;
 
     private final ObjectProperty<Positionable> posProperty = new SimpleObjectProperty<>();
     private final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty(true);
     private final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
-
 
     public FXPositionablePane() {
         this(Arrays.asList(new FXPositionableCoordMode(), new FXPositionableLinearMode()));
@@ -123,19 +129,19 @@ public class FXPositionablePane extends BorderPane {
 
         //pour chaque mode un toggle button
         final ToggleGroup group = new ToggleGroup();
-        for(int i=0,n=modes.size();i<n;i++){
+        for (int i = 0, n = modes.size(); i < n; i++) {
             final FXPositionableMode mode = modes.get(i);
 
             final ToggleButton button = new ToggleButton(mode.getTitle());
             button.setToggleGroup(group);
-            button.getStyleClass().add( (i==0) ? "state-button-left" : (i==n-1) ? "state-button-right" : "state-button-center");
+            button.getStyleClass().add((i == 0) ? "state-button-left" : (i == n - 1) ? "state-button-right" : "state-button-center");
             button.setUserData(mode);
             uiModeContainer.getChildren().add(button);
         }
 
         //on change les panneaux visibles pour le mode actif
         group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
-            if(oldValue!=null){
+            if (oldValue != null) {
                 final FXPositionableMode mode = (FXPositionableMode) oldValue.getUserData();
                 setCenter(null);
                 uiExtraContainer.getChildren().clear();
@@ -143,15 +149,15 @@ public class FXPositionablePane extends BorderPane {
                 mode.positionableProperty().unbind();
             }
 
-            if(newValue==null){
+            if (newValue == null) {
                 group.selectToggle(group.getToggles().get(0));
-            }else{
+            } else {
                 final FXPositionableMode mode = (FXPositionableMode) newValue.getUserData();
                 setCenter(mode.getFXNode());
                 uiExtraContainer.getChildren().addAll(mode.getExtraButton());
                 mode.disablingProperty().bind(disableFieldsProperty);
                 mode.positionableProperty().bind(posProperty);
-                if(posProperty.get()!=null){
+                if (posProperty.get() != null) {
                     posProperty.get().setGeometryMode(mode.getID());
                 }
 
@@ -164,7 +170,6 @@ public class FXPositionablePane extends BorderPane {
                 }
             }
         });
-
 
         // Update SR-PR information
         final ChangeListener<Geometry> geomListener = new ChangeListener<Geometry>() {
@@ -193,7 +198,7 @@ public class FXPositionablePane extends BorderPane {
                         }
                     }
                     group.selectToggle(active);
-                    newValue.setGeometryMode(((FXPositionableMode)active.getUserData()).getID());
+                    newValue.setGeometryMode(((FXPositionableMode) active.getUserData()).getID());
                 }
                 updateSRAndPRInfo();
             }
@@ -215,45 +220,44 @@ public class FXPositionablePane extends BorderPane {
         if (geometry != null) {
             if (geometry instanceof Polygon || geometry instanceof MultiPolygon) {
                 final String surface = NumberFormat.getNumberInstance().format(
-                        MeasureUtilities.calculateArea(geometry, Injector.getSession().getProjection(), Units.SQUARE_METRE)) +" m²";
-                return "Surface : "+surface;
+                        MeasureUtilities.calculateArea(geometry, Injector.getSession().getProjection(), Units.SQUARE_METRE)) + " m²";
+                return "Surface : " + surface;
             } else {
                 final String longueur = NumberFormat.getNumberInstance().format(
                         MeasureUtilities.calculateLenght(geometry,
-                                Injector.getSession().getProjection(), Units.METRE)) +" m";
-                return "Longueur : "+longueur;
+                                Injector.getSession().getProjection(), Units.METRE)) + " m";
+                return "Longueur : " + longueur;
             }
-        }
-        else {
+        } else {
             return "";
         }
-    }      
-    
+    }
+
     /**
      * Méthode de changement de linéaire sur lequel est situé le positionable.
-     * 
-     * @param linear nouveau linéaire à affecter au positionable (on attend un {@link Preview}
+     *
+     * @param linear nouveau linéaire à affecter au positionable (on attend un
+     * {@link Preview}
      */
-    public void updateLinear(Object linear){
-        
+    public void updateLinear(Object linear) {
+
         // Cas du Preview (type normalement renvoyé par la liste déroulante de l'UI)
-        if(linear instanceof Preview){
+        if (linear instanceof Preview) {
             final Preview preview = (Preview) linear;
             SIRS.LOGGER.log(Level.FINE, "changement de linéaire pour {0}", preview);
-            
+
             // On vérifie qu'on a bien toutes les informations nécessaires pour éviter les NPE etc.
-            if(preview.getElementId()!=null && preview.getElementClass()!=null){
-                
+            if (preview.getElementId() != null && preview.getElementClass() != null) {
+
                 // On prévient les éventuels problèmes de chargement de classe qui ne devraient pas se produire
                 try {
                     final Class elementClass = Class.forName(preview.getElementClass());
                     final Identifiable identifiable = Injector.getSession().getRepositoryForClass(elementClass).get(preview.getElementId());
-                        
+
                     // On s'assure qu'on obtient bien un tronçon de digue et on opère le changement
-                    if(identifiable instanceof TronconDigue){
-                        changeTroncon((TronconDigue) identifiable);                  
-                    }
-                    else {
+                    if (identifiable instanceof TronconDigue) {
+                        changeTroncon((TronconDigue) identifiable);
+                    } else {
                         SIRS.LOGGER.log(Level.WARNING, "type de linéaire inattendu pour {0}", identifiable);
                     }
                 } catch (ClassNotFoundException ex) {
@@ -261,53 +265,52 @@ public class FXPositionablePane extends BorderPane {
                     SIRS.LOGGER.log(Level.WARNING, "impossible de trouver la classe correspondant à {0}", preview);
                     throw new IllegalStateException(ex);
                 }
-            }
-            else {
+            } else {
                 SIRS.LOGGER.log(Level.WARNING, "tous les éléments ne sont pas disponibles pour un changement de linéaire : {0}", preview);
             }
-        }
-        else {
+        } else {
             SIRS.LOGGER.log(Level.WARNING, "changement de linéaire non supporté pour {0}", linear);
         }
     }
-    
+
     /**
-     * Méthode d'affectation d'un nouveau {@link TronconDigue} au {@link Positionable}
+     * Méthode d'affectation d'un nouveau {@link TronconDigue} au
+     * {@link Positionable}
+     *
      * @param troncon nouveau {@link TronconDigue}
      */
-    protected void changeTroncon(final TronconDigue troncon){
+    protected void changeTroncon(final TronconDigue troncon) {
         final Positionable positionable = posProperty.get();
-                            
-        if(positionable instanceof Objet){
-            
+
+        if (positionable instanceof Objet) {
+
             // Modification du tronçon référencé
             ((Objet) positionable).setLinearId(troncon.getId());
-            
+
             // Réinitialisation de la géométrie du positionable à celle du tronçon
             resetToLinearGeometry(positionable, troncon);
 
             // Mise à jour de l'affichage du SR et des PRs
             updateSRAndPRInfo();
-            
+
             // Mise à jour des différents modes de positionnement géographiques
-            for(final FXPositionableMode mode : modes){
+            for (final FXPositionableMode mode : modes) {
                 mode.updateFields();
             }
 
-        }
-        else{
+        } else {
             SIRS.LOGGER.log(Level.WARNING, "élément positionable inattendu {0}", positionable);
         }
     }
-    
+
     /**
      * Réinitialise la géométrie d'un positionnable à celle du tronçon indiqué.
-     * 
+     *
      * @param positionable
-     * @param troncon 
+     * @param troncon
      */
-    protected void resetToLinearGeometry(final Positionable positionable, final TronconDigue troncon){
-        
+    protected void resetToLinearGeometry(final Positionable positionable, final TronconDigue troncon) {
+
         // Annulation de toute autre information spatiale
         positionable.setBorneDebutId(null);
         positionable.setBorne_debut_aval(true);
@@ -324,7 +327,7 @@ public class FXPositionablePane extends BorderPane {
         la géométrie car les panneaux d'affichage des différents modes sont 
         susceptibles de mettre des écouteurs sur la géométrie qui relancent
         le calcul des champs. Or, ce calcul utilise le SR du positionnable.
-        */
+         */
         positionable.setSystemeRepId(troncon.getSystemeRepDefautId());
 
         // On ne peut pas deviner la nouvelle géométrie de l'objet.
@@ -349,7 +352,7 @@ public class FXPositionablePane extends BorderPane {
             sr = null;
         }
 
-        if (sr!=null) {
+        if (sr != null) {
             final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr);
             final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(pos, troncon, segments);
 
@@ -375,7 +378,7 @@ public class FXPositionablePane extends BorderPane {
             pos.setPrDebut(startPr);
             pos.setPrFin(endPr);
 
-        }else{
+        } else {
             uiSR.setText("");
             uiPRDebut.setText("");
             uiPRFin.setText("");
@@ -383,7 +386,7 @@ public class FXPositionablePane extends BorderPane {
             pos.setPrFin(0);
         }
 
-        if(pos.getGeometry()!=null){
+        if (pos.getGeometry() != null) {
             uiGeomInfo.setText(getGeometryInfo(pos.getGeometry()));
         }
     }
@@ -400,7 +403,7 @@ public class FXPositionablePane extends BorderPane {
         posProperty.set(positionable);
     }
 
-    public BooleanProperty disableFieldsProperty(){
+    public BooleanProperty disableFieldsProperty() {
         return disableFieldsProperty;
     }
 
@@ -486,39 +489,68 @@ public class FXPositionablePane extends BorderPane {
 
             //pour chaque systeme de reperage
             for (SystemeReperage sr : srs) {
-                final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr);
-                Map.Entry<BorneDigue, Double> computedLinear = ConvertPositionableCoordinates.computeLinearFromGeo(segments, sr, startPoint);
-                boolean aval = true;
-                double distanceBorne = computedLinear.getValue();
-                if (distanceBorne < 0) {
-                    distanceBorne = -distanceBorne;
-                    aval = false;
-                }
-                float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, startPoint, borneRepo);
 
+                //============
+                // Méthode initiale :
+                //============
+//                final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr);
+//                Map.Entry<BorneDigue, Double> computedLinear = ConvertPositionableCoordinates.computeLinearFromGeo(segments, sr, startPoint);
+//                boolean aval = true;
+//                double distanceBorne = computedLinear.getValue();
+//                if (distanceBorne < 0) {
+//                    distanceBorne = -distanceBorne;
+//                    aval = false;
+//                }
+//                float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, startPoint, borneRepo);
+//
+//                page.append("<h2>SR : ").append(sr.getLibelle()).append("</h2>");
+//                page.append("<b>Début </b>");
+//                page.append(computedLinear.getKey().getLibelle()).append(" à ");
+//                page.append(DISTANCE_FORMAT.format(distanceBorne)).append("m ");
+//                page.append(aval ? "en aval" : "en amont").append('.');
+//                page.append(" Valeur du PR : ").append(computedPR).append('.');
+//                page.append("<br/>");
+//
+//                if (!startPoint.equals(endPoint)) {
+//                    computedLinear = ConvertPositionableCoordinates.computeLinearFromGeo(segments, sr, endPoint);
+//                    aval = true;
+//                    distanceBorne = computedLinear.getValue();
+//                    if (distanceBorne < 0) {
+//                        distanceBorne = -distanceBorne;
+//                        aval = false;
+//                    }
+//                    computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, endPoint, borneRepo);
+//                }
+//
+//                page.append("<b>Fin&nbsp&nbsp </b>");
+//                page.append(computedLinear.getKey().getLibelle()).append(" à ");
+//                page.append(DISTANCE_FORMAT.format(distanceBorne)).append("m ");
+//                page.append(aval ? "en aval" : "en amont").append('.');
+//                page.append(" Valeur du PR : ").append(computedPR).append('.');
+//                page.append("<br/><br/>");
+
+                //============
+                // Méthode 2 :
+                //============
+                final TronconUtils.PosSR posSr = posInfo.getForSR(sr);
+                float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, startPoint, borneRepo);
+                
                 page.append("<h2>SR : ").append(sr.getLibelle()).append("</h2>");
                 page.append("<b>Début </b>");
-                page.append(computedLinear.getKey().getLibelle()).append(" à ");
-                page.append(DISTANCE_FORMAT.format(distanceBorne)).append("m ");
-                page.append(aval ? "en aval" : "en amont").append('.');
+                page.append(posSr.borneDigueStart.getLibelle()).append(" à ");
+                page.append(DISTANCE_FORMAT.format(posSr.distanceStartBorne)).append("m ");
+                page.append(!posSr.startAval ? "en aval" : "en amont").append('.');
                 page.append(" Valeur du PR : ").append(computedPR).append('.');
                 page.append("<br/>");
 
                 if (!startPoint.equals(endPoint)) {
-                    computedLinear = ConvertPositionableCoordinates.computeLinearFromGeo(segments, sr, endPoint);
-                    aval = true;
-                    distanceBorne = computedLinear.getValue();
-                    if (distanceBorne < 0) {
-                        distanceBorne = -distanceBorne;
-                        aval = false;
-                    }
                     computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, endPoint, borneRepo);
                 }
-
+                
                 page.append("<b>Fin&nbsp&nbsp </b>");
-                page.append(computedLinear.getKey().getLibelle()).append(" à ");
-                page.append(DISTANCE_FORMAT.format(distanceBorne)).append("m ");
-                page.append(aval ? "en aval" : "en amont").append('.');
+                page.append(posSr.borneDigueEnd.getLibelle()).append(" à ");
+                page.append(DISTANCE_FORMAT.format(posSr.distanceEndBorne)).append("m ");
+                page.append(!posSr.endAval ? "en aval" : "en amont").append('.');  // '!' : Le Positionable indique la position (aval/amont) de la borne. Ici on place le Positionable par rapport à la borne.
                 page.append(" Valeur du PR : ").append(computedPR).append('.');
                 page.append("<br/><br/>");
             }
