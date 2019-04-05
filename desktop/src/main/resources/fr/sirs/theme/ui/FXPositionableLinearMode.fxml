@@ -28,6 +28,8 @@
                <children>
                   <Label text="Systeme de Reperage" />
                   <ComboBox fx:id="uiSRs" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" HBox.hgrow="NEVER" />
+                        <Label fx:id="uiLinearCoordLabel" textAlignment="CENTER" styleClass="label-header" text="">
+                        </Label>
                </children>
             </HBox>
             <Label text="Borne" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />

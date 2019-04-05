@@ -43,37 +43,40 @@ public class ConvertPositionableCoordinates {
 //    //===============================
 //    //  Compute Geo from Linear.
 //    //===============================
-//    /**
-//     * Compute current positionable point using linear referencing information
-//     * defined in the form. Returned point is expressed with Database CRS.
-//     *
-//     * Méthode extraite de FXPositionableAbstractLinearMode.java
-//     *
-//     * @param distance
-//     * @param borneProperty
-//     * @param amont
-//     * @param positionable
-//     * @return The point computed from starting borne. If we cannot, we return
-//     * null.
-//     */
-//    public static Point computeGeoFromLinear(final Number distance,
-//            final BorneDigue borneProperty, final boolean amont, final Positionable positionable) {
-//
-////        final Positionable positionable = posProperty.get();
-//        final TronconDigue t = FXPositionableMode.getTronconFromPositionable(positionable);
-//
-//        if (distance != null && borneProperty != null && t != null) {
-//            //calcul à partir des bornes
-//            final Point bornePoint = borneProperty.getGeometry();
-//            double dist = distance.doubleValue();
-//            if (amont) {
-//                dist *= -1;
-//            }
-//            return LinearReferencingUtilities.computeCoordinate(t.getGeometry(), bornePoint, dist, 0);
-//        } else {
-//            return null;
-//        }
-//    }
+    /**
+     * Compute current positionable point using linear referencing information
+     * defined in the form. Returned point is expressed with Database CRS.
+     *
+     * Méthode extraite de FXPositionableAbstractLinearMode.java
+     *
+     * @param distance
+     * @param borneProperty
+     * @param amont
+     * @param positionable
+     * @return The point computed from starting borne. If we cannot, we return
+     * null.
+     */
+    public static Point computeGeoFromLinear(final Number distance,
+            final BorneDigue borneProperty, final boolean amont, final Positionable positionable) {
+
+//        final Positionable positionable = posProperty.get();
+        final TronconDigue t = FXPositionableMode.getTronconFromPositionable(positionable);
+
+        if (distance != null && borneProperty != null && t != null) {
+            //calcul à partir des bornes
+            final Point bornePoint = borneProperty.getGeometry();
+            double dist = distance.doubleValue();
+            if (amont) {
+                dist *= -1;
+            }
+            return LinearReferencingUtilities.computeCoordinate(t.getGeometry(), bornePoint, dist, 0);
+        } else {
+            return null;
+        }
+    }
+    
+   
+    
     /**
      * Calcule de la géométrie et des coordonnées d'un positionable à partir de
      * ses coordonnées linéaires.
@@ -102,7 +105,7 @@ public class ConvertPositionableCoordinates {
             // On indique que les coordonnées Géographique du Positionable n'ont pas été éditées.
             positionableWithLinearCoord.setEditedGeoCoordinate(Boolean.FALSE);
         } catch (RuntimeException re) {
-            SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de géométrie pour le positionable :\n"+
+            SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de géométrie depuis les coordonnées linéaires du positionable :\n"+
                     positionableWithLinearCoord.getDesignation(), re);
 
         }

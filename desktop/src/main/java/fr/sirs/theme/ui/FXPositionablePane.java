@@ -51,6 +51,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -178,6 +179,7 @@ public class FXPositionablePane extends BorderPane {
                 updateSRAndPRInfo();
             }
         };
+        
         posProperty.addListener(new ChangeListener<Positionable>() {
             @Override
             public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
@@ -528,13 +530,12 @@ public class FXPositionablePane extends BorderPane {
 //                page.append(aval ? "en aval" : "en amont").append('.');
 //                page.append(" Valeur du PR : ").append(computedPR).append('.');
 //                page.append("<br/><br/>");
-
                 //============
                 // Méthode 2 :
                 //============
                 final TronconUtils.PosSR posSr = posInfo.getForSR(sr);
                 float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, startPoint, borneRepo);
-                
+
                 page.append("<h2>SR : ").append(sr.getLibelle()).append("</h2>");
                 page.append("<b>Début </b>");
                 page.append(posSr.borneDigueStart.getLibelle()).append(" à ");
@@ -546,7 +547,7 @@ public class FXPositionablePane extends BorderPane {
                 if (!startPoint.equals(endPoint)) {
                     computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, endPoint, borneRepo);
                 }
-                
+
                 page.append("<b>Fin&nbsp&nbsp </b>");
                 page.append(posSr.borneDigueEnd.getLibelle()).append(" à ");
                 page.append(DISTANCE_FORMAT.format(posSr.distanceEndBorne)).append("m ");
