@@ -30,6 +30,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.FXPositionableMode;
+import java.util.function.Function;
 import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.referencing.LinearReferencing;
@@ -39,6 +40,50 @@ import org.geotoolkit.referencing.LinearReferencing;
  * @author Matthieu Bastianelli (Geomatys)
  */
 public class ConvertPositionableCoordinates {
+
+    /**
+     * Implémentation de d'une interface fonctionnelle visant à calculer les
+     * coordonnées manquantes de positionables.
+     */
+    final public static Function<? extends Positionable, ? extends Positionable> COMPUTE_MISSING_COORD = positionable -> {
+
+        try {
+
+            if (positionable == null) {
+                throw new NullPointerException("Null input positionable.");
+            }
+
+            final boolean withLinearCoord = ((positionable.borne_debut_avalProperty() != null)
+                    && (positionable.borne_debut_distanceProperty() != null));
+
+            final boolean withGeoCoord = ((positionable.getPositionDebut() != null)
+                    && (positionable.getPositionFin() != null));;
+
+            //Si aucun type de coordonnées n'est présent on renvoie une exception
+            if ((!withLinearCoord) && (!withGeoCoord)) {
+                throw new IllegalArgumentException("The positionable input must provide at least one kind of coordinates 'Linear or geo' but both of them are empty.");
+
+                // Si les coordonnées sont déjà présentes, aucune modification n'est apportée.
+            } else if ((withLinearCoord) && (withGeoCoord)) {
+                return positionable;
+
+                //Si seules les coordonnées Linéaires sont présentes on essaie de calculer les coordonnées géo    
+            } else if (withLinearCoord) {
+                computePositionableGeometryAndCoord(positionable);
+
+                //Sinon, on essaie de calculer les coordonnées linéaires à partir des coordonnées géo    
+            } else { //withGeoCoord
+
+                final SystemeReperage sr = getDefaultSRforPositionable(positionable);
+                computePositionableLinearCoordinate(sr, positionable);
+
+            }
+        } catch (RuntimeException e) {
+            SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément positionable : " + positionable.getDesignation(), e);
+        }
+
+        return positionable;
+    };
 
 //    //===============================
 //    //  Compute Geo from Linear.
@@ -74,9 +119,7 @@ public class ConvertPositionableCoordinates {
             return null;
         }
     }
-    
-   
-    
+
     /**
      * Calcule de la géométrie et des coordonnées d'un positionable à partir de
      * ses coordonnées linéaires.
@@ -85,9 +128,9 @@ public class ConvertPositionableCoordinates {
      */
     public static void computePositionableGeometryAndCoord(Positionable positionableWithLinearCoord) {
         ArgumentChecks.ensureNonNull("Borne de début du Positionable", positionableWithLinearCoord.getBorneDebutId());
-        ArgumentChecks.ensureNonNull("Borne de fin du Positionable", positionableWithLinearCoord.getBorneFinId());
+//        ArgumentChecks.ensureNonNull("Borne de fin du Positionable", positionableWithLinearCoord.getBorneFinId());
         ArgumentChecks.ensureNonNull("Distance borne début du Positionable", positionableWithLinearCoord.getBorne_debut_distance());
-        ArgumentChecks.ensureNonNull("Distance borne fin du Positionable", positionableWithLinearCoord.getBorne_fin_distance());
+//        ArgumentChecks.ensureNonNull("Distance borne fin du Positionable", positionableWithLinearCoord.getBorne_fin_distance());
 
         try {
 
@@ -104,9 +147,10 @@ public class ConvertPositionableCoordinates {
 
             // On indique que les coordonnées Géographique du Positionable n'ont pas été éditées.
             positionableWithLinearCoord.setEditedGeoCoordinate(Boolean.FALSE);
+
         } catch (RuntimeException re) {
-            SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de géométrie depuis les coordonnées linéaires du positionable :\n"+
-                    positionableWithLinearCoord.getDesignation(), re);
+            SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de géométrie depuis les coordonnées linéaires du positionable :\n"
+                    + positionableWithLinearCoord.getDesignation(), re);
 
         }
 
@@ -141,7 +185,8 @@ public class ConvertPositionableCoordinates {
             }
 
             //Initialisation
-            final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
+            final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class
+            );
             final TronconDigue tronconFromPositionable = FXPositionableMode.getTronconFromPositionable(positionableWithGeo);
             final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr, positionableWithGeo);
             final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(positionableWithGeo, tronconFromPositionable, segments);
@@ -173,6 +218,42 @@ public class ConvertPositionableCoordinates {
                     + positionableWithGeo.getDesignation() + "\n Dans le Système de représentation :\n" + sr.getLibelle(), re);
 
         }
+
+    }
+
+    /**
+     * Méthode permettant de chercher un Système de représentation (SR) pour un
+     * élément 'Positionable' donné.
+     *
+     *
+     *
+     * @param positionable
+     * @return SystemeReperage sr : Système de repérage associé à l'attribut
+     * SystemeRepId du positionable ou s'il n'est pas donné, le SR par défaut du
+     * tronçon sur lequel est placé le positionable.
+     *
+     * Throws RuntimeException si aucun SR n'a été trouvé.
+     */
+    public static SystemeReperage getDefaultSRforPositionable(final Positionable positionable) {
+        ArgumentChecks.ensureNonNull("Positionable positionable", positionable);
+
+        final SystemeReperage sr;
+
+        //On cherche le Système de repérage dans lequel calculer les coordonnées.
+        if (positionable.getSystemeRepId() != null) {
+            sr = Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(positionable.getSystemeRepId());
+        } else {
+            //Si le positionable n'a pas de SR renseigné, on prend celui par défaut du tronçon.
+            final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
+            sr = Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(troncon.getSystemeRepDefautId());
+        }
+
+        if (sr == null) {
+            // On signale par une RuntimeException que le Système de représentation n'a pas été trouvé.
+            throw new RuntimeException("Système de repérage non trouvé pour le positionable : " + positionable.getDesignation());
+        }
+
+        return sr;
 
     }
 
