@@ -179,7 +179,7 @@ public class FXPositionablePane extends BorderPane {
                 updateSRAndPRInfo();
             }
         };
-        
+
         posProperty.addListener(new ChangeListener<Positionable>() {
             @Override
             public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
@@ -533,27 +533,32 @@ public class FXPositionablePane extends BorderPane {
                 //============
                 // Méthode 2 :
                 //============
-                final TronconUtils.PosSR posSr = posInfo.getForSR(sr);
-                float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, startPoint, borneRepo);
+                try {
+                    final TronconUtils.PosSR posSr = posInfo.getForSR(sr);
+                    float computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, startPoint, borneRepo);
 
-                page.append("<h2>SR : ").append(sr.getLibelle()).append("</h2>");
-                page.append("<b>Début </b>");
-                page.append(posSr.borneDigueStart.getLibelle()).append(" à ");
-                page.append(DISTANCE_FORMAT.format(posSr.distanceStartBorne)).append("m ");
-                page.append(!posSr.startAval ? "en aval" : "en amont").append('.');
-                page.append(" Valeur du PR : ").append(computedPR).append('.');
-                page.append("<br/>");
+                    page.append("<h2>SR : ").append(sr.getLibelle()).append("</h2>");
+                    page.append("<b>Début </b>");
+                    page.append(posSr.borneDigueStart.getLibelle()).append(" à ");
+                    page.append(DISTANCE_FORMAT.format(posSr.distanceStartBorne)).append("m ");
+                    page.append(!posSr.startAval ? "en aval" : "en amont").append('.');
+                    page.append(" Valeur du PR : ").append(computedPR).append('.');
+                    page.append("<br/>");
 
-                if (!startPoint.equals(endPoint)) {
-                    computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, endPoint, borneRepo);
+                    if (!startPoint.equals(endPoint)) {
+                        computedPR = TronconUtils.computePR(getSourceLinear(sr), sr, endPoint, borneRepo);
+                    }
+
+                    page.append("<b>Fin&nbsp&nbsp </b>");
+                    page.append(posSr.borneDigueEnd.getLibelle()).append(" à ");
+                    page.append(DISTANCE_FORMAT.format(posSr.distanceEndBorne)).append("m ");
+                    page.append(!posSr.endAval ? "en aval" : "en amont").append('.');  // '!' : Le Positionable indique la position (aval/amont) de la borne. Ici on place le Positionable par rapport à la borne.
+                    page.append(" Valeur du PR : ").append(computedPR).append('.');
+                    page.append("<br/><br/>");
+                    
+                } catch (Exception e) {
+                    SIRS.LOGGER.log(Level.WARNING,"Echec du calcul de PR pour le système de repérage : "+sr.getLibelle(), e);
                 }
-
-                page.append("<b>Fin&nbsp&nbsp </b>");
-                page.append(posSr.borneDigueEnd.getLibelle()).append(" à ");
-                page.append(DISTANCE_FORMAT.format(posSr.distanceEndBorne)).append("m ");
-                page.append(!posSr.endAval ? "en aval" : "en amont").append('.');  // '!' : Le Positionable indique la position (aval/amont) de la borne. Ici on place le Positionable par rapport à la borne.
-                page.append(" Valeur du PR : ").append(computedPR).append('.');
-                page.append("<br/><br/>");
             }
         }
         page.append("</html></body>");

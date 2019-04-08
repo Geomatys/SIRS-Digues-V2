@@ -162,6 +162,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
             }
         };
 
+        //Listener permettant d'indiquer si les coordonnées sont calculées ou éditées
         final ChangeListener<Boolean> updateEditedGeoCoordinatesDisplay = (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             setCoordinatesLabel(oldValue, newValue);
         };
@@ -176,6 +177,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
                 if (newValue != null) {
                     newValue.geometryProperty().addListener(geomListener);
                     newValue.editedGeoCoordinateProperty().addListener(updateEditedGeoCoordinatesDisplay);
+                    setCoordinatesLabel(null, posProperty.get().getEditedGeoCoordinate());
                     updateFields();
                 }
             }
@@ -200,7 +202,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
      * editedGeoCoordinate du positionable courant. Null si ont l'ignore.
      * @param newEditedGeoCoordinate nouvelle valeur.
      */
-    protected void setCoordinatesLabel(Boolean oldEditedGeoCoordinate, Boolean newEditedGeoCoordinate){
+    final protected void setCoordinatesLabel(Boolean oldEditedGeoCoordinate, Boolean newEditedGeoCoordinate){
        if (newEditedGeoCoordinate == null) {
                 uiLinearCoordLabel.setText("Le mode d'obtention du type de coordonnées n'est pas renseigné.");
                 return;

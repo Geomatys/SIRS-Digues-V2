@@ -103,7 +103,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
     protected Spinner<Double> uiLatitudeStart;
     @FXML
     protected Spinner<Double> uiLatitudeEnd;
-    
+
     @FXML
     protected Label uiGeoCoordLabel;
 
@@ -162,7 +162,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
 
         // Listener pour les changements sur les points de début et de fin, dans le cadre de l'import de bornes par exemple.
         final ChangeListener<Point> pointListener = (obs, oldVal, newVal) -> updateFields();
-        
+
         //Listener permettant d'indiquer si les coordonnées sont calculées ou éditées
         final ChangeListener<Boolean> updateEditedGeoCoordinatesDisplay = (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             setCoordinatesLabel(oldValue, newValue);
@@ -182,13 +182,13 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
                     newValue.positionDebutProperty().addListener(pointListener);
                     newValue.positionFinProperty().addListener(pointListener);
                     newValue.editedGeoCoordinateProperty().addListener(updateEditedGeoCoordinatesDisplay);
-                    setCoordinatesLabel(null, newValue.getEditedGeoCoordinate());
+                    setCoordinatesLabel(null, posProperty.get().getEditedGeoCoordinate());
                     updateFields();
                 }
             }
         });
 
-        final ChangeListener<Double> valListener = (ObservableValue<? extends Double> observable, Double oldValue, Double newValue) -> coordChange();        
+        final ChangeListener<Double> valListener = (ObservableValue<? extends Double> observable, Double oldValue, Double newValue) -> coordChange();
         uiLongitudeStart.valueProperty().addListener(valListener);
         uiLatitudeStart.valueProperty().addListener(valListener);
         uiLongitudeEnd.valueProperty().addListener(valListener);
@@ -205,21 +205,21 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
      * editedGeoCoordinate du positionable courant. Null si ont l'ignore.
      * @param newEditedGeoCoordinate nouvelle valeur.
      */
-    protected void setCoordinatesLabel(Boolean oldEditedGeoCoordinate, Boolean newEditedGeoCoordinate){
+    protected void setCoordinatesLabel(Boolean oldEditedGeoCoordinate, Boolean newEditedGeoCoordinate) {
         if (newEditedGeoCoordinate == null) {
-                uiGeoCoordLabel.setText("Le mode d'obtention du type de coordonnées n'est pas renseigné.");
-                return;
-            } else if ((oldEditedGeoCoordinate!=null) && (oldEditedGeoCoordinate.equals(newEditedGeoCoordinate))) {
-                return;
-            }
+            uiGeoCoordLabel.setText("Le mode d'obtention du type de coordonnées n'est pas renseigné.");
+            return;
+        } else if ((oldEditedGeoCoordinate != null) && (oldEditedGeoCoordinate.equals(newEditedGeoCoordinate))) {
+            return;
+        }
 
-            if (newEditedGeoCoordinate) {
-                uiGeoCoordLabel.setText("Coordonnées saisies");
-            } else {
-                uiGeoCoordLabel.setText("Coordonnées calculées");
-            }
+        if (newEditedGeoCoordinate) {
+            uiGeoCoordLabel.setText("Coordonnées saisies");
+        } else {
+            uiGeoCoordLabel.setText("Coordonnées calculées");
+        }
     }
-    
+
     @Override
     public String getTitle() {
         return "Coordonnée";
@@ -394,7 +394,9 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
     }
 
     protected void coordChange() {
-        if (reseting) {return;}
+        if (reseting) {
+            return;
+        }
         reseting = true;
         try {
             buildGeometry();

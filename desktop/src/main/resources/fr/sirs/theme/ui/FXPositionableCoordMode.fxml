@@ -33,11 +33,12 @@
                     <children>
                         <Label text="Système de coordonnées " />
                         <ComboBox fx:id="uiCRSs" maxWidth="1.7976931348623157E308" />
-                        <Label fx:id="uiGeoCoordLabel" textAlignment="CENTER" styleClass="label-header" text="">
-                        </Label>
                     </children>
                 </HBox>
-                <Label text="X (longitude)" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                <Label fx:id="uiGeoCoordLabel" text="" textAlignment="CENTER" GridPane.columnIndex="4" GridPane.rowIndex="0" >
+                    <font><Font name="System Bold" size="13.0" /></font>
+                </Label>
+                <Label text="X (longitude)" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
                 <Label text="Y (latitude)" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                 <Spinner fx:id="uiLongitudeStart" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                 <Spinner fx:id="uiLatitudeStart" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.rowIndex="2" />
