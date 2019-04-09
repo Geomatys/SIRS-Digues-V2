@@ -56,8 +56,10 @@ public class ConvertPositionableCoordinates {
             final boolean withLinearCoord = ((positionable.borne_debut_avalProperty() != null)
                     && (positionable.borne_debut_distanceProperty() != null));
 
+            
+            //Note : si un seul des 2 points Départ/Fin n'est pas null, on considère ici que le positionable est ponctuel.
             final boolean withGeoCoord = ((positionable.getPositionDebut() != null)
-                    && (positionable.getPositionFin() != null));;
+                    || (positionable.getPositionFin() != null)); 
 
             //Si aucun type de coordonnées n'est présent on renvoie une exception
             if ((!withLinearCoord) && (!withGeoCoord)) {
