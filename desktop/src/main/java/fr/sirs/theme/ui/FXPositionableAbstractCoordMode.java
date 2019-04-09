@@ -111,6 +111,10 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
 
     private boolean reseting = false;
 
+    public void setReseting(boolean reseting) {
+        this.reseting = reseting;
+    }
+    
     public FXPositionableAbstractCoordMode() {
         SIRS.loadFXML(this, Positionable.class);
 

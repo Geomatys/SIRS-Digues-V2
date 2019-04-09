@@ -95,10 +95,14 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
 
     //Indicatif de la coordonnée saisie/calculée.    
     @FXML
-    public Label uiLinearCoordLabel;
+    protected Label uiLinearCoordLabel;
     
     private boolean reseting = false;
 
+    public void setReseting(boolean reseting) {
+        this.reseting = reseting;
+    }
+    
     public FXPositionableAbstractLinearMode() {
         SIRS.loadFXML(this, Positionable.class);
 
