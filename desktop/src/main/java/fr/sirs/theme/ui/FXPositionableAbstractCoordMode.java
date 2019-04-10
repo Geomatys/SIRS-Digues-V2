@@ -28,8 +28,11 @@ import static fr.sirs.SIRS.CRS_WGS84;
 import static fr.sirs.SIRS.ICON_IMPORT_WHITE;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.theme.ui.FXPositionableMode.fxNumberValue;
+import fr.sirs.theme.ui.calculcoordinates.ConvertPositionableCoordinates;
+import static fr.sirs.theme.ui.calculcoordinates.ConvertPositionableCoordinates.getDefaultSRforPositionable;
 import fr.sirs.util.FormattedDoubleConverter;
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
@@ -395,6 +398,9 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         positionable.setPositionFin(endPoint);
         positionable.geometryModeProperty().set(getID());
         positionable.setGeometry(geometry);
+        
+        SystemeReperage sr = ConvertPositionableCoordinates.getDefaultSRforPositionable(positionable);
+        ConvertPositionableCoordinates.computePositionableLinearCoordinate(sr, positionable);
     }
 
     protected void coordChange() {
