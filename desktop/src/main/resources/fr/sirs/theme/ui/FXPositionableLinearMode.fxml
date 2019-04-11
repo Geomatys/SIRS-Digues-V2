@@ -32,7 +32,7 @@
                   <ComboBox fx:id="uiSRs" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" HBox.hgrow="NEVER" />
                </children>
             </HBox>
-            <Label fx:id="uiLinearCoordLabel" textAlignment="LEFT" text="" GridPane.rowIndex="0" GridPane.columnIndex="5">
+            <Label fx:id="uiLinearCoordLabel" textAlignment="CENTER" text="" GridPane.rowIndex="0" GridPane.columnIndex="5">
                 <font><Font name="System Bold" size="13.0" /></font>
             </Label>
             <Label text="Borne" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />

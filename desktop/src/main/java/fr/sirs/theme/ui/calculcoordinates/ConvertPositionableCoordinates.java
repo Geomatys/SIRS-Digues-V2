@@ -45,7 +45,7 @@ public class ConvertPositionableCoordinates {
      * Implémentation de d'une interface fonctionnelle visant à calculer les
      * coordonnées manquantes de positionables.
      */
-    final public static Function<? extends Positionable, ? extends Positionable> COMPUTE_MISSING_COORD = positionable -> {
+    final public static Function<Positionable, Positionable> COMPUTE_MISSING_COORD = positionable -> {
 
         try {
 
@@ -187,8 +187,7 @@ public class ConvertPositionableCoordinates {
             }
 
             //Initialisation
-            final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class
-            );
+            final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
             final TronconDigue tronconFromPositionable = FXPositionableMode.getTronconFromPositionable(positionableWithGeo);
             final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr, positionableWithGeo);
             final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(positionableWithGeo, tronconFromPositionable, segments);
