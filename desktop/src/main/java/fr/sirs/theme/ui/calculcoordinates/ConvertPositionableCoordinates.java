@@ -23,6 +23,7 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.LinearReferencingUtilities;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.BorneDigue;
@@ -30,6 +31,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.FXPositionableMode;
+import fr.sirs.theme.ui.PojoTable;
 import java.util.function.Function;
 import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
@@ -56,10 +58,9 @@ public class ConvertPositionableCoordinates {
             final boolean withLinearCoord = ((positionable.borne_debut_avalProperty() != null)
                     && (positionable.borne_debut_distanceProperty() != null));
 
-            
             //Note : si un seul des 2 points Départ/Fin n'est pas null, on considère ici que le positionable est ponctuel.
             final boolean withGeoCoord = ((positionable.getPositionDebut() != null)
-                    || (positionable.getPositionFin() != null)); 
+                    || (positionable.getPositionFin() != null));
 
             //Si aucun type de coordonnées n'est présent on renvoie une exception
             if ((!withLinearCoord) && (!withGeoCoord)) {
@@ -76,16 +77,47 @@ public class ConvertPositionableCoordinates {
                 //Sinon, on essaie de calculer les coordonnées linéaires à partir des coordonnées géo    
             } else { //withGeoCoord
 
-                final SystemeReperage sr = getDefaultSRforPositionable(positionable);
-                computePositionableLinearCoordinate(sr, positionable);
+                computePositionableLinearCoordinate(positionable);
 
             }
+
         } catch (RuntimeException e) {
-            SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément positionable : " + positionable.getDesignation(), e);
+            SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément positionable.", e);
         }
 
         return positionable;
     };
+
+    /**
+     * Méthode permettant de recalculer les coordonnées linéaires (ou
+     * Géographiques) lorsqu'une propriété associée aux coordonnées
+     * géographiques (respectivement Linéaires) a été modifiée.
+     *
+     * @param PositionableToUpdate l'élément Positionable qui a (déjà!!) été
+     * modifié
+     * @param modifiedPropretieName le nom de la propriété modifiée : doit
+     * correspondre à une (chaîne de caractère) constante de la classe
+     * SirsCore.java (validée par le test unitaire
+     * SirsCoreTest.test_Nom_Methodes_Positionable_Valides() )
+     */
+    public static void computeForModifiedPropertie(Positionable PositionableToUpdate, String modifiedPropretieName) {
+        ArgumentChecks.ensureNonNull("Positionable positionable", PositionableToUpdate);
+        ArgumentChecks.ensureNonNull("Propertie name modifiedPropertirName", modifiedPropretieName);
+
+        //Si c'est une coordonnées Géo qui a été modifiée on recalcule les coordonnées linéaires :
+        if ((modifiedPropretieName.equals(SirsCore.POSITION_DEBUT_FIELD)) || (modifiedPropretieName.equals(SirsCore.POSITION_FIN_FIELD))) {
+
+            computePositionableLinearCoordinate((Positionable) PositionableToUpdate);
+
+            //Si c'est une coordonnées Linéaire qui a été modifiée on recalcule les coordonnées géo :
+        } else if ((modifiedPropretieName.equals(SirsCore.BORNE_DEBUT_AVAL)) || (modifiedPropretieName.equals(SirsCore.BORNE_FIN_AVAL))
+                || (modifiedPropretieName.equals(SirsCore.BORNE_DEBUT_DISTANCE)) || (modifiedPropretieName.equals(SirsCore.BORNE_FIN_DISTANCE))
+                || (modifiedPropretieName.equals(SirsCore.BORNE_DEBUT_ID)) || (modifiedPropretieName.equals(SirsCore.BORNE_FIN_ID))) {
+
+            computePositionableGeometryAndCoord((Positionable) PositionableToUpdate);
+
+        }
+    }
 
 //    //===============================
 //    //  Compute Geo from Linear.
@@ -220,6 +252,26 @@ public class ConvertPositionableCoordinates {
 
         }
 
+    }
+
+    /**
+     * /**
+     * Calcul des coordonnées linéaires et mise à jour d'un Positionable à
+     * partir de ses coordonnées Géométriques MAIS en cherchant un Système de
+     * représentation par défaut pour le positionable donné.
+     *
+     * @param positionableWithGeo
+     */
+    public static void computePositionableLinearCoordinate(final Positionable positionableWithGeo) {
+        ArgumentChecks.ensureNonNull("Positionable", positionableWithGeo);
+
+        final SystemeReperage sr = ConvertPositionableCoordinates.getDefaultSRforPositionable(positionableWithGeo);
+
+        if (sr == null) {
+            throw new NullPointerException("Impossible d'identifier un Système de représentation par défaut pour le positionable : " + positionableWithGeo.getDesignation());
+        }
+
+        computePositionableLinearCoordinate(sr, positionableWithGeo);
     }
 
     /**

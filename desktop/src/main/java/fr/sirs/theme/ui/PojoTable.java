@@ -170,6 +170,7 @@ import jidefx.scene.control.field.NumberField;
 import org.apache.sis.feature.AbstractIdentifiedType;
 import org.apache.sis.feature.DefaultAssociationRole;
 import org.apache.sis.feature.DefaultAttributeType;
+import org.apache.sis.util.ArgumentChecks;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -1205,7 +1206,7 @@ public class PojoTable extends BorderPane implements Printable {
 
         dataSupplierProperty.set(producerWithCoordinates);
     }
-    
+
     protected final void updateTableItems(
             final ObservableValue<? extends Supplier<ObservableList<Element>>> obs,
             final Supplier<ObservableList<Element>> oldSupplier,
@@ -1822,6 +1823,7 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     public void setOnPropertyCommit(final TableColumn.CellEditEvent<Element, Object> event) {
+        ArgumentChecks.ensureNonNull("Event event", event);
         /*
          * We try to update data. If it's a failure, we store exception
          * to give more information to user. In all cases, a notification
@@ -1840,8 +1842,18 @@ public class PojoTable extends BorderPane implements Printable {
         ObservableValue<Object> value = col.getCellObservableValue(pos.getRow());
         if (value instanceof WritableValue) {
             final Object oldValue = value.getValue();
+
             try {
                 ((WritableValue) value).setValue(event.getNewValue());
+
+                //On recalcule les coordonnées si la colonne modifiée correspond à une des propriétées de coordonnées géo ou linéaire.
+                String modifiedPropretieName = ((PojoTable.PropertyColumn) col).getName();
+                if ((event.getRowValue() != null) && (Positionable.class.isAssignableFrom(event.getRowValue().getClass()))) {
+                    
+                    ConvertPositionableCoordinates.computeForModifiedPropertie((Positionable) event.getRowValue(), modifiedPropretieName);
+                    
+                }
+
                 elementEdited(event);
             } catch (Exception e) {
                 SIRS.LOGGER.log(Level.WARNING, "Cannot update field.", e);

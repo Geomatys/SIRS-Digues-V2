@@ -399,8 +399,8 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         positionable.geometryModeProperty().set(getID());
         positionable.setGeometry(geometry);
         
-        SystemeReperage sr = ConvertPositionableCoordinates.getDefaultSRforPositionable(positionable);
-        ConvertPositionableCoordinates.computePositionableLinearCoordinate(sr, positionable);
+        ConvertPositionableCoordinates.computePositionableLinearCoordinate(positionable);
+        
     }
 
     protected void coordChange() {
