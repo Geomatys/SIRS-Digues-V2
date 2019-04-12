@@ -60,6 +60,10 @@ public class SirsCoreTest {
 
             assertTrue(positionableKeys.contains(SirsCore.POSITION_DEBUT_FIELD));
             assertTrue(positionableKeys.contains(SirsCore.POSITION_FIN_FIELD));
+            
+            
+            assertTrue(positionableKeys.contains(SirsCore.PR_DEBUT_FIELD));
+            assertTrue(positionableKeys.contains(SirsCore.PR_FIN_FIELD));
 
         } catch (Exception e) {
             SirsCore.LOGGER.log(Level.WARNING, "La vérification des noms de méthodes pour la classe Positionable a échoué.", e);

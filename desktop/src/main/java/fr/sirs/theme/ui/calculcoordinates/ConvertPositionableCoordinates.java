@@ -103,7 +103,12 @@ public class ConvertPositionableCoordinates {
     public static void computeForModifiedPropertie(Positionable PositionableToUpdate, String modifiedPropretieName) {
         ArgumentChecks.ensureNonNull("Positionable positionable", PositionableToUpdate);
         ArgumentChecks.ensureNonNull("Propertie name modifiedPropertirName", modifiedPropretieName);
-
+        
+        //Si le PR a été modifié on ne permet pas le calcul des coordonnées. Pourra évoluer.
+        if( (modifiedPropretieName.equals(SirsCore.PR_DEBUT_FIELD)) || (modifiedPropretieName.equals(SirsCore.PR_FIN_FIELD)) ){
+            throw new RuntimeException("Impossible de recalculer des coordonnées de position uniquement à partir des PR");      
+        }
+        
         //Si c'est une coordonnées Géo qui a été modifiée on recalcule les coordonnées linéaires :
         if ((modifiedPropretieName.equals(SirsCore.POSITION_DEBUT_FIELD)) || (modifiedPropretieName.equals(SirsCore.POSITION_FIN_FIELD))) {
 
