@@ -18,6 +18,7 @@
  */
 package fr.sirs.theme.ui.columns;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.SIRS;
 import java.io.File;
@@ -39,27 +40,33 @@ import java.util.logging.Level;
 //@Component   
 public class TableColumnsPreferences {
 
+    @JsonIgnore
     private Class pojoClass;
 
+    @JsonIgnore
+    final private ObjectMapper objectMapper = new ObjectMapper();
+    @JsonIgnore
+    final private File filePref;
+
     // Map associant le nom d'une colonne (keys) aux préférences de l'utilisateur (values).
-    private Map<String, ColumnState> withPreferencesColumns;
+    final private Map<String, ColumnState> withPreferencesColumns = new HashMap<>();
 
     public TableColumnsPreferences() {
         this(null);
-
-//        this.pojoClass = null;
-//        this.withPreferencesColumns = new HashMap<>();
     }
 
     public TableColumnsPreferences(final Class pojoClass) {
-        this(pojoClass, new HashMap<>());
-//        this.pojoClass = pojoClass;
+        this.pojoClass = pojoClass;
+        
+        String path = "preferences.json";
+        this.filePref = new File(path);
+        this.loadReferencesFromJsonPath(filePref);
     }
 
-    public TableColumnsPreferences(final Class pojoClass, final Map<String, ColumnState> withPreferencesColumns) {
-        this.pojoClass = pojoClass;
-        this.withPreferencesColumns = withPreferencesColumns;
-    }
+//    public TableColumnsPreferences(final Class pojoClass, final Map<String, ColumnState> withPreferencesColumns) {
+//        this.pojoClass = pojoClass;
+//        this.withPreferencesColumns = withPreferencesColumns;
+//    }
 
     //=========
     //Methodes
@@ -77,8 +84,8 @@ public class TableColumnsPreferences {
      * Récupère les préférences pour un nom de colonne donné.
      *
      * Attention il s'agit des préférences inclues dans la
-     * Map<String, ColumnState>
-     * withPreferencesColumns ; Pas celles du fichier Json.
+     * Map<String, ColumnState> withPreferencesColumns ; Pas celles du fichier
+     * Json.
      *
      * @param columnName : nom de la colonne dont on cherche les préférences.
      * @return ColumnState indiquant les préférences de la colonne 'columnName'.
@@ -96,8 +103,6 @@ public class TableColumnsPreferences {
      * @return boolean : indiquant si la sauvegarde à réussie (if true).
      */
     public boolean saveInJson() {
-
-        final ObjectMapper objectMapper = new ObjectMapper();
 
 //            objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 //            String path = "/src/main/resources/target/" + pojoClass.toString() + "_preferences.json";
@@ -135,18 +140,17 @@ public class TableColumnsPreferences {
      * @param filePref fichier Json comptenant les préférences sauvegardées.
      * @return boolean indiquant si le chargement c'est bien déroulé (true).
      */
-    public boolean loadReferencesFromJsonPath(File filePref) {
-        final ObjectMapper objectMapper = new ObjectMapper();
+    final public boolean loadReferencesFromJsonPath(File filePref) {
         try {
             TableColumnsPreferences readPref = objectMapper.readValue(filePref, TableColumnsPreferences.class);
-            
+
             //Si on trouve des préférences on met à jour la Map withPreferencesColumns
-            if((readPref == null) || (readPref.getWithPreferencesColumns()).isEmpty()){
+            if ((readPref == null) || (readPref.getWithPreferencesColumns()).isEmpty()) {
                 SIRS.LOGGER.log(Level.INFO, "Fichier {0} vide.", filePref);
-            }else{
+            } else {
                 readPref.getWithPreferencesColumns().forEach((name, state) -> {
                     this.withPreferencesColumns.put(name, state);
-                }); 
+                });
             }
             return true;
 
@@ -173,8 +177,8 @@ public class TableColumnsPreferences {
         return withPreferencesColumns;
     }
 
-    public void setWithPreferencesColumns(Map<String, ColumnState> withPreferencesColumns) {
-        this.withPreferencesColumns = withPreferencesColumns;
-    }
+//    public void setWithPreferencesColumns(Map<String, ColumnState> withPreferencesColumns) {
+//        this.withPreferencesColumns = withPreferencesColumns;
+//    }
 
 }
