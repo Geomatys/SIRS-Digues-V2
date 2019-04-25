@@ -918,38 +918,11 @@ public class PojoTable extends BorderPane implements Printable {
 
             //Nettoyage de l'indicateur des colonnes modifiées.
             modifiedColumnsIndices.clear();
-            SIRS.LOGGER.log(Level.INFO, "Fin Sauvegarde de préférences PojoTable.");
-            System.out.println(columnsPreferences);
-
-            ObjectMapper objectMapper = new ObjectMapper();
-
-//            objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
             
-//            String path = "/src/main/resources/target/" + pojoClass.toString() + "_preferences.json";
-//            String path = "/target/" + pojoClass.toString() + "_preferences.json";
-
-            try {
-
-                String path = "preferences.json";
-                File filePref = new File(path);
-                if (!filePref.exists()) {
-                    SIRS.LOGGER.log(Level.INFO, "Création du fichier Json lors de la sauvegarde des préférences utilisateur.");
-                    filePref.createNewFile();
-                }
-
-//                final Path targetDir = basedir.toPath().resolve("target");
-//                if (!Files.isDirectory(targetDir)) {
-//                    Files.createDirectory(targetDir);
-//                }
-//                final File target = targetDir.resolve(project.getArtifactId() + ".json").toFile();
-//                File target = targetDir.resolve(project.getArtifactId() + ".json").toFile();
-                objectMapper.writeValue(filePref, columnsPreferences);
-
-                TableColumnsPreferences prefRead = objectMapper.readValue(filePref, TableColumnsPreferences.class);
-                System.out.println(prefRead.getWithPreferencesColumns());
-            } catch (IOException ioe) {
-                SIRS.LOGGER.log(Level.WARNING, "Echec lors de l'écriture des préférences de la PojoTable.", ioe);
-            }
+            //Sauvegarde des préférences au format Json.
+            columnsPreferences.saveInJson();
+            
+            SIRS.LOGGER.log(Level.INFO, "Fin Sauvegarde de préférences PojoTable.");
 
         }
     };
