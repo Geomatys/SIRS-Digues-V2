@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
-package fr.sirs.theme.ui.pojotable;
+package fr.sirs.theme.ui.columns;
 
-import java.util.ArrayList;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,40 +35,56 @@ import java.util.Map;
 public class TableColumnsPreferences {
 
     private Class pojoClass;
-    
-    // Liste des colonnes 'cachées' par l'utilisateur
-    final private List<String> unVisibleColumns =new ArrayList<>();
 
-    // Map associant le nom de colonne à sa position et largeur : remplie lorsque 
-    // l'utilisateur a rendu une colonne visible, qu'il en a déplacée une ou 
-    // qu'il en a redimensionné une.
-    final private Map<String, Double[]> visibleNameAndwidthColumns = new HashMap<>();
+    // Map associant le nom d'une colonne (keys) aux préférences de l'utilisateur (values).
+    private Map<String, ColumnState> withPreferencesColumns;
 
     public TableColumnsPreferences() {
-        this.pojoClass = null;
+        this(null);
+
+//        this.pojoClass = null;
+//        this.withPreferencesColumns = new HashMap<>();
     }
-    
+
     public TableColumnsPreferences(final Class pojoClass) {
+        this(pojoClass, new HashMap<>());
+//        this.pojoClass = pojoClass;
+    }
+
+    public TableColumnsPreferences(final Class pojoClass, final Map<String, ColumnState> withPreferencesColumns) {
         this.pojoClass = pojoClass;
+        this.withPreferencesColumns = withPreferencesColumns;
     }
 
     public Class getPojoClass() {
         return pojoClass;
     }
 
+    // Utilisable uniquement pour les TableColumnsPreferences 
     public void setPojoClass(Class pojoClass) {
         this.pojoClass = pojoClass;
     }
-    
-    public List<String> getUnVisibleColumns() {
-        return unVisibleColumns;
+
+    public Map<String, ColumnState> getWithPreferencesColumns() {
+        return withPreferencesColumns;
     }
- 
-    public Map<String, Double[]> getVisibleNameAndwidthColumns() {
-        return visibleNameAndwidthColumns;
+    
+    public void setWithPreferencesColumns(Map<String, ColumnState> withPreferencesColumns){
+        this.withPreferencesColumns = withPreferencesColumns;
     }
 
+    /**
+     * Ajout ou mise à jour de préférences pour une colonne.
+     *
+     * @param newColumnPreference
+     */
     
-    
+    public void addColumnPreference(ColumnState newColumnPreference) {
+        this.withPreferencesColumns.put(newColumnPreference.getName(), newColumnPreference);
+    }
+
+    public ColumnState getPreferencesFor(String columnName) {
+        return this.withPreferencesColumns.get(columnName);
+    }
 
 }
