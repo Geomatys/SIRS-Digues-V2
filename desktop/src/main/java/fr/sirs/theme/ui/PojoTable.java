@@ -206,6 +206,7 @@ import org.opengis.filter.Filter;
  * @author Johann Sorel (Geomatys)
  * @author Alexis Manin (Geomatys)
  * @author Samuel Andrés (Geomatys)
+ * @author Matthieu Bastianelli (Geomatys)
  */
 public class PojoTable extends BorderPane implements Printable {
 
@@ -831,7 +832,19 @@ public class PojoTable extends BorderPane implements Printable {
         uiDelete.setTooltip(new Tooltip("Supprimer les éléments sélectionnés"));
         uiFilter.setTooltip(new Tooltip("Filtrer les données"));
 
+        
+        // Préférences utilisateur pour cette PojoTable.
+        columnsPreferences = new TableColumnsPreferences(this.pojoClass);
+        
+        if(!columnsPreferences.getWithPreferencesColumns().isEmpty()){
+            columnsPreferences.applyPreferencesToTableColumns(uiTable.getColumns());
+        }
+        
         updateView();
+        
+        //===============================================================
+        // Suivi des préférences utilisateur pour les colonnes affichées.
+        //===============================================================
 
         //Ajout Listener pour identifier et sauvegarder les modifications de colonnes par l'utilisateur :
         //Identification des changements d'épaisseur.
@@ -842,7 +855,7 @@ public class PojoTable extends BorderPane implements Printable {
             if (!isColumnModifying.getValue()) {
 
                 isColumnModifying.set(true);
-                scheduledExecutorService.schedule(saveColumnsPreferences, 3, TimeUnit.SECONDS);
+                scheduledExecutorService.schedule(saveColumnsPreferences, 3, TimeUnit.SECONDS); 
 
             }
         }));
@@ -860,14 +873,15 @@ public class PojoTable extends BorderPane implements Printable {
             }
         }));
 
+        // Suivi des changement de position des colonnes.
         uiTable.getColumns().addListener((Change<? extends TableColumn<Element, ?>> change) -> {
-
             if (change.next()) {
+                
+                // Lors d'un changement parmi les colonnes de uiTable,
+                // on compare les Id des colonnes avant et après le changement 
+                // pour identifier les changements de position.
                 for (int i = 0; i < change.getTo(); i++) {
-                    if (i <= change.getRemoved().size()) {
-                        System.out.println(i + " : " + change.getList().get(i).getId() + "<->" + change.getRemoved().get(i).getId() + " =>  " + (change.getList().get(i).getId() == change.getRemoved().get(i).getId()));
-                    }
-
+                    //Comparaison avec == ou != car on compare les instances.
                     if (change.getList().get(i).getId() != change.getRemoved().get(i).getId()) {
                         modifiedColumnsIndices.add(i);
                     }
@@ -876,16 +890,13 @@ public class PojoTable extends BorderPane implements Printable {
                 //Changement de position de colonne.
                 if (!isColumnModifying.getValue()) {
                     isColumnModifying.set(true);
-
                     scheduledExecutorService.schedule(saveColumnsPreferences, 3, TimeUnit.SECONDS);
                 }
             }
         });
 
-        // Préférences utilisateur pour cette PojoTable.
-        columnsPreferences = new TableColumnsPreferences(this.pojoClass);
-
-    }
+    }// FIN Constructeur.
+    //==========================================================================
 
     //==========================================================================
     // Préférences utilisateur pour cette PojoTable.
@@ -909,6 +920,7 @@ public class PojoTable extends BorderPane implements Printable {
 
                 TableColumn<Element, ?> column = uiTable.getColumns().get(colIndice);
                 try {
+                    //TODO empêcher la castException -> S'il y a problème de cast on met un nom vide.
                     ColumnState newState = new ColumnState(((PropertyColumn) column).getName(), column.isVisible(), colIndice, (float) column.widthProperty().get());
                     columnsPreferences.addColumnPreference(newState);
                 } catch (Exception e) {
