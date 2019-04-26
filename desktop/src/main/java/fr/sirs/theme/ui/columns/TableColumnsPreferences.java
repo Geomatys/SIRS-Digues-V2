@@ -85,13 +85,7 @@ public class TableColumnsPreferences {
      */
     public void applyPreferencesToTableColumns(List<TableColumn<Element, ?>> columns) {
 
-        System.out.println("Colonnes avant changements :");
-        columns.stream().forEach(col -> System.out.println(getColumnRef(col)));
-
-        List<TableColumn<Element, ?>> oldColumns = new ArrayList<>();
         Map<String, TableColumn<Element, ?>> changedColumns = new HashMap<>();
-
-        oldColumns = columns;
 
         for (int i = 0; i < columns.size(); i++) {
             ColumnState preference = withPreferencesColumns.get(i);
@@ -101,7 +95,7 @@ public class TableColumnsPreferences {
                     TableColumn<Element, ?> updatedColumn = columns.get(i);
 
 //                        if (preference.getName().equals(((PojoTable.PropertyColumn) oldColumns.get(i)).getName())) {
-                    if (!(preference.getName().equals(getColumnRef(oldColumns.get(i))))) {
+                    if (!(preference.getName().equals(getColumnRef(columns.get(i))))) {
                         //nom de colonne différent on alimente 'changedColumns' et on remplace
                         TableColumn<Element, ?> extractedColumn = changedColumns.get(preference.getName());
 
@@ -109,9 +103,9 @@ public class TableColumnsPreferences {
                             //Si la colonne associée à cette position dans les 
                             //préférences ne fait pas partie des colonnes extraites, 
                             //on l'y ajoute puis on la mofifie.
-                            TableColumn<Element, ?> oldColumn = oldColumns.get(i);
+                            TableColumn<Element, ?> oldColumn = columns.get(i);
                             changedColumns.put(getColumnRef(oldColumn), oldColumn);
-                            updatedColumn = oldColumns.stream()
+                            updatedColumn = columns.stream()
                                     .filter(col -> ((getColumnRef(col) != null) && (getColumnRef(col).equals(preference.getName()))))
                                     .findFirst()
                                     .orElseThrow(() -> new RuntimeException("Problème de référencement des colonnes.\n"
@@ -122,7 +116,7 @@ public class TableColumnsPreferences {
                             //Si la colonne fait partie des colonnes extraites,
                             //On la remplace par celle extraite.
 
-                            TableColumn<Element, ?> oldColumn = oldColumns.get(i);
+                            TableColumn<Element, ?> oldColumn = columns.get(i);
                             changedColumns.put(getColumnRef(oldColumn), oldColumn);
 
                             updatedColumn = extractedColumn;
@@ -140,11 +134,7 @@ public class TableColumnsPreferences {
                     columns.set(i, updatedColumn);
                 }
             }
-
         }
-
-        System.out.println("Colonnes changées :");
-        columns.stream().forEach(col -> System.out.println(getColumnRef(col)));
     }
 
     /**
