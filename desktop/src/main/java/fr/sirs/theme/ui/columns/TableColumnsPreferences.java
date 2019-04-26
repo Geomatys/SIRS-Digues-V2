@@ -74,16 +74,19 @@ public class TableColumnsPreferences {
     //=========
     //Methodes
     //=========
-    
     /**
-     * Application des préférences utilisateurs aux colonnes d'une TableView de 
+     * Application des préférences utilisateurs aux colonnes d'une TableView de
      * en attribut d'une PojoTable
-     * 
-     * - Ne marche pas s'il y a suppression de colonnes mais à priori pas possible.
-     * 
-     * @param columns 
+     *
+     * - Ne marche pas s'il y a suppression de colonnes mais à priori pas
+     * possible.
+     *
+     * @param columns
      */
     public void applyPreferencesToTableColumns(List<TableColumn<Element, ?>> columns) {
+
+        System.out.println("Colonnes avant changements :");
+        columns.stream().forEach(col -> System.out.println(getColumnRef(col)));
 
         List<TableColumn<Element, ?>> oldColumns = new ArrayList<>();
         Map<String, TableColumn<Element, ?>> changedColumns = new HashMap<>();
@@ -92,68 +95,77 @@ public class TableColumnsPreferences {
 
         for (int i = 0; i < columns.size(); i++) {
             ColumnState preference = withPreferencesColumns.get(i);
-            if ( !(preference == null) ){
-                if(! (preference.getName() == null) ) {
-                        
-                        TableColumn<Element, ?> updatedColumn = columns.get(i);
-                        
+            if (!(preference == null)) {
+                if (!(preference.getName() == null)) {
+
+                    TableColumn<Element, ?> updatedColumn = columns.get(i);
+
 //                        if (preference.getName().equals(((PojoTable.PropertyColumn) oldColumns.get(i)).getName())) {
+                    if (!(preference.getName().equals(getColumnRef(oldColumns.get(i))))) {
+                        //nom de colonne différent on alimente 'changedColumns' et on remplace
+                        TableColumn<Element, ?> extractedColumn = changedColumns.get(preference.getName());
 
-                        if (!(preference.getName().equals(getColumnRef(oldColumns.get(i))))) {
-                            //nom de colonne différent on alimente 'changedColumns' et on remplace
-                            TableColumn<Element, ?> extractedColumn = changedColumns.get(preference.getName());
+                        if (extractedColumn == null) {
+                            //Si la colonne associée à cette position dans les 
+                            //préférences ne fait pas partie des colonnes extraites, 
+                            //on l'y ajoute puis on la mofifie.
+                            TableColumn<Element, ?> oldColumn = oldColumns.get(i);
+                            changedColumns.put(getColumnRef(oldColumn), oldColumn);
+                            updatedColumn = oldColumns.stream()
+                                    .filter(col -> ((getColumnRef(col) != null) && (getColumnRef(col).equals(preference.getName()))))
+                                    .findFirst()
+                                    .orElseThrow(() -> new RuntimeException("Problème de référencement des colonnes.\n"
+                                    + "Aucune référence de colonne ne correspond au nom de la préférence :\n"
+                                    + preference.getName()));
 
-                            if (extractedColumn == null) {
-                                //Si la colonne associée à cette position dans les 
-                                //préférences ne fait pas partie des colonnes extraites, 
-                                //on l'y ajoute puis on la mofifie.
-                                TableColumn<Element, ?> oldColumn=oldColumns.get(i);
-                                changedColumns.put(getColumnRef(oldColumn), oldColumn);
-                                updatedColumn = oldColumns.stream()
-                                        .filter( col-> ((getColumnRef(col)!=null)&&(getColumnRef(col).equals(preference.getName()))) )
-                                        .findFirst()
-                                        .orElseThrow(() -> new RuntimeException("Problème de référencement des colonnes.\n"
-                                                + "Aucune référence de colonne ne correspond au nom de la préférence."));
-                                
-                                
-                            } else {
-                                //Si la colonne fait partie des colonnes extraites,
-                                //On la remplace par celle extraite.
-                                updatedColumn = extractedColumn;
-                                changedColumns.remove(preference.getName());
+                        } else {
+                            //Si la colonne fait partie des colonnes extraites,
+                            //On la remplace par celle extraite.
 
-                            }
-                            
-                            // mise à jour de l'épaisseur et de la visibilité
-                            updatedColumn.setVisible(preference.isVisible());
-                            updatedColumn.setVisible(preference.isVisible());
-                            
+                            TableColumn<Element, ?> oldColumn = oldColumns.get(i);
+                            changedColumns.put(getColumnRef(oldColumn), oldColumn);
+
+                            updatedColumn = extractedColumn;
+                            changedColumns.remove(preference.getName());
+
                         }
+
+                    }
+
+                    // mise à jour de l'épaisseur et de la visibilité
+                    updatedColumn.setVisible(preference.isVisible());
+//                    updatedColumn.setMinWidth(preference.getWidth());
+                    updatedColumn.setPrefWidth(preference.getWidth());
+
+                    columns.set(i, updatedColumn);
                 }
             }
 
         }
+
+        System.out.println("Colonnes changées :");
+        columns.stream().forEach(col -> System.out.println(getColumnRef(col)));
     }
 
     /**
      * Méthode static permettant d'identifier une colonne par sont Id ou par le
      * nom de sa classe.
-     * 
-     * En effet la plupart des colonnes d'une PojoTable ont un nom permettant de 
-     * les identifier. Lorsque ce n'est pas le cas (classe spécifique de colonnes)
-     * on les identifie par leur nom de classe.
-     * 
+     *
+     * En effet la plupart des colonnes d'une PojoTable ont un nom permettant de
+     * les identifier. Lorsque ce n'est pas le cas (classe spécifique de
+     * colonnes) on les identifie par leur nom de classe.
+     *
      * @param column
-     * @return 
+     * @return
      */
-    public static String getColumnRef(TableColumn<Element, ?> column){
-        try{
+    public static String getColumnRef(TableColumn<Element, ?> column) {
+        try {
             return ((PojoTable.PropertyColumn) column).getName();
-        }catch(ClassCastException cce){
+        } catch (ClassCastException cce) {
             return column.getClass().toString();
         }
     }
-    
+
     /**
      * Ajout ou mise à jour de préférences pour une colonne.
      *

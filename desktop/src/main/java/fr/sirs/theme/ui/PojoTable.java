@@ -921,7 +921,8 @@ public class PojoTable extends BorderPane implements Printable {
                 TableColumn<Element, ?> column = uiTable.getColumns().get(colIndice);
                 try {
                     //TODO empêcher la castException -> S'il y a problème de cast on met un nom vide.
-                    ColumnState newState = new ColumnState(((PropertyColumn) column).getName(), column.isVisible(), colIndice, (float) column.widthProperty().get());
+                    // ColumnState newState = new ColumnState(((PropertyColumn) column).getName(), column.isVisible(), colIndice, (float) column.widthProperty().get());
+                    ColumnState newState = new ColumnState(TableColumnsPreferences.getColumnRef(column), column.isVisible(), colIndice, (float) column.widthProperty().get());
                     columnsPreferences.addColumnPreference(newState);
                 } catch (Exception e) {
                     SIRS.LOGGER.log(Level.WARNING, "Modification de la colonne {0} non enregistr\u00e9e dans les pr\u00e9f\u00e9rences.", colIndice);
