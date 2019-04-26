@@ -18,14 +18,17 @@
  */
 package fr.sirs.theme.ui.columns;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.SIRS;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
 import fr.sirs.theme.ui.PojoTable;
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,16 +44,13 @@ import javafx.scene.control.TableColumn;
  *
  * @author Matthieu Bastianelli (Geomatys)
  */
-//@Component   
 public class TableColumnsPreferences {
 
-    @JsonIgnore
     private Class pojoClass;
 
-    @JsonIgnore
+    final Path filePrefPath;
+
     final private ObjectMapper objectMapper = new ObjectMapper();
-    @JsonIgnore
-    final private File filePref;
 
     // Map associant le nom d'une colonne (keys) aux préférences de l'utilisateur (values).
     final private Map<Integer, ColumnState> withPreferencesColumns = new HashMap<>();
@@ -61,16 +61,12 @@ public class TableColumnsPreferences {
 
     public TableColumnsPreferences(final Class pojoClass) {
         this.pojoClass = pojoClass;
-
-        String path = "preferences.json";
-        this.filePref = new File(path);
+        String fileName = pojoClass.getName().replace(".", "_").replace(" ", "_") + "_preferences.json";
+        this.filePrefPath = SirsCore.CONFIGURATION_PATH.resolve(fileName);
         this.loadReferencesFromJsonPath();
     }
 
-//    public TableColumnsPreferences(final Class pojoClass, final Map<String, ColumnState> withPreferencesColumns) {
-//        this.pojoClass = pojoClass;
-//        this.withPreferencesColumns = withPreferencesColumns;
-//    }
+    
     //=========
     //Methodes
     //=========
@@ -190,24 +186,9 @@ public class TableColumnsPreferences {
      */
     public boolean saveInJson() {
 
-//            objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-//            String path = "/src/main/resources/target/" + pojoClass.toString() + "_preferences.json";
-//            String path = "/target/" + pojoClass.toString() + "_preferences.json";
-        try {
+        try (final OutputStream preferencesStream = Files.newOutputStream(filePrefPath)) {
 
-            if (!filePref.exists()) {
-                SIRS.LOGGER.log(Level.INFO, "Création du fichier Json lors de la sauvegarde des préférences utilisateur.");
-                filePref.createNewFile();
-            }
-
-//                final Path targetDir = basedir.toPath().resolve("target");
-//                if (!Files.isDirectory(targetDir)) {
-//                    Files.createDirectory(targetDir);
-//                }
-//                final File target = targetDir.resolve(project.getArtifactId() + ".json").toFile();
-//                File target = targetDir.resolve(project.getArtifactId() + ".json").toFile();
-            objectMapper.writeValue(filePref, this);
-
+            objectMapper.writeValue(preferencesStream, withPreferencesColumns);
             return true;
 
         } catch (IOException ioe) {
@@ -224,14 +205,16 @@ public class TableColumnsPreferences {
      * @return boolean indiquant si le chargement c'est bien déroulé (true).
      */
     final public boolean loadReferencesFromJsonPath() {
-        try {
-            TableColumnsPreferences readPref = objectMapper.readValue(filePref, TableColumnsPreferences.class);
+        
+        try (final InputStream preferencesStream = Files.newInputStream(filePrefPath)) {
+            
+            Map<Integer, ColumnState>  readPref = objectMapper.readValue(preferencesStream, new TypeReference<Map<Integer,ColumnState>>(){});
 
             //Si on trouve des préférences on met à jour la Map withPreferencesColumns
-            if ((readPref == null) || (readPref.getWithPreferencesColumns()).isEmpty()) {
-                SIRS.LOGGER.log(Level.INFO, "Fichier {0} vide.", filePref);
+            if ( (readPref == null) || (readPref.isEmpty()) ) {
+                SIRS.LOGGER.log(Level.INFO, "Fichier {0} vide.", filePrefPath.toString());
             } else {
-                readPref.getWithPreferencesColumns().forEach((colPosition, state) -> {
+                readPref.forEach((colPosition, state) -> {
                     this.withPreferencesColumns.put(colPosition, state);
                 });
             }
