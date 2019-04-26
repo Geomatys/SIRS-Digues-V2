@@ -33,7 +33,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
+import org.jsoup.select.Collector;
 
 /**
  * Classe utilisée pour stocker les préférence de l'utilisateur quant à la
@@ -66,7 +68,6 @@ public class TableColumnsPreferences {
         this.loadReferencesFromJsonPath();
     }
 
-    
     //=========
     //Methodes
     //=========
@@ -79,58 +80,82 @@ public class TableColumnsPreferences {
      *
      * @param columns
      */
+//    public void applyPreferencesToTableColumns(List<TableColumn<Element, ?>> columns) {
+//
+//        Map<String, TableColumn<Element, ?>> changedColumns = new HashMap<>();
+//
+//        for (int i = 0; i < columns.size(); i++) {
+//            ColumnState preference = withPreferencesColumns.get(i);
+//            if (!(preference == null)) {
+//                if (!(preference.getName() == null)) {
+//
+//                    TableColumn<Element, ?> updatedColumn = columns.get(i);
+//
+////                        if (preference.getName().equals(((PojoTable.PropertyColumn) oldColumns.get(i)).getName())) {
+//                    if (!(preference.getName().equals(getColumnRef(columns.get(i))))) {
+//                        //nom de colonne différent on alimente 'changedColumns' et on remplace
+//                        TableColumn<Element, ?> extractedColumn = changedColumns.get(preference.getName());
+//
+//                        if (extractedColumn == null) {
+//                            //Si la colonne associée à cette position dans les 
+//                            //préférences ne fait pas partie des colonnes extraites, 
+//                            //on l'y ajoute puis on la mofifie.
+//                            TableColumn<Element, ?> oldColumn = columns.get(i);
+//                            changedColumns.put(getColumnRef(oldColumn), oldColumn);
+//                            updatedColumn = columns.stream()
+//                                    .filter(col -> ((getColumnRef(col) != null) && (getColumnRef(col).equals(preference.getName()))))
+//                                    .findFirst()
+//                                    .orElseThrow(() -> new RuntimeException("Problème de référencement des colonnes.\n"
+//                                    + "Aucune référence de colonne ne correspond au nom de la préférence :\n"
+//                                    + preference.getName()));
+//
+//                        } else {
+//                            //Si la colonne fait partie des colonnes extraites,
+//                            //On la remplace par celle extraite.
+//
+//                            TableColumn<Element, ?> oldColumn = columns.get(i);
+//                            changedColumns.put(getColumnRef(oldColumn), oldColumn);
+//
+//                            updatedColumn = extractedColumn;
+//                            changedColumns.remove(preference.getName());
+//
+//                        }
+//
+//                    }
+//
+//                    // mise à jour de l'épaisseur et de la visibilité
+//                    updatedColumn.setVisible(preference.isVisible());
+////                    updatedColumn.setMinWidth(preference.getWidth());
+//                    updatedColumn.setPrefWidth(preference.getWidth());
+//
+//                    columns.set(i, updatedColumn);
+//                }
+//            }
+//        }
+//    }
+
     public void applyPreferencesToTableColumns(List<TableColumn<Element, ?>> columns) {
 
         Map<String, TableColumn<Element, ?>> changedColumns = new HashMap<>();
+        withPreferencesColumns.forEach((preferedPosition, columnState) -> {
 
-        for (int i = 0; i < columns.size(); i++) {
-            ColumnState preference = withPreferencesColumns.get(i);
-            if (!(preference == null)) {
-                if (!(preference.getName() == null)) {
-
-                    TableColumn<Element, ?> updatedColumn = columns.get(i);
-
-//                        if (preference.getName().equals(((PojoTable.PropertyColumn) oldColumns.get(i)).getName())) {
-                    if (!(preference.getName().equals(getColumnRef(columns.get(i))))) {
-                        //nom de colonne différent on alimente 'changedColumns' et on remplace
-                        TableColumn<Element, ?> extractedColumn = changedColumns.get(preference.getName());
-
-                        if (extractedColumn == null) {
-                            //Si la colonne associée à cette position dans les 
-                            //préférences ne fait pas partie des colonnes extraites, 
-                            //on l'y ajoute puis on la mofifie.
-                            TableColumn<Element, ?> oldColumn = columns.get(i);
-                            changedColumns.put(getColumnRef(oldColumn), oldColumn);
-                            updatedColumn = columns.stream()
-                                    .filter(col -> ((getColumnRef(col) != null) && (getColumnRef(col).equals(preference.getName()))))
-                                    .findFirst()
-                                    .orElseThrow(() -> new RuntimeException("Problème de référencement des colonnes.\n"
-                                    + "Aucune référence de colonne ne correspond au nom de la préférence :\n"
-                                    + preference.getName()));
-
-                        } else {
-                            //Si la colonne fait partie des colonnes extraites,
-                            //On la remplace par celle extraite.
-
-                            TableColumn<Element, ?> oldColumn = columns.get(i);
-                            changedColumns.put(getColumnRef(oldColumn), oldColumn);
-
-                            updatedColumn = extractedColumn;
-                            changedColumns.remove(preference.getName());
-
+            columns.stream()
+                    .filter(col -> (getColumnRef(col) != null) && (getColumnRef(col).equals(columnState.getName())))
+                    .findFirst()
+                    .ifPresent(col -> {
+                        
+                        col.setPrefWidth(columnState.getWidth());
+                        col.setVisible(columnState.isVisible());
+                        
+                        if (preferedPosition != columns.indexOf(col)) {
+                            TableColumn<Element, ?> changedCol = col;
+                            changedColumns.put(columnState.getName(), col);
+                            columns.remove(col);
+                            columns.add(preferedPosition, col);
                         }
+                    });
+        });
 
-                    }
-
-                    // mise à jour de l'épaisseur et de la visibilité
-                    updatedColumn.setVisible(preference.isVisible());
-//                    updatedColumn.setMinWidth(preference.getWidth());
-                    updatedColumn.setPrefWidth(preference.getWidth());
-
-                    columns.set(i, updatedColumn);
-                }
-            }
-        }
     }
 
     /**
@@ -205,13 +230,14 @@ public class TableColumnsPreferences {
      * @return boolean indiquant si le chargement c'est bien déroulé (true).
      */
     final public boolean loadReferencesFromJsonPath() {
-        
+
         try (final InputStream preferencesStream = Files.newInputStream(filePrefPath)) {
-            
-            Map<Integer, ColumnState>  readPref = objectMapper.readValue(preferencesStream, new TypeReference<Map<Integer,ColumnState>>(){});
+
+            Map<Integer, ColumnState> readPref = objectMapper.readValue(preferencesStream, new TypeReference<Map<Integer, ColumnState>>() {
+            });
 
             //Si on trouve des préférences on met à jour la Map withPreferencesColumns
-            if ( (readPref == null) || (readPref.isEmpty()) ) {
+            if ((readPref == null) || (readPref.isEmpty())) {
                 SIRS.LOGGER.log(Level.INFO, "Fichier {0} vide.", filePrefPath.toString());
             } else {
                 readPref.forEach((colPosition, state) -> {
