@@ -1304,7 +1304,7 @@ public class PojoTable extends BorderPane implements Printable {
         final Supplier<ObservableList<Element>> producerWithCoordinates;
 
         //S'ils sont positionable, on calcule les coordonnées manquantes des éléments de la PojoTable.
-        if (Positionable.class.isAssignableFrom(this.pojoClass)) {
+        if (Positionable.class.isAssignableFrom(this.pojoClass) && (producer!=null)) {
 
             producerWithCoordinates = () -> {
                 return FXCollections.observableArrayList(producer.get().stream().map(elt -> {
