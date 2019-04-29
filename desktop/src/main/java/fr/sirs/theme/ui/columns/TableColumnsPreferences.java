@@ -63,8 +63,19 @@ public class TableColumnsPreferences {
 
     public TableColumnsPreferences(final Class pojoClass) {
         this.pojoClass = pojoClass;
+        Path directory;
+        try {
+            directory = SirsCore.CONFIGURATION_PATH.resolve("columns_preferences");
+            if (!Files.isDirectory(directory)) {
+                Files.createDirectory(SirsCore.CONFIGURATION_PATH.resolve(directory));
+            }
+        } catch (IOException ioe) {
+            SIRS.LOGGER.log(Level.WARNING, "IOException pendant l'identification du chemin d'accès au fichier de préférences utilisateur.", ioe);
+            directory = SirsCore.CONFIGURATION_PATH;
+        }
+
         String fileName = pojoClass.getName().replace(".", "_").replace(" ", "_") + "_preferences.json";
-        this.filePrefPath = SirsCore.CONFIGURATION_PATH.resolve(fileName);
+        this.filePrefPath = SirsCore.CONFIGURATION_PATH.resolve(directory).resolve(fileName);
         this.loadReferencesFromJsonPath();
     }
 
@@ -80,59 +91,6 @@ public class TableColumnsPreferences {
      *
      * @param columns
      */
-//    public void applyPreferencesToTableColumns(List<TableColumn<Element, ?>> columns) {
-//
-//        Map<String, TableColumn<Element, ?>> changedColumns = new HashMap<>();
-//
-//        for (int i = 0; i < columns.size(); i++) {
-//            ColumnState preference = withPreferencesColumns.get(i);
-//            if (!(preference == null)) {
-//                if (!(preference.getName() == null)) {
-//
-//                    TableColumn<Element, ?> updatedColumn = columns.get(i);
-//
-////                        if (preference.getName().equals(((PojoTable.PropertyColumn) oldColumns.get(i)).getName())) {
-//                    if (!(preference.getName().equals(getColumnRef(columns.get(i))))) {
-//                        //nom de colonne différent on alimente 'changedColumns' et on remplace
-//                        TableColumn<Element, ?> extractedColumn = changedColumns.get(preference.getName());
-//
-//                        if (extractedColumn == null) {
-//                            //Si la colonne associée à cette position dans les 
-//                            //préférences ne fait pas partie des colonnes extraites, 
-//                            //on l'y ajoute puis on la mofifie.
-//                            TableColumn<Element, ?> oldColumn = columns.get(i);
-//                            changedColumns.put(getColumnRef(oldColumn), oldColumn);
-//                            updatedColumn = columns.stream()
-//                                    .filter(col -> ((getColumnRef(col) != null) && (getColumnRef(col).equals(preference.getName()))))
-//                                    .findFirst()
-//                                    .orElseThrow(() -> new RuntimeException("Problème de référencement des colonnes.\n"
-//                                    + "Aucune référence de colonne ne correspond au nom de la préférence :\n"
-//                                    + preference.getName()));
-//
-//                        } else {
-//                            //Si la colonne fait partie des colonnes extraites,
-//                            //On la remplace par celle extraite.
-//
-//                            TableColumn<Element, ?> oldColumn = columns.get(i);
-//                            changedColumns.put(getColumnRef(oldColumn), oldColumn);
-//
-//                            updatedColumn = extractedColumn;
-//                            changedColumns.remove(preference.getName());
-//
-//                        }
-//
-//                    }
-//
-//                    // mise à jour de l'épaisseur et de la visibilité
-//                    updatedColumn.setVisible(preference.isVisible());
-////                    updatedColumn.setMinWidth(preference.getWidth());
-//                    updatedColumn.setPrefWidth(preference.getWidth());
-//
-//                    columns.set(i, updatedColumn);
-//                }
-//            }
-//        }
-//    }
 
     public void applyPreferencesToTableColumns(List<TableColumn<Element, ?>> columns) {
 
@@ -143,10 +101,12 @@ public class TableColumnsPreferences {
                     .filter(col -> (getColumnRef(col) != null) && (getColumnRef(col).equals(columnState.getName())))
                     .findFirst()
                     .ifPresent(col -> {
-                        
+                        //Affectations des préférences d'épaisseur et de visibilité
                         col.setPrefWidth(columnState.getWidth());
                         col.setVisible(columnState.isVisible());
-                        
+
+                        //Prise en compte des modification de l'ordre d'affichage
+                        //des colonnes: 
                         if (preferedPosition != columns.indexOf(col)) {
                             TableColumn<Element, ?> changedCol = col;
                             changedColumns.put(columnState.getName(), col);
@@ -269,7 +229,4 @@ public class TableColumnsPreferences {
         return withPreferencesColumns;
     }
 
-//    public void setWithPreferencesColumns(Map<Integer, ColumnState> withPreferencesColumns) {
-//        this.withPreferencesColumns = withPreferencesColumns;
-//    }
 }

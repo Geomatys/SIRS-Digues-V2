@@ -360,6 +360,18 @@ public class PojoTable extends BorderPane implements Printable {
 
     protected ElementCopier elementCopier;
 
+    //---------------------------------------------
+    // Attributs pour les préférences utilisateur :
+    //---------------------------------------------
+    // Préférences utilisateur pour cette PojoTable.
+    TableColumnsPreferences columnsPreferences;
+    //A déplacer avec les autres attributs :
+    private BooleanProperty isColumnModifying = new SimpleBooleanProperty(false);
+    // ScheduledExecutorService permettant d'instancier un délais avant de sauvegarder les modifications apportées à des colonnes
+    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+    //Liste des colonnes modifiées :
+    private Set<Integer> modifiedColumnsIndices = new HashSet<>();
+
     /*
     Objet auquel sont rattachés les éléments de la pojoTable.
     On utilise une référence différente de ownerElementProperty et parentProperty car ces deux attributs sont déjà utilisés à des fins spécifiques
@@ -597,7 +609,6 @@ public class PojoTable extends BorderPane implements Printable {
 
                         choices = SIRS.observableList(possiblePreviews);
 
-                        System.out.println("positionables");
                     } else {
                         choices = SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted();
                     }
@@ -639,8 +650,6 @@ public class PojoTable extends BorderPane implements Printable {
                     //Choix du destinataire de la copie.
                     Element target = elementCopier.askForCopyTarget();
 
-                    System.out.println("Demande de Copie dans PojoTable.java pour " + elements.length + " éléments."); //A SUPPRIMER DEBBUG ou mettre en log
-                    System.out.println("Vers :\n" + target.toString());
 
                     //Copie des éléments sélectionnés vers la cible identifiée.
                     this.elementCopier.copyPojosTo(target, elements);
@@ -832,51 +841,37 @@ public class PojoTable extends BorderPane implements Printable {
         uiDelete.setTooltip(new Tooltip("Supprimer les éléments sélectionnés"));
         uiFilter.setTooltip(new Tooltip("Filtrer les données"));
 
-        
         // Préférences utilisateur pour cette PojoTable.
         columnsPreferences = new TableColumnsPreferences(this.pojoClass);
-        
-        if(!columnsPreferences.getWithPreferencesColumns().isEmpty()){
+
+        if (!columnsPreferences.getWithPreferencesColumns().isEmpty()) {
             columnsPreferences.applyPreferencesToTableColumns(uiTable.getColumns());
         }
-        
+
         updateView();
-        
+
         //===============================================================
         // Suivi des préférences utilisateur pour les colonnes affichées.
         //===============================================================
-
         //Ajout Listener pour identifier et sauvegarder les modifications de colonnes par l'utilisateur :
         //Identification des changements d'épaisseur.
         uiTable.getColumns().forEach(col -> col.widthProperty().addListener((ov, t, t1) -> {
 
             modifiedColumnsIndices.add(this.uiTable.getColumns().indexOf(col));
-            //Changement d'épaisseur
-            if (!isColumnModifying.getValue()) {
-
-                isColumnModifying.set(true);
-                scheduledExecutorService.schedule(saveColumnsPreferences, 3, TimeUnit.SECONDS); 
-
-            }
+            modifiedColumn();
         }));
 
         //Identification des changements de visibilité des colonnes.
         uiTable.getColumns().forEach(col -> col.visibleProperty().addListener((ov, t, t1) -> {
 
             modifiedColumnsIndices.add(this.uiTable.getColumns().indexOf(col));
-            //Changement de visibilité
-            if (!isColumnModifying.getValue()) {
-                isColumnModifying.set(true);
-
-                scheduledExecutorService.schedule(saveColumnsPreferences, 3, TimeUnit.SECONDS);
-
-            }
+            modifiedColumn();
         }));
 
         // Suivi des changement de position des colonnes.
         uiTable.getColumns().addListener((Change<? extends TableColumn<Element, ?>> change) -> {
             if (change.next()) {
-                
+
                 // Lors d'un changement parmi les colonnes de uiTable,
                 // on compare les Id des colonnes avant et après le changement 
                 // pour identifier les changements de position.
@@ -887,11 +882,7 @@ public class PojoTable extends BorderPane implements Printable {
                     }
                 }
 
-                //Changement de position de colonne.
-                if (!isColumnModifying.getValue()) {
-                    isColumnModifying.set(true);
-                    scheduledExecutorService.schedule(saveColumnsPreferences, 3, TimeUnit.SECONDS);
-                }
+                modifiedColumn();
             }
         });
 
@@ -899,15 +890,25 @@ public class PojoTable extends BorderPane implements Printable {
     //==========================================================================
 
     //==========================================================================
-    // Préférences utilisateur pour cette PojoTable.
-    TableColumnsPreferences columnsPreferences;
-    //A déplacer avec les autres attributs :
-    private BooleanProperty isColumnModifying = new SimpleBooleanProperty(false);
-    // ScheduledExecutorService permettant d'instancier un délais avant de sauvegarder les modifications apportées à des colonnes
-    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
-    //Liste des colonnes modifiées :
-    private Set<Integer> modifiedColumnsIndices = new HashSet<>();
-
+    /**
+     * Méthode permettant de lancer une sauvegarde de préférences utilisateur
+     * lorsqu'un changement de la tableView {@code  uiTable} a été détécté.
+     *
+     * Un délai de 4 seconde est mis en place pour n'effectuer qu'une seule
+     * sauvegarde lors de plusieurs changements ce succédant. 
+     */
+    private void modifiedColumn() {
+        //Changement de position de colonne.
+        if (!isColumnModifying.getValue()) {
+            isColumnModifying.set(true);
+            scheduledExecutorService.schedule(saveColumnsPreferences, 4, TimeUnit.SECONDS);
+        }
+    }
+    
+    /**
+     * Runnable permettant d'exécuter la sauvegarde des préférences utilisateur
+     * {@link modifiedColumn}.
+     */
     private Runnable saveColumnsPreferences = new Runnable() {
         @Override
         public void run() {
@@ -931,10 +932,10 @@ public class PojoTable extends BorderPane implements Printable {
 
             //Nettoyage de l'indicateur des colonnes modifiées.
             modifiedColumnsIndices.clear();
-            
+
             //Sauvegarde des préférences au format Json.
             columnsPreferences.saveInJson();
-            
+
             SIRS.LOGGER.log(Level.INFO, "Fin Sauvegarde de préférences PojoTable.");
 
         }
