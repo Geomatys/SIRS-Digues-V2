@@ -1697,7 +1697,7 @@ public class TronconUtils {
             // Affectation des coordonnées linéaires calculées au Positionable :
             
             //Système de représentation :
-            if (!pos.getSystemeRepId().equals(posSR.srid)) {
+            if (!posSR.srid.equals(pos.getSystemeRepId())) {
                 pos.setSystemeRepId(posSR.srid);
             }
 

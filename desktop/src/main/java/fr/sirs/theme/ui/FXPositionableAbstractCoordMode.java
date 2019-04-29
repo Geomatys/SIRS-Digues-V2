@@ -189,7 +189,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
                     newValue.positionDebutProperty().addListener(pointListener);
                     newValue.positionFinProperty().addListener(pointListener);
                     newValue.editedGeoCoordinateProperty().addListener(updateEditedGeoCoordinatesDisplay);
-                    setCoordinatesLabel(null, posProperty.get().getEditedGeoCoordinate());
+                    setCoordinatesLabel(null, newValue.getEditedGeoCoordinate());
                     updateFields();
                 }
             }

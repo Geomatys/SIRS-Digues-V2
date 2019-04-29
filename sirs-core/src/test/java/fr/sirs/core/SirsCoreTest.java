@@ -19,8 +19,8 @@
 package fr.sirs.core;
 
 import fr.sirs.core.model.Positionable;
+import java.beans.IntrospectionException;
 import java.util.Set;
-import java.util.logging.Level;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -36,38 +36,33 @@ public class SirsCoreTest {
      * constantes associées de la classe SirsCore.
      *
      * Ce test est essentiel pour le calcul des coordonnées dans la classe lors
-     * de l'appel à la méthode :
-     * public void setOnPropertyCommit(final TableColumn.CellEditEvent<Element, Object> event)
-     *
+     * de l'appel à la méthode : public void setOnPropertyCommit(final
+     * TableColumn.CellEditEvent<Element, Object> event)
+     * 
+     * @throws IntrospectionException 
      */
     @Test
-    public void test_Nom_Methodes_Positionable_Valides() {
+    public void test_Nom_Methodes_Positionable_Valides() throws Exception{
+        
+        final Set<String> positionableKeys = SirsCore.listSimpleProperties(Positionable.class).keySet();
 
-        try {
-            final Set<String> positionableKeys = SirsCore.listSimpleProperties(Positionable.class).keySet();
+        assertTrue(positionableKeys.contains(SirsCore.BORNE_DEBUT_ID));
+        assertTrue(positionableKeys.contains(SirsCore.BORNE_FIN_ID));
 
-            assertTrue(positionableKeys.contains(SirsCore.BORNE_DEBUT_ID));
-            assertTrue(positionableKeys.contains(SirsCore.BORNE_FIN_ID));
+        assertTrue(positionableKeys.contains(SirsCore.BORNE_DEBUT_DISTANCE));
+        assertTrue(positionableKeys.contains(SirsCore.BORNE_FIN_DISTANCE));
 
-            assertTrue(positionableKeys.contains(SirsCore.BORNE_DEBUT_DISTANCE));
-            assertTrue(positionableKeys.contains(SirsCore.BORNE_FIN_DISTANCE));
+        assertTrue(positionableKeys.contains(SirsCore.BORNE_DEBUT_AVAL));
+        assertTrue(positionableKeys.contains(SirsCore.BORNE_FIN_AVAL));
 
-            assertTrue(positionableKeys.contains(SirsCore.BORNE_DEBUT_AVAL));
-            assertTrue(positionableKeys.contains(SirsCore.BORNE_FIN_AVAL));
+        assertTrue(positionableKeys.contains(SirsCore.PR_DEBUT_FIELD));
+        assertTrue(positionableKeys.contains(SirsCore.PR_FIN_FIELD));
 
-            assertTrue(positionableKeys.contains(SirsCore.PR_DEBUT_FIELD));
-            assertTrue(positionableKeys.contains(SirsCore.PR_FIN_FIELD));
+        assertTrue(positionableKeys.contains(SirsCore.POSITION_DEBUT_FIELD));
+        assertTrue(positionableKeys.contains(SirsCore.POSITION_FIN_FIELD));
 
-            assertTrue(positionableKeys.contains(SirsCore.POSITION_DEBUT_FIELD));
-            assertTrue(positionableKeys.contains(SirsCore.POSITION_FIN_FIELD));
-            
-            
-            assertTrue(positionableKeys.contains(SirsCore.PR_DEBUT_FIELD));
-            assertTrue(positionableKeys.contains(SirsCore.PR_FIN_FIELD));
-
-        } catch (Exception e) {
-            SirsCore.LOGGER.log(Level.WARNING, "La vérification des noms de méthodes pour la classe Positionable a échoué.", e);
-        }
+        assertTrue(positionableKeys.contains(SirsCore.PR_DEBUT_FIELD));
+        assertTrue(positionableKeys.contains(SirsCore.PR_FIN_FIELD));
 
     }
 

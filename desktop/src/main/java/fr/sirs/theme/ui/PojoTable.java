@@ -872,6 +872,8 @@ public class PojoTable extends BorderPane implements Printable {
         uiTable.getColumns().addListener((Change<? extends TableColumn<Element, ?>> change) -> {
             if (change.next()) {
 
+                if(change.getRemoved()==null || change.getRemoved().size()<change.getTo())
+                    return;
                 // Lors d'un changement parmi les colonnes de uiTable,
                 // on compare les Id des colonnes avant et après le changement 
                 // pour identifier les changements de position.
@@ -881,7 +883,6 @@ public class PojoTable extends BorderPane implements Printable {
                         modifiedColumnsIndices.add(i);
                     }
                 }
-
                 modifiedColumn();
             }
         });
@@ -1300,30 +1301,34 @@ public class PojoTable extends BorderPane implements Printable {
      *
      * @param producer Data provider.
      */
-    public void setTableItems(final Supplier<ObservableList<Element>> producer) {
-        final Supplier<ObservableList<Element>> producerWithCoordinates;
-
-        //S'ils sont positionable, on calcule les coordonnées manquantes des éléments de la PojoTable.
-        if (Positionable.class.isAssignableFrom(this.pojoClass) && (producer!=null)) {
-
-            producerWithCoordinates = () -> {
-                return FXCollections.observableArrayList(producer.get().stream().map(elt -> {
-                    try {
-                        elt = ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.apply((Positionable) elt);
-                    } catch (Exception e) {
-                        SIRS.LOGGER.log(Level.WARNING, "Echec du calcule de coordonnées manquantes", e);
-                    }
-
-                    return elt;
-                }).collect(Collectors.toList()));
-
-            };
-        } else {
-            producerWithCoordinates = producer;
-        }
-
-        dataSupplierProperty.set(producerWithCoordinates);
+      public void setTableItems(Supplier<ObservableList<Element>> producer) {
+        dataSupplierProperty.set(producer);
     }
+
+//    public void setTableItems(final Supplier<ObservableList<Element>> producer) {
+//        final Supplier<ObservableList<Element>> producerWithCoordinates;
+//
+//        //S'ils sont positionable, on calcule les coordonnées manquantes des éléments de la PojoTable.
+//        if (Positionable.class.isAssignableFrom(this.pojoClass) && (producer!=null)) {
+//
+//            producerWithCoordinates = () -> {
+//                return FXCollections.observableArrayList(producer.get().stream().map(elt -> {
+//                    try {
+//                        elt = ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.apply((Positionable) elt);
+//                    } catch (Exception e) {
+//                        SIRS.LOGGER.log(Level.WARNING, "Echec du calcule de coordonnées manquantes", e);
+//                    }
+//
+//                    return elt;
+//                }).collect(Collectors.toList()));
+//
+//            };
+//        } else {
+//            producerWithCoordinates = producer;
+//        }
+//
+//        dataSupplierProperty.set(producerWithCoordinates);
+//    }
 
     protected final void updateTableItems(
             final ObservableValue<? extends Supplier<ObservableList<Element>>> obs,
