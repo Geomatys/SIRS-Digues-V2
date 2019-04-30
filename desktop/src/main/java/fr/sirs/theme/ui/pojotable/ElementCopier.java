@@ -132,7 +132,7 @@ public class ElementCopier {
         if (target != null) {
             return target;
         } else {
-            throw new CopyElementException("Aucun élément sélectionné comme cible de la copie.");
+            throw new CopyElementException("Copie annulée ou aucun élément sélectionné comme cible de la copie.");
         }
 
     }
