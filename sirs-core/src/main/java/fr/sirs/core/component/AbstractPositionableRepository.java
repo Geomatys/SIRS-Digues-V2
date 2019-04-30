@@ -18,14 +18,13 @@
  */
 package fr.sirs.core.component;
 
-import fr.sirs.SIRS;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.theme.ui.calculcoordinates.ConvertPositionableCoordinates;
+import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.util.StreamingIterable;
 import java.util.List;
 import java.util.logging.Level;
@@ -71,12 +70,13 @@ public abstract class AbstractPositionableRepository<T extends Positionable> ext
         try {
             loaded = (T) ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.apply(loaded);
         } catch (ClassCastException cce) {
-            SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément chargé : \n"+loaded.toString(), cce);
+            SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément chargé : \n"+loaded.toString(), cce);
         }
 
-//        if (loaded.getGeometry() == null) {  
-//            updateGeometryAndPRs(loaded);
-//        }
+        if (loaded.getGeometry() == null) {  
+            updateGeometryAndPRs(loaded);
+        }
+        
         return loaded;
     }
 

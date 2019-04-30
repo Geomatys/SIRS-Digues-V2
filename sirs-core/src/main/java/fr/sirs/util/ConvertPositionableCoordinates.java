@@ -16,22 +16,23 @@
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
-package fr.sirs.theme.ui.calculcoordinates;
+package fr.sirs.util;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.Injector;
-import fr.sirs.SIRS;
+import fr.sirs.core.InjectorCore;
 import fr.sirs.core.LinearReferencingUtilities;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.theme.ui.FXPositionableMode;
-import fr.sirs.theme.ui.PojoTable;
 import java.util.function.Function;
 import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
@@ -82,7 +83,7 @@ public class ConvertPositionableCoordinates {
             }
 
         } catch (RuntimeException e) {
-            SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément positionable.", e);
+            SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément positionable.", e);
         }
 
         return positionable;
@@ -103,12 +104,12 @@ public class ConvertPositionableCoordinates {
     public static void computeForModifiedPropertie(Positionable PositionableToUpdate, String modifiedPropretieName) {
         ArgumentChecks.ensureNonNull("Positionable positionable", PositionableToUpdate);
         ArgumentChecks.ensureNonNull("Propertie name modifiedPropertirName", modifiedPropretieName);
-        
+
         //Si le PR a été modifié on ne permet pas le calcul des coordonnées. Pourra évoluer.
-        if( (modifiedPropretieName.equals(SirsCore.PR_DEBUT_FIELD)) || (modifiedPropretieName.equals(SirsCore.PR_FIN_FIELD)) ){
-            throw new RuntimeException("Impossible de recalculer des coordonnées de position uniquement à partir des PR");      
+        if ((modifiedPropretieName.equals(SirsCore.PR_DEBUT_FIELD)) || (modifiedPropretieName.equals(SirsCore.PR_FIN_FIELD))) {
+            throw new RuntimeException("Impossible de recalculer des coordonnées de position uniquement à partir des PR");
         }
-        
+
         //Si c'est une coordonnées Géo qui a été modifiée on recalcule les coordonnées linéaires :
         if ((modifiedPropretieName.equals(SirsCore.POSITION_DEBUT_FIELD)) || (modifiedPropretieName.equals(SirsCore.POSITION_FIN_FIELD))) {
 
@@ -144,7 +145,7 @@ public class ConvertPositionableCoordinates {
             final BorneDigue borneProperty, final boolean amont, final Positionable positionable) {
 
 //        final Positionable positionable = posProperty.get();
-        final TronconDigue t = FXPositionableMode.getTronconFromPositionable(positionable);
+        final TronconDigue t = getTronconFromPositionable(positionable);
 
         if (distance != null && borneProperty != null && t != null) {
             //calcul à partir des bornes
@@ -173,8 +174,8 @@ public class ConvertPositionableCoordinates {
 
         try {
 
-            final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionableWithLinearCoord);
-            final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
+            final TronconDigue troncon = getTronconFromPositionable(positionableWithLinearCoord);
+            final AbstractSIRSRepository<BorneDigue> borneRepo = InjectorCore.getBean(SessionCore.class).getRepositoryForClass(BorneDigue.class);
             final LineString geometry = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), positionableWithLinearCoord, borneRepo);
 
             //sauvegarde de la geometrie
@@ -188,7 +189,7 @@ public class ConvertPositionableCoordinates {
             positionableWithLinearCoord.setEditedGeoCoordinate(Boolean.FALSE);
 
         } catch (RuntimeException re) {
-            SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de géométrie depuis les coordonnées linéaires du positionable :\n"
+            SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de géométrie depuis les coordonnées linéaires du positionable :\n"
                     + positionableWithLinearCoord.getDesignation(), re);
 
         }
@@ -224,8 +225,8 @@ public class ConvertPositionableCoordinates {
             }
 
             //Initialisation
-            final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-            final TronconDigue tronconFromPositionable = FXPositionableMode.getTronconFromPositionable(positionableWithGeo);
+            final AbstractSIRSRepository<BorneDigue> borneRepo = InjectorCore.getBean(SessionCore.class).getRepositoryForClass(BorneDigue.class);
+            final TronconDigue tronconFromPositionable = getTronconFromPositionable(positionableWithGeo);
             final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr, positionableWithGeo);
             final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(positionableWithGeo, tronconFromPositionable, segments);
 
@@ -252,7 +253,7 @@ public class ConvertPositionableCoordinates {
                 positionableWithGeo.setEditedGeoCoordinate(Boolean.TRUE);
             }
         } catch (RuntimeException re) {
-            SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées linéaires pour le positionable :\n "
+            SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées linéaires pour le positionable :\n "
                     + positionableWithGeo.getDesignation() + "\n Dans le Système de représentation :\n" + sr.getLibelle(), re);
 
         }
@@ -299,11 +300,11 @@ public class ConvertPositionableCoordinates {
 
         //On cherche le Système de repérage dans lequel calculer les coordonnées.
         if (positionable.getSystemeRepId() != null) {
-            sr = Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(positionable.getSystemeRepId());
+            sr = InjectorCore.getBean(SessionCore.class).getRepositoryForClass(SystemeReperage.class).get(positionable.getSystemeRepId());
         } else {
             //Si le positionable n'a pas de SR renseigné, on prend celui par défaut du tronçon.
-            final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
-            sr = Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(troncon.getSystemeRepDefautId());
+            final TronconDigue troncon = getTronconFromPositionable(positionable);
+            sr = InjectorCore.getBean(SessionCore.class).getRepositoryForClass(SystemeReperage.class).get(troncon.getSystemeRepDefautId());
         }
 
         if (sr == null) {
@@ -316,8 +317,71 @@ public class ConvertPositionableCoordinates {
     }
 
     public static LinearReferencing.SegmentInfo[] getSourceLinear(final SystemeReperage source, final Positionable positionable) {
-        final TronconDigue t = FXPositionableMode.getTronconFromPositionable(positionable);
+        final TronconDigue t = getTronconFromPositionable(positionable);
         return LinearReferencingUtilities.getSourceLinear(t, source);
+    }
+    
+//==============================================================================
+    /**
+     * Méthodes permettant de retrouver le tronçon sur lequel se trouve un
+     * élément (input).
+     *
+     * Peut retourner un null si la recherche échoue.
+     * 
+     * Initialement dans le module desktop : fr.sirs.theme.ui.FXPositionableMode.java
+     * cette méthode a été ramenée dans le module core.
+     * 
+     * Cette méthode est comparable à la méthode getTroncon() de la classe PosInfo dans
+     * fr.sirs.core.TronconUtils.java ; Il faudrait à terme les fusionner, par 
+     * exemple en permettant à la méthode getTroncon() de prendre en compte les 
+     * Berge ou autre dans la recherche des éléments parent :
+     * getRepositoryForClass(TronconDigue.class) -> getRepositories... + stream
+     *
+     * @param element
+     * @return
+     */
+    /**
+     * Search recursively the troncon of the positionable.
+     *
+     * @param pos Positionable object to find parent linear.
+     * @return Found linear object, or null if we cannot deduce it from input.
+     */
+    public static TronconDigue getTronconFromPositionable(final Positionable pos) {
+        final Element currentElement = getTronconFromElement(pos);
+        if (currentElement instanceof TronconDigue) {
+            return (TronconDigue) currentElement;
+        } else {
+            return null;
+        }
+    }
+    
+    
+    public static Element getTronconFromElement(final Element element) {
+        Element candidate = null;
+
+        // Si on arrive sur un Troncon, on renvoie le troncon.
+        if (element instanceof TronconDigue) {
+            candidate = element;
+        } // Sinon on cherche un troncon dans les parents
+        else {
+            // On privilégie le chemin AvecForeignParent
+            if (element instanceof AvecForeignParent) {
+                String id = ((AvecForeignParent) element).getForeignParentId();
+                final SessionCore session = InjectorCore.getBean(SessionCore.class);
+                final Preview preview = session.getPreviews().get(id);
+                if (preview == null) {
+                    return null;
+                }
+
+                final AbstractSIRSRepository repo = InjectorCore.getBean(SessionCore.class).getRepositoryForType(preview.getElementClass());
+                candidate = getTronconFromElement((Element) repo.get(id));
+            }
+            // Si on n'a pas (ou pas trouvé) de troncon via la référence ForeignParent on cherche via le conteneur
+            if (candidate == null && element.getParent() != null) {
+                candidate = getTronconFromElement(element.getParent());
+            }
+        }
+        return candidate;
     }
 
     //=====================================================================

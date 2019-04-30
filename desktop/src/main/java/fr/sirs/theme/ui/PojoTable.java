@@ -60,7 +60,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.theme.ColumnOrder;
-import fr.sirs.theme.ui.calculcoordinates.ConvertPositionableCoordinates;
+import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.theme.ui.columns.ColumnState;
 import fr.sirs.theme.ui.columns.TableColumnsPreferences;
 import fr.sirs.theme.ui.pojotable.ChoiceStage;
@@ -872,8 +872,13 @@ public class PojoTable extends BorderPane implements Printable {
         uiTable.getColumns().addListener((Change<? extends TableColumn<Element, ?>> change) -> {
             if (change.next()) {
 
-                if(change.getRemoved()==null || change.getRemoved().size()<change.getTo())
+                
+                // Si la table avant changement n'était pas définie ou disposer de
+                // moins de colonnes que la nouvelle table, ce n'est pas un changement
+                // provoqué par l'utilisateur.
+                if(change.getRemoved()==null || change.getRemoved().size()<change.getTo()){
                     return;
+                }
                 // Lors d'un changement parmi les colonnes de uiTable,
                 // on compare les Id des colonnes avant et après le changement 
                 // pour identifier les changements de position.

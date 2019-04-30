@@ -32,7 +32,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.theme.ui.calculcoordinates.ConvertPositionableCoordinates;
+import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.util.FormattedDoubleConverter;
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
@@ -252,7 +252,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
             final Positionable pos = posProperty.get();
             final String mode = pos.getGeometryMode();
 
-            final TronconDigue t = FXPositionableMode.getTronconFromPositionable(pos);
+            final TronconDigue t = ConvertPositionableCoordinates.getTronconFromPositionable(pos);
             final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
             final SystemeReperage defaultSR;
             boolean sameSR = false;
@@ -459,7 +459,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
     protected LinearReferencing.SegmentInfo[] getSourceLinear(final SystemeReperage source) {
         if (tronconSegments == null) {
             final Positionable positionable = posProperty.get();
-            final TronconDigue t = FXPositionableMode.getTronconFromPositionable(positionable);
+            final TronconDigue t = ConvertPositionableCoordinates.getTronconFromPositionable(positionable);
             tronconSegments = LinearReferencingUtilities.getSourceLinear(t, source);
         }
         return tronconSegments;

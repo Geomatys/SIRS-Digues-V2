@@ -20,7 +20,7 @@ package fr.sirs;
 
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.RefOuvrageHydrauliqueAssocie;
-import fr.sirs.theme.ui.calculcoordinates.ConvertPositionableCoordinates;
+import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.ClosingDaemon;
 import java.util.List;

@@ -24,7 +24,7 @@ import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.RefUrgence;
-import fr.sirs.theme.ui.calculcoordinates.ConvertPositionableCoordinates;
+import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.ClosingDaemon;
 import java.util.Comparator;

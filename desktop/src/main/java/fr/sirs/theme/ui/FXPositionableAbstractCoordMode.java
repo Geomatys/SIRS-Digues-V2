@@ -31,8 +31,8 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.theme.ui.FXPositionableMode.fxNumberValue;
-import fr.sirs.theme.ui.calculcoordinates.ConvertPositionableCoordinates;
-import static fr.sirs.theme.ui.calculcoordinates.ConvertPositionableCoordinates.getDefaultSRforPositionable;
+import fr.sirs.util.ConvertPositionableCoordinates;
+import static fr.sirs.util.ConvertPositionableCoordinates.getDefaultSRforPositionable;
 import fr.sirs.util.FormattedDoubleConverter;
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
@@ -371,7 +371,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             }
         }
 
-        final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
+        final TronconDigue troncon = ConvertPositionableCoordinates.getTronconFromPositionable(positionable);
         LineString geometry = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
 
         /* SYM-1658 : If user has inverted start and end point, we must try to

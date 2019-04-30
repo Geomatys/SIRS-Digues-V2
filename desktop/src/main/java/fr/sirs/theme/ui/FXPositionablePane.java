@@ -38,7 +38,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.theme.ui.calculcoordinates.ConvertPositionableCoordinates;
+import fr.sirs.util.ConvertPositionableCoordinates;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -344,7 +344,7 @@ public class FXPositionablePane extends BorderPane {
         final Positionable pos = getPositionable();
 
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
-        final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(pos);
+        final TronconDigue troncon = ConvertPositionableCoordinates.getTronconFromPositionable(pos);
         final SystemeReperage sr;
         if (pos.getSystemeRepId() != null) {
             sr = srRepo.get(pos.getSystemeRepId());
@@ -429,7 +429,7 @@ public class FXPositionablePane extends BorderPane {
 
         //calcul de la position geographique
         final Positionable pos = getPositionable();
-        final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(pos);
+        final TronconDigue troncon = ConvertPositionableCoordinates.getTronconFromPositionable(pos);
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
 
         final SystemeReperage defaultSr;
