@@ -71,6 +71,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
@@ -325,7 +326,18 @@ public final class SIRS extends SirsCore {
      * @param current the element to select by default.
      */
     public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current) {
-        final SirsStringConverter converter = new SirsStringConverter();
+        initCombo(comboBox, items, current, new SirsStringConverter());
+    }
+
+    /**
+     * initialize ComboBox items using input list. We also activate completion.
+     * @param comboBox The combo box to set value on.
+     * @param items The items we want into the ComboBox.
+     * @param current the element to select by default.
+     * @param converter the StringConverter to use to identify the items.
+     */
+    public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final StringConverter converter) {
+        ArgumentChecks.ensureNonNull("items", items);
         comboBox.setConverter(converter);
         if (items instanceof SortedList) {
             comboBox.setItems(items);
@@ -336,7 +348,7 @@ public final class SIRS extends SirsCore {
         comboBox.getSelectionModel().select(current);
         ComboBoxCompletion.autocomplete(comboBox);
     }
-
+    
     /**
      * Convert byte number given in parameter in a human readable string. It tries
      * to fit the best unit. Ex : if you've got a number higher than a thousand,

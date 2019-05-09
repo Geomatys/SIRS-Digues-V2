@@ -39,6 +39,8 @@ import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.index.ElementHit;
+import fr.sirs.util.property.ShowCase_Possibility;
+import fr.sirs.util.property.SirsPreferences;
 import java.lang.reflect.Method;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
@@ -68,7 +70,21 @@ public class SirsStringConverter extends StringConverter {
      */
     @Override
     public String toString(Object item) {
-        return toString(item, true);
+        
+//        String showCase = SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.ABSTRACT_SHOWCASE);
+//        if (showCase != null && showCase.equals(ShowCase_Possibility.FULL_NAME.name)) {
+//            return toString(item, false);
+//            
+//        }else{
+//            return toString(item, true);
+//        }
+        if ( SirsPreferences.INSTANCE.getShowCase() == null) { //"Abstract : Designation" attendu 
+            return toString(item, true);
+        } else if ( SirsPreferences.INSTANCE.getShowCase()) { //"Abstract" (only)
+            return toString(item, true);
+        }else{ //"Designation"/Nom complet seulement
+            return toString(item, false);
+        }
     }
 
     private static String getDesignation(Object item){
