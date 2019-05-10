@@ -56,9 +56,6 @@ public class ShowCaseComboBox extends BorderPane {
 
         Bindings.bindBidirectional(stringValue, comboBox.valueProperty(), showCaseConverter);
 
-        comboBox.valueProperty().setValue(
-                ShowCase_Possibility.getFromName(SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.ABSTRACT_SHOWCASE))
-        );
         
         comboBox.valueProperty().addListener(change ->{
             ArgumentChecks.ensureNonNull(" Instance de SirsPreferences", SirsPreferences.INSTANCE);
@@ -68,7 +65,10 @@ public class ShowCaseComboBox extends BorderPane {
                 SirsPreferences.INSTANCE.setShowCase(null);
             }
         });
-
+        
+        comboBox.valueProperty().setValue(
+                ShowCase_Possibility.getFromName(SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.ABSTRACT_SHOWCASE))
+        );
     }
     
     
