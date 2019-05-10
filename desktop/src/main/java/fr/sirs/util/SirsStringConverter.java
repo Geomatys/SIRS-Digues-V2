@@ -39,7 +39,6 @@ import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.index.ElementHit;
-import fr.sirs.util.property.ShowCase_Possibility;
 import fr.sirs.util.property.SirsPreferences;
 import java.lang.reflect.Method;
 import java.util.WeakHashMap;
@@ -79,25 +78,20 @@ public class SirsStringConverter extends StringConverter {
 //            return toString(item, true);
 //        }
         if ( SirsPreferences.INSTANCE.getShowCase() == null) { //"Abstract : Designation" attendu 
-            return toString(item, true);
+            return toString(item, true, true);
         } else if ( SirsPreferences.INSTANCE.getShowCase()) { //"Abstract" (only)
-            return toString(item, true);
+            return toString(item, true, false);
         }else{ //"Designation"/Nom complet seulement
-            return toString(item, false);
+            return toString(item, false, true);
         }
     }
-
-    private static String getDesignation(Object item){
-        if (item instanceof Element) {
-            return getDesignation((Element)item);
-        }  else if (item instanceof Preview) {
-            return getDesignation((Preview) item);
-        }  else if (item instanceof SQLQuery) {
-            return ((SQLQuery)item).getLibelle();
-        } else return "";
+    
+    
+    public String toString(Object item, final boolean prefixed) {
+        return toString(item, prefixed, true);
     }
 
-    public String toString(Object item, final boolean prefixed) {
+    public String toString(Object item, final boolean prefixed, final boolean suffixed) {
         if(item instanceof SystemeReperageBorne){
             final SystemeReperageBorne srb = (SystemeReperageBorne) item;
             final Session session = Injector.getBean(Session.class);
@@ -106,7 +100,12 @@ public class SirsStringConverter extends StringConverter {
 
         StringBuilder text = new StringBuilder();
         // Start title with element designation
-        if(prefixed) text.append(getDesignation(item));
+        if(prefixed){
+            text.append(getDesignation(item));
+            if (!suffixed){
+                return convertAndRegister(text, item);
+            }
+        }
 
         // Search for a name or label associated to input object
         if (item instanceof Contact) {
@@ -163,8 +162,26 @@ public class SirsStringConverter extends StringConverter {
 
         // Si on a un résultat vide, on retourne la désignation, même si on a
         // demandé un résultat non préfixé.
-        if(!prefixed && text.length()==0) text.append(getDesignation(item));
+        if(!prefixed && text.length() == 0)
+            text.append(getDesignation(item));
 
+//        final String result = text.toString();
+//        if (result != null && !result.isEmpty()) {
+//            FROM_STRING.put(result, item);
+//        }
+//        return result;
+        return convertAndRegister(text, item);
+    }
+    
+    /**
+     * Convert input StringBuilder in String and register the (text,item) couple
+     * in FROM_STRING WeakHashMap.
+     *
+     * @param text StringBuilder to convert.
+     * @param item Object to associate with the returned String.
+     * @return 
+     */
+    private String convertAndRegister (StringBuilder text, Object item){
         final String result = text.toString();
         if (result != null && !result.isEmpty()) {
             FROM_STRING.put(result, item);
@@ -172,6 +189,17 @@ public class SirsStringConverter extends StringConverter {
         return result;
     }
 
+    
+    private static String getDesignation(Object item){
+        if (item instanceof Element) {
+            return getDesignation((Element)item);
+        }  else if (item instanceof Preview) {
+            return getDesignation((Preview) item);
+        }  else if (item instanceof SQLQuery) {
+            return ((SQLQuery)item).getLibelle();
+        } else return "";
+    }
+    
     public static String getDesignation(final Preview source) {
         ArgumentChecks.ensureNonNull("Preview to get designation for", source);
         final LabelMapper labelMapper = source.getElementClass() == null? null : getLabelMapperForClass(source.getElementClass());
