@@ -92,9 +92,14 @@ public class JRXMLUtil {
         }
         else {
 //            SirsCore.LOGGER.log(Level.WARNING, "Label separator not found : {0}", input);  //Surcharge les logs.
-            if ((input.length()>2) && (input.charAt(1) == ')')){ //Permet de ne pas considérer la numérotation ("1)") lors de l'extraction du label
-                SirsCore.LOGGER.log(Level.INFO, "Substring \"{0}\" extraite lors de l'extraction du label.", input.substring(0,2));
-               return input.substring(2); 
+            if ((input.length()>2) && (input.charAt(1) == ')')) {
+                //ATTENTION : Bricolage 
+                // Permet de ne pas considérer la numérotation ("1) ") lors de l'extraction de certain label.
+                // Ces cas ce produisent pas exemple dans la colonne 'Intervenants' des prestations au sein des fiches désordre.
+                // Sans cette opération, le "1) " est duppliqué.
+                // Je ne connais pas l'origine du "1) ".
+                SirsCore.LOGGER.log(Level.INFO, "Substring \"{0}\" extraite lors de l'extraction du label.", input.substring(0, 2));
+                return input.substring(2).trim(); 
             }
             return input;
         }

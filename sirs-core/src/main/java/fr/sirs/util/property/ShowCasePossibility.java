@@ -25,7 +25,7 @@ import org.apache.sis.util.ArgumentChecks;
  *
  * @author Matthieu Bastianelli (Geomatys)
  */
-public enum ShowCase_Possibility {
+public enum ShowCasePossibility {
 
     ABSTRACT("Abrégé", Boolean.TRUE),
     FULL_NAME("Nom Complet", Boolean.FALSE),
@@ -34,20 +34,20 @@ public enum ShowCase_Possibility {
     public final String name;
     public final Boolean booleanValue;
 
-    private ShowCase_Possibility(final String name, final Boolean value) {
+    private ShowCasePossibility(final String name, final Boolean value) {
         this.name = name;
         this.booleanValue = value;
     }
 
     /**
-     * Renvoie l'énum ShowCase_Possibility associé à la chaîne de caractère en
-     * paramètre.
+     * Renvoie l'énum ShowCasePossibility associé à la chaîne de caractère en
+ paramètre.
      *
      * @param searchedString
      * @return
      * @throws IllegalArgumentException
      */
-    public static ShowCase_Possibility getFromName(String searchedString) throws IllegalArgumentException {
+    public static ShowCasePossibility getFromName(String searchedString) throws IllegalArgumentException {
         ArgumentChecks.ensureNonNull("searchedString", searchedString);
         if (searchedString.equals(ABSTRACT.name)) {
             return ABSTRACT;
@@ -67,20 +67,20 @@ public enum ShowCase_Possibility {
      * 
      * @return StringConverter<ShowCase_Possibility>
      */
-    public static StringConverter<ShowCase_Possibility> getConverter() {
+    public static StringConverter<ShowCasePossibility> getConverter() {
 
-        return new StringConverter<ShowCase_Possibility>() {
+        return new StringConverter<ShowCasePossibility>() {
             @Override
-            public String toString(ShowCase_Possibility object) {
-                return object == null ? ShowCase_Possibility.BOTH.name : object.name;
+            public String toString(ShowCasePossibility object) {
+                return object == null ? ShowCasePossibility.BOTH.name : object.name;
             }
 
             @Override
-            public ShowCase_Possibility fromString(String string) {
+            public ShowCasePossibility fromString(String string) {
                 try {
-                    return ShowCase_Possibility.getFromName(string);
+                    return ShowCasePossibility.getFromName(string);
                 } catch (IllegalArgumentException | NullPointerException e) {
-                    return ShowCase_Possibility.BOTH;
+                    return ShowCasePossibility.BOTH;
                 }
             }
         };

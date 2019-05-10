@@ -70,13 +70,6 @@ public class SirsStringConverter extends StringConverter {
     @Override
     public String toString(Object item) {
         
-//        String showCase = SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.ABSTRACT_SHOWCASE);
-//        if (showCase != null && showCase.equals(ShowCase_Possibility.FULL_NAME.name)) {
-//            return toString(item, false);
-//            
-//        }else{
-//            return toString(item, true);
-//        }
         if ( SirsPreferences.INSTANCE.getShowCase() == null) { //"Abstract : Designation" attendu 
             return toString(item, true, true);
         } else if ( SirsPreferences.INSTANCE.getShowCase()) { //"Abstract" (only)

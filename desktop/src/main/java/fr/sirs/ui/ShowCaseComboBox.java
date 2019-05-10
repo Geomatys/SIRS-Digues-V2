@@ -19,7 +19,7 @@
 package fr.sirs.ui;
 
 import fr.sirs.SIRS;
-import fr.sirs.util.property.ShowCase_Possibility;
+import fr.sirs.util.property.ShowCasePossibility;
 import fr.sirs.util.property.SirsPreferences;
 import java.util.Arrays;
 import javafx.beans.DefaultProperty;
@@ -35,6 +35,11 @@ import javafx.util.StringConverter;
 import org.apache.sis.util.ArgumentChecks;
 
 /**
+ * ComboBox utilisée pour choisir et enregistrer les préférences de l'utilisateur
+ * quant à l'affichage utilisé pour désigné les objets de l'application :
+ * -abrégé seulement
+ * -nom complet seulement
+ * -abrégé : nom complet (par défaut)
  *
  * @author Matthieu Bastianelli (Geomatys)
  */
@@ -47,27 +52,27 @@ public class ShowCaseComboBox extends BorderPane {
     public ShowCaseComboBox() {
         comboBox = new ComboBox();
 
-        ObservableList<ShowCase_Possibility> values = FXCollections.observableArrayList(Arrays.asList(ShowCase_Possibility.values()));
-        final StringConverter showCaseConverter  = ShowCase_Possibility.getConverter();
+        ObservableList<ShowCasePossibility> values = FXCollections.observableArrayList(Arrays.asList(ShowCasePossibility.values()));
+        final StringConverter showCaseConverter  = ShowCasePossibility.getConverter();
         
-        SIRS.initCombo(comboBox, values, ShowCase_Possibility.BOTH, showCaseConverter);
+        SIRS.initCombo(comboBox, values, ShowCasePossibility.BOTH, showCaseConverter);
 
         setCenter(comboBox);
 
         Bindings.bindBidirectional(stringValue, comboBox.valueProperty(), showCaseConverter);
 
-        
+        //Ecouteur sur la valeur sélectionnée.
         comboBox.valueProperty().addListener(change ->{
             ArgumentChecks.ensureNonNull(" Instance de SirsPreferences", SirsPreferences.INSTANCE);
             try{
-                SirsPreferences.INSTANCE.setShowCase(((ShowCase_Possibility) ((SimpleObjectProperty) change).get()).booleanValue);
+                SirsPreferences.INSTANCE.setShowCase(((ShowCasePossibility) ((SimpleObjectProperty) change).get()).booleanValue);
             }catch(ClassCastException | NullPointerException ex){
                 SirsPreferences.INSTANCE.setShowCase(null);
             }
         });
         
-        comboBox.valueProperty().setValue(
-                ShowCase_Possibility.getFromName(SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.ABSTRACT_SHOWCASE))
+        //Chargement de la valeur sauvegardée ou par défaut.
+        comboBox.valueProperty().setValue(ShowCasePossibility.getFromName(SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.ABSTRACT_SHOWCASE))
         );
     }
     

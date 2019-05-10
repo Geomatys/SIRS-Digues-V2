@@ -58,7 +58,7 @@ public class SirsPreferences extends Properties {
                 + " déterminée à partir de l'objet du même type ayant une désignation de forme numérique la plus haute trouvée dans la base de données, + 1.", Boolean.FALSE.toString()),
         
         ABSTRACT_SHOWCASE("Préférence pour la désignation des objets de l'application","Choix entre abrégé, nom complet ou les 2 pour la désignation des objet dans l'application.",
-           ShowCase_Possibility.BOTH.name);
+           ShowCasePossibility.BOTH.name);
         public final String title;
         public final String description;
         public final String defaultValue;
