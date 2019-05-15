@@ -27,7 +27,6 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.CRS_WGS84;
 import static fr.sirs.SIRS.ICON_VIEWOTHER_WHITE;
-import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
@@ -44,14 +43,12 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -342,16 +339,27 @@ public class FXPositionablePane extends BorderPane {
      */
     public final void updateSRAndPRInfo() {
         final Positionable pos = getPositionable();
+        final SystemeReperage sr;
+
+        if (pos == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Impossible de mettre à jour le SR et PR, pour Positionable null");
+            uiSR.setText("No SR found.");
+            uiPRDebut.setText("");
+            uiPRFin.setText("");
+            return;
+        }
 
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
         final TronconDigue troncon = ConvertPositionableCoordinates.getTronconFromPositionable(pos);
-        final SystemeReperage sr;
-        if (pos.getSystemeRepId() != null) {
-            sr = srRepo.get(pos.getSystemeRepId());
-        } else if (troncon.getSystemeRepDefautId() != null) {
-            sr = srRepo.get(troncon.getSystemeRepDefautId());
-        } else {
+
+        if (srRepo == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Impossible de mettre à jour le SR et PR, Repository srRepo null");
             sr = null;
+        } else if (troncon == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Impossible de mettre à jour le SR et PR, TronconDigue troncon null");
+            sr = null;
+        } else {
+            sr = srRepo.get(troncon.getSystemeRepDefautId());
         }
 
         if (sr != null) {
@@ -381,7 +389,7 @@ public class FXPositionablePane extends BorderPane {
             pos.setPrFin(endPr);
 
         } else {
-            uiSR.setText("");
+            uiSR.setText("No SR found.");
             uiPRDebut.setText("");
             uiPRFin.setText("");
             pos.setPrDebut(0);
@@ -555,9 +563,9 @@ public class FXPositionablePane extends BorderPane {
                     page.append(!posSr.endAval ? "en aval" : "en amont").append('.');  // '!' : Le Positionable indique la position (aval/amont) de la borne. Ici on place le Positionable par rapport à la borne.
                     page.append(" Valeur du PR : ").append(computedPR).append('.');
                     page.append("<br/><br/>");
-                    
+
                 } catch (Exception e) {
-                    SIRS.LOGGER.log(Level.WARNING,"Echec du calcul de PR pour le système de repérage : "+sr.getLibelle(), e);
+                    SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de PR pour le système de repérage : " + sr.getLibelle(), e);
                 }
             }
         }
