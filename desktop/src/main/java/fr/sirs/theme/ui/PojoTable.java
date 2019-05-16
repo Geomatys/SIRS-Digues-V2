@@ -650,7 +650,6 @@ public class PojoTable extends BorderPane implements Printable {
                     //Choix du destinataire de la copie.
                     Element target = elementCopier.askForCopyTarget();
 
-
                     //Copie des éléments sélectionnés vers la cible identifiée.
                     this.elementCopier.copyPojosTo(target, elements);
 
