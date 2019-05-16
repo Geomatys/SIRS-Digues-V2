@@ -50,10 +50,14 @@ public class ShowCaseComboBox extends BorderPane {
     protected final ComboBox comboBox;
 
     public ShowCaseComboBox() {
+        ArgumentChecks.ensureNonNull(" Instance de SirsPreferences", SirsPreferences.INSTANCE);
         comboBox = new ComboBox();
 
         ObservableList<ShowCasePossibility> values = FXCollections.observableArrayList(Arrays.asList(ShowCasePossibility.values()));
         final StringConverter showCaseConverter  = ShowCasePossibility.getConverter();
+             
+        //Chargement de la valeur sauvegardée ou par défaut.
+        comboBox.valueProperty().setValue(ShowCasePossibility.getFromName(SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.ABSTRACT_SHOWCASE)));
         
         SIRS.initCombo(comboBox, values, ShowCasePossibility.BOTH, showCaseConverter);
 
@@ -63,7 +67,6 @@ public class ShowCaseComboBox extends BorderPane {
 
         //Ecouteur sur la valeur sélectionnée.
         comboBox.valueProperty().addListener(change ->{
-            ArgumentChecks.ensureNonNull(" Instance de SirsPreferences", SirsPreferences.INSTANCE);
             try{
                 SirsPreferences.INSTANCE.setShowCase(((ShowCasePossibility) ((SimpleObjectProperty) change).get()).booleanValue);
             }catch(ClassCastException | NullPointerException ex){
@@ -71,9 +74,6 @@ public class ShowCaseComboBox extends BorderPane {
             }
         });
         
-        //Chargement de la valeur sauvegardée ou par défaut.
-        comboBox.valueProperty().setValue(ShowCasePossibility.getFromName(SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.ABSTRACT_SHOWCASE))
-        );
     }
     
     

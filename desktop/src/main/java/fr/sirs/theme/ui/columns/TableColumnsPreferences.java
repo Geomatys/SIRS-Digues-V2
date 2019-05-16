@@ -75,7 +75,7 @@ public class TableColumnsPreferences {
         }
 
         String fileName = pojoClass.getName().replace(".", "_").replace(" ", "_") + "_preferences.json";
-        this.filePrefPath = SirsCore.CONFIGURATION_PATH.resolve(directory).resolve(fileName);
+        this.filePrefPath = directory.resolve(fileName);
         this.loadReferencesFromJsonPath();
     }
 

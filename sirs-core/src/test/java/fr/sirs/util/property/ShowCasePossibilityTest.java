@@ -41,7 +41,7 @@ public class ShowCasePossibilityTest {
         // Tests des valeurs Booleans
         Assert.assertEquals(Boolean.TRUE, ShowCasePossibility.getFromName(abstractString).booleanValue);
         Assert.assertEquals(Boolean.FALSE, ShowCasePossibility.getFromName(fullNameString).booleanValue);
-        Assert.assertEquals(null, ShowCasePossibility.getFromName(bothString).booleanValue);
+        Assert.assertNull(ShowCasePossibility.getFromName(bothString).booleanValue);
 
         int val0 = 0;
 
@@ -51,10 +51,10 @@ public class ShowCasePossibilityTest {
                 ShowCasePossibility.getFromName(testedString);
                 val0++;
             } catch (IllegalArgumentException iae) {
-                Assert.assertNotEquals(null, testedString);
+                Assert.assertNotNull(testedString);
                 Assert.assertEquals(testedString + " n'est pas un nom valide pour l'énum ShowCase_Possibility", iae.getMessage());
             } catch (NullArgumentException ne) {
-                Assert.assertEquals(null, testedString);
+                Assert.assertNull(testedString);
                 Assert.assertEquals("L’argument ‘searchedString’ ne doit pas être nul.", ne.getMessage());
             }
         }
