@@ -61,6 +61,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -72,7 +74,9 @@ import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.geometry.Orientation;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
@@ -85,6 +89,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import org.apache.sis.geometry.GeneralEnvelope;
 import org.apache.sis.measure.NumberRange;
@@ -92,6 +98,8 @@ import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.coverage.amended.AmendedCoverageReference;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.query.QueryBuilder;
+import org.geotoolkit.display.canvas.AbstractCanvas2D;
+import org.geotoolkit.display.canvas.control.AbstractCanvasMonitor;
 import org.geotoolkit.display2d.GO2Hints;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.canvas.J2DCanvas;
@@ -183,10 +191,15 @@ public class FXMapPane extends BorderPane implements Printable {
     private final ToolBar uiSplitBar = new ToolBar(splitButton);
 
     private final FXMapContextTree uiTree;
+    
+    //Static growl used to managed AbstractCanvasMonitor exceptions
+    private static Growl nullableAlert=null;
 
     public FXMapPane() {
         setFocusTraversable(true);
 
+        overloadMonitor(uiMap1);
+        
         uiCoordBar2.setCrsButtonVisible(false);
         uiMap1.getCanvas().setBackgroundPainter(new SolidColorPainter(Color.WHITE));
         uiMap2.getCanvas().setBackgroundPainter(new SolidColorPainter(Color.WHITE));
@@ -374,6 +387,38 @@ public class FXMapPane extends BorderPane implements Printable {
         });
     }
 
+     /**
+     * Static method used to manage the exception produced in geotoolkit.
+     * 
+     * Allows to alert the user of the exception occurences. 
+     * 
+     * @param fxMap : FXMap to survey.
+     */
+    private static void overloadMonitor(FXMap fxMap) {
+        ArgumentChecks.ensureNonNull("fxMap, overloadMonitor method's input,", fxMap);
+        if (fxMap.getCanvas() != null) {
+            fxMap.getCanvas().setMonitor(new AbstractCanvasMonitor() {
+                @Override
+                public void exceptionOccured(Exception ex, Level level) {
+                    Platform.runLater(() -> {
+                    if (nullableAlert == null) {
+                            nullableAlert = new Growl(Growl.Type.ERROR, "Erreur lors d'une requête CQL, veuillez corriger ou annuler vos modifications.");
+                            nullableAlert.show(Duration.seconds(4));
+
+                            // On remet  ensuite l'alert à null pour afficher de nouveau le message d'alerte si aucune correction n'a été apportée.
+                            try{
+                            Executors.newScheduledThreadPool(1)
+                                    .schedule(() -> {nullableAlert = null;}, 4, TimeUnit.SECONDS);
+                            }catch (RuntimeException re){
+                                nullableAlert=null;
+                            }
+                        }
+                });
+                }
+            });
+        }
+    }
+    
     /**
      * Tries to replace all coverage layers to use an {@link AmendedCoverageReference}
      * @param parent The map item containing layers to analyze.
