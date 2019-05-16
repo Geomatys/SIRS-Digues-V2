@@ -55,8 +55,10 @@ public class SirsPreferences extends Properties {
         NODE_NAME("Nom du nœud de l'instance CouchDB", "Nom du nœud utilisé pour la configuration dans l'instance CouchDB.", "_local"),
         CHECK_COUCHDB_VERSION("Vérifie la version de CouchDB", "Permet de vérifier ou d'ignorer la version de CouchDB au lancement de l'application.", Boolean.TRUE.toString()),
         DESIGNATION_AUTO_INCREMENT("Auto-incrément des désignations", "Lorsqu'un nouvel élément sera créé, sa désignation sera automatiquement remplie avec une valeur numérique"
-                + " déterminée à partir de l'objet du même type ayant une déisgnation de forme numérique la plus haute trouvée dans la base de données, + 1.", Boolean.FALSE.toString());
-
+                + " déterminée à partir de l'objet du même type ayant une désignation de forme numérique la plus haute trouvée dans la base de données, + 1.", Boolean.FALSE.toString()),
+        
+        ABSTRACT_SHOWCASE("Préférence pour la désignation des objets de l'application","Choix entre abrégé, nom complet ou les 2 pour la désignation des objet dans l'application.",
+           ShowCasePossibility.BOTH.name);
         public final String title;
         public final String description;
         public final String defaultValue;
@@ -67,6 +69,16 @@ public class SirsPreferences extends Properties {
         }
 
         public String getDefaultValue(){return defaultValue;}
+    }
+    
+    private Boolean showCase = null;
+    
+    public Boolean getShowCase(){
+        return showCase;        
+    }
+    
+    public Boolean setShowCase(Boolean newShowCase){
+        return showCase = newShowCase;        
     }
     
     /**

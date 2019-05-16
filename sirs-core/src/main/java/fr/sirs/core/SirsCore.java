@@ -192,8 +192,16 @@ public class SirsCore {
     public static final String DATE_DEBUT_FIELD = "date_debut";
     public static final String DATE_FIN_FIELD = "date_fin";
     public static final String DATE_MAJ_FIELD = "dateMaj";
+    
     public static final String BORNE_DEBUT_AVAL = "borne_debut_aval";
     public static final String BORNE_FIN_AVAL = "borne_fin_aval";
+    
+    public static final String BORNE_DEBUT_DISTANCE = "borne_debut_distance";  //Doit correspondre au nom de la Propriété de la classe Positionable
+    public static final String BORNE_FIN_DISTANCE = "borne_fin_distance";  //Doit correspondre au nom de la Propriété de la classe Positionable
+    
+    
+    public static final String BORNE_DEBUT_ID = "borneDebutId";  //Doit correspondre au nom de la Propriété de la classe Positionable
+    public static final String BORNE_FIN_ID = "borneFinId";  //Doit correspondre au nom de la Propriété de la classe Positionable
 
     public static final String COMMENTAIRE_FIELD = "commentaire";
     public static final String GEOMETRY_FIELD = "geometry";

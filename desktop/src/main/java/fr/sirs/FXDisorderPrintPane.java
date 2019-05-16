@@ -21,8 +21,10 @@ package fr.sirs;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Observation;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.RefUrgence;
+import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.ClosingDaemon;
 import java.util.Comparator;
@@ -30,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -183,7 +186,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
                 .and(new PRPredicate<>())
                 .and(new UrgencePredicate());
-
+        
         final CloseableIterator<Desordre> it = Injector.getSession()
                 .getRepositoryForClass(Desordre.class)
                 .getAllStreaming()
@@ -191,8 +194,10 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
 
         final Spliterator<Desordre> split = Spliterators.spliteratorUnknownSize(it, 0);
         final Stream dataStream = StreamSupport.stream(split, false)
-                .filter(userOptions);
+                .filter(userOptions)
+                .map(ConvertPositionableCoordinates.COMPUTE_MISSING_COORD);
 
+        
         dataStream.onClose(() -> it.close());
         ClosingDaemon.watchResource(dataStream, it);
 

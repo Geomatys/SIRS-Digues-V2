@@ -143,7 +143,7 @@ public class ElementCopier {
         if (target != null) {
             return target;
         } else {
-            throw new CopyElementException("Aucun élément sélectionné comme cible de la copie.");
+            throw new CopyElementException("Copie annulée ou aucun élément sélectionné comme cible de la copie.");
         }
 
     }
@@ -156,8 +156,9 @@ public class ElementCopier {
      * 'copie'. Par défaut, cette méthode informe l'utilisateur que la copie est
      * impossible.
      *
-     * @param targetedElement
-     * @param pojosToCopy
+     * @param targetedElement : Elément auquel on veut ajouter les éléments
+     * copiés.
+     * @param pojosToCopy : éléments à copier.
      * @return
      */
     public List<? extends Element> copyPojosTo(Element targetedElement, Element... pojosToCopy) {
@@ -185,8 +186,9 @@ public class ElementCopier {
      *
      * Copie des éléments sélectionnés vers un Foreign Parent.
      *
-     * @param targetedForeignParent
-     * @param pojosToCopy
+     * @param targetedForeignParent: élément auquel on veut ajouter les éléments
+     * copiés. Cette élément sera le ForeignParent des copies.
+     * @param pojosToCopy éléments à copier.
      * @return
      */
     public List<AvecForeignParent> copyPojosToForeignParent(Element targetedForeignParent, Element... pojosToCopy) {
@@ -242,8 +244,9 @@ public class ElementCopier {
      * l'utilisateur évolue pour permettre la copie d'autres type d'éléments
      * vers leur container. ((avecForeignParent && (container != null))
      *
-     * @param targetedContainer
-     * @param pojosToCopy
+     * @param targetedContainer : container (implémentant Element) auquel on
+     * veut ajouter les éléments copiés.
+     * @param pojosToCopy : éléments à copier
      * @return
      */
     public List<? extends Element> copyPojosToContainer(Element targetedContainer, Element... pojosToCopy) {

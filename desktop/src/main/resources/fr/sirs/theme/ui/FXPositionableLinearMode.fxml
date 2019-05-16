@@ -2,6 +2,8 @@
 
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.text.Font?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -30,6 +32,9 @@
                   <ComboBox fx:id="uiSRs" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" HBox.hgrow="NEVER" />
                </children>
             </HBox>
+            <Label fx:id="uiLinearCoordLabel" textAlignment="CENTER" text="" GridPane.rowIndex="0" GridPane.columnIndex="5">
+                <font><Font name="System Bold" size="13.0" /></font>
+            </Label>
             <Label text="Borne" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
             <Label text="Amont/Aval" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
             <Label text="Distance (m)" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="1" />

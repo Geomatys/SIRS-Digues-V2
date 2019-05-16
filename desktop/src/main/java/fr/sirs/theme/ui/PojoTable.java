@@ -18,6 +18,9 @@
  */
 package fr.sirs.theme.ui;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sun.javafx.property.PropertyReference;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
@@ -57,6 +60,9 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.theme.ColumnOrder;
+import fr.sirs.util.ConvertPositionableCoordinates;
+import fr.sirs.theme.ui.columns.ColumnState;
+import fr.sirs.theme.ui.columns.TableColumnsPreferences;
 import fr.sirs.theme.ui.pojotable.ChoiceStage;
 import fr.sirs.theme.ui.pojotable.CopyElementException;
 import fr.sirs.theme.ui.pojotable.DeleteColumn;
@@ -82,6 +88,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -98,6 +105,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -121,6 +131,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
@@ -169,6 +180,7 @@ import jidefx.scene.control.field.NumberField;
 import org.apache.sis.feature.AbstractIdentifiedType;
 import org.apache.sis.feature.DefaultAssociationRole;
 import org.apache.sis.feature.DefaultAttributeType;
+import org.apache.sis.util.ArgumentChecks;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -194,6 +206,7 @@ import org.opengis.filter.Filter;
  * @author Johann Sorel (Geomatys)
  * @author Alexis Manin (Geomatys)
  * @author Samuel Andrés (Geomatys)
+ * @author Matthieu Bastianelli (Geomatys)
  */
 public class PojoTable extends BorderPane implements Printable {
 
@@ -344,8 +357,20 @@ public class PojoTable extends BorderPane implements Printable {
 
     // Default deletor
     private Consumer deletor;
-    
+
     protected ElementCopier elementCopier;
+
+    //---------------------------------------------
+    // Attributs pour les préférences utilisateur :
+    //---------------------------------------------
+    // Préférences utilisateur pour cette PojoTable.
+    TableColumnsPreferences columnsPreferences;
+    //A déplacer avec les autres attributs :
+    private BooleanProperty isColumnModifying = new SimpleBooleanProperty(false);
+    // ScheduledExecutorService permettant d'instancier un délais avant de sauvegarder les modifications apportées à des colonnes
+    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+    //Liste des colonnes modifiées :
+    private Set<Integer> modifiedColumnsIndices = new HashSet<>();
 
     /*
     Objet auquel sont rattachés les éléments de la pojoTable.
@@ -627,8 +652,8 @@ public class PojoTable extends BorderPane implements Printable {
 
                     //Copie des éléments sélectionnés vers la cible identifiée.
                     this.elementCopier.copyPojosTo(target, elements);
-                    
-                    if (elementCopier.getAvecForeignParent()){
+
+                    if (elementCopier.getAvecForeignParent()) {
                         //On rafraîchie les éléments du tableau.
                         updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get());
                     }
@@ -815,9 +840,113 @@ public class PojoTable extends BorderPane implements Printable {
         uiDelete.setTooltip(new Tooltip("Supprimer les éléments sélectionnés"));
         uiFilter.setTooltip(new Tooltip("Filtrer les données"));
 
-        updateView();
-    }
+        // Préférences utilisateur pour cette PojoTable.
+        columnsPreferences = new TableColumnsPreferences(this.pojoClass);
 
+        if (!columnsPreferences.getWithPreferencesColumns().isEmpty()) {
+            columnsPreferences.applyPreferencesToTableColumns(uiTable.getColumns());
+        }
+
+        updateView();
+
+        //===============================================================
+        // Suivi des préférences utilisateur pour les colonnes affichées.
+        //===============================================================
+        //Ajout Listener pour identifier et sauvegarder les modifications de colonnes par l'utilisateur :
+        //Identification des changements d'épaisseur.
+        uiTable.getColumns().forEach(col -> col.widthProperty().addListener((ov, t, t1) -> {
+
+            modifiedColumnsIndices.add(this.uiTable.getColumns().indexOf(col));
+            modifiedColumn();
+        }));
+
+        //Identification des changements de visibilité des colonnes.
+        uiTable.getColumns().forEach(col -> col.visibleProperty().addListener((ov, t, t1) -> {
+
+            modifiedColumnsIndices.add(this.uiTable.getColumns().indexOf(col));
+            modifiedColumn();
+        }));
+
+        // Suivi des changement de position des colonnes.
+        uiTable.getColumns().addListener((Change<? extends TableColumn<Element, ?>> change) -> {
+            if (change.next()) {
+
+                
+                // Si la table avant changement n'était pas définie ou disposer de
+                // moins de colonnes que la nouvelle table, ce n'est pas un changement
+                // provoqué par l'utilisateur.
+                if(change.getRemoved()==null || change.getRemoved().size()<change.getTo()){
+                    return;
+                }
+                // Lors d'un changement parmi les colonnes de uiTable,
+                // on compare les Id des colonnes avant et après le changement 
+                // pour identifier les changements de position.
+                for (int i = 0; i < change.getTo(); i++) {
+                    //Comparaison avec == ou != car on compare les instances.
+                    if (change.getList().get(i).getId() != change.getRemoved().get(i).getId()) {
+                        modifiedColumnsIndices.add(i);
+                    }
+                }
+                modifiedColumn();
+            }
+        });
+
+    }// FIN Constructeur.
+    //==========================================================================
+
+    //==========================================================================
+    /**
+     * Méthode permettant de lancer une sauvegarde de préférences utilisateur
+     * lorsqu'un changement de la tableView {@code  uiTable} a été détécté.
+     *
+     * Un délai de 4 seconde est mis en place pour n'effectuer qu'une seule
+     * sauvegarde lors de plusieurs changements ce succédant. 
+     */
+    private void modifiedColumn() {
+        //Changement de position de colonne.
+        if (!isColumnModifying.getValue()) {
+            isColumnModifying.set(true);
+            scheduledExecutorService.schedule(saveColumnsPreferences, 4, TimeUnit.SECONDS);
+        }
+    }
+    
+    /**
+     * Runnable permettant d'exécuter la sauvegarde des préférences utilisateur
+     * {@link modifiedColumn}.
+     */
+    private Runnable saveColumnsPreferences = new Runnable() {
+        @Override
+        public void run() {
+
+            isColumnModifying.set(false);
+            SIRS.LOGGER.log(Level.INFO, "Sauvegarde des préférences de la pojoTable {0} pour les colonnes :\n", modifiedColumnsIndices);
+
+            //Pour chaque colonne modifiée, on met à jours les préférences.
+            modifiedColumnsIndices.forEach(colIndice -> {
+
+                TableColumn<Element, ?> column = uiTable.getColumns().get(colIndice);
+                try {
+                    //TODO empêcher la castException -> S'il y a problème de cast on met un nom vide.
+                    // ColumnState newState = new ColumnState(((PropertyColumn) column).getName(), column.isVisible(), colIndice, (float) column.widthProperty().get());
+                    ColumnState newState = new ColumnState(TableColumnsPreferences.getColumnRef(column), column.isVisible(), colIndice, (float) column.widthProperty().get());
+                    columnsPreferences.addColumnPreference(newState);
+                } catch (Exception e) {
+                    SIRS.LOGGER.log(Level.WARNING, "Modification de la colonne {0} non enregistr\u00e9e dans les pr\u00e9f\u00e9rences.", colIndice);
+                }
+            });
+
+            //Nettoyage de l'indicateur des colonnes modifiées.
+            modifiedColumnsIndices.clear();
+
+            //Sauvegarde des préférences au format Json.
+            columnsPreferences.saveInJson();
+
+            SIRS.LOGGER.log(Level.INFO, "Fin Sauvegarde de préférences PojoTable.");
+
+        }
+    };
+
+    //==========================================================================
     protected StructBeanSupplier getStructBeanSupplier() {
         return new StructBeanSupplier(pojoClass, () -> new ArrayList(uiTable.getSelectionModel().getSelectedItems()));
     }
@@ -1176,9 +1305,34 @@ public class PojoTable extends BorderPane implements Printable {
      *
      * @param producer Data provider.
      */
-    public void setTableItems(Supplier<ObservableList<Element>> producer) {
+      public void setTableItems(Supplier<ObservableList<Element>> producer) {
         dataSupplierProperty.set(producer);
     }
+
+//    public void setTableItems(final Supplier<ObservableList<Element>> producer) {
+//        final Supplier<ObservableList<Element>> producerWithCoordinates;
+//
+//        //S'ils sont positionable, on calcule les coordonnées manquantes des éléments de la PojoTable.
+//        if (Positionable.class.isAssignableFrom(this.pojoClass) && (producer!=null)) {
+//
+//            producerWithCoordinates = () -> {
+//                return FXCollections.observableArrayList(producer.get().stream().map(elt -> {
+//                    try {
+//                        elt = ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.apply((Positionable) elt);
+//                    } catch (Exception e) {
+//                        SIRS.LOGGER.log(Level.WARNING, "Echec du calcule de coordonnées manquantes", e);
+//                    }
+//
+//                    return elt;
+//                }).collect(Collectors.toList()));
+//
+//            };
+//        } else {
+//            producerWithCoordinates = producer;
+//        }
+//
+//        dataSupplierProperty.set(producerWithCoordinates);
+//    }
 
     protected final void updateTableItems(
             final ObservableValue<? extends Supplier<ObservableList<Element>>> obs,
@@ -1796,6 +1950,7 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     public void setOnPropertyCommit(final TableColumn.CellEditEvent<Element, Object> event) {
+        ArgumentChecks.ensureNonNull("Event event", event);
         /*
          * We try to update data. If it's a failure, we store exception
          * to give more information to user. In all cases, a notification
@@ -1814,8 +1969,18 @@ public class PojoTable extends BorderPane implements Printable {
         ObservableValue<Object> value = col.getCellObservableValue(pos.getRow());
         if (value instanceof WritableValue) {
             final Object oldValue = value.getValue();
+
             try {
                 ((WritableValue) value).setValue(event.getNewValue());
+
+                //On recalcule les coordonnées si la colonne modifiée correspond à une des propriétées de coordonnées géo ou linéaire.
+                String modifiedPropretieName = ((PojoTable.PropertyColumn) col).getName();
+                if ((event.getRowValue() != null) && (Positionable.class.isAssignableFrom(event.getRowValue().getClass()))) {
+
+                    ConvertPositionableCoordinates.computeForModifiedPropertie((Positionable) event.getRowValue(), modifiedPropretieName);
+
+                }
+
                 elementEdited(event);
             } catch (Exception e) {
                 SIRS.LOGGER.log(Level.WARNING, "Cannot update field.", e);
