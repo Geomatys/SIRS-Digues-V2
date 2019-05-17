@@ -18,9 +18,6 @@
  */
 package fr.sirs.theme.ui;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sun.javafx.property.PropertyReference;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
@@ -88,7 +85,6 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Files;

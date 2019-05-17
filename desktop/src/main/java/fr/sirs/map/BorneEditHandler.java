@@ -452,6 +452,9 @@ public class BorneEditHandler extends AbstractNavigationHandler {
                     editGeometry.moveSelectedNode(helperBorne.toCoord(startX, startY));
                     updateGeometry();
                     
+                    // Probablement pas nécessaire de sauvegarder le non changement de la borne
+                    // mais permet d'actualiser la carte
+                    //-> TODO : appliquer un refresh de la map uniquement.
                     borne.setGeometry((Point) editGeometry.geometry.get());
                     session.getRepositoryForClass(BorneDigue.class).update(borne);
                 }

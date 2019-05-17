@@ -19,7 +19,6 @@
 package fr.sirs.theme.ui.columns;
 
 import java.io.Serializable;
-import javafx.scene.control.TableColumn;
 
 /**
  *

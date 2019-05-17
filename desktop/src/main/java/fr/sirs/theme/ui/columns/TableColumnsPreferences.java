@@ -33,9 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
-import org.jsoup.select.Collector;
 
 /**
  * Classe utilisée pour stocker les préférence de l'utilisateur quant à la
