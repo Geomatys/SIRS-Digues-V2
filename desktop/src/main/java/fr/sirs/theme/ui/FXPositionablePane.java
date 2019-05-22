@@ -61,6 +61,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -106,6 +107,10 @@ public class FXPositionablePane extends BorderPane {
     @FXML
     private Label uiGeomInfo;
 
+    //Bouton permettant le rafraîchissement du SR par défaut manuellement.
+    @FXML
+    protected Button uiRefreshCoord = new Button(null);
+    
     private final ObjectProperty<Positionable> posProperty = new SimpleObjectProperty<>();
     private final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty(true);
     private final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
@@ -122,7 +127,10 @@ public class FXPositionablePane extends BorderPane {
         SIRS.loadFXML(this, clazz);
 
         uiView.setGraphic(new ImageView(ICON_VIEWOTHER_WHITE));
-
+        
+        uiRefreshCoord.setGraphic(new ImageView(SIRS.ICON_REFRESH_WHITE));
+        uiRefreshCoord.setTooltip(new Tooltip("Actualiser SR par défaut"));
+        
         modes.addAll(lstModes);
 
         //pour chaque mode un toggle button
@@ -334,6 +342,15 @@ public class FXPositionablePane extends BorderPane {
         positionable.setGeometry(troncon.getGeometry());
     }
 
+    /**
+     * Au clic du bouton permet de mettre à jour le SR par défaut et les PR associés.
+     * @param event 
+     */
+    @FXML
+    void refreshSRAndPRInfo(ActionEvent event) {
+            this.updateSRAndPRInfo();
+    }
+    
     /**
      * Mise à jour de l'affichage du SR et des PRs sur le bandeau informatif.
      */
