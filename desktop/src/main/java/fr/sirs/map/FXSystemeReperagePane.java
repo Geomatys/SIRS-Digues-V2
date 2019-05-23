@@ -26,7 +26,6 @@ import fr.sirs.Session;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.LinearReferencingUtilities;
 import static fr.sirs.core.LinearReferencingUtilities.asLineString;
-import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.SR_ELEMENTAIRE;
 import fr.sirs.core.TronconUtils;
