@@ -45,7 +45,7 @@ import org.geotoolkit.referencing.LinearReferencing;
 public class ConvertPositionableCoordinates {
 
     /**
-     * Implémentation de d'une interface fonctionnelle visant à calculer les
+     * Implémentation d'une interface fonctionnelle visant à calculer les
      * coordonnées manquantes de positionables.
      */
     final public static Function<Positionable, Positionable> COMPUTE_MISSING_COORD = positionable -> {
@@ -56,19 +56,44 @@ public class ConvertPositionableCoordinates {
                 throw new NullPointerException("Null input positionable.");
             }
 
-            final boolean withLinearCoord = ((positionable.borne_debut_avalProperty() != null)
-                    && (positionable.borne_debut_distanceProperty() != null));
-
-            //Note : si un seul des 2 points Départ/Fin n'est pas null, on considère ici que le positionable est ponctuel.
+            final boolean withLinearCoord = ((positionable.getBorneDebutId() != null))||((positionable.getBorneDebutId() != null));
+               
             final boolean withGeoCoord = ((positionable.getPositionDebut() != null)
                     || (positionable.getPositionFin() != null));
 
             //Si aucun type de coordonnées n'est présent on renvoie une exception
             if ((!withLinearCoord) && (!withGeoCoord)) {
                 throw new IllegalArgumentException("The positionable input must provide at least one kind of coordinates 'Linear or geo' but both of them are empty.");
-
+            }
+            
+            if (withLinearCoord) {
+                if (positionable.getBorneDebutId() == null) { //if missing, compute the starting coordinates from the ending ones
+                    positionable.setBorneDebutId(positionable.getBorneFinId());
+                    positionable.setBorne_debut_aval(positionable.getBorne_fin_aval());
+                    positionable.setBorne_debut_distance(positionable.getBorne_fin_distance());
+                } else if (positionable.getBorneFinId() == null) { //if missing, compute the ending coordinates from the starting ones
+                    positionable.setBorneFinId(positionable.getBorneDebutId());
+                    positionable.setBorne_fin_aval(positionable.getBorne_debut_aval());
+                    positionable.setBorne_fin_distance(positionable.getBorne_debut_distance());
+                }
+            }
+            if (withGeoCoord) {
+                if (positionable.getPositionDebut() == null) {//if missing, compute the starting coordinates from the ending ones
+                    positionable.setPositionDebut(positionable.getPositionFin()); //Peut il y avoir une incohérence avec la géométrie?
+                } else if (positionable.getPositionFin() == null) { //if missing, compute the starting coordinates from the ending ones
+                    positionable.setPositionFin(positionable.getPositionDebut()); //idem?
+                }
+            }
                 // Si les coordonnées sont déjà présentes, aucune modification n'est apportée.
-            } else if ((withLinearCoord) && (withGeoCoord)) {
+            if ((withLinearCoord) && (withGeoCoord)) {
+                
+                if (positionable.getPositionFin() == null) {
+                    positionable.setPositionFin(positionable.getPositionDebut());
+
+                } else if (positionable.getPositionDebut() == null) {
+                    positionable.setPositionDebut(positionable.getPositionFin());
+                }
+                
                 return positionable;
 
                 //Si seules les coordonnées Linéaires sont présentes on essaie de calculer les coordonnées géo    
@@ -77,9 +102,7 @@ public class ConvertPositionableCoordinates {
 
                 //Sinon, on essaie de calculer les coordonnées linéaires à partir des coordonnées géo    
             } else { //withGeoCoord
-
                 computePositionableLinearCoordinate(positionable);
-
             }
 
         } catch (RuntimeException e) {
