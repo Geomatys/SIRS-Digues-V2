@@ -249,8 +249,9 @@ public class Session extends SessionCore {
                 //Fond de plan
                 backgroundGroup.setName("Fond de plan");
                 mapContext.items().add(0,backgroundGroup);
-                final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
-
+//                final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
+                final CoverageStore store = new OSMTileMapClient(new URL("http://c.tile.stamen.com/terrain"), null, 18, true);
+       
                 for (GenericName n : store.getNames()) {
                     final CoverageReference cr = store.getCoverageReference(n);
                     final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);

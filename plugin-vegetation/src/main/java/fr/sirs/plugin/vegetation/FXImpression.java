@@ -459,7 +459,8 @@ public class FXImpression extends GridPane{
     }
 
     private static MapLayer createOSMLayer() throws MalformedURLException, DataStoreException{
-        final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
+//        final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
+        final CoverageStore store = new OSMTileMapClient(new URL("http://c.tile.stamen.com/terrain"), null, 18, true);
         for (GenericName n : store.getNames()) {
             final CoverageReference cr = store.getCoverageReference(n);
             final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
