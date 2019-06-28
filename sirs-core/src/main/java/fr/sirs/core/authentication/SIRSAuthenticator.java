@@ -51,7 +51,8 @@ public class SIRSAuthenticator extends Authenticator {
      * Keep reference of checked entries, because if login information is wrong,
      * we'll know it and will prompt user.
      */
-    private final HashMap<String, Entry> entriesToCheck = new HashMap<>();
+    private static final HashMap<String, Entry> ENTRIES_TO_CHECK = new HashMap<>();
+    private static boolean alreadyChecked=false;
 
     @Override
     protected synchronized PasswordAuthentication getPasswordAuthentication() {
@@ -83,25 +84,39 @@ public class SIRSAuthenticator extends Authenticator {
 
         SirsCore.LOGGER.log(Level.FINE, "CREDENTIAL QUERY FROM "+ (fromApache? "APACHE" : "JAVA.NET"));
 
+//        
+        if (( (entry != null) && ((!alreadyChecked) || ENTRIES_TO_CHECK.get(serviceId) == null) )
+            && !(((ENTRIES_TO_CHECK.get(serviceId)!=null) && (ENTRIES_TO_CHECK.get(serviceId).equals(entry))))){
+//           
         // We've got login from wallet, and it has not been rejected yet.
-        if (entry != null && (fromApache || entriesToCheck.get(serviceId) == null)) {
-            if (!fromApache) entriesToCheck.put(serviceId, entry);
-            return new PasswordAuthentication(entry.login, (entry.password == null)? new char[0] : entry.password.toCharArray());
+//        if ( (entry != null) && (fromApache || ENTRIES_TO_CHECK.get(serviceId) == null) && (!alreadyChecked)) {
+//              if (!fromApache) {
+                
+                if (!alreadyChecked) {
+                    ENTRIES_TO_CHECK.put(serviceId, entry);
+                    alreadyChecked=true;
+                }
+                return new PasswordAuthentication(entry.login, (entry.password == null) ? new char[0] : entry.password.toCharArray());
 
         // New or invalid entry case.
         } else {
+            
             Map.Entry<String, String> login = askForLogin(entry == null? null : entry.login, entry == null? null : entry.password);
             if (login == null || login.getKey() == null) {
                 return null;
             } else {
                 entry = new AuthenticationWallet.Entry(host, port, login.getKey(), login.getValue());
-                entriesToCheck.put(serviceId, entry);
+                ENTRIES_TO_CHECK.put(serviceId, entry);
                 if (wallet != null) {
                     wallet.put(entry);
                 }
                 return new PasswordAuthentication(login.getKey(), login.getValue() == null? new char[0] : login.getValue().toCharArray());
             }
         }
+    }
+    
+    public static void cleanEntriesToCheck(){
+        ENTRIES_TO_CHECK.clear();
     }
 
     /**
@@ -151,11 +166,14 @@ public class SIRSAuthenticator extends Authenticator {
                 question.setHeaderText(headerText.toString());
 
                 Optional<ButtonType> result = question.showAndWait();
-                if (result.isPresent() && result.get().equals(ButtonType.OK)) {
-                    return new AbstractMap.SimpleEntry<>(userInput.getText(), passInput.getText());
-                } else {
-                    return null;
+                if (result.isPresent()) {
+                    if (result.get().equals(ButtonType.OK)) {
+                        return new AbstractMap.SimpleEntry<>(userInput.getText(), passInput.getText());
+                    } else if (result.get().equals(ButtonType.CANCEL)) {
+                        System.exit(0);
+                    }
                 }
+                return null;
             }
         };
 

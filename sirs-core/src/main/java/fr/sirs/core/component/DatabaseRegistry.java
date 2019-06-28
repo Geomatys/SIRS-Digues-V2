@@ -83,6 +83,7 @@ import org.ektorp.http.StdHttpClient;
 import org.ektorp.impl.StdCouchDb2Instance;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.Filter;
+import org.ektorp.util.Exceptions;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -312,21 +313,21 @@ public class DatabaseRegistry {
         /*
          * First, we will open a connection with a java.net url to initialize authentication.
          */
-        try (final InputStream stream = couchDbUrl.openStream()) {
-            if (wallet != null) {
-                AuthenticationWallet.Entry authEntry = wallet.get(couchDbUrl);
-                if (authEntry != null) {
-                    username = authEntry.login;
-                    userPass = authEntry.password;
-                }
-                else if (username!=null && userPass!=null) {
-                    final String host = couchDbUrl.getHost();
-                    final int port = (couchDbUrl.getPort() < 0)? couchDbUrl.getDefaultPort() : couchDbUrl.getPort();
-                    
-                    wallet.put(new AuthenticationWallet.Entry(host, port, username, userPass));
-                }
-            }
-        }
+//        try (final InputStream stream = couchDbUrl.openStream()) {
+//            if (wallet != null) {
+//                AuthenticationWallet.Entry authEntry = wallet.get(couchDbUrl);
+//                if (authEntry != null) {
+//                    username = authEntry.login;
+//                    userPass = authEntry.password;
+//                }
+//                else if (username!=null && userPass!=null) {
+//                    final String host = couchDbUrl.getHost();
+//                    final int port = (couchDbUrl.getPort() < 0)? couchDbUrl.getDefaultPort() : couchDbUrl.getPort();
+//                    
+//                    wallet.put(new AuthenticationWallet.Entry(host, port, username, userPass));
+//                }
+//            }
+//        }
 
         // Configure http client
         final StdHttpClient.Builder builder = new SirsClientBuilder()
@@ -337,8 +338,24 @@ public class DatabaseRegistry {
                 .socketTimeout(SOCKET_TIMEOUT)
                 .relaxedSSLSettings(true);
 
-        couchDbInstance = new StdCouchDb2Instance(builder.build(), SirsPreferences.INSTANCE.getProperty(NODE_NAME));
-        couchDbInstance.getAllDatabases();
+                
+               boolean unPassed=true;
+               byte attempt =0;
+        while(unPassed) {                 
+            try {    
+       couchDbInstance = new StdCouchDb2Instance(builder.build(), SirsPreferences.INSTANCE.getProperty(NODE_NAME));
+
+   
+
+                couchDbInstance.getAllDatabases();
+                unPassed = false;
+            } catch (DbAccessException dbexc) {
+                if (++attempt==(byte)3){
+                    throw Exceptions.propagate(dbexc);
+                }
+                    
+            }
+        }
     }
 
     /**
