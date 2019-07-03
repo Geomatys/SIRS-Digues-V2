@@ -836,13 +836,6 @@ public class PojoTable extends BorderPane implements Printable {
         uiDelete.setTooltip(new Tooltip("Supprimer les éléments sélectionnés"));
         uiFilter.setTooltip(new Tooltip("Filtrer les données"));
   
-        // Préférences utilisateur pour cette PojoTable.
-        columnsPreferences = new TableColumnsPreferences(this.pojoClass);
-
-        if (!columnsPreferences.getWithPreferencesColumns().isEmpty()) {
-            columnsPreferences.applyPreferencesToTableColumns(uiTable.getColumns());
-        }
-      
         //Place toutes les colonnes non visible en fin de tableau (excepté le bouton de suppression)
         // afin de permettre un déplacement (manuel) de colonne intelligible.
         // En effet, la version de javaFX utilisée (lors de la version 2.16 de 
@@ -857,10 +850,16 @@ public class PojoTable extends BorderPane implements Printable {
                 uiTable.getColumns().add(deplacedCol);
             }
         }
-        deplacedCol=null;
         
         updateView();
+        
+        // Préférences utilisateur pour cette PojoTable.
+        columnsPreferences = new TableColumnsPreferences(this.pojoClass);
 
+        if (!columnsPreferences.getWithPreferencesColumns().isEmpty()) {
+            columnsPreferences.applyPreferencesToTableColumns(uiTable.getColumns());
+        }
+      
         //===============================================================
         // Suivi des préférences utilisateur pour les colonnes affichées.
         //===============================================================
@@ -875,8 +874,11 @@ public class PojoTable extends BorderPane implements Printable {
         //Identification des changements de visibilité des colonnes.
         uiTable.getColumns().forEach(col -> col.visibleProperty().addListener((ov, oldVisibility, newVisibility) -> {
             if ((newVisibility == null)) {
+                SIRS.LOGGER.log(Level.INFO, "Une visibilité nulle est attribuée à une colonne. Ce cas n'est pas géré par la sauvegarde des préférences de la classe PojoTable.");
                 return;
             }
+            
+            int colIndex = this.uiTable.getColumns().indexOf(col);
             //Pour permettre un déplacement instinctif des colonnes par l'utilisateur
             // - Les colonnes non visibles sont déplacées en fin de tableau
             // - Les colonnes visibles sont déplacées à l'index 3 de la table
@@ -889,16 +891,25 @@ public class PojoTable extends BorderPane implements Printable {
                     TableColumn<Element, ?> deplacedColumn = col;
                     uiTable.getColumns().remove(col);
                     uiTable.getColumns().add(deplacedColumn);
+                    //On sauvegarde toutes les colonnes de l'indice identifié jusqu'à la fin de la table où la colonne sera réintroduite.
+                    for (int j = colIndex; j < uiTable.getColumns().size(); j++) { 
+                        modifiedColumnsIndices.add(j);
+                        modifiedColumn();
+                    }
                     deplacedColumn = null;
                 } else if ((newVisibility.equals(Boolean.TRUE))) {
                     TableColumn<Element, ?> deplacedColumn = col;
                     uiTable.getColumns().remove(col);
                     uiTable.getColumns().add(3, deplacedColumn);
                     deplacedColumn = null;
+                    //On sauvegarde toutes les colonnes de l'indice identifié jusqu'à la 4e colonne (3+1) de la table où la colonne sera réintroduite.
+                    for (int j = 3; j <= colIndex; j++) {
+                        modifiedColumnsIndices.add(j);
+                        modifiedColumn();
+                    }
                 }
             }
-            modifiedColumnsIndices.add(this.uiTable.getColumns().indexOf(col));
-            modifiedColumn();
+            
         }));
 
         // Suivi des changement de position des colonnes.
@@ -909,19 +920,21 @@ public class PojoTable extends BorderPane implements Printable {
                 // Si la table avant changement n'était pas définie ou disposer de
                 // moins de colonnes que la nouvelle table, ce n'est pas un changement
                 // provoqué par l'utilisateur.
-                if(change.getRemoved()==null || change.getRemoved().size()<change.getTo()){
-                    return;
-                }
-                // Lors d'un changement parmi les colonnes de uiTable,
-                // on compare les Id des colonnes avant et après le changement 
-                // pour identifier les changements de position.
-                for (int i = 0; i < change.getTo(); i++) {
-                    //Comparaison avec == ou != car on compare les instances.
-                    if (change.getList().get(i).getId() != change.getRemoved().get(i).getId()) {
-                        modifiedColumnsIndices.add(i);
+                if(change.getRemoved() == null || change.getRemoved().size() < change.getTo()) {
+                      SIRS.LOGGER.log(Level.INFO, "Une colonne a été supprimée.\n S'il ne s'agit pas d'une suppression dûe à un changement de visibilité, ce changement n'est pas sauvegardé.");
+
+                } else {
+                    // Lors d'un changement parmi les colonnes de uiTable,
+                    // on compare les Id des colonnes avant et après le changement 
+                    // pour identifier les changements de position.
+                    for (int i = 0; i < change.getTo(); i++) {
+                        //Comparaison avec == ou != car on compare les instances.
+                        if (change.getList().get(i).getId() != change.getRemoved().get(i).getId()) {
+                            modifiedColumnsIndices.add(i);
+                        }
                     }
+                    modifiedColumn();
                 }
-                modifiedColumn();
             }
         });
            
@@ -933,14 +946,14 @@ public class PojoTable extends BorderPane implements Printable {
      * Méthode permettant de lancer une sauvegarde de préférences utilisateur
      * lorsqu'un changement de la tableView {@code  uiTable} a été détécté.
      *
-     * Un délai de 6 seconde est mis en place pour n'effectuer qu'une seule
+     * Un délai de 4 seconde est mis en place pour n'effectuer qu'une seule
      * sauvegarde lors de plusieurs changements ce succédant. 
      */
     private void modifiedColumn() {
         //Changement de position de colonne.
         if (!isColumnModifying.getValue()) {
             isColumnModifying.set(true);
-            scheduledExecutorService.schedule(saveColumnsPreferences, 6, TimeUnit.SECONDS);
+            scheduledExecutorService.schedule(saveColumnsPreferences, 4, TimeUnit.SECONDS);
         }
     }
     
