@@ -42,6 +42,7 @@ import javafx.scene.layout.GridPane;
  * An authenticator which will prompt a JavaFX dialog to query password from user.
  *
  * @author Alexis Manin (Geomatys)
+ * @author Matthieu Bastianelli (Geomatys)
  */
 public class SIRSAuthenticator extends Authenticator {
 
@@ -54,6 +55,19 @@ public class SIRSAuthenticator extends Authenticator {
     private static final Map<String, Entry> ENTRIES_TO_CHECK = new ConcurrentHashMap<>();
 
 
+    /**
+     * Récupération d'un mots de passe:
+     * Soit depuis AuthenticationWallet. 
+     * le demande à l'utilisateur ou teste celui déjà indiqué par l'utilisateur 
+     * via la Map ENTRIES_TO_CHECK. 
+     * En cas de succès, la méthode à l'origine de la demande de l'identification
+     * doit l'indiquer à cette classe à partir de la méthode statique :
+     * {@link #validEntry(java.net.URL)} afin de sauvegarder l'entrée valide.
+     * 
+     * Todo : autoriser plusieurs authentification pour une même base?
+     * 
+     * @return 
+     */
     @Override
     protected synchronized PasswordAuthentication getPasswordAuthentication() {
         // First, we retrieve target service information and check its integrity.
@@ -93,9 +107,9 @@ public class SIRSAuthenticator extends Authenticator {
             ){
 //           
         // We've got login from wallet, and it has not been rejected yet.
-//        if ( (entry != null) && (checked || (!checked && ENTRIES_TO_CHECK.get(serviceId) == null)) ){
-//              if (!fromApache) {
-                
+                // A priori l'attribut checked n'est plus nécessaire (car on ne sauvegarde que des identifiants
+                // valides. Je le conserve cependant au cas où l'identifiant et mots de passe
+                // sont changés. Les identifiants sauvegardés sont alors obsolètes.
                 if (!nullEntryToCheck && !checkedEntry.checked) {
                     ENTRIES_TO_CHECK.put(serviceId, entry);
                     checkedEntry.checked=true;
@@ -119,22 +133,27 @@ public class SIRSAuthenticator extends Authenticator {
     /**
      * Méthode à appeler lorsqu'une recette réussie.
      * 
-     * on entre toutes les entrées testées dans la "wallet" avec leur status
-     * (alreadyChecked mis à jour). Puis on vide la Map.
+     * on entre l'entrée validée dans la "wallet" avec ses attributs
+     * (checked) mis à jour. Puis on la retire de la Map.
      * 
      * Idéalement, il faudrait faire évoluer cette méthode pour n'entrer que l'entrée
      * associée à la requête.
+     * 
+     * @param couchdbUrl : the url associated with the entries to validate.
      */
-    public static void validEntry(){
-        if (ENTRIES_TO_CHECK != null && !ENTRIES_TO_CHECK.isEmpty()) {
-            ENTRIES_TO_CHECK.values().forEach(entry -> {
-                final AuthenticationWallet wallet = AuthenticationWallet.getDefault();
-                if (wallet != null && (entry.login!=null) ){
-                    wallet.put(entry);
-                }
-            });
+    public static void validEntry(URL couchdbUrl) {
+        if (couchdbUrl == null) {
+            throw new IllegalStateException("Neither host nor valid URL has been provided for authentication validation");
         }
-        ENTRIES_TO_CHECK.clear();
+        String serviceId = AuthenticationWallet.toServiceId(couchdbUrl);
+        
+        if (ENTRIES_TO_CHECK != null && ENTRIES_TO_CHECK.containsKey(serviceId)) {
+            final AuthenticationWallet wallet = AuthenticationWallet.getDefault();
+            if (wallet != null) {
+                wallet.put(ENTRIES_TO_CHECK.get(serviceId));
+                ENTRIES_TO_CHECK.remove(serviceId);
+            }
+        }
     }
 
     /**

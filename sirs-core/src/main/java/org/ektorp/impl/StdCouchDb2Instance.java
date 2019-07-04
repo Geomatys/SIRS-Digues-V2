@@ -167,7 +167,6 @@ public class StdCouchDb2Instance implements CouchDbInstance {
         return restTemplate.get("/_all_dbs", new StdResponseHandler<List<String>>(){
             @Override
             public List<String> success(HttpResponse hr) throws Exception {
-                SIRSAuthenticator.validEntry();
                 return objectMapper.readValue(hr.getContent(), STRING_LIST_TYPE_DEF);
             }
 
@@ -187,7 +186,6 @@ public class StdCouchDb2Instance implements CouchDbInstance {
                 @Override
                 public ReplicationStatus success(HttpResponse hr)
                         throws Exception {
-                    SIRSAuthenticator.validEntry();
                     return objectMapper.readValue(hr.getContent(), ReplicationStatus.class);
                 }
             });
@@ -243,7 +241,6 @@ public class StdCouchDb2Instance implements CouchDbInstance {
           new StdResponseHandler<T>() {
              @Override
              public T success(HttpResponse hr) throws Exception {
-                SIRSAuthenticator.validEntry();
                 return objectMapper.readValue(hr.getContent(), c);
              }
           });

@@ -29,6 +29,7 @@ import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.authentication.AuthenticationWallet;
+import fr.sirs.core.authentication.SIRSAuthenticator;
 import fr.sirs.couchdb2.Couchdb2ReplicationTask;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.util.ClosingDaemon;
@@ -348,6 +349,9 @@ public class DatabaseRegistry {
    
 
                 couchDbInstance.getAllDatabases();
+                //Si cette ligne est exécutée, cela signifie que la requête provoquée par getAllDatabases()
+                //a réussie. On demande alors à la classe SIRSAuthenticator.java de sauvegarder les identifiants de connection utilisés.
+                SIRSAuthenticator.validEntry(couchDbUrl);
                 unPassed = false;
             } catch (DbAccessException dbexc) {
                 if (++attempt==(byte)3){
@@ -724,6 +728,10 @@ public class DatabaseRegistry {
         while (status == null && remainingAttempt-- > 0) {
             try {
                 status = couchDbInstance.replicate(cmd);
+                // Si cette ligne est exécutée, cela signifie que la requête envoyée
+                // a réussie. On demande alors à la classe SIRSAuthenticator.java 
+                // de sauvegarder les identifiants de connection utilisés.
+                SIRSAuthenticator.validEntry(couchDbUrl);
             } catch (DbAccessException e) {
                 checkReplicationError(e, sourceDb, targetDb);
                 // If the error has not been thrown back, it means it was not
