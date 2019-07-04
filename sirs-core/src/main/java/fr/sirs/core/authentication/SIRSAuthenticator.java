@@ -24,9 +24,9 @@ import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.AbstractMap;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import javafx.application.Platform;
@@ -51,8 +51,8 @@ public class SIRSAuthenticator extends Authenticator {
      * Keep reference of checked entries, because if login information is wrong,
      * we'll know it and will prompt user.
      */
-    private static final HashMap<String, Entry> ENTRIES_TO_CHECK = new HashMap<>();
-    private static boolean alreadyChecked=false;
+    private static final Map<String, Entry> ENTRIES_TO_CHECK = new ConcurrentHashMap<>();
+
 
     @Override
     protected synchronized PasswordAuthentication getPasswordAuthentication() {
@@ -75,26 +75,30 @@ public class SIRSAuthenticator extends Authenticator {
         AuthenticationWallet.Entry entry = wallet == null? null : wallet.get(host, port);
 
         /*
-         * HACK : Apache HttpClient (used by Ektorp) will call this method on
-         * each query, which means we cannot determine if it is performing a
-         * fail&retry. As java.net methods give us the query URL, we can adopt
-         * different behavior for thee two components.
-         */
-        final boolean fromApache = (getRequestingURL() == null);
+//         * HACK : Apache HttpClient (used by Ektorp) will call this method on
+//         * each query, which means we cannot determine if it is performing a
+//         * fail&retry. As java.net methods give us the query URL, we can adopt
+//         * different behavior for thee two components.
+//         */
 
-        SirsCore.LOGGER.log(Level.FINE, "CREDENTIAL QUERY FROM "+ (fromApache? "APACHE" : "JAVA.NET"));
-
-//        
-        if (( (entry != null) && ((!alreadyChecked) || ENTRIES_TO_CHECK.get(serviceId) == null) )
-            && !(((ENTRIES_TO_CHECK.get(serviceId)!=null) && (ENTRIES_TO_CHECK.get(serviceId).equals(entry))))){
+        final Entry checkedEntry =  ENTRIES_TO_CHECK.get(serviceId);
+        final boolean nullEntryToCheck = checkedEntry == null;
+        
+        if ( (entry != null) &&   
+                (nullEntryToCheck || 
+                    (  ((!checkedEntry.checked)  && !(checkedEntry.equals(entry))) 
+                    && (checkedEntry.checked && ( (checkedEntry.equals(entry))))
+                    )
+                ) 
+            ){
 //           
         // We've got login from wallet, and it has not been rejected yet.
-//        if ( (entry != null) && (fromApache || ENTRIES_TO_CHECK.get(serviceId) == null) && (!alreadyChecked)) {
+//        if ( (entry != null) && (checked || (!checked && ENTRIES_TO_CHECK.get(serviceId) == null)) ){
 //              if (!fromApache) {
                 
-                if (!alreadyChecked) {
+                if (!nullEntryToCheck && !checkedEntry.checked) {
                     ENTRIES_TO_CHECK.put(serviceId, entry);
-                    alreadyChecked=true;
+                    checkedEntry.checked=true;
                 }
                 return new PasswordAuthentication(entry.login, (entry.password == null) ? new char[0] : entry.password.toCharArray());
 
@@ -107,15 +111,29 @@ public class SIRSAuthenticator extends Authenticator {
             } else {
                 entry = new AuthenticationWallet.Entry(host, port, login.getKey(), login.getValue());
                 ENTRIES_TO_CHECK.put(serviceId, entry);
-                if (wallet != null) {
-                    wallet.put(entry);
-                }
                 return new PasswordAuthentication(login.getKey(), login.getValue() == null? new char[0] : login.getValue().toCharArray());
             }
         }
     }
     
-    public static void cleanEntriesToCheck(){
+    /**
+     * Méthode à appeler lorsqu'une recette réussie.
+     * 
+     * on entre toutes les entrées testées dans la "wallet" avec leur status
+     * (alreadyChecked mis à jour). Puis on vide la Map.
+     * 
+     * Idéalement, il faudrait faire évoluer cette méthode pour n'entrer que l'entrée
+     * associée à la requête.
+     */
+    public static void validEntry(){
+        if (ENTRIES_TO_CHECK != null && !ENTRIES_TO_CHECK.isEmpty()) {
+            ENTRIES_TO_CHECK.values().forEach(entry -> {
+                final AuthenticationWallet wallet = AuthenticationWallet.getDefault();
+                if (wallet != null && (entry.login!=null) ){
+                    wallet.put(entry);
+                }
+            });
+        }
         ENTRIES_TO_CHECK.clear();
     }
 

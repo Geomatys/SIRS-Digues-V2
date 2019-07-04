@@ -411,6 +411,13 @@ public class DatabaseRegistry {
             changeEmiter.start();
         }
         if (initIndex) {
+            if (username == null) {  //Si aucun utilisateur n'est identifié, on vérifie qu'il n'a pas était créé depuis instanciation.
+                AuthenticationWallet.Entry entry = AuthenticationWallet.getDefault().get(couchDbUrl);
+                if (entry != null && entry.login != null) {
+                    username = entry.login;
+                    userPass = entry.password;
+                }
+            }
             ElasticSearchEngine elasticEngine = new ElasticSearchEngine(
                     couchDbUrl.getHost(), (couchDbUrl.getPort() < 0) ? 5984 : couchDbUrl.getPort(), connector.getDatabaseName(), username, userPass);
             parentFactory.registerSingleton(ElasticSearchEngine.class.getSimpleName(), elasticEngine);

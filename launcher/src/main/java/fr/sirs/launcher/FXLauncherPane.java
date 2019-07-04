@@ -1098,10 +1098,16 @@ public class FXLauncherPane extends BorderPane {
                     final UtilisateurRepository utilisateurRepository = (UtilisateurRepository) ctx.getBean(Session.class).getRepositoryForClass(Utilisateur.class);
 
                     final List<Utilisateur> utilisateurs = utilisateurRepository.getByLogin(login.getText());
-                    final String encryptedPassword = hexaMD5(password.getText());
+                    final String encryptedPassword;
+                    if(password.getText() == null || password.getText().isEmpty()) {
+                        encryptedPassword = null;
+                    } else {
+                        encryptedPassword = hexaMD5(password.getText());
+                    }
                     boolean allowedToDropDB = false;
                     for (final Utilisateur utilisateur : utilisateurs) {
-                        if (encryptedPassword.equals(utilisateur.getPassword())) {
+//                        if (encryptedPassword.equals(utilisateur.getPassword()) || ((utilisateur.getPassword() == null) && encryptedPassword.equals(hexaMD5(""))) ){
+                        if ( ((utilisateur.getPassword() == null) && (encryptedPassword == null)) || ((encryptedPassword != null))&&(encryptedPassword.equals(utilisateur.getPassword())) ){
                             allowedToDropDB = true;
                             break;
                         }
