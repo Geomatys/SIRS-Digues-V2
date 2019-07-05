@@ -29,6 +29,8 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementContainerPane;
+import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.theme.ui.columns.TableColumnsPreferences;
 import fr.sirs.util.FXPreferenceEditor;
 import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.SirsStringConverter;
@@ -509,11 +511,16 @@ public final class SIRS extends SirsCore {
      * @return Listener attached to given table to manage its column sizes.
      */
     public static InvalidationListener setColumnResize(final TableView target) {
-        final ColumnAutomaticResize resize = new ColumnAutomaticResize(target);
-        target.widthProperty().addListener(resize);
-        return resize;
+        return setColumnResize(target, null);
     }
 
+        
+    
+    public static InvalidationListener setColumnResize(final TableView target, final TableColumnsPreferences preferences) {
+        final ColumnAutomaticResize resize = new ColumnAutomaticResize(target, preferences);
+        target.widthProperty().addListener(resize);
+        return resize;
+    }    
     /**
      * An invalidation listener to put on a table width property to set its column's
      * preferred size to fill entire width.
@@ -521,21 +528,32 @@ public final class SIRS extends SirsCore {
     private static class ColumnAutomaticResize implements InvalidationListener {
 
         private final WeakReference<TableView> target;
+        private final WeakReference<TableColumnsPreferences> preferences;
 
         public ColumnAutomaticResize(TableView target) {
-            this.target = new WeakReference<>(target);
+            this(target, null);
         }
-
+        
+        public ColumnAutomaticResize(TableView target, final TableColumnsPreferences preferences) {
+            this.target = new WeakReference<>(target);
+            this.preferences = new WeakReference<>(preferences);
+        }
+        
         @Override
         public void invalidated(Observable observable) {
             final TableView<?> tView = target.get();
             if (tView == null)
                 return;
-
+            final TableColumnsPreferences pref = preferences.get();
+            final boolean notNull = pref != null;
+                        
             double unresizable = 0;
             final ArrayList<TableColumn> resizableColumns = new ArrayList<>();
             for (final TableColumn col : tView.getColumns()) {
-                if (!col.isResizable()) {
+                if (!col.isResizable() || (notNull && (pref.withPreferences(tView.getColumns().indexOf(col))) ) ){ 
+                    // Afin d'appliquer la largeur sauvegardé par l'utilisateur, 
+                    // on considère les colonnes avec préférences de la même manière
+                    // que les colonnes non-redimensionnable.  
                     unresizable += col.getWidth();
                 } else if (col.isVisible()) {
                     resizableColumns.add(col);

@@ -367,6 +367,16 @@ public class PojoTable extends BorderPane implements Printable {
     private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
     //Liste des colonnes modifiées :
     private Set<Integer> modifiedColumnsIndices = new HashSet<>();
+    
+    /**
+     * Un bug de javafx est constaté lorsque l'on déplace des colonnes d'une TableView
+     * possédant certaines colonnes non-visibles. Le déplacement est alors erronné.
+     * Cette variable indique que ce bug n'a pas encore était corrigé dans javafx.
+     * Plusieurs corrections sont apportées dans le projet pour palier à ce bug.
+     * Elle doivent utiliser cette variable.
+     * Si ce bug javafx est corrigé, on peut chercher les références à cette variable.
+     */
+    public static final boolean BUG_JAVAFX_COLUMN_MOVE = true;
 
     /*
     Objet auquel sont rattachés les éléments de la pojoTable.
@@ -408,17 +418,24 @@ public class PojoTable extends BorderPane implements Printable {
 
         this.container = container;
 
-        SIRS.setColumnResize(uiTable);
-
-        setFocusTraversable(true);
-
-        dataSupplierProperty.addListener(this::updateTableItems);
-
         if (pojoClass == null) {
             this.pojoClass = repo.getModelClass();
         } else {
             this.pojoClass = pojoClass;
         }
+
+        // Préférences utilisateur pour cette PojoTable.
+        columnsPreferences = new TableColumnsPreferences(this.pojoClass);
+        
+        if (BUG_JAVAFX_COLUMN_MOVE) {
+            SIRS.setColumnResize(uiTable, columnsPreferences);   //Entre en concurrence avec l'application des préférences utilisateurs.
+        } else {
+            SIRS.setColumnResize(uiTable); //initialement placé avant l'instanciation de pojoclass
+        }
+
+        setFocusTraversable(true);
+
+        dataSupplierProperty.addListener(this::updateTableItems);
 
         this.labelMapper = LabelMapper.get(this.pojoClass);
         if (repo == null) {
@@ -835,31 +852,31 @@ public class PojoTable extends BorderPane implements Printable {
         uiCurrent.setTooltip(new Tooltip("Aller au numéro..."));
         uiDelete.setTooltip(new Tooltip("Supprimer les éléments sélectionnés"));
         uiFilter.setTooltip(new Tooltip("Filtrer les données"));
-  
-        //Place toutes les colonnes non visible en fin de tableau (excepté le bouton de suppression)
-        // afin de permettre un déplacement (manuel) de colonne intelligible.
-        // En effet, la version de javaFX utilisée (lors de la version 2.16 de 
-        // l'appli) gère mal le déplacement de colonnes lorsque des colonnes ne 
-        // sont pas visibles.
-        //    -> voir aussi col.visibleProperty().addListener ~l.880
-        TableColumn<Element, ?> deplacedCol = null;
-        for(int i = uiTable.getColumns().size() - 1; i > 0; i--) {//On ne veut pas déplacer la première colonne (suppression)
-            if ((uiTable.getColumns().get(i).visibleProperty().get() == false)) {
-                deplacedCol = uiTable.getColumns().get(i);
-                uiTable.getColumns().remove(i);
-                uiTable.getColumns().add(deplacedCol);
+        
+        
+        if (BUG_JAVAFX_COLUMN_MOVE) {
+            //Place toutes les colonnes non visible en fin de tableau (excepté le bouton de suppression)
+            // afin de permettre un déplacement (manuel) de colonne intelligible.
+            // En effet, la version de javaFX utilisée (lors de la version 2.16 de 
+            // l'appli) gère mal le déplacement de colonnes lorsque des colonnes ne 
+            // sont pas visibles.
+            //    -> voir aussi col.visibleProperty().addListener ~l.880
+            TableColumn<Element, ?> deplacedCol = null;
+            for (int i = uiTable.getColumns().size() - 1; i > 0; i--) {//On ne veut pas déplacer la première colonne (suppression)
+                if ((uiTable.getColumns().get(i).visibleProperty().get() == false)) {
+                    deplacedCol = uiTable.getColumns().get(i);
+                    uiTable.getColumns().remove(i);
+                    uiTable.getColumns().add(deplacedCol);
+                }
             }
         }
         
-        updateView();
-        
-        // Préférences utilisateur pour cette PojoTable.
-        columnsPreferences = new TableColumnsPreferences(this.pojoClass);
-
         if (!columnsPreferences.getWithPreferencesColumns().isEmpty()) {
             columnsPreferences.applyPreferencesToTableColumns(uiTable.getColumns());
         }
-      
+
+        updateView();
+
         //===============================================================
         // Suivi des préférences utilisateur pour les colonnes affichées.
         //===============================================================
@@ -877,59 +894,93 @@ public class PojoTable extends BorderPane implements Printable {
                 SIRS.LOGGER.log(Level.INFO, "Une visibilité nulle est attribuée à une colonne. Ce cas n'est pas géré par la sauvegarde des préférences de la classe PojoTable.");
                 return;
             }
-            
+
             int colIndex = this.uiTable.getColumns().indexOf(col);
-            //Pour permettre un déplacement instinctif des colonnes par l'utilisateur
-            // - Les colonnes non visibles sont déplacées en fin de tableau
-            // - Les colonnes visibles sont déplacées à l'index 3 de la table
-            //  ( l'index 3 permet de placer les colonnes rendues visibles en
-            //  début de tableau)
-            // - ce traitement n'es pas appliqué au colonnes sans id 
-            // (suppression, accès aux fixhes et à la carto).
-            if (col.getId() != null) {
-                if ((newVisibility.equals(Boolean.FALSE))) {
-                    TableColumn<Element, ?> deplacedColumn = col;
-                    uiTable.getColumns().remove(col);
-                    uiTable.getColumns().add(deplacedColumn);
-                    //On sauvegarde toutes les colonnes de l'indice identifié jusqu'à la fin de la table où la colonne sera réintroduite.
-                    for (int j = colIndex; j < uiTable.getColumns().size(); j++) { 
-                        modifiedColumnsIndices.add(j);
-                        modifiedColumn();
-                    }
-                    deplacedColumn = null;
-                } else if ((newVisibility.equals(Boolean.TRUE))) {
-                    TableColumn<Element, ?> deplacedColumn = col;
-                    uiTable.getColumns().remove(col);
-                    uiTable.getColumns().add(3, deplacedColumn);
-                    deplacedColumn = null;
-                    //On sauvegarde toutes les colonnes de l'indice identifié jusqu'à la 4e colonne (3+1) de la table où la colonne sera réintroduite.
-                    for (int j = 3; j <= colIndex; j++) {
-                        modifiedColumnsIndices.add(j);
-                        modifiedColumn();
+
+            if (BUG_JAVAFX_COLUMN_MOVE) {
+                //Pour permettre un déplacement instinctif des colonnes par l'utilisateur
+                // - Les colonnes non visibles sont déplacées en fin de tableau
+                // - Les colonnes visibles sont déplacées à l'index 3 de la table
+                //  ( l'index 3 permet de placer les colonnes rendues visibles en
+                //  début de tableau)
+                // - ce traitement n'es pas appliqué au colonnes sans id 
+                // (suppression, accès aux fixhes et à la carto).
+                if (col.getId() != null) {
+                    if ((newVisibility.equals(Boolean.FALSE))) {
+                        TableColumn<Element, ?> deplacedColumn = col;
+                        uiTable.getColumns().remove(col);
+                        uiTable.getColumns().add(deplacedColumn);
+                        //On sauvegarde toutes les colonnes de l'indice identifié jusqu'à la fin de la table où la colonne sera réintroduite.
+                        for (int j = colIndex; j < uiTable.getColumns().size(); j++) {
+                            modifiedColumnsIndices.add(j);
+                            modifiedColumn();
+                        }
+                        deplacedColumn = null;
+                    } else if ((newVisibility.equals(Boolean.TRUE))) {
+                        TableColumn<Element, ?> deplacedColumn = col;
+                        uiTable.getColumns().remove(col);
+                        uiTable.getColumns().add(3, deplacedColumn);
+                        deplacedColumn = null;
+                        //On sauvegarde toutes les colonnes de l'indice identifié jusqu'à la 4e colonne (3+1) de la table où la colonne sera réintroduite.
+                        for (int j = 3; j <= colIndex; j++) {
+                            modifiedColumnsIndices.add(j);
+                            modifiedColumn();
+                        }
                     }
                 }
+            } else {
+                modifiedColumnsIndices.add(colIndex);
             }
-            
+
         }));
 
         // Suivi des changement de position des colonnes.
         uiTable.getColumns().addListener((Change<? extends TableColumn<Element, ?>> change) -> {
             if (change.next()) {
 
-                
+                List<TableColumn<Element, ?>> listInit = (List<TableColumn<Element, ?>>) change.getRemoved();
+                int nbreCol = change.getTo();
                 // Si la table avant changement n'était pas définie ou disposer de
                 // moins de colonnes que la nouvelle table, ce n'est pas un changement
                 // provoqué par l'utilisateur.
-                if(change.getRemoved() == null || change.getRemoved().size() < change.getTo()) {
-                      SIRS.LOGGER.log(Level.INFO, "Une colonne a été supprimée.\n S'il ne s'agit pas d'une suppression dûe à un changement de visibilité, ce changement n'est pas sauvegardé.");
+                if (listInit == null || listInit.size() < nbreCol) {
+                    SIRS.LOGGER.log(Level.INFO, "Une colonne a été supprimée.\n S'il ne s'agit pas d'une suppression due à un changement de visibilité, ce changement n'est pas sauvegardé.");
 
                 } else {
+
+//                ObservableListWrapper
+                    List<TableColumn<Element, ?>> listEnd = (List<TableColumn<Element, ?>>) change.getList();
+
                     // Lors d'un changement parmi les colonnes de uiTable,
                     // on compare les Id des colonnes avant et après le changement 
                     // pour identifier les changements de position.
-                    for (int i = 0; i < change.getTo(); i++) {
+                    for (int i = 0; i < nbreCol; i++) {
+                        TableColumn<Element, ?> colInit = listInit.get(i);
+                        String colInitId = colInit.getId();
                         //Comparaison avec == ou != car on compare les instances.
-                        if (change.getList().get(i).getId() != change.getRemoved().get(i).getId()) {
+                        if (listEnd.get(i).getId() != colInit.getId()) {
+
+                            if (BUG_JAVAFX_COLUMN_MOVE) {
+                                //Si la colonne est déplacée en fin de table, on la replace 
+                                //avant les colonnes non-visibles afin d'éviter 
+                                // le bug JavaFX
+                                try {
+                                    int maxVisible = nbreCol - 1;
+                                    if (colInitId == listEnd.get(maxVisible).getId()) {
+                                        ;
+                                        for (int j = maxVisible - 1; j > 0; j--) {
+                                            if (listEnd.get(j).isVisible()) {
+                                                break;
+                                            }
+                                            maxVisible = j;
+                                        }
+                                        listEnd.remove(colInit);
+                                        listEnd.add(maxVisible, colInit);
+                                    }
+                                } catch (RuntimeException re) {
+                                    //Do nothing
+                                }
+                            }
                             modifiedColumnsIndices.add(i);
                         }
                     }
@@ -937,7 +988,7 @@ public class PojoTable extends BorderPane implements Printable {
                 }
             }
         });
-           
+
     }// FIN Constructeur.
     //==========================================================================
 
@@ -947,7 +998,7 @@ public class PojoTable extends BorderPane implements Printable {
      * lorsqu'un changement de la tableView {@code  uiTable} a été détécté.
      *
      * Un délai de 4 seconde est mis en place pour n'effectuer qu'une seule
-     * sauvegarde lors de plusieurs changements ce succédant. 
+     * sauvegarde lors de plusieurs changements ce succédant.
      */
     private void modifiedColumn() {
         //Changement de position de colonne.
@@ -956,7 +1007,7 @@ public class PojoTable extends BorderPane implements Printable {
             scheduledExecutorService.schedule(saveColumnsPreferences, 4, TimeUnit.SECONDS);
         }
     }
-    
+
     /**
      * Runnable permettant d'exécuter la sauvegarde des préférences utilisateur
      * {@link modifiedColumn}.
@@ -1352,7 +1403,7 @@ public class PojoTable extends BorderPane implements Printable {
      *
      * @param producer Data provider.
      */
-      public void setTableItems(Supplier<ObservableList<Element>> producer) {
+    public void setTableItems(Supplier<ObservableList<Element>> producer) {
         dataSupplierProperty.set(producer);
     }
 
@@ -1380,7 +1431,6 @@ public class PojoTable extends BorderPane implements Printable {
 //
 //        dataSupplierProperty.set(producerWithCoordinates);
 //    }
-
     protected final void updateTableItems(
             final ObservableValue<? extends Supplier<ObservableList<Element>>> obs,
             final Supplier<ObservableList<Element>> oldSupplier,
@@ -1889,7 +1939,8 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     private static final Callback<TableColumn<Element, Double>, TableCell<Element, Double>> DOUBLE_CELL_FACTORY = param -> {
-        return new FXNumberCell(Double.class);};
+        return new FXNumberCell(Double.class);
+    };
 
     /**
      * Column used to display / edit simple attributes or references of an

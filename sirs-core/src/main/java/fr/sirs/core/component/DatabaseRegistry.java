@@ -92,6 +92,14 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Create a wrapper for connections on a CouchDb service.
+ * 
+ * Warning in order to avoid repetitive authentication, logins are saved by
+ * {@link AuthenticationWallet} and {@link SIRSAuthenticator} in a authWallet.json 
+ * file. 
+ * In order to allow the backup of a valid authentication, this class is 
+ * responsible for alerting the {@link SIRSAuthenticator} class of successful 
+ * requests by calling {@link SIRSAuthenticator#validEntry(java.net.URL)} with 
+ * the requested Url. 
  *
  * @author Olivier Nouguier (Geomatys)
  * @author Alexis Manin (Geomatys)
@@ -242,6 +250,7 @@ public class DatabaseRegistry {
         if (username != null && isLocal) {
             try {
                 createUserIfNotExists(couchDbUrl, username, userPass);
+                SIRSAuthenticator.validEntry(couchDbUrl);
             } catch (Exception e) {
                 // normal behavior if authentication is required.
                 SirsCore.LOGGER.log(Level.FINE, "User check / creation failed.", e);
@@ -311,24 +320,6 @@ public class DatabaseRegistry {
      */
     private void connect() throws IOException {
         final AuthenticationWallet wallet = AuthenticationWallet.getDefault();
-        /*
-         * First, we will open a connection with a java.net url to initialize authentication.
-         */
-//        try (final InputStream stream = couchDbUrl.openStream()) {
-//            if (wallet != null) {
-//                AuthenticationWallet.Entry authEntry = wallet.get(couchDbUrl);
-//                if (authEntry != null) {
-//                    username = authEntry.login;
-//                    userPass = authEntry.password;
-//                }
-//                else if (username!=null && userPass!=null) {
-//                    final String host = couchDbUrl.getHost();
-//                    final int port = (couchDbUrl.getPort() < 0)? couchDbUrl.getDefaultPort() : couchDbUrl.getPort();
-//                    
-//                    wallet.put(new AuthenticationWallet.Entry(host, port, username, userPass));
-//                }
-//            }
-//        }
 
         // Configure http client
         final StdHttpClient.Builder builder = new SirsClientBuilder()
@@ -344,10 +335,7 @@ public class DatabaseRegistry {
                byte attempt =0;
         while(unPassed) {                 
             try {    
-       couchDbInstance = new StdCouchDb2Instance(builder.build(), SirsPreferences.INSTANCE.getProperty(NODE_NAME));
-
-   
-
+                couchDbInstance = new StdCouchDb2Instance(builder.build(), SirsPreferences.INSTANCE.getProperty(NODE_NAME));
                 couchDbInstance.getAllDatabases();
                 //Si cette ligne est exécutée, cela signifie que la requête provoquée par getAllDatabases()
                 //a réussie. On demande alors à la classe SIRSAuthenticator.java de sauvegarder les identifiants de connection utilisés.
@@ -368,7 +356,7 @@ public class DatabaseRegistry {
      */
     public List<String> listSirsDatabases() {
         final List<String> dbList = couchDbInstance.getAllDatabases();
-
+        SIRSAuthenticator.validEntry(couchDbUrl);
         List<String> res = new ArrayList<>();
         for (String db : dbList) {
             if (db.startsWith("_"))
@@ -975,6 +963,7 @@ public class DatabaseRegistry {
         String authValue;
         try {
             authValue = couchDbInstance.getConfiguration(AUTH_SECTION, REQUIRE_USER_OPTION);
+            SIRSAuthenticator.validEntry(couchDbUrl);
         } catch (DbAccessException e) {
             authValue = null;
         }

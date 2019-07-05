@@ -52,7 +52,7 @@ public class TableColumnsPreferences {
 
     final private ObjectMapper objectMapper = new ObjectMapper();
 
-    // Map associant le nom d'une colonne (keys) aux préférences de l'utilisateur (values).
+    // Map associant la position d'une colonne (keys) aux préférences de l'utilisateur (values).
     final private Map<Integer, ColumnState> withPreferencesColumns = new HashMap<>();
 
     public TableColumnsPreferences() {
@@ -157,6 +157,20 @@ public class TableColumnsPreferences {
      */
     public ColumnState getPreferencesFor(Integer columnPosition) {
         return this.withPreferencesColumns.get(columnPosition);
+    }
+    
+    /**
+     * Indique si la colonne à l'indice 'columnPosition' est dotée de préférences 
+     * utilisateur.
+     * 
+     * @param columnPosition : position de la colonne à vérifier.
+     * @return true s'il y a des préférences associées à la position spécifiée.
+     */
+    public boolean withPreferences(Integer columnPosition){
+        if(withPreferencesColumns == null || withPreferencesColumns.isEmpty()){
+            return false;
+        }
+        return withPreferencesColumns.containsKey(columnPosition);
     }
 
     /**
