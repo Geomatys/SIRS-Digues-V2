@@ -459,9 +459,15 @@ public class FXSeuilLitPane  extends AbstractFXElementPane<SeuilLit> {
         couchesTable.setTableItems(()-> (ObservableList) newElement.getCouches());
         // * commentaire
         ui_commentaire.textProperty().bindBidirectional(newElement.commentaireProperty());
+        
+        final Preview linearPreview = newElement.getLinearId() == null ? null : previewRepository.get(newElement.getLinearId());
         SIRS.initCombo(ui_linearId, SIRS.observableList(
-            previewRepository.getByClass(TronconDigue.class)).sorted(),
-            newElement.getLinearId() == null? null : previewRepository.get(newElement.getLinearId()));
+            previewRepository.getByClass(linearPreview == null ? TronconDigue.class : linearPreview.getJavaClassOr(TronconDigue.class))).sorted(),
+            linearPreview);
+//        SIRS.initCombo(ui_linearId, SIRS.observableList(
+//            previewRepository.getByClass(TronconDigue.class)).sorted(),
+//            newElement.getLinearId() == null? null : previewRepository.get(newElement.getLinearId()));
+        
         // Propriétés de ObjetPhotographiable
         photosTable.setParentElement(newElement);
         photosTable.setTableItems(()-> (ObservableList) newElement.getPhotos());
