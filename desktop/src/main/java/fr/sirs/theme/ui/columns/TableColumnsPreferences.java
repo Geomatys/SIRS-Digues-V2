@@ -44,7 +44,7 @@ import javafx.scene.control.TableColumn;
  *
  * @author Matthieu Bastianelli (Geomatys)
  */
-public class TableColumnsPreferences {
+ public class TableColumnsPreferences {
 
     private Class pojoClass;
 
@@ -91,12 +91,15 @@ public class TableColumnsPreferences {
      */
 
     public void applyPreferencesToTableColumns(List<TableColumn<Element, ?>> columns) {
-
+        
+        try{
         Map<String, TableColumn<Element, ?>> changedColumns = new HashMap<>();
         withPreferencesColumns.forEach((preferedPosition, columnState) -> {
 
             columns.stream()
-                    .filter(col -> (getColumnRef(col) != null) && (getColumnRef(col).equals(columnState.getName())))
+                    .filter(col -> {
+                        return (getColumnRef(col) != null) && (getColumnRef(col).equals(columnState.getName()));
+                            })
                     .findFirst()
                     .ifPresent(col -> {
                         //Affectations des préférences d'épaisseur et de visibilité
@@ -113,6 +116,9 @@ public class TableColumnsPreferences {
                         }
                     });
         });
+        }catch(RuntimeException re){
+                SIRS.LOGGER.log(Level.WARNING, "Exception lors de l'application des préférences utilisateurs.",re);
+        }
         
     }
 

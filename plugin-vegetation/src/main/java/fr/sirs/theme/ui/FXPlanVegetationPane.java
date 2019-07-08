@@ -342,7 +342,7 @@ public class FXPlanVegetationPane extends BorderPane {
         private final SirsStringConverter converter = new SirsStringConverter();
 
         public ParamPojoTable(String title, final ObjectProperty<? extends Element> container) {
-            super(ParamFrequenceTraitementVegetation.class, title, container);
+            super(ParamFrequenceTraitementVegetation.class, title, container, false);
 
             // On garde les classes de zones de végétation.
             vegetationClasses = zoneVegetationClasses();
@@ -352,6 +352,9 @@ public class FXPlanVegetationPane extends BorderPane {
             });
             classColumn.setCellFactory(param -> new FXListTableCell<>(vegetationClasses, converter));
             getTable().getColumns().add(3, (TableColumn) classColumn);
+            
+            applyPreferences();
+            listenPreferences();
         }
     }
 }

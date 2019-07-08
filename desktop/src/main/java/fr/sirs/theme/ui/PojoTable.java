@@ -367,14 +367,14 @@ public class PojoTable extends BorderPane implements Printable {
     private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
     //Liste des colonnes modifiées :
     private Set<Integer> modifiedColumnsIndices = new HashSet<>();
-    
+
     /**
-     * Un bug de javafx est constaté lorsque l'on déplace des colonnes d'une TableView
-     * possédant certaines colonnes non-visibles. Le déplacement est alors erronné.
-     * Cette variable indique que ce bug n'a pas encore était corrigé dans javafx.
-     * Plusieurs corrections sont apportées dans le projet pour palier à ce bug.
-     * Elle doivent utiliser cette variable.
-     * Si ce bug javafx est corrigé, on peut chercher les références à cette variable.
+     * Un bug de javafx est constaté lorsque l'on déplace des colonnes d'une
+     * TableView possédant certaines colonnes non-visibles. Le déplacement est
+     * alors erronné. Cette variable indique que ce bug n'a pas encore était
+     * corrigé dans javafx. Plusieurs corrections sont apportées dans le projet
+     * pour palier à ce bug. Elle doivent utiliser cette variable. Si ce bug
+     * javafx est corrigé, on peut chercher les références à cette variable.
      */
     public static final boolean BUG_JAVAFX_COLUMN_MOVE = true;
 
@@ -388,11 +388,15 @@ public class PojoTable extends BorderPane implements Printable {
     private final ObjectProperty<? extends Element> container;
 
     public PojoTable(final Class pojoClass, final String title, final ObjectProperty<? extends Element> container) {
-        this(pojoClass, title, container, null);
+        this(pojoClass, title, container, null, true);
+    }
+
+    public PojoTable(final Class pojoClass, final String title, final ObjectProperty<? extends Element> container, final boolean applyPreferences) {
+        this(pojoClass, title, container, null, applyPreferences);
     }
 
     public PojoTable(final AbstractSIRSRepository repo, final String title, final ObjectProperty<? extends Element> container) {
-        this(repo.getModelClass(), title, container, repo);
+        this(repo.getModelClass(), title, container, repo, true);
     }
 
     public PojoTable(final Class pojoClass, final String title) {
@@ -403,7 +407,16 @@ public class PojoTable extends BorderPane implements Printable {
         this(repo, title, (ObjectProperty<? extends Element>) null);
     }
 
-    private PojoTable(final Class pojoClass, final String title, final ObjectProperty<? extends Element> container, final AbstractSIRSRepository repo) {
+    /**
+     * @param pojoClass
+     * @param title
+     * @param container
+     * @param repo
+     * @param applyPreferences : boolean value use to indicate to not apply
+     * preferences in the constructor. It is used in {@link ParamPojoTable}
+     * which add columns to uiTable after super constructor's call.
+     */
+    private PojoTable(final Class pojoClass, final String title, final ObjectProperty<? extends Element> container, final AbstractSIRSRepository repo, final boolean applyPreferences) {
         if (pojoClass == null && repo == null) {
             throw new IllegalArgumentException("Pojo class to expose and Repository parameter are both null. At least one of them must be valid.");
         }
@@ -426,7 +439,7 @@ public class PojoTable extends BorderPane implements Printable {
 
         // Préférences utilisateur pour cette PojoTable.
         columnsPreferences = new TableColumnsPreferences(this.pojoClass);
-        
+
         if (BUG_JAVAFX_COLUMN_MOVE) {
             SIRS.setColumnResize(uiTable, columnsPreferences);   //Entre en concurrence avec l'application des préférences utilisateurs.
         } else {
@@ -852,8 +865,7 @@ public class PojoTable extends BorderPane implements Printable {
         uiCurrent.setTooltip(new Tooltip("Aller au numéro..."));
         uiDelete.setTooltip(new Tooltip("Supprimer les éléments sélectionnés"));
         uiFilter.setTooltip(new Tooltip("Filtrer les données"));
-        
-        
+
         if (BUG_JAVAFX_COLUMN_MOVE) {
             //Place toutes les colonnes non visible en fin de tableau (excepté le bouton de suppression)
             // afin de permettre un déplacement (manuel) de colonne intelligible.
@@ -870,16 +882,83 @@ public class PojoTable extends BorderPane implements Printable {
                 }
             }
         }
-        
-        if (!columnsPreferences.getWithPreferencesColumns().isEmpty()) {
-            columnsPreferences.applyPreferencesToTableColumns(uiTable.getColumns());
-        }
 
+        
         updateView();
+        
+        if (applyPreferences){
+            applyPreferences();
+            listenPreferences();
+        }
 
         //===============================================================
         // Suivi des préférences utilisateur pour les colonnes affichées.
         //===============================================================
+        
+
+    }// FIN Constructeur.
+    //==========================================================================
+
+    //==========================================================================
+    /**
+     * Méthode permettant de lancer une sauvegarde de préférences utilisateur
+     * lorsqu'un changement de la tableView {@code  uiTable} a été détécté.
+     *
+     * Un délai de 4 seconde est mis en place pour n'effectuer qu'une seule
+     * sauvegarde lors de plusieurs changements ce succédant.
+     */
+    private void modifiedColumn() {
+        //Changement de position de colonne.
+        if (!isColumnModifying.getValue()) {
+            isColumnModifying.set(true);
+            scheduledExecutorService.schedule(saveColumnsPreferences, 4, TimeUnit.SECONDS);
+        }
+    }
+
+    /**
+     * Runnable permettant d'exécuter la sauvegarde des préférences utilisateur
+     * {@link modifiedColumn}.
+     */
+    private Runnable saveColumnsPreferences = new Runnable() {
+        @Override
+        public void run() {
+
+            isColumnModifying.set(false);
+            SIRS.LOGGER.log(Level.INFO, "Sauvegarde des préférences de la pojoTable {0} pour les colonnes :\n", modifiedColumnsIndices);
+
+            //Pour chaque colonne modifiée, on met à jours les préférences.
+            modifiedColumnsIndices.forEach(colIndice -> {
+
+                TableColumn<Element, ?> column = uiTable.getColumns().get(colIndice);
+                try {
+                    //TODO empêcher la castException -> S'il y a problème de cast on met un nom vide.
+                    // ColumnState newState = new ColumnState(((PropertyColumn) column).getName(), column.isVisible(), colIndice, (float) column.widthProperty().get());
+                    ColumnState newState = new ColumnState(TableColumnsPreferences.getColumnRef(column), column.isVisible(), colIndice, (float) column.widthProperty().get());
+                    columnsPreferences.addColumnPreference(newState);
+                } catch (Exception e) {
+                    SIRS.LOGGER.log(Level.WARNING, "Modification de la colonne {0} non enregistr\u00e9e dans les pr\u00e9f\u00e9rences.", colIndice);
+                }
+            });
+
+            //Nettoyage de l'indicateur des colonnes modifiées.
+            modifiedColumnsIndices.clear();
+
+            //Sauvegarde des préférences au format Json.
+            columnsPreferences.saveInJson();
+
+            SIRS.LOGGER.log(Level.INFO, "Fin Sauvegarde de préférences PojoTable.");
+
+        }
+    };
+    
+    /**
+     * Set listeners for visibility, width and position changes of the uiTable's
+     * columns.
+     * 
+     * TODO : should call 3 methods : one by listener.
+     * 
+     */
+    final protected void listenPreferences(){
         //Ajout Listener pour identifier et sauvegarder les modifications de colonnes par l'utilisateur :
         //Identification des changements d'épaisseur.
         uiTable.getColumns().forEach(col -> col.widthProperty().addListener((ov, t, t1) -> {
@@ -988,61 +1067,13 @@ public class PojoTable extends BorderPane implements Printable {
                 }
             }
         });
-
-    }// FIN Constructeur.
-    //==========================================================================
-
-    //==========================================================================
-    /**
-     * Méthode permettant de lancer une sauvegarde de préférences utilisateur
-     * lorsqu'un changement de la tableView {@code  uiTable} a été détécté.
-     *
-     * Un délai de 4 seconde est mis en place pour n'effectuer qu'une seule
-     * sauvegarde lors de plusieurs changements ce succédant.
-     */
-    private void modifiedColumn() {
-        //Changement de position de colonne.
-        if (!isColumnModifying.getValue()) {
-            isColumnModifying.set(true);
-            scheduledExecutorService.schedule(saveColumnsPreferences, 4, TimeUnit.SECONDS);
+    }
+    
+    final protected void applyPreferences() {
+        if (!columnsPreferences.getWithPreferencesColumns().isEmpty()) {
+            columnsPreferences.applyPreferencesToTableColumns(uiTable.getColumns());
         }
     }
-
-    /**
-     * Runnable permettant d'exécuter la sauvegarde des préférences utilisateur
-     * {@link modifiedColumn}.
-     */
-    private Runnable saveColumnsPreferences = new Runnable() {
-        @Override
-        public void run() {
-
-            isColumnModifying.set(false);
-            SIRS.LOGGER.log(Level.INFO, "Sauvegarde des préférences de la pojoTable {0} pour les colonnes :\n", modifiedColumnsIndices);
-
-            //Pour chaque colonne modifiée, on met à jours les préférences.
-            modifiedColumnsIndices.forEach(colIndice -> {
-
-                TableColumn<Element, ?> column = uiTable.getColumns().get(colIndice);
-                try {
-                    //TODO empêcher la castException -> S'il y a problème de cast on met un nom vide.
-                    // ColumnState newState = new ColumnState(((PropertyColumn) column).getName(), column.isVisible(), colIndice, (float) column.widthProperty().get());
-                    ColumnState newState = new ColumnState(TableColumnsPreferences.getColumnRef(column), column.isVisible(), colIndice, (float) column.widthProperty().get());
-                    columnsPreferences.addColumnPreference(newState);
-                } catch (Exception e) {
-                    SIRS.LOGGER.log(Level.WARNING, "Modification de la colonne {0} non enregistr\u00e9e dans les pr\u00e9f\u00e9rences.", colIndice);
-                }
-            });
-
-            //Nettoyage de l'indicateur des colonnes modifiées.
-            modifiedColumnsIndices.clear();
-
-            //Sauvegarde des préférences au format Json.
-            columnsPreferences.saveInJson();
-
-            SIRS.LOGGER.log(Level.INFO, "Fin Sauvegarde de préférences PojoTable.");
-
-        }
-    };
 
     //==========================================================================
     protected StructBeanSupplier getStructBeanSupplier() {
