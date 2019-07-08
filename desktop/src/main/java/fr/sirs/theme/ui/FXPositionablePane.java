@@ -384,6 +384,12 @@ public class FXPositionablePane extends BorderPane {
             final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(pos, troncon, segments);
 
             final Geometry geometry = posInfo.getGeometry();
+            if(geometry == null){
+                SIRS.LOGGER.log(Level.WARNING, "Impossible de calculer la g\u00e9om\u00e9trie du positionable sur le sr : \n{0}", sr.toString());
+                uiSR.setText(sr.getLibelle());
+                uiPRDebut.setText("");
+                uiPRFin.setText("");
+            } else {
             final Point startPoint, endPoint;
             if (geometry instanceof LineString) {
                 LineString ls = (LineString) geometry;
@@ -404,6 +410,7 @@ public class FXPositionablePane extends BorderPane {
             //on sauvegarde les PR dans le positionable.
             pos.setPrDebut(startPr);
             pos.setPrFin(endPr);
+            }
 
         } else {
             uiSR.setText("No SR found.");
