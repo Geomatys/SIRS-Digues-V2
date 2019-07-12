@@ -102,7 +102,7 @@ public class ConvertPositionableCoordinates {
      * @return true if the input positionable has linear coordinates. 
      */
     private static boolean checkLinearCoordAndAffectMissing(Positionable positionable){
-        if(((positionable.getBorneDebutId() == null))&&((positionable.getBorneDebutId() == null))){
+        if(((positionable.getBorneDebutId() == null))&&((positionable.getBorneFinId() == null))){
             return false;
         }
         
