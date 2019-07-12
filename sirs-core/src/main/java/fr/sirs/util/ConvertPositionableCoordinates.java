@@ -56,34 +56,14 @@ public class ConvertPositionableCoordinates {
                 throw new NullPointerException("Null input positionable.");
             }
 
-            final boolean withLinearCoord = ((positionable.getBorneDebutId() != null))||((positionable.getBorneDebutId() != null));
-               
-            final boolean withGeoCoord = ((positionable.getPositionDebut() != null)
-                    || (positionable.getPositionFin() != null));
+            final boolean withLinearCoord = checkLinearCoordAndAffectMissing(positionable);
+            final boolean withGeoCoord = checkGeomCoordAndAffectMissing(positionable);
 
             //Si aucun type de coordonnées n'est présent on renvoie une exception
             if ((!withLinearCoord) && (!withGeoCoord)) {
                 throw new IllegalArgumentException("The positionable input must provide at least one kind of coordinates 'Linear or geo' but both of them are empty.");
             }
             
-            if (withLinearCoord) {
-                if (positionable.getBorneDebutId() == null) { //if missing, compute the starting coordinates from the ending ones
-                    positionable.setBorneDebutId(positionable.getBorneFinId());
-                    positionable.setBorne_debut_aval(positionable.getBorne_fin_aval());
-                    positionable.setBorne_debut_distance(positionable.getBorne_fin_distance());
-                } else if (positionable.getBorneFinId() == null) { //if missing, compute the ending coordinates from the starting ones
-                    positionable.setBorneFinId(positionable.getBorneDebutId());
-                    positionable.setBorne_fin_aval(positionable.getBorne_debut_aval());
-                    positionable.setBorne_fin_distance(positionable.getBorne_debut_distance());
-                }
-            }
-            if (withGeoCoord) {
-                if (positionable.getPositionDebut() == null) {//if missing, compute the starting coordinates from the ending ones
-                    positionable.setPositionDebut(positionable.getPositionFin()); //Peut il y avoir une incohérence avec la géométrie?
-                } else if (positionable.getPositionFin() == null) { //if missing, compute the starting coordinates from the ending ones
-                    positionable.setPositionFin(positionable.getPositionDebut()); //idem?
-                }
-            }
                 // Si les coordonnées sont déjà présentes, aucune modification n'est apportée.
             if ((withLinearCoord) && (withGeoCoord)) {
                 
@@ -111,6 +91,55 @@ public class ConvertPositionableCoordinates {
 
         return positionable;
     };
+    
+    /**
+     * Check if the input Positionable has got linear Coordinates ; 
+     * If is has only the starting (respectively ending) point  coordinates, 
+     * the methods affects the own coordinates to the missing ending (resp starting)
+     * point.
+     * 
+     * @param positionable
+     * @return true if the input positionable has linear coordinates. 
+     */
+    private static boolean checkLinearCoordAndAffectMissing(Positionable positionable){
+        if(((positionable.getBorneDebutId() == null))&&((positionable.getBorneDebutId() == null))){
+            return false;
+        }
+        
+        if (positionable.getBorneDebutId() == null) { //if missing, compute the starting coordinates from the ending ones
+            positionable.setBorneDebutId(positionable.getBorneFinId());
+            positionable.setBorne_debut_aval(positionable.getBorne_fin_aval());
+            positionable.setBorne_debut_distance(positionable.getBorne_fin_distance());
+        } else if (positionable.getBorneFinId() == null) { //if missing, compute the ending coordinates from the starting ones
+            positionable.setBorneFinId(positionable.getBorneDebutId());
+            positionable.setBorne_fin_aval(positionable.getBorne_debut_aval());
+            positionable.setBorne_fin_distance(positionable.getBorne_debut_distance());
+        }
+        return true;
+    }
+    
+    /**
+     * Check if the input Positionable has got Geographical Coordinates ; 
+     * If is has only the starting (respectively ending) point coordinates, 
+     * the methods affects the own coordinates to the missing ending (resp starting)
+     * point.
+     * 
+     * @param positionable
+     * @return 
+     */
+    private static boolean checkGeomCoordAndAffectMissing(Positionable positionable){
+        if(((positionable.getPositionDebut() == null)
+                    && (positionable.getPositionFin() == null))){
+            return false;
+        }
+        
+        if (positionable.getPositionDebut() == null) {//if missing, compute the starting coordinates from the ending ones
+            positionable.setPositionDebut(positionable.getPositionFin()); //Peut il y avoir une incohérence avec la géométrie?
+        } else if (positionable.getPositionFin() == null) { //if missing, compute the starting coordinates from the ending ones
+            positionable.setPositionFin(positionable.getPositionDebut()); //idem?
+        }
+        return true;
+    }
 
     /**
      * Méthode permettant de recalculer les coordonnées linéaires (ou
@@ -190,11 +219,10 @@ public class ConvertPositionableCoordinates {
      * @param positionableWithLinearCoord
      */
     public static void computePositionableGeometryAndCoord(Positionable positionableWithLinearCoord) {
-        ArgumentChecks.ensureNonNull("Borne de début du Positionable", positionableWithLinearCoord.getBorneDebutId());
-//        ArgumentChecks.ensureNonNull("Borne de fin du Positionable", positionableWithLinearCoord.getBorneFinId());
-        ArgumentChecks.ensureNonNull("Distance borne début du Positionable", positionableWithLinearCoord.getBorne_debut_distance());
-//        ArgumentChecks.ensureNonNull("Distance borne fin du Positionable", positionableWithLinearCoord.getBorne_fin_distance());
-
+        if(!checkLinearCoordAndAffectMissing(positionableWithLinearCoord)){
+            throw new IllegalStateException("Try to compute Geometry and Coordinate from positionable without linear coordinates");
+        }
+        
         try {
 
             final TronconDigue troncon = getTronconFromPositionable(positionableWithLinearCoord);

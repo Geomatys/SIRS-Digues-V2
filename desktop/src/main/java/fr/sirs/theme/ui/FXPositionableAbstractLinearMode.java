@@ -19,8 +19,6 @@
 package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.LinearReferencingUtilities;
@@ -388,6 +386,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         }catch(Exception e){
             SIRS.LOGGER.log(Level.WARNING, "Echec de la construction de la géométrie lors du changement de coordonnées.", e);
         }finally {
+            updateFields();
             reseting = false;
         }
     }
