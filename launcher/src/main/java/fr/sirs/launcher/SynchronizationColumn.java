@@ -33,7 +33,9 @@ import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.Tooltip;
@@ -118,7 +120,14 @@ public class SynchronizationColumn extends TableColumn<String, Task> {
             button.setPadding(Insets.EMPTY);
 
             button.setOnAction(evt -> {
-                updateState();
+                final Alert ask = new Alert(Alert.AlertType.CONFIRMATION,
+                        "Êtes-vous sûr de vouloir reprendre la synchronisation automatique?",
+                        ButtonType.YES, ButtonType.NO);
+                ask.setResizable(true);
+                final ButtonType choice = ask.showAndWait().orElse(ButtonType.NO);
+                if (ButtonType.YES.equals(choice)) {
+                    updateState();
+                }
             });
         }
 

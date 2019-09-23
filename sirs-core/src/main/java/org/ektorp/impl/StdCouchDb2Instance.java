@@ -26,7 +26,6 @@ import java.util.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.sirs.core.authentication.SIRSAuthenticator;
 import fr.sirs.core.component.CouchSGBD;
 
 import org.ektorp.*;
@@ -167,6 +166,7 @@ public class StdCouchDb2Instance implements CouchDbInstance {
         return restTemplate.get("/_all_dbs", new StdResponseHandler<List<String>>(){
             @Override
             public List<String> success(HttpResponse hr) throws Exception {
+                LOG.info("Success of the request /_all_dbs");
                 return objectMapper.readValue(hr.getContent(), STRING_LIST_TYPE_DEF);
             }
 

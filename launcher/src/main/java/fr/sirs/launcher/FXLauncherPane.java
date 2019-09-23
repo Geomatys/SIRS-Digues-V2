@@ -30,6 +30,7 @@ import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
 import fr.sirs.core.CacheRules;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.component.CouchSGBD;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
@@ -983,7 +984,7 @@ public class FXLauncherPane extends BorderPane {
 
                                 if (!localRegistry.listSirsDatabases().contains(destDbName)
                                 || ButtonType.YES.equals(alert.showAndWait().get())) {
-
+                                    
                                     final TaskManager.MockTask<org.ektorp.ReplicationStatus> copyTask = new TaskManager.MockTask("Copie de base de données", () -> {
                                         return localRegistry.copyDatabase(
                                                 DatabaseRegistry.addAuthenticationInformation(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + sourceDb), 
@@ -1015,6 +1016,40 @@ public class FXLauncherPane extends BorderPane {
                                             alerte.setResizable(true);
                                             alerte.show();
                                         }
+                                        
+                                        /*
+                                        * ======================================
+                                        * Si la base de données copiée est
+                                        * associé à une base distante 
+                                        * (synchronisable) on propose à 
+                                        * l'utilisateur de conserver ou non
+                                        * cette association sur la copie.
+                                        * Redmine#6727
+                                        */
+                                        try {
+                                            SirsDBInfo destDBInfo = localRegistry
+                                                    .getInfo(destDbName)
+                                                    .orElseThrow(() -> new IllegalStateException("Une erreur s'est produite lors de la récupération des informations de la base de données copiée."));
+
+                                            if (destDBInfo.getRemoteDatabase() != null) {
+                                                final Alert confirmation = new Alert(
+                                                        Alert.AlertType.WARNING,
+                                                        "Voulez-vous associer la base copiée à la base de données distantes?\n (Offre la possibilité de synchroniser la copie avec la base de données distantes)",
+                                                        ButtonType.NO, ButtonType.YES);
+                                                confirmation.setResizable(true);
+                                                ButtonType choice = confirmation.showAndWait().get();
+                                                if (!choice.equals(ButtonType.YES)) {
+
+                                                    destDBInfo.setRemoteDatabase(null);
+                                                    localRegistry.createConnector(destDbName, DatabaseRegistry.DatabaseConnectionBehavior.DEFAULT).update(destDBInfo);
+
+                                                };
+                                            }
+                                        } catch (IOException | IllegalArgumentException ex) {
+                                            LOGGER.log(Level.WARNING, "Une exception c'est produite lors de la suppression de la base distante associée à la copie locale.", ex);
+                                        }
+                                        //======================================
+
                                         updateLocalDbList();
                                     }));
 
