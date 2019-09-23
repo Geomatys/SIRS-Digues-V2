@@ -60,7 +60,9 @@ import java.util.logging.Level;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
@@ -252,7 +254,7 @@ public class Session extends SessionCore {
 //                final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
 //                final CoverageStore store = new OSMTileMapClient(new URL("http://c.tile.stamen.com/terrain"), null, 18, true);
                 final CoverageStore store = new OSMTileMapClient(new URL("http://c.tile.stamen.com/toner"), null, 18, true);
-       
+
                 for (GenericName n : store.getNames()) {
                     final CoverageReference cr = store.getCoverageReference(n);
                     final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
@@ -483,7 +485,9 @@ public class Session extends SessionCore {
             return openEditors.getOrCreate(target, () -> {
                 final FXFreeTab newTab = tabCreator.call();
                 if (newTab != null) {
-                    newTab.setOnClosed(event -> openEditors.remove(target));
+                    newTab.setOnClosed(event -> {
+                        openEditors.remove(target);
+                                });
                 }
                 return newTab;
             });
@@ -567,16 +571,21 @@ public class Session extends SessionCore {
                 });
             });
 
+
+            ChangeListener<String> listenDesignation = (ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+                tab.setTextAbrege(generateElementTitle(target));
+            };
+
+            tab.hack = listenDesignation;
+
             // Update tab title if element designation changes.
             if (target instanceof PositionDocument) {
                 final PositionDocument positionDocument = (PositionDocument) target;
-                positionDocument.sirsdocumentProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
-                    tab.setTextAbrege(generateElementTitle(target));
-                });
+                positionDocument.sirsdocumentProperty().addListener(new WeakChangeListener<>(listenDesignation));
             }
-            target.designationProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
-                tab.setTextAbrege(generateElementTitle(target));
-            });
+
+            target.designationProperty().addListener(new WeakChangeListener<>(listenDesignation));
+
             tab.setTextAbrege(generateElementTitle(target));
 
             return tab;
