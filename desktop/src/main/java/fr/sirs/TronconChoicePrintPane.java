@@ -80,7 +80,7 @@ public abstract class TronconChoicePrintPane extends BorderPane {
     protected class TronconChoicePojoTable extends PojoTable {
 
         public TronconChoicePojoTable() {
-            super(TronconDigue.class, "Tronçons", (ObjectProperty<Element>) null);
+            super(TronconDigue.class, "Tronçons", (ObjectProperty<Element>) null, false); //le dernier input 'false" permet de ne pas appliquer les préférences utilisateur depuis le constructeur parent.
             getColumns().remove(editCol);
             editableProperty.set(false);
             createNewProperty.set(false);
@@ -104,6 +104,10 @@ public abstract class TronconChoicePrintPane extends BorderPane {
             getColumns().add(new EditablePRColumn("PR fin sélectionné", ExtremiteTroncon.FIN));
             getColumns().add(new OriginalPRColumn("PR minimum existant", ExtremiteTroncon.DEBUT));
             getColumns().add(new OriginalPRColumn("PR maximum existant", ExtremiteTroncon.FIN));
+            
+            // application des préférence (après la suppression de la colonne 'editcol'
+            applyPreferences();
+            listenPreferences();
         }
     }
 

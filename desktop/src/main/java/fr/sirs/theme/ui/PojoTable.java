@@ -886,6 +886,9 @@ public class PojoTable extends BorderPane implements Printable {
         
         updateView();
         
+        //Application des préférence utilisateur (position, visibilité et largeur
+        // de colonne. Le booléan applyPreferences permet de ne pas appliqué ces 
+        // préférence depuis ce contructeur.
         if (applyPreferences){
             applyPreferences();
             listenPreferences();
