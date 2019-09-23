@@ -143,6 +143,7 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
 
     private Stream<OuvrageHydrauliqueAssocie> getData() {
             final Predicate userOptions = new TypeOuvragePredicate()
+                    .and(OuvrageHydrauliqueAssocie::getValid) // On n'autorise à l'impression uniquement les désordre valides.
                     .and(new TemporalPredicate())
                     .and(new LinearPredicate<>())
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
