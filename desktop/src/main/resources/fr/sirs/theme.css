@@ -7,7 +7,6 @@
     -sirs-form-background : rgb(220, 220, 220);
 }
 
-// FOR ALL WIDGETS
 
 .unvalid {
     -fx-base : #FF6666;
@@ -17,7 +16,6 @@
     -fx-base : #66FF66;
 }
 
-//special classes
 
 .list-header{
     -fx-border-width: 0 0 1 0;
@@ -234,7 +232,6 @@
     -fx-background-radius: 0 0 10 10;
 }
 
-// Set disabled texts fully opaque to ease "consultation" mode.
 .label:disabled,
 .text-input:disabled, 
 .text-input > .scroll-pane:disabled,
@@ -295,7 +292,6 @@
     -fx-padding: 0.20em;
 }
 
-// Deactivate background of arrow buttons of spinners.
 .spinner > .decrement-arrow-button, .increment-arrow-button {
     -fx-background-color:transparent
 }
@@ -363,7 +359,6 @@
     -fx-border-radius: 5;
 }
 
-// GROWL
 .growl {
    -fx-padding: 20px;
    -fx-background-radius: 7;
