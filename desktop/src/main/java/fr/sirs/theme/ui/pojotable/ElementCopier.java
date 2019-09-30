@@ -207,6 +207,7 @@ public class ElementCopier {
 
                     AvecForeignParent copiedPojo = (AvecForeignParent) pojo.copy();
                     copiedPojo.setForeignParentId(targetedForeignParent.getId());
+                    copiedPojo.setDesignation(null);
 
                     //CHECK BORNES TEMPORELLES Parent ET BORNES TEMPORELLLES copiedPojo
                     copiedPojos.add(copiedPojo);
@@ -263,10 +264,11 @@ public class ElementCopier {
 
                 try {
                     AbstractObservation copiedPojo = ((AbstractObservation) pojo).copy();
+                    copiedPojo.setDesignation(null);
                     copiedPojos.add(copiedPojo);
                     targetedContainer.addChild(copiedPojo);
 
-                    //CHECK BORNES TEMPORELLES Parent ET BORNES TEMPORELLLES copiedPojo
+                    //TODO : CHECK BORNES TEMPORELLES Parent ET BORNES TEMPORELLLES copiedPojo
                 } catch (ClassCastException e) {
 
                     completSuccess = false;
