@@ -18,6 +18,7 @@
  */
 package fr.sirs;
 
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.RefConduiteFermee;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.util.ConvertPositionableCoordinates;
@@ -157,7 +158,7 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
         final Spliterator<ReseauHydrauliqueFerme> split = Spliterators.spliteratorUnknownSize(it, 0);
         final Stream dataStream = StreamSupport.stream(split, false)
                 .filter(userOptions)
-                .map(ConvertPositionableCoordinates.COMPUTE_MISSING_COORD);
+                .peek(p -> ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test((Positionable) p));
 
         dataStream.onClose(() -> it.close());
         ClosingDaemon.watchResource(dataStream, it);

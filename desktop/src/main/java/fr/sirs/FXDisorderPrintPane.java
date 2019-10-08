@@ -21,6 +21,7 @@ package fr.sirs;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Observation;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.RefUrgence;
 import fr.sirs.util.ConvertPositionableCoordinates;
@@ -185,7 +186,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
                 .and(new PRPredicate<>())
                 .and(new UrgencePredicate());
-        
+
         final CloseableIterator<Desordre> it = Injector.getSession()
                 .getRepositoryForClass(Desordre.class)
                 .getAllStreaming()
@@ -194,9 +195,8 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         final Spliterator<Desordre> split = Spliterators.spliteratorUnknownSize(it, 0);
         final Stream dataStream = StreamSupport.stream(split, false)
                 .filter(userOptions)
-                .map(ConvertPositionableCoordinates.COMPUTE_MISSING_COORD);
+                .peek(p -> ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test((Positionable) p));
 
-        
         dataStream.onClose(() -> it.close());
         ClosingDaemon.watchResource(dataStream, it);
 

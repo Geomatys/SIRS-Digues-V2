@@ -21,9 +21,6 @@ package fr.sirs.core.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.authentication.SIRSAuthenticator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 

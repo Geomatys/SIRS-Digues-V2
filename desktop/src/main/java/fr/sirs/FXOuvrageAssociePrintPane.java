@@ -19,6 +19,7 @@
 package fr.sirs;
 
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.RefOuvrageHydrauliqueAssocie;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.ui.Growl;
@@ -157,7 +158,7 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
         final Spliterator<OuvrageHydrauliqueAssocie> split = Spliterators.spliteratorUnknownSize(it, 0);
         final Stream dataStream = StreamSupport.stream(split, false)
                 .filter(userOptions)
-                .map(ConvertPositionableCoordinates.COMPUTE_MISSING_COORD);
+                .peek(p -> ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test((Positionable) p));
 
         dataStream.onClose(() -> it.close());
         ClosingDaemon.watchResource(dataStream, it);
