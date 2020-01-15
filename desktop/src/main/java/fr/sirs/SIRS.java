@@ -29,7 +29,6 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementContainerPane;
-import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.theme.ui.columns.TableColumnsPreferences;
 import fr.sirs.util.FXPreferenceEditor;
 import fr.sirs.util.ReferenceTableCell;
@@ -350,7 +349,7 @@ public final class SIRS extends SirsCore {
         comboBox.getSelectionModel().select(current);
         ComboBoxCompletion.autocomplete(comboBox);
     }
-    
+
     /**
      * Convert byte number given in parameter in a human readable string. It tries
      * to fit the best unit. Ex : if you've got a number higher than a thousand,
@@ -514,13 +513,13 @@ public final class SIRS extends SirsCore {
         return setColumnResize(target, null);
     }
 
-        
-    
+
+
     public static InvalidationListener setColumnResize(final TableView target, final TableColumnsPreferences preferences) {
         final ColumnAutomaticResize resize = new ColumnAutomaticResize(target, preferences);
         target.widthProperty().addListener(resize);
         return resize;
-    }    
+    }
     /**
      * An invalidation listener to put on a table width property to set its column's
      * preferred size to fill entire width.
@@ -533,12 +532,12 @@ public final class SIRS extends SirsCore {
         public ColumnAutomaticResize(TableView target) {
             this(target, null);
         }
-        
+
         public ColumnAutomaticResize(TableView target, final TableColumnsPreferences preferences) {
             this.target = new WeakReference<>(target);
             this.preferences = new WeakReference<>(preferences);
         }
-        
+
         @Override
         public void invalidated(Observable observable) {
             final TableView<?> tView = target.get();
@@ -546,14 +545,14 @@ public final class SIRS extends SirsCore {
                 return;
             final TableColumnsPreferences pref = preferences.get();
             final boolean notNull = pref != null;
-                        
+
             double unresizable = 0;
             final ArrayList<TableColumn> resizableColumns = new ArrayList<>();
             for (final TableColumn col : tView.getColumns()) {
-                if (!col.isResizable() || (notNull && (pref.withPreferences(tView.getColumns().indexOf(col))) ) ){ 
-                    // Afin d'appliquer la largeur sauvegardé par l'utilisateur, 
+                if (!col.isResizable() || (notNull && (pref.withPreferences(tView.getColumns().indexOf(col))) ) ){
+                    // Afin d'appliquer la largeur sauvegardé par l'utilisateur,
                     // on considère les colonnes avec préférences de la même manière
-                    // que les colonnes non-redimensionnable.  
+                    // que les colonnes non-redimensionnable.
                     unresizable += col.getWidth();
                 } else if (col.isVisible()) {
                     resizableColumns.add(col);
