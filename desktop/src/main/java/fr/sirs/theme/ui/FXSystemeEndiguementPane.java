@@ -23,7 +23,6 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
-import fr.sirs.util.javafx.FloatSpinnerValueFactory;
 import javafx.beans.property.ObjectProperty;
 
 import javafx.beans.value.ObservableValue;
@@ -39,6 +38,7 @@ import javafx.scene.layout.VBox;
  * @author Olivier Nouguier (Geomatys)
  * @author Alexis Manin (Geomatys)
  * @author Samuel Andrés (Geomatys)
+ * @author Matthieu Bastianelli (Geomatys)
  */
 public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndiguement> {
 
