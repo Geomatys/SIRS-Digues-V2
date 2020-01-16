@@ -371,6 +371,8 @@
         eType="#//RapportEtude" eOpposite="#//RapportEtude/prestationIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="documentGrandeEchelleIds"
         upperBound="-1" eType="#//DocumentGrandeEchelle"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
+        eType="#//ObservationPrestation" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PositionDocument" eSuperTypes="#//AbstractPositionDocumentAssociable">
     <eAnnotations source="couchDBDocument"/>
@@ -1500,4 +1502,5 @@
   <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvertureBatardable" eSuperTypes="#//AbstractObservation"/>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageFranchissement" eSuperTypes="#//AbstractObservation"/>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationVoieAcces" eSuperTypes="#//AbstractObservation"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationPrestation" eSuperTypes="#//AbstractObservation"/>
 </ecore:EPackage>
