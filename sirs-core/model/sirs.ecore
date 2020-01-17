@@ -1467,9 +1467,9 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TronconLitAssociable" abstract="true"
       interface="true"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauHydrauliqueFerme" eSuperTypes="#//AbstractObservation"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauHydrauliqueFerme" eSuperTypes="#//AbstractObservationReseauVoirie"/>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageHydrauliqueAssocie"
-      eSuperTypes="#//AbstractObservation"/>
+      eSuperTypes="#//AbstractObservationReseauVoirie"/>
   <eClassifiers xsi:type="ecore:EClass" name="AbstractObservation" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
       <eAnnotations source="localDate"/>
@@ -1487,20 +1487,24 @@
         eType="#//Photo" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauHydrauliqueCielOuvert"
-      eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationStationPompage" eSuperTypes="#//AbstractObservation"/>
+      eSuperTypes="#//AbstractObservationReseauVoirie"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationStationPompage" eSuperTypes="#//AbstractObservationReseauVoirie"/>
   <eClassifiers xsi:type="ecore:EClass" name="RefCategorieDesordre" eSuperTypes="#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageTelecomEnergie" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauTelecomEnergie" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageParticulier" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationEchelleLimnimetrique" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageVoirie" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationVoieDigue" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvertureBatardable" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageFranchissement" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationVoieAcces" eSuperTypes="#//AbstractObservation"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageTelecomEnergie" eSuperTypes="#//AbstractObservationReseauVoirie"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauTelecomEnergie" eSuperTypes="#//AbstractObservationReseauVoirie"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageParticulier" eSuperTypes="#//AbstractObservationReseauVoirie"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationEchelleLimnimetrique" eSuperTypes="#//AbstractObservationReseauVoirie"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageVoirie" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationVoieDigue" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvertureBatardable" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageFranchissement" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationVoieAcces" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationPrestation" eSuperTypes="#//AbstractObservation"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractObservationReseauEtOuvrage"
+      abstract="true" eSuperTypes="#//AbstractObservation"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractObservationReseauVoirie" abstract="true"
+      eSuperTypes="#//AbstractObservation"/>
 </ecore:EPackage>
