@@ -318,14 +318,14 @@
         upperBound="-1" eType="#//ReseauHydrauliqueCielOuvert"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageParticulierIds"
         upperBound="-1" eType="#//OuvrageParticulier"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="voieDigueIds" upperBound="-1"
-        eType="#//VoieDigue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageVoirieIds" upperBound="-1"
         eType="#//OuvrageVoirie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="echelleLimnimetriqueIds"
         upperBound="-1" eType="#//EchelleLimnimetrique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleIds" upperBound="-1"
         eType="#//ArticleJournal"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voieDigueIds" upperBound="-1"
+        eType="#//VoieDigue" eOpposite="#//VoieDigue/desordreIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Observation" eSuperTypes="#//AbstractObservation">
     <eStructuralFeatures xsi:type="ecore:EReference" name="urgenceId" eType="#//RefUrgence"/>
@@ -610,6 +610,8 @@
         upperBound="-1" eType="#//OuvrageFranchissement" eOpposite="#//OuvrageFranchissement/voieDigueIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="#//ObservationVoieDigue" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
+        eType="#//Desordre" eOpposite="#//Desordre/voieDigueIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageVoirie" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -1467,9 +1469,9 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TronconLitAssociable" abstract="true"
       interface="true"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauHydrauliqueFerme" eSuperTypes="#//AbstractObservationReseauVoirie"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauHydrauliqueFerme" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageHydrauliqueAssocie"
-      eSuperTypes="#//AbstractObservationReseauVoirie"/>
+      eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
   <eClassifiers xsi:type="ecore:EClass" name="AbstractObservation" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
       <eAnnotations source="localDate"/>
@@ -1487,24 +1489,32 @@
         eType="#//Photo" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauHydrauliqueCielOuvert"
-      eSuperTypes="#//AbstractObservationReseauVoirie"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationStationPompage" eSuperTypes="#//AbstractObservationReseauVoirie"/>
+      eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationStationPompage" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
   <eClassifiers xsi:type="ecore:EClass" name="RefCategorieDesordre" eSuperTypes="#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageTelecomEnergie" eSuperTypes="#//AbstractObservationReseauVoirie"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauTelecomEnergie" eSuperTypes="#//AbstractObservationReseauVoirie"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageParticulier" eSuperTypes="#//AbstractObservationReseauVoirie"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationEchelleLimnimetrique" eSuperTypes="#//AbstractObservationReseauVoirie"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageVoirie" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationVoieDigue" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvertureBatardable" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageFranchissement" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationVoieAcces" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageTelecomEnergie" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauTelecomEnergie" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageParticulier" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationEchelleLimnimetrique" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageVoirie" eSuperTypes="#//AbstractObservationReseauVoirie"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationVoieDigue" eSuperTypes="#//AbstractObservationReseauVoirie"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvertureBatardable" eSuperTypes="#//AbstractObservationReseauVoirie"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageFranchissement" eSuperTypes="#//AbstractObservationReseauVoirie"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationVoieAcces" eSuperTypes="#//AbstractObservationReseauVoirie"/>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationPrestation" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="AbstractObservationReseauEtOuvrage"
-      abstract="true" eSuperTypes="#//AbstractObservation"/>
   <eClassifiers xsi:type="ecore:EClass" name="AbstractObservationReseauVoirie" abstract="true"
-      eSuperTypes="#//AbstractObservation"/>
+      eSuperTypes="#//AbstractObservation">
+    <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+      <details key="documentation" value="Classe parente des observations sur les réseaux de voirie. Mise en place pour permettre d'ajouter des spécification sur ce type d'observations."/>
+    </eAnnotations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractObservationReseauEtOuvrage"
+      abstract="true" eSuperTypes="#//AbstractObservation">
+    <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+      <details key="documentation" value="Classe parente des observations sur les réseau et ouvrages. Mise en place pour permettre d'ajouter des spécification sur ce type d'observations."/>
+    </eAnnotations>
+  </eClassifiers>
 </ecore:EPackage>
