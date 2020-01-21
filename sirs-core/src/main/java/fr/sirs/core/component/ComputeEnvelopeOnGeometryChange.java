@@ -58,13 +58,13 @@ public class ComputeEnvelopeOnGeometryChange implements ChangeListener<Geometry>
                     SirsCore.LOGGER.log(Level.CONFIG, "Récupération du CRS de la session pour mettre à jour l'enveloppe de géométrie");
                     final SessionCore session = InjectorCore.getBean(SessionCore.class);
                     if(session==null){
-                        SirsCore.LOGGER.log(Level.INFO, "La session n'est pas encore disponible dans le contexte d'application");
+                        SirsCore.LOGGER.log(Level.FINE, "La session n'est pas encore disponible dans le contexte d'application");
                     }
                     else{
                         geometryCRS = session.getProjection();
                     }
                 }
-                
+
                 if(geometryCRS!=null){
                     SirsCore.LOGGER.log(Level.FINE, "calcul d'une enveloppe de géométrie");
                     Envelope envelope2D = JTS.getEnvelope2D(newValue.getEnvelopeInternal(), geometryCRS);
