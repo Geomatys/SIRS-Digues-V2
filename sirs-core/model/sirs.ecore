@@ -399,7 +399,7 @@
         eType="#//StationPompage" eOpposite="#//StationPompage/prestationIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageVoirieIds" upperBound="-1"
         eType="#//OuvrageVoirie" eOpposite="#//OuvrageVoirie/prestationIds"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="voiedDigueIds" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voieDigueIds" upperBound="-1"
         eType="#//VoieDigue" eOpposite="#//VoieDigue/prestationIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvertureBatardableIds"
         upperBound="-1" eType="#//OuvertureBatardable" eOpposite="#//OuvertureBatardable/prestationIds"/>
@@ -663,7 +663,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/voieDigueIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
-        eType="#//Prestation" eOpposite="#//Prestation/voiedDigueIds"/>
+        eType="#//Prestation" eOpposite="#//Prestation/voieDigueIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageVoirie" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
