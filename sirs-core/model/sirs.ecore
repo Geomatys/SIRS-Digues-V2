@@ -383,6 +383,30 @@
         eType="#//ObservationPrestation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="echelleLimnimetriqueIds"
         upperBound="-1" eType="#//EchelleLimnimetrique" eOpposite="#//EchelleLimnimetrique/prestationIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageParticulierIds"
+        upperBound="-1" eType="#//OuvrageParticulier" eOpposite="#//OuvrageParticulier/prestationIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauTelecomEnergieIds"
+        upperBound="-1" eType="#//ReseauTelecomEnergie" eOpposite="#//ReseauTelecomEnergie/prestationIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageTelecomEnergieIds"
+        upperBound="-1" eType="#//OuvrageTelecomEnergie" eOpposite="#//OuvrageTelecomEnergie/prestationIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageHydrauliqueAssocieIds"
+        upperBound="-1" eType="#//OuvrageHydrauliqueAssocie" eOpposite="#//OuvrageHydrauliqueAssocie/prestationIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueFermeIds"
+        upperBound="-1" eType="#//ReseauHydrauliqueFerme" eOpposite="#//ReseauHydrauliqueFerme/prestationIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueCielOuvertIds"
+        upperBound="-1" eType="#//ReseauHydrauliqueCielOuvert" eOpposite="#//ReseauHydrauliqueCielOuvert/prestationIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="stationPompageIds" upperBound="-1"
+        eType="#//StationPompage" eOpposite="#//StationPompage/prestationIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageVoirieIds" upperBound="-1"
+        eType="#//OuvrageVoirie" eOpposite="#//OuvrageVoirie/prestationIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voiedDigueIds" upperBound="-1"
+        eType="#//VoieDigue" eOpposite="#//VoieDigue/prestationIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvertureBatardableIds"
+        upperBound="-1" eType="#//OuvertureBatardable" eOpposite="#//OuvertureBatardable/prestationIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voieAccesIds" upperBound="-1"
+        eType="#//VoieAcces" eOpposite="#//VoieAcces/prestationIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageFranchissementIds"
+        upperBound="-1" eType="#//OuvrageFranchissement" eOpposite="#//OuvrageFranchissement/prestationIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PositionDocument" eSuperTypes="#//AbstractPositionDocumentAssociable">
     <eAnnotations source="couchDBDocument"/>
@@ -574,6 +598,8 @@
         eType="#//ObservationOuvertureBatardable" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/ouvertureBatardableIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/ouvertureBatardableIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageFranchissement" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -600,6 +626,8 @@
         eType="#//ObservationOuvrageFranchissement" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/ouvrageFranchissementIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/ouvrageFranchissementIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="VoieAcces" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -616,6 +644,8 @@
         eType="#//ObservationVoieAcces" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/voieAccesIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/voieAccesIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="VoieDigue" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -632,6 +662,8 @@
         eType="#//ObservationVoieDigue" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/voieDigueIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/voiedDigueIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageVoirie" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -643,6 +675,8 @@
         eType="#//ObservationOuvrageVoirie" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/ouvrageVoirieIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/ouvrageVoirieIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="StationPompage" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -655,6 +689,8 @@
         upperBound="-1" eType="#//ReseauHydrauliqueFerme" eOpposite="#//ReseauHydrauliqueFerme/stationPompageIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/stationPompageIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/stationPompageIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Pompe">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="marque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -691,6 +727,8 @@
         upperBound="-1" eType="#//OuvrageHydrauliqueAssocie" eOpposite="#//OuvrageHydrauliqueAssocie/reseauHydrauliqueFermeIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/reseauHydrauliqueFermeIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/reseauHydrauliqueFermeIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageHydrauliqueAssocie" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -703,6 +741,8 @@
         upperBound="-1" eType="#//ReseauHydrauliqueFerme" eOpposite="#//ReseauHydrauliqueFerme/ouvrageHydrauliqueAssocieIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/ouvrageHydrauliqueAssocieIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/ouvrageHydrauliqueAssocieIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReseauTelecomEnergie" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -718,6 +758,8 @@
         eType="#//ObservationReseauTelecomEnergie" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/reseauTelecomEnergieIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/reseauTelecomEnergieIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageTelecomEnergie" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -730,6 +772,8 @@
         eType="#//ObservationOuvrageTelecomEnergie" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/ouvrageTelecomEnergieIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/ouvrageTelecomEnergieIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReseauHydrauliqueCielOuvert" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -742,6 +786,8 @@
         upperBound="-1" eType="#//ReseauHydrauliqueFerme" eOpposite="#//ReseauHydrauliqueFerme/reseauHydrauliqueCielOuvertIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/reseauHydrauliqueCielOuvertIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/reseauHydrauliqueCielOuvertIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageParticulier" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -752,6 +798,8 @@
         eType="#//ObservationOuvrageParticulier" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/ouvrageParticulierIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/ouvrageParticulierIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObjetMesure" abstract="true" eSuperTypes="#//ObjetPhotographiable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleIds" upperBound="-1"
