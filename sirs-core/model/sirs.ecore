@@ -381,6 +381,8 @@
         upperBound="-1" eType="#//DocumentGrandeEchelle"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="#//ObservationPrestation" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="echelleLimnimetriqueIds"
+        upperBound="-1" eType="#//EchelleLimnimetrique" eOpposite="#//EchelleLimnimetrique/prestationIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PositionDocument" eSuperTypes="#//AbstractPositionDocumentAssociable">
     <eAnnotations source="couchDBDocument"/>
@@ -542,6 +544,8 @@
         eType="#//ObservationEchelleLimnimetrique" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/echelleLimnimetriqueIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/echelleLimnimetriqueIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvertureBatardable" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
