@@ -219,7 +219,7 @@ public class ModuleChecker extends Task<Boolean> {
                 Plugin appModule = plugins.get(desc.getName());
                 if (appModule != null) {
                     final PluginInfo modConf = appModule.getConfiguration();
-                    final int comparison = new ModuleVersion(desc.getVersion()).compareTo(modConf);
+                    final int comparison = new ModuleVersion(desc.getVersion()).compareTo(modConf); //>0 si desc.getVersion() > modConf
                     if (comparison < 0) {
                         try {
                             tmpUpgrades.add(new Upgrade(appModule, desc));
