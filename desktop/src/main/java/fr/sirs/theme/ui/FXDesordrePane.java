@@ -76,23 +76,24 @@ public class FXDesordrePane extends FXDesordrePaneStub {
             }
         });
 
-        /*
-
-        /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\
-
-        SYM-1727 : on souhaite que le rôle externe puisse ajouter des observations
-        même dans les désordres dont il n'est pas l'auteur.
-
-        Pour cela, il faut surcharger la création du tableau définie
-        dans le constructeur de la classe-mère.
-        */
-
-        ui_observations.setContent(() -> {
-            observationsTable = new PojoTableExternalAddable(Observation.class, elementProperty());
-            observationsTable.editableProperty().bind(disableFieldsProperty().not());
-            updateObservationsTable(Injector.getSession(), elementProperty.get());
-            return observationsTable;
-        });
+//        /*
+// -> removed here to be integrated in fxml-controller.jet
+//
+//        /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\
+//
+//        SYM-1727 : on souhaite que le rôle externe puisse ajouter des observations
+//        même dans les désordres dont il n'est pas l'auteur.
+//
+//        Pour cela, il faut surcharger la création du tableau définie
+//        dans le constructeur de la classe-mère.
+//        */
+//
+//        ui_observations.setContent(() -> {
+//            observationsTable = new PojoTableExternalAddable(Observation.class, elementProperty());
+//            observationsTable.editableProperty().bind(disableFieldsProperty().not());
+//            updateObservationsTable(Injector.getSession(), elementProperty.get());
+//            return observationsTable;
+//        });
 
     }
 }

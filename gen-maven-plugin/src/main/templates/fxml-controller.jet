@@ -3,6 +3,7 @@
 
 package fr.sirs.theme.ui;
 
+import fr.sirs.theme.ui.pojotable.PojoTableExternalAddable;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
@@ -456,7 +457,12 @@ else if (helper.isParcelleVegetation()){
         <%= eRef.getName()%>Table = new ListeningPojoTable(<%=Helper.getClassName(eRef) %>.class, null, elementProperty());
 <%
             }
-            else {
+            else if(Helper.isAbstractObservation(eRef)) {
+%>
+        <%= eRef.getName()%>Table = new PojoTableExternalAddable(<%=Helper.getClassName(eRef) %>.class, elementProperty());
+<%
+            }
+        else {
 %>
         <%= eRef.getName()%>Table = new PojoTable(<%=Helper.getClassName(eRef) %>.class, null, elementProperty());
 <%
