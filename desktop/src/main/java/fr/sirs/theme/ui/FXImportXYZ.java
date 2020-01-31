@@ -114,9 +114,8 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
             uiTable.init(layer);
 
             //liste des propriétés
-            final ObservableList<PropertyType> properties = FXCollections
-                    .observableArrayList(col.getFeatureType().getProperties(true))
-                    .sorted((o1, o2) -> o1.getName().compareTo(o2.getName()));
+            final ObservableList<PropertyType> properties = getPropertiesFromFeatures(col);
+
             uiAttDesignation.setItems(properties);
             uiAttX.setItems(properties);
             uiAttY.setItems(properties);
