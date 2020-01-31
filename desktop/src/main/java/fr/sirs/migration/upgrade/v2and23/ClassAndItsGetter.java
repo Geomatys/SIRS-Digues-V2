@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.sirs.maj.upgrade1NtoNN;
+package fr.sirs.migration.upgrade.v2and23;
 
 import fr.sirs.util.property.Reference;
 import java.lang.reflect.Method;

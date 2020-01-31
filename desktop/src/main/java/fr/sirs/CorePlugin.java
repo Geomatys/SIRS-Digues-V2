@@ -27,6 +27,7 @@ import static fr.sirs.SIRS.SIRSDOCUMENT_REFERENCE;
 import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
@@ -79,6 +80,8 @@ import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.migration.HtmlRemoval;
+import fr.sirs.migration.upgrade.v2and23.UpgradeLink1NtoNN;
+import fr.sirs.migration.upgrade.v2and23.Upgrades1NtoNNSupported;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DocumentTheme;
 import fr.sirs.theme.EvenementsHydrauliquesTheme;
@@ -96,6 +99,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -911,14 +915,14 @@ public class CorePlugin extends Plugin {
     public static MutableStyle createDefaultStyle(Color col) {
         return createDefaultStyle(col, null);
     }
-    
+
     // règle de style pour les points de début et de fin
     // test et préparation pour SYM-1776
     private static MutableRule createExactPositinRule(final String name, final String geometryProperty, final Color col, final Expression wellKnownName){
-        return SF.rule(SF.pointSymbolizer(name, geometryProperty, DEFAULT_DESCRIPTION, Units.POINT, 
-                SF.graphic(Arrays.asList(SF.mark(wellKnownName, SF.fill(Color.WHITE), SF.stroke(col, 4))), 
+        return SF.rule(SF.pointSymbolizer(name, geometryProperty, DEFAULT_DESCRIPTION, Units.POINT,
+                SF.graphic(Arrays.asList(SF.mark(wellKnownName, SF.fill(Color.WHITE), SF.stroke(col, 4))),
                         LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(20), LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT)),
-                SF.textSymbolizer(SF.fill(col), DEFAULT_FONT, SF.halo(Color.WHITE, 2), FF.property("designation"), 
+                SF.textSymbolizer(SF.fill(col), DEFAULT_FONT, SF.halo(Color.WHITE, 2), FF.property("designation"),
                         StyleConstants.DEFAULT_POINTPLACEMENT, geometryProperty));
     }
 
@@ -933,11 +937,11 @@ public class CorePlugin extends Plugin {
                 STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
                 geometryName,DEFAULT_DESCRIPTION,Units.POINT,line2Stroke,LITERAL_ZERO_FLOAT);
-        
+
         // test et préparation pour SYM-1776
         final MutableRule start = createExactPositinRule("start", "positionDebut", col, StyleConstants.MARK_CIRCLE);
         final MutableRule end = createExactPositinRule("end", "positionFin", col, StyleConstants.MARK_CIRCLE);
-        
+
         //the visual element
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(16);
 
@@ -1088,11 +1092,19 @@ public class CorePlugin extends Plugin {
     }
 
     @Override
-    public Optional<Task> findUpgradeTask(int fromMajor, int fromMinor, CouchDbConnector dbConnector) {
+    public void findUpgradeTasks(final int fromMajor, final int fromMinor, final CouchDbConnector dbConnector, final LinkedHashSet<Task> upgradeTasks, final DatabaseRegistry... dbRegistry) {
+
         if (fromMajor < 2 || (fromMajor == 2 && fromMinor < 7)) {
-            return Optional.of(new HtmlRemoval(dbConnector, "commentaire"));
+            upgradeTasks.add(new HtmlRemoval(dbConnector, "commentaire"));
+            findUpgradeTasks(2, 7, dbConnector, upgradeTasks); //Reccursive call to findUpgradeTasks from the 2.7 version of the plugin reached with the previous Task.
+            return;
+        } else if (fromMajor < 2 || (fromMajor == 2 && fromMinor < 23)) {
+            upgradeTasks.add(new UpgradeLink1NtoNN(dbRegistry[0], dbConnector.getDatabaseName(), Upgrades1NtoNNSupported.DESORDRE));
+            findUpgradeTasks(2, 23, dbConnector, upgradeTasks); //Reccursive call to findUpgradeTasks from the 2.23 version of the plugin reached with the previous Task.
+            return;
+
         }
 
-        return super.findUpgradeTask(fromMajor, fromMinor, dbConnector);
+        super.findUpgradeTasks(fromMajor, fromMinor, dbConnector, upgradeTasks);
     }
 }

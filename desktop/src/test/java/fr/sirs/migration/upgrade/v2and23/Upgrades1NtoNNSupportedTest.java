@@ -1,4 +1,4 @@
-package fr.sirs.maj.upgrade1NtoNN;
+package fr.sirs.migration.upgrade.v2and23;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -17,7 +17,7 @@ import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.VoieDigue;
-import static fr.sirs.maj.upgrade1NtoNN.Upgrades1NtoNNSupported.DESORDRE;
+import static fr.sirs.migration.upgrade.v2and23.Upgrades1NtoNNSupported.DESORDRE;
 import org.junit.Assert;
 import org.junit.Test;
 

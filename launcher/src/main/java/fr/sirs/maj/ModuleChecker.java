@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -95,30 +96,31 @@ public class ModuleChecker extends Task<Boolean> {
             throw new IllegalStateException("Chosen database is not SIRS database !");
         }
         for (int i = 0; i < upgrades.size(); i++) {
-            updateTitle(String.format(titleFormat, i+1, upgrades.size()));
+            updateTitle(String.format(titleFormat, i + 1, upgrades.size()));
             final Upgrade upgrade = upgrades.get(i);
-            final Task t = upgrade.upgradeTask;
-            final ChangeListener<Number> progressListener = (obs, oldValue, newValue) -> {
-                updateProgress(t.getWorkDone(), t.getTotalWork());
-            };
-            final ChangeListener<State> cancelListener = (obs, oldState, newState) -> t.cancel();
+            for (Task t : upgrade.upgradeTasks ) {
+                final ChangeListener<Number> progressListener = (obs, oldValue, newValue) -> {
+                    updateProgress(t.getWorkDone(), t.getTotalWork());
+                };
+                final ChangeListener<State> cancelListener = (obs, oldState, newState) -> t.cancel();
 
-            SIRS.fxRun(false, () -> {
-                t.progressProperty().addListener(progressListener);
-                t.messageProperty().addListener(msgListener);
-                stateProperty().addListener(cancelListener);
-            });
+                SIRS.fxRun(false, () -> {
+                    t.progressProperty().addListener(progressListener);
+                    t.messageProperty().addListener(msgListener);
+                    stateProperty().addListener(cancelListener);
+                });
 
-            t.run();
+                t.run();
 
-            SIRS.fxRun(false, () -> {
-                t.progressProperty().removeListener(progressListener);
-                t.messageProperty().removeListener(msgListener);
-                stateProperty().removeListener(cancelListener);
-            });
+                SIRS.fxRun(false, () -> {
+                    t.progressProperty().removeListener(progressListener);
+                    t.messageProperty().removeListener(msgListener);
+                    stateProperty().removeListener(cancelListener);
+                });
 
-            // ensure no error occurred
-            t.get();
+                // ensure no error occurred
+                t.get();
+            }
 
             info.getModuleDescriptions().get(upgrade.toUpgrade.getConfiguration().getName()).setVersion(getVersion(upgrade.toUpgrade));
             connector.update(info);
@@ -249,7 +251,7 @@ public class ModuleChecker extends Task<Boolean> {
         /** Installed (i.e new version) plugin which will handle migration process. */
         public final Plugin toUpgrade;
         /** Upgrade process, provided by installed plugin. */
-        public final Task upgradeTask;
+        public final LinkedHashSet<Task> upgradeTasks;
 
         protected Upgrade(final Plugin toUpgrade, final ModuleDescription oldModule) {
             ArgumentChecks.ensureNonNull("Plugin providing update process", toUpgrade);
@@ -257,12 +259,16 @@ public class ModuleChecker extends Task<Boolean> {
 
             this.toUpgrade = toUpgrade;
             oldVersion = new ModuleVersion(oldModule.getVersion());
-            if (oldVersion.version.length < 2)
-                throw new IllegalArgumentException("Given module description does not contain any acceptable version.");
 
-            upgradeTask = toUpgrade.findUpgradeTask(oldVersion.version[0], oldVersion.version[1], connector).orElse(null);
-            if (upgradeTask == null)
+            if (oldVersion.version.length < 2) {
+                throw new IllegalArgumentException("Given module description does not contain any acceptable version.");
+            }
+
+            this.upgradeTasks = new LinkedHashSet<>();
+            toUpgrade.findUpgradeTasks(oldVersion.version[0], oldVersion.version[1], connector, upgradeTasks, dbRegistry);
+            if (upgradeTasks.isEmpty()) {
                 throw new IllegalArgumentException("Input plugin is not upgradable.");
+            }
         }
     }
 

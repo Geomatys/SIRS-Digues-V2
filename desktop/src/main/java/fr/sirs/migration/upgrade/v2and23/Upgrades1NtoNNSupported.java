@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.sirs.maj.upgrade1NtoNN;
+package fr.sirs.migration.upgrade.v2and23;
 
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.EchelleLimnimetrique;
@@ -46,10 +46,10 @@ public enum Upgrades1NtoNNSupported {
     ));
 
 
-    public final int upgradeMajorVersion;
-    public final int upgradeMinorVersion;
-    public final Class linkSide1;
-    public final List<ClassAndItsGetter> linkSidesN;
+    final int upgradeMajorVersion;
+    final int upgradeMinorVersion;
+    final Class linkSide1;
+    final List<ClassAndItsGetter> linkSidesN;
 
 
     private Upgrades1NtoNNSupported(final int major, final int minor, final Class clazz, final List<ClassAndItsGetter> listLinks1N){
