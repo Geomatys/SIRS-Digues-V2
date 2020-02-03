@@ -85,6 +85,7 @@ import fr.sirs.migration.upgrade.v2and23.Upgrades1NtoNNSupported;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DocumentTheme;
 import fr.sirs.theme.EvenementsHydrauliquesTheme;
+import fr.sirs.theme.GlobalPrestationTheme;
 import fr.sirs.theme.PositionDocumentTheme;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.TronconTheme;
@@ -679,6 +680,7 @@ public class CorePlugin extends Plugin {
         themes.add(new DocumentTheme<>("Marché", Marche.class));
         themes.add(new DocumentTheme<>("Rapport d'étude", RapportEtude.class));
         themes.add(new DocumentTheme<>("Document à grande échelle", DocumentGrandeEchelle.class));
+        themes.add(new GlobalPrestationTheme());
     }
 
     @Override
