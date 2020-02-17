@@ -42,7 +42,7 @@ import org.apache.sis.util.ArgumentChecks;
  */
 public class ElementCopier {
 
-    // Repository 
+    // Repository
     protected AbstractSIRSRepository currentPojoRepo;
     protected AbstractSIRSRepository targetRepo;
     final protected Session session;
@@ -71,7 +71,7 @@ public class ElementCopier {
         //Identification de la classe vers laquelle on permet la copie.
         if (avecForeignParent) {
 
-            //On a besoin du repositorie de la classe courante uniquement pour 
+            //On a besoin du repositorie de la classe courante uniquement pour
             // les classes AvecForeignParent.
             currentPojoRepo = pojoRepo;
 
@@ -122,7 +122,7 @@ public class ElementCopier {
         }
         //------------------------------------------------------------------------------------------
 
-        //L'identification de la targetClass est faite dans le constructeur et priorise 
+        //L'identification de la targetClass est faite dans le constructeur et priorise
         //le ForeignParent sur le container.
         if (avecForeignParent || isAbstractObservation) {
 
@@ -208,6 +208,7 @@ public class ElementCopier {
                     AvecForeignParent copiedPojo = (AvecForeignParent) pojo.copy();
                     copiedPojo.setForeignParentId(targetedForeignParent.getId());
                     copiedPojo.setDesignation(null);
+                    session.getElementCreator().tryAutoIncrementDesignation(copiedPojo);
 
                     //CHECK BORNES TEMPORELLES Parent ET BORNES TEMPORELLLES copiedPojo
                     copiedPojos.add(copiedPojo);
@@ -265,6 +266,7 @@ public class ElementCopier {
                 try {
                     AbstractObservation copiedPojo = ((AbstractObservation) pojo).copy();
                     copiedPojo.setDesignation(null);
+                    session.getElementCreator().tryAutoIncrementDesignation(copiedPojo);
                     copiedPojos.add(copiedPojo);
                     targetedContainer.addChild(copiedPojo);
 
@@ -280,7 +282,7 @@ public class ElementCopier {
             try {
                 // Le container porte les référence vers les "enfants" sauf pour les
                 // AbstractObservation qui ne sont pas des documents couchDB.
-                // C'est donc le container cible de la copie, qu'il faut mettre à 
+                // C'est donc le container cible de la copie, qu'il faut mettre à
                 // jour en base.
                 this.getTargetRepo().update(targetedContainer);
             } catch (NullPointerException e) {

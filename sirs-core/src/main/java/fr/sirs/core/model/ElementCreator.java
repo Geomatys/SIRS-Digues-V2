@@ -98,7 +98,34 @@ public class ElementCreator {
 
             if (tryAutoIncrement) {
                 // Determine an auto-incremented value for designation
-                tryAutoIncrement(element.getClass()).ifPresent(t -> {
+                tryAutoIncrementDesignation(element);
+//                tryAutoIncrement(element.getClass()).ifPresent(t -> {
+//                    TaskManager.INSTANCE.submit(t);
+//                    try {
+//                        final Integer value = t.get();
+//                        if (value != null) {
+//                            element.setDesignation(value.toString());
+//                            //SirsCore.fxRunAndWait(() -> element.setDesignation(value.toString()));
+//                        }
+//                    } catch (InterruptedException ex) {
+//                        SirsCore.LOGGER.log(Level.FINE, "Interruption while auto-incrementing value", ex);
+//                        Thread.currentThread().interrupt();
+//                    } catch (ExecutionException ex) {
+//                        SirsCore.LOGGER.log(Level.WARNING, "Cannot compute auto-increment value", ex);
+//                    }
+//                });
+            }
+
+            return element;
+
+        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            throw new SirsCoreRuntimeException(ex.getMessage());
+        }
+    }
+
+    public <T extends Element> void tryAutoIncrementDesignation(final T element){
+
+        tryAutoIncrement(element.getClass()).ifPresent(t -> {
                     TaskManager.INSTANCE.submit(t);
                     try {
                         final Integer value = t.get();
@@ -113,13 +140,6 @@ public class ElementCreator {
                         SirsCore.LOGGER.log(Level.WARNING, "Cannot compute auto-increment value", ex);
                     }
                 });
-            }
-
-            return element;
-
-        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            throw new SirsCoreRuntimeException(ex.getMessage());
-        }
     }
 
     /**
