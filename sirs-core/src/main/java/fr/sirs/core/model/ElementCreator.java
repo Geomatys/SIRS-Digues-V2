@@ -99,21 +99,6 @@ public class ElementCreator {
             if (tryAutoIncrement) {
                 // Determine an auto-incremented value for designation
                 tryAutoIncrementDesignation(element);
-//                tryAutoIncrement(element.getClass()).ifPresent(t -> {
-//                    TaskManager.INSTANCE.submit(t);
-//                    try {
-//                        final Integer value = t.get();
-//                        if (value != null) {
-//                            element.setDesignation(value.toString());
-//                            //SirsCore.fxRunAndWait(() -> element.setDesignation(value.toString()));
-//                        }
-//                    } catch (InterruptedException ex) {
-//                        SirsCore.LOGGER.log(Level.FINE, "Interruption while auto-incrementing value", ex);
-//                        Thread.currentThread().interrupt();
-//                    } catch (ExecutionException ex) {
-//                        SirsCore.LOGGER.log(Level.WARNING, "Cannot compute auto-increment value", ex);
-//                    }
-//                });
             }
 
             return element;
@@ -128,6 +113,7 @@ public class ElementCreator {
         tryAutoIncrement(element.getClass()).ifPresent(t -> {
                     TaskManager.INSTANCE.submit(t);
                     try {
+                        //TODO : change strategy to release the FX thread. (t.get() is blocking!).
                         final Integer value = t.get();
                         if (value != null) {
                             element.setDesignation(value.toString());
