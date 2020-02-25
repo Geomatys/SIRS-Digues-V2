@@ -292,7 +292,7 @@
       <eParameters name="sirsdocument" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
     </eOperations>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//Objet #//AvecObservations">
+  <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//Objet #//AvecObservations #//AvecPrestations">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieuDit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
@@ -556,7 +556,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ObjetReseau" abstract="true" eSuperTypes="#//ObjetGerable #//AvecObservations">
+  <eClassifiers xsi:type="ecore:EClass" name="ObjetReseau" abstract="true" eSuperTypes="#//ObjetGerable #//AvecObservations #//AvecPrestations">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
@@ -1601,7 +1601,7 @@
       <details key="documentation" value="Classe parente des observations sur les réseau et ouvrages. Mise en place pour permettre d'ajouter des spécification sur ce type d'observations."/>
     </eAnnotations>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="GlobalPrestation">
+  <eClassifiers xsi:type="ecore:EClass" name="GlobalPrestation" eSuperTypes="#//AvecPrestations">
     <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1613,4 +1613,5 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AvecObservations" abstract="true" interface="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AvecPrestations" abstract="true" interface="true"/>
 </ecore:EPackage>

@@ -21,7 +21,9 @@ package fr.sirs;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecForeignParent;
+import fr.sirs.core.model.AvecPrestations;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
@@ -31,8 +33,6 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,23 +43,14 @@ import java.util.stream.Collectors;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
-import org.apache.sis.measure.Range;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.referencing.LinearReferencing;
@@ -74,12 +65,7 @@ import org.geotoolkit.referencing.LinearReferencing;
 public abstract class TronconChoicePrintPane extends BorderPane {
 
     @FXML protected Tab uiTronconChoice;
-
-    @FXML protected CheckBox uiOptionPrestation;
-    @FXML protected ComboBox<Prestation> uiChoicePrestation;
-    @FXML protected ListView<Prestation> uiListPrestation;
-    @FXML protected Button uiAddPrestation;
-    @FXML protected Button uiRemovePrestation;
+    @FXML protected FXPrestationPredicater uiPrestationPredicater;
 
 //    private List<Prestation> addedPrestations;
 
@@ -97,32 +83,6 @@ public abstract class TronconChoicePrintPane extends BorderPane {
         tronconsTable.setTableItems(()-> (ObservableList) SIRS.observableList(session.getRepositoryForClass(TronconDigue.class).getAll()));
         tronconsTable.commentAndPhotoProperty().set(false);
         uiTronconChoice.setContent(tronconsTable);
-
-        ObservableList choices = SIRS.observableList(new ArrayList<>(session.getPreviews().getByClass(Prestation.class)));
-        SIRS.initCombo(uiChoicePrestation, choices, null);
-//        addedPrestations=new ArrayList<>();
-//        uiListPrestation=new ListView(FXCollections.observableList(new ArrayList<>()));
-        uiListPrestation.setItems(FXCollections.observableList(new ArrayList<>()));
-        uiListPrestation.setCellFactory(TextFieldListCell.forListView(new SirsStringConverter()));
-        uiListPrestation.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        uiAddPrestation.setOnAction(this::addPrestationToFilter);
-        uiRemovePrestation.setOnAction(this::removePrestationToFilter);
-    }
-
-    private void addPrestationToFilter(final ActionEvent evt) {
-//        addedPrestations.add(uiChoicePrestation.getSelectionModel().getSelectedItem());
-        uiListPrestation.getItems().add(uiChoicePrestation.getSelectionModel().getSelectedItem());
-//        uiListPrestation.refresh();
-        uiOptionPrestation.selectedProperty().setValue(Boolean.TRUE);
-    }
-    private void removePrestationToFilter(final ActionEvent evt) {
-        final ObservableList<Prestation> prestations = uiListPrestation.getItems();
-        prestations.removeAll(uiListPrestation.getSelectionModel().getSelectedItems());
-        if (prestations.isEmpty()) {
-            uiOptionPrestation.selectedProperty().setValue(Boolean.FALSE);
-        }
-//        uiListPrestation.refresh();
-
     }
 
     class SelectedPrestationPredicate implements Predicate<AvecPrestations> {
@@ -133,17 +93,20 @@ public abstract class TronconChoicePrintPane extends BorderPane {
          * Nullable if it isn't to apply
          */
         private final List<Prestation> selectedPrestations;
+        private final AbstractSIRSRepository<Prestation> repository;
 
         SelectedPrestationPredicate() {
 
-            if (uiOptionPrestation.isSelected()) {
-                selectedPrestations = uiListPrestation.getItems();
+            if (uiPrestationPredicater.uiOptionPrestation.isSelected()) {
+                selectedPrestations = uiPrestationPredicater.uiListPrestation.getItems();
                 toApply =  (!((selectedPrestations == null) || selectedPrestations.isEmpty()));
 
             } else {
                 selectedPrestations = null;
                 toApply = false;
             }
+
+            repository = Injector.getSession().getRepositoryForClass(Prestation.class);
 
         }
 
@@ -152,9 +115,18 @@ public abstract class TronconChoicePrintPane extends BorderPane {
             if (!toApply) {
                 return true;
             }
-            final List<Prestation> inputPrestations = input.getPrestations();
+            final List<String> prestationIds = input.getPrestationIds();
+
+            if ( (prestationIds == null) || (prestationIds.isEmpty()) ) {
+                SIRS.LOGGER.log(Level.WARNING, "Try to filter elements to print from null or empty list of prestations");
+                return false;
+            }
+
+            final List<Prestation> inputPrestations = repository.get((String[]) prestationIds.toArray());
+
             return (selectedPrestations.stream().anyMatch((p) -> (inputPrestations.contains(p))));
         }
+    }
 
 
     protected class TronconChoicePojoTable extends PojoTable {
