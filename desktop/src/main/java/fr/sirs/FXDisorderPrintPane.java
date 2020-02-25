@@ -185,7 +185,8 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                 .and(new LinearPredicate<>())
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
                 .and(new PRPredicate<>())
-                .and(new UrgencePredicate());
+                .and(new UrgencePredicate())
+                .and(uiPrestationPredicater.getPredicate());
 
         final CloseableIterator<Desordre> it = Injector.getSession()
                 .getRepositoryForClass(Desordre.class)

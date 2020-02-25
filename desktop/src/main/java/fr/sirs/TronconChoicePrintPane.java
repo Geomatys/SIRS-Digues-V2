@@ -85,50 +85,6 @@ public abstract class TronconChoicePrintPane extends BorderPane {
         uiTronconChoice.setContent(tronconsTable);
     }
 
-    class SelectedPrestationPredicate implements Predicate<AvecPrestations> {
-
-        private final boolean toApply;
-        /**
-         * Prestations to test.
-         * Nullable if it isn't to apply
-         */
-        private final List<Prestation> selectedPrestations;
-        private final AbstractSIRSRepository<Prestation> repository;
-
-        SelectedPrestationPredicate() {
-
-            if (uiPrestationPredicater.uiOptionPrestation.isSelected()) {
-                selectedPrestations = uiPrestationPredicater.uiListPrestation.getItems();
-                toApply =  (!((selectedPrestations == null) || selectedPrestations.isEmpty()));
-
-            } else {
-                selectedPrestations = null;
-                toApply = false;
-            }
-
-            repository = Injector.getSession().getRepositoryForClass(Prestation.class);
-
-        }
-
-        @Override
-        public boolean test(AvecPrestations input) {
-            if (!toApply) {
-                return true;
-            }
-            final List<String> prestationIds = input.getPrestationIds();
-
-            if ( (prestationIds == null) || (prestationIds.isEmpty()) ) {
-                SIRS.LOGGER.log(Level.WARNING, "Try to filter elements to print from null or empty list of prestations");
-                return false;
-            }
-
-            final List<Prestation> inputPrestations = repository.get((String[]) prestationIds.toArray());
-
-            return (selectedPrestations.stream().anyMatch((p) -> (inputPrestations.contains(p))));
-        }
-    }
-
-
     protected class TronconChoicePojoTable extends PojoTable {
 
         public TronconChoicePojoTable() {

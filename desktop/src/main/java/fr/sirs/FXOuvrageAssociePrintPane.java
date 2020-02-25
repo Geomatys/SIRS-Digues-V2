@@ -148,7 +148,8 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
                     .and(new TemporalPredicate())
                     .and(new LinearPredicate<>())
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
-                    .and(new PRPredicate<>());
+                    .and(new PRPredicate<>())
+                    .and(uiPrestationPredicater.getPredicate());
 
         final CloseableIterator<OuvrageHydrauliqueAssocie> it = Injector.getSession()
                 .getRepositoryForClass(OuvrageHydrauliqueAssocie.class)

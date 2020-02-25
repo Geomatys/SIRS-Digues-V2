@@ -144,11 +144,12 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
 
     private Stream<ReseauHydrauliqueFerme> getData() {
         final Predicate userOptions = new TypeConduitePredicate()
-                .and(ReseauHydrauliqueFerme::getValid) // On n'autorise à l'impression uniquement les désordre valides.
+                .and(ReseauHydrauliqueFerme::getValid) // On n'autorise à l'impression uniquement les éléments valides valides.
                 .and(new TemporalPredicate())
                 .and(new LinearPredicate<>())
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
-                .and(new PRPredicate<>());
+                .and(new PRPredicate<>())
+                .and(uiPrestationPredicater.getPredicate());
 
         final CloseableIterator<ReseauHydrauliqueFerme> it = Injector.getSession()
                 .getRepositoryForClass(ReseauHydrauliqueFerme.class)
@@ -157,8 +158,8 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
 
         final Spliterator<ReseauHydrauliqueFerme> split = Spliterators.spliteratorUnknownSize(it, 0);
         final Stream dataStream = StreamSupport.stream(split, false)
-                .filter(userOptions)
-                .peek(p -> ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test((Positionable) p));
+                .filter(userOptions);
+//                .peek(p -> ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test((Positionable) p));
 
         dataStream.onClose(() -> it.close());
         ClosingDaemon.watchResource(dataStream, it);

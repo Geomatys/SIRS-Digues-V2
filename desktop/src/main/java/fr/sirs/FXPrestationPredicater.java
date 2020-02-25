@@ -5,10 +5,17 @@
  */
 package fr.sirs;
 
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.AvecPrestations;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.logging.Level;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -33,36 +40,94 @@ public class FXPrestationPredicater extends VBox {
     @FXML protected Button uiAddPrestation;
     @FXML protected Button uiRemovePrestation;
 
+    private final AbstractSIRSRepository<Prestation> repository;
+    private final ObservableList<Prestation> selectedPrestations;
+
+    private final SelectedPrestationPredicate predicate;
+
     public FXPrestationPredicater() {
         SIRS.loadFXML(this, FXPrestationPredicater.class);
 
+        repository = Injector.getSession().getRepositoryForClass(Prestation.class);
+
+        if (repository == null) {
+            throw new IllegalStateException("Try to instantiate FXPrestationPredicater but failed to get the Prestation repository.");
+        }
+
 //        final ObservableList choices = SIRS.observableList(new ArrayList<>(Injector.getSession().getPreviews().getByClass(Prestation.class)));
-        final ObservableList choices = SIRS.observableList(new ArrayList<>(Injector.getSession().getRepositoryForClass(Prestation.class).getAll()));
+        final ObservableList choices = SIRS.observableList(new ArrayList<>(repository.getAll()));
         SIRS.initCombo(uiChoicePrestation, choices, null);
-        uiListPrestation.setItems(FXCollections.observableList(new ArrayList<>()));
+        selectedPrestations = FXCollections.observableList(new ArrayList<>());
+        uiListPrestation.setItems(selectedPrestations);
         uiListPrestation.setCellFactory(TextFieldListCell.forListView(new SirsStringConverter()));
         uiListPrestation.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         uiAddPrestation.setOnAction(this::addPrestationToFilter);
         uiRemovePrestation.setOnAction(this::removePrestationToFilter);
+        predicate = new SelectedPrestationPredicate();
+        uiOptionPrestation.selectedProperty().addListener(predicate.listener);
+        selectedPrestations.addListener(predicate.listener);
+
     }
 
 
     private void addPrestationToFilter(final ActionEvent evt) {
         final Prestation added = uiChoicePrestation.getSelectionModel().getSelectedItem();
-        ObservableList<Prestation> items = uiListPrestation.getItems();
 
-        if (!items.contains(added))
-            items.add(added);
+        if (!selectedPrestations.contains(added))
+            selectedPrestations.add(added);
         if (!uiOptionPrestation.selectedProperty().get())
             uiOptionPrestation.selectedProperty().setValue(Boolean.TRUE);
 
     }
     private void removePrestationToFilter(final ActionEvent evt) {
-        final ObservableList<Prestation> prestations = uiListPrestation.getItems();
-        prestations.removeAll(uiListPrestation.getSelectionModel().getSelectedItems());
-        if (prestations.isEmpty()) {
+        selectedPrestations.removeAll(uiListPrestation.getSelectionModel().getSelectedItems());
+        if (selectedPrestations.isEmpty()) {
             uiOptionPrestation.selectedProperty().setValue(Boolean.FALSE);
         }
+    }
+
+    public Predicate<AvecPrestations> getPredicate() {
+        return predicate;
+    }
+
+
+    private class SelectedPrestationPredicate implements Predicate<AvecPrestations> {
+
+        private boolean toApply;
+
+        final InvalidationListener listener = c -> predicate.determineToApply();
+
+        /**
+         * Prestations to test.
+         * Nullable if it isn't to apply
+         */
+//        private final List<Prestation> selectedPrestations;
+
+        private SelectedPrestationPredicate() {
+            determineToApply();
+        }
+
+        private void determineToApply() {
+            this.toApply = (uiOptionPrestation.isSelected()) && (!selectedPrestations.isEmpty());
+        }
+
+        @Override
+        public boolean test(AvecPrestations input) {
+            if (!toApply) {
+                return true;
+            }
+            final List<String> prestationIds = input.getPrestationIds();
+
+            if ( (prestationIds == null) || (prestationIds.isEmpty()) ) {
+                SIRS.LOGGER.log(Level.INFO, "Try to filter elements to print from null or empty list of prestations");
+                return false;
+            }
+
+            final List<Prestation> inputPrestations = repository.get(prestationIds.toArray(new String[prestationIds.size()]));
+
+            return (selectedPrestations.stream().anyMatch((p) -> (inputPrestations.contains(p))));
+        }
+
     }
 
 }
