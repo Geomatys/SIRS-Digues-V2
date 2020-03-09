@@ -46,6 +46,9 @@ public class PhotoPurge extends StackPane {
     private Button uiCancel;
 
     @FXML
+    private Button uiCompact;
+
+    @FXML
     private VBox uiProgressPane;
 
     @FXML
@@ -80,6 +83,7 @@ public class PhotoPurge extends StackPane {
         uiDate.disableProperty().bind(uiDateTrigger.selectedProperty().not());
 
         uiDateBox.managedProperty().bind(uiDateBox.visibleProperty());
+        uiCompact.setOnAction(evt -> Platform.runLater(() -> askForCompaction(false)));
     }
 
     @FXML
@@ -127,7 +131,7 @@ public class PhotoPurge extends StackPane {
 
         uiCancel.setOnAction(evt -> delete.cancel(true));
 
-        delete.setOnSucceeded(evt -> Platform.runLater(this::askForCompaction));
+        delete.setOnSucceeded(evt -> Platform.runLater(() -> askForCompaction(true)));
 
         TaskManager.INSTANCE.submit(delete);
     }
@@ -136,13 +140,24 @@ public class PhotoPurge extends StackPane {
      * Displays an alert to the user to query for a database compaction (see {@link CouchDbConnector#compact()
      * }.). If user confirms, we launch a compaction asynchronously.
      */
-    private void askForCompaction() {
-        final Alert ask = new Alert(Alert.AlertType.CONFIRMATION,
+    private void askForCompaction(final boolean afterDeletion) {
+        final String message;
+        if (afterDeletion) {
+            message =
                 "Les photographies ont été supprimées de la base de données. "
                 + "Voulez-vous compacter cette dernière ?"
                 + System.lineSeparator()
                 + "Note : Cette opération supprimera d'éventuels relicats de documents "
-                + "supprimés de la base de données, afin d'en optimiser le stockage.",
+                + "supprimés de la base de données, afin d'en optimiser le stockage.";
+        } else {
+            message = "Êtes vous sûr de vouloire compacter la base de données?"
+                + System.lineSeparator()
+                + "Note : Cette opération supprimera d'éventuels relicats de documents "
+                + "supprimés de la base de données, afin d'en optimiser le stockage.";
+        }
+
+        final Alert ask = new Alert(Alert.AlertType.CONFIRMATION,
+                message,
                 ButtonType.YES, ButtonType.NO);
         ask.setResizable(true);
         final ButtonType choice = ask.showAndWait().orElse(ButtonType.NO);

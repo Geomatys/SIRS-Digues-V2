@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<fx:root stylesheets="@../../MobilePluginStyle.css" type="StackPane" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root stylesheets="@../../MobilePluginStyle.css" type="StackPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <TitledPane styleClass="header" text="Maintenance photographies">
          <content>
@@ -41,6 +41,13 @@
                      <children>
                         <Label text="Taille estimée :" />
                         <Label fx:id="uiSize" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" text="N/A" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label text="Compaction manuelle : " />
+                        <Separator visible="false" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="uiCompact" mnemonicParsing="false" text="Compacter" />
                      </children>
                   </HBox>
                   <Label maxHeight="1.7976931348623157E308" maxWidth="600.0" styleClass="warn-label" text="Attention, en cliquant sur 'Purger', vous supprimerez toutes les photographies encore présentes dans la base de données" textAlignment="CENTER" wrapText="true" />
