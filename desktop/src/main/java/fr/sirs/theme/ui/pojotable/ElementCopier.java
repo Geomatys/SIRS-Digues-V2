@@ -161,7 +161,7 @@ public class ElementCopier {
      * @param pojosToCopy : éléments à copier.
      * @return
      */
-    public List<? extends Element> copyPojosTo(Element targetedElement, Element... pojosToCopy) {
+    public List<? extends Element> copyPojosTo(final Element targetedElement, final Element... pojosToCopy) {
 
         if (this.avecForeignParent) {
             return copyPojosToForeignParent(targetedElement, pojosToCopy);
@@ -191,7 +191,7 @@ public class ElementCopier {
      * @param pojosToCopy éléments à copier.
      * @return
      */
-    public List<AvecForeignParent> copyPojosToForeignParent(Element targetedForeignParent, Element... pojosToCopy) {
+    public List<AvecForeignParent> copyPojosToForeignParent(final Element targetedForeignParent, final Element... pojosToCopy) {
 
         // Si l'utilisateur est un externe, on court-circuite
         // la copie. -> s'assurer que la copie n'est pas réalisable pour les

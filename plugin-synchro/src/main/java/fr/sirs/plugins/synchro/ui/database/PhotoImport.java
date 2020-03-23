@@ -2,13 +2,14 @@ package fr.sirs.plugins.synchro.ui.database;
 
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.SIRSFileReference;
+import fr.sirs.plugins.synchro.common.PhotoAndTroncon;
 import fr.sirs.plugins.synchro.concurrent.AsyncPool;
 import fr.sirs.plugins.synchro.ui.PhotoDestination;
 import fr.sirs.plugins.synchro.ui.PrefixComposer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.function.Function;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
@@ -21,16 +22,17 @@ import javafx.scene.layout.VBox;
  */
 public class PhotoImport extends VBox {
 
+
     public PhotoImport(final Session session, final AsyncPool executor) {
         super(10);
         setFillWidth(true);
         setAlignment(Pos.CENTER);
 
-        final PhotoDestination photoDestination = new PhotoDestination();
+        final PhotoDestination photoDestination = new PhotoDestination(session);
         final PrefixComposer prefixPane = new PrefixComposer();
 
         final ObjectBinding<Function<SIRSFileReference, String>> prefixBuilder = prefixPane.getPrefixBuilder();
-        final ObjectBinding<Function<AbstractPhoto, Path>> destBuilder = Bindings.createObjectBinding(() -> {
+        final ObjectBinding<Function<PhotoAndTroncon, Path>> destBuilder = Bindings.createObjectBinding(() -> {
             final Path p = photoDestination.getDestination().get();
             if (p == null)
                 return null;
@@ -44,8 +46,9 @@ public class PhotoImport extends VBox {
                     return Paths.get(chemin).getFileName().toString();};
             }
             final Function<SIRSFileReference, String> finalPrefixer = prefixer;
+            final Function<Optional<String>, String> intermediateDirectory = idTroncon -> photoDestination.getDirectoryNameFromTronconId(idTroncon);
 
-            return file -> SIRS.concatenatePaths(p, finalPrefixer.apply(file));
+            return file -> SIRS.concatenatePaths(p, intermediateDirectory.apply(file.getTronconId()), finalPrefixer.apply(file.getPhoto()));
 
         }, photoDestination.getDestination(), prefixBuilder);
 

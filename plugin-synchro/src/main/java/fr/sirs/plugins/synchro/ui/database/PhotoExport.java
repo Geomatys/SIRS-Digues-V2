@@ -224,7 +224,8 @@ public class PhotoExport extends StackPane implements TaskProvider {
                 .setTronconIds(tdIds)
                 .setDocDateFilter(dateFilter)
                 .setPreProcessor(preProcessor)
-                .get();
+                .get()
+                .flatMap(photoTronconWrapper -> photoTronconWrapper.getPhotosStream());
 
         return photos
                 .filter(DocumentUtilities::isFileAvailable);

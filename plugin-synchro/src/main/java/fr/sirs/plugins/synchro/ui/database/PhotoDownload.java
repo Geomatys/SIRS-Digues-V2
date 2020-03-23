@@ -5,7 +5,9 @@ import fr.sirs.Session;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.plugins.synchro.attachment.AttachmentUtilities;
 import fr.sirs.plugins.synchro.common.DocumentUtilities;
+import fr.sirs.plugins.synchro.common.PhotoAndTroncon;
 import fr.sirs.plugins.synchro.common.PhotoFinder;
+import fr.sirs.plugins.synchro.common.PhotosTronconWrapper;
 import fr.sirs.plugins.synchro.concurrent.AsyncPool;
 import fr.sirs.ui.Growl;
 import java.io.IOException;
@@ -74,11 +76,11 @@ public class PhotoDownload extends StackPane {
 
     private final Session session;
 
-    private final ObservableValue<Function<AbstractPhoto, Path>> destinationProvider;
+    private final ObservableValue<Function<PhotoAndTroncon, Path>> destinationProvider;
 
     private final AsyncPool pool;
 
-    public PhotoDownload(final AsyncPool pool, final Session session, final ObservableValue<Function<AbstractPhoto, Path>> destinationProvider) {
+    public PhotoDownload(final AsyncPool pool, final Session session, final ObservableValue<Function<PhotoAndTroncon, Path>> destinationProvider) {
         ArgumentChecks.ensureNonNull("Asynchronous executor", pool);
         ArgumentChecks.ensureNonNull("Session", session);
         ArgumentChecks.ensureNonNull("Path provider", destinationProvider);
@@ -93,7 +95,7 @@ public class PhotoDownload extends StackPane {
 
     @FXML
     void estimate(ActionEvent event) {
-        final Stream<AbstractPhoto> photos = getPhotographs();
+        final Stream<AbstractPhoto> photos = getPhotographs().map(photoAndTroncon -> photoAndTroncon.getPhoto());
 
         final CouchDbConnector connector = session.getConnector();
 
@@ -120,7 +122,7 @@ public class PhotoDownload extends StackPane {
     @FXML
     void importPhotos(ActionEvent event) {
         final CouchDbConnector connector = session.getConnector();
-        final Function<AbstractPhoto, Path> destinationFinder = destinationProvider.getValue();
+        final Function<PhotoAndTroncon, Path> destinationFinder = destinationProvider.getValue();
         if (destinationFinder == null) {
             final Alert alert = new Alert(Alert.AlertType.ERROR, "Aucune destination spécifiée pour télécharger les données", ButtonType.OK);
             alert.setResizable(true);
@@ -130,10 +132,10 @@ public class PhotoDownload extends StackPane {
 
         // Note : incremented in handleResult method.
         final LongProperty count = new SimpleLongProperty(0);
-        final Function<AbstractPhoto, LongProperty> downloader = photo -> {
+        final Function<PhotoAndTroncon, LongProperty> downloader = photo -> {
             final Path output = destinationFinder.apply(photo);
             try {
-                download(connector, photo, output);
+                download(connector, photo.getPhoto(), output);
                 return count;
             } catch (IOException ex) {
                 throw new UncheckedIOException(ex);
@@ -153,20 +155,22 @@ public class PhotoDownload extends StackPane {
         TaskManager.INSTANCE.submit(download);
     }
 
-    private Stream<AbstractPhoto> getPhotographs() {
-        Stream<AbstractPhoto> distantPhotos = new PhotoFinder(session).get();
+    private Stream<PhotoAndTroncon> getPhotographs() {
+        Stream<PhotosTronconWrapper> distantPhotos = new PhotoFinder(session).get();
 
         if (uiDateTrigger.isSelected()) {
             final LocalDate since = uiDate.getValue().minusDays(1);
-            distantPhotos = distantPhotos.filter(photo -> photo.getDate() != null && since.isBefore(photo.getDate()));
+//            distantPhotos = distantPhotos.filter(photo -> );
+            distantPhotos.map(wrapper -> wrapper.applyFilter(photo -> photo.getDate() != null && since.isBefore(photo.getDate())));
         }
 
         final CouchDbConnector connector = session.getConnector();
         return distantPhotos
+                .flatMap(wrapper -> wrapper.getPhotosAndTronçons())
                 // Skip photographs already downloaded
-                .filter(photo -> !DocumentUtilities.isFileAvailable(photo))
+                .filter(photo -> !DocumentUtilities.isFileAvailable(photo.getPhoto()))
                 // Find photographs uploaded in database.
-                .filter(photo -> AttachmentUtilities.isAvailable(connector, photo));
+                .filter(photo -> AttachmentUtilities.isAvailable(connector, photo.getPhoto()));
     }
 
     private void handleResult(final LongProperty count, final Throwable error) {

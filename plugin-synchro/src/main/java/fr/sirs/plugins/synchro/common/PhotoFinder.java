@@ -6,15 +6,27 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AvecBornesTemporelles;
+import fr.sirs.core.model.AvecObservations;
 import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.EchelleLimnimetrique;
+import fr.sirs.core.model.OuvertureBatardable;
+import fr.sirs.core.model.OuvrageFranchissement;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
+import fr.sirs.core.model.OuvrageParticulier;
+import fr.sirs.core.model.OuvrageTelecomEnergie;
+import fr.sirs.core.model.OuvrageVoirie;
+import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
+import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.StationPompage;
+import fr.sirs.core.model.VoieAcces;
+import fr.sirs.core.model.VoieDigue;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -33,7 +45,7 @@ import org.apache.sis.util.ArgumentChecks;
  *
  * @author Alexis Manin (Geomatys)
  */
-public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
+public class PhotoFinder implements Supplier<Stream<PhotosTronconWrapper>> {
 
     final Session session;
     Collection<String> tronconIds;
@@ -73,12 +85,16 @@ public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
         return this;
     }
 
+    /**
+     * Resulting Stream's PhotosTronconWrapper#get
+     * @return
+     */
     @Override
-    public Stream<AbstractPhoto> get() {
+    public Stream<PhotosTronconWrapper> get() {
         return filter(getPhotoContainers());
     }
 
-    private Stream<AvecPhotos> getPhotoContainers() {
+    private Stream<PhotoContainerTronconWrapper> getPhotoContainers() {
         return Stream.of(session)
                 .flatMap((Session source) -> {
                     return Stream.concat(stream(source, OuvrageHydrauliqueAssocie.class)
@@ -91,7 +107,29 @@ public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
                                     .map(StationPompageWrapper::new),
                             Stream.concat(stream(source, Desordre.class)
                                     .map(DesordreWrapper::new),
-                            stream(source, AvecPhotos.class))))));
+                            Stream.concat(stream(source, EchelleLimnimetrique.class)
+                                    .map(EchelleLimnimetriqueWrapper::new),
+                            Stream.concat(stream(source, OuvertureBatardable.class)
+                                    .map(OuvertureBatardableWrapper::new),
+                            Stream.concat(stream(source, OuvrageFranchissement.class)
+                                    .map(OuvrageFranchissementWrapper::new),
+                            Stream.concat(stream(source, OuvrageParticulier.class)
+                                    .map(OuvrageParticulierWrapper::new),
+                            Stream.concat(stream(source,  OuvrageTelecomEnergie.class)
+                                    .map(OuvrageTelecomEnergieWrapper::new),
+                            Stream.concat(stream(source, OuvrageVoirie.class)
+                                    .map(OuvrageVoirieWrapper::new),
+                            Stream.concat(stream(source, Prestation.class)
+                                    .map(PrestationWrapper::new),
+                            Stream.concat(stream(source, ReseauTelecomEnergie.class)
+                                    .map(ReseauTelecomEnergieWrapper::new),
+                            Stream.concat(stream(source, VoieAcces.class)
+                                    .map(VoieAccesWrapper::new),
+                            Stream.concat(stream(source, VoieDigue.class)
+                                    .map(VoieDigueWrapper::new),
+                            stream(source, AvecPhotos.class)
+                            )))))))))))))))
+                            .map(PhotoContainerTronconWrapper::new);
                 });
     }
 
@@ -108,22 +146,27 @@ public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
 
     private Stream getForTroncons(final AbstractPositionableRepository repo) {
         return tronconIds.stream()
-                .flatMap(id -> repo.getByLinearId(id).stream());
+                .flatMap(id -> repo.getByLinearId(id).stream().flatMap(t -> new TronconWrapper(t, Optional.of(id))));
     }
 
-    private Stream<AbstractPhoto> filter(Stream<AvecPhotos> containers) {
+    private Stream<PhotosTronconWrapper> filter(Stream<PhotoContainerTronconWrapper> containers) {
+        containers = containers
+                    .filter(container -> container.getPhotoContainer()!= null);
+
         if (docDateFilter != null) {
             containers = containers
-                    .filter(AvecBornesTemporelles.class::isInstance)
-                    .filter(obj -> DocumentUtilities.intersectsDate((AvecBornesTemporelles) obj, docDateFilter));
+                    .filter(container -> container.getPhotoContainer() instanceof AvecBornesTemporelles)
+                    .filter(obj -> DocumentUtilities.intersectsDate((AvecBornesTemporelles) obj.getPhotoContainer(), docDateFilter));
         }
 
-        Function<AvecPhotos, Stream<AbstractPhoto>> photoExtractor = ap -> ap.getPhotos().stream();
+
+        Function<PhotoContainerTronconWrapper, PhotosTronconWrapper> photoExtractor = PhotosTronconWrapper::new;
+//        Function<AvecPhotos, Stream<AbstractPhoto>> photoExtractor = ap -> ap.getPhotos().stream();
         if (preProcessor != null) {
-            photoExtractor = photoExtractor.andThen(preProcessor);
+            photoExtractor = photoExtractor.andThen(pt -> pt.applyUnaryOperator(preProcessor));
         }
 
-        return containers.flatMap(photoExtractor);
+        return containers.map(photoExtractor);
     }
 
     /**
@@ -146,37 +189,105 @@ public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
     private static class DesordreWrapper extends ObservationContainerWrapper<Desordre> {
 
         public DesordreWrapper(Desordre source) {
-            super(source, source.observations);
+            super(source);
+        }
+    }
+
+    private static class EchelleLimnimetriqueWrapper extends ObservationContainerWrapper<EchelleLimnimetrique> {
+
+        public EchelleLimnimetriqueWrapper(EchelleLimnimetrique source) {
+            super(source);
+        }
+    }
+
+    private static class OuvertureBatardableWrapper extends ObservationContainerWrapper<OuvertureBatardable> {
+
+        public OuvertureBatardableWrapper(final OuvertureBatardable source) {
+            super(source);
+        }
+    }
+
+    private static class OuvrageFranchissementWrapper extends ObservationContainerWrapper<OuvrageFranchissement> {
+
+        public OuvrageFranchissementWrapper(final OuvrageFranchissement source) {
+            super(source);
         }
     }
 
     private static class OuvrageHydrauliqueAssocieWrapper extends ObservationContainerWrapper<OuvrageHydrauliqueAssocie> {
 
         public OuvrageHydrauliqueAssocieWrapper(OuvrageHydrauliqueAssocie source) {
-            super(source, source.observations);
+            super(source);
         }
     }
 
+    private static class OuvrageParticulierWrapper extends ObservationContainerWrapper<OuvrageParticulier> {
+
+        public OuvrageParticulierWrapper(final OuvrageParticulier source) {
+            super(source);
+        }
+    }
+
+    private static class OuvrageTelecomEnergieWrapper extends ObservationContainerWrapper<OuvrageTelecomEnergie> {
+
+        public OuvrageTelecomEnergieWrapper(final OuvrageTelecomEnergie source) {
+            super(source);
+        }
+    }
     private static class ReseauHydrauliqueFermeWrapper extends ObservationContainerWrapper<ReseauHydrauliqueFerme> {
 
         public ReseauHydrauliqueFermeWrapper(ReseauHydrauliqueFerme source) {
-            super(source, source.observations);
+            super(source);
         }
     }
 
     private static class ReseauHydrauliqueCielOuvertWrapper extends ObservationContainerWrapper<ReseauHydrauliqueCielOuvert> {
 
         public ReseauHydrauliqueCielOuvertWrapper(ReseauHydrauliqueCielOuvert source) {
-            super(source, source.observations);
+            super(source);
         }
     }
 
     private static class StationPompageWrapper extends ObservationContainerWrapper<StationPompage> {
 
         public StationPompageWrapper(StationPompage source) {
-            super(source, source.observations);
+            super(source);
         }
     }
+    private static class OuvrageVoirieWrapper extends ObservationContainerWrapper<OuvrageVoirie> {
+
+        public OuvrageVoirieWrapper(final OuvrageVoirie source) {
+            super(source);
+        }
+    }
+    private static class PrestationWrapper extends ObservationContainerWrapper<Prestation> {
+
+        public PrestationWrapper(final Prestation source) {
+            super(source);
+        }
+    }
+
+    private static class ReseauTelecomEnergieWrapper extends ObservationContainerWrapper<ReseauTelecomEnergie> {
+
+        public ReseauTelecomEnergieWrapper(final ReseauTelecomEnergie source) {
+            super(source);
+        }
+    }
+
+    private static class VoieAccesWrapper extends ObservationContainerWrapper<VoieAcces> {
+
+        public VoieAccesWrapper(final VoieAcces source) {
+            super(source);
+        }
+    }
+
+    private static class VoieDigueWrapper extends ObservationContainerWrapper<VoieDigue> {
+
+        public VoieDigueWrapper(final VoieDigue source) {
+            super(source);
+        }
+    }
+
 
     /**
      * Encapsule des conteneurs d'observations en implémentations de "AvecPhotos" renvoyant les photos de leurs
@@ -184,15 +295,18 @@ public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
      *
      * @param <OC> type de conteneur d'observations (désordres etc.)
      */
-    private static abstract class ObservationContainerWrapper<OC extends AvecBornesTemporelles>
-            implements AvecPhotos<AbstractPhoto>, AvecBornesTemporelles {
+    private static abstract class ObservationContainerWrapper<OC extends AvecBornesTemporelles & AvecObservations>
+            extends TronconWrapper implements AvecPhotos<AbstractPhoto>, AvecBornesTemporelles  {
 
+//        private final Optional<String> tronconId;
         private final OC source;
         private final List<? extends AbstractObservation> observations;
 
-        public ObservationContainerWrapper(final OC source, List<? extends AbstractObservation> observations) {
+        public ObservationContainerWrapper(final OC source) {
+            super(source);
             this.source = source;
-            this.observations = observations;
+            this.observations = source.getObservations();
+//            this.tronconId = PhotoContainerTronconWrapper.tryFindTronçon(source);
         }
 
         /**

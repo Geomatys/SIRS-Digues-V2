@@ -1,12 +1,18 @@
 package fr.sirs.plugins.synchro.ui;
 
 import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.DocumentRoots;
 import fr.sirs.util.property.SirsPreferences;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileStore;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Optional;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -50,8 +56,14 @@ public class PhotoDestination extends StackPane {
 
     private final ObjectBinding<Path> destination;
 
-    public PhotoDestination() {
+    final TronconDigueRepository tronconRepository;
+    private final HashMap<String, String> idToDirectory = new HashMap<>();
+
+    public PhotoDestination(final Session session) {
         SIRS.loadFXML(this);
+
+
+        tronconRepository = (TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class);
 
         final BooleanBinding noRootConfigured = rootDirProperty.isNull();
         uiChooseSubDir.disableProperty().bind(noRootConfigured);
@@ -146,4 +158,26 @@ public class PhotoDestination extends StackPane {
             }
         }
     }
+
+
+    public String getDirectoryNameFromTronconId(final Optional<String> tronconId) {
+
+        if (tronconId.isPresent()) {
+            final String id = tronconId.get();
+
+            return idToDirectory.computeIfAbsent(id, key -> forTronconId(id) );
+
+        } else {
+            return "";
+        }
+    }
+
+    private String forTronconId(final String id) {
+        return SirsStringConverter.getDesignation(tronconRepository.get(id)); //Utiliser des Previews?
+
+    }
+
+
+
+
 }

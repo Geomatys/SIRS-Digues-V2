@@ -674,7 +674,7 @@ public class PojoTable extends BorderPane implements Printable {
                 try {
 
                     //Choix du destinataire de la copie.
-                    Element target = elementCopier.askForCopyTarget();
+                    final Element target = elementCopier.askForCopyTarget();
 
                     //Copie des éléments sélectionnés vers la cible identifiée.
                     this.elementCopier.copyPojosTo(target, elements);
@@ -869,8 +869,8 @@ public class PojoTable extends BorderPane implements Printable {
         if (BUG_JAVAFX_COLUMN_MOVE) {
             //Place toutes les colonnes non visible en fin de tableau (excepté le bouton de suppression)
             // afin de permettre un déplacement (manuel) de colonne intelligible.
-            // En effet, la version de javaFX utilisée (lors de la version 2.16 de 
-            // l'appli) gère mal le déplacement de colonnes lorsque des colonnes ne 
+            // En effet, la version de javaFX utilisée (lors de la version 2.16 de
+            // l'appli) gère mal le déplacement de colonnes lorsque des colonnes ne
             // sont pas visibles.
             //    -> voir aussi col.visibleProperty().addListener ~l.880
             TableColumn<Element, ?> deplacedCol = null;
@@ -883,11 +883,11 @@ public class PojoTable extends BorderPane implements Printable {
             }
         }
 
-        
+
         updateView();
-        
+
         //Application des préférence utilisateur (position, visibilité et largeur
-        // de colonne. Le booléan applyPreferences permet de ne pas appliqué ces 
+        // de colonne. Le booléan applyPreferences permet de ne pas appliqué ces
         // préférence depuis ce contructeur.
         if (applyPreferences){
             applyPreferences();
@@ -897,7 +897,7 @@ public class PojoTable extends BorderPane implements Printable {
         //===============================================================
         // Suivi des préférences utilisateur pour les colonnes affichées.
         //===============================================================
-        
+
 
     }// FIN Constructeur.
     //==========================================================================
@@ -953,13 +953,13 @@ public class PojoTable extends BorderPane implements Printable {
 
         }
     };
-    
+
     /**
      * Set listeners for visibility, width and position changes of the uiTable's
      * columns.
-     * 
+     *
      * TODO : should call 3 methods : one by listener.
-     * 
+     *
      */
     final protected void listenPreferences(){
         //Ajout Listener pour identifier et sauvegarder les modifications de colonnes par l'utilisateur :
@@ -985,7 +985,7 @@ public class PojoTable extends BorderPane implements Printable {
                 // - Les colonnes visibles sont déplacées à l'index 3 de la table
                 //  ( l'index 3 permet de placer les colonnes rendues visibles en
                 //  début de tableau)
-                // - ce traitement n'es pas appliqué au colonnes sans id 
+                // - ce traitement n'es pas appliqué au colonnes sans id
                 // (suppression, accès aux fixhes et à la carto).
                 if (col.getId() != null) {
                     if ((newVisibility.equals(Boolean.FALSE))) {
@@ -1034,7 +1034,7 @@ public class PojoTable extends BorderPane implements Printable {
                     List<TableColumn<Element, ?>> listEnd = (List<TableColumn<Element, ?>>) change.getList();
 
                     // Lors d'un changement parmi les colonnes de uiTable,
-                    // on compare les Id des colonnes avant et après le changement 
+                    // on compare les Id des colonnes avant et après le changement
                     // pour identifier les changements de position.
                     for (int i = 0; i < nbreCol; i++) {
                         TableColumn<Element, ?> colInit = listInit.get(i);
@@ -1043,8 +1043,8 @@ public class PojoTable extends BorderPane implements Printable {
                         if (listEnd.get(i).getId() != colInit.getId()) {
 
                             if (BUG_JAVAFX_COLUMN_MOVE) {
-                                //Si la colonne est déplacée en fin de table, on la replace 
-                                //avant les colonnes non-visibles afin d'éviter 
+                                //Si la colonne est déplacée en fin de table, on la replace
+                                //avant les colonnes non-visibles afin d'éviter
                                 // le bug JavaFX
                                 try {
                                     int maxVisible = nbreCol - 1;
@@ -1071,7 +1071,7 @@ public class PojoTable extends BorderPane implements Printable {
             }
         });
     }
-    
+
     final protected void applyPreferences() {
         if (!columnsPreferences.getWithPreferencesColumns().isEmpty()) {
             columnsPreferences.applyPreferencesToTableColumns(uiTable.getColumns());

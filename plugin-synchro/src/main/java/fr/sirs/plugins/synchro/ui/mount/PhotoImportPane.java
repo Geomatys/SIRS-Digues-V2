@@ -161,7 +161,7 @@ public class PhotoImportPane extends StackPane {
 
         uiImportProgress.visibleProperty().bind(taskProperty.isNotNull());
 
-        destPane = new PhotoDestination();
+        destPane = new PhotoDestination(Injector.getSession());
         prefixPane = new PrefixComposer();
         uiParameterContainer.getChildren().addAll(destPane, prefixPane);
     }

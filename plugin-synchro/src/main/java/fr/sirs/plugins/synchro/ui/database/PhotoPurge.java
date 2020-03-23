@@ -179,7 +179,8 @@ public class PhotoPurge extends StackPane {
     }
 
     private Stream<AbstractPhoto> getPhotographs() {
-        Stream<AbstractPhoto> distantPhotos = new PhotoFinder(session).get();
+        Stream<AbstractPhoto> distantPhotos = new PhotoFinder(session).get()
+                .flatMap(photoTronconWrapper -> photoTronconWrapper.getPhotosStream());
 
         if (uiDateTrigger.isSelected()) {
             final LocalDate since = uiDate.getValue().minusDays(1);
