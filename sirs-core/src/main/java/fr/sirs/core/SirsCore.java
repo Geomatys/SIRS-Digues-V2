@@ -166,11 +166,11 @@ public class SirsCore {
     public static final Path LOCAL_QUERIES_PATH = CONFIGURATION_PATH.resolve("queries.properties");
 
     /**
-     * Les requêtes préprogrammées de référence sont désormatis enregistrées sur le serveur de France-Digues et sont 
+     * Les requêtes préprogrammées de référence sont désormatis enregistrées sur le serveur de France-Digues et sont
      * téléchargées à chaque nouvelle connexion lorsque le réseau est disponible.
-     * 
+     *
      * Mais afin que les requêtes préprogrammées soient utilisables même hors-ligne (du moins dans leur dernière version
-     * connue), ce n'est pas le fichier distant qui est directement utilisé pour la lecture et l'exécution des 
+     * connue), ce n'est pas le fichier distant qui est directement utilisé pour la lecture et l'exécution des
      * requêtes, mais une copie locale mise à jour à chaque nouvelle connexion avec le contenu du fichier distant.
      */
     public static final Path PREPROGRAMMED_QUERIES_PATH = CONFIGURATION_PATH.resolve("preprogrammedQueries.properties");
@@ -192,14 +192,14 @@ public class SirsCore {
     public static final String DATE_DEBUT_FIELD = "date_debut";
     public static final String DATE_FIN_FIELD = "date_fin";
     public static final String DATE_MAJ_FIELD = "dateMaj";
-    
+
     public static final String BORNE_DEBUT_AVAL = "borne_debut_aval";
     public static final String BORNE_FIN_AVAL = "borne_fin_aval";
-    
+
     public static final String BORNE_DEBUT_DISTANCE = "borne_debut_distance";  //Doit correspondre au nom de la Propriété de la classe Positionable
     public static final String BORNE_FIN_DISTANCE = "borne_fin_distance";  //Doit correspondre au nom de la Propriété de la classe Positionable
-    
-    
+
+
     public static final String BORNE_DEBUT_ID = "borneDebutId";  //Doit correspondre au nom de la Propriété de la classe Positionable
     public static final String BORNE_FIN_ID = "borneFinId";  //Doit correspondre au nom de la Propriété de la classe Positionable
 

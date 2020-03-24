@@ -173,11 +173,9 @@ public class PhotoDestination extends StackPane {
     }
 
     private String forTronconId(final String id) {
-        return SirsStringConverter.getDesignation(tronconRepository.get(id)); //Utiliser des Previews?
+        return SirsStringConverter.getDesignation(tronconRepository.get(id));//Utiliser des Previews?
+//                .replaceAll("\\s", "_"); //-> remplace les caractères 'blancs'
 
     }
-
-
-
 
 }

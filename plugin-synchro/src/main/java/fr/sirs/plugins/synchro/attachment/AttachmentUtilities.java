@@ -330,7 +330,7 @@ public class AttachmentUtilities {
      * image if no alpha canal is detected. Otherwise, png format is selected.
      * Also, given limit size won't be perfectly fit. We'll determine a subsample
      * parameter allowing to reduce image size under given limit size.
-     * 
+     *
      * @param source The source image to subsample.
      * @param outName Name of the output image, without extension.
      * @param limitSize The maximum width or height autorized.

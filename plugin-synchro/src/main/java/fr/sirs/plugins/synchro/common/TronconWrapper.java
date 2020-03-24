@@ -30,9 +30,19 @@ class TronconWrapper {
         this.tronconId = tronconWrapper.getTronconId();
     }
 
+    /**
+     * Try to find the id of the "troncon" encompassing the the inpud document.
+     * 
+     * This method currently only search if the document is an instance of
+     * {@link Objet} and have a {@link Objet#parent}. It would be improve in
+     * futur developments.
+     *
+     * @param document
+     * @return
+     */
     static Optional<String> tryFindTronçon(final Object document) {
         if (document instanceof Objet) {
-           return Optional.of( ((Objet) document).getForeignParentId() );
+           return Optional.ofNullable(((Objet) document).getForeignParentId() );
         } else {
            return Optional.empty();
         }

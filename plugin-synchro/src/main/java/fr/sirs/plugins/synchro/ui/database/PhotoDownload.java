@@ -12,6 +12,7 @@ import fr.sirs.plugins.synchro.concurrent.AsyncPool;
 import fr.sirs.ui.Growl;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Map;
@@ -135,6 +136,7 @@ public class PhotoDownload extends StackPane {
         final Function<PhotoAndTroncon, LongProperty> downloader = photo -> {
             final Path output = destinationFinder.apply(photo);
             try {
+                Files.createDirectories(output.getParent());
                 download(connector, photo.getPhoto(), output);
                 return count;
             } catch (IOException ex) {
