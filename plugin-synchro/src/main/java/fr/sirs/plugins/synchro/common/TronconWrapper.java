@@ -1,6 +1,7 @@
 package fr.sirs.plugins.synchro.common;
 
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.TronconDigue;
 import java.util.Optional;
 import org.apache.sis.util.ArgumentChecks;
 
@@ -32,7 +33,7 @@ class TronconWrapper {
 
     /**
      * Try to find the id of the "troncon" encompassing the the inpud document.
-     * 
+     *
      * This method currently only search if the document is an instance of
      * {@link Objet} and have a {@link Objet#parent}. It would be improve in
      * futur developments.
@@ -41,7 +42,10 @@ class TronconWrapper {
      * @return
      */
     static Optional<String> tryFindTronçon(final Object document) {
-        if (document instanceof Objet) {
+
+        if (document instanceof TronconDigue) {
+            return Optional.of(((TronconDigue) document).getId()); //Normalement inutile
+        } else if (document instanceof Objet) {
            return Optional.ofNullable(((Objet) document).getForeignParentId() );
         } else {
            return Optional.empty();

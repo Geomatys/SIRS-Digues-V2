@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -81,15 +81,15 @@ public class SynchronizationColumn extends TableColumn<String, Task> {
         dbRegistry = registry;
 
         setCellValueFactory((CellDataFeatures<String, Task> param) -> {
-            
+
             // récupération du nom local de la base
             final String dbName = param.getValue();
             if (dbName == null || dbName.isEmpty()) {
                 return null;
             } else {
-                
+
                 final String dbUrl = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + dbName;
-                
+
                 try {
                     if (dbRegistry.getSynchronizationTasks(dbUrl).count() > 0) {
                         return new SimpleObjectProperty<>(new StopSync(dbUrl));
@@ -121,7 +121,7 @@ public class SynchronizationColumn extends TableColumn<String, Task> {
 
             button.setOnAction(evt -> {
                 final Alert ask = new Alert(Alert.AlertType.CONFIRMATION,
-                        "Êtes-vous sûr de vouloir reprendre la synchronisation automatique?",
+                        "Êtes-vous sûr de vouloir reprendre/arrêter la synchronisation automatique?",
                         ButtonType.YES, ButtonType.NO);
                 ask.setResizable(true);
                 final ButtonType choice = ask.showAndWait().orElse(ButtonType.NO);
@@ -156,11 +156,11 @@ public class SynchronizationColumn extends TableColumn<String, Task> {
 
         private void updateState() {
             final Task t = getItem();
-            t.setOnFailed(evt -> Platform.runLater(() -> 
+            t.setOnFailed(evt -> Platform.runLater(() ->
                 GeotkFX.newExceptionDialog("Mise à jour de la synchronisation impossible.", t.getException()).show()
             ));
 
-            t.setOnSucceeded(evt -> Platform.runLater(() -> 
+            t.setOnSucceeded(evt -> Platform.runLater(() ->
                    updateItem((Task)t.getValue(), false)
             ));
 

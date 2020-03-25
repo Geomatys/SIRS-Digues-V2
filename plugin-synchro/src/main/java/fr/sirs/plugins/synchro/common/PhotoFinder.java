@@ -97,39 +97,39 @@ public class PhotoFinder implements Supplier<Stream<PhotosTronconWrapper>> {
     private Stream<PhotoContainerTronconWrapper> getPhotoContainers() {
         return Stream.of(session)
                 .flatMap((Session source) -> {
-                    return Stream.concat(stream(source, OuvrageHydrauliqueAssocie.class)
-                                    .map(OuvrageHydrauliqueAssocieWrapper::new),
+                    return
+                            Stream.concat(stream(source, OuvrageHydrauliqueAssocie.class)
+                                    .map(OuvrageHydrauliqueAssocieWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, ReseauHydrauliqueFerme.class)
-                                    .map(ReseauHydrauliqueFermeWrapper::new),
+                                    .map(ReseauHydrauliqueFermeWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, ReseauHydrauliqueCielOuvert.class)
-                                    .map(ReseauHydrauliqueCielOuvertWrapper::new),
+                                    .map(ReseauHydrauliqueCielOuvertWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, StationPompage.class)
-                                    .map(StationPompageWrapper::new),
+                                    .map(StationPompageWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, Desordre.class)
-                                    .map(DesordreWrapper::new),
+                                    .map(DesordreWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, EchelleLimnimetrique.class)
-                                    .map(EchelleLimnimetriqueWrapper::new),
+                                    .map(EchelleLimnimetriqueWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, OuvertureBatardable.class)
-                                    .map(OuvertureBatardableWrapper::new),
+                                    .map(OuvertureBatardableWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, OuvrageFranchissement.class)
-                                    .map(OuvrageFranchissementWrapper::new),
+                                    .map(OuvrageFranchissementWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, OuvrageParticulier.class)
-                                    .map(OuvrageParticulierWrapper::new),
+                                    .map(OuvrageParticulierWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source,  OuvrageTelecomEnergie.class)
-                                    .map(OuvrageTelecomEnergieWrapper::new),
+                                    .map(OuvrageTelecomEnergieWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, OuvrageVoirie.class)
-                                    .map(OuvrageVoirieWrapper::new),
+                                    .map(OuvrageVoirieWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, Prestation.class)
-                                    .map(PrestationWrapper::new),
+                                    .map(PrestationWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, ReseauTelecomEnergie.class)
-                                    .map(ReseauTelecomEnergieWrapper::new),
+                                    .map(ReseauTelecomEnergieWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, VoieAcces.class)
-                                    .map(VoieAccesWrapper::new),
+                                    .map(VoieAccesWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, VoieDigue.class)
-                                    .map(VoieDigueWrapper::new),
-                            stream(source, AvecPhotos.class)
-                            )))))))))))))))
-                            .map(PhotoContainerTronconWrapper::new);
+                                    .map(VoieDigueWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
+                            stream(source, AvecPhotos.class).map(PhotoContainerTronconWrapper::new)
+                            )))))))))))))));
                 });
     }
 
