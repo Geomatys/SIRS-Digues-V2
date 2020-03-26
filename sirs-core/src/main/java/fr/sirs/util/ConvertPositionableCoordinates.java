@@ -61,7 +61,7 @@ public class ConvertPositionableCoordinates {
 
             //Si aucun type de coordonnées n'est présent on renvoie une exception
             if ((!withLinearCoord) && (!withGeoCoord)) {
-                throw new IllegalArgumentException("The positionable input must provide at least one kind of coordinates 'Linear or geo' but both of them are empty.");
+                throw new IllegalStateException("The positionable input must provide at least one kind of coordinates 'Linear or geo' but both of them are empty.");
             }
 
                 // Si les coordonnées sont déjà présentes, aucune modification n'est apportée.
@@ -83,6 +83,8 @@ public class ConvertPositionableCoordinates {
                 return computePositionableLinearCoordinate(positionable);
             }
 
+        } catch (IllegalStateException e) {
+            SirsCore.LOGGER.log(Level.INFO, "Echec du calcul de coordonnées pour l'élément positionable.", e);
         } catch (RuntimeException e) {
             SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément positionable.", e);
         }
