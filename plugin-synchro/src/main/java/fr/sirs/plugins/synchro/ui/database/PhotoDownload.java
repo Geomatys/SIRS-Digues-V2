@@ -4,6 +4,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.plugins.synchro.attachment.AttachmentUtilities;
+import fr.sirs.plugins.synchro.attachment.AttachmentsSizeAndTroncons;
 import fr.sirs.plugins.synchro.common.DocumentUtilities;
 import fr.sirs.plugins.synchro.common.PhotoAndTroncon;
 import fr.sirs.plugins.synchro.common.PhotoFinder;
@@ -15,14 +16,16 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.LongProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -96,29 +99,23 @@ public class PhotoDownload extends StackPane {
 
     @FXML
     void estimate(ActionEvent event) {
-        final Stream<AbstractPhoto> photos = getPhotographs().map(photoAndTroncon -> photoAndTroncon.getPhoto());
+        final Stream<PhotoAndTroncon> photos = getPhotographs();
 
         final CouchDbConnector connector = session.getConnector();
 
-        final Task<Map.Entry<Long, Long>> t = AttachmentUtilities.estimateSize(connector, photos);
+//        final Task<Map.Entry<Long, Long>> t
+        final Task<AttachmentsSizeAndTroncons> t = AttachmentUtilities.estimateSizeAndTroncons(connector, photos);
 
-        t.setOnFailed(evt -> {
-            SIRS.LOGGER.log(Level.WARNING, "Estimation failed", t.getException());
-            Platform.runLater(() -> new Growl(Growl.Type.ERROR, "Impossible d'estimer le volume des données à télécharger.").showAndFade());
-                });
-        t.setOnSucceeded(evt -> Platform.runLater(() -> {
-            Map.Entry<Long, Long> value = t.getValue();
-            final long nb = value.getKey();
-            uiNb.setText(nb < 0? "inconnu" : Long.toString(nb));
-            uiSize.setText(SIRS.toReadableSize(value.getValue()));
-        }));
+        t.setOnFailed(ResultTaskUtilities.failedEstimation(t));
+        t.setOnSucceeded(ResultTaskUtilities.succedSizeAndTronconsEstimation(t, uiNb, uiSize, tronconids));
 
         uiProgressPane.visibleProperty().bind(t.runningProperty());
-
         uiCancel.setOnAction(evt -> t.cancel(true));
 
         TaskManager.INSTANCE.submit(t);
     }
+
+    private final ObjectProperty<Set<String>> tronconids =new SimpleObjectProperty<>();
 
     @FXML
     void importPhotos(ActionEvent event) {

@@ -44,7 +44,7 @@ class TronconWrapper {
     static Optional<String> tryFindTronçon(final Object document) {
 
         if (document instanceof TronconDigue) {
-            return Optional.of(((TronconDigue) document).getId()); //Normalement inutile
+            return Optional.of(((TronconDigue) document).getId()); //Normally useless as photo can't be associated with 'tronçons'
         } else if (document instanceof Objet) {
            return Optional.ofNullable(((Objet) document).getForeignParentId() );
         } else {

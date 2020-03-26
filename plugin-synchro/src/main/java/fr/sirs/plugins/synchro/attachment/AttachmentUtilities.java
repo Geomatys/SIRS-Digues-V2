@@ -3,6 +3,7 @@ package fr.sirs.plugins.synchro.attachment;
 import fr.sirs.SIRS;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SIRSFileReference;
+import fr.sirs.plugins.synchro.common.PhotoAndTroncon;
 import fr.sirs.util.property.DocumentRoots;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -18,10 +19,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.concurrent.Task;
 import javax.activation.MimetypesFileTypeMap;
@@ -299,6 +302,20 @@ public class AttachmentUtilities {
             }
         }
     }
+        public static long sizeAndTroncon(final CouchDbConnector connector, final SIRSFileReference doc) {
+        final AttachmentInputStream in = download(connector, doc);
+        try {
+            return in.getContentLength();
+        } finally {
+            // Use finally here, because bad closing is not a real problem as long
+            // as we've got the size.
+            try {
+                in.close();
+            } catch (IOException ex) {
+                SIRS.LOGGER.log(Level.WARNING, "A resource cannot be closed properly.", ex);
+            }
+        }
+    }
 
     public static Task<Map.Entry<Long, Long>> estimateSize(final CouchDbConnector connector, final Stream<? extends SIRSFileReference> attachments) {
         return new TaskManager.MockTask("Estimation...", () -> {
@@ -314,6 +331,36 @@ public class AttachmentUtilities {
                         .mapToLong(ath -> AttachmentUtilities.size(connector, ath))
                         .sum();
                 return new AbstractMap.SimpleEntry<>(count.get(), size);
+            } catch (RuntimeException e) {
+                if (e.getCause() instanceof InterruptedException) {
+                    throw (InterruptedException) e.getCause();
+                } else {
+                    throw e;
+                }
+            }
+        });
+    }
+
+    public static Task<AttachmentsSizeAndTroncons> estimateSizeAndTroncons(final CouchDbConnector connector, final Stream<? extends PhotoAndTroncon> attachments) {
+        return new TaskManager.MockTask("Estimation...", () -> {
+            final Thread th = Thread.currentThread();
+            try {
+                final List<PhotoAndTroncon> photosWithTronçon = attachments
+                        .peek(ath -> {
+                            if (th.isInterrupted())
+                                throw new RuntimeException(new InterruptedException());
+                        })
+                        .collect(Collectors.toList());
+
+                final long count = photosWithTronçon.size();
+                final long size  = photosWithTronçon.stream()
+                        .mapToLong(ath -> AttachmentUtilities.size(connector, ath.getPhoto()))
+                        .sum();
+                final Set<String> tronconIds = photosWithTronçon.stream()
+                        .map(pNt -> pNt.getTronconId().get())
+                        .collect(Collectors.toSet());
+                return new AttachmentsSizeAndTroncons(count, size, tronconIds);
+
             } catch (RuntimeException e) {
                 if (e.getCause() instanceof InterruptedException) {
                     throw (InterruptedException) e.getCause();

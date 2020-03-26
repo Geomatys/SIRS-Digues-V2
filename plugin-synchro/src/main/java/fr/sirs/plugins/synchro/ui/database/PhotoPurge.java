@@ -93,16 +93,8 @@ public class PhotoPurge extends StackPane {
         final CouchDbConnector connector = session.getConnector();
         final Task<Map.Entry<Long, Long>> t = AttachmentUtilities.estimateSize(connector, photos);
 
-        t.setOnFailed(evt -> {
-            SIRS.LOGGER.log(Level.WARNING, "Estimation failed", t.getException());
-            Platform.runLater(() -> new Growl(Growl.Type.ERROR, "Impossible d'estimer le volume des données à télécharger.").showAndFade());
-                });
-        t.setOnSucceeded(evt -> Platform.runLater(() -> {
-            Map.Entry<Long, Long> value = t.getValue();
-            final long nb = value.getKey();
-            uiNb.setText(nb < 0? "inconnu" : Long.toString(nb));
-            uiSize.setText(SIRS.toReadableSize(value.getValue()));
-        }));
+        t.setOnFailed(ResultTaskUtilities.failedEstimation(t));
+        t.setOnSucceeded(ResultTaskUtilities.succedEstimation(t, uiNb, uiSize));
 
         uiProgressPane.visibleProperty().bind(t.runningProperty());
 
