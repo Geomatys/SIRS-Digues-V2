@@ -78,6 +78,8 @@ public class PhotoDownload extends StackPane {
     @FXML
     private Button uiImportBtn;
 
+    private final ObjectProperty<Set<String>> tronconids =new SimpleObjectProperty<>();
+
     private final Session session;
 
     private final ObservableValue<Function<PhotoAndTroncon, Path>> destinationProvider;
@@ -114,8 +116,6 @@ public class PhotoDownload extends StackPane {
 
         TaskManager.INSTANCE.submit(t);
     }
-
-    private final ObjectProperty<Set<String>> tronconids =new SimpleObjectProperty<>();
 
     @FXML
     void importPhotos(ActionEvent event) {
