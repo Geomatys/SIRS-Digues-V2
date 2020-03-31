@@ -10,6 +10,7 @@ import fr.sirs.plugins.synchro.common.PhotoAndTroncon;
 import fr.sirs.plugins.synchro.common.PhotoFinder;
 import fr.sirs.plugins.synchro.common.PhotosTronconWrapper;
 import fr.sirs.plugins.synchro.concurrent.AsyncPool;
+import fr.sirs.plugins.synchro.ui.FXTronconPathSelector;
 import fr.sirs.ui.Growl;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -78,7 +79,7 @@ public class PhotoDownload extends StackPane {
     @FXML
     private Button uiImportBtn;
 
-    private final ObjectProperty<Set<String>> tronconids =new SimpleObjectProperty<>();
+    private final ObjectProperty<Set<String>> tronconIds =new SimpleObjectProperty<>();
 
     private final Session session;
 
@@ -99,6 +100,10 @@ public class PhotoDownload extends StackPane {
         uiDate.disableProperty().bind(uiDateTrigger.selectedProperty().not());
     }
 
+    ObjectProperty<Set<String>> getTronconIds() {
+        return tronconIds;
+    }
+
     @FXML
     void estimate(ActionEvent event) {
         final Stream<PhotoAndTroncon> photos = getPhotographs();
@@ -109,7 +114,7 @@ public class PhotoDownload extends StackPane {
         final Task<AttachmentsSizeAndTroncons> t = AttachmentUtilities.estimateSizeAndTroncons(connector, photos);
 
         t.setOnFailed(ResultTaskUtilities.failedEstimation(t));
-        t.setOnSucceeded(ResultTaskUtilities.succedSizeAndTronconsEstimation(t, uiNb, uiSize, tronconids));
+        t.setOnSucceeded(ResultTaskUtilities.succedSizeAndTronconsEstimation(t, uiNb, uiSize, tronconIds));
 
         uiProgressPane.visibleProperty().bind(t.runningProperty());
         uiCancel.setOnAction(evt -> t.cancel(true));

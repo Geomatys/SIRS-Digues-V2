@@ -29,6 +29,7 @@ public class PhotoImport extends VBox {
         setAlignment(Pos.CENTER);
 
         final PhotoDestination photoDestination = new PhotoDestination(session);
+        photoDestination.setPathSelector();
         final PrefixComposer prefixPane = new PrefixComposer();
 
         final ObjectBinding<Function<SIRSFileReference, String>> prefixBuilder = prefixPane.getPrefixBuilder();
@@ -53,6 +54,8 @@ public class PhotoImport extends VBox {
         }, photoDestination.getDestination(), prefixBuilder);
 
         final PhotoDownload downloadPane = new PhotoDownload(executor, session, destBuilder);
+
+        downloadPane.getTronconIds().addListener((o, old, tronconsIds) -> photoDestination.update(tronconsIds));
 
         final PhotoPurge photoPurge = new PhotoPurge(executor, session);
 

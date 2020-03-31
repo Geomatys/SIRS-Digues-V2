@@ -11,8 +11,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileStore;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -25,6 +28,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
+import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.internal.GeotkFX;
 
 /**
@@ -32,6 +36,7 @@ import org.geotoolkit.internal.GeotkFX;
  * @author Alexis Manin (Geomatys)
  */
 public class PhotoDestination extends StackPane {
+
     @FXML
     private Label uiRootLabel;
 
@@ -43,6 +48,9 @@ public class PhotoDestination extends StackPane {
 
     @FXML
     private ProgressIndicator uiDestSpaceProgress;
+
+    @FXML
+    private FXTronconPathSelector pathSelector; //Risque de fuite mémoire?;
 
     /**
      * Destination root path, as it should be defined in {@link SirsPreferences.PROPERTIES#DOCUMENT_ROOT}.
@@ -57,11 +65,14 @@ public class PhotoDestination extends StackPane {
     private final ObjectBinding<Path> destination;
 
     final TronconDigueRepository tronconRepository;
+
     private final HashMap<String, String> idToDirectory = new HashMap<>();
 
     public PhotoDestination(final Session session) {
         SIRS.loadFXML(this);
 
+//        pathSelector=new FXTronconPathSelector();
+//        pathSelector.setPhotoDestination(this);
 
         tronconRepository = (TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class);
 
@@ -81,9 +92,16 @@ public class PhotoDestination extends StackPane {
             return root.resolve(subDir);
 
         }, rootDirProperty, subDirProperty);
+//        }, rootDirProperty, subDirProperty, pathSelector.getPhotoDestination());
+
         destination.addListener(this::destinationChanged);
 
         rootDirProperty.set(DocumentRoots.getPhotoRoot(null, false).orElse(null));
+    }
+
+    public void setPathSelector(){
+        pathSelector.setPhotoDestination(this);
+        //TODO adapt destination
     }
 
     public Path getRoot() {
@@ -100,14 +118,24 @@ public class PhotoDestination extends StackPane {
 
     @FXML
     void chooseSubDirectory(ActionEvent event) {
+        final Path root = rootDirProperty.get();
+        final Optional<File> chosen = chooseDirectory(root);
+        if (chosen.isPresent()) {
+            subDirProperty.set(root.relativize(chosen.get().toPath()));
+        }
+    }
+
+    Optional<File> chooseDirectory(final Path fromPath) {
+        ArgumentChecks.ensureNonNull("Root path", fromPath);
+
         final DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Répertoire destination");
-        final Path root = rootDirProperty.get();
-        chooser.setInitialDirectory(root.toFile());
-        File chosen = chooser.showDialog(getScene().getWindow());
-        if (chosen != null) {
-            subDirProperty.set(root.relativize(chosen.toPath()));
-        }
+        chooser.setInitialDirectory(fromPath.toFile());
+        return Optional.ofNullable(chooser.showDialog(getScene().getWindow()));
+    }
+
+    Optional<File> chooseDirectoryFromSubDir() {
+        return chooseDirectory(getSubDir());
     }
 
     @FXML
@@ -165,17 +193,30 @@ public class PhotoDestination extends StackPane {
         if (tronconId.isPresent()) {
             final String id = tronconId.get();
 
-            return idToDirectory.computeIfAbsent(id, key -> forTronconId(id) );
+            return idToDirectory.computeIfAbsent(id, key -> getPathForTronconId(id) );
 
         } else {
             return "";
         }
     }
 
-    private String forTronconId(final String id) {
+    void setPathToTroncons(final Path path, final List<String> tronconsIds) {
+        ArgumentChecks.ensureNonNull("Path", path);
+        ArgumentChecks.ensureNonNull("List of selected tronçons", tronconsIds);
+
+        tronconsIds.forEach( id -> idToDirectory.put(id, path.toString()));
+
+    }
+
+    private String getPathForTronconId(final String id) {
         return SirsStringConverter.getDesignation(tronconRepository.get(id));//Utiliser des Previews?
 //                .replaceAll("\\s", "_"); //-> remplace les caractères 'blancs'
 
+    }
+
+    public void update(Set<String> tronconsIds) {
+
+        pathSelector.updateTronconList(new ArrayList(tronconsIds));
     }
 
 }
