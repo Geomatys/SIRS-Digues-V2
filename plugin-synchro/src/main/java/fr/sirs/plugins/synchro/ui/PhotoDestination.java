@@ -135,7 +135,7 @@ public class PhotoDestination extends StackPane {
     }
 
     Optional<File> chooseDirectoryFromSubDir() {
-        return chooseDirectory(getSubDir());
+        return chooseDirectory( getDestination().get());
     }
 
     @FXML
