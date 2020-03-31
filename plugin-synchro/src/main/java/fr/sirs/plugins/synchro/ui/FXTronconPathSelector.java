@@ -88,9 +88,11 @@ public class FXTronconPathSelector extends StackPane {
     void updateTronconList(final List<String> newIds) {
         identificatedTroncons.removeAll(uiTronconList.getSelectionModel().getSelectedItems());
         final List<Preview> previews = Injector.getSession().getPreviews().getByclassAndIds(TronconDigue.class, newIds);
-
         identificatedTroncons.addAll(previews);
+    }
 
+    public void refresh() {
+        uiTronconList.refresh();
     }
 
      private final class LocalStringConverter<T extends Preview> extends SirsStringConverter {

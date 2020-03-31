@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -177,6 +178,8 @@ public class PhotoDestination extends StackPane {
                 uiSubDirLabel.setText(subDir.toString());
             }
 
+            updateRelativePaths(oldValue, newValue);
+
             try {
                 final FileStore fileStore = newValue.getFileSystem().provider().getFileStore(newValue);
 
@@ -188,6 +191,22 @@ public class PhotoDestination extends StackPane {
                 GeotkFX.newExceptionDialog("L'analyse du dossier destination a échoué. Veuillez choisir un autre dossier destination.", e);
             }
         }
+    }
+
+    void updateRelativePaths(final Path oldValue, final Path newValue) {
+//        ArgumentChecks.ensureNonNull("Path", oldValue);
+        ArgumentChecks.ensureNonNull("Path", newValue);
+        if (oldValue == null) {
+            SIRS.LOGGER.log(Level.INFO, "Null oldPath in PhotoDestination#updateRelativePaths; relative path is not updated.");
+        } else {
+            idToDirectory.replaceAll((key, path) -> getNewRelativePath(oldValue, newValue, path));
+        }
+        pathSelector.refresh();
+
+    }
+
+    private String getNewRelativePath(final Path oldRoot, final Path newRoot, final String oldRelative) {
+        return newRoot.relativize(oldRoot.resolve(oldRelative)).toString();
     }
 
 
