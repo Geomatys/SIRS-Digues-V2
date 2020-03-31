@@ -134,8 +134,11 @@ public class PhotoDestination extends StackPane {
         return Optional.ofNullable(chooser.showDialog(getScene().getWindow()));
     }
 
-    Optional<File> chooseDirectoryFromSubDir() {
-        return chooseDirectory( getDestination().get());
+    Optional<Path> chooseDirectoryFromSubDir() {
+        final Path subdir = getSubDir();
+        final Path from = (subdir!= null)?subdir:getRoot(); //I assume getRoot() can't be null.
+        final Optional<File> chosen = chooseDirectory(from);
+        return chosen.map(file -> from.relativize(chosen.get().toPath()));
     }
 
     @FXML
