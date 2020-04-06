@@ -74,9 +74,7 @@ import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.geometry.Orientation;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
@@ -90,7 +88,6 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
-import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import org.apache.sis.geometry.GeneralEnvelope;
 import org.apache.sis.measure.NumberRange;
@@ -98,7 +95,6 @@ import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.coverage.amended.AmendedCoverageReference;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.query.QueryBuilder;
-import org.geotoolkit.display.canvas.AbstractCanvas2D;
 import org.geotoolkit.display.canvas.control.AbstractCanvasMonitor;
 import org.geotoolkit.display2d.GO2Hints;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -191,7 +187,7 @@ public class FXMapPane extends BorderPane implements Printable {
     private final ToolBar uiSplitBar = new ToolBar(splitButton);
 
     private final FXMapContextTree uiTree;
-    
+
     //Static growl used to managed AbstractCanvasMonitor exceptions
     private static Growl nullableAlert=null;
 
@@ -199,7 +195,7 @@ public class FXMapPane extends BorderPane implements Printable {
         setFocusTraversable(true);
 
         overloadMonitor(uiMap1);
-        
+
         uiCoordBar2.setCrsButtonVisible(false);
         uiMap1.getCanvas().setBackgroundPainter(new SolidColorPainter(Color.WHITE));
         uiMap2.getCanvas().setBackgroundPainter(new SolidColorPainter(Color.WHITE));
@@ -242,6 +238,7 @@ public class FXMapPane extends BorderPane implements Printable {
         uiTree.getMenuItems().add(new DeleteItem());
         uiTree.getTreetable().getColumns().add(2,new MapItemFilterColumn());
         uiTree.getTreetable().getColumns().add(3,new MapItemSelectableColumn());
+        uiTree.getTreetable().getColumns().add(4,new MapItemViewRealPositionColumn());
         final Property<MapContext> prop1 = FXUtilities.beanProperty(uiMap1.getContainer(),ContextContainer2D.CONTEXT_PROPERTY, MapContext.class);
         uiTree.mapItemProperty().bind(prop1);
         prop1.addListener(new ChangeListener<MapContext>() {
@@ -389,9 +386,9 @@ public class FXMapPane extends BorderPane implements Printable {
 
      /**
      * Static method used to manage the exception produced in geotoolkit.
-     * 
-     * Allows to alert the user of the exception occurences. 
-     * 
+     *
+     * Allows to alert the user of the exception occurences.
+     *
      * @param fxMap : FXMap to survey.
      */
     private static void overloadMonitor(FXMap fxMap) {
@@ -418,7 +415,7 @@ public class FXMapPane extends BorderPane implements Printable {
             });
         }
     }
-    
+
     /**
      * Tries to replace all coverage layers to use an {@link AmendedCoverageReference}
      * @param parent The map item containing layers to analyze.

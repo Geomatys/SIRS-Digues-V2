@@ -891,7 +891,7 @@ public class FXSearchPane extends SplitPane {
             geomType = null;
         }
 
-        return CorePlugin.createDefaultStyle(Color.GRAY, (geomType == null)? null : geomType.getName().toString());
+        return CorePlugin.createDefaultStyle(Color.GRAY, (geomType == null)? null : geomType.getName().toString(), false);
     }
 
     private Optional<Task> export(final FeatureMapLayer layer) {

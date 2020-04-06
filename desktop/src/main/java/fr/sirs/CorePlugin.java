@@ -872,6 +872,10 @@ public class CorePlugin extends Plugin {
     }
 
     public static MutableStyle createDefaultSelectionStyle(){
+        return createDefaultSelectionStyle(false);
+    }
+
+    public static MutableStyle createDefaultSelectionStyle(final boolean withRealPosition){
         // Stroke to use for lines and point perimeter
         final Stroke stroke = SF.stroke(SF.literal(Color.GREEN),LITERAL_ONE_FLOAT,FF.literal(13),
                 STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
@@ -906,6 +910,13 @@ public class CorePlugin extends Plugin {
         );
 
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
+        if(withRealPosition) {
+            final MutableRule start = createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, Color.GREEN, StyleConstants.MARK_TRIANGLE);
+            final MutableRule end = createExactPositinRule("end", SirsCore.POSITION_FIN_FIELD, Color.GREEN, StyleConstants.MARK_TRIANGLE);
+
+            fts.rules().add(start);
+            fts.rules().add(end);
+        }
         fts.rules().add(ruleLongObjects);
         fts.rules().add(ruleSmallObjects);
 
@@ -915,20 +926,20 @@ public class CorePlugin extends Plugin {
     }
 
     public static MutableStyle createDefaultStyle(Color col) {
-        return createDefaultStyle(col, null);
+        return createDefaultStyle(col, null, false);
     }
 
     // règle de style pour les points de début et de fin
     // test et préparation pour SYM-1776
-    private static MutableRule createExactPositinRule(final String name, final String geometryProperty, final Color col, final Expression wellKnownName){
+    public static MutableRule createExactPositinRule(final String name, final String geometryProperty, final Color col, final Expression wellKnownName){
         return SF.rule(SF.pointSymbolizer(name, geometryProperty, DEFAULT_DESCRIPTION, Units.POINT,
-                SF.graphic(Arrays.asList(SF.mark(wellKnownName, SF.fill(Color.WHITE), SF.stroke(col, 4))),
+                SF.graphic(Arrays.asList(SF.mark(wellKnownName, SF.fill(Color.WHITE), SF.stroke(col, 2))),
                         LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(20), LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT)),
-                SF.textSymbolizer(SF.fill(col), DEFAULT_FONT, SF.halo(Color.WHITE, 2), FF.property("designation"),
+                SF.textSymbolizer(SF.fill(col), DEFAULT_FONT, SF.halo(Color.WHITE, 1), FF.property("designation"),
                         StyleConstants.DEFAULT_POINTPLACEMENT, geometryProperty));
     }
 
-    public static MutableStyle createDefaultStyle(Color col, final String geometryName) {
+    public static MutableStyle createDefaultStyle(final Color col, final String geometryName, final boolean withRealPosition) {
         final Stroke line1Stroke = SF.stroke(SF.literal(col),LITERAL_ONE_FLOAT,GO2Utilities.FILTER_FACTORY.literal(8),
                 STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
@@ -940,9 +951,11 @@ public class CorePlugin extends Plugin {
         final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
                 geometryName,DEFAULT_DESCRIPTION,Units.POINT,line2Stroke,LITERAL_ZERO_FLOAT);
 
-        // test et préparation pour SYM-1776
-        final MutableRule start = createExactPositinRule("start", "positionDebut", col, StyleConstants.MARK_CIRCLE);
-        final MutableRule end = createExactPositinRule("end", "positionFin", col, StyleConstants.MARK_CIRCLE);
+//        // test et préparation pour SYM-1776
+//        final MutableRule start = createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, col, StyleConstants.MARK_TRIANGLE);
+//        final MutableRule end   = createExactPositinRule("end",   SirsCore.POSITION_FIN_FIELD,   col, StyleConstants.MARK_TRIANGLE);
+//        final MutableRule startReal = createExactPositinRule("start", "approximatePositionDebut", col, StyleConstants.MARK_TRIANGLE);
+//        final MutableRule endReal = createExactPositinRule("end", "approximatePositionFin", col, StyleConstants.MARK_TRIANGLE);
 
         //the visual element
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(16);
@@ -974,9 +987,16 @@ public class CorePlugin extends Plugin {
         );
 
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
-        // test et préparation pour SYM-1776
-//        fts.rules().add(start);
-//        fts.rules().add(end);
+//        // test et préparation pour SYM-1776
+
+        if(withRealPosition) {
+        final MutableRule start = createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, col, StyleConstants.MARK_TRIANGLE);
+        final MutableRule end   = createExactPositinRule("end",   SirsCore.POSITION_FIN_FIELD,   col, StyleConstants.MARK_TRIANGLE);
+            fts.rules().add(start);
+            fts.rules().add(end);
+        }
+//        fts.rules().add(startReal);
+//        fts.rules().add(endReal);
         fts.rules().add(ruleLongObjects);
         fts.rules().add(ruleSmallObjects);
 
