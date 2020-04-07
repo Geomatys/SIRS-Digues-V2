@@ -9,7 +9,6 @@ import fr.sirs.CorePlugin;
 import java.awt.Color;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -21,17 +20,19 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import org.apache.sis.util.ArgumentChecks;
-import static org.elasticsearch.search.aggregations.support.format.ValueParser.DateMath.mapper;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.style.MutableFeatureTypeStyle;
-import org.geotoolkit.style.RandomStyleBuilder;
 import org.geotoolkit.style.visitor.ListingColorVisitor;
 import org.opengis.style.Style;
 
 /**
+ * Column of the {@link FXMapContextTree}'s {@link TreeTableCell} allowing the
+ * user to display or not the "real positions" associated with a {@link MapLayer}.
+ *
+ * @see CorePlugin#createDefaultStyle(java.awt.Color, java.lang.String, boolean)
  *
  * @author Matthieu Bastianelli (Geomatys)
  */
@@ -119,6 +120,12 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
                 final Stream<Color> colors = tryFinfColorFromPrevious(maplayer.getStyle());
                 final Color color = colors.filter(c -> !(c.equals(Color.BLACK) || c.equals(Color.WHITE))).findAny().orElse(Color.BLACK);
 
+                /* Following commented code tried to only modificate the rules
+                * associated with the real positions. It worked for addition of
+                * the rule but not for the removal. Then we choose to re-create
+                * the full Style.
+                */
+
 //                final MutableRule start = CorePlugin.createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, Color.red, StyleConstants.MARK_TRIANGLE);
 //                final MutableRule end   = CorePlugin.createExactPositinRule("end", SirsCore.POSITION_FIN_FIELD, Color.red, StyleConstants.MARK_TRIANGLE);
                 if(visible) {
@@ -143,6 +150,13 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
     }
 
 //    private static Color tryFinfColorFromPrevious(final List<MutableFeatureTypeStyle> ftsList) {
+    /**
+     * Try to find colors used to define the input {@link Style}.
+     * Only rgb components are assesd here.
+     *
+     * @param style
+     * @return {@link Stream} of identified colors. Empty if no color was found.
+     */
     private static Stream<Color> tryFinfColorFromPrevious(final Style style) {
         ArgumentChecks.ensureNonNull("MutableFeatureTypeStyles", style);
 
