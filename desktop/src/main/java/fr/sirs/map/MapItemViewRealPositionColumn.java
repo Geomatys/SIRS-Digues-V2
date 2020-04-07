@@ -9,6 +9,7 @@ import fr.sirs.CorePlugin;
 import java.awt.Color;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -116,7 +117,7 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
             if (fts != null) {
 
                 final Stream<Color> colors = tryFinfColorFromPrevious(maplayer.getStyle());
-                final Color color = colors.filter(c -> !c.equals(Color.BLACK)).findAny().orElse(RandomStyleBuilder.randomColor());
+                final Color color = colors.filter(c -> !(c.equals(Color.BLACK) || c.equals(Color.WHITE))).findAny().orElse(Color.BLACK);
 
 //                final MutableRule start = CorePlugin.createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, Color.red, StyleConstants.MARK_TRIANGLE);
 //                final MutableRule end   = CorePlugin.createExactPositinRule("end", SirsCore.POSITION_FIN_FIELD, Color.red, StyleConstants.MARK_TRIANGLE);
@@ -151,7 +152,7 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
         if (colors == null) {
             return Stream.empty();
         } else {
-            return colors.stream().map(integer -> new Color(0));
+            return colors.stream().map(integer -> new Color(integer)); //We don't take into account the alpha component to improve comparisaon with white and black colors
         }
 
 
