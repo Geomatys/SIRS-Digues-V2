@@ -118,7 +118,10 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
             if (fts != null) {
 
                 final Stream<Color> colors = tryFinfColorFromPrevious(maplayer.getStyle());
-                final Color color = colors.filter(c -> !(c.equals(Color.BLACK) || c.equals(Color.WHITE))).findAny().orElse(Color.BLACK);
+                final Color color = colors
+                        .filter(c -> !(c.equals(Color.BLACK) || c.equals(Color.WHITE))) //Borders and real positions' items contain black and white colors so we ignore it.
+                        .findAny()
+                        .orElse(Color.BLACK);
 
                 /* Following commented code tried to only modificate the rules
                 * associated with the real positions. It worked for addition of
