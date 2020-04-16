@@ -132,8 +132,8 @@ public class FXCommentPhotoView extends SplitPane {
         if ( (!filledPhoto) &&(newValue instanceof AvecObservations) ) {
             final AvecObservations tmpObserved = (AvecObservations) newValue;
             AbstractObservation target = null;
-            if (tmpObserved.getObservations() != null && !tmpObserved.getObservations().isEmpty()) {
-                List<? extends AbstractObservation> assessedObservations = tmpObserved.getObservations();
+            List<? extends AbstractObservation> assessedObservations = tmpObserved.getObservations();
+            if (assessedObservations != null && !assessedObservations.isEmpty()) {
                 assessedObservations.sort(observationComparator);
                 target = assessedObservations.get(0);
             }
@@ -159,22 +159,17 @@ public class FXCommentPhotoView extends SplitPane {
             };
 
     private final Comparator<AbstractObservation> observationComparator = (o1, o2) -> {
-        final boolean o1WithPhoto = (o1.photos == null || o1.photos.isEmpty());
-        final boolean o2WithPhoto = (o2.photos == null || o2.photos.isEmpty());
+        final boolean o1WithPhoto = !(o1 == null || o1.getDate() == null || o1.photos == null || o1.photos.isEmpty());
+        final boolean o2WithPhoto = !(o2 == null || o2.getDate() == null || o2.photos == null || o2.photos.isEmpty());
 
-        if(o1WithPhoto&&!o2WithPhoto) {
+        if (!o1WithPhoto && !o2WithPhoto) {
+            return 0;
+        } else if (o1WithPhoto && !o2WithPhoto) {
             return -2;
-        } else if (o2WithPhoto&&!o1WithPhoto) {
+        } else if (o2WithPhoto && !o1WithPhoto) {
             return 2;
-
         } else {
-            if (o1 == null || o1.getDate() == null) {
-                return 1;
-            } else if (o2 == null || o2.getDate() == null) {
-                return -1;
-            } else {
-                return o1.getDate().compareTo(o2.getDate());
-            }
+            return o1.getDate().compareTo(o2.getDate());
         }
     };
 
@@ -206,7 +201,7 @@ public class FXCommentPhotoView extends SplitPane {
         AbstractPhoto assessed;
         final int size = tmpPhotos.size();
         assessed= tmpPhotos.get(index);
-        while ((assessed.getChemin() == null || assessed.getChemin().isEmpty()) && (index<size)) {
+        while ((assessed.getChemin() == null || assessed.getChemin().isEmpty()) && (index<size-1)) {
             assessed= tmpPhotos.get(++index);
         }
         selected = assessed;

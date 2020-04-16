@@ -103,7 +103,7 @@ public class FXOpenElementEditorAction extends FXMapAction {
         final Rectangle selection = new Rectangle();
         final Point anchor = new Point();
 
-        public OpenElementEditorHandler(FXMap map) {
+        public OpenElementEditorHandler(final FXMap map) {
             super();
             mouseListener = new InfoMouseListener(anchor, selection);
         }
@@ -121,7 +121,7 @@ public class FXOpenElementEditorAction extends FXMapAction {
             //====================================
             //Mise en place du carré de sélection
             //====================================
-            
+
             Pane root = this.decorationPane;
 //            final Rectangle selection = new Rectangle();
 //            final Point anchor = new Point();
@@ -131,7 +131,7 @@ public class FXOpenElementEditorAction extends FXMapAction {
                 anchor.setY(event.getY());
                 selection.setX(event.getX());
                 selection.setY(event.getY());
-                selection.setFill(null); // transparent 
+                selection.setFill(null); // transparent
                 selection.setStroke(Color.BLUE); // border
                 selection.getStrokeDashArray().add(10.0);
                 root.getChildren().add(selection);
@@ -247,10 +247,18 @@ public class FXOpenElementEditorAction extends FXMapAction {
                 };
 
                 //Recherche sur la surface couverte par le carré de sélection.
-                Rectangle2D.Double searchArea = new Rectangle2D.Double(
+                final Rectangle2D.Double searchArea;
+                final double selectionWidth  = this.selection.getWidth();
+                final double selectionHeight = this.selection.getHeight();
+                if( (selectionWidth > POINT_RADIUS) || (selectionHeight >POINT_RADIUS) ) {
+                    searchArea = new Rectangle2D.Double(
                         anchor.getX(), anchor.getY(), selection.getWidth(), selection.getHeight());
+                }  else {
+                    searchArea = new Rectangle2D.Double(
+                        anchor.getX()-(POINT_RADIUS/2), anchor.getY() - (POINT_RADIUS/2), POINT_RADIUS, POINT_RADIUS);
+                }
                 map.getCanvas().getGraphicsIn(searchArea, visitor, VisitFilter.INTERSECTS);
-                
+
             }
         }
 
