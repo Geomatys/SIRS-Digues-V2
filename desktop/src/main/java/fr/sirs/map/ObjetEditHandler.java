@@ -137,7 +137,6 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
      * SIRS depuis une carte de l'application.
      *
      * @param map : carte à partir de laquelle on permet l'édition.
-     * @param typeName : nom du type du panneau d'édition.
      * @param clazz : classe éditée.
      * @param editPane : panneau d'édition associé.
      */
@@ -240,6 +239,8 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
                 }
             }
         });
+
+        dialog.show();
     }
 
     /**

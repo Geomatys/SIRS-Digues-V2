@@ -32,6 +32,7 @@ import fr.sirs.util.LabelComparator;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.ReferenceTableCell;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -45,6 +46,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -72,6 +74,7 @@ import org.geotoolkit.util.StringUtilities;
  *
  * @author Johann Sorel (Geomatys)
  * @author Matthieu Bastianelli (Geomatys)
+ * @param <T>
  */
 public class FXObjetEditPane <T extends Objet> extends BorderPane {
 
@@ -86,7 +89,7 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
 
     @FXML TextField uiTronconLabel;
     @FXML ToggleButton uiPickTroncon;
-    @FXML private FXTableView<Element> uiObjetTable;
+    @FXML private FXTableView<T> uiObjetTable;
     @FXML Button uiAddObjet;
     @FXML ToggleButton uiCreateObjet;
     @FXML Label typeNameLabel;
@@ -100,8 +103,9 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
     final SimpleBooleanProperty saveTD = new SimpleBooleanProperty(false);
 
     final Class<T> editedClass;
-    private AbstractSIRSRepository<T> repo;
-//    private AbstractRepository<T> repo;
+    private final AbstractSIRSRepository<T> repo;
+
+    private final String defaultEmptyLibelle = "Aucun tronçon sélectionné";
 
 
 //    public FXObjetEditPane(FXMap map, final String typeName, final Class clazz, final boolean createNameColumn, final boolean createDeleteColumn) {
@@ -144,7 +148,7 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
         uiCreateObjet.setOnAction(this::startCreateObjet);
 
         // Affichage du libellé du tronçon
-        uiTronconLabel.textProperty().bind(Bindings.createStringBinding(()->tronconProp.get()==null?"":tronconProp.get().getLibelle(),tronconProp));
+        uiTronconLabel.textProperty().bind(Bindings.createStringBinding(()->tronconProp.get()==null?defaultEmptyLibelle:tronconProp.get().getLibelle(),tronconProp));
 
         //etat des boutons sélectionné
         final ToggleGroup group = new ToggleGroup();
@@ -214,7 +218,7 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
         return mode.get();
     }
 
-    public ObservableList<Element> objetProperties(){
+    public ObservableList<T> objetProperties(){
         return uiObjetTable.getSelectionModel().getSelectedItems();
     }
 
@@ -252,6 +256,24 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
      * null if no troncon is selected.
      */
     ListView<T> buildObjetList(final Set<String> toExclude) {
+
+        // Construction du composant graphique.
+        final ListView<T> elementsView = new ListView<>();
+        elementsView.setItems(getObjectListFromTroncon(toExclude));
+        elementsView.setCellFactory(TextFieldListCell.forListView(new SirsStringConverter()));
+        elementsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        return elementsView;
+    }
+
+    /**
+     * Retourne la liste des éléments T de la base associés au tronçon sélectionné.
+     *
+     * @param toExclude
+     * @return
+     */
+    private ObservableList<T> getObjectListFromTroncon(final Set<String> toExclude) {
+
         final TronconDigue troncon = tronconProperty().get();
         if (troncon == null) return null;
 
@@ -264,23 +286,7 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
         if (toExclude != null && !toExclude.isEmpty()) {
             elements.removeIf(elt -> toExclude.contains(elt.getId()));
         }
-//
-//        // Récupération et tri
-//        final List<BorneDigue> bornes = session.getRepositoryForClass(BorneDigue.class).get(borneIds);
-//        bornes.sort((BorneDigue b1, BorneDigue b2) -> {
-//            if (b1.getLibelle() == null) {
-//                return 1;
-//            }
-//            return b1.getLibelle().compareToIgnoreCase(b2.getLibelle());
-//        });
-
-        // Construction du composant graphique.
-        final ListView<T> elementsView = new ListView<>();
-        elementsView.setItems(FXCollections.observableArrayList(elements));
-        elementsView.setCellFactory(TextFieldListCell.forListView(new SirsStringConverter()));
-        elementsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
-        return elementsView;
+        return FXCollections.observableArrayList(elements);
     }
 
     /**
@@ -469,36 +475,39 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
 //    void tronconChanged(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
     void tronconChanged(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
 
-        throw new UnsupportedOperationException("Unsupported tronconChanged yet.");
-//        if (oldValue != null) {
-//            save(uiSrComboBox.getValue(), oldValue);
-//        }
-//
-//        if(newValue==null) {
-//            uiSrComboBox.setItems(FXCollections.emptyObservableList());
-//        } else {
+        if (oldValue != null) {
+            save(oldValue);
+        }
+
+//        if(newValue!=null) {
 //            mode.set(ObjetEditMode.NONE);
-//            final List<SystemeReperage> srs = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinear(newValue);
-//            uiSrComboBox.setItems(FXCollections.observableArrayList(srs));
-//
-//            final String defaultSRID = newValue.getSystemeRepDefautId();
-//            if (defaultSRID != null) {
-//                for (final SystemeReperage sr : srs) {
-//                    if (defaultSRID.equals(sr.getId())) {
-//                        uiSrComboBox.getSelectionModel().select(sr);
-//                        break;
-//                    }
-//                }
-//            }
-//
-//            // In case default SR change from another panel
-//            newValue.systemeRepDefautIdProperty().addListener((ObservableValue<? extends String> srObservable, String oldSR, String newSR) -> {
-//                uiDefaultSRCheckBox.setSelected(newSR == null? false : newSR.equals(uiSrComboBox.getValue() == null? null : uiSrComboBox.getValue().getId()));
-//            });
-//
-//            // On met à jour le SR élémentaire s'il esxiste.
-//            TronconUtils.updateSRElementaireIfExists(newValue, session);
 //        }
+
+
+        if (newValue == null) {
+            uiObjetTable.setItems(FXCollections.emptyObservableList());
+            mode.set(ObjetEditMode.NONE); //Todo?
+        } else {
+            final ObjetEditMode current = getMode();
+            if (current.equals(ObjetEditMode.CREATE_OBJET) || current.equals(ObjetEditMode.EDIT_OBJET)) {
+                //do nothing
+            } else {
+                mode.set(ObjetEditMode.EDIT_OBJET);
+            }
+
+            // By default, we'll sort bornes from uphill to downhill, but alow user to sort them according to available table columns.
+//            final Comparator defaultComparator = defaultSRBComparator.get();
+//            final SortedList sortedItems;
+//            if (defaultComparator != null) {
+//                sortedItems = newValue.getSystemeReperageBornes().sorted(defaultComparator).sorted();
+//            } else {
+//                sortedItems = newValue.getSystemeReperageBornes().sorted();
+//            }
+
+//            sortedItems.comparatorProperty().bind(uiObjetTable.comparatorProperty());
+            uiObjetTable.setItems(getObjectListFromTroncon(null));
+        }
+
     }
 
 //    private void updateDefaultSRCheckBox(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) {

@@ -50,10 +50,8 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -79,7 +77,6 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -135,7 +132,7 @@ public class FXSystemeReperagePane extends FXObjetEditPane {
 
     public FXSystemeReperagePane(FXMap map, final String typeName) {
         super(map, typeName, BorneDigue.class, false, false);
-        SIRS.loadFXML(this);
+//        SIRS.loadFXML(this);
 
 
         uiAddSr.setGraphic(new ImageView(SIRS.ICON_ADD_BLACK));
