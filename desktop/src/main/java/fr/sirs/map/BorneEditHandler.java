@@ -20,6 +20,7 @@ package fr.sirs.map;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.CorePlugin;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
@@ -41,7 +42,6 @@ import org.geotoolkit.feature.Feature;
 import org.geotoolkit.filter.identity.DefaultFeatureId;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
-import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.opengis.filter.Id;
 import org.opengis.filter.identity.Identifier;
 
@@ -51,26 +51,14 @@ import org.opengis.filter.identity.Identifier;
  */
 public class BorneEditHandler extends ObjetEditHandler {
 
-    private final MouseListenForBorne mouseInputListener = new MouseListenForBorne();
-
-    //edition de borne :
-//    private FeatureMapLayer borneLayer = null;
-    private BorneDigue borne = null;
-    private EditionHelper helperBorne;
-
-//    private final Stage dialog = new Stage();
-//     final FXSystemeReperagePane editPane;
-
-    // overriden variable by init();
-//    protected String TRONCON_LAYER_NAME;
-//    protected String typeName;
+    private static final String BORNE_LAYER_NAME = CorePlugin.BORNE_LAYER_NAME;
 
     public BorneEditHandler(final FXMap map) {
         this(map, "troncon");
     }
 
     public BorneEditHandler(final FXMap map, final String typeName) {
-        super(map, BorneDigue.class, new FXSystemeReperagePane(map, typeName));
+        super(map, BorneDigue.class, new FXSystemeReperagePane(map, typeName), false);
 
         editPane.objetProperties().addListener(new ListChangeListener<SystemeReperageBorne>() {
             @Override
@@ -91,31 +79,38 @@ public class BorneEditHandler extends ObjetEditHandler {
                 if (ids.size() == 1) {
                     //borne edition mode
                     final String borneId = lst.get(0).getBorneId();
-                    borne = session.getRepositoryForClass(BorneDigue.class).get(borneId);
+                    editedObjet = session.getRepositoryForClass(BorneDigue.class).get(borneId);
                     updateGeometry();
                 } else {
-                    borne = null;
+                    editedObjet = null;
                     updateGeometry();
                 }
 
             }
         });
 
+        mouseInputListener = new MouseListenForBorne();
+
     }
 
-    private void updateGeometry() {
-        if (borne == null) {
-            editGeometry.reset();
-        } else {
-            editGeometry.geometry.set(borne.getGeometry());
-        }
-
-        if (editGeometry.geometry == null) {
-            geomlayer.getGeometries().clear();
-        } else {
-            geomlayer.getGeometries().setAll(editGeometry.geometry.get());
-        }
+    @Override
+    String getObjetLayerName() {
+        return BORNE_LAYER_NAME;
     }
+
+//    private void updateGeometry() {
+//        if (editedObjet == null) {
+//            editGeometry.reset();
+//        } else {
+//            editGeometry.geometry.set(editedObjet.getGeometry());
+//        }
+//
+//        if (editGeometry.geometry == null) {
+//            geomLayer.getGeometries().clear();
+//        } else {
+//            geomLayer.getGeometries().setAll(editGeometry.geometry.get());
+//        }
+//    }
 
     private class MouseListenForBorne extends EditionMouseListen {
 
@@ -151,9 +146,9 @@ public class BorneEditHandler extends ObjetEditHandler {
             } else if (FXSystemeReperagePane.ObjetEditMode.EDIT_OBJET.equals(mode)) {
                 final SystemeReperage sr = srbEditPane.systemeReperageProperty().get();
 
-                if (borne == null || editGeometry.selectedNode[0] < 0) {
+                if (editedObjet == null || editGeometry.selectedNode[0] < 0) {
                     //selection d'une borne
-                    final Feature feature = helperBorne.grabFeature(e.getX(), e.getY(), false);
+                    final Feature feature = helperObjet.grabFeature(e.getX(), e.getY(), false);
                     if (feature != null) {
                         final Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
                         if (bean instanceof BorneDigue && session.editionAuthorized((BorneDigue) bean)) {
@@ -174,7 +169,7 @@ public class BorneEditHandler extends ObjetEditHandler {
 
             } else if (FXSystemeReperagePane.ObjetEditMode.CREATE_OBJET.equals(mode)) {
 
-                final Coordinate coord = helperBorne.toCoord(startX, startY);
+                final Coordinate coord = helperObjet.toCoord(startX, startY);
                 final Point point = GO2Utilities.JTS_FACTORY.createPoint(coord);
                 JTS.setCRS(point, session.getProjection());
                 //les events vont induire le repaint de la carte
@@ -193,7 +188,7 @@ public class BorneEditHandler extends ObjetEditHandler {
             startY = getMouseY(e);
 
             if (editGeometry.geometry.get() != null) {
-                helperBorne.grabGeometryNode(startX, startY, editGeometry);
+                helperObjet.grabGeometryNode(startX, startY, editGeometry);
             }
         }
 
@@ -206,9 +201,9 @@ public class BorneEditHandler extends ObjetEditHandler {
             startX = getMouseX(me);
             startY = getMouseY(me);
 
-            if (borne != null && editGeometry.selectedNode[0] >= 0) {
+            if (editedObjet != null && editGeometry.selectedNode[0] >= 0) {
                 //deplacement d'une borne
-                editGeometry.moveSelectedNode(helperBorne.toCoord(startX, startY));
+                editGeometry.moveSelectedNode(helperObjet.toCoord(startX, startY));
                 updateGeometry();
             } else {
                 super.mouseDragged(me);
@@ -219,7 +214,7 @@ public class BorneEditHandler extends ObjetEditHandler {
         public void mouseReleased(MouseEvent me) {
             mouseDragged(me);
 
-            if (borne != null && editGeometry.selectedNode[0] >= 0) {
+            if (editedObjet != null && editGeometry.selectedNode[0] >= 0) {
                 //On demande à l'utilisateur s'il souhaite sauvegarder en base de données les modifications apportées.
                 final Alert alert = new Alert(Alert.AlertType.WARNING, "Confirmer le déplacement de la borne?", ButtonType.OK, ButtonType.CANCEL);
                 alert.setResizable(true);
@@ -227,8 +222,8 @@ public class BorneEditHandler extends ObjetEditHandler {
 
                 if (clickedButton.get() == ButtonType.OK) {
 
-                    borne.setGeometry((Point) editGeometry.geometry.get());
-                    session.getRepositoryForClass(BorneDigue.class).update(borne);
+                    ((BorneDigue) editedObjet).setGeometry((Point) editGeometry.geometry.get());
+                    session.getRepositoryForClass(objetClass).update(editedObjet);
                     ((FXSystemeReperagePane) editPane).selectSRB(null); //Cast possible as the editPane is initialized in the current constructor as FXSystemeReperagePane
 
                     //les event vont induire le repaint de la carte
@@ -242,14 +237,14 @@ public class BorneEditHandler extends ObjetEditHandler {
                     startY = initialY;
 
                     // La position initiale de la borne est rétablie.
-                    editGeometry.moveSelectedNode(helperBorne.toCoord(startX, startY));
+                    editGeometry.moveSelectedNode(helperObjet.toCoord(startX, startY));
                     updateGeometry();
 
                     // Probablement pas nécessaire de sauvegarder le non changement de la borne
                     // mais permet d'actualiser la carte
                     //-> TODO : appliquer un refresh de la map uniquement.
-                    borne.setGeometry((Point) editGeometry.geometry.get());
-                    session.getRepositoryForClass(BorneDigue.class).update(borne);
+                    ((BorneDigue) editedObjet).setGeometry((Point) editGeometry.geometry.get());
+                    session.getRepositoryForClass(objetClass).update(editedObjet);
                 }
             } else {
                 super.mouseReleased(me);

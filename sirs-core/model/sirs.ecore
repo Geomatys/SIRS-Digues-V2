@@ -53,7 +53,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="TronconDigue" eSuperTypes="#//AvecGeometrie">
+  <eClassifiers xsi:type="ecore:EClass" name="TronconDigue" eSuperTypes="#//AvecSettableGeometrie">
     <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -197,7 +197,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="BorneDigue">
+  <eClassifiers xsi:type="ecore:EClass" name="BorneDigue" eSuperTypes="#//AvecGeometrie">
     <eAnnotations source="couchDBDocument">
       <details key="document" value="true&#xA;"/>
     </eAnnotations>
@@ -218,7 +218,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Positionable" abstract="true" eSuperTypes="#//AvecGeometrie">
+  <eClassifiers xsi:type="ecore:EClass" name="Positionable" abstract="true" eSuperTypes="#//AvecSettableGeometrie">
     <eStructuralFeatures xsi:type="ecore:EReference" name="borneDebutId" eType="#//BorneDigue"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="borne_debut_aval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="borne_debut_distance" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
@@ -1548,12 +1548,11 @@
     <eOperations name="getPhotographeId" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AotCotAssociable" abstract="true" interface="true"/>
-  <eClassifiers xsi:type="ecore:EClass" name="AvecGeometrie" abstract="true" interface="true">
+  <eClassifiers xsi:type="ecore:EClass" name="AvecSettableGeometrie" abstract="true"
+      interface="true" eSuperTypes="#//AvecGeometrie">
     <eOperations name="setGeometry">
       <eParameters name="geometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
     </eOperations>
-    <eOperations name="getGeometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
-    <eOperations name="geometryProperty" eType="ecore:EDataType jts.ecore#//ObjectProperty"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TronconLitAssociable" abstract="true"
       interface="true"/>
@@ -1618,4 +1617,8 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AvecObservations" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="AvecPrestations" abstract="true" interface="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AvecGeometrie" abstract="true" interface="true">
+    <eOperations name="getGeometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
+    <eOperations name="geometryProperty" eType="ecore:EDataType jts.ecore#//ObjectProperty"/>
+  </eClassifiers>
 </ecore:EPackage>

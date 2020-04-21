@@ -36,8 +36,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -50,8 +48,6 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -66,7 +62,6 @@ import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
-import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
@@ -77,21 +72,7 @@ import org.opengis.filter.identity.Identifier;
  * @author Johann Sorel (Geomatys)
  * @param <T>
  */
-public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandler {
-
-    static final int CROSS_SIZE = 5;
-
-    private final EditionMouseListen mouseInputListener = new EditionMouseListen();
-    final FXGeometryLayer geomlayer = new FXGeometryLayer() {
-        @Override
-        protected Node createVerticeNode(Coordinate c, boolean selected) {
-            final Line h = new Line(c.x - CROSS_SIZE, c.y, c.x + CROSS_SIZE, c.y);
-            final Line v = new Line(c.x, c.y - CROSS_SIZE, c.x, c.y + CROSS_SIZE);
-            h.setStroke(Color.RED);
-            v.setStroke(Color.RED);
-            return new Group(h, v);
-        }
-    };
+public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler {
 
     final Session session;
 
@@ -99,13 +80,7 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
     FeatureMapLayer tronconLayer = null;
     EditionHelper helperTroncon;
 
-    final Class<T> objetClass;
-    private T objet = null;
-    FeatureMapLayer objetLayer = null;
-    private EditionHelper helperObjet;
-
-    final EditionHelper.EditionGeometry editGeometry = new EditionHelper.EditionGeometry();
-
+    EditionMouseListen mouseInputListener;
 
     //Panneaux d'édition
     final Stage dialog = new Stage();
@@ -129,7 +104,7 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
      * @param clazz
      */
     public ObjetEditHandler(final FXMap map, final Class<T> clazz) {
-        this(map,clazz, new FXObjetEditPane(map, "troncon", clazz, true, true));
+        this(map,clazz, new FXObjetEditPane(map, "troncon", clazz, true, true), true);
     }
 
     /**
@@ -139,14 +114,15 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
      * @param map : carte à partir de laquelle on permet l'édition.
      * @param clazz : classe éditée.
      * @param editPane : panneau d'édition associé.
+     * @param instantiateMouseEditListener : boolean indiquant si l'on souhaite que ce constructeur instantie {@link #mouseInputListener} with a default value.
      */
-    public ObjetEditHandler(final FXMap map, final Class<T> clazz, final FXObjetEditPane editPane) {
+    public ObjetEditHandler(final FXMap map, final Class<T> clazz, final FXObjetEditPane editPane, final boolean instantiateMouseEditListener) {
+        super(clazz);
         ArgumentChecks.ensureNonNull("Panneau d'édition", editPane);
-        objetClass =clazz;
+
         session = Injector.getSession();
         dialog.getIcons().add(SIRS.ICON);
         this.editPane = editPane;
-//        this.editPane.setTypeNameLabel(typeName);
 
         // Prepare footer to set an "exit" button
         final Button exitButton = new Button("Fermer");
@@ -241,6 +217,21 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
         });
 
         dialog.show();
+
+        if (instantiateMouseEditListener) {
+            mouseInputListener = new EditionMouseListen();
+        }
+    }
+
+    String getObjetLayerName() {
+        final LabelMapper mapper = LabelMapper.get(objetClass);
+        return mapper.mapClassName();
+    }
+
+
+    @Override
+    protected FXPanMouseListen getMouseInputListener() {
+        return mouseInputListener;
     }
 
     /**
@@ -249,10 +240,6 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
     @Override
     public void install(final FXMap component) {
         super.install(component);
-        component.addEventHandler(MouseEvent.ANY, mouseInputListener);
-        component.addEventHandler(ScrollEvent.ANY, mouseInputListener);
-        map.setCursor(Cursor.CROSSHAIR);
-        map.addDecoration(0, geomlayer);
 
         //recuperation du layer de troncon
         tronconLayer = null;
@@ -263,12 +250,11 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
         final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
         final MapContext context = cc.getContext();
         toActivateBack = new ArrayList<>();
-        LabelMapper mapper = LabelMapper.get(objetClass);
         for (MapLayer layer : context.layers()) {
             if (layer.getName().equalsIgnoreCase(TRONCON_LAYER_NAME)) {
                 tronconLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
-            } else if (layer.getName().equalsIgnoreCase(mapper.mapClassName())) {
+            } else if (layer.getName().equalsIgnoreCase(getObjetLayerName())) {
                 objetLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
             } else if (layer.isSelectable()) {
@@ -304,7 +290,7 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
             }
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
-            component.removeDecoration(geomlayer);
+            component.removeDecoration(geomLayer);
             component.setBottom(null);
 
             //déselection borne et troncon
@@ -322,19 +308,19 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
         return false;
     }
 
-    private void updateGeometry() {
-        if (objet == null) {
-            editGeometry.reset();
-        } else {
-            editGeometry.geometry.set(objet.getGeometry());
-        }
-
-        if (editGeometry.geometry == null) {
-            geomlayer.getGeometries().clear();
-        } else {
-            geomlayer.getGeometries().setAll(editGeometry.geometry.get());
-        }
-    }
+//    private void updateGeometry() {
+//        if (editedObjet == null) {
+//            editGeometry.reset();
+//        } else {
+//            editGeometry.geometry.set(editedObjet.getGeometry());
+//        }
+//
+//        if (editGeometry.geometry == null) {
+//            geomLayer.getGeometries().clear();
+//        } else {
+//            geomLayer.getGeometries().setAll(editGeometry.geometry.get());
+//        }
+//    }
 
     class EditionMouseListen extends FXPanMouseListen {
 
@@ -438,7 +424,7 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
             startX = getMouseX(me);
             startY = getMouseY(me);
 
-            if (objet != null && editGeometry.selectedNode[0] >= 0) {
+            if (editedObjet != null && editGeometry.selectedNode[0] >= 0) {
                 //deplacement d'une borne
                 editGeometry.moveSelectedNode(helperObjet.toCoord(startX, startY));
                 updateGeometry();
@@ -451,7 +437,7 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
         public void mouseReleased(MouseEvent me) {
             mouseDragged(me);
 
-            if (objet != null && editGeometry.selectedNode[0] >= 0) {
+            if (editedObjet != null && editGeometry.selectedNode[0] >= 0) {
                 //On demande à l'utilisateur s'il souhaite sauvegarder en base de données les modifications apportées.
                 final Alert alert = new Alert(Alert.AlertType.WARNING, "Confirmer le déplacement de l'objet?", ButtonType.OK, ButtonType.CANCEL);
                 alert.setResizable(true);
@@ -459,8 +445,8 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
 
                 if (clickedButton.get() == ButtonType.OK) {
 
-                    objet.setGeometry((Point) editGeometry.geometry.get());
-                    session.getRepositoryForClass(objetClass).update(objet);
+//                    editedObjet.setGeometry((Point) editGeometry.geometry.get());
+                    session.getRepositoryForClass(objetClass).update(editedObjet);
 //                    editPane.selectSRB(null);
                     //les event vont induire le repaint de la carte
                     final TronconDigue troncon = editPane.getTronconProperty();
@@ -479,8 +465,8 @@ public class ObjetEditHandler <T extends Objet> extends AbstractNavigationHandle
                     // Probablement pas nécessaire de sauvegarder le non changement de la borne
                     // mais permet d'actualiser la carte
                     //-> TODO : appliquer un refresh de la map uniquement.
-                    objet.setGeometry((Point) editGeometry.geometry.get());
-                    session.getRepositoryForClass(objetClass).update(objet);
+//                    editedObjet.setGeometry((Point) editGeometry.geometry.get());
+                    session.getRepositoryForClass(objetClass).update(editedObjet);
                 }
             } else {
                 super.mouseReleased(me);
