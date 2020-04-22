@@ -112,7 +112,7 @@ public class BorneEditHandler extends ObjetEditHandler {
 //        }
 //    }
 
-    private class MouseListenForBorne extends EditionMouseListen {
+    private class MouseListenForBorne extends EditionOnTronconMouseListen {
 
         public MouseListenForBorne() {
             super(BorneEditHandler.this);
@@ -128,10 +128,10 @@ public class BorneEditHandler extends ObjetEditHandler {
             startY = getMouseY(e);
             mousebutton = e.getButton();
 
-            final FXSystemeReperagePane.ObjetEditMode mode = editPane.getMode();
+            final ObjetEditMode mode = editPane.getMode();
             final FXSystemeReperagePane srbEditPane = (FXSystemeReperagePane) editPane; //Cast possible as the editPane is initialized in the current constructor as FXSystemeReperagePane
 
-            if (FXSystemeReperagePane.ObjetEditMode.PICK_TRONCON.equals(mode)) {
+            if (ObjetEditMode.PICK_TRONCON.equals(mode)) {
                 if (mousebutton == MouseButton.PRIMARY) {
                     //selection d'un troncon
                     final Feature feature = helperTroncon.grabFeature(e.getX(), e.getY(), false);
@@ -143,7 +143,7 @@ public class BorneEditHandler extends ObjetEditHandler {
                         }
                     }
                 }
-            } else if (FXSystemeReperagePane.ObjetEditMode.EDIT_OBJET.equals(mode)) {
+            } else if (ObjetEditMode.EDIT_OBJET.equals(mode)) {
                 final SystemeReperage sr = srbEditPane.systemeReperageProperty().get();
 
                 if (editedObjet == null || editGeometry.selectedNode[0] < 0) {
@@ -167,7 +167,7 @@ public class BorneEditHandler extends ObjetEditHandler {
                     }
                 }
 
-            } else if (FXSystemeReperagePane.ObjetEditMode.CREATE_OBJET.equals(mode)) {
+            } else if (ObjetEditMode.CREATE_OBJET.equals(mode)) {
 
                 final Coordinate coord = helperObjet.toCoord(startX, startY);
                 final Point point = GO2Utilities.JTS_FACTORY.createPoint(coord);

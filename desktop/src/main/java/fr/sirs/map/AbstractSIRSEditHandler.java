@@ -7,10 +7,13 @@ package fr.sirs.map;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import fr.sirs.core.model.AvecGeometrie;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
@@ -21,6 +24,7 @@ import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
 import org.geotoolkit.map.FeatureMapLayer;
+import org.geotoolkit.map.MapLayer;
 
 /**
  * Abstract base Classe for Edition on map of {@link AvecGeometrie} elements in Sirs
@@ -39,7 +43,9 @@ public abstract class AbstractSIRSEditHandler<T extends AvecGeometrie> extends A
 
     protected final Class<T> objetClass;
     protected T editedObjet = null;
-    protected final SimpleObjectProperty<T> editedObjetProperty;
+    protected final ObjectProperty<T> editedObjetProperty;
+
+    protected final ObjectProperty<ObjetEditMode> modeProperty;
 
     protected FeatureMapLayer objetLayer = null;
     protected EditionHelper helperObjet;
@@ -70,7 +76,15 @@ public abstract class AbstractSIRSEditHandler<T extends AvecGeometrie> extends A
             }
         };
         editedObjetProperty = new SimpleObjectProperty<>(editedObjet);
+        modeProperty = new SimpleObjectProperty<>();
 
+    }
+
+    protected ObjectProperty<T> getEditedObjetProperty() {
+        return editedObjetProperty;
+    }
+    protected ObjectProperty<ObjetEditMode> getModeProperty() {
+        return modeProperty;
     }
 
     public EditionHelper.EditionGeometry getEditionGeometry() {
@@ -111,6 +125,24 @@ public abstract class AbstractSIRSEditHandler<T extends AvecGeometrie> extends A
         component.addEventHandler(ScrollEvent.ANY, getMouseInputListener());
         map.setCursor(Cursor.CROSSHAIR);
         map.addDecoration(0, getGeometryLayer());
+    }
+
+    /**
+     * {@inheritDoc }
+     */
+    @Override
+    public boolean uninstall(final FXMap component) {
+            super.uninstall(component);
+            component.removeDecoration(getGeometryLayer());
+            component.removeEventHandler(MouseEvent.ANY, getMouseInputListener());
+            component.removeEventHandler(ScrollEvent.ANY, getMouseInputListener());
+            component.setBottom(null);
+
+            if (objetLayer != null) {
+                objetLayer.setSelectionFilter(null);
+            }
+
+            return true;
     }
 
     protected void updateGeometry() {

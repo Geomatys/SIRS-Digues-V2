@@ -19,56 +19,16 @@
 package fr.sirs.map;
 
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.Session;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.util.LabelComparator;
-import fr.sirs.util.SimpleButtonColumn;
-import fr.sirs.util.SirsStringConverter;
-import fr.sirs.util.ReferenceTableCell;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.cell.TextFieldListCell;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.util.Callback;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
-import org.geotoolkit.gui.javafx.util.FXTableCell;
-import org.geotoolkit.gui.javafx.util.FXTableView;
-import org.geotoolkit.gui.javafx.util.TaskManager;
-import org.geotoolkit.internal.GeotkFX;
-import org.geotoolkit.util.StringUtilities;
 
 /**
  *
@@ -76,39 +36,14 @@ import org.geotoolkit.util.StringUtilities;
  * @author Matthieu Bastianelli (Geomatys)
  * @param <T>
  */
-public class FXObjetEditPane <T extends Objet> extends BorderPane {
+public class FXObjetEditPane <T extends Objet> extends FXAbstractEditOnTronconPane<T> {
 
-    public interface EditMode {};
-
-    public static enum ObjetEditMode implements EditMode {
-        PICK_TRONCON,
-        EDIT_OBJET,
-        CREATE_OBJET,
-        NONE
-    };
-
-    @FXML TextField uiTronconLabel;
-    @FXML ToggleButton uiPickTroncon;
-    @FXML private FXTableView<T> uiObjetTable;
-    @FXML Button uiAddObjet;
-    @FXML ToggleButton uiCreateObjet;
-    @FXML Label typeNameLabel;
-
-    final ObjectProperty<TronconDigue> tronconProp = new SimpleObjectProperty<>();
-    final ObjectProperty<ObjetEditMode> mode = new SimpleObjectProperty<>(ObjetEditMode.NONE);
-    final Session session;
-    final FXMap map;
-
-    /** A flag to indicate that selected {@link TronconDigue} must be saved. */
-    final SimpleBooleanProperty saveTD = new SimpleBooleanProperty(false);
-
-    final Class<T> editedClass;
-    private final AbstractSIRSRepository<T> repo;
-
-    private final String defaultEmptyLibelle = "Aucun tronçon sélectionné";
+//    private final AbstractSIRSRepository<T> repo;
+//
+//    private final String defaultEmptyLibelle = "Aucun tronçon sélectionné";
 
 
-//    public FXObjetEditPane(FXMap map, final String typeName, final Class clazz, final boolean createNameColumn, final boolean createDeleteColumn) {
+//    public FXAbstractEditOnTronconPane(FXMap map, final String typeName, final Class clazz, final boolean createNameColumn, final boolean createDeleteColumn) {
 //        this(map, clazz, createNameColumn, createDeleteColumn);
 //        setTypeNameLabel(typeName);
 //    }
@@ -118,72 +53,16 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
      * @param map
      * @param typeName
      * @param clazz
-     * @param createNameColumn : indicates if the name column must be set.
-     * @param createDeleteColumn indicates if the delete column must be set.
      */
-    public FXObjetEditPane(FXMap map,final String typeName, final Class clazz, final boolean createNameColumn, final boolean createDeleteColumn) {
-        SIRS.loadFXML(this);
-
-        editedClass = clazz;
-        this.map = map;
-        session = Injector.getSession();
-        setTypeNameLabel(typeName);
-
-        repo = session.getRepositoryForClass(editedClass);
-
-        uiPickTroncon.setGraphic(new ImageView(SIRS.ICON_CROSSHAIR_BLACK));
-
-        uiObjetTable.setEditable(true);
-        uiObjetTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-//        uiObjetTable.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<SystemeReperageBorne>() {
-//            @Override
-//            public void onChanged(ListChangeListener.Change<? extends SystemeReperageBorne> c) {
-//                final int size = uiObjetTable.getSelectionModel().getSelectedItems().size();
-//                uiProject.setDisable(size<1);
-//            }
-//        });
-
-        uiPickTroncon.setOnAction(this::startPickTroncon);
-//        uiAddObjet.setOnAction(this::startAddObjet);
-        uiCreateObjet.setOnAction(this::startCreateObjet);
-
-        // Affichage du libellé du tronçon
-        uiTronconLabel.textProperty().bind(Bindings.createStringBinding(()->tronconProp.get()==null?defaultEmptyLibelle:tronconProp.get().getLibelle(),tronconProp));
-
-        //etat des boutons sélectionné
-        final ToggleGroup group = new ToggleGroup();
-        uiPickTroncon.setToggleGroup(group);
-        uiCreateObjet.setToggleGroup(group);
-
-        mode.addListener(new ChangeListener<ObjetEditMode>() {
-            @Override
-            public void changed(ObservableValue<? extends ObjetEditMode> observable, ObjetEditMode oldValue, ObjetEditMode newValue) {
-                if(newValue==ObjetEditMode.CREATE_OBJET){
-                    group.selectToggle(uiCreateObjet);
-                }else if(newValue==ObjetEditMode.PICK_TRONCON){
-                    group.selectToggle(uiPickTroncon);
-                }else{
-                    group.selectToggle(null);
-                }
-            }
-        });
-
-        //colonne de la table
-        if (createDeleteColumn)
-            addColumToTable(new DeleteColumn(), false);
-
-        if (createNameColumn) {
-            addColumToTable(new NameColumn(), true);
-        }
-
-        // Initialize event listeners
-        tronconProp.addListener(this::tronconChanged);
-
+    public FXObjetEditPane(FXMap map,final String typeName, final Class clazz) {
+        super(map, typeName, clazz, true, false);
+//        SIRS.loadFXML(this);
+//        setTypeNameLabel(typeName);
     }
 
-    final void setTypeNameLabel(final String name){
-        typeNameLabel.setText(StringUtilities.firstToUpper(name)+ " :");
-    }
+//    final void setTypeNameLabel(final String name){
+//        typeNameLabel.setText(StringUtilities.firstToUpper(name)+ " :");
+//    }
 
     /**
      * Set the input Tablecolumn to the {@link #uiObjetTable}
@@ -191,80 +70,80 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
      * @param toAddColumn
      * @param toSort
      */
-    final void addColumToTable(final TableColumn toAddColumn, final boolean toSort) {
-            uiObjetTable.getColumns().add(toAddColumn);
-            if (toSort)
-                toAddColumn.setSortable(true);
-    }
+//    final void addColumToTable(final TableColumn toAddColumn, final boolean toSort) {
+//            uiObjetTable.getColumns().add(toAddColumn);
+//            if (toSort)
+//                toAddColumn.setSortable(true);
+//    }
 
-    public void reset(){
-        mode.set(ObjetEditMode.PICK_TRONCON);
-        tronconProperty().set(null);
-    }
+//    public void reset(){
+//        mode.set(ObjetEditMode.PICK_TRONCON);
+//        tronconProperty().set(null);
+//    }
 
-    public ReadOnlyObjectProperty<ObjetEditMode> modeProperty(){
-        return mode;
-    }
+//    public ReadOnlyObjectProperty<ObjetEditMode> modeProperty(){
+//        return mode;
+//    }
 
-    public ObjectProperty<TronconDigue> tronconProperty(){
-        return tronconProp;
-    }
+//    public ObjectProperty<TronconDigue> tronconProperty(){
+//        return tronconProp;
+//    }
+//
+//    public TronconDigue getTronconProperty(){
+//        return tronconProp.get();
+//    }
+//
+//    ObjetEditMode getMode() {
+//        return mode.get();
+//    }
 
-    public TronconDigue getTronconProperty(){
-        return tronconProp.get();
-    }
+//    public ObservableList<T> objetProperties(){
+//        return uiObjetTable.getSelectionModel().getSelectedItems();
+//    }
 
-    ObjetEditMode getMode() {
-        return mode.get();
-    }
+//    public void save() {
+//        save(tronconProp.getValue());
+//    }
 
-    public ObservableList<T> objetProperties(){
-        return uiObjetTable.getSelectionModel().getSelectedItems();
-    }
-
-    public void save() {
-        save(tronconProp.getValue());
-    }
-
-    private void save(final TronconDigue td) {
-        final boolean mustSaveTd = saveTD.get();
-
-        if (mustSaveTd) {
-            saveTD.set(false);
-
-            TaskManager.INSTANCE.submit("Sauvegarde...", () -> {
-                if (td != null && mustSaveTd) {
-                    ((AbstractSIRSRepository) session.getRepositoryForClass(td.getClass())).update(td);
-                }
-            });
-        }
-    }
-
-    private void startPickTroncon(ActionEvent evt){
-        mode.set(ObjetEditMode.PICK_TRONCON);
-    }
+//    private void save(final TronconDigue td) {
+//        final boolean mustSaveTd = saveTD.get();
+//
+//        if (mustSaveTd) {
+//            saveTD.set(false);
+//
+//            TaskManager.INSTANCE.submit("Sauvegarde...", () -> {
+//                if (td != null && mustSaveTd) {
+//                    ((AbstractSIRSRepository) session.getRepositoryForClass(td.getClass())).update(td);
+//                }
+//            });
+//        }
+//    }
+//
+//    private void startPickTroncon(ActionEvent evt){
+//        mode.set(ObjetEditMode.PICK_TRONCON);
+//    }
 
     /*
      * OBJET UTILITIES
      */
 
-    /**
-     * Constuit un composant graphique listant les éléments du tronçon.
-     *
-     * @param toExclude Liste des identifiants des éléments à exclure de la liste.
-     * @return A list view of all bornes bound to currently selected troncon, or
-     * null if no troncon is selected.
-     */
-    ListView<T> buildObjetList(final Set<String> toExclude) {
-
-        // Construction du composant graphique.
-        final ListView<T> elementsView = new ListView<>();
-        elementsView.setItems(getObjectListFromTroncon(toExclude));
-        elementsView.setCellFactory(TextFieldListCell.forListView(new SirsStringConverter()));
-        elementsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
-        return elementsView;
-    }
+//    /**
+//     * Constuit un composant graphique listant les éléments du tronçon.
+//     *
+//     * @param toExclude Liste des identifiants des éléments à exclure de la liste.
+//     * @return A list view of all bornes bound to currently selected troncon, or
+//     * null if no troncon is selected.
+//     */
+//    ListView<T> buildObjetList(final Set<String> toExclude) {
+//
+//        // Construction du composant graphique.
+//        final ListView<T> elementsView = new ListView<>();
+//        elementsView.setItems(getObjectListFromTroncon(toExclude));
+//        elementsView.setCellFactory(TextFieldListCell.forListView(new SirsStringConverter()));
+//        elementsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+//
+//        return elementsView;
+//    }
 
     /**
      * Retourne la liste des éléments T de la base associés au tronçon sélectionné.
@@ -272,29 +151,30 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
      * @param toExclude
      * @return
      */
-    private ObservableList<T> getObjectListFromTroncon(final Set<String> toExclude) {
-
-        final TronconDigue troncon = tronconProperty().get();
-        if (troncon == null) return null;
-
-//        // Construction de la liste définitive des éléments à afficher.
-        final List<T> elements =repo.getAll().stream()
-//                    .map(elt -> (T) elt)
-                    .filter(elt -> (troncon.getId().equals( ((Objet) elt).getForeignParentId())))
-                    .collect(Collectors.toList());
-
-        if (toExclude != null && !toExclude.isEmpty()) {
-            elements.removeIf(elt -> toExclude.contains(elt.getId()));
-        }
-        return FXCollections.observableArrayList(elements);
-    }
+//    private ObservableList<T> getObjectListFromTroncon(final Set<String> toExclude) {
+//
+//        final TronconDigue troncon = tronconProperty().get();
+//        if (troncon == null) return null;
+//
+////        // Construction de la liste définitive des éléments à afficher.
+//        final List<T> elements =repo.getAll().stream()
+////                    .map(elt -> (T) elt)
+//                    .filter(elt -> (troncon.getId().equals( ((Objet) elt).getForeignParentId())))
+//                    .collect(Collectors.toList());
+//
+//        if (toExclude != null && !toExclude.isEmpty()) {
+//            elements.removeIf(elt -> toExclude.contains(elt.getId()));
+//        }
+//        return FXCollections.observableArrayList(elements);
+//    }
 
     /**
      * Ajout
      *
      * @param evt
      */
-    void startAddObjet(ActionEvent evt){
+    @Override
+    void startAddObjet(ActionEvent evt) {
         throw new UnsupportedOperationException("Unsupported yet.");
 //        final TronconDigue troncon = tronconProperty().get();
 //        if(troncon==null) return;
@@ -323,23 +203,24 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
 //        }
     }
 
-    private void startCreateObjet(ActionEvent evt){
-        if(mode.get().equals(ObjetEditMode.CREATE_OBJET)){
-            //on retourne on mode edition
-            mode.set(ObjetEditMode.EDIT_OBJET);
-        }else{
-            mode.set(ObjetEditMode.CREATE_OBJET);
-        }
-    }
+//    private void startCreateObjet(ActionEvent evt){
+//        if(mode.get().equals(ObjetEditMode.CREATE_OBJET)){
+//            //on retourne on mode edition
+//            mode.set(ObjetEditMode.EDIT_OBJET);
+//        }else{
+//            mode.set(ObjetEditMode.CREATE_OBJET);
+//        }
+//    }
 
     /**
      * Création d'un élément
      *
      * @param geom
      */
-    public void createObjet(final Point geom){ //uniquement un point ici, on veut pouvoir éditer un segment!
+    @Override
+    public void createObjet(final Point geom) { //uniquement un point ici, on veut pouvoir éditer un segment!
 
-        throw new UnsupportedOperationException("Unsupported yet.");
+//        throw new UnsupportedOperationException("Unsupported yet.");
 //
 //        // Formulaire de renseignement du libellé de la borne.
 //        final TextInputDialog dialog = new TextInputDialog("");
@@ -386,6 +267,7 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
      * @param e Event fired when deletion button has been fired.
      */
     @FXML
+    @Override
     void deleteObjets(ActionEvent e) {
 
         throw new UnsupportedOperationException("Unsupported yet.");
@@ -436,109 +318,13 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
 //        stage.show();
     }
 
-    /**
-     * Detect if any available SR would be emptied if input {@link BorneDigue}s
-     * were deleted from database. If it's the case, we ask user to confirm his
-     * will to remove them.
-     * @param bornes Bornes to delete.
-     * @return True if we can proceed to borne deletion, false if not.
-     */
-    public boolean checkObjetSuppression(final BorneDigue... bornes) {
-
-        throw new UnsupportedOperationException("Unsupported yet.");
-//        final HashSet<String> borneIds = new HashSet<>();
-//        for (final BorneDigue bd : bornes) {
-//            borneIds.add(bd.getId());
-//        }
-//
-//        // Find all Sr which would be emptied by suppression of input bornes.
-//        FilteredList<SystemeReperage> emptiedSrs = uiSrComboBox.getItems().filtered(sr
-//                -> sr.systemeReperageBornes.filtered(srb -> !borneIds.contains(srb.getBorneId())).isEmpty()
-//        );
-//
-//        if (emptiedSrs.isEmpty()) {
-//            return true;
-//        }
-//
-//        final StringBuilder msg = new StringBuilder("La suppression des bornes séléctionnées va entièrement vider les systèmes de repérage suivants :");
-//        for (final SystemeReperage sr : emptiedSrs) {
-//            msg.append(System.lineSeparator()).append(uiSrComboBox.getConverter().toString(sr));
-//        }
-//        msg.append(System.lineSeparator()).append("Voulez-vous tout-de-même supprimer ces bornes ?");
-//
-//        final Alert alert = new Alert(Alert.AlertType.WARNING, msg.toString(), ButtonType.NO, ButtonType.YES);
-//        alert.setResizable(true);
-//        return ButtonType.YES.equals(alert.showAndWait().orElse(ButtonType.NO));
-    }
-
-
-//    void tronconChanged(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
-    void tronconChanged(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
-
-        if (oldValue != null) {
-            save(oldValue);
-        }
-
-//        if(newValue!=null) {
-//            mode.set(ObjetEditMode.NONE);
-//        }
-
-
-        if (newValue == null) {
-            uiObjetTable.setItems(FXCollections.emptyObservableList());
-            mode.set(ObjetEditMode.NONE); //Todo?
-        } else {
-            final ObjetEditMode current = getMode();
-            if (current.equals(ObjetEditMode.CREATE_OBJET) || current.equals(ObjetEditMode.EDIT_OBJET)) {
-                //do nothing
-            } else {
-                mode.set(ObjetEditMode.EDIT_OBJET);
-            }
-
-            // By default, we'll sort bornes from uphill to downhill, but alow user to sort them according to available table columns.
-//            final Comparator defaultComparator = defaultSRBComparator.get();
-//            final SortedList sortedItems;
-//            if (defaultComparator != null) {
-//                sortedItems = newValue.getSystemeReperageBornes().sorted(defaultComparator).sorted();
-//            } else {
-//                sortedItems = newValue.getSystemeReperageBornes().sorted();
-//            }
-
-//            sortedItems.comparatorProperty().bind(uiObjetTable.comparatorProperty());
-            uiObjetTable.setItems(getObjectListFromTroncon(null));
-        }
-
-    }
-
-//    private void updateDefaultSRCheckBox(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) {
-//        if (newValue != null && tronconProp.get() != null &&
-//                newValue.getId().equals(tronconProp.get().getSystemeRepDefautId())) {
-//            uiDefaultSRCheckBox.setSelected(true);
-//        } else {
-//            uiDefaultSRCheckBox.setSelected(false);
-//        }
-//    }
-
-//    private void updateTonconDefaultSR(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-//        TronconDigue td = tronconProp.get();
-//        final SystemeReperage selectedSR = uiSrComboBox.getSelectionModel().getSelectedItem();
-//        final String srid = selectedSR == null? null : selectedSR.getId();
-//        if (td != null && srid != null) {
-//            if (Boolean.TRUE.equals(newValue) && !srid.equals(td.getSystemeRepDefautId())) {
-//                td.setSystemeRepDefautId(srid);
-//                saveTD.set(true);
-//            } else if (Boolean.FALSE.equals(newValue) && srid.equals(td.getSystemeRepDefautId())) {
-//                td.setSystemeRepDefautId(null);
-//                saveTD.set(true);
-//            }
-//        }
-//    }
 
     /*
      * TABLE UTILITIES
      */
 
-    private void updateObjetTable(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) {
+    @Override
+    void updateObjetTable(ObservableValue observable, SystemeReperage oldValue, SystemeReperage newValue) {
         throw new UnsupportedOperationException("Unsupported updateObjetTable yet.");
 //        if (oldValue != null) {
 //            save(oldValue, null);
@@ -569,73 +355,73 @@ public class FXObjetEditPane <T extends Objet> extends BorderPane {
     }
 
 
-    /**
-     * Colonne de suppression d'une borne d'un système de repérage.
-     */
-    private class DeleteColumn extends SimpleButtonColumn<Element, Element> {
+//    /**
+//     * Colonne de suppression d'une borne d'un système de repérage.
+//     */
+//    private class DeleteColumn extends SimpleButtonColumn<Element, Element> {
+//
+//        public DeleteColumn() {
+//            super(GeotkFX.ICON_UNLINK,
+//                    (TableColumn.CellDataFeatures<Element, Element> param) -> new SimpleObjectProperty<>(param.getValue()),
+//                    (Element t) -> true,
+//                    new Function<Element, Element>() {
+//
+//                        public Element apply(Element srb) {
+//                            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression?",
+//                                    ButtonType.NO, ButtonType.YES);
+//                            alert.setResizable(true);
+//                            final ButtonType res = alert.showAndWait().get();
+//                            if (ButtonType.YES == res) {
+////                                saveSR.set(systemeReperageProperty().get().getSystemeReperageBornes().remove(srb));
+//                            }
+//                            return null;
+//                        }
+//                    },
+//                    "Enlever du système de repérage"
+//            );
+//        }
+//    }
 
-        public DeleteColumn() {
-            super(GeotkFX.ICON_UNLINK,
-                    (TableColumn.CellDataFeatures<Element, Element> param) -> new SimpleObjectProperty<>(param.getValue()),
-                    (Element t) -> true,
-                    new Function<Element, Element>() {
 
-                        public Element apply(Element srb) {
-                            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression?",
-                                    ButtonType.NO, ButtonType.YES);
-                            alert.setResizable(true);
-                            final ButtonType res = alert.showAndWait().get();
-                            if (ButtonType.YES == res) {
-//                                saveSR.set(systemeReperageProperty().get().getSystemeReperageBornes().remove(srb));
-                            }
-                            return null;
-                        }
-                    },
-                    "Enlever du système de repérage"
-            );
-        }
-    }
-
-
-    /**
-     * Colonne d'affichage et de mise à jour du nom d'une borne.
-     */
-    private static class NameColumn extends TableColumn<Element,Element>{
-
-        public NameColumn() {
-            super("Nom");
-            setSortable(false);
-
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, Element>, ObservableValue<Element>>() {
-                @Override
-                public ObservableValue<Element> call(TableColumn.CellDataFeatures<Element, Element> param) {
-                    return new SimpleObjectProperty<>(param.getValue());
-                }
-            });
-
-            final SirsStringConverter sirsStringConverter = new SirsStringConverter();
-            setCellFactory((TableColumn<Element, Element> param) -> {
-                final FXTableCell<Element, Element> tableCell = new FXTableCell<Element, Element>() {
-
-                    @Override
-                    protected void updateItem(Element item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty || item == null) {
-                            setText(null);
-                            setGraphic(null);
-                        } else {
-                            setGraphic(new ImageView(ReferenceTableCell.ICON_LINK));
-                            setText(sirsStringConverter.toString(item));
-                        }
-                    }
-
-                };
-                tableCell.setEditable(false);
-                return tableCell;
-            });
-
-            setComparator(new LabelComparator());
-        }
-    }
+//    /**
+//     * Colonne d'affichage et de mise à jour du nom d'une borne.
+//     */
+//    private static class NameColumn extends TableColumn<Element,Element>{
+//
+//        public NameColumn() {
+//            super("Nom");
+//            setSortable(false);
+//
+//            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, Element>, ObservableValue<Element>>() {
+//                @Override
+//                public ObservableValue<Element> call(TableColumn.CellDataFeatures<Element, Element> param) {
+//                    return new SimpleObjectProperty<>(param.getValue());
+//                }
+//            });
+//
+//            final SirsStringConverter sirsStringConverter = new SirsStringConverter();
+//            setCellFactory((TableColumn<Element, Element> param) -> {
+//                final FXTableCell<Element, Element> tableCell = new FXTableCell<Element, Element>() {
+//
+//                    @Override
+//                    protected void updateItem(Element item, boolean empty) {
+//                        super.updateItem(item, empty);
+//                        if (empty || item == null) {
+//                            setText(null);
+//                            setGraphic(null);
+//                        } else {
+//                            setGraphic(new ImageView(ReferenceTableCell.ICON_LINK));
+//                            setText(sirsStringConverter.toString(item));
+//                        }
+//                    }
+//
+//                };
+//                tableCell.setEditable(false);
+//                return tableCell;
+//            });
+//
+//            setComparator(new LabelComparator());
+//        }
+//    }
 
 }

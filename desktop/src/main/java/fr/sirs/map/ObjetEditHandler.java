@@ -18,8 +18,6 @@
  */
 package fr.sirs.map;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
 import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
@@ -31,16 +29,13 @@ import fr.sirs.core.model.Objet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
-import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Separator;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -57,7 +52,6 @@ import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.filter.identity.DefaultFeatureId;
-import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
@@ -80,11 +74,11 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
     FeatureMapLayer tronconLayer = null;
     EditionHelper helperTroncon;
 
-    EditionMouseListen mouseInputListener;
+    EditionOnTronconMouseListen mouseInputListener;
 
     //Panneaux d'édition
     final Stage dialog = new Stage();
-    FXObjetEditPane editPane;
+    FXAbstractEditOnTronconPane editPane;
 
     // overriden variable by init();
     protected String TRONCON_LAYER_NAME = CorePlugin.TRONCON_LAYER_NAME;
@@ -97,14 +91,14 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
 
     /**
      * Same as {@link #ObjetEditHandler(org.geotoolkit.gui.javafx.render2d.FXMap, java.lang.String, java.lang.Class, fr.sirs.map.FXObjetEditPane)}
-     * but with a default Pane of edition {@link FXObjetEditPane} and default type
+     * but with a default Pane of edition {@link FXAbstractEditOnTronconPane} and default type
      * name (tronçon).
      *
      * @param map
      * @param clazz
      */
     public ObjetEditHandler(final FXMap map, final Class<T> clazz) {
-        this(map,clazz, new FXObjetEditPane(map, "troncon", clazz, true, true), true);
+        this(map,clazz, new FXObjetEditPane(map, "troncon", clazz), true);
     }
 
     /**
@@ -116,9 +110,11 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
      * @param editPane : panneau d'édition associé.
      * @param instantiateMouseEditListener : boolean indiquant si l'on souhaite que ce constructeur instantie {@link #mouseInputListener} with a default value.
      */
-    public ObjetEditHandler(final FXMap map, final Class<T> clazz, final FXObjetEditPane editPane, final boolean instantiateMouseEditListener) {
+    public ObjetEditHandler(final FXMap map, final Class<T> clazz, final FXAbstractEditOnTronconPane editPane, final boolean instantiateMouseEditListener) {
         super(clazz);
         ArgumentChecks.ensureNonNull("Panneau d'édition", editPane);
+
+        this.map = map;
 
         session = Injector.getSession();
         dialog.getIcons().add(SIRS.ICON);
@@ -163,35 +159,6 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
             }
         });
 
-//        editPane.objetProperties().addListener(new ListChangeListener<SystemeReperageBorne>() {
-//            @Override
-//            public void onChanged(ListChangeListener.Change<? extends SystemeReperageBorne> c) {
-//                if (borneLayer == null) {
-//                    return;
-//                }
-//
-//                final ObservableList<SystemeReperageBorne> lst = editPane.objetProperties();
-//                final Set<Identifier> ids = new HashSet<>();
-//                for (SystemeReperageBorne borne : lst) {
-//                    ids.add(new DefaultFeatureId(borne.getBorneId()));
-//                }
-//
-//                final Id filter = GO2Utilities.FILTER_FACTORY.id(ids);
-//                borneLayer.setSelectionFilter(filter);
-//
-//                if (ids.size() == 1) {
-//                    //borne edition mode
-//                    final String borneId = lst.get(0).getBorneId();
-//                    borne = session.getRepositoryForClass(BorneDigue.class).get(borneId);
-//                    updateGeometry();
-//                } else {
-//                    borne = null;
-//                    updateGeometry();
-//                }
-//
-//            }
-//        });
-
         //fin de l'edition
         dialog.setOnHiding((WindowEvent event) -> {
             TronconDigue troncon = editPane.getTronconProperty();
@@ -219,7 +186,7 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
         dialog.show();
 
         if (instantiateMouseEditListener) {
-            mouseInputListener = new EditionMouseListen();
+            mouseInputListener = new EditionOnTronconMouseListen();
         }
     }
 
@@ -288,10 +255,6 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
                     layer.setSelectable(true);
                 }
             }
-            component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
-            component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
-            component.removeDecoration(geomLayer);
-            component.setBottom(null);
 
             //déselection borne et troncon
             if (tronconLayer != null) {
@@ -322,21 +285,21 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
 //        }
 //    }
 
-    class EditionMouseListen extends FXPanMouseListen {
+    class EditionOnTronconMouseListen extends SIRSEditMouseListen {
 
-        final ContextMenu popup = new ContextMenu();
+//        final ContextMenu popup = new ContextMenu();
         double startX;
         double startY;
 
         double initialX;
         double initialY;
 
-        public EditionMouseListen() {
+        public EditionOnTronconMouseListen() {
             super(ObjetEditHandler.this);
             popup.setAutoHide(true);
         }
 
-        public EditionMouseListen(final ObjetEditHandler editHandler) {
+        public EditionOnTronconMouseListen(final ObjetEditHandler editHandler) {
             super(editHandler);
             popup.setAutoHide(true);
         }
@@ -351,9 +314,9 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
             startY = getMouseY(e);
             mousebutton = e.getButton();
 
-            final FXSystemeReperagePane.ObjetEditMode mode = editPane.getMode();
+            final ObjetEditMode mode = editPane.getMode();
 
-            if (FXSystemeReperagePane.ObjetEditMode.PICK_TRONCON.equals(mode)) {
+            if (ObjetEditMode.PICK_TRONCON.equals(mode)) {
                 if (mousebutton == MouseButton.PRIMARY) {
                     //selection d'un troncon
                     final Feature feature = helperTroncon.grabFeature(e.getX(), e.getY(), false);
@@ -365,8 +328,11 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
                         }
                     }
                 }
-            } else if (FXSystemeReperagePane.ObjetEditMode.EDIT_OBJET.equals(mode)) {
-                throw new UnsupportedOperationException("unsupported EDIT_OBJET on mouseclicked");
+            } else {
+                super.mouseClicked(e);
+            }
+//            } else if (FXSystemeReperagePane.ObjetEditMode.EDIT_OBJET.equals(mode)) {
+//                throw new UnsupportedOperationException("unsupported EDIT_OBJET on mouseclicked");
 //                final SystemeReperage sr = editPane.systemeReperageProperty().get();
 //
 //                if (objet == null || editGeometry.selectedNode[0] < 0) {
@@ -390,88 +356,88 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
 //                    }
 //                }
 
-            } else if (FXSystemeReperagePane.ObjetEditMode.CREATE_OBJET.equals(mode)) {
-
-                final Coordinate coord = helperObjet.toCoord(startX, startY);
-                final Point point = GO2Utilities.JTS_FACTORY.createPoint(coord);
-                JTS.setCRS(point, session.getProjection());
-                //les event vont induire le repaint de la carte
-                editPane.createObjet(point);
-            }
+//            } else if (FXSystemeReperagePane.ObjetEditMode.CREATE_OBJET.equals(mode)) {
+//
+//                final Coordinate coord = helperObjet.toCoord(startX, startY);
+//                final Point point = GO2Utilities.JTS_FACTORY.createPoint(coord);
+//                JTS.setCRS(point, session.getProjection());
+//                //les event vont induire le repaint de la carte
+//                editPane.createObjet(point);
+//            }
 
         }
 
-        @Override
-        public void mousePressed(final MouseEvent e) {
-            super.mousePressed(e);
+//        @Override
+//        public void mousePressed(final MouseEvent e) {
+//            super.mousePressed(e);
+//
+//            initialX = getMouseX(e);
+//            initialY = getMouseY(e);
+//            startX = getMouseX(e);
+//            startY = getMouseY(e);
+//
+//            if (editGeometry.geometry.get() != null) {
+//                helperObjet.grabGeometryNode(startX, startY, editGeometry);
+//            }
+//        }
 
-            initialX = getMouseX(e);
-            initialY = getMouseY(e);
-            startX = getMouseX(e);
-            startY = getMouseY(e);
+//        @Override
+//        public void mouseDragged(MouseEvent me) {
+//            //do not use getX/getY to calculate difference
+//            //JavaFX Bug : https://javafx-jira.kenai.com/browse/RT-34608
+//
+//            //calcul du deplacement
+//            startX = getMouseX(me);
+//            startY = getMouseY(me);
+//
+//            if (editedObjet != null && editGeometry.selectedNode[0] >= 0) {
+//                //deplacement d'une borne
+//                editGeometry.moveSelectedNode(helperObjet.toCoord(startX, startY));
+//                updateGeometry();
+//            } else {
+//                super.mouseDragged(me);
+//            }
+//        }
 
-            if (editGeometry.geometry.get() != null) {
-                helperObjet.grabGeometryNode(startX, startY, editGeometry);
-            }
-        }
-
-        @Override
-        public void mouseDragged(MouseEvent me) {
-            //do not use getX/getY to calculate difference
-            //JavaFX Bug : https://javafx-jira.kenai.com/browse/RT-34608
-
-            //calcul du deplacement
-            startX = getMouseX(me);
-            startY = getMouseY(me);
-
-            if (editedObjet != null && editGeometry.selectedNode[0] >= 0) {
-                //deplacement d'une borne
-                editGeometry.moveSelectedNode(helperObjet.toCoord(startX, startY));
-                updateGeometry();
-            } else {
-                super.mouseDragged(me);
-            }
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent me) {
-            mouseDragged(me);
-
-            if (editedObjet != null && editGeometry.selectedNode[0] >= 0) {
-                //On demande à l'utilisateur s'il souhaite sauvegarder en base de données les modifications apportées.
-                final Alert alert = new Alert(Alert.AlertType.WARNING, "Confirmer le déplacement de l'objet?", ButtonType.OK, ButtonType.CANCEL);
-                alert.setResizable(true);
-                Optional<ButtonType> clickedButton = alert.showAndWait();
-
-                if (clickedButton.get() == ButtonType.OK) {
-
-//                    editedObjet.setGeometry((Point) editGeometry.geometry.get());
-                    session.getRepositoryForClass(objetClass).update(editedObjet);
-//                    editPane.selectSRB(null);
-                    //les event vont induire le repaint de la carte
-                    final TronconDigue troncon = editPane.getTronconProperty();
-                    if (troncon != null) {
-                        //on recalcule les geometries des positionables du troncon.
-                        TronconUtils.updatePositionableGeometry(troncon, session);
-                    }
-                } else {
-                    startX = initialX;
-                    startY = initialY;
-
-                    // La position initiale de la borne est rétablie.
-                    editGeometry.moveSelectedNode(helperObjet.toCoord(startX, startY));
-                    updateGeometry();
-
-                    // Probablement pas nécessaire de sauvegarder le non changement de la borne
-                    // mais permet d'actualiser la carte
-                    //-> TODO : appliquer un refresh de la map uniquement.
-//                    editedObjet.setGeometry((Point) editGeometry.geometry.get());
-                    session.getRepositoryForClass(objetClass).update(editedObjet);
-                }
-            } else {
-                super.mouseReleased(me);
-            }
-        }
+//        @Override
+//        public void mouseReleased(MouseEvent me) {
+//            mouseDragged(me);
+//
+//            if (editedObjet != null && editGeometry.selectedNode[0] >= 0) {
+//                //On demande à l'utilisateur s'il souhaite sauvegarder en base de données les modifications apportées.
+//                final Alert alert = new Alert(Alert.AlertType.WARNING, "Confirmer le déplacement de l'objet?", ButtonType.OK, ButtonType.CANCEL);
+//                alert.setResizable(true);
+//                Optional<ButtonType> clickedButton = alert.showAndWait();
+//
+//                if (clickedButton.get() == ButtonType.OK) {
+//
+////                    editedObjet.setGeometry((Point) editGeometry.geometry.get());
+//                    session.getRepositoryForClass(objetClass).update(editedObjet);
+////                    editPane.selectSRB(null);
+//                    //les event vont induire le repaint de la carte
+//                    final TronconDigue troncon = editPane.getTronconProperty();
+//                    if (troncon != null) {
+//                        //on recalcule les geometries des positionables du troncon.
+//                        TronconUtils.updatePositionableGeometry(troncon, session);
+//                    }
+//                } else {
+//                    startX = initialX;
+//                    startY = initialY;
+//
+//                    // La position initiale de la borne est rétablie.
+//                    editGeometry.moveSelectedNode(helperObjet.toCoord(startX, startY));
+//                    updateGeometry();
+//
+//                    // Probablement pas nécessaire de sauvegarder le non changement de la borne
+//                    // mais permet d'actualiser la carte
+//                    //-> TODO : appliquer un refresh de la map uniquement.
+////                    editedObjet.setGeometry((Point) editGeometry.geometry.get());
+//                    session.getRepositoryForClass(objetClass).update(editedObjet);
+//                }
+//            } else {
+//                super.mouseReleased(me);
+//            }
+//        }
     }
 
 }

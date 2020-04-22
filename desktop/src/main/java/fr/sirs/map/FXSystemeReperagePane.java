@@ -101,7 +101,7 @@ import static org.geotoolkit.referencing.LinearReferencing.projectReference;
  * @author Johann Sorel (Geomatys)
  * @author Matthieu Bastianelli (Geomatys)
  */
-public class FXSystemeReperagePane extends FXObjetEditPane {
+public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
 
 //    public static enum ObjetEditMode implements EditMode {
 //        PICK_TRONCON ,
@@ -133,6 +133,7 @@ public class FXSystemeReperagePane extends FXObjetEditPane {
     public FXSystemeReperagePane(FXMap map, final String typeName) {
         super(map, typeName, BorneDigue.class, false, false);
 //        SIRS.loadFXML(this);
+//        setTypeNameLabel(typeName);
 
 
         uiAddSr.setGraphic(new ImageView(SIRS.ICON_ADD_BLACK));
@@ -519,7 +520,7 @@ public class FXSystemeReperagePane extends FXObjetEditPane {
      * @param bornes Bornes to delete.
      * @return True if we can proceed to borne deletion, false if not.
      */
-    @Override
+//    @Override
     public boolean checkObjetSuppression(final BorneDigue... bornes) {
         final HashSet<String> borneIds = new HashSet<>();
         for (final BorneDigue bd : bornes) {
