@@ -33,12 +33,16 @@ import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
+import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SQLQuery;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.FXPreviewToElementTableColumn;
 import fr.sirs.util.ReferenceTableCell;
+import fr.sirs.util.SirsStringConverter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -82,7 +86,11 @@ public class FXValidationPane extends BorderPane {
     private final Previews repository = session.getPreviews();
     private final ChoiceBox<Choice> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(Choice.values()));
 
-    private List<Preview> previews;
+
+    final TronconDigueRepository tronconRepository = (TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class);
+    final  SirsStringConverter converter = new SirsStringConverter();
+
+//    private List<Preview> previews;
     private final Map<String, ResourceBundle> bundles = new HashMap<>();
 
     private static enum Choice {
@@ -181,12 +189,42 @@ public class FXValidationPane extends BorderPane {
             });
         table.getColumns().add(labelColumn);
 
+        // Colonne de l'auteur.
         final TableColumn<Preview, String> authorColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_AUTHOR));
         authorColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                 return new SimpleObjectProperty(param.getValue().getAuthor());
             });
         authorColumn.setCellFactory((TableColumn<Preview, String> param) -> new ReferenceTableCell(Utilisateur.class));
         table.getColumns().add(authorColumn);
+
+        // SYM-1941 : Ajout Colonne tronçon
+        final TableColumn<Preview, String> tronconColumn = new TableColumn<>("Tronçon d'appartenance");
+        tronconColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
+            String result;
+            final Preview preview = param.getValue();
+            final Class elementClass = preview.getJavaClassOr(Object.class);
+            try{
+                if(Objet.class.isAssignableFrom(elementClass)){
+
+//                    result = ((Element) session.getRepositoryForClass(elementClass)
+//                            .get(preview.getDocId())).getParent().getDesignation(); //new SirsStringConverter()
+                    result = converter.toString(tronconRepository.get(((Objet) session.getRepositoryForClass(elementClass)
+                            .get(preview.getDocId()))
+                            .getLinearId()));
+                } else {
+                    SIRS.LOGGER.log(Level.INFO, "Impossible d''identifi\u00e9 un tron\u00e7on pour les \u00e9l\u00e9ments de type : {0}", elementClass.getCanonicalName());
+                    result = "";
+                }
+
+//                return tronconRepository.get();
+            } catch(Exception e) {
+                SIRS.LOGGER.log(Level.INFO, "Impossible d''identifi\u00e9 un tron\u00e7on pour les \u00e9l\u00e9ments de type : {0}", elementClass.getCanonicalName());
+                result = "";
+            }
+            return new SimpleObjectProperty(result);
+            });
+        table.getColumns().add(tronconColumn);
+
 
         table.getColumns().add(new ValidColumn());
 
