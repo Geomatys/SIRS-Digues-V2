@@ -12,8 +12,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
@@ -24,7 +22,6 @@ import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
 import org.geotoolkit.map.FeatureMapLayer;
-import org.geotoolkit.map.MapLayer;
 
 /**
  * Abstract base Classe for Edition on map of {@link AvecGeometrie} elements in Sirs
@@ -45,7 +42,8 @@ public abstract class AbstractSIRSEditHandler<T extends AvecGeometrie> extends A
     protected T editedObjet = null;
     protected final ObjectProperty<T> editedObjetProperty;
 
-    protected final ObjectProperty<ObjetEditMode> modeProperty;
+    protected EditModeObjet mode = EditModeObjet.NONE;
+    protected final ObjectProperty<EditModeObjet> modeProperty;
 
     protected FeatureMapLayer objetLayer = null;
     protected EditionHelper helperObjet;
@@ -76,14 +74,14 @@ public abstract class AbstractSIRSEditHandler<T extends AvecGeometrie> extends A
             }
         };
         editedObjetProperty = new SimpleObjectProperty<>(editedObjet);
-        modeProperty = new SimpleObjectProperty<>();
+        modeProperty = new SimpleObjectProperty<>(mode);
 
     }
 
     protected ObjectProperty<T> getEditedObjetProperty() {
         return editedObjetProperty;
     }
-    protected ObjectProperty<ObjetEditMode> getModeProperty() {
+    protected ObjectProperty<EditModeObjet> getModeProperty() {
         return modeProperty;
     }
 

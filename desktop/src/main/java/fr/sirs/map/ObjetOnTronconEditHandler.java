@@ -18,17 +18,19 @@
  */
 package fr.sirs.map;
 
-import fr.sirs.CorePlugin;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.Session;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Objet;
+import static fr.sirs.map.EditModeObjet.CREATE_OBJET;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
@@ -39,12 +41,10 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Separator;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.bean.BeanFeature;
@@ -66,39 +66,20 @@ import org.opengis.filter.identity.Identifier;
  * @author Johann Sorel (Geomatys)
  * @param <T>
  */
-public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler {
+public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronconEditHandler<T> {
 
-    final Session session;
-
-    //edition variables
-    FeatureMapLayer tronconLayer = null;
-    EditionHelper helperTroncon;
-
-    EditionOnTronconMouseListen mouseInputListener;
-
-    //Panneaux d'édition
-    final Stage dialog = new Stage();
-    FXAbstractEditOnTronconPane editPane;
-
-    // overriden variable by init();
-    protected String TRONCON_LAYER_NAME = CorePlugin.TRONCON_LAYER_NAME;
 
     /**
-     * List of layers deactivated on tool install. They will be activated back
-     * at uninstallation.
-     */
-    List<MapLayer> toActivateBack;
-
-    /**
-     * Same as {@link #ObjetEditHandler(org.geotoolkit.gui.javafx.render2d.FXMap, java.lang.String, java.lang.Class, fr.sirs.map.FXObjetEditPane)}
-     * but with a default Pane of edition {@link FXAbstractEditOnTronconPane} and default type
-     * name (tronçon).
+     * Same as
+     * {@link #ObjetEditHandler(org.geotoolkit.gui.javafx.render2d.FXMap, java.lang.String, java.lang.Class, fr.sirs.map.FXObjetEditPane)}
+     * but with a default Pane of edition {@link FXAbstractEditOnTronconPane}
+     * and default type name (tronçon).
      *
      * @param map
      * @param clazz
      */
-    public ObjetEditHandler(final FXMap map, final Class<T> clazz) {
-        this(map,clazz, new FXObjetEditPane(map, "troncon", clazz), true);
+    public ObjetOnTronconEditHandler(final FXMap map, final Class<T> clazz) {
+        this(map, clazz, new FXObjetEditPane(map, "troncon", clazz), true);
     }
 
     /**
@@ -108,15 +89,17 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
      * @param map : carte à partir de laquelle on permet l'édition.
      * @param clazz : classe éditée.
      * @param editPane : panneau d'édition associé.
-     * @param instantiateMouseEditListener : boolean indiquant si l'on souhaite que ce constructeur instantie {@link #mouseInputListener} with a default value.
+     * @param instantiateMouseEditListener : boolean indiquant si l'on souhaite
+     * que ce constructeur instantie {@link #mouseInputListener} with a default
+     * value.
      */
-    public ObjetEditHandler(final FXMap map, final Class<T> clazz, final FXAbstractEditOnTronconPane editPane, final boolean instantiateMouseEditListener) {
-        super(clazz);
+    public ObjetOnTronconEditHandler(final FXMap map, final Class<T> clazz, final FXAbstractEditOnTronconPane editPane, final boolean instantiateMouseEditListener) {
+        super(map, clazz, editPane, instantiateMouseEditListener);
         ArgumentChecks.ensureNonNull("Panneau d'édition", editPane);
 
-        this.map = map;
+//        this.map = map;
 
-        session = Injector.getSession();
+//        session = Injector.getSession();
         dialog.getIcons().add(SIRS.ICON);
         this.editPane = editPane;
 
@@ -172,21 +155,23 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
             editPane.reset();
         });
 
-        editPane.tronconProperty().addListener(new ChangeListener<TronconDigue>() {
-            @Override
-            public void changed(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
-                if (newValue != null) {
-                    dialog.show();
-                } else {
-                    dialog.hide();
-                }
+        editPane.tronconProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                dialog.show();
+            } else {
+                dialog.hide();
             }
         });
+
+        editPane.getModeProperty().bindBidirectional(modeProperty);
+//                .addListener((observable, oldValue, newValue) -> {
+//            modeProperty.setValue(newValue);
+//        });
 
         dialog.show();
 
         if (instantiateMouseEditListener) {
-            mouseInputListener = new EditionOnTronconMouseListen();
+            mouseInputListener = new EditionOnTronconMouseListen(this);
         }
     }
 
@@ -194,7 +179,6 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
         final LabelMapper mapper = LabelMapper.get(objetClass);
         return mapper.mapClassName();
     }
-
 
     @Override
     protected FXPanMouseListen getMouseInputListener() {
@@ -284,24 +268,19 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
 //            geomLayer.getGeometries().setAll(editGeometry.geometry.get());
 //        }
 //    }
-
-    class EditionOnTronconMouseListen extends SIRSEditMouseListen {
+    class EditionOnTronconMouseListen extends SIRSEditMouseListen<T> {
 
 //        final ContextMenu popup = new ContextMenu();
-        double startX;
-        double startY;
+//        double startX;
+//        double startY;
 
-        double initialX;
-        double initialY;
-
-        public EditionOnTronconMouseListen() {
-            super(ObjetEditHandler.this);
-            popup.setAutoHide(true);
-        }
-
-        public EditionOnTronconMouseListen(final ObjetEditHandler editHandler) {
+//        public EditionOnTronconMouseListen() {
+//            super(AbstractOnTronconEditHandler.this);
+////            popup.setAutoHide(true);
+//        }
+        public EditionOnTronconMouseListen(final ObjetOnTronconEditHandler editHandler) {
             super(editHandler);
-            popup.setAutoHide(true);
+//            popup.setAutoHide(true);
         }
 
         @Override
@@ -314,9 +293,8 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
             startY = getMouseY(e);
             mousebutton = e.getButton();
 
-            final ObjetEditMode mode = editPane.getMode();
-
-            if (ObjetEditMode.PICK_TRONCON.equals(mode)) {
+//            final EditModeObjet mode = editPane.getMode();
+            if (EditModeObjet.PICK_TRONCON.equals(mode)) {
                 if (mousebutton == MouseButton.PRIMARY) {
                     //selection d'un troncon
                     final Feature feature = helperTroncon.grabFeature(e.getX(), e.getY(), false);
@@ -331,113 +309,95 @@ public class ObjetEditHandler <T extends Objet> extends AbstractSIRSEditHandler 
             } else {
                 super.mouseClicked(e);
             }
-//            } else if (FXSystemeReperagePane.ObjetEditMode.EDIT_OBJET.equals(mode)) {
-//                throw new UnsupportedOperationException("unsupported EDIT_OBJET on mouseclicked");
-//                final SystemeReperage sr = editPane.systemeReperageProperty().get();
-//
-//                if (objet == null || editGeometry.selectedNode[0] < 0) {
-//                    //selection d'une borne
-//                    final Feature feature = helperObjet.grabFeature(e.getX(), e.getY(), false);
-//                    if (feature != null) {
-//                        final Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
-//                        if (bean instanceof BorneDigue && session.editionAuthorized((BorneDigue) bean)) {
-//                            final BorneDigue candidate = (BorneDigue) bean;
-//                            final String candidateId = candidate.getDocumentId();
-//
-//                            //on vérifie que la borne fait bien partie du SR sélectionné
-//                            final List<SystemeReperageBorne> srbs = sr.getSystemeReperageBornes();
-//                            for (SystemeReperageBorne srb : srbs) {
-//                                if (srb.getBorneId().equals(candidateId)) {
-//                                    editPane.selectSRB(srb);
-//                                    break;
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-
-//            } else if (FXSystemeReperagePane.ObjetEditMode.CREATE_OBJET.equals(mode)) {
-//
-//                final Coordinate coord = helperObjet.toCoord(startX, startY);
-//                final Point point = GO2Utilities.JTS_FACTORY.createPoint(coord);
-//                JTS.setCRS(point, session.getProjection());
-//                //les event vont induire le repaint de la carte
-//                editPane.createObjet(point);
-//            }
 
         }
 
-//        @Override
-//        public void mousePressed(final MouseEvent e) {
-//            super.mousePressed(e);
-//
-//            initialX = getMouseX(e);
-//            initialY = getMouseY(e);
-//            startX = getMouseX(e);
-//            startY = getMouseY(e);
-//
-//            if (editGeometry.geometry.get() != null) {
-//                helperObjet.grabGeometryNode(startX, startY, editGeometry);
-//            }
-//        }
+        @Override
+        protected void chooseTypesAndCreate() {
 
-//        @Override
-//        public void mouseDragged(MouseEvent me) {
-//            //do not use getX/getY to calculate difference
-//            //JavaFX Bug : https://javafx-jira.kenai.com/browse/RT-34608
-//
-//            //calcul du deplacement
-//            startX = getMouseX(me);
-//            startY = getMouseY(me);
-//
-//            if (editedObjet != null && editGeometry.selectedNode[0] >= 0) {
-//                //deplacement d'une borne
-//                editGeometry.moveSelectedNode(helperObjet.toCoord(startX, startY));
-//                updateGeometry();
-//            } else {
-//                super.mouseDragged(me);
-//            }
-//        }
+            editPane = new FXObjetEditPane(map, TRONCON_LAYER_NAME, objetClass);
+//            final Stage stage = new Stage();
+//            stage.getIcons().add(SIRS.ICON);
+//            stage.setTitle("Création d'objet");
+//            stage.initModality(Modality.WINDOW_MODAL);
+//            stage.setAlwaysOnTop(true);
 
-//        @Override
-//        public void mouseReleased(MouseEvent me) {
-//            mouseDragged(me);
+            final Scene sceneChoices = new Scene(editPane);
+            dialog.setScene(sceneChoices);
+            dialog.showAndWait();
+
+            objetHelper = getHelperObjet();
+            final AbstractSIRSRepository<T> repo = Injector.getSession().getRepositoryForClass(editedClass);
+            editedObjet = repo.create();
+//                newCreatedObjet = true;
+            modeProperty.setValue(CREATE_OBJET);
+
+            switch (((FXObjetEditPane) editPane).getGeomType()) {
+                case "Ponctuel":
+                    newGeomType = Point.class;
+                    break;
+                case "Linéaire":
+                    newGeomType = LineString.class;
+                    break;
+                case "Surfacique":
+                    newGeomType = Polygon.class;
+                    break;
+                default:
+                    newGeomType = Point.class;
+            }
+
+//                final Stage stage = new Stage();
+//                stage.getIcons().add(SIRS.ICON);
+//                stage.setTitle("Création d'objet");
+//                stage.initModality(Modality.WINDOW_MODAL);
+//                stage.setAlwaysOnTop(true);
+//                final GridPane gridPane = new GridPane();
+//                gridPane.setVgap(10);
+//                gridPane.setHgap(5);
+//                gridPane.setPadding(new Insets(10));
+//                gridPane.add(new Label("Choisir un type de d'objet"), 0, 0);
 //
-//            if (editedObjet != null && editGeometry.selectedNode[0] >= 0) {
-//                //On demande à l'utilisateur s'il souhaite sauvegarder en base de données les modifications apportées.
-//                final Alert alert = new Alert(Alert.AlertType.WARNING, "Confirmer le déplacement de l'objet?", ButtonType.OK, ButtonType.CANCEL);
-//                alert.setResizable(true);
-//                Optional<ButtonType> clickedButton = alert.showAndWait();
+//                final ComboBox<String> geomTypeBox = new ComboBox<>();
+//                geomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
+//                geomTypeBox.getSelectionModel().selectFirst();
+//                final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
+//                geomChoiceLbl.visibleProperty().bind(geomTypeBox.visibleProperty());
+//                gridPane.add(geomChoiceLbl, 0, 1);
+//                gridPane.add(geomTypeBox, 1, 1);
 //
-//                if (clickedButton.get() == ButtonType.OK) {
+//                final Button validateBtn = new Button("Valider");
+//                validateBtn.setOnAction(event -> stage.close());
+//                gridPane.add(validateBtn, 2, 3);
 //
-////                    editedObjet.setGeometry((Point) editGeometry.geometry.get());
-//                    session.getRepositoryForClass(objetClass).update(editedObjet);
-////                    editPane.selectSRB(null);
-//                    //les event vont induire le repaint de la carte
-//                    final TronconDigue troncon = editPane.getTronconProperty();
-//                    if (troncon != null) {
-//                        //on recalcule les geometries des positionables du troncon.
-//                        TronconUtils.updatePositionableGeometry(troncon, session);
-//                    }
-//                } else {
-//                    startX = initialX;
-//                    startY = initialY;
+//                final Scene sceneChoices = new Scene(gridPane);
+//                stage.setScene(sceneChoices);
+//                stage.showAndWait();
 //
-//                    // La position initiale de la borne est rétablie.
-//                    editGeometry.moveSelectedNode(helperObjet.toCoord(startX, startY));
-//                    updateGeometry();
+////                final Class clazz = DesordreDependance.class;
+////                objetHelper = new EditionHelper(map, objetLayer);
+//                objetHelper = editHandler.getHelperObjet();
 //
-//                    // Probablement pas nécessaire de sauvegarder le non changement de la borne
-//                    // mais permet d'actualiser la carte
-//                    //-> TODO : appliquer un refresh de la map uniquement.
-////                    editedObjet.setGeometry((Point) editGeometry.geometry.get());
-//                    session.getRepositoryForClass(objetClass).update(editedObjet);
+//                final AbstractSIRSRepository<G> repo = Injector.getSession().getRepositoryForClass(editedClass);
+//                editedObjet = repo.create();
+////                newCreatedObjet = true;
+//                modeProperty.setValue(CREATE_OBJET);
+//
+//
+//                switch (geomTypeBox.getSelectionModel().getSelectedItem()) {
+//                    case "Ponctuel":
+//                        newGeomType = Point.class;
+//                        break;
+//                    case "Linéaire":
+//                        newGeomType = LineString.class;
+//                        break;
+//                    case "Surfacique":
+//                        newGeomType = Polygon.class;
+//                        break;
+//                    default:
+//                        newGeomType = Point.class;
 //                }
-//            } else {
-//                super.mouseReleased(me);
-//            }
-//        }
+        }
+
     }
 
 }

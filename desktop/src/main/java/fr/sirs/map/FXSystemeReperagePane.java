@@ -103,14 +103,15 @@ import static org.geotoolkit.referencing.LinearReferencing.projectReference;
  */
 public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
 
-//    public static enum ObjetEditMode implements EditMode {
+//    public static enum EditModeObjet implements EditMode {
 //        PICK_TRONCON ,
-//        EDIT_BORNE (ObjetEditMode.EDIT_OBJET),
-//        CREATE_BORNE (ObjetEditMode.CREATE_OBJET),
-//        NONE (ObjetEditMode.NONE)
+//        EDIT_BORNE (EditModeObjet.EDIT_OBJET),
+//        CREATE_BORNE (EditModeObjet.CREATE_OBJET),
+//        NONE (EditModeObjet.NONE)
 //    };
 
 
+    @FXML Button uiAddObjet;
     @FXML private ChoiceBox<SystemeReperage> uiSrComboBox;
     @FXML private CheckBox uiDefaultSRCheckBox;
     @FXML private Button uiAddSr;
@@ -119,7 +120,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
     @FXML Button uiProject;
 
 
-//    private final ObjectProperty<ObjetEditMode> mode = new SimpleObjectProperty<>(ObjetEditMode.NONE);
+//    private final ObjectProperty<ObjetEditMode> mode = new SimpleObjectProperty<>(EditModeObjet.NONE);
 
     /** A flag to indicate that selected {@link SystemeReperage} must be saved. */
     private final SimpleBooleanProperty saveSR = new SimpleBooleanProperty(false);
@@ -286,7 +287,6 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
      *
      * @param evt
      */
-    @Override
     void startAddObjet(ActionEvent evt) {
         final TronconDigue troncon = getTronconProperty();
         final SystemeReperage csr = systemeReperageProperty().get();
@@ -638,7 +638,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
         if(newValue==null) {
             uiSrComboBox.setItems(FXCollections.emptyObservableList());
         } else {
-            mode.set(ObjetEditMode.NONE);
+            mode.set(EditModeObjet.NONE);
             final List<SystemeReperage> srs = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinear(newValue);
             uiSrComboBox.setItems(FXCollections.observableArrayList(srs));
 
@@ -698,11 +698,11 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
         if (newValue == null) {
             uiObjetTable.setItems(FXCollections.emptyObservableList());
         } else {
-            final ObjetEditMode current = getMode();
-            if (current.equals(ObjetEditMode.CREATE_OBJET) || current.equals(ObjetEditMode.EDIT_OBJET)) {
+            final EditModeObjet current = getMode();
+            if (current.equals(EditModeObjet.CREATE_OBJET) || current.equals(EditModeObjet.EDIT_OBJET)) {
                 //do nothing
             } else {
-                mode.set(ObjetEditMode.EDIT_OBJET);
+                mode.set(EditModeObjet.EDIT_OBJET);
             }
 
             // By default, we'll sort bornes from uphill to downhill, but alow user to sort them according to available table columns.

@@ -14,7 +14,7 @@ package fr.sirs.map;
  * @author Johann Sorel (Geomatys)
  * @author Matthieu Bastianelli (Geomatys)
  */
-public enum ObjetEditMode {
+public enum EditModeObjet {
     PICK_TRONCON, // Sélection de tronçon
     EDIT_OBJET,   // Edition d'un objet existant
     CREATE_OBJET, // Création d'un objet

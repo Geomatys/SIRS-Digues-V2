@@ -41,14 +41,12 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -79,12 +77,11 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
     @FXML TextField uiTronconLabel;
     @FXML ToggleButton uiPickTroncon;
     @FXML private FXTableView<T> uiObjetTable;
-    @FXML Button uiAddObjet;
     @FXML ToggleButton uiCreateObjet;
     @FXML Label typeNameLabel;
 
     final ObjectProperty<TronconDigue> tronconProp = new SimpleObjectProperty<>();
-    final ObjectProperty<ObjetEditMode> mode = new SimpleObjectProperty<>(ObjetEditMode.NONE);
+    final ObjectProperty<EditModeObjet> mode = new SimpleObjectProperty<>(EditModeObjet.NONE);
     final Session session;
     final FXMap map;
 
@@ -144,16 +141,17 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
         uiPickTroncon.setToggleGroup(group);
         uiCreateObjet.setToggleGroup(group);
 
-        mode.addListener(new ChangeListener<ObjetEditMode>() {
-            @Override
-            public void changed(ObservableValue<? extends ObjetEditMode> observable, ObjetEditMode oldValue, ObjetEditMode newValue) {
-                if(newValue==ObjetEditMode.CREATE_OBJET){
+        mode.addListener((observable, oldValue, newValue) -> {
+            switch (newValue) {
+                case CREATE_OBJET:
                     group.selectToggle(uiCreateObjet);
-                }else if(newValue==ObjetEditMode.PICK_TRONCON){
+                    break;
+                case PICK_TRONCON:
                     group.selectToggle(uiPickTroncon);
-                }else{
+                    break;
+                default:
                     group.selectToggle(null);
-                }
+                    break;
             }
         });
 
@@ -187,11 +185,15 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
     }
 
     public void reset(){
-        mode.set(ObjetEditMode.PICK_TRONCON);
+        mode.set(EditModeObjet.PICK_TRONCON);
         tronconProperty().set(null);
     }
 
-    public ReadOnlyObjectProperty<ObjetEditMode> modeProperty(){
+    public ReadOnlyObjectProperty<EditModeObjet> modeProperty(){
+        return mode;
+    }
+
+    ObjectProperty<EditModeObjet> getModeProperty(){
         return mode;
     }
 
@@ -203,7 +205,7 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
         return tronconProp.get();
     }
 
-    ObjetEditMode getMode() {
+    EditModeObjet getMode() {
         return mode.get();
     }
 
@@ -230,7 +232,7 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
     }
 
     private void startPickTroncon(ActionEvent evt){
-        mode.set(ObjetEditMode.PICK_TRONCON);
+        mode.set(EditModeObjet.PICK_TRONCON);
     }
 
     /*
@@ -283,7 +285,7 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
      *
      * @param evt
      */
-    abstract void startAddObjet(ActionEvent evt) ;
+//    abstract void startAddObjet(ActionEvent evt) ;
 //        throw new UnsupportedOperationException("Unsupported yet.");
 //        final TronconDigue troncon = tronconProperty().get();
 //        if(troncon==null) return;
@@ -313,11 +315,11 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
 //    }
 
     private void startCreateObjet(ActionEvent evt){
-        if(mode.get().equals(ObjetEditMode.CREATE_OBJET)){
+        if(mode.get().equals(EditModeObjet.CREATE_OBJET)){
             //on retourne on mode edition
-            mode.set(ObjetEditMode.EDIT_OBJET);
+            mode.set(EditModeObjet.EDIT_OBJET);
         }else{
-            mode.set(ObjetEditMode.CREATE_OBJET);
+            mode.set(EditModeObjet.CREATE_OBJET);
         }
     }
 
@@ -469,19 +471,19 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
         }
 
 //        if(newValue!=null) {
-//            mode.set(ObjetEditMode.NONE);
+//            mode.set(EditModeObjet.NONE);
 //        }
 
 
         if (newValue == null) {
             uiObjetTable.setItems(FXCollections.emptyObservableList());
-            mode.set(ObjetEditMode.NONE); //Todo?
+            mode.set(EditModeObjet.NONE); //Todo?
         } else {
-            final ObjetEditMode current = getMode();
-            if (current.equals(ObjetEditMode.CREATE_OBJET) || current.equals(ObjetEditMode.EDIT_OBJET)) {
+            final EditModeObjet current = getMode();
+            if (current.equals(EditModeObjet.CREATE_OBJET) || current.equals(EditModeObjet.EDIT_OBJET)) {
                 //do nothing
             } else {
-                mode.set(ObjetEditMode.EDIT_OBJET);
+                mode.set(EditModeObjet.EDIT_OBJET);
             }
 
             uiObjetTable.setItems(getObjectListFromTroncon(null));
@@ -502,11 +504,11 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
 //        if (newValue == null) {
 //            uiObjetTable.setItems(FXCollections.emptyObservableList());
 //        } else {
-//            final ObjetEditMode current = mode.get();
-//            if (current.equals(ObjetEditMode.CREATE_OBJET) || current.equals(ObjetEditMode.EDIT_OBJET)) {
+//            final EditModeObjet current = mode.get();
+//            if (current.equals(EditModeObjet.CREATE_OBJET) || current.equals(EditModeObjet.EDIT_OBJET)) {
 //                //do nothing
 //            } else {
-//                mode.set(ObjetEditMode.EDIT_OBJET);
+//                mode.set(EditModeObjet.EDIT_OBJET);
 //            }
 //
 //            // By default, we'll sort bornes from uphill to downhill, but alow user to sort them according to available table columns.

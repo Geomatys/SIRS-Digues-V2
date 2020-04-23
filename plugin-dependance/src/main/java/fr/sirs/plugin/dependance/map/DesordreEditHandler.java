@@ -105,6 +105,8 @@ public class DesordreEditHandler extends AbstractSIRSEditHandler {
             geomLayer.getGeometries().setAll(editGeometry.geometry.get());
             newCreatedObjet = false;
         }
+
+        mouseInputListener = new SIRSEditMouseListen(this);
     }
 
     @Override
@@ -119,6 +121,7 @@ public class DesordreEditHandler extends AbstractSIRSEditHandler {
      */
     @Override
     public void install(FXMap component) {
+//        mouseInputListener = new SIRSEditMouseListen(this);
         super.install(component);
 //        component.addEventHandler(MouseEvent.ANY, mouseInputListener);
 //        component.addEventHandler(ScrollEvent.ANY, mouseInputListener);
@@ -127,8 +130,10 @@ public class DesordreEditHandler extends AbstractSIRSEditHandler {
 
         objetLayer = PluginDependance.getDesordreLayer();
 
-        mouseInputListener = new SIRSEditMouseListen(this);
-        mouseInputListener.setNewCreatedObjet(newCreatedObjet);
+        //Debug point to check the binding
+//        mouseInputListener = new SIRSEditMouseListen(this);
+//        mouseInputListener.setNewCreatedObjet(newCreatedObjet);
+
 
     }
 

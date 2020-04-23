@@ -49,7 +49,7 @@ import org.opengis.filter.identity.Identifier;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class BorneEditHandler extends ObjetEditHandler {
+public class BorneEditHandler extends AbstractOnTronconEditHandler {
 
     private static final String BORNE_LAYER_NAME = CorePlugin.BORNE_LAYER_NAME;
 
@@ -112,7 +112,7 @@ public class BorneEditHandler extends ObjetEditHandler {
 //        }
 //    }
 
-    private class MouseListenForBorne extends EditionOnTronconMouseListen {
+    private class MouseListenForBorne extends AbstractSIRSEditMouseListen<BorneDigue> {
 
         public MouseListenForBorne() {
             super(BorneEditHandler.this);
@@ -128,10 +128,10 @@ public class BorneEditHandler extends ObjetEditHandler {
             startY = getMouseY(e);
             mousebutton = e.getButton();
 
-            final ObjetEditMode mode = editPane.getMode();
+            final EditModeObjet mode = editPane.getMode();
             final FXSystemeReperagePane srbEditPane = (FXSystemeReperagePane) editPane; //Cast possible as the editPane is initialized in the current constructor as FXSystemeReperagePane
 
-            if (ObjetEditMode.PICK_TRONCON.equals(mode)) {
+            if (EditModeObjet.PICK_TRONCON.equals(mode)) {
                 if (mousebutton == MouseButton.PRIMARY) {
                     //selection d'un troncon
                     final Feature feature = helperTroncon.grabFeature(e.getX(), e.getY(), false);
@@ -143,7 +143,7 @@ public class BorneEditHandler extends ObjetEditHandler {
                         }
                     }
                 }
-            } else if (ObjetEditMode.EDIT_OBJET.equals(mode)) {
+            } else if (EditModeObjet.EDIT_OBJET.equals(mode)) {
                 final SystemeReperage sr = srbEditPane.systemeReperageProperty().get();
 
                 if (editedObjet == null || editGeometry.selectedNode[0] < 0) {
@@ -167,7 +167,7 @@ public class BorneEditHandler extends ObjetEditHandler {
                     }
                 }
 
-            } else if (ObjetEditMode.CREATE_OBJET.equals(mode)) {
+            } else if (EditModeObjet.CREATE_OBJET.equals(mode)) {
 
                 final Coordinate coord = helperObjet.toCoord(startX, startY);
                 final Point point = GO2Utilities.JTS_FACTORY.createPoint(coord);

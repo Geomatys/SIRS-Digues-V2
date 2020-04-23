@@ -47,18 +47,18 @@ public class ObjetEditAction extends FXMapAction {
         this.disabledProperty().bind(Injector.getSession().geometryEditionProperty().not());
 
         map.getHandlerProperty().addListener((observable, oldValue, newValue) -> {
-            selectedProperty().set(newValue instanceof ObjetEditHandler);
+            selectedProperty().set(newValue instanceof AbstractOnTronconEditHandler);
         });
 
     }
 
     @Override
     public void accept(ActionEvent event) {
-        if (map != null && !(map.getHandler() instanceof ObjetEditHandler)) {
+        if (map != null && !(map.getHandler() instanceof AbstractOnTronconEditHandler)) {
             throw new RuntimeException("PASSE HERE  BY MISTAKE !"); //TODO : remove after tests
             // Choix du type d'objet à éditer à éditer.
-//            map.setHandler(new ObjetEditHandler(map));
-//            map.setHandler(new ObjetEditHandler());
+//            map.setHandler(new AbstractOnTronconEditHandler(map));
+//            map.setHandler(new AbstractOnTronconEditHandler());
         }
     }
 
@@ -132,7 +132,7 @@ public class ObjetEditAction extends FXMapAction {
 
                     // Choix du type d'objet à éditer.
                     SIRS.LOGGER.log(Level.INFO, "Ouverture de L''\u00e9dition pour la classe :{0}", themeClasses.toString());
-                    map.setHandler(new ObjetEditHandler(map, themeClasses.get(0)));
+                    map.setHandler(new ObjetOnTronconEditHandler(map, themeClasses.get(0)));
                 }
 
             }
