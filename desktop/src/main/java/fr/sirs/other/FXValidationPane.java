@@ -71,6 +71,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.util.StringConverter;
+import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
@@ -200,29 +201,9 @@ public class FXValidationPane extends BorderPane {
         // SYM-1941 : Ajout Colonne tronçon
         final TableColumn<Preview, String> tronconColumn = new TableColumn<>("Tronçon d'appartenance");
         tronconColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
-            String result;
-            final Preview preview = param.getValue();
-            final Class elementClass = preview.getJavaClassOr(Object.class);
-            try{
-                if(Objet.class.isAssignableFrom(elementClass)){
-
-//                    result = ((Element) session.getRepositoryForClass(elementClass)
-//                            .get(preview.getDocId())).getParent().getDesignation(); //new SirsStringConverter()
-                    result = converter.toString(tronconRepository.get(((Objet) session.getRepositoryForClass(elementClass)
-                            .get(preview.getDocId()))
-                            .getLinearId()));
-                } else {
-                    SIRS.LOGGER.log(Level.INFO, "Impossible d''identifi\u00e9 un tron\u00e7on pour les \u00e9l\u00e9ments de type : {0}", elementClass.getCanonicalName());
-                    result = "";
-                }
-
-//                return tronconRepository.get();
-            } catch(Exception e) {
-                SIRS.LOGGER.log(Level.INFO, "Impossible d''identifi\u00e9 un tron\u00e7on pour les \u00e9l\u00e9ments de type : {0}", elementClass.getCanonicalName());
-                result = "";
-            }
-            return new SimpleObjectProperty(result);
-            });
+            return new SimpleObjectProperty(tryFindTronconFromPreview(param.getValue()));
+        });
+        tronconColumn.setEditable(false);
         table.getColumns().add(tronconColumn);
 
 
@@ -270,6 +251,33 @@ public class FXValidationPane extends BorderPane {
         hBox.setSpacing(100);
 
         setTop(hBox);
+    }
+
+    private String tryFindTronconFromPreview( final Preview preview) {
+        String result;
+        final Class elementClass;
+//            final Class elementClass = preview.getJavaClassOr(Object.class);
+
+        try {
+            elementClass = Class.forName(preview.getDocClass());
+            if (Objet.class.isAssignableFrom(elementClass)) {
+
+//                    result = ((Element) session.getRepositoryForClass(elementClass)
+//                            .get(preview.getDocId())).getParent().getDesignation(); //new SirsStringConverter()
+                result = converter.toString(tronconRepository.get(((Objet) session.getRepositoryForClass(elementClass)
+                        .get(preview.getDocId()))
+                        .getLinearId()));
+            } else {
+                SIRS.LOGGER.log(Level.INFO, "Impossible d'identifi\u00e9 un tron\u00e7on pour les \u00e9l\u00e9ments de type : {0}", elementClass.getCanonicalName());
+                result = "";
+            }
+
+//                return tronconRepository.get();
+        } catch (Exception e) {
+            SIRS.LOGGER.log(Level.INFO, "Exception - Impossible d'identifi\u00e9 un tron\u00e7on pour l'\u00e9l\u00e9ment {0} de type : {1}", new Object[]{preview.getDocId(), preview.getDocClass()});
+            result = "";
+        }
+        return result;
     }
 
     private void fillTable(){
