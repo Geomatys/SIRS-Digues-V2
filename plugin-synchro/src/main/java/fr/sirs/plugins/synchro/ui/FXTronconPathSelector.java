@@ -113,5 +113,19 @@ public class FXTronconPathSelector extends StackPane {
 
     }
 
+    @FXML
+    private void printHelp(ActionEvent event) {
+        final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Commencez par \"Estimer\" le nombre de photos à télécharger.\n\n"
+                                                                 + "Une fois cette action réalisée, la liste \"Tronçons -> chemin associé\" présente un \n"
+                                                                 + "répertoire de destination pour chacun des tronçons sur lesquels se trouvent des photos.\n\n"
+                                                                 + "Vous pouvez ensuite changer le répertoire de destination en cliquant sur le(s) tronçon(s)\n"
+                                                                 + "puis en choisissant un répertoire à partir du bouton \"Parcourir\".\n\n"
+                                                                 + "Finallement, cliquez sur le bouton \"Importer\" pour procéder au téléchargement.");
+        alert.setResizable(true);
+        alert.setWidth(600);
+        alert.setHeight(300);
+        alert.show();
+    }
+
 }
 

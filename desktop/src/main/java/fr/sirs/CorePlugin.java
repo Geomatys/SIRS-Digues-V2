@@ -990,8 +990,8 @@ public class CorePlugin extends Plugin {
 //        // test et préparation pour SYM-1776
 
         if(withRealPosition) {
-        final MutableRule start = createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, col, StyleConstants.MARK_TRIANGLE);
-        final MutableRule end   = createExactPositinRule("end",   SirsCore.POSITION_FIN_FIELD,   col, StyleConstants.MARK_TRIANGLE);
+            final MutableRule start = createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, col, StyleConstants.MARK_TRIANGLE);
+            final MutableRule end = createExactPositinRule("end", SirsCore.POSITION_FIN_FIELD, col, StyleConstants.MARK_TRIANGLE);
             fts.rules().add(start);
             fts.rules().add(end);
         }

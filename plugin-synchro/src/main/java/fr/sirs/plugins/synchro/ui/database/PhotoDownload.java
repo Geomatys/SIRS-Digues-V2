@@ -10,13 +10,13 @@ import fr.sirs.plugins.synchro.common.PhotoAndTroncon;
 import fr.sirs.plugins.synchro.common.PhotoFinder;
 import fr.sirs.plugins.synchro.common.PhotosTronconWrapper;
 import fr.sirs.plugins.synchro.concurrent.AsyncPool;
-import fr.sirs.plugins.synchro.ui.FXTronconPathSelector;
 import fr.sirs.ui.Growl;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -124,6 +124,13 @@ public class PhotoDownload extends StackPane {
 
     @FXML
     void importPhotos(ActionEvent event) {
+        final Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer le Téléchargement ?\nSi vous souhaitez choisir au préalable le(s) répertoire(s) de destination, Cliquez d'abord sur le bouton \"Estimer\".", ButtonType.NO, ButtonType.YES);
+        confirmation.setResizable(true);
+        final Optional<ButtonType> res = confirmation.showAndWait();
+        if (!((res.isPresent() && ButtonType.YES.equals(res.get())))) {
+            return;
+        }
+
         final CouchDbConnector connector = session.getConnector();
         final Function<PhotoAndTroncon, Path> destinationFinder = destinationProvider.getValue();
         if (destinationFinder == null) {

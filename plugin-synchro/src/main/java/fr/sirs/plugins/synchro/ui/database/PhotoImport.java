@@ -13,20 +13,24 @@ import java.util.Optional;
 import java.util.function.Function;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
-import javafx.geometry.Pos;
-import javafx.scene.layout.VBox;
+import javafx.fxml.FXML;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.GridPane;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
-public class PhotoImport extends VBox {
+public class PhotoImport extends ScrollPane {
 
+    @FXML
+    private GridPane uiImportGridPane;
 
     public PhotoImport(final Session session, final AsyncPool executor) {
-        super(10);
-        setFillWidth(true);
-        setAlignment(Pos.CENTER);
+        SIRS.loadFXML(this);
+
+//        super(10);
+        this.setFitToWidth(true);
 
         final PhotoDestination photoDestination = new PhotoDestination(session);
         photoDestination.setPathSelector();
@@ -58,7 +62,9 @@ public class PhotoImport extends VBox {
         downloadPane.getTronconIds().addListener((o, old, tronconsIds) -> photoDestination.update(tronconsIds));
 
         final PhotoPurge photoPurge = new PhotoPurge(executor, session);
-
-        getChildren().addAll(photoDestination, prefixPane, downloadPane, photoPurge);
+        uiImportGridPane.add(photoDestination, 0, 0);
+        uiImportGridPane.add(downloadPane,     1, 0);
+        uiImportGridPane.add(prefixPane,       0, 1);
+        uiImportGridPane.add(photoPurge,       1, 1);
     }
 }

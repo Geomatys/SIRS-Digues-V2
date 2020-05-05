@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -18,9 +19,9 @@
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </padding>
                <content>
-                  <VBox prefHeight="200.0" prefWidth="467.0">
+                  <VBox prefHeight="250.0" prefWidth="467.0">
                      <children>
-                        <Label prefHeight="16.0" prefWidth="190.0" text="Tronçons -&gt; chemin associé" />
+                        <Hyperlink prefHeight="16.0" minWidth="250" prefWidth="300" text="Tronçons -&gt; chemin associé (aide)" onAction="#printHelp"/>
                         <ListView fx:id="uiTronconList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="100.0" minWidth="0.0" prefHeight="200.0" />
                         <Label prefHeight="38.0" prefWidth="345.0" text="Choix du répertoire de destination pour la sélection :">
                            <padding>
