@@ -38,6 +38,7 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.ConvertPositionableCoordinates;
+import fr.sirs.util.SIRSAreaComputer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -110,7 +111,7 @@ public class FXPositionablePane extends BorderPane {
     //Bouton permettant le rafraîchissement du SR par défaut manuellement.
     @FXML
     protected Button uiRefreshCoord = new Button(null);
-    
+
     private final ObjectProperty<Positionable> posProperty = new SimpleObjectProperty<>();
     private final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty(true);
     private final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
@@ -127,10 +128,10 @@ public class FXPositionablePane extends BorderPane {
         SIRS.loadFXML(this, clazz);
 
         uiView.setGraphic(new ImageView(ICON_VIEWOTHER_WHITE));
-        
+
         uiRefreshCoord.setGraphic(new ImageView(SIRS.ICON_REFRESH_WHITE));
         uiRefreshCoord.setTooltip(new Tooltip("Actualiser SR par défaut"));
-        
+
         modes.addAll(lstModes);
 
         //pour chaque mode un toggle button
@@ -227,7 +228,7 @@ public class FXPositionablePane extends BorderPane {
         if (geometry != null) {
             if (geometry instanceof Polygon || geometry instanceof MultiPolygon) {
                 final String surface = NumberFormat.getNumberInstance().format(
-                        MeasureUtilities.calculateArea(geometry, Injector.getSession().getProjection(), Units.SQUARE_METRE)) + " m²";
+                        SIRSAreaComputer.calculateArea(geometry, Injector.getSession().getProjection(), Units.SQUARE_METRE)) + " m²";
                 return "Surface : " + surface;
             } else {
                 final String longueur = NumberFormat.getNumberInstance().format(
@@ -330,8 +331,8 @@ public class FXPositionablePane extends BorderPane {
 
         /*On ne peut pas deviner non plus le nouveau SR
         On lui affecte celui du nouveau tronçon.
-        Attention : il faut initialiser cette propritété AVANT la mise à jour de 
-        la géométrie car les panneaux d'affichage des différents modes sont 
+        Attention : il faut initialiser cette propritété AVANT la mise à jour de
+        la géométrie car les panneaux d'affichage des différents modes sont
         susceptibles de mettre des écouteurs sur la géométrie qui relancent
         le calcul des champs. Or, ce calcul utilise le SR du positionnable.
          */
@@ -344,13 +345,13 @@ public class FXPositionablePane extends BorderPane {
 
     /**
      * Au clic du bouton permet de mettre à jour le SR par défaut et les PR associés.
-     * @param event 
+     * @param event
      */
     @FXML
     void refreshSRAndPRInfo(ActionEvent event) {
             this.updateSRAndPRInfo();
     }
-    
+
     /**
      * Mise à jour de l'affichage du SR et des PRs sur le bandeau informatif.
      */
