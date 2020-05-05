@@ -2,7 +2,6 @@
 
 package fr.sirs.core.model;
 
-import fr.sirs.core.model.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -13,18 +12,16 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
+import fr.sirs.util.SIRSAreaComputer;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.json.LocalDateDeserializer;
 import fr.sirs.util.json.LocalDateSerializer;
-import fr.sirs.util.json.LocalDateTimeDeserializer;
-import fr.sirs.util.json.LocalDateTimeSerializer;
 import fr.sirs.util.property.Computed;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.Reference;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 import javafx.beans.property.*;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -33,27 +30,26 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import org.apache.sis.measure.Units;
-import org.geotoolkit.display.MeasureUtilities;
 
-public abstract class ZoneVegetation  extends PositionableVegetation 
+public abstract class ZoneVegetation  extends PositionableVegetation
     implements Element , AvecBornesTemporelles, AvecForeignParent ,  AvecGeometrie {
 
     private static final SirsStringConverter converter = new SirsStringConverter();
-    
+
     @Override
-    @Internal    
+    @Internal
     @JsonIgnore
     public String getDocumentId(){
         return documentId;
     }
-   
+
     private String documentId;
-    
+
     @JsonProperty(required=false)
     public void setDocumentId(String documentId) {
         this.documentId = documentId;
     }
-   
+
     protected final ObjectProperty<Element> parent =  new SimpleObjectProperty<>();
 
     /**
@@ -64,7 +60,7 @@ public abstract class ZoneVegetation  extends PositionableVegetation
     public ObjectProperty<Element> parentProperty() {
         return parent;
     }
-   
+
     /**
      * @return the parent {@link Element} of the current element, or null if no parent is set.
      * Note that no CouchDB document has a parent property. Only contained elements have one.
@@ -73,12 +69,12 @@ public abstract class ZoneVegetation  extends PositionableVegetation
     public Element getParent(){
        return parent.get();
     }
- 
+
     @Override
     @JsonBackReference("parent")
     public void setParent(Element parent){
        this.parent.set(parent);
-    } 
+    }
     /**
     * JavaFX property for contactEau.
     */
@@ -109,9 +105,9 @@ public abstract class ZoneVegetation  extends PositionableVegetation
     public ObjectProperty<LocalDate> date_finProperty() {
        return date_fin;
     }
-     
+
     public final ObjectProperty<TraitementZoneVegetation>  traitement = new SimpleObjectProperty<>();
-     
+
     {
         traitement.addListener(new ChangeListener<Element>() {
 
@@ -124,47 +120,47 @@ public abstract class ZoneVegetation  extends PositionableVegetation
         });
     }
     private final StringProperty typePositionId = new SimpleStringProperty();
-    
+
     public StringProperty typePositionIdProperty() {
         return this.typePositionId;
     }
     private final StringProperty typeCoteId = new SimpleStringProperty();
-    
+
     public StringProperty typeCoteIdProperty() {
         return this.typeCoteId;
     }
-    
+
     public boolean getContactEau(){
         return this.contactEau.get();
     }
-    
-        
+
+
     public void setContactEau(boolean contactEau){
         this.contactEau.set(contactEau);
     }
 
-    @JsonSerialize(using=LocalDateSerializer.class)    
+    @JsonSerialize(using=LocalDateSerializer.class)
     public LocalDate getDate_debut(){
         return this.date_debut.get();
     }
-    
-    
-    @JsonDeserialize(using=LocalDateDeserializer.class)    
+
+
+    @JsonDeserialize(using=LocalDateDeserializer.class)
     public void setDate_debut(LocalDate date_debut){
         this.date_debut.set(date_debut);
     }
 
-    @JsonSerialize(using=LocalDateSerializer.class)    
+    @JsonSerialize(using=LocalDateSerializer.class)
     public LocalDate getDate_fin(){
         return this.date_fin.get();
     }
-    
-    
-    @JsonDeserialize(using=LocalDateDeserializer.class)    
+
+
+    @JsonDeserialize(using=LocalDateDeserializer.class)
     public void setDate_fin(LocalDate date_fin){
         this.date_fin.set(date_fin);
     }
-    
+
     @Internal
     @JsonManagedReference("parent")
     public TraitementZoneVegetation getTraitement(){
@@ -174,8 +170,8 @@ public abstract class ZoneVegetation  extends PositionableVegetation
     public void setTraitement(TraitementZoneVegetation traitement){
             this.traitement.set( traitement );
         }
-    
-    @Reference(ref=RefPosition.class)  
+
+    @Reference(ref=RefPosition.class)
     public String getTypePositionId(){
         return this.typePositionId.get();
     }
@@ -183,8 +179,8 @@ public abstract class ZoneVegetation  extends PositionableVegetation
     public void setTypePositionId(String typePositionId){
         this.typePositionId.set( typePositionId );
     }
-    
-    @Reference(ref=RefCote.class)  
+
+    @Reference(ref=RefCote.class)
     public String getTypeCoteId(){
         return this.typeCoteId.get();
     }
@@ -193,7 +189,7 @@ public abstract class ZoneVegetation  extends PositionableVegetation
         this.typeCoteId.set( typeCoteId );
     }
         @Override
-    public abstract ZoneVegetation copy(); 
+    public abstract ZoneVegetation copy();
     @Override
     public String toString(){
         StringBuilder builder = new StringBuilder("[ZoneVegetation ");
@@ -276,7 +272,7 @@ public abstract class ZoneVegetation  extends PositionableVegetation
         builder.append(getDate_fin());
         return builder.toString();
     }
-    
+
     @Override
     public boolean contentBasedEquals(Element element) {
         if(element instanceof ZoneVegetation) {
@@ -327,7 +323,7 @@ public abstract class ZoneVegetation  extends PositionableVegetation
     public String getZoneType(){
         return LabelMapper.get(this.getClass()).mapClassName();
     }
-    
+
     @JsonIgnore
     @Computed
     public String getVegetationType(){
@@ -340,14 +336,14 @@ public abstract class ZoneVegetation  extends PositionableVegetation
         else {
             vegetationId=null;
         }
-        
+
         return vegetationId==null ? null : converter.toString(Injector.getSession().getPreviews().get(vegetationId));
     }
-    
+
     @JsonIgnore
     @Computed
     public String getSurface(){
-        
+
             if(this!=null){
                 final Geometry geom = geometryProperty().get();
                 if(geom!=null){
@@ -361,7 +357,7 @@ public abstract class ZoneVegetation  extends PositionableVegetation
                 return null;
             }
     }
-    
+
     /**
      * Calcul de la surface en m².
      * @param geometry
@@ -370,7 +366,7 @@ public abstract class ZoneVegetation  extends PositionableVegetation
     private static String getGeometryInfo(final Geometry geometry) {
         if (geometry != null && (geometry instanceof Polygon || geometry instanceof MultiPolygon)) {
             final String surface = NumberFormat.getNumberInstance().format(
-                    MeasureUtilities.calculateArea(geometry, Injector.getSession().getProjection(), Units.SQUARE_METRE));
+                    SIRSAreaComputer.calculateArea(geometry, Injector.getSession().getProjection(), Units.SQUARE_METRE));
             return surface;
         }
         else {

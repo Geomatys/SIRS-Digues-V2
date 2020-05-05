@@ -41,8 +41,8 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
     private static final Image ICON_REAL_POSITION_VISIBLE   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CROSSHAIRS, 16, Color.DARK_GRAY),null);
     private static final Image ICON_REAL_POSITION_UNVISIBLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CROSSHAIRS, 16, Color.LIGHT_GRAY),null);
 
-    private static final Tooltip REAL_POSITION_VISIBLE_TOOLTIP   = new Tooltip("Afficher les positions réelles de début et de fin");
-    private static final Tooltip REAL_POSITION_UNVISIBLE_TOOLTIP = new Tooltip("Afficher uniquement les géométries");
+    private static final Tooltip REAL_POSITION_VISIBLE_TOOLTIP   = new Tooltip("Afficher uniquement les géométries");
+    private static final Tooltip REAL_POSITION_UNVISIBLE_TOOLTIP = new Tooltip("Afficher les positions réelles de début et de fin");
 
 
 
