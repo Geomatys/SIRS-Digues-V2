@@ -199,7 +199,7 @@ public class FXValidationPane extends BorderPane {
         table.getColumns().add(authorColumn);
 
         // SYM-1941 : Ajout Colonne tronçon
-        final TableColumn<Preview, String> tronconColumn = new TableColumn<>("Tronçon d'appartenance");
+        final TableColumn<Preview, String> tronconColumn = new TableColumn<>("Tronçon - document : designation");
         tronconColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
             return new SimpleObjectProperty(tryFindTronconFromPreview(param.getValue()));
         });
@@ -259,14 +259,21 @@ public class FXValidationPane extends BorderPane {
 //            final Class elementClass = preview.getJavaClassOr(Object.class);
 
         try {
-            elementClass = Class.forName(preview.getDocClass());
+
+            final StringBuilder resultBuilder = new StringBuilder();
+            final String className = preview.getDocClass();
+            elementClass = Class.forName(className);
             if (Objet.class.isAssignableFrom(elementClass)) {
 
-//                    result = ((Element) session.getRepositoryForClass(elementClass)
-//                            .get(preview.getDocId())).getParent().getDesignation(); //new SirsStringConverter()
-                result = converter.toString(tronconRepository.get(((Objet) session.getRepositoryForClass(elementClass)
-                        .get(preview.getDocId()))
-                        .getLinearId()));
+                final Objet objet = ((Objet) session.getRepositoryForClass(elementClass)
+                        .get(preview.getDocId()));
+
+                resultBuilder.append(converter.toString(tronconRepository.get(objet.getLinearId()))).append(" - ");
+
+                if(objet.getDesignation() !=null) {
+                    resultBuilder.append(getBundleForClass(className).getString(BUNDLE_KEY_CLASS)).append (" : ").append(objet.getDesignation());
+                }
+                result =resultBuilder.toString();
             } else {
                 SIRS.LOGGER.log(Level.INFO, "Impossible d'identifi\u00e9 un tron\u00e7on pour les \u00e9l\u00e9ments de type : {0}", elementClass.getCanonicalName());
                 result = "";
