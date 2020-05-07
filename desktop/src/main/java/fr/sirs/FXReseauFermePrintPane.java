@@ -112,6 +112,8 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
         uiOptionDebutArchive.valueProperty().addListener(parameterListener);
         uiOptionFinArchive.valueProperty().addListener(parameterListener);
 
+        uiPrestationPredicater.uiOptionPrestation.selectedProperty().addListener(parameterListener);
+
         uiCountProgress.setVisible(false);
         updateCount(null);
     }
