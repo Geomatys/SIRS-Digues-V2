@@ -117,6 +117,7 @@ import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArraysExt;
 import org.ektorp.CouchDbConnector;
+import org.geotoolkit.cql.CQL;
 import org.geotoolkit.cql.CQLException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
@@ -127,6 +128,7 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
 import org.geotoolkit.filter.DefaultLiteral;
+import org.geotoolkit.filter.function.geometry.GeometryFunctionFactory;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -945,7 +947,6 @@ public class CorePlugin extends Plugin {
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 geometryName,DEFAULT_DESCRIPTION,Units.POINT,line1Stroke,LITERAL_ZERO_FLOAT);
 
-
         final Stroke line2Stroke = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,GO2Utilities.FILTER_FACTORY.literal(1),
                 STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
@@ -990,10 +991,29 @@ public class CorePlugin extends Plugin {
 //        // test et préparation pour SYM-1776
 
         if(withRealPosition) {
-            final MutableRule start = createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, col, StyleConstants.MARK_TRIANGLE);
-            final MutableRule end = createExactPositinRule("end", SirsCore.POSITION_FIN_FIELD, col, StyleConstants.MARK_TRIANGLE);
-            fts.rules().add(start);
-            fts.rules().add(end);
+
+            try {
+
+                final MutableRule start = createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, col, StyleConstants.MARK_TRIANGLE);
+                final MutableRule end = createExactPositinRule("end", SirsCore.POSITION_FIN_FIELD, col, StyleConstants.MARK_TRIANGLE);
+
+                final Expression customFun = new PointsToLine(FF.property(SirsCore.POSITION_DEBUT_FIELD),  FF.property(SirsCore.POSITION_FIN_FIELD));
+
+                final Stroke realLineStroke = SF.stroke(SF.literal(col), LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(5),
+                        STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, new float[]{15.f, 15.f}, LITERAL_ZERO_FLOAT);
+
+                final LineSymbolizer lineReal = SF.lineSymbolizer("symbol",
+                customFun,
+                DEFAULT_DESCRIPTION,Units.POINT, realLineStroke,LITERAL_ZERO_FLOAT);
+                final MutableRule ruleLineReal = SF.rule(lineReal);
+                fts.rules().add(ruleLineReal);
+                fts.rules().add(start);
+                fts.rules().add(end);
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.WARNING, NAME, e);
+            }
+
+
         }
 //        fts.rules().add(startReal);
 //        fts.rules().add(endReal);
