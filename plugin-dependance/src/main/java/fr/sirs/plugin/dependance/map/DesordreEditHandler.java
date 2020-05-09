@@ -106,7 +106,7 @@ public class DesordreEditHandler extends AbstractSIRSEditHandler {
             newCreatedObjet = false;
         }
 
-        mouseInputListener = new SIRSEditMouseListen(this);
+        mouseInputListener = new SIRSEditMouseListen(this, true);
     }
 
     @Override

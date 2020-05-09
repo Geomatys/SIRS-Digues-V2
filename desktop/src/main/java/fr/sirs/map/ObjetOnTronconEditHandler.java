@@ -20,32 +20,25 @@ package fr.sirs.map;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
-import fr.sirs.SIRS;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Objet;
 import static fr.sirs.map.EditModeObjet.CREATE_OBJET;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.geometry.Insets;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Separator;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.stage.Modality;
-import javafx.stage.WindowEvent;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -59,6 +52,7 @@ import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
+import org.opengis.filter.Id;
 import org.opengis.filter.identity.Identifier;
 
 /**
@@ -100,24 +94,24 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
 //        this.map = map;
 
 //        session = Injector.getSession();
-        dialog.getIcons().add(SIRS.ICON);
+//        dialog.getIcons().add(SIRS.ICON);
         this.editPane = editPane;
 
         // Prepare footer to set an "exit" button
-        final Button exitButton = new Button("Fermer");
-        exitButton.setCancelButton(true);
-        exitButton.setOnAction(event -> dialog.hide());
-        final Separator sep = new Separator();
-        sep.setVisible(false);
-        final HBox footer = new HBox(sep, exitButton);
-        footer.setPadding(new Insets(0, 10, 10, 0));
-        HBox.setHgrow(sep, Priority.ALWAYS);
-        final BorderPane bp = new BorderPane(editPane, null, null, footer, null);
+//        final Button exitButton = new Button("Fermer");
+//        exitButton.setCancelButton(true);
+//        exitButton.setOnAction(event -> dialog.hide());
+//        final Separator sep = new Separator();
+//        sep.setVisible(false);
+//        final HBox footer = new HBox(sep, exitButton);
+//        footer.setPadding(new Insets(0, 10, 10, 0));
+//        HBox.setHgrow(sep, Priority.ALWAYS);
+//        final BorderPane bp = new BorderPane(editPane, null, null, footer, null);
 
-        dialog.setResizable(true);
-        dialog.initModality(Modality.NONE);
-        dialog.initOwner(map.getScene().getWindow());
-        dialog.setScene(new Scene(bp));
+//        dialog.setResizable(true);
+//        dialog.initModality(Modality.NONE);
+//        dialog.initOwner(map.getScene().getWindow());
+//        dialog.setScene(new Scene(bp));
 
         //on ecoute la selection du troncon et des bornes pour les mettre en surbrillant
         editPane.tronconProperty().addListener(new ChangeListener<TronconDigue>() {
@@ -142,33 +136,65 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
             }
         });
 
-        //fin de l'edition
-        dialog.setOnHiding((WindowEvent event) -> {
-            TronconDigue troncon = editPane.getTronconProperty();
-            if (troncon != null) {
-                //on recupère la derniere version, la maj des sr entraine la maj des troncons
-                troncon = session.getRepositoryForClass(TronconDigue.class).get(troncon.getDocumentId());
-                //on recalcule les geometries des positionables du troncon.
-                TronconUtils.updatePositionableGeometry(troncon, session);
+//        //fin de l'edition
+//        dialog.setOnHiding((WindowEvent event) -> {
+//            TronconDigue troncon = editPane.getTronconProperty();
+//            if (troncon != null) {
+//                //on recupère la derniere version, la maj des sr entraine la maj des troncons
+//                troncon = session.getRepositoryForClass(TronconDigue.class).get(troncon.getDocumentId());
+//                //on recalcule les geometries des positionables du troncon.
+//                TronconUtils.updatePositionableGeometry(troncon, session);
+//            }
+//            editPane.save();
+//            editPane.reset();
+//        });
+
+//        editPane.tronconProperty().addListener((observable, oldValue, newValue) -> {
+//            if (newValue != null) {
+//                dialog.show();
+//            } else {
+//                dialog.hide();
+//            }
+//        });
+
+
+        editPane.objetProperties().addListener(new ListChangeListener<TronconDigue>() {
+            @Override
+            public void onChanged(ListChangeListener.Change<? extends TronconDigue> c) {
+                if (objetLayer == null) {
+                    return;
+                }
+
+                final ObservableList<T> lst = editPane.objetProperties();
+                final Set<Identifier> ids = new HashSet<>();
+                for (T elt : lst) {
+                    ids.add(new DefaultFeatureId(elt.getId()));
+                }
+
+                final Id filter = GO2Utilities.FILTER_FACTORY.id(ids);
+                objetLayer.setSelectionFilter(filter);
+
+                if (ids.size() == 1) {
+                    //borne edition mode
+                    final String id = lst.get(0).getId();
+                    editedObjet = (T) session.getRepositoryForClass(objetClass).get(id);
+                    updateGeometry();
+                } else {
+                    editedObjet = null;
+                    updateGeometry();
+                }
+
             }
-            editPane.save();
-            editPane.reset();
         });
 
-        editPane.tronconProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                dialog.show();
-            } else {
-                dialog.hide();
-            }
-        });
+         editPane.getModeProperty().addListener((cl,o,n)-> mode = editPane.getMode());
 
-        editPane.getModeProperty().bindBidirectional(modeProperty);
+//        editPane.getModeProperty().bindBidirectional(modeProperty);
 //                .addListener((observable, oldValue, newValue) -> {
 //            modeProperty.setValue(newValue);
 //        });
 
-        dialog.show();
+//        dialog.show();
 
         if (instantiateMouseEditListener) {
             mouseInputListener = new EditionOnTronconMouseListen(this);
@@ -279,7 +305,7 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
 ////            popup.setAutoHide(true);
 //        }
         public EditionOnTronconMouseListen(final ObjetOnTronconEditHandler editHandler) {
-            super(editHandler);
+            super(editHandler, false);
 //            popup.setAutoHide(true);
         }
 
@@ -294,7 +320,7 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
             mousebutton = e.getButton();
 
 //            final EditModeObjet mode = editPane.getMode();
-            if (EditModeObjet.PICK_TRONCON.equals(mode)) {
+            if (EditModeObjet.PICK_TRONCON.equals(modeProperty.get())) {
                 if (mousebutton == MouseButton.PRIMARY) {
                     //selection d'un troncon
                     final Feature feature = helperTroncon.grabFeature(e.getX(), e.getY(), false);
@@ -315,21 +341,22 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
         @Override
         protected void chooseTypesAndCreate() {
 
-            editPane = new FXObjetEditPane(map, TRONCON_LAYER_NAME, objetClass);
+//            editPane = new FXObjetEditPane(map, TRONCON_LAYER_NAME, objetClass);
 //            final Stage stage = new Stage();
 //            stage.getIcons().add(SIRS.ICON);
 //            stage.setTitle("Création d'objet");
 //            stage.initModality(Modality.WINDOW_MODAL);
 //            stage.setAlwaysOnTop(true);
 
-            final Scene sceneChoices = new Scene(editPane);
-            dialog.setScene(sceneChoices);
-            dialog.showAndWait();
+//            final Scene sceneChoices = new Scene(editPane);
+//            dialog.setScene(sceneChoices);
+//            dialog.showAndWait();
 
             objetHelper = getHelperObjet();
             final AbstractSIRSRepository<T> repo = Injector.getSession().getRepositoryForClass(editedClass);
             editedObjet = repo.create();
-//                newCreatedObjet = true;
+            final TronconDigue tronconParent = editPane.getTronconProperty();
+            editedObjet.setForeignParentId(tronconParent==null?null:tronconParent.getId());
             modeProperty.setValue(CREATE_OBJET);
 
             switch (((FXObjetEditPane) editPane).getGeomType()) {
@@ -339,63 +366,13 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
                 case "Linéaire":
                     newGeomType = LineString.class;
                     break;
-                case "Surfacique":
-                    newGeomType = Polygon.class;
-                    break;
+//                case "Surfacique":
+//                    newGeomType = Polygon.class;
+//                    break;
                 default:
                     newGeomType = Point.class;
             }
 
-//                final Stage stage = new Stage();
-//                stage.getIcons().add(SIRS.ICON);
-//                stage.setTitle("Création d'objet");
-//                stage.initModality(Modality.WINDOW_MODAL);
-//                stage.setAlwaysOnTop(true);
-//                final GridPane gridPane = new GridPane();
-//                gridPane.setVgap(10);
-//                gridPane.setHgap(5);
-//                gridPane.setPadding(new Insets(10));
-//                gridPane.add(new Label("Choisir un type de d'objet"), 0, 0);
-//
-//                final ComboBox<String> geomTypeBox = new ComboBox<>();
-//                geomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
-//                geomTypeBox.getSelectionModel().selectFirst();
-//                final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
-//                geomChoiceLbl.visibleProperty().bind(geomTypeBox.visibleProperty());
-//                gridPane.add(geomChoiceLbl, 0, 1);
-//                gridPane.add(geomTypeBox, 1, 1);
-//
-//                final Button validateBtn = new Button("Valider");
-//                validateBtn.setOnAction(event -> stage.close());
-//                gridPane.add(validateBtn, 2, 3);
-//
-//                final Scene sceneChoices = new Scene(gridPane);
-//                stage.setScene(sceneChoices);
-//                stage.showAndWait();
-//
-////                final Class clazz = DesordreDependance.class;
-////                objetHelper = new EditionHelper(map, objetLayer);
-//                objetHelper = editHandler.getHelperObjet();
-//
-//                final AbstractSIRSRepository<G> repo = Injector.getSession().getRepositoryForClass(editedClass);
-//                editedObjet = repo.create();
-////                newCreatedObjet = true;
-//                modeProperty.setValue(CREATE_OBJET);
-//
-//
-//                switch (geomTypeBox.getSelectionModel().getSelectedItem()) {
-//                    case "Ponctuel":
-//                        newGeomType = Point.class;
-//                        break;
-//                    case "Linéaire":
-//                        newGeomType = LineString.class;
-//                        break;
-//                    case "Surfacique":
-//                        newGeomType = Polygon.class;
-//                        break;
-//                    default:
-//                        newGeomType = Point.class;
-//                }
         }
 
     }

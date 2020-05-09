@@ -5,13 +5,21 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TableView?>
+<!--<?import javafx.scene.control.TableView?>-->
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
+
+<?import org.geotoolkit.gui.javafx.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<!--<?import javafx.scene.control.TableView?>-->
+<!--<?import org.geotoolkit.gui.javafx.util.FXTableView?>-->
 
 <fx:root maxWidth="800.0" minHeight="480.0" minWidth="380.0" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <center>
@@ -24,25 +32,23 @@
           <RowConstraints vgrow="ALWAYS" />
         </rowConstraints>
          <children>
-            <GridPane hgap="10.0" prefHeight="203.0" prefWidth="360.0" styleClass="gray-light" vgap="10.0">
+            <GridPane hgap="10.0" prefHeight="147.0" prefWidth="360.0" styleClass="gray-light" vgap="10.0">
               <columnConstraints>
                 <ColumnConstraints hgrow="ALWAYS" />
                 <ColumnConstraints hgrow="NEVER" />
-                  <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
               </columnConstraints>
               <rowConstraints>
                 <RowConstraints vgrow="NEVER" />
                 <RowConstraints vgrow="NEVER" />
                 <RowConstraints vgrow="NEVER" />
-                <RowConstraints vgrow="NEVER" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                  <RowConstraints />
+<!--                <RowConstraints vgrow="NEVER" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />-->
               </rowConstraints>
                <children>
                   <Label fx:id="typeNameLabel" text="Choix du tronçon parent :" />
-                  <ToggleButton fx:id="uiPickTroncon" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0" prefWidth="27.0" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <TextField fx:id="uiTronconLabel" editable="false" maxWidth="1.7976931348623157E308" promptText="Sélectionner un tronçon" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" />
-<!--                  <Label layoutX="20.0" layoutY="20.0" text="Choisir un type de d'objet :" GridPane.rowIndex="2" />
-                  <ComboBox fx:id="uiObjetType" prefHeight="26.0" prefWidth="178.0" GridPane.rowIndex="3" />-->
+                  <ToggleButton fx:id="uiPickTroncon" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0" prefWidth="27.0" visible="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <TextField fx:id="uiTronconLabel" editable="false" maxWidth="1.7976931348623157E308" promptText="Sélectionner un tronçon" GridPane.rowIndex="1" />
                   <Label layoutX="20.0" layoutY="82.0" text="Choisir un type de géométrie :" GridPane.rowIndex="2" />
                   <ComboBox fx:id="uiGeomTypeBox" layoutX="20.0" layoutY="108.0" prefHeight="26.0" prefWidth="181.0" GridPane.rowIndex="3" />
                </children>
@@ -73,13 +79,14 @@
                         <FXTableView fx:id="uiObjetTable" editable="true">
                            <columnResizePolicy>
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                           </columnResizePolicy></FXTableView>
+                           </columnResizePolicy>
+                        </FXTableView>
                      </content>
                   </ScrollPane>
                   <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Tracer sur la carte un nouvel objet" wrapText="true" GridPane.rowIndex="3" />
                   <ToggleButton fx:id="uiCreateObjet" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Tracer" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <Label text="Editer l'objet sélectionné" GridPane.rowIndex="2" />
-                  <Button fx:id="uiModifyObjet" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Modify" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label text="Modifier un objet existant (sélectionnez puis modifiez)" GridPane.rowIndex="2" />
+                  <Button fx:id="uiModifyObjet" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Modifier" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                   <Label text="Supprimer les objets sélectionnés" GridPane.rowIndex="4" />
                   <Button mnemonicParsing="false" onAction="#deleteObjets" text="Supprimer" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                </children>

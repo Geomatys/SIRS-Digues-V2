@@ -44,8 +44,8 @@ public abstract class AbstractSIRSEditMouseListen<G extends AvecGeometrie> exten
     protected final Class<G> editedClass;
     protected G editedObjet = null;
     protected final SimpleObjectProperty<G> editedObjetProperty = new SimpleObjectProperty<>(editedObjet);
-    protected EditModeObjet mode = EditModeObjet.NONE;
-    protected final ObjectProperty<EditModeObjet> modeProperty = new SimpleObjectProperty<>(mode);
+//    protected EditModeObjet mode = EditModeObjet.NONE;
+    protected final ObjectProperty<EditModeObjet> modeProperty = new SimpleObjectProperty<>(EditModeObjet.NONE);
 
     protected EditionHelper objetHelper;
 
@@ -152,23 +152,23 @@ public abstract class AbstractSIRSEditMouseListen<G extends AvecGeometrie> exten
 //
 //        super.mouseDragged(e);
 //    }
-//
-//    /**
-//     * Réinitialise la carte et vide la géométrie en cours d'édition.
-//     */
-//    private void reset() {
-////        newCreatedObjet = false;
-//        justCreated = false;
-//        geomLayer.getGeometries().clear();
-//        geomLayer.setNodeSelection(null);
-//        coords.clear();
-//        editGeometry.reset();
-//        editedObjet = null;
-//    }
-//
-//    // ==========================  UTILITIES  ==================================
-//
-//    private void selectObjet(final double x, final double y) {
+
+    /**
+     * Réinitialise la carte et vide la géométrie en cours d'édition.
+     */
+    private void reset() {
+//        newCreatedObjet = false;
+        justCreated = false;
+        geomLayer.getGeometries().clear();
+        geomLayer.setNodeSelection(null);
+        coords.clear();
+        editGeometry.reset();
+        editedObjet = null;
+    }
+
+    // ==========================  UTILITIES  ==================================
+
+//    protected abstract void selectObjet(final double x, final double y) ;
 //         // Recherche d'une couche de la carte qui contiendrait une géométrie là où l'utilisateur a cliqué
 ////                final Rectangle2D clickArea = new Rectangle2D.Double(e.getX() - 2, e.getY() - 2, 4, 4);
 //
@@ -217,10 +217,10 @@ public abstract class AbstractSIRSEditMouseListen<G extends AvecGeometrie> exten
 ////                    }
 ////                }, VisitFilter.INTERSECTS);
 //    }
-//
-//
-//
-//    private void createNewGeometryForObjet(final double x, final double y) {
+
+
+
+//    protected abstract void createNewGeometryForObjet(final double x, final double y);
 //
 //                    // Le helper peut être null si on a choisi d'activer ce handler pour une dépendance existante,
 //                    // sans passer par le clic droit pour choisir un type de dépendance.
@@ -300,15 +300,15 @@ public abstract class AbstractSIRSEditMouseListen<G extends AvecGeometrie> exten
 //                        reset();
 //                    }
 //    }
-//
-//    /**
-//     * On réédite une géométrie existante, le double clic gauche va nous
-//     * permettre d'ajouter un nouveau point à la géométrie, si ce n'est pas un point.
-//     * @param e
-//     * @param x
-//     * @param y
-//     */
-//    private void modifyObjetGeometry(final MouseEvent e, final double x, final double y) {
+
+    /**
+     * On réédite une géométrie existante, le double clic gauche va nous
+     * permettre d'ajouter un nouveau point à la géométrie, si ce n'est pas un point.
+     * @param e
+     * @param x
+     * @param y
+     */
+//    protected abstract void modifyObjetGeometry(final MouseEvent e, final double x, final double y);
 //        final Geometry tempEditGeom = editGeometry.geometry.get();
 //        if (!Point.class.isAssignableFrom(tempEditGeom.getClass()) && e.getClickCount() >= 2) {
 //            final Geometry result;
@@ -321,13 +321,13 @@ public abstract class AbstractSIRSEditMouseListen<G extends AvecGeometrie> exten
 //            geomLayer.getGeometries().setAll(editGeometry.geometry.get());
 //        }
 //    }
-//
-//    /**
-//     * L'objet n'existe pas, on en créé une nouvelle après avoir choisi son type
-//     * et le type de géométrie à dessiner.
-//     */
+
+    /**
+     * L'objet n'existe pas, on en créé une nouvelle après avoir choisi son type
+     * et le type de géométrie à dessiner.
+     */
 //    protected void chooseTypesAndCreate() {
-//
+
 //                final Stage stage = new Stage();
 //                stage.getIcons().add(SIRS.ICON);
 //                stage.setTitle("Création d'objet");
@@ -379,8 +379,8 @@ public abstract class AbstractSIRSEditMouseListen<G extends AvecGeometrie> exten
 //                        newGeomType = Point.class;
 //                }
 //    }
-//
-//    private void concludeTheEdition(final double x, final double y) {
+
+//    protected abstract void concludeTheEdition(final double x, final double y);
 //
 //                // popup :
 //                // -suppression d'un noeud
@@ -447,5 +447,5 @@ public abstract class AbstractSIRSEditMouseListen<G extends AvecGeometrie> exten
 ////                popup.show(geomLayer, Side.TOP, e.getX(), e.getY());
 //                popup.show(geomLayer, Side.TOP, x, y);
 //    }
-//    //============================ End Utilities ===============================
+    //============================ End Utilities ===============================
 }

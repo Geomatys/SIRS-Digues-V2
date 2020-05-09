@@ -23,7 +23,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
@@ -38,6 +37,9 @@ import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static fr.sirs.map.EditModeObjet.*;
+import static javafx.scene.control.Alert.AlertType.NONE;
+import javafx.scene.input.MouseButton;
+import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 
 /**
  *
@@ -48,76 +50,21 @@ import static fr.sirs.map.EditModeObjet.*;
  */
 public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends AbstractSIRSEditMouseListen<G> {
 
-    public SIRSEditMouseListen(final AbstractSIRSEditHandler sirsEditHandler) {
+    private final boolean allowSurfaces;
+
+    /**
+     * Create a {@link FXPanMouseListen} for geometry on map edition.
+     *
+     * @param sirsEditHandler
+     * @param allowSurfaces : indicate if the  listener allow to create objets
+     * with surface elements. If false, Only Points and Linestring will be
+     * editable.
+     */
+    public SIRSEditMouseListen(final AbstractSIRSEditHandler sirsEditHandler, final boolean allowSurfaces) {
         super(sirsEditHandler);
+        this.allowSurfaces = allowSurfaces;
     }
 
-//    public void setNewCreatedObjet(final boolean newCreatedObjet) {
-//        this.newCreatedObjet = newCreatedObjet;
-//    }
-
-//    @Override
-//    public void mouseClicked(final MouseEvent e) {
-//        final double x = e.getX();
-//        final double y = e.getY();
-//
-//        if (MouseButton.PRIMARY.equals(e.getButton())) {
-//            if ( (editedObjet == null) || (NONE.equals(modeProperty.get())) ) {
-//               selectObjet(x, y);
-//            } else {
-//                // L'objet existe, on peut travailler avec sa géométrie.
-////                if (newCreatedObjet) {
-//                switch (modeProperty.get()) {
-//                    case CREATE_OBJET :
-//                        createNewGeometryForObjet(x, y);
-//                        break;
-//
-//                    case EDIT_OBJET :
-//                        modifyObjetGeometry(e, x, y);
-//                        break;
-//                }
-//            }
-//        } else if (MouseButton.SECONDARY.equals(e.getButton())) {
-//            if (editedObjet == null) {
-//                chooseTypesAndCreate();
-//            } else {
-//                concludeTheEdition(x, y);
-//            }
-//        }
-//    }
-//
-//    @Override
-//    public void mousePressed(final MouseEvent e) {
-//        pressed = e.getButton();
-//
-////        if (editedObjet != null && !CREATE_OBJET.equals(modeProperty.get()) && pressed == MouseButton.PRIMARY) {
-//        if (EDIT_OBJET.equals(modeProperty.get()) && pressed == MouseButton.PRIMARY) {
-//            // On va sélectionner un noeud sur lequel l'utilisateur a cliqué, s'il y en a un.
-//
-//            // Le helper peut être null si on a choisi d'activer ce handler pour une dépendance existante,
-//            // sans passer par le clic droit pour choisir un type de dépendance.
-//            objetHelper = editHandler.getHelperObjet();
-//
-//            objetHelper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
-//            geomLayer.setNodeSelection(editGeometry);
-//        }
-//
-//        super.mousePressed(e);
-//    }
-//
-//    @Override
-//    public void mouseDragged(final MouseEvent e) {
-//
-////        if (editedObjet != null && !newCreatedObjet && pressed == MouseButton.PRIMARY) {
-//        if (EDIT_OBJET.equals(modeProperty.get()) && pressed == MouseButton.PRIMARY) {
-//            // On déplace le noeud sélectionné
-//            editGeometry.moveSelectedNode(objetHelper.toCoord(e.getX(), e.getY()));
-//            geomLayer.getGeometries().setAll(editGeometry.geometry.get());
-//            return;
-//        }
-//
-//        super.mouseDragged(e);
-//    }
 
     /**
      * Réinitialise la carte et vide la géométrie en cours d'édition.
@@ -132,9 +79,71 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
         editedObjet = null;
     }
 
+    @Override
+    public void mouseClicked(final MouseEvent e) {
+        final double x = e.getX();
+        final double y = e.getY();
+
+        if (MouseButton.PRIMARY.equals(e.getButton())) {
+            if ( (editedObjet == null) || (NONE.equals(modeProperty.get())) ) {
+               selectObjet(x, y);
+            } else {
+                // L'objet existe, on peut travailler avec sa géométrie.
+//                if (newCreatedObjet) {
+                switch (modeProperty.get()) {
+                    case CREATE_OBJET :
+                        createNewGeometryForObjet(x, y);
+                        break;
+
+                    case EDIT_OBJET :
+                        modifyObjetGeometry(e, x, y);
+                        break;
+                }
+            }
+        } else if (MouseButton.SECONDARY.equals(e.getButton())) {
+            if (editedObjet == null) {
+                chooseTypesAndCreate();
+            } else {
+                concludeTheEdition(x, y);
+            }
+        }
+    }
+    @Override
+    public void mousePressed(final MouseEvent e) {
+        pressed = e.getButton();
+
+//        if (editedObjet != null && !CREATE_OBJET.equals(modeProperty.get()) && pressed == MouseButton.PRIMARY) {
+        if (EDIT_OBJET.equals(modeProperty.get()) && pressed == MouseButton.PRIMARY) {
+            // On va sélectionner un noeud sur lequel l'utilisateur a cliqué, s'il y en a un.
+
+            // Le helper peut être null si on a choisi d'activer ce handler pour une dépendance existante,
+            // sans passer par le clic droit pour choisir un type de dépendance.
+            objetHelper = editHandler.getHelperObjet();
+
+            objetHelper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
+            geomLayer.setNodeSelection(editGeometry);
+        }
+
+        super.mousePressed(e);
+    }
+
+    @Override
+    public void mouseDragged(final MouseEvent e) {
+
+//        if (editedObjet != null && !newCreatedObjet && pressed == MouseButton.PRIMARY) {
+        if (EDIT_OBJET.equals(modeProperty.get()) && pressed == MouseButton.PRIMARY) {
+            // On déplace le noeud sélectionné
+            editGeometry.moveSelectedNode(objetHelper.toCoord(e.getX(), e.getY()));
+            geomLayer.getGeometries().setAll(editGeometry.geometry.get());
+            return;
+        }
+
+        super.mouseDragged(e);
+    }
+
     // ==========================  UTILITIES  ==================================
 
-    private void selectObjet(final double x, final double y) {
+    protected void selectObjet(final double x, final double y) {
          // Recherche d'une couche de la carte qui contiendrait une géométrie là où l'utilisateur a cliqué
 //                final Rectangle2D clickArea = new Rectangle2D.Double(e.getX() - 2, e.getY() - 2, 4, 4);
 
@@ -158,113 +167,88 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
             }
 
         }
-//                map.getCanvas().getGraphicsIn(clickArea, new AbstractGraphicVisitor() {
-//                    @Override
-//                    public void visit(ProjectedFeature graphic, RenderingContext2D context, SearchAreaJ2D area) {
-//                        final Object bean = graphic.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
-//                        if (editedClass.isInstance(bean)) {
-//                            objetHelper = new EditionHelper(map, graphic.getLayer());
-//                            editedObjet = editedClass.cast(bean);
-//                            // On récupère la géométrie de cet objet pour passer en mode édition
-//                            editGeometry.geometry.set((Geometry) editedObjet.getGeometry().clone());
-//                            // Ajout de cette géométrie dans la couche d'édition sur la carte.
-//                            geomLayer.getGeometries().setAll(editGeometry.geometry.get());
-//                            newCreatedObjet = false;
-//                        }
-//                    }
-//
-//                    @Override
-//                    public boolean isStopRequested() {
-//                        return objetHelper != null;
-//                    }
-//
-//                    @Override
-//                    public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {
-//                    }
-//                }, VisitFilter.INTERSECTS);
     }
 
 
+    protected void createNewGeometryForObjet(final double x, final double y) {
 
-    private void createNewGeometryForObjet(final double x, final double y) {
-
-                    // Le helper peut être null si on a choisi d'activer ce handler pour une dépendance existante,
-                    // sans passer par le clic droit pour choisir un type de dépendance.
-                    final Class clazz = editedObjet.getClass();
-                    if (objetHelper == null) {
-                        if (editedClass.isAssignableFrom(clazz)) {
+        // Le helper peut être null si on a choisi d'activer ce handler pour une dépendance existante,
+        // sans passer par le clic droit pour choisir un type de dépendance.
+        final Class clazz = editedObjet.getClass();
+        if (objetHelper == null) {
+            if (editedClass.isAssignableFrom(clazz)) {
 //                            objetHelper = new EditionHelper(map, editHandler.objetLayer);
-                            objetHelper = editHandler.getHelperObjet();
-                        }
-                    }
+                objetHelper = editHandler.getHelperObjet();
+            }
+        }
 
-                    // le choix fait par l'utilisateur dans le panneau de création de dépendance.
-                    final Class geomClass = newGeomType;
+        // le choix fait par l'utilisateur dans le panneau de création.
+        final Class geomClass = newGeomType;
 
-                    // On vient de créer la dépendance, le clic gauche va permettre d'ajouter des points.
-                    if (Point.class.isAssignableFrom(geomClass)) {
-                        coords.clear();
-                        coords.add(objetHelper.toCoord(x, y));
-                    } else {
-                        if (justCreated) {
-                            justCreated = false;
-                            //we must modify the second point since two point where added at the start
-                            if (Polygon.class.isAssignableFrom(geomClass)) {
-                                coords.remove(2);
-                            }
-                            coords.remove(1);
-                            coords.add(objetHelper.toCoord(x, y));
-                            if (Polygon.class.isAssignableFrom(geomClass)) {
-                                coords.add(objetHelper.toCoord(x, y));
-                            }
-                        } else if (coords.isEmpty()) {
-                            justCreated = true;
-                            //this is the first point of the geometry we create
-                            //add 3 points that will be used when moving the mouse around for polygons,
-                            //for lines just add 2 points.
-                            coords.add(objetHelper.toCoord(x, y));
-                            coords.add(objetHelper.toCoord(x, y));
-                            if (Polygon.class.isAssignableFrom(geomClass)) {
-                                coords.add(objetHelper.toCoord(x, y));
-                            }
-                        } else {
-                            // On ajoute le point en plus.
-                            justCreated = false;
-                            coords.add(objetHelper.toCoord(x, y));
-                        }
-                    }
+        // On vient de créer la dépendance, le clic gauche va permettre d'ajouter des points.
+        if (Point.class.isAssignableFrom(geomClass)) {
+            coords.clear();
+            coords.add(objetHelper.toCoord(x, y));
+        } else {
+            if (justCreated) {
+                justCreated = false;
+                //we must modify the second point since two point where added at the start
+                if (Polygon.class.isAssignableFrom(geomClass)) {
+                    coords.remove(2);
+                }
+                coords.remove(1);
+                coords.add(objetHelper.toCoord(x, y));
+                if (Polygon.class.isAssignableFrom(geomClass)) {
+                    coords.add(objetHelper.toCoord(x, y));
+                }
+            } else if (coords.isEmpty()) {
+                justCreated = true;
+                //this is the first point of the geometry we create
+                //add 3 points that will be used when moving the mouse around for polygons,
+                //for lines just add 2 points.
+                coords.add(objetHelper.toCoord(x, y));
+                coords.add(objetHelper.toCoord(x, y));
+                if (Polygon.class.isAssignableFrom(geomClass)) {
+                    coords.add(objetHelper.toCoord(x, y));
+                }
+            } else {
+                // On ajoute le point en plus.
+                justCreated = false;
+                coords.add(objetHelper.toCoord(x, y));
+            }
+        }
 
-                    // Création de la géométrie à éditer à partir des coordonnées
-                    if (Polygon.class.isAssignableFrom(geomClass)) {
-                        editGeometry.geometry.set(EditionHelper.createPolygon(coords));
-                    } else if (LineString.class.isAssignableFrom(geomClass)) {
-                        editGeometry.geometry.set(EditionHelper.createLine(coords));
-                    } else {
-                        editGeometry.geometry.set(EditionHelper.createPoint(coords.get(0)));
-                    }
-                    JTS.setCRS(editGeometry.geometry.get(), map.getCanvas().getObjectiveCRS2D());
-                    geomLayer.getGeometries().setAll(editGeometry.geometry.get());
+        // Création de la géométrie à éditer à partir des coordonnées
+        if (Polygon.class.isAssignableFrom(geomClass)) {
+            editGeometry.geometry.set(EditionHelper.createPolygon(coords));
+        } else if (LineString.class.isAssignableFrom(geomClass)) {
+            editGeometry.geometry.set(EditionHelper.createLine(coords));
+        } else {
+            editGeometry.geometry.set(EditionHelper.createPoint(coords.get(0)));
+        }
+        JTS.setCRS(editGeometry.geometry.get(), map.getCanvas().getObjectiveCRS2D());
+        geomLayer.getGeometries().setAll(editGeometry.geometry.get());
 
-                    if (Point.class.isAssignableFrom(geomClass)) {
-                        // Pour un nouveau point ajouté, on termine l'édition directement.
-                        final Geometry geometry = editGeometry.geometry.get();
-                        if (editedObjet instanceof AvecSettableGeometrie) {
-                            ((AvecSettableGeometrie) editedObjet).setGeometry(geometry);
-                        } else if ( (editedObjet instanceof BorneDigue) && (geometry instanceof Point) ) {
-                            ((BorneDigue) editedObjet).setGeometry((Point) geometry);
-                        } else {
-                            throw new IllegalStateException("Impossible d'associer le type de géométrie éditée au le type d'objet édité");
-                        }
-                        final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(editedObjet.getClass());
+        if (Point.class.isAssignableFrom(geomClass)) {
+            // Pour un nouveau point ajouté, on termine l'édition directement.
+            final Geometry geometry = editGeometry.geometry.get();
+            if (editedObjet instanceof AvecSettableGeometrie) {
+                ((AvecSettableGeometrie) editedObjet).setGeometry(geometry);
+            } else if ((editedObjet instanceof BorneDigue) && (geometry instanceof Point)) {
+                ((BorneDigue) editedObjet).setGeometry((Point) geometry);
+            } else {
+                throw new IllegalStateException("Impossible d'associer le type de géométrie éditée au le type d'objet édité");
+            }
+            final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(editedObjet.getClass());
 
-                        if (editedObjet.getDocumentId() != null) {
-                            repo.update(editedObjet);
-                        } else {
-                            repo.add(editedObjet);
-                        }
-                        // On quitte le mode d'édition.
-                        reset();
-                    }
+            if (editedObjet.getDocumentId() != null) {
+                repo.update(editedObjet);
+            } else {
+                repo.add(editedObjet);
+            }
+            // On quitte le mode d'édition.
+            reset();
+        }
     }
 
     /**
@@ -294,57 +278,61 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
      */
     protected void chooseTypesAndCreate() {
 
-                final Stage stage = new Stage();
-                stage.getIcons().add(SIRS.ICON);
-                stage.setTitle("Création d'objet");
-                stage.initModality(Modality.WINDOW_MODAL);
-                stage.setAlwaysOnTop(true);
-                final GridPane gridPane = new GridPane();
-                gridPane.setVgap(10);
-                gridPane.setHgap(5);
-                gridPane.setPadding(new Insets(10));
-                gridPane.add(new Label("Choisir un type de d'objet"), 0, 0);
+        final Stage stage = new Stage();
+        stage.getIcons().add(SIRS.ICON);
+        stage.setTitle("Création d'objet");
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.setAlwaysOnTop(true);
+        final GridPane gridPane = new GridPane();
+        gridPane.setVgap(10);
+        gridPane.setHgap(5);
+        gridPane.setPadding(new Insets(10));
+        gridPane.add(new Label("Choisir un type de d'objet"), 0, 0);
 
-                final ComboBox<String> geomTypeBox = new ComboBox<>();
-                geomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
-                geomTypeBox.getSelectionModel().selectFirst();
-                final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
-                geomChoiceLbl.visibleProperty().bind(geomTypeBox.visibleProperty());
-                gridPane.add(geomChoiceLbl, 0, 1);
-                gridPane.add(geomTypeBox, 1, 1);
+        final ComboBox<String> geomTypeBox = new ComboBox<>();
+        if (allowSurfaces) {
+            geomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
+        } else {
+            geomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire"));
+        }
+        geomTypeBox.getSelectionModel().selectFirst();
+        final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
+        geomChoiceLbl.visibleProperty().bind(geomTypeBox.visibleProperty());
+        gridPane.add(geomChoiceLbl, 0, 1);
+        gridPane.add(geomTypeBox, 1, 1);
 
-                final Button validateBtn = new Button("Valider");
-                validateBtn.setOnAction(event -> stage.close());
-                gridPane.add(validateBtn, 2, 3);
+        final Button validateBtn = new Button("Valider");
+        validateBtn.setOnAction(event -> stage.close());
+        gridPane.add(validateBtn, 2, 3);
 
-                final Scene sceneChoices = new Scene(gridPane);
-                stage.setScene(sceneChoices);
-                stage.showAndWait();
+        final Scene sceneChoices = new Scene(gridPane);
+        stage.setScene(sceneChoices);
+        stage.showAndWait();
 
 //                final Class clazz = DesordreDependance.class;
 //                objetHelper = new EditionHelper(map, objetLayer);
-                objetHelper = editHandler.getHelperObjet();
+        objetHelper = editHandler.getHelperObjet();
 
-                final AbstractSIRSRepository<G> repo = Injector.getSession().getRepositoryForClass(editedClass);
-                editedObjet = repo.create();
+        final AbstractSIRSRepository<G> repo = Injector.getSession().getRepositoryForClass(editedClass);
+        editedObjet = repo.create();
 //                newCreatedObjet = true;
-                modeProperty.setValue(CREATE_OBJET);
+        modeProperty.setValue(CREATE_OBJET);
 
-
-                switch (geomTypeBox.getSelectionModel().getSelectedItem()) {
-                    case "Ponctuel":
-                        newGeomType = Point.class;
-                        break;
-                    case "Linéaire":
-                        newGeomType = LineString.class;
-                        break;
-                    case "Surfacique":
-                        newGeomType = Polygon.class;
-                        break;
-                    default:
-                        newGeomType = Point.class;
-                }
+        switch (geomTypeBox.getSelectionModel().getSelectedItem()) {
+            case "Ponctuel":
+                newGeomType = Point.class;
+                break;
+            case "Linéaire":
+                newGeomType = LineString.class;
+                break;
+            case "Surfacique":
+                newGeomType = Polygon.class;
+                break;
+            default:
+                newGeomType = Point.class;
+        }
     }
+
 
     private void concludeTheEdition(final double x, final double y) {
 

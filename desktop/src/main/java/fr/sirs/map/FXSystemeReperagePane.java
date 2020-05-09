@@ -88,7 +88,6 @@ import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
-import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.LinearReferencing;
@@ -116,7 +115,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
     @FXML private CheckBox uiDefaultSRCheckBox;
     @FXML private Button uiAddSr;
     @FXML private Button uiDeleteSR;
-    @FXML private FXTableView<SystemeReperageBorne> uiObjetTable;
+//    @FXML private FXTableView<SystemeReperageBorne> uiObjetTable;
     @FXML Button uiProject;
 
 

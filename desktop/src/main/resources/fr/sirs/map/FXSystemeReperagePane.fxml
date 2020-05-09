@@ -35,8 +35,8 @@
                   <Button fx:id="uiAddSr" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                   <Label text="Système de repèrage :" GridPane.rowIndex="2" />
                   <ChoiceBox fx:id="uiSrComboBox" maxWidth="1.7976931348623157E308" GridPane.rowIndex="3" />
-                  <ToggleButton fx:id="uiPickTroncon" maxWidth="1.7976931348623157E308" mnemonicParsing="false" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <TextField fx:id="uiTronconLabel" editable="false" maxWidth="1.7976931348623157E308" promptText="Sélectionner un tronçon" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" />
+                  <ToggleButton fx:id="uiPickTroncon" maxWidth="1.7976931348623157E308" mnemonicParsing="false" visible="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <TextField fx:id="uiTronconLabel" editable="false" maxWidth="1.7976931348623157E308" promptText="Sélectionner un tronçon"  GridPane.rowIndex="1" />
                   <CheckBox fx:id="uiDefaultSRCheckBox" mnemonicParsing="false" text="Définir comme SR par défaut" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
                   <Button fx:id="uiDeleteSR" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                </children>
@@ -67,7 +67,8 @@
                         <FXTableView fx:id="uiObjetTable" editable="true">
                            <columnResizePolicy>
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                           </columnResizePolicy></FXTableView>
+                           </columnResizePolicy>
+                        </FXTableView>
                      </content>
                   </ScrollPane>
                   <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Saisir de nouvelles bornes" wrapText="true" GridPane.rowIndex="3" />

@@ -76,7 +76,7 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
 
     @FXML TextField uiTronconLabel;
     @FXML ToggleButton uiPickTroncon;
-    @FXML private FXTableView<T> uiObjetTable;
+    @FXML FXTableView<T> uiObjetTable;
     @FXML ToggleButton uiCreateObjet;
     @FXML Label typeNameLabel;
 
@@ -89,7 +89,7 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
     final SimpleBooleanProperty saveTD = new SimpleBooleanProperty(false);
 
     final Class<T> editedClass;
-    private final AbstractSIRSRepository<T> repo;
+    final AbstractSIRSRepository<T> repo;
 
     private final String defaultEmptyLibelle = "Aucun tronçon sélectionné";
 
@@ -263,7 +263,7 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
      * @param toExclude
      * @return
      */
-    private ObservableList<T> getObjectListFromTroncon(final Set<String> toExclude) {
+    ObservableList<T> getObjectListFromTroncon(final Set<String> toExclude) {
 
         final TronconDigue troncon = tronconProperty().get();
         if (troncon == null) return null;
@@ -495,35 +495,35 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
      * TABLE UTILITIES
      */
 
-    void updateObjetTable(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) {
-        throw new UnsupportedOperationException("Unsupported updateObjetTable yet.");
-//        if (oldValue != null) {
-//            save(oldValue, null);
-//        }
-//
-//        if (newValue == null) {
-//            uiObjetTable.setItems(FXCollections.emptyObservableList());
-//        } else {
-//            final EditModeObjet current = mode.get();
-//            if (current.equals(EditModeObjet.CREATE_OBJET) || current.equals(EditModeObjet.EDIT_OBJET)) {
-//                //do nothing
-//            } else {
-//                mode.set(EditModeObjet.EDIT_OBJET);
-//            }
-//
-//            // By default, we'll sort bornes from uphill to downhill, but alow user to sort them according to available table columns.
-//            final Comparator defaultComparator = defaultSRBComparator.get();
-//            final SortedList sortedItems;
-//            if (defaultComparator != null) {
-//                sortedItems = newValue.getSystemeReperageBornes().sorted(defaultComparator).sorted();
-//            } else {
-//                sortedItems = newValue.getSystemeReperageBornes().sorted();
-//            }
-//
-//            sortedItems.comparatorProperty().bind(uiObjetTable.comparatorProperty());
-//            uiObjetTable.setItems(sortedItems);
-//        }
-    }
+//    void updateObjetTable(ObservableValue<? extends T> observable, T oldValue, T newValue) {
+//        throw new UnsupportedOperationException("Unsupported updateObjetTable yet.");
+////        if (oldValue != null) {
+////            save(oldValue, null);
+////        }
+////
+////        if (newValue == null) {
+////            uiObjetTable.setItems(FXCollections.emptyObservableList());
+////        } else {
+////            final EditModeObjet current = mode.get();
+////            if (current.equals(EditModeObjet.CREATE_OBJET) || current.equals(EditModeObjet.EDIT_OBJET)) {
+////                //do nothing
+////            } else {
+////                mode.set(EditModeObjet.EDIT_OBJET);
+////            }
+////
+////            // By default, we'll sort bornes from uphill to downhill, but alow user to sort them according to available table columns.
+////            final Comparator defaultComparator = defaultSRBComparator.get();
+////            final SortedList sortedItems;
+////            if (defaultComparator != null) {
+////                sortedItems = newValue.getSystemeReperageBornes().sorted(defaultComparator).sorted();
+////            } else {
+////                sortedItems = newValue.getSystemeReperageBornes().sorted();
+////            }
+////
+////            sortedItems.comparatorProperty().bind(uiObjetTable.comparatorProperty());
+////            uiObjetTable.setItems(sortedItems);
+////        }
+//    }
 
 
     /**

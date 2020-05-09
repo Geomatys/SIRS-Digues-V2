@@ -205,11 +205,11 @@ public abstract class AbstractOnTronconEditHandler<T extends Element> extends Ab
         dialog.show();
 
         if (instantiateMouseEditListener) {
-            if(!objetClass.isAssignableFrom(AvecSettableGeometrie.class) ) {
+            if(!AvecSettableGeometrie.class.isAssignableFrom(objetClass) ) {
 //            if(!objetClass.isAssignableFrom(Class.forName("fr.sirs.core.model.AvecSettableGeometrie")) ) {
                 throw new IllegalStateException("Can't initialize SIRSEditMouseListen if edited object's class doesn't implement AvecSettableGeometrie interface.");
             }
-            mouseInputListener = new SIRSEditMouseListen(this);
+            mouseInputListener = new SIRSEditMouseListen(this, false);
         }
     }
 

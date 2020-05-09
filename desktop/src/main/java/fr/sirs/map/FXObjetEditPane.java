@@ -19,18 +19,28 @@
 package fr.sirs.map;
 
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.SIRS;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.ui.Growl;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
  *
@@ -41,11 +51,13 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPane<T> {
 
     @FXML
-    final ComboBox<String> uiGeomTypeBox = new ComboBox<>();
+    ComboBox<String> uiGeomTypeBox;
 //    @FXML
 //    final ComboBox<String> uiObjetType = new ComboBox<>();
     @FXML
     Button uiModifyObjet;
+
+//    @FXML private FXTableView<T> uiObjetTable;
 
     /**
      *
@@ -55,6 +67,7 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
      */
     public FXObjetEditPane(FXMap map, final String typeName, final Class clazz) {
         super(map, typeName, clazz, true, false);
+//        SIRS.loadFXML(this);
 
 //        final Stage stage = new Stage();
 //        stage.getIcons().add(SIRS.ICON);
@@ -66,8 +79,8 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
 //        gridPane.setHgap(5);
 //        gridPane.setPadding(new Insets(10));
 //        gridPane.add(new Label("Choisir un type de d'objet"), 0, 0);
-
-        uiGeomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
+//        uiGeomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
+        uiGeomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire"));
         uiGeomTypeBox.getSelectionModel().selectFirst();
 //        final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
 //        geomChoiceLbl.visibleProperty().bind(geomTypeBox.visibleProperty());
@@ -85,6 +98,7 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
 //                final Class clazz = DesordreDependance.class;
 //                objetHelper = new EditionHelper(map, objetLayer);
 
+        tronconProp.addListener(this::updateObjetTable);
 
     }
 
@@ -96,13 +110,33 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
         return uiGeomTypeBox.getSelectionModel().getSelectedItem();
     }
 
+//    @Override
+//    public void save() {
+//        save(getTronconProperty());
+//    }
+//
+//    private void save(final TronconDigue td) {
+//        final boolean mustSaveTd = saveTD.get();
+//
+//        if (mustSaveTd) {
+//            saveTD.set(false);
+//
+//            TaskManager.INSTANCE.submit("Sauvegarde...", () -> {
+//                if (td != null && mustSaveTd) {
+//                    ((AbstractSIRSRepository) session.getRepositoryForClass(td.getClass())).update(td);
+//                }
+//            });
+//        }
+//    }
+
     /**
      * Ajout
      *
      * @param evt
      */
     void modifyObjet(ActionEvent evt) {
-        throw new UnsupportedOperationException("Unsupported modifyObjet() yet.");
+        mode.setValue(EditModeObjet.EDIT_OBJET);
+//        throw new UnsupportedOperationException("Unsupported modifyObjet() yet.");
     }
 
 //    private void startCreateObjet(ActionEvent evt){
@@ -120,7 +154,16 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
      */
     @Override
     public void createObjet(final Point geom) { //uniquement un point ici, on veut pouvoir éditer un segment!
-        throw new UnsupportedOperationException("Unsupported createObjet() yet.");
+
+        if (getTronconProperty() == null) {
+            Growl alert = new Growl(Growl.Type.WARNING, "Pour créer un nouvel élément, veuillez sélectionner un tronçon d'appartenance");
+            alert.showAndFade();
+            mode.setValue(EditModeObjet.PICK_TRONCON);
+        } else {
+
+            mode.setValue(EditModeObjet.CREATE_OBJET);
+        }
+//        throw new UnsupportedOperationException("Unsupported createObjet() yet.");
     }
 
     /**
@@ -137,6 +180,8 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
     @Override
     void deleteObjets(ActionEvent e) {
 
+//        mode.setValue(EditModeObjet.NONE);
+
         throw new UnsupportedOperationException("Unsupported deleteObjets() yet.");
     }
 
@@ -144,9 +189,41 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
     /*
      * TABLE UTILITIES
      */
-    @Override
-    void updateObjetTable(ObservableValue observable, SystemeReperage oldValue, SystemeReperage newValue) {
-        throw new UnsupportedOperationException("Unsupported updateObjetTable yet.");
+    /**
+     * Met à jour les éléments de la liste à partir du tronçon sélectionné.
+     *
+     * @param observable
+     * @param oldValue
+     * @param newValue
+     */
+    void updateObjetTable(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
+
+//        if (oldValue != null) {
+//            save(oldValue);
+//        }
+
+        if (newValue == null) {
+            uiObjetTable.setItems(FXCollections.emptyObservableList());
+        } else {
+            final EditModeObjet current = getMode();
+            if (current.equals(EditModeObjet.CREATE_OBJET) || current.equals(EditModeObjet.EDIT_OBJET)) {
+                //do nothing
+            } else {
+                mode.set(EditModeObjet.EDIT_OBJET);
+            }
+
+            // By default, we'll sort bornes from uphill to downhill, but alow user to sort them according to available table columns.
+            ObservableList items;
+            try {
+                items = getObjectListFromTroncon(null);
+            } catch (Exception e) {
+                SIRS.LOGGER.log(Level.WARNING, "Exception lors de la récupération des éléments du tronçon", e);
+                items = null;
+            }
+
+//            sortedItems.comparatorProperty().bind(uiObjetTable.comparatorProperty());
+            uiObjetTable.setItems(items);
+        }
     }
 
 }
