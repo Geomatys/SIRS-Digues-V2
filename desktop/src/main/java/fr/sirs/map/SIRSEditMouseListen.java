@@ -37,6 +37,7 @@ import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static fr.sirs.map.EditModeObjet.*;
+import javafx.event.EventHandler;
 import static javafx.scene.control.Alert.AlertType.NONE;
 import javafx.scene.input.MouseButton;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
@@ -69,7 +70,7 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
     /**
      * Réinitialise la carte et vide la géométrie en cours d'édition.
      */
-    private void reset() {
+    void reset() {
 //        newCreatedObjet = false;
         justCreated = false;
         geomLayer.getGeometries().clear();
@@ -108,6 +109,7 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
             }
         }
     }
+
     @Override
     public void mousePressed(final MouseEvent e) {
         pressed = e.getButton();
@@ -143,7 +145,7 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
 
     // ==========================  UTILITIES  ==================================
 
-    protected void selectObjet(final double x, final double y) {
+    protected final void selectObjet(final double x, final double y) {
          // Recherche d'une couche de la carte qui contiendrait une géométrie là où l'utilisateur a cliqué
 //                final Rectangle2D clickArea = new Rectangle2D.Double(e.getX() - 2, e.getY() - 2, 4, 4);
 
@@ -170,7 +172,7 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
     }
 
 
-    protected void createNewGeometryForObjet(final double x, final double y) {
+    protected final void createNewGeometryForObjet(final double x, final double y) {
 
         // Le helper peut être null si on a choisi d'activer ce handler pour une dépendance existante,
         // sans passer par le clic droit pour choisir un type de dépendance.
@@ -230,24 +232,7 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
         geomLayer.getGeometries().setAll(editGeometry.geometry.get());
 
         if (Point.class.isAssignableFrom(geomClass)) {
-            // Pour un nouveau point ajouté, on termine l'édition directement.
-            final Geometry geometry = editGeometry.geometry.get();
-            if (editedObjet instanceof AvecSettableGeometrie) {
-                ((AvecSettableGeometrie) editedObjet).setGeometry(geometry);
-            } else if ((editedObjet instanceof BorneDigue) && (geometry instanceof Point)) {
-                ((BorneDigue) editedObjet).setGeometry((Point) geometry);
-            } else {
-                throw new IllegalStateException("Impossible d'associer le type de géométrie éditée au le type d'objet édité");
-            }
-            final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(editedObjet.getClass());
-
-            if (editedObjet.getDocumentId() != null) {
-                repo.update(editedObjet);
-            } else {
-                repo.add(editedObjet);
-            }
-            // On quitte le mode d'édition.
-            reset();
+            PointSecondGeometryStrategy();
         }
     }
 
@@ -258,7 +243,7 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
      * @param x
      * @param y
      */
-    private void modifyObjetGeometry(final MouseEvent e, final double x, final double y) {
+    protected final void modifyObjetGeometry(final MouseEvent e, final double x, final double y) {
         final Geometry tempEditGeom = editGeometry.geometry.get();
         if (!Point.class.isAssignableFrom(tempEditGeom.getClass()) && e.getClickCount() >= 2) {
             final Geometry result;
@@ -334,7 +319,7 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
     }
 
 
-    private void concludeTheEdition(final double x, final double y) {
+    protected final void concludeTheEdition(final double x, final double y) {
 
                 // popup :
                 // -suppression d'un noeud
@@ -343,12 +328,10 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
                 // -supprimer dépendance
                 popup.getItems().clear();
 
-//                objetHelper = new EditionHelper(map, objetLayer);
                 objetHelper = editHandler.getHelperObjet();
 
                 //action : suppression d'un noeud
                 if (editGeometry.geometry.get() != null) {
-//                    objetHelper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
                     objetHelper.grabGeometryNode(x, y, editGeometry);
                     if (editGeometry.selectedNode[0] >= 0) {
                         final MenuItem item = new MenuItem("Supprimer noeud");
@@ -364,18 +347,7 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
                 // action : sauvegarde
                 // Sauvegarde de l'objet de stockage ainsi que sa géométrie qui a éventuellement été éditée.
                 final MenuItem saveItem = new MenuItem("Sauvegarder");
-                saveItem.setOnAction((ActionEvent event) -> {
-                    ((AvecSettableGeometrie) editedObjet).setGeometry(editGeometry.geometry.get());
-                    final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(editedObjet.getClass());
-
-                    if (editedObjet.getDocumentId() != null) {
-                        repo.update(editedObjet);
-                    } else {
-                        repo.add(editedObjet);
-                    }
-                    // On quitte le mode d'édition.
-                    reset();
-                });
+                saveItem.setOnAction(saveAndReset());
                 popup.getItems().add(saveItem);
 
                 // action : annuler édition
@@ -398,8 +370,53 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
                 });
                 popup.getItems().add(deleteItem);
 
-//                popup.show(geomLayer, Side.TOP, e.getX(), e.getY());
                 popup.show(geomLayer, Side.TOP, x, y);
     }
+
+
+    EventHandler<ActionEvent> saveAndReset() {
+        return (ActionEvent event) -> {
+                    ((AvecSettableGeometrie) editedObjet).setGeometry(editGeometry.geometry.get());
+                    final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(editedObjet.getClass());
+
+                    if (editedObjet.getDocumentId() != null) {
+                        repo.update(editedObjet);
+                    } else {
+                        repo.add(editedObjet);
+                    }
+                    // On quitte le mode d'édition.
+                    reset();
+                };
+    }
+
+    /**
+     * Provide actions to apply when the geomtype is a point and a second point was
+     * geometry is created.
+     *
+     * Ici ({@link SIRSEditMouseListen}, on termine l'édition directement.
+     *
+     */
+    protected void PointSecondGeometryStrategy(){
+
+            // Pour un nouveau point ajouté, on termine l'édition directement.
+            final Geometry geometry = editGeometry.geometry.get();
+            if (editedObjet instanceof AvecSettableGeometrie) {
+                ((AvecSettableGeometrie) editedObjet).setGeometry(geometry);
+            } else if ((editedObjet instanceof BorneDigue) && (geometry instanceof Point)) {
+                ((BorneDigue) editedObjet).setGeometry((Point) geometry);
+            } else {
+                throw new IllegalStateException("Impossible d'associer le type de géométrie éditée au le type d'objet édité");
+            }
+            final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(editedObjet.getClass());
+
+            if (editedObjet.getDocumentId() != null) {
+                repo.update(editedObjet);
+            } else {
+                repo.add(editedObjet);
+            }
+            // On quitte le mode d'édition.
+            reset();
+    }
+
     //============================ End Utilities ===============================
 }

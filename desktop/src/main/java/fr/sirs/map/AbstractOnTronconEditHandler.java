@@ -265,11 +265,11 @@ public abstract class AbstractOnTronconEditHandler<T extends Element> extends Ab
      */
     @Override
     public boolean uninstall(final FXMap component) {
-        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.",
-                ButtonType.YES, ButtonType.NO);
-        alert.setResizable(true);
-        if (editPane.tronconProperty().get() == null
-                || ButtonType.YES.equals(alert.showAndWait().get())) {
+//        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.",
+//                ButtonType.YES, ButtonType.NO);
+//        alert.setResizable(true);
+//        if (editPane.tronconProperty().get() == null) {
+//                || ButtonType.YES.equals(alert.showAndWait().get())) {
 
             super.uninstall(component);
             if (toActivateBack != null) {
@@ -288,24 +288,9 @@ public abstract class AbstractOnTronconEditHandler<T extends Element> extends Ab
 
             dialog.close();
             return true;
-        }
+//        }
 
-        return false;
+//        return false;
     }
-
-//    private void updateGeometry() {
-//        if (editedObjet == null) {
-//            editGeometry.reset();
-//        } else {
-//            editGeometry.geometry.set(editedObjet.getGeometry());
-//        }
-//
-//        if (editGeometry.geometry == null) {
-//            geomLayer.getGeometries().clear();
-//        } else {
-//            geomLayer.getGeometries().setAll(editGeometry.geometry.get());
-//        }
-//    }
-
 
 }

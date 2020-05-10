@@ -18,14 +18,20 @@
  */
 package fr.sirs.map;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
+import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.AvecSettableGeometrie;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Positionable;
 import static fr.sirs.map.EditModeObjet.CREATE_OBJET;
+import fr.sirs.ui.Growl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -34,9 +40,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import org.apache.sis.util.ArgumentChecks;
@@ -91,27 +96,7 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
         super(map, clazz, editPane, instantiateMouseEditListener);
         ArgumentChecks.ensureNonNull("Panneau d'édition", editPane);
 
-//        this.map = map;
-
-//        session = Injector.getSession();
-//        dialog.getIcons().add(SIRS.ICON);
         this.editPane = editPane;
-
-        // Prepare footer to set an "exit" button
-//        final Button exitButton = new Button("Fermer");
-//        exitButton.setCancelButton(true);
-//        exitButton.setOnAction(event -> dialog.hide());
-//        final Separator sep = new Separator();
-//        sep.setVisible(false);
-//        final HBox footer = new HBox(sep, exitButton);
-//        footer.setPadding(new Insets(0, 10, 10, 0));
-//        HBox.setHgrow(sep, Priority.ALWAYS);
-//        final BorderPane bp = new BorderPane(editPane, null, null, footer, null);
-
-//        dialog.setResizable(true);
-//        dialog.initModality(Modality.NONE);
-//        dialog.initOwner(map.getScene().getWindow());
-//        dialog.setScene(new Scene(bp));
 
         //on ecoute la selection du troncon et des bornes pour les mettre en surbrillant
         editPane.tronconProperty().addListener(new ChangeListener<TronconDigue>() {
@@ -135,28 +120,6 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
                 }
             }
         });
-
-//        //fin de l'edition
-//        dialog.setOnHiding((WindowEvent event) -> {
-//            TronconDigue troncon = editPane.getTronconProperty();
-//            if (troncon != null) {
-//                //on recupère la derniere version, la maj des sr entraine la maj des troncons
-//                troncon = session.getRepositoryForClass(TronconDigue.class).get(troncon.getDocumentId());
-//                //on recalcule les geometries des positionables du troncon.
-//                TronconUtils.updatePositionableGeometry(troncon, session);
-//            }
-//            editPane.save();
-//            editPane.reset();
-//        });
-
-//        editPane.tronconProperty().addListener((observable, oldValue, newValue) -> {
-//            if (newValue != null) {
-//                dialog.show();
-//            } else {
-//                dialog.hide();
-//            }
-//        });
-
 
         editPane.objetProperties().addListener(new ListChangeListener<TronconDigue>() {
             @Override
@@ -187,20 +150,15 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
             }
         });
 
-         editPane.getModeProperty().addListener((cl,o,n)-> mode = editPane.getMode());
-
-//        editPane.getModeProperty().bindBidirectional(modeProperty);
-//                .addListener((observable, oldValue, newValue) -> {
-//            modeProperty.setValue(newValue);
-//        });
-
-//        dialog.show();
+        editPane.getModeProperty().addListener((cl, o, n) -> mode = editPane.getMode());
 
         if (instantiateMouseEditListener) {
             mouseInputListener = new EditionOnTronconMouseListen(this);
         }
+
     }
 
+    @Override
     String getObjetLayerName() {
         final LabelMapper mapper = LabelMapper.get(objetClass);
         return mapper.mapClassName();
@@ -248,79 +206,35 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
 
     }
 
-    /**
-     * {@inheritDoc }
-     */
-    @Override
-    public boolean uninstall(final FXMap component) {
-        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.",
-                ButtonType.YES, ButtonType.NO);
-        alert.setResizable(true);
-        if (editPane.tronconProperty().get() == null
-                || ButtonType.YES.equals(alert.showAndWait().get())) {
-
-            super.uninstall(component);
-            if (toActivateBack != null) {
-                for (final MapLayer layer : toActivateBack) {
-                    layer.setSelectable(true);
-                }
-            }
-
-            //déselection borne et troncon
-            if (tronconLayer != null) {
-                tronconLayer.setSelectionFilter(null);
-            }
-            if (objetLayer != null) {
-                objetLayer.setSelectionFilter(null);
-            }
-
-            dialog.close();
-            return true;
-        }
-
-        return false;
-    }
-
-//    private void updateGeometry() {
-//        if (editedObjet == null) {
-//            editGeometry.reset();
-//        } else {
-//            editGeometry.geometry.set(editedObjet.getGeometry());
-//        }
-//
-//        if (editGeometry.geometry == null) {
-//            geomLayer.getGeometries().clear();
-//        } else {
-//            geomLayer.getGeometries().setAll(editGeometry.geometry.get());
-//        }
-//    }
     class EditionOnTronconMouseListen extends SIRSEditMouseListen<T> {
 
-//        final ContextMenu popup = new ContextMenu();
-//        double startX;
-//        double startY;
 
-//        public EditionOnTronconMouseListen() {
-//            super(AbstractOnTronconEditHandler.this);
-////            popup.setAutoHide(true);
-//        }
+
         public EditionOnTronconMouseListen(final ObjetOnTronconEditHandler editHandler) {
             super(editHandler, false);
-//            popup.setAutoHide(true);
+            if (editPane instanceof FXObjetEditPane) {
+                ((FXObjetEditPane) editPane).geometryTypeProperty.addListener((cl, o, n) -> this.updateGeometryType());
+            }
         }
 
         @Override
         public void mouseClicked(final MouseEvent e) {
             if (tronconLayer == null) {
-                return;
+                throw new IllegalStateException("Auncune couche cartographique associée aux tronçons");
             }
 
             startX = getMouseX(e);
             startY = getMouseY(e);
             mousebutton = e.getButton();
 
-//            final EditModeObjet mode = editPane.getMode();
-            if (EditModeObjet.PICK_TRONCON.equals(modeProperty.get())) {
+            if(modeProperty.get() ==null) {
+                modeProperty.setValue(EditModeObjet.NONE);
+            }
+
+            if(EditModeObjet.NONE.equals(modeProperty.get())) {
+                displayGrowl(Growl.Type.INFO, "Type d'action non sélectionné (création, modification, choix tronçon...)");
+                return;
+            } else if (EditModeObjet.PICK_TRONCON.equals(modeProperty.get())) {
                 if (mousebutton == MouseButton.PRIMARY) {
                     //selection d'un troncon
                     final Feature feature = helperTroncon.grabFeature(e.getX(), e.getY(), false);
@@ -333,7 +247,38 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
                     }
                 }
             } else {
-                super.mouseClicked(e);
+                final double x = e.getX();
+                final double y = e.getY();
+
+                if (MouseButton.PRIMARY.equals(mousebutton)) {
+//
+                        // L'objet existe, on peut travailler avec sa géométrie.
+//                if (newCreatedObjet) {
+                        switch (modeProperty.get()) {
+                            case CREATE_OBJET:
+                                if (editedObjet == null) {
+                                    chooseTypesAndCreate();
+                                } else {
+                                    createNewGeometryForObjet(x, y);
+                                }
+                                break;
+
+                            case EDIT_OBJET:
+                                if (editedObjet == null) {
+                                    selectObjet(x, y);
+                                } else {
+                                    modifyObjetGeometry(e, x, y);
+                                }
+                                break;
+                        }
+//                    }
+                } else if (MouseButton.SECONDARY.equals(e.getButton())) {
+                    if (editedObjet == null) {
+                        chooseTypesAndCreate();
+                    } else {
+                        concludeTheEdition(x, y);
+                    }
+                }
             }
 
         }
@@ -353,12 +298,18 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
 //            dialog.showAndWait();
 
             objetHelper = getHelperObjet();
-            final AbstractSIRSRepository<T> repo = Injector.getSession().getRepositoryForClass(editedClass);
-            editedObjet = repo.create();
+//            final AbstractSIRSRepository<T> repo = Injector.getSession().getRepositoryForClass(editedClass);
+//            editedObjet = repo.create();
+            editedObjet = session.getElementCreator().createElement(editedClass);
             final TronconDigue tronconParent = editPane.getTronconProperty();
             editedObjet.setForeignParentId(tronconParent==null?null:tronconParent.getId());
             modeProperty.setValue(CREATE_OBJET);
 
+            updateGeometryType();
+
+        }
+
+        private void updateGeometryType() {
             switch (((FXObjetEditPane) editPane).getGeomType()) {
                 case "Ponctuel":
                     newGeomType = Point.class;
@@ -372,9 +323,135 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
                 default:
                     newGeomType = Point.class;
             }
-
         }
 
+        @Override
+        EventHandler<ActionEvent> saveAndReset() {
+            return (ActionEvent event) -> {
+                final Geometry geometry = editGeometry.geometry.get();
+                if (geometry == null) {
+                    final Growl growl = new Growl(Growl.Type.WARNING, "Géométrie non renseignée, sauvegarde annulée.");
+                    growl.showAndFade();
+                    return;
+                }
+
+                projectOnTronçon(geometry);
+
+                final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(editedObjet.getClass());
+
+                if (editedObjet.getId() != null) {
+                    repo.update(editedObjet);
+                } else {
+                    repo.add(editedObjet);
+                }
+                // Open the sheet of the created element
+                Injector.getSession().showEditionTab(editedObjet);
+
+                // On quitte le mode d'édition.
+                reset();
+                uninstall(map);
+            };
+        }
+
+        /**
+         * Provide actions to apply when the geomtype is a point and a second
+         * point was geometry is created.
+         *
+         * Ici ({@link ObjetOnTronconEditHandler}, on termine remplace le point précédent.
+         */
+        @Override
+        protected void PointSecondGeometryStrategy() {
+
+            final Geometry geometry = editGeometry.geometry.get();
+            if (editedObjet instanceof AvecSettableGeometrie) {
+                ((AvecSettableGeometrie) editedObjet).setGeometry(geometry);
+            } else {
+                throw new IllegalStateException("Impossible d'associer le type de géométrie éditée au le type d'objet édité");
+            }
+        }
+
+        /**
+         * Affecte les points de début et de fin (position réelle de l'élément)
+         * puis projette la géométrie créée sur le tronçon d'appartenance.
+         *          *
+         * Finallement, 'repaint' la carte.
+         */
+        void projectOnTronçon(final Geometry geometry) {
+            // Récupération du tronçon et du SR.
+            final TronconDigue troncon = editPane.getTronconProperty();
+            if (troncon == null) {
+                displayGrowl(Growl.Type.WARNING, "Tronçon non renseigné.\n Impossible de projeter la géométrie créée.");
+                return;
+            }
+            final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());
+
+//
+//                final BorneDigue borne = repo.get(srb.getBorneId());
+//            final Geometry geometry = editedObjet.getGeometry();
+            final LinearReferencingUtilities.SegmentInfo[] segments ;
+
+            final Point positionDebut , positionFin;
+            final boolean isPositionable = editedObjet instanceof Positionable;
+
+            if (geometry instanceof Point) {
+
+                final Point point = (Point) geometry;
+                segments = LinearReferencingUtilities.buildSegments(linear);
+                final LinearReferencingUtilities.ProjectedPoint proj = LinearReferencingUtilities.projectReference(segments, point);
+                point.getCoordinate().setCoordinate(proj.projected);
+                if(isPositionable) {
+                    positionDebut = point;
+                    positionFin = positionDebut;
+                    final Positionable positionable = (Positionable) editedObjet;
+//                        ((Positionable) editedObjet).setPositionDebut(EditionHelper.createPoint(coordinates[0]));
+//                        ((Positionable) editedObjet).setPositionFin(EditionHelper.createPoint(coordinates[length - 1]));
+                    positionable.setPositionDebut(positionDebut);
+                    positionable.setPositionFin(positionFin);
+                    positionable.setGeometry(point);
+
+                    editedObjet = (T) positionable;
+                } else {
+                    editedObjet.setGeometry(point);
+                }
+            } else if (geometry instanceof LineString) {
+                final Coordinate[] coordinates = geometry.getCoordinates();
+                if ((coordinates == null) || (coordinates.length == 0)) {
+                    displayGrowl(Growl.Type.WARNING, "Pas de coordonnées associées à la géométrie créée.\n Impossible de projeter la géométrie créée.");
+                    return;
+                }
+                final int length = coordinates.length;
+
+                positionDebut = EditionHelper.createPoint(coordinates[0]);
+                positionFin   = EditionHelper.createPoint(coordinates[length - 1]);
+
+                segments = LinearReferencingUtilities.buildSegments((LineString) geometry);
+                final LineString projLine = LinearReferencingUtilities.buildGeometryFromGeo(linear, segments, positionDebut, positionFin);
+
+                if (isPositionable) {
+                    final Positionable positionable = (Positionable) editedObjet;
+                    positionable.setPositionDebut(positionDebut);
+                    positionable.setPositionFin(positionFin);
+                    positionable.setGeometry(projLine);
+                    editedObjet = (T) positionable;
+
+                } else {
+                    editedObjet.setGeometry(projLine);
+                }
+
+            }
+
+            displayGrowl(Growl.Type.INFO, "Géométrie projetée avec succès sur le tronçon d'appartenance.");
+
+
+//            uiObjetTable.getSelectionModel().clearSelection();
+            map.getCanvas().repaint();
+        }
+
+    }
+
+    private static void displayGrowl(final Growl.Type type, final String text) {
+        final Growl growl = new Growl(type, text);
+                growl.showAndFade();
     }
 
 }

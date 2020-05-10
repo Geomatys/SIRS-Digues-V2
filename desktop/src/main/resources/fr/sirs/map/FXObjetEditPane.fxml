@@ -5,7 +5,6 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<!--<?import javafx.scene.control.TableView?>-->
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
@@ -18,6 +17,8 @@
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
+
+<!--<?import javafx.scene.control.TableView?>-->
 <!--<?import javafx.scene.control.TableView?>-->
 <!--<?import org.geotoolkit.gui.javafx.util.FXTableView?>-->
 
@@ -51,6 +52,7 @@
                   <TextField fx:id="uiTronconLabel" editable="false" maxWidth="1.7976931348623157E308" promptText="Sélectionner un tronçon" GridPane.rowIndex="1" />
                   <Label layoutX="20.0" layoutY="82.0" text="Choisir un type de géométrie :" GridPane.rowIndex="2" />
                   <ComboBox fx:id="uiGeomTypeBox" layoutX="20.0" layoutY="108.0" prefHeight="26.0" prefWidth="181.0" GridPane.rowIndex="3" />
+                  <ToggleButton fx:id="uiSelectTroncon" layoutX="333.0" layoutY="46.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0" prefWidth="27.0" visible="true" GridPane.columnIndex="1" />
                </children>
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -83,12 +85,12 @@
                         </FXTableView>
                      </content>
                   </ScrollPane>
-                  <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Tracer sur la carte un nouvel objet" wrapText="true" GridPane.rowIndex="3" />
+                  <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Tracer sur la carte un nouvel objet (double click)" wrapText="true" GridPane.rowIndex="3" />
                   <ToggleButton fx:id="uiCreateObjet" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Tracer" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                   <Label text="Modifier un objet existant (sélectionnez puis modifiez)" GridPane.rowIndex="2" />
                   <Button fx:id="uiModifyObjet" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Modifier" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Label text="Supprimer les objets sélectionnés" GridPane.rowIndex="4" />
-                  <Button mnemonicParsing="false" onAction="#deleteObjets" text="Supprimer" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+<!--                  <Label text="Supprimer les objets sélectionnés" GridPane.rowIndex="4" />
+                  <Button mnemonicParsing="false" onAction="#deleteObjets" text="Supprimer" GridPane.columnIndex="1" GridPane.rowIndex="4" />-->
                </children>
             </GridPane>
          </children>

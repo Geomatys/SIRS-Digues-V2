@@ -20,27 +20,31 @@ package fr.sirs.map;
 
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.SIRS;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.theme.ui.PojoTableChoiceStage;
+import fr.sirs.theme.ui.pojotable.ChoiceStage;
 import fr.sirs.ui.Growl;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.image.ImageView;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
-import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
  *
@@ -50,14 +54,11 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
  */
 public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPane<T> {
 
-    @FXML
-    ComboBox<String> uiGeomTypeBox;
-//    @FXML
-//    final ComboBox<String> uiObjetType = new ComboBox<>();
-    @FXML
-    Button uiModifyObjet;
+    @FXML ToggleButton uiSelectTroncon;
+    @FXML ComboBox<String> uiGeomTypeBox;
+    @FXML Button uiModifyObjet;
 
-//    @FXML private FXTableView<T> uiObjetTable;
+    final ObjectProperty<String> geometryTypeProperty;
 
     /**
      *
@@ -67,36 +68,22 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
      */
     public FXObjetEditPane(FXMap map, final String typeName, final Class clazz) {
         super(map, typeName, clazz, true, false);
-//        SIRS.loadFXML(this);
 
-//        final Stage stage = new Stage();
-//        stage.getIcons().add(SIRS.ICON);
-//        stage.setTitle("Création d'objet");
-//        stage.initModality(Modality.WINDOW_MODAL);
-//        stage.setAlwaysOnTop(true);
-//        final GridPane gridPane = new GridPane();
-//        gridPane.setVgap(10);
-//        gridPane.setHgap(5);
-//        gridPane.setPadding(new Insets(10));
-//        gridPane.add(new Label("Choisir un type de d'objet"), 0, 0);
-//        uiGeomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
         uiGeomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire"));
         uiGeomTypeBox.getSelectionModel().selectFirst();
-//        final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
-//        geomChoiceLbl.visibleProperty().bind(geomTypeBox.visibleProperty());
-//        gridPane.add(geomChoiceLbl, 0, 1);
-//        gridPane.add(geomTypeBox, 1, 1);
-//
-//        final Button validateBtn = new Button("Valider");
-//        validateBtn.setOnAction(event -> stage.close());
-//        gridPane.add(validateBtn, 2, 3);
-//
-//        final Scene sceneChoices = new Scene(gridPane);
-//        stage.setScene(sceneChoices);
-//        stage.showAndWait();
+        geometryTypeProperty = new SimpleObjectProperty<>(getGeomType());
 
-//                final Class clazz = DesordreDependance.class;
-//                objetHelper = new EditionHelper(map, objetLayer);
+        uiObjetTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+
+        uiSelectTroncon.setOnAction(e -> {
+            final ObservableList<Preview> tronconPreviews = SIRS.observableList(new ArrayList<>(session.getPreviews().getByClass(TronconDigue.class)));
+            final PojoTableChoiceStage<Element> stage = new ChoiceStage(session.getRepositoryForClass(TronconDigue.class), tronconPreviews, null, "Choix du tronçon d'appartenance", "Choisir");
+            stage.showAndWait();
+            tronconProp.setValue( (TronconDigue) stage.getRetrievedElement().get());
+        });
+
+        uiSelectTroncon.setGraphic(new ImageView(SIRS.ICON_ARROW_RIGHT_BLACK));
 
         tronconProp.addListener(this::updateObjetTable);
 
@@ -106,28 +93,10 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
      * Retourne le type de géométrie à éditer
      * @return
      */
-    public String getGeomType() {
+    public final String getGeomType() {
         return uiGeomTypeBox.getSelectionModel().getSelectedItem();
     }
 
-//    @Override
-//    public void save() {
-//        save(getTronconProperty());
-//    }
-//
-//    private void save(final TronconDigue td) {
-//        final boolean mustSaveTd = saveTD.get();
-//
-//        if (mustSaveTd) {
-//            saveTD.set(false);
-//
-//            TaskManager.INSTANCE.submit("Sauvegarde...", () -> {
-//                if (td != null && mustSaveTd) {
-//                    ((AbstractSIRSRepository) session.getRepositoryForClass(td.getClass())).update(td);
-//                }
-//            });
-//        }
-//    }
 
     /**
      * Ajout
@@ -136,17 +105,9 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
      */
     void modifyObjet(ActionEvent evt) {
         mode.setValue(EditModeObjet.EDIT_OBJET);
-//        throw new UnsupportedOperationException("Unsupported modifyObjet() yet.");
+        geometryTypeProperty.setValue(getGeomType());
     }
 
-//    private void startCreateObjet(ActionEvent evt){
-//        if(mode.get().equals(ObjetEditMode.CREATE_OBJET)){
-//            //on retourne on mode edition
-//            mode.set(ObjetEditMode.EDIT_OBJET);
-//        }else{
-//            mode.set(ObjetEditMode.CREATE_OBJET);
-//        }
-//    }
     /**
      * Création d'un élément
      *
@@ -160,10 +121,9 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
             alert.showAndFade();
             mode.setValue(EditModeObjet.PICK_TRONCON);
         } else {
-
+            geometryTypeProperty.setValue(getGeomType());
             mode.setValue(EditModeObjet.CREATE_OBJET);
         }
-//        throw new UnsupportedOperationException("Unsupported createObjet() yet.");
     }
 
     /**
@@ -179,9 +139,6 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
     @FXML
     @Override
     void deleteObjets(ActionEvent e) {
-
-//        mode.setValue(EditModeObjet.NONE);
-
         throw new UnsupportedOperationException("Unsupported deleteObjets() yet.");
     }
 
@@ -197,10 +154,6 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
      * @param newValue
      */
     void updateObjetTable(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
-
-//        if (oldValue != null) {
-//            save(oldValue);
-//        }
 
         if (newValue == null) {
             uiObjetTable.setItems(FXCollections.emptyObservableList());
@@ -221,7 +174,6 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
                 items = null;
             }
 
-//            sortedItems.comparatorProperty().bind(uiObjetTable.comparatorProperty());
             uiObjetTable.setItems(items);
         }
     }

@@ -98,20 +98,6 @@ public class BorneEditHandler extends AbstractOnTronconEditHandler {
         return BORNE_LAYER_NAME;
     }
 
-//    private void updateGeometry() {
-//        if (editedObjet == null) {
-//            editGeometry.reset();
-//        } else {
-//            editGeometry.geometry.set(editedObjet.getGeometry());
-//        }
-//
-//        if (editGeometry.geometry == null) {
-//            geomLayer.getGeometries().clear();
-//        } else {
-//            geomLayer.getGeometries().setAll(editGeometry.geometry.get());
-//        }
-//    }
-
     private class MouseListenForBorne extends AbstractSIRSEditMouseListen<BorneDigue> {
 
         public MouseListenForBorne() {

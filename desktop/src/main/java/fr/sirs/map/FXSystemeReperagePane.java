@@ -135,6 +135,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
 //        SIRS.loadFXML(this);
 //        setTypeNameLabel(typeName);
 
+        uiObjetTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         uiAddSr.setGraphic(new ImageView(SIRS.ICON_ADD_BLACK));
         uiDeleteSR.setGraphic(new ImageView(GeotkFX.ICON_DELETE));

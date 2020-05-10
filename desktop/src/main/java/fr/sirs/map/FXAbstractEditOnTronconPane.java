@@ -26,12 +26,16 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.theme.ui.PojoTableChoiceStage;
+import fr.sirs.theme.ui.pojotable.ChoiceStage;
 import fr.sirs.util.LabelComparator;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.ReferenceTableCell;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -120,7 +124,7 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
         uiPickTroncon.setGraphic(new ImageView(SIRS.ICON_CROSSHAIR_BLACK));
 
         uiObjetTable.setEditable(true);
-        uiObjetTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+//        uiObjetTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 //        uiObjetTable.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<SystemeReperageBorne>() {
 //            @Override
 //            public void onChanged(ListChangeListener.Change<? extends SystemeReperageBorne> c) {
