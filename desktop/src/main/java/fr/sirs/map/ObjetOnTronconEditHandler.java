@@ -50,6 +50,7 @@ import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.filter.identity.DefaultFeatureId;
+import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
@@ -59,6 +60,7 @@ import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
 import org.opengis.filter.Id;
 import org.opengis.filter.identity.Identifier;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  *
@@ -395,23 +397,28 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
 
             if (geometry instanceof Point) {
 
-                final Point point = (Point) geometry;
+                final Point pointProj = (Point) geometry;
+//                final Point pointReal = EditionHelper.createPoint(pointProj.getCoordinate());
+                final Point pointReal = (Point) pointProj.clone();
                 segments = LinearReferencingUtilities.buildSegments(linear);
-                final LinearReferencingUtilities.ProjectedPoint proj = LinearReferencingUtilities.projectReference(segments, point);
-                point.getCoordinate().setCoordinate(proj.projected);
-                if(isPositionable) {
-                    positionDebut = point;
-                    positionFin = positionDebut;
-                    final Positionable positionable = (Positionable) editedObjet;
-//                        ((Positionable) editedObjet).setPositionDebut(EditionHelper.createPoint(coordinates[0]));
-//                        ((Positionable) editedObjet).setPositionFin(EditionHelper.createPoint(coordinates[length - 1]));
-                    positionable.setPositionDebut(positionDebut);
-                    positionable.setPositionFin(positionFin);
-                    positionable.setGeometry(point);
+                final LinearReferencingUtilities.ProjectedPoint proj = LinearReferencingUtilities.projectReference(segments, pointProj);
+                pointProj.getCoordinate().setCoordinate(proj.projected);
+                final CoordinateReferenceSystem crs = session.getProjection();
+                JTS.setCRS(pointProj, crs);
+                JTS.setCRS(pointReal, crs);
 
-                    editedObjet = (T) positionable;
+                if(isPositionable) {
+                    positionDebut = pointReal;
+                    positionFin = positionDebut;
+                    setPositionableGeometries((Positionable) editedObjet, pointProj, positionDebut, positionFin);
+//                    final Positionable positionable = (Positionable) editedObjet;
+//                    positionable.setPositionDebut(positionDebut);
+//                    positionable.setPositionFin(positionFin);
+//                    positionable.setGeometry(pointProj);
+
+//                    editedObjet = (T) positionable;
                 } else {
-                    editedObjet.setGeometry(point);
+                    editedObjet.setGeometry(pointProj);
                 }
             } else if (geometry instanceof LineString) {
                 final Coordinate[] coordinates = geometry.getCoordinates();
@@ -423,16 +430,20 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
 
                 positionDebut = EditionHelper.createPoint(coordinates[0]);
                 positionFin   = EditionHelper.createPoint(coordinates[length - 1]);
+                final CoordinateReferenceSystem crs = session.getProjection();
+                JTS.setCRS(positionDebut, crs);
+                JTS.setCRS(positionDebut, crs);
 
                 segments = LinearReferencingUtilities.buildSegments((LineString) geometry);
                 final LineString projLine = LinearReferencingUtilities.buildGeometryFromGeo(linear, segments, positionDebut, positionFin);
 
                 if (isPositionable) {
-                    final Positionable positionable = (Positionable) editedObjet;
-                    positionable.setPositionDebut(positionDebut);
-                    positionable.setPositionFin(positionFin);
-                    positionable.setGeometry(projLine);
-                    editedObjet = (T) positionable;
+                    setPositionableGeometries((Positionable) editedObjet, projLine, positionDebut, positionFin);
+//                    final Positionable positionable = (Positionable) editedObjet;
+//                    positionable.setPositionDebut(positionDebut);
+//                    positionable.setPositionFin(positionFin);
+//                    positionable.setGeometry(projLine);
+//                    editedObjet = (T) positionable;
 
                 } else {
                     editedObjet.setGeometry(projLine);
@@ -446,6 +457,20 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
 //            uiObjetTable.getSelectionModel().clearSelection();
             map.getCanvas().repaint();
         }
+
+    }
+
+    /**
+     *
+     * @param positionable on wich it sets the geometries
+     * @param projected projected geometry to set
+     * @param positionDebut real position of the start point to set
+     * @param positionFin real position of the end point to set
+     */
+    private void setPositionableGeometries(final Positionable positionable, final Geometry projected, final Point positionDebut, final Point positionFin) {
+                    positionable.setPositionDebut(positionDebut);
+                    positionable.setPositionFin(positionFin);
+                    positionable.setGeometry(projected);
 
     }
 

@@ -174,8 +174,7 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
 
     protected final void createNewGeometryForObjet(final double x, final double y) {
 
-        // Le helper peut être null si on a choisi d'activer ce handler pour une dépendance existante,
-        // sans passer par le clic droit pour choisir un type de dépendance.
+        // Le helper peut être null si on a choisi d'activer ce handler pour un objet existant,
         final Class clazz = editedObjet.getClass();
         if (objetHelper == null) {
             if (editedClass.isAssignableFrom(clazz)) {
@@ -187,7 +186,7 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
         // le choix fait par l'utilisateur dans le panneau de création.
         final Class geomClass = newGeomType;
 
-        // On vient de créer la dépendance, le clic gauche va permettre d'ajouter des points.
+        // On vient de créer l'objet, le clic gauche va permettre d'ajouter des points.
         if (Point.class.isAssignableFrom(geomClass)) {
             coords.clear();
             coords.add(objetHelper.toCoord(x, y));
