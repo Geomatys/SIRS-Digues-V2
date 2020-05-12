@@ -21,20 +21,16 @@ package fr.sirs;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.AvecPrestations;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -44,6 +40,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableCell;
@@ -53,6 +50,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.gui.javafx.util.FXNumberCell;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.referencing.LinearReferencing;
 
 /**
@@ -208,7 +206,37 @@ public abstract class TronconChoicePrintPane extends BorderPane {
         // Si le PR de l'extrémité voulue du tronçon n'a pas encore été calculé.
         if (prCache.get(troncon.getId())[index]==null) {
             prProperty = new SimpleObjectProperty<>();
-            try {
+
+            TaskManager.INSTANCE.submit(new computePRTask(troncon, extremite, prProperty));
+
+            prCache.get(troncon.getId())[index] = prProperty;
+        }
+        else {
+            prProperty = prCache.get(troncon.getId())[index];
+        }
+        return prProperty;
+    }
+
+    /**
+     * Tâche asynchrone pour le calcul des valeurs de PR (début et fin) calculées.
+     */
+    private final class computePRTask extends Task<Number> {
+
+        private final TronconDigue troncon;
+        private final ExtremiteTroncon extremite;
+
+        final ObjectProperty<Number> prProperty;
+
+        computePRTask(final TronconDigue troncon, final ExtremiteTroncon extremite, final ObjectProperty<Number> prProperty ){
+            this.troncon=troncon;
+            this.extremite=extremite;
+            this.prProperty=prProperty;
+
+        }
+
+        @Override
+        protected Number call() throws Exception {
+
                 final SystemeReperage sr = Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(troncon.getSystemeRepDefautId());
                 final LinearReferencing.SegmentInfo[] tronconSegments = LinearReferencingUtilities.buildSegments(LinearReferencing.asLineString(troncon.getGeometry()));
 
@@ -223,18 +251,22 @@ public abstract class TronconChoicePrintPane extends BorderPane {
                         point = GO2Utilities.JTS_FACTORY.createPoint(tronconSegments[0].getPoint(0, 0));
                         break;
                 }
-                prProperty.set(TronconUtils.computePR(tronconSegments, sr, point, Injector.getSession().getRepositoryForClass(BorneDigue.class)));
-                prCache.get(troncon.getId())[index] = prProperty;
-            } catch (Exception e) {
-                SIRS.LOGGER.log(Level.WARNING, "Cannot compute PR for linear " + troncon.getId(), e);// SYM-1700
+                return TronconUtils.computePR(tronconSegments, sr, point, Injector.getSession().getRepositoryForClass(BorneDigue.class));
+        }
+
+        @Override
+        protected void succeeded() {
+            prProperty.set(getValue());
+            super.succeeded();
+        }
+
+        @Override
+        protected void failed() {
+            SIRS.LOGGER.log(Level.WARNING, "Cannot compute PR for linear " + troncon.getId(), getException());// SYM-1700
                 final String tronconTitle = new SirsStringConverter().toString(troncon);
                 new Growl(Growl.Type.WARNING, "Impossible de calculer les PRs du tronçon "+tronconTitle+". Veuillez vérifier les informations de référencement linéaire.").showAndFade();
-            }
+            super.failed(); 
         }
-        else {
-            prProperty = prCache.get(troncon.getId())[index];
-        }
-        return prProperty;
     }
 
     protected class TypeChoicePojoTable extends PojoTable {

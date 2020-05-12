@@ -71,8 +71,6 @@ public class PointsToLine extends AbstractFunction {
         } catch (MismatchedDimensionException | TransformException | FactoryException e) {
             throw new RuntimeException("Fail to convert the 2nd geometry " + parameters.get(1) + "In the same CRS than the 1st one "+parameters.get(0)+" ;\n srid = "+srid+"\n CRS = "+startCRS, e);
         }
-//        pt2.setSRID(geom2.getSRID());
-//        pt2.setUserData(geom2.getUserData());
 
         final LineString lineString = GF.createLineString(new Coordinate[]{
             pt1.getCoordinate(),
