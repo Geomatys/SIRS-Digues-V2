@@ -6,8 +6,15 @@
 package fr.sirs.map;
 
 import fr.sirs.CorePlugin;
+import fr.sirs.core.model.Positionable;
+import fr.sirs.ui.Growl;
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -20,11 +27,18 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import org.apache.sis.util.ArgumentChecks;
+import org.geotoolkit.data.bean.BeanFeature;
+import org.geotoolkit.display2d.GO2Utilities;
+import org.geotoolkit.feature.Feature;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
+import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
+import org.geotoolkit.map.CollectionMapLayer;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.style.MutableFeatureTypeStyle;
+import org.geotoolkit.style.MutableStyle;
+import org.geotoolkit.style.MutableStyleFactory;
 import org.geotoolkit.style.visitor.ListingColorVisitor;
 import org.opengis.style.Style;
 
@@ -44,6 +58,8 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
     private static final Tooltip REAL_POSITION_VISIBLE_TOOLTIP   = new Tooltip("Afficher uniquement les géométries");
     private static final Tooltip REAL_POSITION_UNVISIBLE_TOOLTIP = new Tooltip("Afficher les positions réelles de début et de fin");
 
+    private final static Map<MapLayer, List<MutableFeatureTypeStyle>> STYLE_MAP = new HashMap<>();
+    private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
 
 
     public MapItemViewRealPositionColumn() {
@@ -70,7 +86,6 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
 
 
         public ViewRealPositionCell() {
-//            setFont(FXUtilities.FONTAWESOME);
             setOnMouseClicked(this::mouseClicked);
             itemProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
 
@@ -111,33 +126,68 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
     }
 
     private static void setRealPositionVisible(final MapItem target, final Boolean visible) {
+        ArgumentChecks.ensureNonNull("MapItem", target);
         if (target instanceof MapLayer) {
             final MapLayer maplayer = (MapLayer) target;
-            final List<MutableFeatureTypeStyle> fts = maplayer.getStyle().featureTypeStyles();
+            boolean appliable = false;
+
+
+            if (maplayer instanceof CollectionMapLayer) {
+                CollectionMapLayer collectionmaplayer = (CollectionMapLayer) maplayer;
+                Collection col = collectionmaplayer.getCollection();
+                if(!((col == null) || (col.isEmpty()))){
+                    Iterator iterator = col.iterator();
+                    Object tested;
+                    while (iterator.hasNext()) {
+                        tested = iterator.next();
+                        if (tested != null) {
+                            if(tested instanceof Feature) {
+                                Object objt = ((Feature) tested).getUserData().get(BeanFeature.KEY_BEAN);
+                                if (objt instanceof Positionable) {
+                                    appliable = true;
+                                }
+                            }
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if(!appliable) {
+                Growl growl = new Growl(Growl.Type.INFO, "La couche cartographique ne différentie pas la position réelle de la position dite projetée");
+                growl.showAndFade();
+                return;
+            }
+
+
+            MutableStyle currentStyle = maplayer.getStyle();
+            final List<MutableFeatureTypeStyle> fts = currentStyle.featureTypeStyles();
 
             if (fts != null) {
 
-                final Stream<Color> colors = tryFinfColorFromPrevious(maplayer.getStyle());
-                final Color color = colors
-                        .filter(c -> !(c.equals(Color.BLACK) || c.equals(Color.WHITE))) //Borders and real positions' items contain black and white colors so we ignore it.
-                        .findAny()
-                        .orElse(Color.BLACK);
-
-                /* Following commented code tried to only modificate the rules
-                * associated with the real positions. It worked for addition of
-                * the rule but not for the removal. Then we choose to re-create
-                * the full Style.
-                */
-
-//                final MutableRule start = CorePlugin.createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, Color.red, StyleConstants.MARK_TRIANGLE);
-//                final MutableRule end   = CorePlugin.createExactPositinRule("end", SirsCore.POSITION_FIN_FIELD, Color.red, StyleConstants.MARK_TRIANGLE);
                 if(visible) {
+                    STYLE_MAP.put(maplayer, fts);
+                    final Stream<Color> colors = tryFindColorFromPrevious(currentStyle);
+                    final Color color = colors
+                            .filter(c -> !(c.equals(Color.BLACK) || c.equals(Color.WHITE))) //Borders and real positions' items contain black and white colors so we ignore it.
+                            .findAny()
+                            .orElse(Color.BLACK);
+
+                    /* Following commented code tried to only modificate the rules
+                     * associated with the real positions. It worked for addition of
+                     * the rule but not for the removal. Then we choose to re-create
+                     * the full Style.
+                     */
                     maplayer.setStyle(CorePlugin.createDefaultStyle(color, null, true));
-//                    applyRule(fts, start);
-//                    applyRule(fts, end);
                 } else {
 
-                    maplayer.setStyle(CorePlugin.createDefaultStyle(color, null, false));
+                    final MutableStyle style = SF.style();
+                    style.featureTypeStyles().addAll(new ArrayList<>(STYLE_MAP.get(maplayer)));
+                    maplayer.setStyle(style);
+
+//                    maplayer.setStyle(STYLE_MAP.get(maplayer));
+                    STYLE_MAP.remove(maplayer);
 //                    removeRule(fts, "start");
 //                    removeRule(fts, "end");
                 }
@@ -160,7 +210,7 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
      * @param style
      * @return {@link Stream} of identified colors. Empty if no color was found.
      */
-    private static Stream<Color> tryFinfColorFromPrevious(final Style style) {
+    private static Stream<Color> tryFindColorFromPrevious(final Style style) {
         ArgumentChecks.ensureNonNull("MutableFeatureTypeStyles", style);
 
         final ListingColorVisitor visitor = new ListingColorVisitor();
@@ -172,48 +222,6 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
             return colors.stream().map(integer -> new Color(integer)); //We don't take into account the alpha component to improve comparisaon with white and black colors
         }
 
-
-//        ftsList.stream().flatMap(fts -> fts.rules().stream())
-//                .flatMap(rule -> rule.symbolizers().stream())
-//                .map(symbolizer-> sgetStroke())
-//                .map(stroke -> )
-//                GO2Utilities.STYLE_FACTORY.lineSymbolizer(stroke, geometryPropertyName);
-//                GO2Utilities.FILTER_FACTORY.
-
     }
-
-
-//
-//    private static void applyRule(final List<MutableFeatureTypeStyle> fts, final MutableRule rule) {
-//        ArgumentChecks.ensureNonNull("Rule", rule);
-//
-//        fts.stream().map(ftsl -> ftsl.rules())
-//                .filter(rules -> !rules.contains(rule))
-//                .forEach(rules -> rules.add(rule));
-//
-//    }
-//
-//    private static void removeRule(final List<MutableFeatureTypeStyle> fts, final String ruleName) {
-//        ArgumentChecks.ensureNonNull("Rule Name", ruleName);
-//
-//        fts.stream().map(ftsl -> ftsl.rules())
-//                .forEach(rules -> rules.removeIf(rule -> ruleName.equals(rule.getName())));
-//
-//    }
-
-
-
-//        private static boolean isRealPositionVisible(final MapItem item) {
-//            if (item instanceof ViewRealPositionCell) {
-//                return ((MapLayer)item).getStyle().featureTypeStyles().contains(item)
-//            } else {
-//                for (MapItem child : item.items()) {
-//                    if (isRealPositionVisible(child)) {
-//                        return true;
-//                    }
-//                }
-//            }
-//            return false;
-//        }
 
 }

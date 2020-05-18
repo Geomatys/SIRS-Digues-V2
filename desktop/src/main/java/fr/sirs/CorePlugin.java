@@ -127,6 +127,7 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
 import org.geotoolkit.filter.DefaultLiteral;
+import org.geotoolkit.filter.function.other.IfThenElseFunction;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -911,11 +912,8 @@ public class CorePlugin extends Plugin {
 
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
         if(withRealPosition) {
-            final MutableRule start = createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, Color.GREEN, StyleConstants.MARK_TRIANGLE);
-            final MutableRule end = createExactPositinRule("end", SirsCore.POSITION_FIN_FIELD, Color.GREEN, StyleConstants.MARK_TRIANGLE);
 
-            fts.rules().add(start);
-            fts.rules().add(end);
+            addRealPositionStyles(fts,  Color.GREEN);
         }
         fts.rules().add(ruleLongObjects);
         fts.rules().add(ruleSmallObjects);
@@ -939,8 +937,9 @@ public class CorePlugin extends Plugin {
                         StyleConstants.DEFAULT_POINTPLACEMENT, geometryProperty));
     }
 
-    public static MutableStyle createDefaultStyle(final Color col, final String geometryName, final boolean withRealPosition) {
-        final Stroke line1Stroke = SF.stroke(SF.literal(col),LITERAL_ONE_FLOAT,GO2Utilities.FILTER_FACTORY.literal(8),
+    public static MutableStyle createDefaultStyle(final Color color, final String geometryName, final boolean withRealPosition) {
+
+        final Stroke line1Stroke = SF.stroke(SF.literal(color),LITERAL_ONE_FLOAT,GO2Utilities.FILTER_FACTORY.literal(8),
                 STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 geometryName,DEFAULT_DESCRIPTION,Units.POINT,line1Stroke,LITERAL_ZERO_FLOAT);
@@ -950,18 +949,12 @@ public class CorePlugin extends Plugin {
         final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
                 geometryName,DEFAULT_DESCRIPTION,Units.POINT,line2Stroke,LITERAL_ZERO_FLOAT);
 
-//        // test et préparation pour SYM-1776
-//        final MutableRule start = createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, col, StyleConstants.MARK_TRIANGLE);
-//        final MutableRule end   = createExactPositinRule("end",   SirsCore.POSITION_FIN_FIELD,   col, StyleConstants.MARK_TRIANGLE);
-//        final MutableRule startReal = createExactPositinRule("start", "approximatePositionDebut", col, StyleConstants.MARK_TRIANGLE);
-//        final MutableRule endReal = createExactPositinRule("end", "approximatePositionFin", col, StyleConstants.MARK_TRIANGLE);
-
         //the visual element
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(16);
 
         final List<GraphicalSymbol> symbols = new ArrayList<>();
         final Stroke stroke = null;
-        final Fill fill = SF.fill(col);
+        final Fill fill = SF.fill(color);
         final Mark mark = SF.mark(StyleConstants.MARK_TRIANGLE, fill, stroke);
         symbols.add(mark);
         final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
@@ -987,40 +980,48 @@ public class CorePlugin extends Plugin {
 
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
 //        // test et préparation pour SYM-1776
-
         if(withRealPosition) {
-
-            try {
-
-                final MutableRule start = createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, col, StyleConstants.MARK_TRIANGLE);
-                final MutableRule end = createExactPositinRule("end", SirsCore.POSITION_FIN_FIELD, col, StyleConstants.MARK_TRIANGLE);
-
-                final Expression customFun = new PointsToLine(FF.property(SirsCore.POSITION_DEBUT_FIELD),  FF.property(SirsCore.POSITION_FIN_FIELD));
-
-                final Stroke realLineStroke = SF.stroke(SF.literal(col), LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(5),
-                        STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, new float[]{15.f, 15.f}, LITERAL_ZERO_FLOAT);
-
-                final LineSymbolizer lineReal = SF.lineSymbolizer("symbol",
-                customFun,
-                DEFAULT_DESCRIPTION,Units.POINT, realLineStroke,LITERAL_ZERO_FLOAT);
-                final MutableRule ruleLineReal = SF.rule(lineReal);
-                fts.rules().add(ruleLineReal);
-                fts.rules().add(start);
-                fts.rules().add(end);
-            } catch (Exception e) {
-                SirsCore.LOGGER.log(Level.WARNING, NAME, e);
-            }
-
-
+            addRealPositionStyles(fts, color);
         }
-//        fts.rules().add(startReal);
-//        fts.rules().add(endReal);
+
         fts.rules().add(ruleLongObjects);
         fts.rules().add(ruleSmallObjects);
 
         final MutableStyle style = SF.style();
         style.featureTypeStyles().add(fts);
         return style;
+    }
+
+    private static void addRealPositionStyles(final MutableFeatureTypeStyle fts, final Color color) {
+        try {
+
+
+                final MutableRule start = createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, color, StyleConstants.MARK_TRIANGLE);
+                final MutableRule end = createExactPositinRule("end", SirsCore.POSITION_FIN_FIELD, color, StyleConstants.MARK_TRIANGLE);
+
+                final Expression customFun = new PointsToLine(FF.property(SirsCore.POSITION_DEBUT_FIELD),  FF.property(SirsCore.POSITION_FIN_FIELD));
+//                final Expression customFun = new TryApplyRealPosition();
+
+                final Stroke realLineStroke = SF.stroke(SF.literal(color), LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(5),
+                        STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, new float[]{15.f, 15.f}, LITERAL_ZERO_FLOAT);
+
+                final LineSymbolizer lineReal = SF.lineSymbolizer("symbol",
+                customFun,
+                DEFAULT_DESCRIPTION,Units.POINT, realLineStroke,LITERAL_ZERO_FLOAT);
+
+                final MutableRule ruleLineReal = SF.rule(lineReal);
+//                final Filter withRealPosition = FF.not(FF.isNull(customFun));
+
+//                ruleLineReal.setFilter(withRealPosition);
+//                start.setFilter(withRealPosition);
+//                end.setFilter(withRealPosition);
+
+                fts.rules().add(ruleLineReal);
+                fts.rules().add(start);
+                fts.rules().add(end);
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.WARNING, NAME, e);
+            }
     }
 
     private class ViewFormItem extends MenuItem {

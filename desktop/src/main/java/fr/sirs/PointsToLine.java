@@ -25,19 +25,20 @@ import org.opengis.util.FactoryException;
  * @throw {@link IllegalArgumentException} if one of the parameter is missing.
  * @throw {@link RuntimeException} if fail to convert the 2nd point in the 1st point CRS.
  */
-public class PointsToLine extends AbstractFunction {
+public final class PointsToLine extends AbstractFunction {
+
+    private static final String NAME = "PointsToLines";
 
     private static final GeometryFactory GF = new GeometryFactory();
 
     public PointsToLine(final Expression expr1, final Expression expr2) {
-        super("PointsToLines", new Expression[] {expr1,expr2}, null);
+        super(NAME, new Expression[] {expr1,expr2}, null);
     }
 
     @Override
     public Object evaluate(final Object feature) {
-        final Geometry geom1;
 
-        final Geometry geom2;
+        final Geometry geom1, geom2;
 
         try {
             geom1 = parameters.get(0).evaluate(feature, Geometry.class);
