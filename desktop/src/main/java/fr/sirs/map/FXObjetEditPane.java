@@ -69,10 +69,12 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
     public FXObjetEditPane(FXMap map, final String typeName, final Class clazz) {
         super(map, typeName, clazz, true, false);
 
-        uiGeomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire"));
+        uiGeomTypeBox.setItems(FXCollections.observableArrayList("Linéaire", "Ponctuel"));
         uiGeomTypeBox.getSelectionModel().selectFirst();
         geometryTypeProperty = new SimpleObjectProperty<>(getGeomType());
-
+         uiGeomTypeBox.getSelectionModel().selectedItemProperty().addListener((o, old, n) -> {
+            geometryTypeProperty.setValue(getGeomType());
+        });
         uiObjetTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
 
@@ -116,7 +118,7 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
     @Override
     public void createObjet(final Point geom) { //uniquement un point ici, on veut pouvoir éditer un segment!
 
-        if (getTronconProperty() == null) {
+        if (getTronconFromProperty() == null) {
             Growl alert = new Growl(Growl.Type.WARNING, "Pour créer un nouvel élément, veuillez sélectionner un tronçon d'appartenance");
             alert.showAndFade();
             mode.setValue(EditModeObjet.PICK_TRONCON);

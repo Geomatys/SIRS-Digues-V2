@@ -23,19 +23,29 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import fr.sirs.core.LinearReferencingUtilities;
+import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.AvecSettableGeometrie;
+import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.SystemeReperage;
 import static fr.sirs.map.EditModeObjet.CREATE_OBJET;
+import fr.sirs.theme.ui.FXPositionableAbstractCoordMode;
+import fr.sirs.theme.ui.FXPositionableCoordMode;
 import fr.sirs.ui.Growl;
+import fr.sirs.util.ConvertPositionableCoordinates;
+import static fr.sirs.util.ConvertPositionableCoordinates.COMPUTE_MISSING_COORD;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -58,6 +68,7 @@ import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
+import org.geotoolkit.referencing.LinearReferencing;
 import org.opengis.filter.Id;
 import org.opengis.filter.identity.Identifier;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -214,9 +225,22 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
 
         public EditionOnTronconMouseListen(final ObjetOnTronconEditHandler editHandler) {
             super(editHandler, false);
-            if (editPane instanceof FXObjetEditPane) {
-                ((FXObjetEditPane) editPane).geometryTypeProperty.addListener((cl, o, n) -> this.updateGeometryType());
+            if (editPane != null) {
+                if (editPane instanceof FXObjetEditPane) {
+                    ((FXObjetEditPane) editPane).geometryTypeProperty.addListener((cl, o, n) -> {
+
+                        justCreated = false;
+                        geomLayer.getGeometries().clear();
+                        geomLayer.setNodeSelection(null);
+                        coords.clear();
+                        editGeometry.reset();
+                        this.updateGeometryType();
+                    });
+                }
+
+                editPane.tronconProperty().addListener((ob, ol, ne) -> chooseTypesAndCreate());
             }
+
         }
 
         @Override
@@ -288,22 +312,12 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
         @Override
         protected void chooseTypesAndCreate() {
 
-//            editPane = new FXObjetEditPane(map, TRONCON_LAYER_NAME, objetClass);
-//            final Stage stage = new Stage();
-//            stage.getIcons().add(SIRS.ICON);
-//            stage.setTitle("Création d'objet");
-//            stage.initModality(Modality.WINDOW_MODAL);
-//            stage.setAlwaysOnTop(true);
-
-//            final Scene sceneChoices = new Scene(editPane);
-//            dialog.setScene(sceneChoices);
-//            dialog.showAndWait();
 
             objetHelper = getHelperObjet();
 //            final AbstractSIRSRepository<T> repo = Injector.getSession().getRepositoryForClass(editedClass);
 //            editedObjet = repo.create();
             editedObjet = session.getElementCreator().createElement(editedClass);
-            final TronconDigue tronconParent = editPane.getTronconProperty();
+            final TronconDigue tronconParent = editPane.getTronconFromProperty();
             editedObjet.setForeignParentId(tronconParent==null?null:tronconParent.getId());
             modeProperty.setValue(CREATE_OBJET);
 
@@ -319,11 +333,10 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
                 case "Linéaire":
                     newGeomType = LineString.class;
                     break;
-//                case "Surfacique":
-//                    newGeomType = Polygon.class;
-//                    break;
                 default:
-                    newGeomType = Point.class;
+                    final Growl growl = new Growl(Growl.Type.WARNING, "Type de géométrie non renseignée.");
+                    growl.showAndFade();
+                    newGeomType = LineString.class;
             }
         }
 
@@ -380,7 +393,7 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
          */
         void projectOnTronçon(final Geometry geometry) {
             // Récupération du tronçon et du SR.
-            final TronconDigue troncon = editPane.getTronconProperty();
+            final TronconDigue troncon = editPane.getTronconFromProperty();
             if (troncon == null) {
                 displayGrowl(Growl.Type.WARNING, "Tronçon non renseigné.\n Impossible de projeter la géométrie créée.");
                 return;
@@ -411,12 +424,7 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
                     positionDebut = pointReal;
                     positionFin = positionDebut;
                     setPositionableGeometries((Positionable) editedObjet, pointProj, positionDebut, positionFin);
-//                    final Positionable positionable = (Positionable) editedObjet;
-//                    positionable.setPositionDebut(positionDebut);
-//                    positionable.setPositionFin(positionFin);
-//                    positionable.setGeometry(pointProj);
-
-//                    editedObjet = (T) positionable;
+                    ConvertPositionableCoordinates.computePositionableLinearCoordinate((Positionable) editedObjet);
                 } else {
                     editedObjet.setGeometry(pointProj);
                 }
@@ -428,26 +436,33 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
                 }
                 final int length = coordinates.length;
 
+
+//                try {
+
                 positionDebut = EditionHelper.createPoint(coordinates[0]);
                 positionFin   = EditionHelper.createPoint(coordinates[length - 1]);
                 final CoordinateReferenceSystem crs = session.getProjection();
+
                 JTS.setCRS(positionDebut, crs);
                 JTS.setCRS(positionDebut, crs);
 
-                segments = LinearReferencingUtilities.buildSegments((LineString) geometry);
-                final LineString projLine = LinearReferencingUtilities.buildGeometryFromGeo(linear, segments, positionDebut, positionFin);
+                    final LineString projLine = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), positionDebut, positionFin);
+
 
                 if (isPositionable) {
                     setPositionableGeometries((Positionable) editedObjet, projLine, positionDebut, positionFin);
-//                    final Positionable positionable = (Positionable) editedObjet;
-//                    positionable.setPositionDebut(positionDebut);
-//                    positionable.setPositionFin(positionFin);
-//                    positionable.setGeometry(projLine);
-//                    editedObjet = (T) positionable;
+                    ConvertPositionableCoordinates.computePositionableLinearCoordinate((Positionable) editedObjet);
 
                 } else {
                     editedObjet.setGeometry(projLine);
                 }
+//                } catch (Exception e) {
+//                    SIRS.LOGGER.warning("Echec de la conversion de la géométrie projetée dans le crs.");
+//
+//                    displayGrowl(Growl.Type.INFO, "Echec lors de la projection de la géométrie succès sur le tronçon d'appartenance.");
+//                    return;
+//
+//                }
 
             }
 
@@ -455,7 +470,7 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
 
 
 //            uiObjetTable.getSelectionModel().clearSelection();
-            map.getCanvas().repaint();
+//            map.getCanvas().repaint();
         }
 
     }
@@ -471,6 +486,7 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
                     positionable.setPositionDebut(positionDebut);
                     positionable.setPositionFin(positionFin);
                     positionable.setGeometry(projected);
+                    positionable.setGeometryMode(FXPositionableCoordMode.MODE);
 
     }
 

@@ -213,7 +213,7 @@ public class BorneEditHandler extends AbstractOnTronconEditHandler {
                     ((FXSystemeReperagePane) editPane).selectSRB(null); //Cast possible as the editPane is initialized in the current constructor as FXSystemeReperagePane
 
                     //les event vont induire le repaint de la carte
-                    final TronconDigue troncon = editPane.getTronconProperty();
+                    final TronconDigue troncon = editPane.getTronconFromProperty();
                     if (troncon != null) {
                         //on recalcule les geometries des positionables du troncon.
                         TronconUtils.updatePositionableGeometry(troncon, session);

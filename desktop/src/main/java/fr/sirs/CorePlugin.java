@@ -710,23 +710,6 @@ public class CorePlugin extends Plugin {
         final LineSymbolizer line3 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,Units.POINT,stroke3,LITERAL_ONE_FLOAT);
 
-//        final Expression size = GO2Utilities.FILTER_FACTORY.literal(18);
-//        final List<GraphicalSymbol> symbols = new ArrayList<>();
-//        final GraphicalSymbol external = SF.externalGraphic(
-//                    SF.onlineResource(CorePlugin.class.getResource("/fr/sirs/arrow-white.png").toURI()),
-//                    "image/png",null);
-//        symbols.add(external);
-//        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
-//                size, DEFAULT_GRAPHIC_ROTATION, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
-//
-//        final Expression initialGap = FF.literal(10);
-//        final Expression strokeGap = FF.literal(100);
-//        final GraphicStroke graphicStroke = SF.graphicStroke(graphic,strokeGap,initialGap);
-//
-//        final Stroke gstroke = SF.stroke(graphicStroke,DEFAULT_FILL_COLOR,LITERAL_ONE_FLOAT,LITERAL_ONE_FLOAT,
-//                STROKE_JOIN_BEVEL,STROKE_CAP_ROUND,null,LITERAL_ZERO_FLOAT);
-//        final LineSymbolizer direction = SF.lineSymbolizer("",(Expression)null,null,null,gstroke,null);
-
         return SF.style(line1,line2,line3);
     }
 

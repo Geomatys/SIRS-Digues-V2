@@ -35,9 +35,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -178,7 +176,7 @@ public abstract class AbstractOnTronconEditHandler<T extends Element> extends Ab
 
         //fin de l'edition
         dialog.setOnHiding((WindowEvent event) -> {
-            TronconDigue troncon = editPane.getTronconProperty();
+            TronconDigue troncon = editPane.getTronconFromProperty();
             if (troncon != null) {
                 //on recupère la derniere version, la maj des sr entraine la maj des troncons
                 troncon = session.getRepositoryForClass(TronconDigue.class).get(troncon.getDocumentId());
@@ -198,9 +196,6 @@ public abstract class AbstractOnTronconEditHandler<T extends Element> extends Ab
         });
 
         editPane.getModeProperty().bindBidirectional(modeProperty);
-//                .addListener((observable, oldValue, newValue) -> {
-//            modeProperty.setValue(newValue);
-//        });
 
         dialog.show();
 
