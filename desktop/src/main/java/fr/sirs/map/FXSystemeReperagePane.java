@@ -35,6 +35,9 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import static fr.sirs.map.EditModeObjet.CREATE_OBJET;
+import static fr.sirs.map.EditModeObjet.EDIT_OBJET;
+import static fr.sirs.map.EditModeObjet.PICK_TRONCON;
 import fr.sirs.util.LabelComparator;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.SirsStringConverter;
@@ -77,6 +80,7 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -94,7 +98,6 @@ import org.geotoolkit.referencing.LinearReferencing;
 import org.geotoolkit.referencing.LinearReferencing.ProjectedPoint;
 import static org.geotoolkit.referencing.LinearReferencing.buildSegments;
 import static org.geotoolkit.referencing.LinearReferencing.projectReference;
-
 /**
  *
  * @author Johann Sorel (Geomatys)
@@ -183,6 +186,25 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
                 return null;
             return new SRBComparator(LinearReferencingUtilities.asLineString(td.getGeometry()));
         }, tronconProp);
+
+        //etat des boutons sélectionné
+        final ToggleGroup group = new ToggleGroup();
+        uiPickTroncon.setToggleGroup(group);
+        uiCreateObjet.setToggleGroup(group);
+
+        mode.addListener((observable, oldValue, newValue) -> {
+            switch ((EditModeObjet) newValue) {
+                case CREATE_OBJET:
+                    group.selectToggle(uiCreateObjet);
+                    break;
+                case PICK_TRONCON:
+                    group.selectToggle(uiPickTroncon);
+                    break;
+                default:
+                    group.selectToggle(null);
+                    break;
+            }
+        });
     }
 
     @Override

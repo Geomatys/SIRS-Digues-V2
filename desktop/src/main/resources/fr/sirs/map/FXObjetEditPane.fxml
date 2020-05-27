@@ -88,7 +88,7 @@
                   <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Tracer sur la carte un nouvel objet (double click)" wrapText="true" GridPane.rowIndex="3" />
                   <ToggleButton fx:id="uiCreateObjet" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Tracer" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                   <Label text="Modifier un objet existant (sélectionnez puis modifiez)" GridPane.rowIndex="2" />
-                  <Button fx:id="uiModifyObjet" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Modifier" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <ToggleButton fx:id="uiModifyObjet" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Modifier" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 <!--                  <Label text="Supprimer les objets sélectionnés" GridPane.rowIndex="4" />
                   <Button mnemonicParsing="false" onAction="#deleteObjets" text="Supprimer" GridPane.columnIndex="1" GridPane.rowIndex="4" />-->
                </children>

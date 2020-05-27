@@ -136,24 +136,26 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
         // Affichage du libellé du tronçon
         uiTronconLabel.textProperty().bind(Bindings.createStringBinding(()->tronconProp.get()==null?defaultEmptyLibelle:tronconProp.get().getLibelle(),tronconProp));
 
-        //etat des boutons sélectionné
-        final ToggleGroup group = new ToggleGroup();
-        uiPickTroncon.setToggleGroup(group);
-        uiCreateObjet.setToggleGroup(group);
-
-        mode.addListener((observable, oldValue, newValue) -> {
-            switch (newValue) {
-                case CREATE_OBJET:
-                    group.selectToggle(uiCreateObjet);
-                    break;
-                case PICK_TRONCON:
-                    group.selectToggle(uiPickTroncon);
-                    break;
-                default:
-                    group.selectToggle(null);
-                    break;
-            }
-        });
+//        //etat des boutons sélectionné
+//        final ToggleGroup group = new ToggleGroup();
+//        uiPickTroncon.setToggleGroup(group);
+//        uiCreateObjet.setToggleGroup(group);
+//
+//        mode.addListener((observable, oldValue, newValue) -> {
+//            switch (newValue) {
+//                case CREATE_OBJET:
+//                    group.selectToggle(uiCreateObjet);
+//                    break;
+//                case PICK_TRONCON:
+//                    group.selectToggle(uiPickTroncon);
+//                    break;
+//                case EDIT_OBJET:
+//                    group.
+//                default:
+//                    group.selectToggle(null);
+//                    break;
+//            }
+//        });
 
         //colonne de la table
         if (createDeleteColumn)

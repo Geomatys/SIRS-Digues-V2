@@ -6,6 +6,7 @@
 package fr.sirs.map;
 
 import fr.sirs.CorePlugin;
+import fr.sirs.SIRS;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.ui.Growl;
 import java.awt.Color;
@@ -90,26 +91,32 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
             itemProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
 
                 setGraphic(null);
-                if (newValue==null || !newValue) { //Should never be null
-                    setTooltip(REAL_POSITION_UNVISIBLE_TOOLTIP);
-                    cellContent.setImage(ICON_REAL_POSITION_UNVISIBLE);
-                } else { //Should never be null
-                    setTooltip(REAL_POSITION_VISIBLE_TOOLTIP);
-                    cellContent.setImage(ICON_REAL_POSITION_VISIBLE);
+                if(newValue!= null) {
+                    if (!newValue) { //Should never be null
+                        setTooltip(REAL_POSITION_UNVISIBLE_TOOLTIP);
+                        cellContent.setImage(ICON_REAL_POSITION_UNVISIBLE);
+                    } else { //Should never be null
+                        setTooltip(REAL_POSITION_VISIBLE_TOOLTIP);
+                        cellContent.setImage(ICON_REAL_POSITION_VISIBLE);
+                    }
+                    setGraphic(cellContent);
                 }
-                setGraphic(cellContent);
             });
             itemProperty().setValue(Boolean.FALSE);
         }
 
         private void mouseClicked(MouseEvent event){
-            if(isEditing() && itemProperty().get() != null) {
-                final MapItem mitem = getTreeTableRow().getItem();
-                if (mitem != null) {
-                    final boolean newValue = !itemProperty().get();
-                    setRealPositionVisible(mitem, newValue);
-                    itemProperty().set(newValue);
+            try {
+                if (isEditing() && itemProperty().get() != null) {
+                    final MapItem mitem = getTreeTableRow().getItem();
+                    if (mitem != null) {
+                        final boolean newValue = !itemProperty().get();
+                        setRealPositionVisible(mitem, newValue);
+                        itemProperty().set(newValue);
+                    }
                 }
+            } catch(Exception e) {
+                SIRS.LOGGER.warning(e.getMessage());
             }
         }
 

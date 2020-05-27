@@ -43,6 +43,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 
@@ -56,7 +57,7 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
 
     @FXML ToggleButton uiSelectTroncon;
     @FXML ComboBox<String> uiGeomTypeBox;
-    @FXML Button uiModifyObjet;
+    @FXML ToggleButton uiModifyObjet;
 
     final ObjectProperty<String> geometryTypeProperty;
 
@@ -68,6 +69,33 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
      */
     public FXObjetEditPane(FXMap map, final String typeName, final Class clazz) {
         super(map, typeName, clazz, true, false);
+
+
+        //etat des boutons sélectionné
+        final ToggleGroup group = new ToggleGroup();
+        uiPickTroncon.setToggleGroup(group);
+        uiCreateObjet.setToggleGroup(group);
+        uiModifyObjet.setToggleGroup(group);
+
+        mode.addListener((observable, oldValue, newValue) -> {
+            switch ((EditModeObjet) newValue) {
+                case CREATE_OBJET:
+                    group.selectToggle(uiCreateObjet);
+                    break;
+                case PICK_TRONCON:
+                    group.selectToggle(uiPickTroncon);
+                    break;
+                case EDIT_OBJET:
+                    group.selectToggle(uiModifyObjet);
+                    break;
+                default:
+                    group.selectToggle(null);
+                    break;
+            }
+        });
+
+        uiModifyObjet.setOnAction(this::modifyObjet);
+
 
         uiGeomTypeBox.setItems(FXCollections.observableArrayList("Linéaire", "Ponctuel"));
         uiGeomTypeBox.getSelectionModel().selectFirst();
@@ -99,6 +127,14 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
         return uiGeomTypeBox.getSelectionModel().getSelectedItem();
     }
 
+//    private void startCreateObjet(ActionEvent evt){
+//        if(mode.get().equals(EditModeObjet.CREATE_OBJET)){
+//            //on retourne on mode edition
+//            mode.set(EditModeObjet.EDIT_OBJET);
+//        }else{
+//            mode.set(EditModeObjet.CREATE_OBJET);
+//        }
+//    }
 
     /**
      * Ajout
