@@ -7,6 +7,7 @@ package fr.sirs;
 
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecPrestations;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.GlobalPrestation;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.util.SirsStringConverter;
@@ -14,8 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -50,6 +53,8 @@ public class FXPrestationPredicater extends VBox {
 
     private final SelectedPrestationPredicate predicate;
 
+    private final ObservableList availablePrestations;
+
     public FXPrestationPredicater() {
         SIRS.loadFXML(this, FXPrestationPredicater.class);
 
@@ -63,9 +68,8 @@ public class FXPrestationPredicater extends VBox {
             throw new IllegalStateException("Try to instantiate FXPrestationPredicater but failed to get the Prestation repository.");
         }
 
-//        final ObservableList choices = SIRS.observableList(new ArrayList<>(Injector.getSession().getPreviews().getByClass(Prestation.class)));
-        final ObservableList choicesP = SIRS.observableList(new ArrayList<>(repositoryP.getAll()));
-        SIRS.initCombo(uiChoicePrestation, choicesP, null);
+        availablePrestations = SIRS.observableList(new ArrayList<>(repositoryP.getAll()));
+        SIRS.initCombo(uiChoicePrestation, availablePrestations, null);
         final ObservableList choicesGP = SIRS.observableList(new ArrayList<>(repositoryGP.getAll()));
         SIRS.initCombo(uiChoiceGlobalPrestation, choicesGP, null);
         selectedPrestations = FXCollections.observableList(new ArrayList<>());
@@ -79,6 +83,33 @@ public class FXPrestationPredicater extends VBox {
         uiOptionPrestation.selectedProperty().addListener(predicate.listener);
         selectedPrestations.addListener(predicate.listener);
 
+    }
+
+    void updateList(ListChangeListener.Change<? extends Element> ch) {
+        if((ch!=null) && (ch.getList() != null)) {
+            final List<String> list = ch.getList().stream()
+                    .map(t -> t.getDocumentId())
+                    .collect(Collectors.toList());
+
+            availablePrestations.clear();
+
+            try {
+                availablePrestations.addAll(
+                        repositoryP.getAll()
+                                .stream()
+                                .filter(prestation -> ((list != null) && (!list.isEmpty()) && (prestation != null)) ? list.contains(prestation.getForeignParentId()) : true) //if the list is empty /null we don't want to filter the prestations.
+                                .collect(Collectors.toList())
+                );
+            } catch (RuntimeException re) {
+                SIRS.LOGGER.log(Level.WARNING, "Exception lors du filtrage, à partir des tronçons sélectionnés, des prestations sélectionnables pour filtrer les fiches d'impression.\n"
+                        + "Tentative d'utiliser l'ensemble des prestations en base de données.", re);
+                availablePrestations.addAll(
+                        repositoryP.getAll()
+                );
+            }
+            uiChoicePrestation.setItems(availablePrestations);
+
+        }
     }
 
     /**
