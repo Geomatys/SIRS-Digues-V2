@@ -174,6 +174,10 @@ public abstract class AbstractOnTronconEditHandler<T extends Element> extends Ab
             }
         });
 
+        dialog.setOnCloseRequest(eh -> {
+            dialog.hide();
+        });
+
         //fin de l'edition
         dialog.setOnHiding((WindowEvent event) -> {
             TronconDigue troncon = editPane.getTronconFromProperty();
@@ -185,6 +189,10 @@ public abstract class AbstractOnTronconEditHandler<T extends Element> extends Ab
             }
             editPane.save();
             editPane.reset();
+            if (mouseInputListener instanceof AbstractSIRSEditMouseListen) {
+                ((AbstractSIRSEditMouseListen) mouseInputListener).reset();
+            }
+            uninstall(map);
         });
 
         editPane.tronconProperty().addListener((observable, oldValue, newValue) -> {
@@ -201,7 +209,6 @@ public abstract class AbstractOnTronconEditHandler<T extends Element> extends Ab
 
         if (instantiateMouseEditListener) {
             if(!AvecSettableGeometrie.class.isAssignableFrom(objetClass) ) {
-//            if(!objetClass.isAssignableFrom(Class.forName("fr.sirs.core.model.AvecSettableGeometrie")) ) {
                 throw new IllegalStateException("Can't initialize SIRSEditMouseListen if edited object's class doesn't implement AvecSettableGeometrie interface.");
             }
             mouseInputListener = new SIRSEditMouseListen(this, false);
@@ -260,11 +267,6 @@ public abstract class AbstractOnTronconEditHandler<T extends Element> extends Ab
      */
     @Override
     public boolean uninstall(final FXMap component) {
-//        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.",
-//                ButtonType.YES, ButtonType.NO);
-//        alert.setResizable(true);
-//        if (editPane.tronconProperty().get() == null) {
-//                || ButtonType.YES.equals(alert.showAndWait().get())) {
 
             super.uninstall(component);
             if (toActivateBack != null) {
@@ -285,7 +287,6 @@ public abstract class AbstractOnTronconEditHandler<T extends Element> extends Ab
             return true;
 //        }
 
-//        return false;
     }
 
 }

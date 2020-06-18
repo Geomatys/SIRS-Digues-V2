@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import javafx.collections.ObservableList;
+import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.ektorp.BulkDeleteDocument;
@@ -435,7 +436,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * View is query on first {@link #hasNext()} call, to avoid keeping useless
      * connections opened.
      *
-     * Note : Thiss implementation is not thread-safe.
+     * Note : This implementation is not thread-safe.
      */
     private class StreamingViewIterator implements CloseableIterator<T> {
 
@@ -459,7 +460,11 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
             if (next == null) {
                 // Open connection on first call.
                 if (result == null) {
+                    try{
                     result = db.queryForStreamingView(query);
+                    } catch (Exception e) {
+                        SirsCore.LOGGER.log(Level.WARNING, "Ektorp Streaming iterator failed retrieving next view element !.", e);
+                    }
                     if (result.getTotalRows() > 0) {
                         this.iterator = result.iterator();
                         objectReader = new ObjectMapper().reader(type);

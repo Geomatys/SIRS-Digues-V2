@@ -240,7 +240,7 @@ public class ConvertPositionableCoordinates {
 
         } catch (RuntimeException re) {
             SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de géométrie depuis les coordonnées linéaires du positionable :\n"
-                    + positionableWithLinearCoord.getDesignation(), re);
+                    + ((positionableWithLinearCoord==null)?"":positionableWithLinearCoord.getDesignation()), re);
 
         }
         return false;
@@ -412,6 +412,7 @@ public class ConvertPositionableCoordinates {
 
 
     public static Element getTronconFromElement(final Element element) {
+        ArgumentChecks.ensureNonNull("element", element);
         Element candidate = null;
 
         // Si on arrive sur un Troncon, on renvoie le troncon.
@@ -423,8 +424,11 @@ public class ConvertPositionableCoordinates {
             if (element instanceof AvecForeignParent) {
                 String id = ((AvecForeignParent) element).getForeignParentId();
                 final SessionCore session = InjectorCore.getBean(SessionCore.class);
-                final Preview preview = session.getPreviews().get(id);
-                if (preview == null) {
+                final Preview preview;
+                try {
+                    preview = session.getPreviews().get(id);
+                }catch (Exception e) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Pas de tron\u00e7on ou \u00e9chec de l''identification du tron\u00e7on pour l''''\u00e9l\u00e9ment{0} : {1}", new Object[]{element.getId(), e.getMessage()});
                     return null;
                 }
 

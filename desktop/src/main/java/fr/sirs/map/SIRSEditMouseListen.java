@@ -71,7 +71,6 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
      * Réinitialise la carte et vide la géométrie en cours d'édition.
      */
     void reset() {
-//        newCreatedObjet = false;
         justCreated = false;
         geomLayer.getGeometries().clear();
         geomLayer.setNodeSelection(null);
@@ -114,10 +113,8 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
     public void mousePressed(final MouseEvent e) {
         pressed = e.getButton();
 
-//        if (editedObjet != null && !CREATE_OBJET.equals(modeProperty.get()) && pressed == MouseButton.PRIMARY) {
-        if (EDIT_OBJET.equals(modeProperty.get()) && pressed == MouseButton.PRIMARY) {
+        if ((!Point.class.isAssignableFrom(newGeomType)) && (EDIT_OBJET.equals(modeProperty.get()) && pressed == MouseButton.PRIMARY)) {
             // On va sélectionner un noeud sur lequel l'utilisateur a cliqué, s'il y en a un.
-
             // Le helper peut être null si on a choisi d'activer ce handler pour une dépendance existante,
             // sans passer par le clic droit pour choisir un type de dépendance.
             objetHelper = editHandler.getHelperObjet();
@@ -132,7 +129,6 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
     @Override
     public void mouseDragged(final MouseEvent e) {
 
-//        if (editedObjet != null && !newCreatedObjet && pressed == MouseButton.PRIMARY) {
         if (EDIT_OBJET.equals(modeProperty.get()) && pressed == MouseButton.PRIMARY) {
             // On déplace le noeud sélectionné
             editGeometry.moveSelectedNode(objetHelper.toCoord(e.getX(), e.getY()));
@@ -178,7 +174,6 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
         final Class clazz = editedObjet.getClass();
         if (objetHelper == null) {
             if (editedClass.isAssignableFrom(clazz)) {
-//                            objetHelper = new EditionHelper(map, editHandler.objetLayer);
                 objetHelper = editHandler.getHelperObjet();
             }
         }
@@ -215,6 +210,8 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
             } else {
                 // On ajoute le point en plus.
                 justCreated = false;
+                //On remplace le dernier point
+                coords.remove(1);
                 coords.add(objetHelper.toCoord(x, y));
             }
         }
@@ -230,9 +227,9 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
         JTS.setCRS(editGeometry.geometry.get(), map.getCanvas().getObjectiveCRS2D());
         geomLayer.getGeometries().setAll(editGeometry.geometry.get());
 
-        if (Point.class.isAssignableFrom(geomClass)) {
-            PointSecondGeometryStrategy();
-        }
+//        if (Point.class.isAssignableFrom(geomClass)) {
+//            PointSecondGeometryStrategy();
+//        }
     }
 
     /**
@@ -242,9 +239,9 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
      * @param x
      * @param y
      */
-    protected final void modifyObjetGeometry(final MouseEvent e, final double x, final double y) {
+    protected void modifyObjetGeometry(final MouseEvent e, final double x, final double y) {
         final Geometry tempEditGeom = editGeometry.geometry.get();
-        if (!Point.class.isAssignableFrom(tempEditGeom.getClass()) && e.getClickCount() >= 2) {
+        if ((tempEditGeom!= null)&&(!Point.class.isAssignableFrom(tempEditGeom.getClass()) && e.getClickCount() >= 2)) {
             final Geometry result;
             if (tempEditGeom instanceof Polygon) {
                 result = objetHelper.insertNode((Polygon) editGeometry.geometry.get(), x, y);
@@ -253,6 +250,8 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
             }
             editGeometry.geometry.set(result);
             geomLayer.getGeometries().setAll(editGeometry.geometry.get());
+        } else if (Point.class.isAssignableFrom(newGeomType)) {
+            createNewGeometryForObjet(x, y);
         }
     }
 
@@ -293,13 +292,10 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
         stage.setScene(sceneChoices);
         stage.showAndWait();
 
-//                final Class clazz = DesordreDependance.class;
-//                objetHelper = new EditionHelper(map, objetLayer);
         objetHelper = editHandler.getHelperObjet();
 
         final AbstractSIRSRepository<G> repo = Injector.getSession().getRepositoryForClass(editedClass);
         editedObjet = repo.create();
-//                newCreatedObjet = true;
         modeProperty.setValue(CREATE_OBJET);
 
         switch (geomTypeBox.getSelectionModel().getSelectedItem()) {

@@ -115,7 +115,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
     public void setReseting(boolean reseting) {
         this.reseting = reseting;
     }
-    
+
     public FXPositionableAbstractCoordMode() {
         SIRS.loadFXML(this, Positionable.class);
 
@@ -308,10 +308,22 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             }
         }
 
-        uiLongitudeStart.getValueFactory().setValue(startPoint == null ? null : startPoint.getX());
-        uiLatitudeStart.getValueFactory().setValue(startPoint == null ? null : startPoint.getY());
-        uiLongitudeEnd.getValueFactory().setValue(endPoint == null ? null : endPoint.getX());
-        uiLatitudeEnd.getValueFactory().setValue(endPoint == null ? null : endPoint.getY());
+        if (startPoint != null) {
+            uiLongitudeStart.getValueFactory().setValue(startPoint.getX());
+             uiLatitudeStart.getValueFactory().setValue(startPoint.getY());
+        } else {
+            uiLongitudeStart.getValueFactory().setValue(null);
+             uiLatitudeStart.getValueFactory().setValue(null);
+
+        }
+
+        if (endPoint != null) {
+            uiLongitudeEnd.getValueFactory().setValue(endPoint.getX());
+             uiLatitudeEnd.getValueFactory().setValue(endPoint.getY());
+        } else {
+            uiLongitudeEnd.getValueFactory().setValue(null);
+             uiLatitudeEnd.getValueFactory().setValue(null);
+        }
 
         reseting = false;
     }
@@ -396,9 +408,9 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         positionable.setPositionFin(endPoint);
         positionable.geometryModeProperty().set(getID());
         positionable.setGeometry(geometry);
-        
+
         ConvertPositionableCoordinates.computePositionableLinearCoordinate(positionable);
-        
+
     }
 
     protected void coordChange() {

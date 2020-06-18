@@ -18,7 +18,6 @@
  */
 package fr.sirs.map;
 
-import com.vividsolutions.jts.geom.Point;
 import fr.sirs.SIRS;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
@@ -38,7 +37,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -61,6 +59,8 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
 
     final ObjectProperty<String> geometryTypeProperty;
 
+    final ObjectProperty<T> selectedObjetProperty =new SimpleObjectProperty<>();
+
     /**
      *
      * @param map
@@ -68,7 +68,7 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
      * @param clazz
      */
     public FXObjetEditPane(FXMap map, final String typeName, final Class clazz) {
-        super(map, typeName, clazz, true, false);
+        super(map, typeName, clazz, true);
 
 
         //etat des boutons sélectionné
@@ -117,6 +117,21 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
 
         tronconProp.addListener(this::updateObjetTable);
 
+        uiObjetTable.getSelectionModel().selectedItemProperty().addListener((obs,old,newV) -> focusOnTabSelection());
+    }
+
+    private void focusOnTabSelection() {
+        final T tofocusOn = uiObjetTable.getSelectionModel().getSelectedItem();
+        if (tofocusOn != null) {
+            final FXMapTab tab = session.getFrame().getMapTab();
+            tab.getMap().focusOnElement(tofocusOn);
+            tab.show();
+
+            //On passe en mode mofification pour ne pas créer un nouvel élément:
+            mode.setValue(EditModeObjet.EDIT_OBJET);
+            geometryTypeProperty.setValue(getGeomType());
+            selectedObjetProperty.setValue(tofocusOn);
+        }
     }
 
     /**
@@ -127,32 +142,22 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
         return uiGeomTypeBox.getSelectionModel().getSelectedItem();
     }
 
-//    private void startCreateObjet(ActionEvent evt){
-//        if(mode.get().equals(EditModeObjet.CREATE_OBJET)){
-//            //on retourne on mode edition
-//            mode.set(EditModeObjet.EDIT_OBJET);
-//        }else{
-//            mode.set(EditModeObjet.CREATE_OBJET);
-//        }
-//    }
-
     /**
-     * Ajout
+     * Mode modification d'objets
      *
      * @param evt
      */
     void modifyObjet(ActionEvent evt) {
-        mode.setValue(EditModeObjet.EDIT_OBJET);
-        geometryTypeProperty.setValue(getGeomType());
+            mode.setValue(EditModeObjet.EDIT_OBJET);
+            geometryTypeProperty.setValue(getGeomType());
     }
 
     /**
      * Création d'un élément
      *
-     * @param geom
      */
-    @Override
-    public void createObjet(final Point geom) { //uniquement un point ici, on veut pouvoir éditer un segment!
+//    @Override
+    public void createObjet() { //uniquement un point ici, on veut pouvoir éditer un segment!
 
         if (getTronconFromProperty() == null) {
             Growl alert = new Growl(Growl.Type.WARNING, "Pour créer un nouvel élément, veuillez sélectionner un tronçon d'appartenance");

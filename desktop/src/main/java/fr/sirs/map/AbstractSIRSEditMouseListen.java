@@ -44,17 +44,11 @@ public abstract class AbstractSIRSEditMouseListen<G extends AvecGeometrie> exten
     protected final Class<G> editedClass;
     protected G editedObjet = null;
     protected final SimpleObjectProperty<G> editedObjetProperty = new SimpleObjectProperty<>(editedObjet);
-//    protected EditModeObjet mode = EditModeObjet.NONE;
     protected final ObjectProperty<EditModeObjet> modeProperty = new SimpleObjectProperty<>(EditModeObjet.NONE);
 
     protected EditionHelper objetHelper;
 
     protected final List<Coordinate> coords = new ArrayList<>();
-
-    /**
-     * Vrai si une dépendance vient d'être créée.
-     */
-//    private boolean newCreatedObjet = false;
 
     /**
      * Définit le type de géométries à dessiner, pour les dépendances de types
@@ -87,8 +81,7 @@ public abstract class AbstractSIRSEditMouseListen<G extends AvecGeometrie> exten
     /**
      * Réinitialise la carte et vide la géométrie en cours d'édition.
      */
-    private void reset() {
-//        newCreatedObjet = false;
+    void reset() {
         justCreated = false;
         geomLayer.getGeometries().clear();
         geomLayer.setNodeSelection(null);

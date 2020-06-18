@@ -1,9 +1,6 @@
 package fr.sirs.plugins.synchro.ui.database;
 
-import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugins.synchro.attachment.AttachmentsSizeAndTroncons;
 import fr.sirs.ui.Growl;
 import java.util.Map;

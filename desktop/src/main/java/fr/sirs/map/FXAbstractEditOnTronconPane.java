@@ -18,7 +18,6 @@
  */
 package fr.sirs.map;
 
-import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
@@ -29,12 +28,10 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.LabelComparator;
-import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.ReferenceTableCell;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -46,15 +43,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -63,7 +57,6 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.gui.javafx.util.TaskManager;
-import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.util.StringUtilities;
 
 /**
@@ -94,20 +87,14 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
     private final String defaultEmptyLibelle = "Aucun tronçon sélectionné";
 
 
-//    public FXAbstractEditOnTronconPane(FXMap map, final String typeName, final Class clazz, final boolean createNameColumn, final boolean createDeleteColumn) {
-//        this(map, clazz, createNameColumn, createDeleteColumn);
-//        setTypeNameLabel(typeName);
-//    }
-
     /**
      *
      * @param map
      * @param typeName
      * @param clazz
      * @param createNameColumn : indicates if the name column must be set.
-     * @param createDeleteColumn indicates if the delete column must be set.
      */
-    public FXAbstractEditOnTronconPane(FXMap map, final String typeName, final Class clazz, final boolean createNameColumn, final boolean createDeleteColumn) {
+    public FXAbstractEditOnTronconPane(FXMap map, final String typeName, final Class clazz, final boolean createNameColumn) {
         SIRS.loadFXML(this);
         setTypeNameLabel(typeName);
 
@@ -120,47 +107,14 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
         uiPickTroncon.setGraphic(new ImageView(SIRS.ICON_CROSSHAIR_BLACK));
 
         uiObjetTable.setEditable(true);
-//        uiObjetTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-//        uiObjetTable.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<SystemeReperageBorne>() {
-//            @Override
-//            public void onChanged(ListChangeListener.Change<? extends SystemeReperageBorne> c) {
-//                final int size = uiObjetTable.getSelectionModel().getSelectedItems().size();
-//                uiProject.setDisable(size<1);
-//            }
-//        });
 
         uiPickTroncon.setOnAction(this::startPickTroncon);
-//        uiAddObjet.setOnAction(this::startAddObjet);
         uiCreateObjet.setOnAction(this::startCreateObjet);
 
         // Affichage du libellé du tronçon
         uiTronconLabel.textProperty().bind(Bindings.createStringBinding(()->tronconProp.get()==null?defaultEmptyLibelle:tronconProp.get().getLibelle(),tronconProp));
 
-//        //etat des boutons sélectionné
-//        final ToggleGroup group = new ToggleGroup();
-//        uiPickTroncon.setToggleGroup(group);
-//        uiCreateObjet.setToggleGroup(group);
-//
-//        mode.addListener((observable, oldValue, newValue) -> {
-//            switch (newValue) {
-//                case CREATE_OBJET:
-//                    group.selectToggle(uiCreateObjet);
-//                    break;
-//                case PICK_TRONCON:
-//                    group.selectToggle(uiPickTroncon);
-//                    break;
-//                case EDIT_OBJET:
-//                    group.
-//                default:
-//                    group.selectToggle(null);
-//                    break;
-//            }
-//        });
-
         //colonne de la table
-        if (createDeleteColumn)
-            addColumToTable(new DeleteColumn(), false);
-
         if (createNameColumn) {
             addColumToTable(new NameColumn(), true);
         }
@@ -272,7 +226,6 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
 
 //        // Construction de la liste définitive des éléments à afficher.
         final List<T> elements =repo.getAll().stream()
-//                    .map(elt -> (T) elt)
                     .filter(elt -> (troncon.getId().equals( ((Objet) elt).getForeignParentId())))
                     .collect(Collectors.toList());
 
@@ -284,39 +237,13 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
 
     /**
      * Ajout
-     *
+
+
+    /**
+     * Action du bouton de création.
      * @param evt
      */
-//    abstract void startAddObjet(ActionEvent evt) ;
-//        throw new UnsupportedOperationException("Unsupported yet.");
-//        final TronconDigue troncon = tronconProperty().get();
-//        if(troncon==null) return;
-//
-//        // Do not show bornes already present in selected SR.
-//        final Set<String> borneIdsAlreadyInSR = new HashSet<>();
-//        for (final SystemeReperageBorne srb : csr.systemeReperageBornes) {
-//            borneIdsAlreadyInSR.add(srb.getBorneId());
-//        }
-//
-//        // Construction et affichage du composant graphique de choix des bornes à ajouter.
-//        final ListView<BorneDigue> bornesView = buildBorneList(borneIdsAlreadyInSR);
-//        final Dialog dialog = new Dialog();
-//        final DialogPane pane = new DialogPane();
-//        pane.setContent(bornesView);
-//        pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-//        dialog.setDialogPane(pane);
-//
-//        // Récupération des bornes sélectionnées et ajout dans le SR.
-//        final Object res = dialog.showAndWait().get();
-//        if(ButtonType.OK.equals(res)){
-//            final ObservableList<BorneDigue> selectedItems = bornesView.getSelectionModel().getSelectedItems();
-//            for(BorneDigue bd : selectedItems){
-//                addBorneToSR(bd);
-//            }
-//        }
-//    }
-
-    private void startCreateObjet(ActionEvent evt){
+    void startCreateObjet(ActionEvent evt){
         if(mode.get().equals(EditModeObjet.CREATE_OBJET)){
             //on retourne on mode edition
             mode.set(EditModeObjet.EDIT_OBJET);
@@ -324,49 +251,6 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
             mode.set(EditModeObjet.CREATE_OBJET);
         }
     }
-
-    /**
-     * Création d'un élément
-     *
-     * @param geom
-     */
-    public abstract void createObjet(final Point geom) ; //uniquement un point ici, on veut pouvoir éditer un segment!
-
-//        throw new UnsupportedOperationException("Unsupported yet.");
-//
-//        // Formulaire de renseignement du libellé de la borne.
-//        final TextInputDialog dialog = new TextInputDialog("");
-//        dialog.getEditor().setPromptText("borne ...");
-//        dialog.setTitle("Nouvelle borne");
-//        dialog.setGraphic(null);
-//        dialog.setHeaderText("Libellé de la nouvelle borne");
-//
-//        final Optional<String> opt = dialog.showAndWait();
-//        if(!opt.isPresent() || opt.get().isEmpty()) return;
-//
-//        //creation de la borne
-//        final String borneLbl = opt.get();
-//
-//        // On vérifie que le libellé renseigné pour la borne ne fait pas partie des libellés utilisés par le SR élémentaire.
-//        if(SirsCore.SR_ELEMENTAIRE_START_BORNE.equals(borneLbl) || SirsCore.SR_ELEMENTAIRE_END_BORNE.equals(borneLbl)){
-//            final Alert alert = new Alert(Alert.AlertType.ERROR, "Le libellé de borne \""+borneLbl+"\" est réservé au SR élémentaire.", ButtonType.CLOSE);
-//            alert.setResizable(true);
-//            alert.showAndWait();
-//            return;
-//        }
-//
-//        final BorneDigue borne = session.getRepositoryForClass(BorneDigue.class).create();
-//        borne.setLibelle(borneLbl);
-//        borne.setGeometry(geom);
-//        session.getRepositoryForClass(BorneDigue.class).add(borne);
-//        final TronconDigue tr = tronconProp.get();
-//        if (tr != null) {
-//            tr.getBorneIds().add(borne.getId());
-//        }
-//
-//        // Ajout de la borne au SR.
-//        addBorneToSR(borne);
-//    }
 
     /**
      * Open a {@link ListView} to allow user to select one or more {@link BorneDigue}
@@ -381,101 +265,12 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
     @FXML
     abstract void deleteObjets(ActionEvent e);
 
-//        throw new UnsupportedOperationException("Unsupported yet.");
-//        final ListView<BorneDigue> borneList = buildObjetList(null);
-//        if (borneList == null) return;
-//
-//        final Stage stage = new Stage();
-//        stage.setTitle("Sélectionnez les bornes à supprimer");
-//        stage.initModality(Modality.WINDOW_MODAL);
-//        stage.initOwner(this.getScene().getWindow());
-//
-//        final Separator blankSpace = new Separator();
-//        blankSpace.setVisible(false);
-//
-//        final Button cancelButton = new Button("Annuler");
-//        cancelButton.setCancelButton(true);
-//        cancelButton.setOnAction(event -> stage.hide());
-//        final Button deleteButton = new Button("Supprimer");
-//        deleteButton.disableProperty().bind(borneList.getSelectionModel().selectedItemProperty().isNull());
-//
-//        final HBox buttonBar = new HBox(10, blankSpace, cancelButton, deleteButton);
-//        buttonBar.setPadding(new Insets(5));
-//        buttonBar.setAlignment(Pos.CENTER_RIGHT);
-//        final VBox content = new VBox(borneList, buttonBar);
-//
-//        stage.setScene(new Scene(content));
-//
-//        deleteButton.setOnAction(event -> {
-//            final Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, "Attention, les bornes séléctionnées seront effacées définitivement. Si elles sont utilisées par un système de repérage, cela entrainera le recalcul des positions liées à ce dernier. Continuer ?", ButtonType.NO, ButtonType.YES);
-//            confirmation.setResizable(true);
-//            final ButtonType userDecision = confirmation.showAndWait().orElse(ButtonType.NO);
-//            if (ButtonType.YES.equals(userDecision)) {
-//                final BorneDigue[] selectedItems = borneList.getSelectionModel().getSelectedItems().toArray(new BorneDigue[0]);
-//                if (checkObjetSuppression(selectedItems)) {
-//                    final TaskManager.MockTask deletor = new TaskManager.MockTask("Suppression de bornes", () -> {
-//                        InjectorCore.getBean(BorneDigueRepository.class).remove(selectedItems);
-//                    });
-//
-//                    deletor.setOnSucceeded(evt -> Platform.runLater(() -> borneList.getItems().removeAll(selectedItems)));
-//                    deletor.setOnFailed(evt -> Platform.runLater(() -> GeotkFX.newExceptionDialog("Une erreur est survenue lors de la suppression des bornes.", deletor.getException()).show()));
-//                    content.disableProperty().bind(deletor.runningProperty());
-//
-//                    TaskManager.INSTANCE.submit(deletor);
-//                }
-//            }
-//        });
-//
-//        stage.show();
-//    }
 
-    /**
-     * Detect if any available SR would be emptied if input {@link BorneDigue}s
-     * were deleted from database. If it's the case, we ask user to confirm his
-     * will to remove them.
-     * @param bornes Bornes to delete.
-     * @return True if we can proceed to borne deletion, false if not.
-     */
-//    public boolean checkObjetSuppression(final BorneDigue... bornes) {
-
-//        throw new UnsupportedOperationException("Unsupported yet.");
-//        final HashSet<String> borneIds = new HashSet<>();
-//        for (final BorneDigue bd : bornes) {
-//            borneIds.add(bd.getId());
-//        }
-//
-//        // Find all Sr which would be emptied by suppression of input bornes.
-//        FilteredList<SystemeReperage> emptiedSrs = uiSrComboBox.getItems().filtered(sr
-//                -> sr.systemeReperageBornes.filtered(srb -> !borneIds.contains(srb.getBorneId())).isEmpty()
-//        );
-//
-//        if (emptiedSrs.isEmpty()) {
-//            return true;
-//        }
-//
-//        final StringBuilder msg = new StringBuilder("La suppression des bornes séléctionnées va entièrement vider les systèmes de repérage suivants :");
-//        for (final SystemeReperage sr : emptiedSrs) {
-//            msg.append(System.lineSeparator()).append(uiSrComboBox.getConverter().toString(sr));
-//        }
-//        msg.append(System.lineSeparator()).append("Voulez-vous tout-de-même supprimer ces bornes ?");
-//
-//        final Alert alert = new Alert(Alert.AlertType.WARNING, msg.toString(), ButtonType.NO, ButtonType.YES);
-//        alert.setResizable(true);
-//        return ButtonType.YES.equals(alert.showAndWait().orElse(ButtonType.NO));
-//    }
-
-
-//    void tronconChanged(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
     void tronconChanged(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
 
         if (oldValue != null) {
             save(oldValue);
         }
-
-//        if(newValue!=null) {
-//            mode.set(EditModeObjet.NONE);
-//        }
-
 
         if (newValue == null) {
             uiObjetTable.setItems(FXCollections.emptyObservableList());
@@ -497,63 +292,6 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
      * TABLE UTILITIES
      */
 
-//    void updateObjetTable(ObservableValue<? extends T> observable, T oldValue, T newValue) {
-//        throw new UnsupportedOperationException("Unsupported updateObjetTable yet.");
-////        if (oldValue != null) {
-////            save(oldValue, null);
-////        }
-////
-////        if (newValue == null) {
-////            uiObjetTable.setItems(FXCollections.emptyObservableList());
-////        } else {
-////            final EditModeObjet current = mode.get();
-////            if (current.equals(EditModeObjet.CREATE_OBJET) || current.equals(EditModeObjet.EDIT_OBJET)) {
-////                //do nothing
-////            } else {
-////                mode.set(EditModeObjet.EDIT_OBJET);
-////            }
-////
-////            // By default, we'll sort bornes from uphill to downhill, but alow user to sort them according to available table columns.
-////            final Comparator defaultComparator = defaultSRBComparator.get();
-////            final SortedList sortedItems;
-////            if (defaultComparator != null) {
-////                sortedItems = newValue.getSystemeReperageBornes().sorted(defaultComparator).sorted();
-////            } else {
-////                sortedItems = newValue.getSystemeReperageBornes().sorted();
-////            }
-////
-////            sortedItems.comparatorProperty().bind(uiObjetTable.comparatorProperty());
-////            uiObjetTable.setItems(sortedItems);
-////        }
-//    }
-
-
-    /**
-     * Colonne de suppression d'une borne d'un système de repérage.
-     */
-    private class DeleteColumn extends SimpleButtonColumn<Element, Element> {
-
-        public DeleteColumn() {
-            super(GeotkFX.ICON_UNLINK,
-                    (TableColumn.CellDataFeatures<Element, Element> param) -> new SimpleObjectProperty<>(param.getValue()),
-                    (Element t) -> true,
-                    new Function<Element, Element>() {
-
-                        public Element apply(Element srb) {
-                            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression?",
-                                    ButtonType.NO, ButtonType.YES);
-                            alert.setResizable(true);
-                            final ButtonType res = alert.showAndWait().get();
-                            if (ButtonType.YES == res) {
-//                                saveSR.set(systemeReperageProperty().get().getSystemeReperageBornes().remove(srb));
-                            }
-                            return null;
-                        }
-                    },
-                    "Enlever du système de repérage"
-            );
-        }
-    }
 
 
     /**

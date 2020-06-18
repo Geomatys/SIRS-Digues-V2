@@ -105,12 +105,6 @@ import static org.geotoolkit.referencing.LinearReferencing.projectReference;
  */
 public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
 
-//    public static enum EditModeObjet implements EditMode {
-//        PICK_TRONCON ,
-//        EDIT_BORNE (EditModeObjet.EDIT_OBJET),
-//        CREATE_BORNE (EditModeObjet.CREATE_OBJET),
-//        NONE (EditModeObjet.NONE)
-//    };
 
 
     @FXML Button uiAddObjet;
@@ -118,7 +112,6 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
     @FXML private CheckBox uiDefaultSRCheckBox;
     @FXML private Button uiAddSr;
     @FXML private Button uiDeleteSR;
-//    @FXML private FXTableView<SystemeReperageBorne> uiObjetTable;
     @FXML Button uiProject;
 
 
@@ -134,7 +127,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
     private final ObjectBinding<Comparator<SystemeReperageBorne>> defaultSRBComparator;
 
     public FXSystemeReperagePane(FXMap map, final String typeName) {
-        super(map, typeName, BorneDigue.class, false, false);
+        super(map, typeName, BorneDigue.class, false);
 
         uiObjetTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
@@ -401,7 +394,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
      *
      * @param geom
      */
-    @Override
+//    @Override
     public final void createObjet(final Point geom){
 
         // Formulaire de renseignement du libellé de la borne.
@@ -745,7 +738,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
      */
     private class SRBDeleteColumn extends SimpleButtonColumn<SystemeReperageBorne, SystemeReperageBorne> {
 
-        public SRBDeleteColumn() {
+        SRBDeleteColumn() {
             super(GeotkFX.ICON_UNLINK,
                     (TableColumn.CellDataFeatures<SystemeReperageBorne, SystemeReperageBorne> param) -> new SimpleObjectProperty<>(param.getValue()),
                     (SystemeReperageBorne t) -> true,
