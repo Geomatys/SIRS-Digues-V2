@@ -712,6 +712,9 @@ public class PojoTable extends BorderPane implements Printable {
                 final Optional<ButtonType> res = alert.showAndWait();
                 if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                     deletePojos(elements);
+                    if (uiFicheMode.isSelected())  {
+                        updateFiche();
+                    }
                 }
             } else {
                 final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée sélectionnée. Pas de suppression possible.");
@@ -784,8 +787,10 @@ public class PojoTable extends BorderPane implements Printable {
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 if (newValue) {
                     uiTable.getSelectionModel().selectedIndexProperty().addListener(selectedIndexListener);
+                    uiTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
                 } else {
                     uiTable.getSelectionModel().selectedIndexProperty().removeListener(selectedIndexListener);
+                    uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
                 }
                 updateView();
             }
