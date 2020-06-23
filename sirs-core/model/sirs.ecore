@@ -411,6 +411,8 @@
         eType="#//VoieAcces" eOpposite="#//VoieAcces/prestationIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageFranchissementIds"
         upperBound="-1" eType="#//OuvrageFranchissement" eOpposite="#//OuvrageFranchissement/prestationIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="globalPrestationIds" upperBound="-1"
+        eType="#//GlobalPrestation" eOpposite="#//GlobalPrestation/prestationIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PositionDocument" eSuperTypes="#//AbstractPositionDocumentAssociable">
     <eAnnotations source="couchDBDocument"/>
@@ -650,6 +652,8 @@
         eType="#//Desordre" eOpposite="#//Desordre/voieAccesIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/voieAccesIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageVoirieIds" upperBound="-1"
+        eType="#//OuvrageVoirie" eOpposite="#//OuvrageVoirie/voieAccesIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="VoieDigue" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -681,6 +685,8 @@
         eType="#//Desordre" eOpposite="#//Desordre/ouvrageVoirieIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/ouvrageVoirieIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voieAccesIds" upperBound="-1"
+        eType="#//VoieAcces" eOpposite="#//VoieAcces/ouvrageVoirieIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="StationPompage" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -1611,8 +1617,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
-        eType="#//Prestation"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="intervenantsIds" upperBound="-1"
         eType="#//Contact"/>
@@ -1641,6 +1645,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typePrestationId" eType="#//RefPrestation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation" eOpposite="#//Prestation/globalPrestationIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AvecObservations" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="AvecPrestations" abstract="true" interface="true"/>
