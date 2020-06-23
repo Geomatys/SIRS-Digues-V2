@@ -360,6 +360,7 @@ else if (helper.isParcelleVegetation()){
             if(eRef.isUnique() && eRef.getEOpposite()!=null && eRef.getEOpposite().isMany()) {
 %>
         // Gestion réciproque de l'association 1-N
+        // WARNING Me semble buggué TODO s'assurer du retour notament de l'ajout d'un écouteur pour prendre en compte les modifications (exemple suppression) du côté N de la relation.
         ui_<%= eRef.getName()  %>.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -380,7 +381,7 @@ else if (helper.isParcelleVegetation()){
                         <%= eRef.getEOpposite().getName()  %>.remove(element.getId());
 
                         // Mise à jour de l'entité précédemment sélectionnée
-                        Injector.getSession().getRepositoryForClass(EvenementHydraulique.class).update(<%= Helper.lcFirst(eRef.getEReferenceType().getName())  %>);
+                        Injector.getSession().getRepositoryForClass(<%= eRef.getEReferenceType().getName()  %>.class).update(<%= Helper.lcFirst(eRef.getEReferenceType().getName())  %>);
                     }
 
                     /*
@@ -396,12 +397,12 @@ else if (helper.isParcelleVegetation()){
 
                         // Ajout de l'identifiant de l'élément courant dans la liste des identifiants de l'entité nouvellement sélectionnée
                         final ObservableList<String> <%= eRef.getEOpposite().getName()  %> = <%= Helper.lcFirst(eRef.getEReferenceType().getName())  %>.get<%= Helper.ucFirst(eRef.getEOpposite().getName())  %>();
-                        if(!<%= eRef.getEOpposite().getName()  %>.contains(newPreview.getElementId())){
+                        if(!<%= eRef.getEOpposite().getName()  %>.contains(element.getId())){
                             <%= eRef.getEOpposite().getName()  %>.add(element.getId());
                         }
 
                         // Mise à jour de l'entité précédemment sélectionnée
-                        Injector.getSession().getRepositoryForClass(EvenementHydraulique.class).update(<%= Helper.lcFirst(eRef.getEReferenceType().getName())  %>);
+                        Injector.getSession().getRepositoryForClass(<%= eRef.getEReferenceType().getName()  %>.class).update(<%= Helper.lcFirst(eRef.getEReferenceType().getName())  %>);
                     }
                 }
             }

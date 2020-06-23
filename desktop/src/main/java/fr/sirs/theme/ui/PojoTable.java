@@ -1606,6 +1606,7 @@ public class PojoTable extends BorderPane implements Printable {
         final int index;
         if (uiFicheMode.isSelected() && (index = uiTable.getItems().indexOf(pojo)) >= 0) {
             uiTable.getSelectionModel().select(index);
+            updateFiche();
         } else {
             editElement(pojo, editionPredicate);
         }
