@@ -62,8 +62,8 @@ public class PhotoImport extends ScrollPane {
         downloadPane.getTronconIds().addListener((o, old, tronconsIds) -> photoDestination.update(tronconsIds));
 
         final PhotoPurge photoPurge = new PhotoPurge(executor, session);
-        uiImportGridPane.add(photoDestination, 0, 0);
-        uiImportGridPane.add(downloadPane,     1, 0);
+        uiImportGridPane.add(downloadPane,     0, 0);
+        uiImportGridPane.add(photoDestination, 1, 0);
         uiImportGridPane.add(prefixPane,       0, 1);
         uiImportGridPane.add(photoPurge,       1, 1);
     }

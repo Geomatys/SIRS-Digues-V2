@@ -21,7 +21,7 @@
                <content>
                   <VBox prefHeight="250.0" prefWidth="467.0">
                      <children>
-                        <Hyperlink prefHeight="16.0" minWidth="250" prefWidth="300" text="Tronçons -&gt; chemin associé (aide)" onAction="#printHelp"/>
+                        <Hyperlink prefHeight="16.0" minWidth="250" prefWidth="300" text="Tronçon -&gt; chemin associé (aide)" onAction="#printHelp"/>
                         <ListView fx:id="uiTronconList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="100.0" minWidth="0.0" prefHeight="200.0" />
                         <Label prefHeight="38.0" prefWidth="345.0" text="Choix du répertoire de destination pour la sélection :">
                            <padding>

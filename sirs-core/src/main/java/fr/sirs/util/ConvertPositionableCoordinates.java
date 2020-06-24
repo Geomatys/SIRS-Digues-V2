@@ -240,7 +240,7 @@ public class ConvertPositionableCoordinates {
 
         } catch (RuntimeException re) {
             SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de géométrie depuis les coordonnées linéaires du positionable :\n"
-                    + ((positionableWithLinearCoord==null)?"":positionableWithLinearCoord.getDesignation()), re);
+                    + ((positionableWithLinearCoord==null)?"positionableWithLinearCoord null":positionableWithLinearCoord.getDesignation()), re);
 
         }
         return false;

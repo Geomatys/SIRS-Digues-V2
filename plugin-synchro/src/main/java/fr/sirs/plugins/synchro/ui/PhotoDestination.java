@@ -72,9 +72,6 @@ public class PhotoDestination extends StackPane {
     public PhotoDestination(final Session session) {
         SIRS.loadFXML(this);
 
-//        pathSelector=new FXTronconPathSelector();
-//        pathSelector.setPhotoDestination(this);
-
         tronconRepository = (TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class);
 
         final BooleanBinding noRootConfigured = rootDirProperty.isNull();
@@ -93,7 +90,6 @@ public class PhotoDestination extends StackPane {
             return root.resolve(subDir);
 
         }, rootDirProperty, subDirProperty);
-//        }, rootDirProperty, subDirProperty, pathSelector.getPhotoDestination());
 
         destination.addListener(this::destinationChanged);
 
@@ -237,8 +233,11 @@ public class PhotoDestination extends StackPane {
     }
 
     public void update(Set<String> tronconsIds) {
-
-        pathSelector.updateTronconList(new ArrayList(tronconsIds));
+        if (tronconsIds != null) {
+            pathSelector.updateTronconList(new ArrayList(tronconsIds));
+        } else {
+            pathSelector.updateTronconList(new ArrayList()); //On set une liste vide pour retirer les précédent tronçons s'il y en a.
+        }
     }
 
 }

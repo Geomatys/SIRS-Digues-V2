@@ -362,6 +362,7 @@ public class AttachmentUtilities {
                 return new AttachmentsSizeAndTroncons(count, size, tronconIds);
 
             } catch (RuntimeException e) {
+                SIRS.LOGGER.log(Level.WARNING, "Exception lors de l'estimation de la taille des photos à importer et des tronçons d'appartenance.", e);
                 if (e.getCause() instanceof InterruptedException) {
                     throw (InterruptedException) e.getCause();
                 } else {
