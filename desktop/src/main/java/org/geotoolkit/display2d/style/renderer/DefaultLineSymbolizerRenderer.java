@@ -19,6 +19,7 @@ package org.geotoolkit.display2d.style.renderer;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
+import fr.sirs.ui.Growl;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
@@ -288,7 +289,13 @@ public class DefaultLineSymbolizerRenderer extends AbstractSymbolizerRenderer<Ca
                 j2dShapes = projectedGeometry.getDisplayGeometryJTS();
                 if (j2dShapes == null) throw new NullPointerException();
             } catch (TransformException | NullPointerException ex) {
-                LOGGER.log(Level.WARNING, "Error while accesing geometry.",ex);
+                LOGGER.log(Level.INFO, "Erreur while selecting an element on the map.", ex);
+                //**** Carefull the following code use a SIRS' classe **********
+                // To remove if deplaced in geotoolkit.
+                final Growl growl = new Growl(Growl.Type.WARNING, "Erreur lors de la sélection d'un élément.\n Rappel : vérifier que l'affichage des positions réelles est désactivé.");
+                growl.showAndFade();
+                //**************************************************************
+
                 return false;
             }
 

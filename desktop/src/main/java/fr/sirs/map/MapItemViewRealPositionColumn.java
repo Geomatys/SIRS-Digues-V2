@@ -83,26 +83,12 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
          * Image view contained in the cell.
          */
         private final ImageView cellContent = new ImageView();
-        private final SimpleBooleanProperty isRealPositionVisible = new SimpleBooleanProperty(false);
 
 
         public ViewRealPositionCell() {
             setOnMouseClicked(this::mouseClicked);
-            itemProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            itemProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> setLogoTo(newValue));
 
-                setGraphic(null);
-                if(newValue!= null) {
-                    if (!newValue) { //Should never be null
-                        setTooltip(REAL_POSITION_UNVISIBLE_TOOLTIP);
-                        cellContent.setImage(ICON_REAL_POSITION_UNVISIBLE);
-                    } else { //Should never be null
-                        setTooltip(REAL_POSITION_VISIBLE_TOOLTIP);
-                        cellContent.setImage(ICON_REAL_POSITION_VISIBLE);
-                    }
-                    setGraphic(cellContent);
-                }
-            });
-            itemProperty().setValue(Boolean.FALSE);
         }
 
         private void mouseClicked(MouseEvent event){
@@ -119,6 +105,24 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
                 SIRS.LOGGER.warning(e.getMessage());
             }
         }
+
+        private void setLogoTo(final Boolean visible){
+                setGraphic(null);
+                if(visible!= null) {
+                    if (!visible) { //Should never be null
+                        setTooltip(REAL_POSITION_UNVISIBLE_TOOLTIP);
+                        cellContent.setImage(ICON_REAL_POSITION_UNVISIBLE);
+                    } else { //Should never be null
+                        setTooltip(REAL_POSITION_VISIBLE_TOOLTIP);
+                        cellContent.setImage(ICON_REAL_POSITION_VISIBLE);
+                    }
+                    setGraphic(cellContent);
+                } else {
+//                   this.setVisible(false);
+                   setTooltip( new Tooltip("Impossible d'afficher la position \"réelle\" pour un répertoire du contexte cartographique."));
+                   cellContent.setImage(null);
+                }
+            }
 
         @Override
         protected void updateItem(Boolean item, boolean empty) {
@@ -140,8 +144,8 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
 
 
             if (maplayer instanceof CollectionMapLayer) {
-                CollectionMapLayer collectionmaplayer = (CollectionMapLayer) maplayer;
-                Collection col = collectionmaplayer.getCollection();
+                final CollectionMapLayer collectionmaplayer = (CollectionMapLayer) maplayer;
+                final Collection col = collectionmaplayer.getCollection();
                 if(!((col == null) || (col.isEmpty()))){
                     Iterator iterator = col.iterator();
                     Object tested;
@@ -154,7 +158,6 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
                                     appliable = true;
                                 }
                             }
-
                             break;
                         }
                     }
@@ -167,6 +170,12 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
                 return;
             }
 
+            if(STYLE_MAP.containsKey(maplayer) && visible) {
+                Growl growl = new Growl(Growl.Type.INFO, "Les positions réelles associées à la couche cartographique ont déjà été affichées.");
+                growl.showAndFade();
+                return;
+            }
+
 
             MutableStyle currentStyle = maplayer.getStyle();
             final List<MutableFeatureTypeStyle> fts = currentStyle.featureTypeStyles();
@@ -174,7 +183,7 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
             if (fts != null) {
 
                 if(visible) {
-                    STYLE_MAP.put(maplayer, fts);
+                    STYLE_MAP.put(maplayer, new ArrayList<>(fts));
                     final Stream<Color> colors = tryFindColorFromPrevious(currentStyle);
                     final Color color = colors
                             .filter(c -> !(c.equals(Color.BLACK) || c.equals(Color.WHITE))) //Borders and real positions' items contain black and white colors so we ignore it.
@@ -186,30 +195,28 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
                      * the rule but not for the removal. Then we choose to re-create
                      * the full Style.
                      */
-                    maplayer.setStyle(CorePlugin.createDefaultStyle(color, null, true));
+//                    maplayer.setStyle(CorePlugin.createDefaultStyle(color, null, true));
+                    maplayer.setStyle(CorePlugin.createRealPositionStyle(color));
                 } else {
 
                     final MutableStyle style = SF.style();
-                    style.featureTypeStyles().addAll(new ArrayList<>(STYLE_MAP.get(maplayer)));
+                    style.featureTypeStyles().addAll(STYLE_MAP.get(maplayer));
                     maplayer.setStyle(style);
 
-//                    maplayer.setStyle(STYLE_MAP.get(maplayer));
                     STYLE_MAP.remove(maplayer);
-//                    removeRule(fts, "start");
-//                    removeRule(fts, "end");
                 }
 
             }
             maplayer.setSelectionStyle(CorePlugin.createDefaultSelectionStyle(visible));
 
         } else {
+
             for (final MapItem child : target.items()) {
                 setRealPositionVisible(child, visible);
             }
         }
     }
 
-//    private static Color tryFinfColorFromPrevious(final List<MutableFeatureTypeStyle> ftsList) {
     /**
      * Try to find colors used to define the input {@link Style}.
      * Only rgb components are assesd here.

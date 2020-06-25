@@ -59,6 +59,7 @@ import fr.sirs.core.model.OuvrageVoirie;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.PositionProfilTravers;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProfilLong;
@@ -127,7 +128,6 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
 import org.geotoolkit.filter.DefaultLiteral;
-import org.geotoolkit.filter.function.other.IfThenElseFunction;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -179,6 +179,20 @@ public class CorePlugin extends Plugin {
     public static final String BORNE_LAYER_NAME = "Bornes";
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
+
+    /**
+     * Expression renvoyant un segment à partir des positions ponctuelles
+     * de début et de fin de l'élément {@link Positionable} sur lequel
+     * l'expression s'applique.
+     */
+    static final Expression POINTS_TO_LINE   = new PointsToLine(FF.property(SirsCore.POSITION_DEBUT_FIELD),  FF.property(SirsCore.POSITION_FIN_FIELD));
+
+    /**
+     * Expression renvoyant le centroïd du segment formé par les positions
+     * ponctuelles de début et de fin de l'élément {@link Positionable} sur
+     * lequel l'expression s'applique.
+     */
+    private static final Expression POINTS_TO_CENTER = new PointsToCenter(FF.property(SirsCore.POSITION_DEBUT_FIELD),  FF.property(SirsCore.POSITION_FIN_FIELD));
 
     /**
      * Plugin correspondant au desktop et au launcher.
@@ -910,14 +924,21 @@ public class CorePlugin extends Plugin {
         return createDefaultStyle(col, null, false);
     }
 
-    // règle de style pour les points de début et de fin
-    // test et préparation pour SYM-1776
-    public static MutableRule createExactPositinRule(final String name, final String geometryProperty, final Color col, final Expression wellKnownName){
-        return SF.rule(SF.pointSymbolizer(name, geometryProperty, DEFAULT_DESCRIPTION, Units.POINT,
-                SF.graphic(Arrays.asList(SF.mark(wellKnownName, SF.fill(Color.WHITE), SF.stroke(col, 2))),
-                        LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(20), LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT)),
-                SF.textSymbolizer(SF.fill(col), DEFAULT_FONT, SF.halo(Color.WHITE, 1), FF.property("designation"),
-                        StyleConstants.DEFAULT_POINTPLACEMENT, geometryProperty));
+    /**
+     * Création d'un style permettant d'afficher les positions dites "réelles"
+     * de la couleur indiquée par le paramètre.
+     *
+     * @param color : couleur à affecter au style
+     * @return
+     */
+    public static MutableStyle createRealPositionStyle(final Color color) {
+
+        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
+        addRealPositionStyles(fts, color);
+
+        final MutableStyle style = SF.style();
+        style.featureTypeStyles().add(fts);
+        return style;
     }
 
     public static MutableStyle createDefaultStyle(final Color color, final String geometryName, final boolean withRealPosition) {
@@ -975,36 +996,76 @@ public class CorePlugin extends Plugin {
         return style;
     }
 
+    /**
+     * Ajout des règles de styles associées aux positions dites "réelles".
+     * La {@linkplain MutableRule règle} 'short' sert à représenter les éléments
+     * ponctuels; la {@linkplain MutableRule règle} 'long' sert à représenter
+     * les éléments linéaires.
+     * 
+     * @param fts
+     * @param color
+     */
     private static void addRealPositionStyles(final MutableFeatureTypeStyle fts, final Color color) {
         try {
 
+            final MutableRule shortRule = createExactShortRule(SirsCore.POSITION_DEBUT_FIELD, color, StyleConstants.MARK_TRIANGLE);
+            final MutableRule longRule  = createExactLongRule(SirsCore.POSITION_DEBUT_FIELD, SirsCore.POSITION_FIN_FIELD, color, StyleConstants.MARK_TRIANGLE);
 
-                final MutableRule start = createExactPositinRule("start", SirsCore.POSITION_DEBUT_FIELD, color, StyleConstants.MARK_TRIANGLE);
-                final MutableRule end = createExactPositinRule("end", SirsCore.POSITION_FIN_FIELD, color, StyleConstants.MARK_TRIANGLE);
+            longRule.setFilter(
+                    FF.greater(
+                            FF.function("length", FF.property("geometry")),
+                            FF.literal(SirsCore.LINE_MIN_LENGTH)
+                    )
+            );
 
-                final Expression customFun = new PointsToLine(FF.property(SirsCore.POSITION_DEBUT_FIELD),  FF.property(SirsCore.POSITION_FIN_FIELD));
-//                final Expression customFun = new TryApplyRealPosition();
+            shortRule.setFilter(
+                    FF.lessOrEqual(
+                            FF.function("length", FF.property("geometry")),
+                            FF.literal(SirsCore.LINE_MIN_LENGTH)
+                    )
+            );
 
-                final Stroke realLineStroke = SF.stroke(SF.literal(color), LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(5),
-                        STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, new float[]{15.f, 15.f}, LITERAL_ZERO_FLOAT);
+            fts.rules().add(shortRule);
+            fts.rules().add(longRule);
 
-                final LineSymbolizer lineReal = SF.lineSymbolizer("symbol",
-                customFun,
-                DEFAULT_DESCRIPTION,Units.POINT, realLineStroke,LITERAL_ZERO_FLOAT);
+        } catch (Exception e) {
+            SirsCore.LOGGER.log(Level.WARNING, NAME, e);
+        }
+    }
 
-                final MutableRule ruleLineReal = SF.rule(lineReal);
-//                final Filter withRealPosition = FF.not(FF.isNull(customFun));
+    private static PointSymbolizer createExactPointSymbolizer(final String pointName, final String geometryProperty, final Color color, final Expression wellKnownName){
+        return SF.pointSymbolizer(pointName, geometryProperty, DEFAULT_DESCRIPTION, Units.POINT,
+                        SF.graphic(Arrays.asList(SF.mark(wellKnownName, SF.fill(Color.WHITE), SF.stroke(color, 2))),
+                                LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(20), LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT));
+    }
 
-//                ruleLineReal.setFilter(withRealPosition);
-//                start.setFilter(withRealPosition);
-//                end.setFilter(withRealPosition);
+    public static MutableRule createExactLongRule(final String geometryStartProperty, final String geometryEndProperty, final Color color, final Expression wellKnownName){
 
-                fts.rules().add(ruleLineReal);
-                fts.rules().add(start);
-                fts.rules().add(end);
-            } catch (Exception e) {
-                SirsCore.LOGGER.log(Level.WARNING, NAME, e);
-            }
+        final Stroke realLineStroke = SF.stroke(SF.literal(color), LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(5),
+                STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, new float[]{15.f, 15.f}, LITERAL_ZERO_FLOAT);
+
+        final LineSymbolizer lineReal = SF.lineSymbolizer("symbol",
+                POINTS_TO_LINE,
+                DEFAULT_DESCRIPTION, Units.POINT, realLineStroke, LITERAL_ZERO_FLOAT);
+
+        final TextSymbolizer centeredDesignation = SF.textSymbolizer("designation", POINTS_TO_CENTER, DEFAULT_DESCRIPTION, null,
+                FF.property("designation"), DEFAULT_FONT, StyleConstants.DEFAULT_POINTPLACEMENT, SF.halo(Color.WHITE, 2), SF.fill(color));
+
+        return SF.rule(
+                lineReal,
+                createExactPointSymbolizer("start", geometryStartProperty, color, wellKnownName),//Point de départ
+                createExactPointSymbolizer(  "end", geometryEndProperty, color, wellKnownName),//Point de fin
+                centeredDesignation
+        );
+    }
+
+    public static MutableRule createExactShortRule(final String geometryStartProperty, final Color color, final Expression wellKnownName){
+
+        return SF.rule(
+                createExactPointSymbolizer("start", geometryStartProperty, color, wellKnownName),
+                SF.textSymbolizer(SF.fill(color), DEFAULT_FONT, SF.halo(Color.WHITE, 1), FF.property("designation"),
+                        StyleConstants.DEFAULT_POINTPLACEMENT, geometryStartProperty)
+        );
     }
 
     private class ViewFormItem extends MenuItem {

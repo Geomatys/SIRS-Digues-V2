@@ -16,7 +16,7 @@ import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
 /**
- * Try to convert to Points feature's parameters in a {@link LineString}.
+ * Try to convert two Points feature's parameters in a {@link LineString}.
  * If only 1 point is non-null return this point.
  *
  *
@@ -83,7 +83,7 @@ public final class PointsToLine extends AbstractFunction {
         return lineString;
     }
 
-    private static Point getPoint(final Geometry geom){
+    static Point getPoint(final Geometry geom){
         if(geom == null) {
             return null;
         }

@@ -1,109 +1,52 @@
 
 package fr.sirs;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import static fr.sirs.CorePlugin.POINTS_TO_LINE;
+import java.util.logging.Level;
 import org.geotoolkit.filter.function.AbstractFunction;
-import org.geotoolkit.geometry.jts.JTS;
 import org.opengis.filter.expression.Expression;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 /**
- * Try to convert to Points feature's parameters in a {@link LineString}.
- * If only 1 point is non-null return this point.
- *
+ * Try to convert two Points feature's parameters in its {@linkplain Point center}.
  *
  *
  * @author Matthieu Bastianelli (Geomatys)
  * @throw {@link IllegalArgumentException} if one of the parameter is missing.
  * @throw {@link RuntimeException} if fail to convert the 2nd point in the 1st point CRS.
  */
-public final class PointsToLine extends AbstractFunction {
+public final class PointsToCenter extends AbstractFunction {
 
-    private static final String NAME = "PointsToLines";
+    private static final String NAME = "PointsToCenter";
 
-    private static final GeometryFactory GF = new GeometryFactory();
-
-    public PointsToLine(final Expression expr1, final Expression expr2) {
+    public PointsToCenter(final Expression expr1, final Expression expr2) {
         super(NAME, new Expression[] {expr1,expr2}, null);
     }
 
     @Override
     public Object evaluate(final Object feature) {
 
-        final Geometry geom1, geom2;
+        final Object ptsToLine = POINTS_TO_LINE.evaluate(feature);
+        if (ptsToLine instanceof Point) {
+            return ptsToLine;
+        } else if (ptsToLine instanceof LineString) {
 
-        try {
-            geom1 = parameters.get(0).evaluate(feature, Geometry.class);
-            geom2 = parameters.get(1).evaluate(feature, Geometry.class);
-
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid function parameter." + parameters.get(0) + " " + parameters.get(1), e);
-        }
-
-        final Point pt1 = getPoint(geom1);
-        final Point pt2 = getPoint(geom2);
-
-        if (pt1 == null) {
-            if(pt2 == null) {
-                return null;
-            } else {
-                return pt2;
+            final LineString lineString = (LineString) POINTS_TO_LINE.evaluate(feature);
+            if (lineString == null) {
+                return lineString;
             }
-        } else if (pt2 == null) {
-            return pt1;
-        }
+            final Point center = lineString.getCentroid();
+            center.setSRID(lineString.getSRID());
+            center.setUserData(lineString.getUserData());
+            return center;
 
-        final int srid = geom1.getSRID();
-        final Object userData = geom1.getUserData();
-        pt1.setSRID(srid);
-        pt1.setUserData(userData);
-        CoordinateReferenceSystem startCRS = null;
-        try {
-            startCRS = JTS.findCoordinateReferenceSystem(geom1);
-            JTS.convertToCRS(pt2, startCRS);
-        } catch (MismatchedDimensionException | TransformException | FactoryException e) {
-            throw new RuntimeException("Fail to convert the 2nd geometry " + parameters.get(1) + "In the same CRS than the 1st one "+parameters.get(0)+" ;\n srid = "+srid+"\n CRS = "+startCRS, e);
-        }
-
-        final LineString lineString = GF.createLineString(new Coordinate[]{
-            pt1.getCoordinate(),
-            pt2.getCoordinate()
-        });
-        lineString.setSRID(srid);
-        lineString.setUserData(userData);
-
-        return lineString;
-    }
-
-    private static Point getPoint(final Geometry geom){
-        if(geom == null) {
-            return null;
-        }
-        if(geom instanceof LineString){
-            return ((LineString)geom).getStartPoint();
-        }else if(geom instanceof Point){
-            return (Point) ((Point)geom).clone();
-        }else if(geom instanceof Polygon){
-            return getPoint( ((Polygon)geom).getExteriorRing());
-        }else if(geom instanceof GeometryCollection){
-            final int nb = ((GeometryCollection)geom).getNumGeometries();
-            if(nb!=0){
-                return getPoint(((GeometryCollection)geom).getGeometryN(0));
-            }else{
-                 return null;
-            }
-        }else{
+        } else {
+            SIRS.LOGGER.log(Level.WARNING, "Fail to compute center for the assessed feature. Return Null.");
             return null;
         }
     }
+
+
 
 }
 
