@@ -10,12 +10,9 @@ import fr.sirs.SIRS;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.ui.Growl;
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -29,7 +26,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.bean.BeanFeature;
-import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
@@ -37,9 +33,6 @@ import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
 import org.geotoolkit.map.CollectionMapLayer;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.style.MutableFeatureTypeStyle;
-import org.geotoolkit.style.MutableStyle;
-import org.geotoolkit.style.MutableStyleFactory;
 import org.geotoolkit.style.visitor.ListingColorVisitor;
 import org.opengis.style.Style;
 
@@ -59,8 +52,7 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
     private static final Tooltip REAL_POSITION_VISIBLE_TOOLTIP   = new Tooltip("Afficher uniquement les géométries");
     private static final Tooltip REAL_POSITION_UNVISIBLE_TOOLTIP = new Tooltip("Afficher les positions réelles de début et de fin");
 
-    private final static Map<MapLayer, List<MutableFeatureTypeStyle>> STYLE_MAP = new HashMap<>();
-    private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
+    private final static Set<String> LAYERS_IN_REALPOSITION = new HashSet<>();
 
 
     public MapItemViewRealPositionColumn() {
@@ -118,7 +110,6 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
                     }
                     setGraphic(cellContent);
                 } else {
-//                   this.setVisible(false);
                    setTooltip( new Tooltip("Impossible d'afficher la position \"réelle\" pour un répertoire du contexte cartographique."));
                    cellContent.setImage(null);
                 }
@@ -142,17 +133,16 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
             final MapLayer maplayer = (MapLayer) target;
             boolean appliable = false;
 
-
             if (maplayer instanceof CollectionMapLayer) {
                 final CollectionMapLayer collectionmaplayer = (CollectionMapLayer) maplayer;
                 final Collection col = collectionmaplayer.getCollection();
-                if(!((col == null) || (col.isEmpty()))){
+                if (!((col == null) || (col.isEmpty()))) {
                     Iterator iterator = col.iterator();
                     Object tested;
                     while (iterator.hasNext()) {
                         tested = iterator.next();
                         if (tested != null) {
-                            if(tested instanceof Feature) {
+                            if (tested instanceof Feature) {
                                 Object objt = ((Feature) tested).getUserData().get(BeanFeature.KEY_BEAN);
                                 if (objt instanceof Positionable) {
                                     appliable = true;
@@ -164,49 +154,39 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
                 }
             }
 
-            if(!appliable) {
+            if (!appliable) {
                 Growl growl = new Growl(Growl.Type.INFO, "La couche cartographique ne différentie pas la position réelle de la position dite projetée");
                 growl.showAndFade();
                 return;
             }
 
-            if(STYLE_MAP.containsKey(maplayer) && visible) {
+            if (LAYERS_IN_REALPOSITION.contains(maplayer.getName()) && visible) {
                 Growl growl = new Growl(Growl.Type.INFO, "Les positions réelles associées à la couche cartographique ont déjà été affichées.");
                 growl.showAndFade();
                 return;
             }
 
+            if (visible) {
 
-            MutableStyle currentStyle = maplayer.getStyle();
-            final List<MutableFeatureTypeStyle> fts = currentStyle.featureTypeStyles();
+                LAYERS_IN_REALPOSITION.add(maplayer.getName());
 
-            if (fts != null) {
+                final Color color = tryFindColorFromPrevious(maplayer.getStyle());
 
-                if(visible) {
-                    STYLE_MAP.put(maplayer, new ArrayList<>(fts));
-                    final Stream<Color> colors = tryFindColorFromPrevious(currentStyle);
-                    final Color color = colors
-                            .filter(c -> !(c.equals(Color.BLACK) || c.equals(Color.WHITE))) //Borders and real positions' items contain black and white colors so we ignore it.
-                            .findAny()
-                            .orElse(Color.BLACK);
-
-                    /* Following commented code tried to only modificate the rules
+                /* Following commented code tried to only modificate the rules
                      * associated with the real positions. It worked for addition of
                      * the rule but not for the removal. Then we choose to re-create
                      * the full Style.
-                     */
-//                    maplayer.setStyle(CorePlugin.createDefaultStyle(color, null, true));
-                    maplayer.setStyle(CorePlugin.createRealPositionStyle(color));
-                } else {
+                 */
+                maplayer.setStyle(CorePlugin.createRealPositionStyle(color));
+            } else {
 
-                    final MutableStyle style = SF.style();
-                    style.featureTypeStyles().addAll(STYLE_MAP.get(maplayer));
-                    maplayer.setStyle(style);
+                final Color color = tryFindColorFromPrevious(maplayer.getStyle());
+                maplayer.setStyle(CorePlugin.createDefaultStyle(color));
 
-                    STYLE_MAP.remove(maplayer);
-                }
+                LAYERS_IN_REALPOSITION.remove(maplayer.getName());
 
             }
+
             maplayer.setSelectionStyle(CorePlugin.createDefaultSelectionStyle(visible));
 
         } else {
@@ -222,19 +202,25 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
      * Only rgb components are assesd here.
      *
      * @param style
-     * @return {@link Stream} of identified colors. Empty if no color was found.
+     * @return identified colors. {@link Color#BLACK} if no color was found.
      */
-    private static Stream<Color> tryFindColorFromPrevious(final Style style) {
+    private static Color tryFindColorFromPrevious(final Style style) {
         ArgumentChecks.ensureNonNull("MutableFeatureTypeStyles", style);
 
         final ListingColorVisitor visitor = new ListingColorVisitor();
         style.accept(visitor, null);
         final Set<Integer> colors = visitor.getColors();
+        final Stream<Color> colorStream;
         if (colors == null) {
-            return Stream.empty();
+            colorStream = Stream.empty();
         } else {
-            return colors.stream().map(integer -> new Color(integer)); //We don't take into account the alpha component to improve comparisaon with white and black colors
+            colorStream = colors.stream().map(integer -> new Color(integer)); //We don't take into account the alpha component to improve comparisaon with white and black colors
         }
+
+        return colorStream
+                .filter(c -> !(c.equals(Color.BLACK) || c.equals(Color.WHITE))) //Borders and real positions' items contain black and white colors so we ignore it.
+                .findAny()
+                .orElse(Color.BLACK);
 
     }
 

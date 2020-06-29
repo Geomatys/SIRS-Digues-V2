@@ -185,14 +185,14 @@ public class CorePlugin extends Plugin {
      * de début et de fin de l'élément {@link Positionable} sur lequel
      * l'expression s'applique.
      */
-    static final Expression POINTS_TO_LINE   = new PointsToLine(FF.property(SirsCore.POSITION_DEBUT_FIELD),  FF.property(SirsCore.POSITION_FIN_FIELD));
+    private static final PointsToLine POINTS_TO_LINE  = new PointsToLine(FF.property(SirsCore.POSITION_DEBUT_FIELD),  FF.property(SirsCore.POSITION_FIN_FIELD));
 
     /**
      * Expression renvoyant le centroïd du segment formé par les positions
      * ponctuelles de début et de fin de l'élément {@link Positionable} sur
      * lequel l'expression s'applique.
      */
-    private static final Expression POINTS_TO_CENTER = new PointsToCenter(FF.property(SirsCore.POSITION_DEBUT_FIELD),  FF.property(SirsCore.POSITION_FIN_FIELD));
+    private static final Expression POINTS_TO_CENTER = new PointsToCenter(POINTS_TO_LINE);
 
     /**
      * Plugin correspondant au desktop et au launcher.
@@ -1001,7 +1001,7 @@ public class CorePlugin extends Plugin {
      * La {@linkplain MutableRule règle} 'short' sert à représenter les éléments
      * ponctuels; la {@linkplain MutableRule règle} 'long' sert à représenter
      * les éléments linéaires.
-     * 
+     *
      * @param fts
      * @param color
      */

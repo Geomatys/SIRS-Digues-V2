@@ -348,7 +348,7 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
                     return;
                 }
 
-                projectOnTronçon(geometry);
+                projectOnTronçon(geometry, editPane.getTronconFromProperty());
 
                 final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(editedObjet.getClass());
 
@@ -389,9 +389,8 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
          *          *
          * Finallement, 'repaint' la carte.
          */
-        void projectOnTronçon(final Geometry geometry) {
-            // Récupération du tronçon et du SR.
-            final TronconDigue troncon = editPane.getTronconFromProperty();
+        void projectOnTronçon(final Geometry geometry, final TronconDigue troncon) {
+
             if (troncon == null) {
                 displayGrowl(Growl.Type.WARNING, "Tronçon non renseigné.\n Impossible de projeter la géométrie créée.");
                 return;
