@@ -58,7 +58,7 @@ public class EtapesPojoTable extends PojoTable {
     private final CheckBox uiHideRealizedCheckBox = new CheckBox("Masquer les étapes réalisées");
 
     public EtapesPojoTable(final TabPane tabPane, final ObjectProperty<? extends Element> container) {
-        super(EtapeObligationReglementaire.class, "Etapes d'obligations réglementaires", container);
+        super(EtapeObligationReglementaire.class, "Etapes d'obligations réglementaires", container, false);
         // Ajout de la colonne de duplication
         getColumns().add(2, new DuplicateEtapeColumn());
 
@@ -73,6 +73,9 @@ public class EtapesPojoTable extends PojoTable {
             vbox.getChildren().add(vbox.getChildren().size() - 1, uiHideRealizedCheckBox);
             uiHideRealizedCheckBox.setStyle("-fx-text-fill: #FFF");
         }
+        
+        applyPreferences();
+        listenPreferences();
     }
 
     @Override
