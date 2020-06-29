@@ -155,7 +155,7 @@ public class FXCommentPhotoView extends SplitPane {
                     return 1;
                 else if (o2 == null || o2.getDate() == null)
                     return -1;
-                else return o1.getDate().compareTo(o2.getDate());
+                else return o2.getDate().compareTo(o1.getDate());  //Rappel : >0 si date de o2 > date de o1
             };
 
     private final Comparator<AbstractObservation> observationComparator = (o1, o2) -> {
@@ -165,11 +165,11 @@ public class FXCommentPhotoView extends SplitPane {
         if (!o1WithPhoto && !o2WithPhoto) {
             return 0;
         } else if (o1WithPhoto && !o2WithPhoto) {
-            return -2;
-        } else if (o2WithPhoto && !o1WithPhoto) {
             return 2;
+        } else if (o2WithPhoto && !o1WithPhoto) {
+            return -2;
         } else {
-            return o1.getDate().compareTo(o2.getDate());
+            return o2.getDate().compareTo(o1.getDate());
         }
     };
 
@@ -240,7 +240,7 @@ public class FXCommentPhotoView extends SplitPane {
                         } catch (IllegalStateException e) {
                             // Illegal state exception here means no root folder has been configured for photos,
                             // just use the given path for the photo.
-                            SIRS.LOGGER.log(Level.INFO, e.getLocalizedMessage());
+                            SIRS.LOGGER.log(Level.WARNING, e.getLocalizedMessage());
                             return SIRS.getOrLoadImage(Paths.get(selected.getChemin()).toUri().toURL().toExternalForm());
                         }
                     });

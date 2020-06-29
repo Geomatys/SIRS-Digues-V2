@@ -452,6 +452,7 @@ public class DocumentsPane extends GridPane {
                 final Preferences prefs = Preferences.userRoot().node("DocumentPlugin");
                 prefs.put(ROOT_FOLDER, rootPath);
                 importDocButton.disableProperty().set(false);
+                deleteDocButton.disableProperty().unbind();
                 deleteDocButton.disableProperty().set(false);
                 addDocButton.disableProperty().set(false);
                 addFolderButton.disableProperty().set(false);
