@@ -242,10 +242,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="editedGeoCoordinate" ordered="false"
         unique="false" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBooleanObject"
         unsettable="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="approximatePositionDebut"
-        eType="ecore:EDataType jts.ecore#//Point"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="approximatePositionFin"
-        eType="ecore:EDataType jts.ecore#//Point"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Objet" abstract="true" eSuperTypes="#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
