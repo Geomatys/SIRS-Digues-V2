@@ -49,15 +49,16 @@ public class ConvertPositionableCoordinates {
      * coordonnées manquantes de positionables.
      * Renvoie un boolean indiquant si des coordonnées ont été mises à jours.
      */
-    final public static Predicate<Positionable> COMPUTE_MISSING_COORD = positionable -> {
+    final public static Predicate<Positionable> COMPUTE_MISSING_COORD = positionable -> ensureCoordinates(positionable);
 
+    private static boolean ensureCoordinates(final Positionable positionable) {
         try {
             if (positionable == null) {
                 throw new NullPointerException("Null input positionable.");
             }
 
-            final boolean withLinearCoord = checkLinearCoordAndAffectMissing(positionable);
-            final boolean withGeoCoord = checkGeomCoordAndAffectMissing(positionable);
+            boolean withLinearCoord = checkLinearCoordAndAffectMissing(positionable);
+            boolean withGeoCoord = checkGeomCoordAndAffectMissing(positionable);
 
             //Si aucun type de coordonnées n'est présent on renvoie une exception
             if ((!withLinearCoord) && (!withGeoCoord)) {
@@ -65,21 +66,37 @@ public class ConvertPositionableCoordinates {
                 return false;
             }
 
-                // Si les coordonnées sont déjà présentes, aucune modification n'est apportée.
+            // Si les coordonnées sont déjà présentes, aucune modification n'est apportée.
             if ((withLinearCoord) && (withGeoCoord)) {
 
-                if (positionable.getPositionFin() == null) {
-                    positionable.setPositionFin(positionable.getPositionDebut());
+                if (positionable.getGeometry() == null) {
+                    if (positionable.getEditedGeoCoordinate()) {
+                        withLinearCoord = false;
+                    } else {
+                        withGeoCoord = false;
+                    }
+                } else {
+                    if (positionable.getPositionFin() == null) {
+                        positionable.setPositionFin(positionable.getPositionDebut());
+                        return true;
 
-                } else if (positionable.getPositionDebut() == null) {
-                    positionable.setPositionDebut(positionable.getPositionFin());
+                    } else if (positionable.getPositionDebut() == null) {
+                        positionable.setPositionDebut(positionable.getPositionFin());
+                        return true;
+                    }
+                    if(((positionable.getPrDebut() == 0.f) && (positionable.getPrFin() == 0.f) )) {
+                        TronconUtils.computePRs(positionable, InjectorCore.getBean(SessionCore.class));
+                        return true;
+                    }
+                    return false;
                 }
+            }
 
-                //Si seules les coordonnées Linéaires sont présentes on essaie de calculer les coordonnées géo
-            } else if (withLinearCoord) {
+            //Si seules les coordonnées Linéaires sont présentes on essaie de calculer les coordonnées géo
+            if (withLinearCoord) {
                 return computePositionableGeometryAndCoord(positionable);
 
-                //Sinon, on essaie de calculer les coordonnées linéaires à partir des coordonnées géo
+            //Sinon, on essaie de calculer les coordonnées linéaires à partir des coordonnées géo
             } else { //withGeoCoord
                 return computePositionableLinearCoordinate(positionable);
             }
@@ -88,7 +105,7 @@ public class ConvertPositionableCoordinates {
             SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément positionable.", e);
         }
         return false;
-    };
+    }
 
     /**
      * Check if the input Positionable has got linear Coordinates ;
@@ -178,36 +195,6 @@ public class ConvertPositionableCoordinates {
 //    //===============================
 //    //  Compute Geo from Linear.
 //    //===============================
-    /**
-     * Compute current positionable point using linear referencing information
-     * defined in the form. Returned point is expressed with Database CRS.
-     *
-     * Méthode extraite de FXPositionableAbstractLinearMode.java
-     *
-     * @param distance
-     * @param borneProperty
-     * @param amont
-     * @param positionable
-     * @return The point computed from starting borne. If we cannot, we return
-     * null.
-     */
-    public static Point computeGeoFromLinear(final Number distance,
-            final BorneDigue borneProperty, final boolean amont, final Positionable positionable) {
-
-        final TronconDigue t = getTronconFromPositionable(positionable);
-
-        if (distance != null && borneProperty != null && t != null) {
-            //calcul à partir des bornes
-            final Point bornePoint = borneProperty.getGeometry();
-            double dist = distance.doubleValue();
-            if (amont) {
-                dist *= -1;
-            }
-            return LinearReferencingUtilities.computeCoordinate(t.getGeometry(), bornePoint, dist, 0);
-        } else {
-            return null;
-        }
-    }
 
     /**
      * Calcule de la géométrie et des coordonnées d'un positionable à partir de
@@ -216,7 +203,7 @@ public class ConvertPositionableCoordinates {
      * @param positionableWithLinearCoord
      * @return boolean indiquant si des coordonnées ont été mises à jours
      */
-    public static boolean computePositionableGeometryAndCoord(Positionable positionableWithLinearCoord) {
+    public static boolean computePositionableGeometryAndCoord(final Positionable positionableWithLinearCoord) {
         if(!checkLinearCoordAndAffectMissing(positionableWithLinearCoord)){
             throw new IllegalStateException("Try to compute Geometry and Coordinate from positionable without linear coordinates");
         }
@@ -236,6 +223,10 @@ public class ConvertPositionableCoordinates {
 
             // On indique que les coordonnées Géographique du Positionable n'ont pas été éditées.
             positionableWithLinearCoord.setEditedGeoCoordinate(Boolean.FALSE);
+
+            TronconUtils.computePRs(positionableWithLinearCoord,  InjectorCore.getBean(SessionCore.class));
+
+//            pr pas mis à jours
             return true;
 
         } catch (RuntimeException re) {
@@ -280,6 +271,9 @@ public class ConvertPositionableCoordinates {
             final AbstractSIRSRepository<BorneDigue> borneRepo = InjectorCore.getBean(SessionCore.class).getRepositoryForClass(BorneDigue.class);
             final TronconDigue tronconFromPositionable = getTronconFromPositionable(positionableWithGeo);
             final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr, positionableWithGeo);
+            if (tronconFromPositionable != null) {
+                positionableWithGeo.setGeometry(null); // to recompute it
+            }
             final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(positionableWithGeo, tronconFromPositionable, segments);
 
             if ((!startPoint.equals(posInfo.getGeoPointStart())) || (!endPoint.equals(posInfo.getGeoPointEnd()))) {
@@ -291,15 +285,14 @@ public class ConvertPositionableCoordinates {
             //Mise à jour du positionable avec ces coordonnées et l'identifiant du Système de représentation
             posInfo.setPosSRToPositionable(posSR);
 
-            //Calcule des PR (Position Relative) dans le Système de représentation :
-            float computedPR = TronconUtils.computePR(segments, sr, startPoint, borneRepo);
-            positionableWithGeo.setPrDebut(computedPR);
-            // Calcul duPr du point de fin du Positionable si différent du points de départ.
-            if (!startPoint.equals(endPoint)) {
-                computedPR = TronconUtils.computePR(getSourceLinear(sr, positionableWithGeo), sr, endPoint, borneRepo);
+            //Update geometry and PR
+            if (posInfo.getTroncon() != null) {
+                if (posInfo.getGeometry() != null) { //getGeometry try to recompute the geometry if missing.
+                    //Calcule des PR (Position Relative) dans le Système de représentation :
+                    TronconUtils.computePRs(posInfo, InjectorCore.getBean(SessionCore.class));
+                }
             }
-            positionableWithGeo.setPrFin(computedPR);
-
+            
             // On indique que les coordonnées Géographique du Positionable ont été éditées.
             if ((positionableWithGeo.getEditedGeoCoordinate() == null) || (!positionableWithGeo.getEditedGeoCoordinate())) {
                 positionableWithGeo.setEditedGeoCoordinate(Boolean.TRUE);

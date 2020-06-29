@@ -92,14 +92,14 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Create a wrapper for connections on a CouchDb service.
- * 
+ *
  * Warning in order to avoid repetitive authentication, logins are saved by
- * {@link AuthenticationWallet} and {@link SIRSAuthenticator} in a authWallet.json 
- * file. 
- * In order to allow the backup of a valid authentication, this class is 
- * responsible for alerting the {@link SIRSAuthenticator} class of successful 
- * requests by calling {@link SIRSAuthenticator#validEntry(java.net.URL)} with 
- * the requested Url. 
+ * {@link AuthenticationWallet} and {@link SIRSAuthenticator} in a authWallet.json
+ * file.
+ * In order to allow the backup of a valid authentication, this class is
+ * responsible for alerting the {@link SIRSAuthenticator} class of successful
+ * requests by calling {@link SIRSAuthenticator#validEntry(java.net.URL)} with
+ * the requested Url.
  *
  * @author Olivier Nouguier (Geomatys)
  * @author Alexis Manin (Geomatys)
@@ -330,11 +330,11 @@ public class DatabaseRegistry {
                 .socketTimeout(SOCKET_TIMEOUT)
                 .relaxedSSLSettings(true);
 
-                
+
                boolean unPassed=true;
                byte attempt =0;
-        while(unPassed) {                 
-            try {    
+        while(unPassed) {
+            try {
                 couchDbInstance = new StdCouchDb2Instance(builder.build(), SirsPreferences.INSTANCE.getProperty(NODE_NAME));
                 couchDbInstance.getAllDatabases();
                 //Si cette ligne est exécutée, cela signifie que la requête provoquée par getAllDatabases()
@@ -345,7 +345,7 @@ public class DatabaseRegistry {
                 if (++attempt==(byte)3){
                     throw Exceptions.propagate(dbexc);
                 }
-                    
+
             }
         }
     }
@@ -717,7 +717,7 @@ public class DatabaseRegistry {
             try {
                 status = couchDbInstance.replicate(cmd);
                 // Si cette ligne est exécutée, cela signifie que la requête envoyée
-                // a réussie. On demande alors à la classe SIRSAuthenticator.java 
+                // a réussie. On demande alors à la classe SIRSAuthenticator.java
                 // de sauvegarder les identifiants de connection utilisés.
                 SIRSAuthenticator.validEntry(couchDbUrl);
             } catch (DbAccessException e) {

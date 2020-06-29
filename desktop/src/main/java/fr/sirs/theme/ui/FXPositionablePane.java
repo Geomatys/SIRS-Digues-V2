@@ -194,6 +194,7 @@ public class FXPositionablePane extends BorderPane {
                 }
                 if (newValue != null) {
                     newValue.geometryProperty().addListener(geomListener);
+                    ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test(newValue);
 
                     //on active le mode dont le type correspond
                     final String modeName = Preferences.userNodeForPackage(FXPositionableMode.class).get("default", null);

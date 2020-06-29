@@ -22,6 +22,7 @@ import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.ConvertPositionableCoordinates;
@@ -66,18 +67,19 @@ public abstract class AbstractPositionableRepository<T extends Positionable> ext
     @Override
     protected T onLoad(T loaded) {
         loaded = super.onLoad(loaded);
-        final boolean toSave;
+        boolean toSave = false;
         try {
             toSave = ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test(loaded);
-            if (toSave) {
-                update(loaded);
-            }
         } catch (ClassCastException cce) {
             SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément chargé : \n" + loaded.toString(), cce);
         }
 
         if (loaded.getGeometry() == null) {
             updateGeometryAndPRs(loaded);
+        }
+
+        if (toSave) {
+            update(loaded);
         }
 
         return loaded;

@@ -27,8 +27,10 @@ import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Identifiable;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.util.ClosingDaemon;
+import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.util.StreamingIterable;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.WeakReference;
@@ -42,7 +44,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import javafx.collections.ObservableList;
-import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.ektorp.BulkDeleteDocument;
@@ -160,6 +161,9 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     private void checkIntegrity(T entity){
         if(entity instanceof AvecForeignParent){
             if(((AvecForeignParent) entity).getForeignParentId()==null) throw new IllegalArgumentException("L'élément ne peut être enregistré sans élement parent.");
+        }
+        if(entity instanceof Positionable) {
+            ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test((Positionable) entity);
         }
     }
 
