@@ -76,16 +76,11 @@ public class ConvertPositionableCoordinates {
                         withGeoCoord = false;
                     }
                 } else {
-                    if (positionable.getPositionFin() == null) {
-                        positionable.setPositionFin(positionable.getPositionDebut());
-                        return true;
-
-                    } else if (positionable.getPositionDebut() == null) {
-                        positionable.setPositionDebut(positionable.getPositionFin());
-                        return true;
-                    }
-                    if(((positionable.getPrDebut() == 0.f) && (positionable.getPrFin() == 0.f) )) {
+                    if(isZeroPRs(positionable)) {
                         TronconUtils.computePRs(positionable, InjectorCore.getBean(SessionCore.class));
+                        if (isZeroPRs(positionable)) {
+                            return false; //Les PR sont toujours à 0.f et n'ont pas changés
+                        }
                         return true;
                     }
                     return false;
@@ -105,6 +100,17 @@ public class ConvertPositionableCoordinates {
             SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément positionable.", e);
         }
         return false;
+    }
+
+    /**
+     * Tests si les PRs de début et de fin d'un {@link Positionable} NON NULL
+     * sont tous 2 égaux à 0.f.
+     *
+     * @param positionable NON NULL; La nullité ne sera pas testée ici.
+     * @return
+     */
+    private static boolean isZeroPRs(final Positionable positionable) {
+        return (positionable.getPrDebut() == 0.f) && (positionable.getPrFin() == 0.f);
     }
 
     /**
@@ -292,7 +298,7 @@ public class ConvertPositionableCoordinates {
                     TronconUtils.computePRs(posInfo, InjectorCore.getBean(SessionCore.class));
                 }
             }
-            
+
             // On indique que les coordonnées Géographique du Positionable ont été éditées.
             if ((positionableWithGeo.getEditedGeoCoordinate() == null) || (!positionableWithGeo.getEditedGeoCoordinate())) {
                 positionableWithGeo.setEditedGeoCoordinate(Boolean.TRUE);
