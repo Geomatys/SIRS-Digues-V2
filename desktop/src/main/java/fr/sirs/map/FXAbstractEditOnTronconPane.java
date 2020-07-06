@@ -21,18 +21,20 @@ package fr.sirs.map;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.LabelComparator;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.ReferenceTableCell;
+import fr.sirs.util.StreamingIterable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -41,6 +43,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -58,6 +61,7 @@ import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.util.StringUtilities;
+import org.geotoolkit.util.collection.CloseableIterator;
 
 /**
  *
@@ -69,7 +73,7 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
 
     @FXML TextField uiTronconLabel;
     @FXML ToggleButton uiPickTroncon;
-    @FXML FXTableView<T> uiObjetTable;
+    @FXML FXTableView<Preview> uiObjetTable;
     @FXML ToggleButton uiCreateObjet;
     @FXML Label typeNameLabel;
 
@@ -166,7 +170,14 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
     }
 
     public ObservableList<T> objetProperties(){
-        return uiObjetTable.getSelectionModel().getSelectedItems();
+        final ObservableList<Preview> selected = uiObjetTable.getSelectionModel().getSelectedItems();
+        if (selected != null) {
+            final String[] ids = selected.stream()
+                    .map(preview -> preview.getDocId())
+                    .toArray(size -> new String[size]);
+            return FXCollections.observableList(repo.get(ids));
+        }
+        return null;
     }
 
     public void save() {
@@ -202,13 +213,16 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
      * @return A list view of all bornes bound to currently selected troncon, or
      * null if no troncon is selected.
      */
-    ListView<T> buildObjetList(final Set<String> toExclude) {
+    ListView<Preview> buildObjetList(final Set<String> toExclude) {
 
         // Construction du composant graphique.
-        final ListView<T> elementsView = new ListView<>();
-        elementsView.setItems(getObjectListFromTroncon(toExclude));
+        final ListView<Preview> elementsView = new ListView<>();
         elementsView.setCellFactory(TextFieldListCell.forListView(new SirsStringConverter()));
         elementsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        final FindObjetsOnTronconTask task = new FindObjetsOnTronconTask(null);
+        TaskManager.INSTANCE.submit(task);
+        task.setOnSucceeded(evt -> elementsView.setItems(task.getValue()));
 
         return elementsView;
     }
@@ -219,20 +233,32 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
      * @param toExclude
      * @return
      */
-    ObservableList<T> getObjectListFromTroncon(final Set<String> toExclude) {
+    ObservableList<Preview> getObjectListFromTroncon(final Set<String> toExclude) {
 
         final TronconDigue troncon = tronconProperty().get();
         if (troncon == null) return null;
 
 //        // Construction de la liste définitive des éléments à afficher.
-        final List<T> elements =repo.getAll().stream()
-                    .filter(elt -> (troncon.getId().equals( ((Objet) elt).getForeignParentId())))
-                    .collect(Collectors.toList());
+//        final List<T> elements =repo.getAll().stream()
+//                    .filter(elt -> (troncon.getId().equals( ((Objet) elt).getForeignParentId())))
+//                    .collect(Collectors.toList());
+        final List<Preview> elementsPreviews = new ArrayList<>();
+        if (repo instanceof AbstractPositionableRepository) {
+            final StreamingIterable byLinearId = ((AbstractPositionableRepository) repo).getByLinearIdStreaming(troncon.getId());
+            try (final CloseableIterator iterator = byLinearId.iterator()) {
+                    while (iterator.hasNext()) {
+                        elementsPreviews.add(Injector.getSession().getPreviews().get(((T)iterator.next()).getId()));
+                    }
+                }
+
+        } else {
+            throw new IllegalStateException("Cast impossible durepository : "+repo+" en AbstractPositionableRepository");
+        }
 
         if (toExclude != null && !toExclude.isEmpty()) {
-            elements.removeIf(elt -> toExclude.contains(elt.getId()));
+            elementsPreviews.removeIf(elt -> toExclude.contains(elt.getDocId()));
         }
-        return FXCollections.observableArrayList(elements);
+        return FXCollections.observableArrayList(elementsPreviews);
     }
 
     /**
@@ -283,7 +309,11 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
                 mode.set(EditModeObjet.EDIT_OBJET);
             }
 
-            uiObjetTable.setItems(getObjectListFromTroncon(null));
+//            uiObjetTable.setItems(getObjectListFromTroncon(null));sc
+
+            final FindObjetsOnTronconTask task = new FindObjetsOnTronconTask(null);
+            TaskManager.INSTANCE.submit(task);
+            task.setOnSucceeded(evt -> uiObjetTable.setItems(task.getValue()));
         }
 
     }
@@ -297,25 +327,25 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
     /**
      * Colonne d'affichage et de mise à jour du nom d'une borne.
      */
-    private static class NameColumn extends TableColumn<Element,Element>{
+    private static class NameColumn extends TableColumn<Preview,Preview>{
 
         public NameColumn() {
             super("Nom");
             setSortable(false);
 
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, Element>, ObservableValue<Element>>() {
+            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Preview, Preview>, ObservableValue<Preview>>() {
                 @Override
-                public ObservableValue<Element> call(TableColumn.CellDataFeatures<Element, Element> param) {
+                public ObservableValue<Preview> call(TableColumn.CellDataFeatures<Preview, Preview> param) {
                     return new SimpleObjectProperty<>(param.getValue());
                 }
             });
 
             final SirsStringConverter sirsStringConverter = new SirsStringConverter();
-            setCellFactory((TableColumn<Element, Element> param) -> {
-                final FXTableCell<Element, Element> tableCell = new FXTableCell<Element, Element>() {
+            setCellFactory((TableColumn<Preview, Preview> param) -> {
+                final FXTableCell<Preview, Preview> tableCell = new FXTableCell<Preview, Preview>() {
 
                     @Override
-                    protected void updateItem(Element item, boolean empty) {
+                    protected void updateItem(Preview item, boolean empty) {
                         super.updateItem(item, empty);
                         if (empty || item == null) {
                             setText(null);
@@ -332,6 +362,26 @@ public abstract class FXAbstractEditOnTronconPane <T extends Objet> extends Bord
             });
 
             setComparator(new LabelComparator());
+        }
+    }
+
+
+    final class FindObjetsOnTronconTask extends Task<ObservableList<Preview>> {
+
+//        final ObservableList<Preview> elementsView;
+//        final ListView<Preview> elementsView;
+        final Set<String> toExclude;
+
+        FindObjetsOnTronconTask(final Set<String> toExclude) {
+//            this.elementsView = elementsView;
+            this.toExclude     = toExclude;
+
+//            elementsView.clear();
+        }
+
+        @Override
+        protected ObservableList<Preview>  call() throws Exception {
+            return getObjectListFromTroncon(toExclude);
         }
     }
 

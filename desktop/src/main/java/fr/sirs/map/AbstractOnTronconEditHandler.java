@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -51,6 +52,7 @@ import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
@@ -180,12 +182,13 @@ public abstract class AbstractOnTronconEditHandler<T extends Element> extends Ab
 
         //fin de l'edition
         dialog.setOnHiding((WindowEvent event) -> {
-            TronconDigue troncon = editPane.getTronconFromProperty();
+            final TronconDigue troncon = editPane.getTronconFromProperty();
             if (troncon != null) {
                 //on recupère la derniere version, la maj des sr entraine la maj des troncons
-                troncon = session.getRepositoryForClass(TronconDigue.class).get(troncon.getDocumentId());
+                final TronconDigue currentTroncon = session.getRepositoryForClass(TronconDigue.class).get(troncon.getDocumentId());
                 //on recalcule les geometries des positionables du troncon.
-                TronconUtils.updatePositionableGeometry(troncon, session);
+                TronconUtils.updateSRElementaireIfExists(currentTroncon, session);
+//                TronconUtils.updatePositionableGeometry(currentTroncon, session); //Coûteux
             }
             editPane.save();
             editPane.reset();

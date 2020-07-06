@@ -104,7 +104,7 @@ public class Previews extends CouchDbRepositorySupport<Preview> implements Docum
     }
 
     @Override
-    public Preview get(String id) {
+    public Preview get(final String id) {
         ArgumentChecks.ensureNonNull("Element ID", id);
         final ViewQuery viewQuery = createQuery(BY_ID).includeDocs(false).key(id);
         final List<Preview> usages = db.queryView(viewQuery, Preview.class);

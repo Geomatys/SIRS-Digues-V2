@@ -44,6 +44,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
  *
@@ -121,16 +122,19 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
     }
 
     private void focusOnTabSelection() {
-        final T tofocusOn = uiObjetTable.getSelectionModel().getSelectedItem();
-        if (tofocusOn != null) {
-            final FXMapTab tab = session.getFrame().getMapTab();
-            tab.getMap().focusOnElement(tofocusOn);
-            tab.show();
+        final Preview selected = uiObjetTable.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            final T tofocusOn = repo.get(selected.getDocId());
+            if (tofocusOn != null) {
+                final FXMapTab tab = session.getFrame().getMapTab();
+                tab.getMap().focusOnElement(tofocusOn);
+                tab.show();
 
-            //On passe en mode mofification pour ne pas créer un nouvel élément:
-            mode.setValue(EditModeObjet.EDIT_OBJET);
-            geometryTypeProperty.setValue(getGeomType());
-            selectedObjetProperty.setValue(tofocusOn);
+                //On passe en mode mofification pour ne pas créer un nouvel élément:
+                mode.setValue(EditModeObjet.EDIT_OBJET);
+                geometryTypeProperty.setValue(getGeomType());
+                selectedObjetProperty.setValue(tofocusOn);
+            }
         }
     }
 
@@ -208,16 +212,12 @@ public class FXObjetEditPane<T extends Objet> extends FXAbstractEditOnTronconPan
                 mode.set(EditModeObjet.EDIT_OBJET);
             }
 
-            // By default, we'll sort bornes from uphill to downhill, but alow user to sort them according to available table columns.
-            ObservableList items;
-            try {
-                items = getObjectListFromTroncon(null);
-            } catch (Exception e) {
-                SIRS.LOGGER.log(Level.WARNING, "Exception lors de la récupération des éléments du tronçon", e);
-                items = null;
-            }
+            final FXAbstractEditOnTronconPane.FindObjetsOnTronconTask task = new FXAbstractEditOnTronconPane.FindObjetsOnTronconTask(null);
+            TaskManager.INSTANCE.submit(task);
+            task.setOnSucceeded(evt -> uiObjetTable.setItems((ObservableList<Preview>) task.getValue()));
+            task.setOnFailed(eh -> SIRS.LOGGER.log(Level.WARNING, "Echec de la tâche de récupération des éléments du tronçon"));
 
-            uiObjetTable.setItems(items);
+
         }
     }
 

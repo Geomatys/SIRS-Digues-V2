@@ -65,7 +65,6 @@ import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -120,7 +119,7 @@ public class SessionCore implements ApplicationContextAware {
     public ReadOnlyBooleanProperty geometryEditionProperty() {return geometryEditionProperty.getReadOnlyProperty();}
 
     /**
-     * 
+     *
      * @deprecated {@link SessionCore#validDocuments().not()}
      */
     @Deprecated
@@ -154,28 +153,28 @@ public class SessionCore implements ApplicationContextAware {
      */
     @Deprecated
     public Role getRole(){return role.get();}
-    
+
     private final ObjectBinding<Role> roleBinding = new ObjectBinding<Role>(){
-        
+
         {
             bind(utilisateurProperty);
         }
-        
+
         @Override
         protected Role computeValue() {
             if(utilisateurProperty.get()==null) return null;
             return utilisateurProperty.get().getRole();
         }
     };
-    
+
     /**
      * @return un binding indiquant le rôle de l'utilisateur
      */
     public ObjectBinding<Role> roleBinding(){return roleBinding;}
-    
-    
+
+
     private final BooleanBinding adminOrUserOrExtern = new BooleanBinding() {
-            
+
         {
             bind(roleBinding);
         }
@@ -183,49 +182,49 @@ public class SessionCore implements ApplicationContextAware {
         @Override
         protected boolean computeValue() {
             final Role userRole = roleBinding.get();
-            return Role.ADMIN.equals(userRole) 
-                    || Role.USER.equals(userRole) 
+            return Role.ADMIN.equals(userRole)
+                    || Role.USER.equals(userRole)
                     || Role.EXTERN.equals(userRole);
         }
     };
-    
+
     /**
      * @return un binding booléen indiquant si l'utilisateur connecté est administrateur, utilisateur ou externe
      */
     public BooleanBinding adminOrUserOrExtern(){return adminOrUserOrExtern;}
-    
+
     private final StringBinding userIdBinding = new StringBinding() {
         {
             bind(utilisateurProperty);
         }
-        
+
         @Override
         protected String computeValue() {
             if(utilisateurProperty.get()==null) return null;
             return utilisateurProperty.get().getId();
         }
     };
-            
+
     /**
      * @return un binding indiquant l'identifiant de l'utilisateur connecté
      */
     public StringBinding userIdBinding(){return userIdBinding;}
-    
+
     private final BooleanBinding createValidDocuments = new BooleanBinding() {
-        
+
         {
             bind(roleBinding);
         }
-        
+
         @Override
         protected boolean computeValue() {
             final Role userRole = roleBinding.get();
             return Role.ADMIN.equals(userRole) || Role.USER.equals(userRole);
         }
     };
-    
+
     /**
-     * 
+     *
      * @return un binding indiquant si l'utilisateur crée des documents déjà valides.
      * (s'il s'agit d'un administrateur ou d'un utilisateur normal)
      */
@@ -538,7 +537,7 @@ public class SessionCore implements ApplicationContextAware {
         return positionables;
     }
 
-    private static List<Class<? extends Element>> ELEMENT_IMPLS;
+//    private static List<Class<? extends Element>> ELEMENT_IMPLS;
     /**
      * Search in {@link Element} {@link ServiceLoader} for all implementations of
      * a given type.
