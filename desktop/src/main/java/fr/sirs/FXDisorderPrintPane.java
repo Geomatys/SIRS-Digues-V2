@@ -217,15 +217,16 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         });
 
         uiCountProgress.visibleProperty().bind(t.runningProperty());
-        t.setOnRunning(evt -> Platform.runLater(() -> {
-            uiCountLabel.setText(null);
-        }));
 
-        t.setOnSucceeded(evt -> Platform.runLater(() -> {
-            uiCountLabel.setText(String.valueOf(t.getValue()));
-        }));
-
-        t.setOnFailed(evt -> Platform.runLater(() -> {
+        /*
+        * t.setOnSucceeded(evt -> Platform.runLater(() -> {
+        *   uiCountLabel.setText(String.valueOf(t.getValue()));
+        * }));
+        * Platform.runLater ne semble pas nécessaire d'où :
+        */
+        t.setOnRunning(  evt -> uiCountLabel.setText(null));
+        t.setOnSucceeded(evt -> uiCountLabel.setText(String.valueOf(t.getValue())));
+        t.setOnFailed(   evt -> Platform.runLater(() -> {
             new Growl(Growl.Type.ERROR, "Impossible de déterminer le nombre de désordres à imprimer.").showAndFade();
         }));
 

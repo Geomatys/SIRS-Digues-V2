@@ -82,6 +82,7 @@ import fr.sirs.core.model.VoieDigue;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.migration.HtmlRemoval;
 import fr.sirs.migration.upgrade.v2and23.UpgradeLink1NtoNN;
+import fr.sirs.migration.upgrade.v2and23.UpgradePrestationsCoordinates;
 import fr.sirs.migration.upgrade.v2and23.Upgrades1NtoNNSupported;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DocumentTheme;
@@ -1185,6 +1186,7 @@ public class CorePlugin extends Plugin {
             return;
         } else if (fromMajor < 2 || (fromMajor == 2 && fromMinor < 23)) {
             upgradeTasks.add(new UpgradeLink1NtoNN(dbRegistry[0], dbConnector.getDatabaseName(), Upgrades1NtoNNSupported.DESORDRE));
+            upgradeTasks.add(new UpgradePrestationsCoordinates(dbRegistry[0], dbConnector.getDatabaseName(), 2,23));
             findUpgradeTasks(2, 23, dbConnector, upgradeTasks); //Reccursive call to findUpgradeTasks from the 2.23 version of the plugin reached with the previous Task.
             return;
 
