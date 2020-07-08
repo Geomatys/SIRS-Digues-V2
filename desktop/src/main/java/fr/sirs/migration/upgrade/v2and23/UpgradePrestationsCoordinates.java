@@ -79,8 +79,12 @@ public class UpgradePrestationsCoordinates extends Task {
             // Parcours des Prestations et contrôle de leurs coordonnées.
             repository.getAllStreaming()
                     .forEach(prestation -> {
-                        if (UpgradeLink1NtoNN.tryUpgradeCoordinates(prestation, String.format("Prestation : ", prestation))) {
-                            prestationsToUpdate.add(prestation);
+                        if (prestation != null) {
+                            final String elementInfo = String.format("Prestation parcourue : %s   -> %s ", prestation.getClass().getCanonicalName(), prestation.getDesignation());
+                            updateMessage(elementInfo);
+                            if (UpgradeLink1NtoNN.tryUpgradeCoordinates(prestation, String.format("Prestation : ", prestation))) {
+                                prestationsToUpdate.add(prestation);
+                            }
                         }
                     });
 

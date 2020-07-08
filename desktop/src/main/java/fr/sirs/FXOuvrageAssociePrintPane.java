@@ -182,17 +182,11 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
         });
 
         uiCountProgress.visibleProperty().bind(t.runningProperty());
-        t.setOnRunning(evt -> Platform.runLater(() -> {
-            uiCountLabel.setText(null);
-        }));
+        t.setOnRunning(evt -> uiCountLabel.setText(null));
 
-        t.setOnSucceeded(evt -> Platform.runLater(() -> {
-            uiCountLabel.setText(String.valueOf(t.getValue()));
-        }));
+        t.setOnSucceeded(evt -> uiCountLabel.setText(String.valueOf(t.getValue())));
 
-        t.setOnFailed(evt -> Platform.runLater(() -> {
-            new Growl(Growl.Type.ERROR, "Impossible de déterminer le nombre d'ouvrages à imprimer.").showAndFade();
-        }));
+        t.setOnFailed(evt -> new Growl(Growl.Type.ERROR, "Impossible de déterminer le nombre d'ouvrages à imprimer.").showAndFade());
 
         countTask.set(t);
         TaskManager.INSTANCE.submit(t);

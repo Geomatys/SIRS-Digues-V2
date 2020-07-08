@@ -138,6 +138,9 @@ public class ModuleChecker extends Task<Boolean> {
                 message.append(System.lineSeparator()).append('\t').append(upgrade.toUpgrade.getTitle())
                         .append(" : mise à jour de ").append(upgrade.oldVersion.stringVersion)
                         .append(" vers ").append(conf.getVersionMajor()).append('.').append(conf.getVersionMinor());
+                if((conf.getVersionMajor()==2)&&(conf.getVersionMinor()==23)) {
+                    message.append("\nMise à jour importante, il est conseillé d'effectuer une copie (sauvegarde) de la base de données avant sa mise à jour.\n");
+                }
         }
         message.append(System.lineSeparator()).append(System.lineSeparator()).append("La mise à jour nécessite l'arrêt des synchronisations en cours sur la base. Confirmer ?");
 
