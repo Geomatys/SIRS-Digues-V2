@@ -59,13 +59,12 @@ public class ComputeEnvelopeOnGeometryChange implements ChangeListener<Geometry>
                     final SessionCore session = InjectorCore.getBean(SessionCore.class);
                     if(session==null){
                         SirsCore.LOGGER.log(Level.FINE, "La session n'est pas encore disponible dans le contexte d'application");
-                    }
-                    else{
+                    } else {
                         geometryCRS = session.getProjection();
                     }
                 }
 
-                if(geometryCRS!=null){
+                if (geometryCRS != null) {
                     SirsCore.LOGGER.log(Level.FINE, "calcul d'une enveloppe de géométrie");
                     Envelope envelope2D = JTS.getEnvelope2D(newValue.getEnvelopeInternal(), geometryCRS);
                     if (!Utilities.equalsApproximatively(geometryCRS, CommonCRS.WGS84.normalizedGeographic())) {
@@ -75,8 +74,7 @@ public class ComputeEnvelopeOnGeometryChange implements ChangeListener<Geometry>
                     target.setLongitudeMax(envelope2D.getMaximum(0));
                     target.setLatitudeMin(envelope2D.getMinimum(1));
                     target.setLatitudeMax(envelope2D.getMaximum(1));
-                }
-                else {
+                } else {
                     SirsCore.LOGGER.log(Level.CONFIG, "Aucun CRS trouvé pour mettre à jour l'enveloppe de géométrie");
                 }
             } catch (Exception e) {

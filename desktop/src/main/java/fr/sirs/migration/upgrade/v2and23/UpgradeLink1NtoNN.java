@@ -145,7 +145,8 @@ public final class UpgradeLink1NtoNN extends Task {
                 }
                 repoSide1.update(element);
             } catch (Exception e) {
-                throw new BackingStoreException(e.getCause());
+                LOGGER.log(Level.WARNING, String.format("Impossible de mettre \u00e0 jour l''\u00e9l\u00e9ment suivant :%s id :%s", elementInfo, element.getId()), e);
+//                throw new BackingStoreException(e.getCause());
             }
         } else {
             LOGGER.log(Level.WARNING, "Try tu upgrade a null element.");
