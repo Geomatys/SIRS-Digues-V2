@@ -171,8 +171,7 @@ public class PhotoDownload extends StackPane {
 
         if (uiDateTrigger.isSelected()) {
             final LocalDate since = uiDate.getValue().minusDays(1);
-//            distantPhotos = distantPhotos.filter(photo -> );
-            distantPhotos.map(wrapper -> wrapper.applyFilter(photo -> photo.getDate() != null && since.isBefore(photo.getDate())));
+            distantPhotos = distantPhotos.map(wrapper -> wrapper.applyFilter(photo -> photo.getDate() != null && since.isBefore(photo.getDate())));
         }
 
         final CouchDbConnector connector = session.getConnector();

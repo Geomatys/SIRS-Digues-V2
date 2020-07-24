@@ -146,7 +146,8 @@ public class PhotoFinder implements Supplier<Stream<PhotosTronconWrapper>> {
 
     private Stream getForTroncons(final AbstractPositionableRepository repo) {
         return tronconIds.stream()
-                .flatMap(id -> repo.getByLinearId(id).stream().flatMap(t -> new TronconWrapper(t, Optional.of(id))));
+                .flatMap(id -> repo.getByLinearId(id).stream());
+//                .flatMap(id -> repo.getByLinearId(id).stream().map(t -> new TronconWrapper(t, Optional.of(id))));
     }
 
     private Stream<PhotosTronconWrapper> filter(Stream<PhotoContainerTronconWrapper> containers) {

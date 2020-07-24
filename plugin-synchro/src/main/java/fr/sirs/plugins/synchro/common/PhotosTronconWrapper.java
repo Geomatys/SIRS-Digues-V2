@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  */
 public class PhotosTronconWrapper extends TronconWrapper {
 
-    private final Stream<AbstractPhoto> photosStream;
+    private Stream<AbstractPhoto> photosStream;
 
     PhotosTronconWrapper(final PhotoContainerTronconWrapper photoContainer) {
         super(photoContainer);
@@ -24,12 +24,12 @@ public class PhotosTronconWrapper extends TronconWrapper {
     }
 
     public PhotosTronconWrapper applyUnaryOperator(UnaryOperator<Stream<AbstractPhoto>> prepocess) {
-        prepocess.apply(photosStream);
+        photosStream = prepocess.apply(photosStream);
         return this;
     }
 
     public PhotosTronconWrapper applyFilter(Predicate<AbstractPhoto> predicate) {
-        photosStream.filter(predicate);
+        photosStream = photosStream.filter(predicate);
         return this;
     }
 

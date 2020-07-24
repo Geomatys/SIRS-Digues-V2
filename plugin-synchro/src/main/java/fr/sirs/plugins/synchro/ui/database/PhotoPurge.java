@@ -104,28 +104,37 @@ public class PhotoPurge extends StackPane {
     }
 
     @FXML
-    void importPhotos(ActionEvent event) {
-        final CouchDbConnector connector = session.getConnector();
-        // Note : incremented in handleResult method.
-        final LongProperty count = new SimpleLongProperty(0);
-        final Function<AbstractPhoto, LongProperty> processor = photo -> {
-            AttachmentUtilities.delete(connector, photo);
-            return count;
-        };
+    void purgePhotos(ActionEvent event) {
 
-        final Task<Void> delete = pool.prepare(processor)
-                .setTarget(getPhotographs())
-                .setWhenComplete(this::handleResult)
-                .build();
+        final Alert ask = new Alert(Alert.AlertType.CONFIRMATION,
+                "Attention, en cliquant sur 'Purger', vous supprimerez toutes les photographies encore présentes dans la base de données",
+                ButtonType.YES, ButtonType.NO);
+        ask.setResizable(true);
+        final ButtonType choice = ask.showAndWait().orElse(ButtonType.NO);
 
-        uiProgressPane.visibleProperty().bind(delete.runningProperty());
-        uiProgressLabel.textProperty().bind(Bindings.createStringBinding(() -> "Images supprimées : "+count.get(), count));
+        if (ButtonType.YES.equals(choice)) {
+            final CouchDbConnector connector = session.getConnector();
+            // Note : incremented in handleResult method.
+            final LongProperty count = new SimpleLongProperty(0);
+            final Function<AbstractPhoto, LongProperty> processor = photo -> {
+                AttachmentUtilities.delete(connector, photo);
+                return count;
+            };
 
-        uiCancel.setOnAction(evt -> delete.cancel(true));
+            final Task<Void> delete = pool.prepare(processor)
+                    .setTarget(getPhotographs())
+                    .setWhenComplete(this::handleResult)
+                    .build();
 
-        delete.setOnSucceeded(evt -> Platform.runLater(() -> askForCompaction(true)));
+            uiProgressPane.visibleProperty().bind(delete.runningProperty());
+            uiProgressLabel.textProperty().bind(Bindings.createStringBinding(() -> "Images supprimées : " + count.get(), count));
 
-        TaskManager.INSTANCE.submit(delete);
+            uiCancel.setOnAction(evt -> delete.cancel(true));
+
+            delete.setOnSucceeded(evt -> Platform.runLater(() -> askForCompaction(true)));
+
+            TaskManager.INSTANCE.submit(delete);
+        }
     }
 
     /**

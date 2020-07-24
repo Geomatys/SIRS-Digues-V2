@@ -245,7 +245,7 @@ public class PhotoExport extends StackPane implements TaskProvider {
                 SIRS.LOGGER.log(Level.WARNING, "Cannot estimate size for photographs to export.", newValue.getException());
                 Platform.runLater(() -> {
                     estimatedSize.set(-1);
-                    new Growl(Growl.Type.ERROR, "Impossible d'estimer la taille des photos poue envoi")
+                    new Growl(Growl.Type.ERROR, "Impossible d'estimer la taille des photos pour envoi")
                             .showAndFade();
                 });
             });

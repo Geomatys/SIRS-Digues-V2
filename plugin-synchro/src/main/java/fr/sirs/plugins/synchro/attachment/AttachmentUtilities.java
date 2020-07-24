@@ -357,7 +357,7 @@ public class AttachmentUtilities {
                         .mapToLong(ath -> AttachmentUtilities.size(connector, ath.getPhoto()))
                         .sum();
                 final Set<String> tronconIds = photosWithTronçon.stream()
-                        .map(pNt -> pNt.getTronconId().get())
+                        .map(pNt -> pNt.getTronconId().orElse(null))
                         .collect(Collectors.toSet());
                 return new AttachmentsSizeAndTroncons(count, size, tronconIds);
 
