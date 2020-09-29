@@ -192,6 +192,12 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
         TaskManager.INSTANCE.submit(t);
     }
 
+
+    @Override
+    protected InvalidationListener getParameterListener() {
+        return parameterListener;
+    }
+
     private class TypeOuvragePredicate implements Predicate<OuvrageHydrauliqueAssocie> {
 
         final Set<String> acceptedIds;

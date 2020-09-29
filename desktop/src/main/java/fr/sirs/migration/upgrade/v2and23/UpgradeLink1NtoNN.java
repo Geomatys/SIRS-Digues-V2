@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.apache.sis.util.ArgumentChecks;
-import org.apache.sis.util.collection.BackingStoreException;
 import org.ektorp.DbAccessException;
 import org.geotoolkit.internal.GeotkFX;
 import org.springframework.context.ConfigurableApplicationContext;

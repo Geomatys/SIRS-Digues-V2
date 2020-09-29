@@ -36,6 +36,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import javafx.beans.InvalidationListener;
+import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -123,18 +125,19 @@ public abstract class TronconChoicePrintPane extends BorderPane {
 
     private enum ExtremiteTroncon {DEBUT, FIN}
 
+    protected abstract InvalidationListener getParameterListener();
+
     private class EditablePRColumn extends TableColumn {
 
         public EditablePRColumn(final String text, final ExtremiteTroncon extremite){
             super(text);
-
             setEditable(true);
 
             setCellFactory(new Callback<TableColumn<TronconDigue, Number>, TableCell<TronconDigue, Number>>() {
 
                 @Override
                 public TableCell<TronconDigue, Number> call(TableColumn<TronconDigue, Number> param) {
-                    final TableCell<TronconDigue, Number> tableCell = new FXNumberCell(Float.class);
+                    final TableCell<TronconDigue, Number> tableCell = new PREditCell(Float.class, getParameterListener());
                     tableCell.setEditable(true);
                     return tableCell;
                 }
@@ -158,6 +161,15 @@ public abstract class TronconChoicePrintPane extends BorderPane {
                     return null;
                 }
             });
+        }
+    }
+
+    private class PREditCell<TronconDigue, T> extends FXNumberCell<T> {
+
+        private PREditCell(final Class clazz, final InvalidationListener invalidListener) {
+            super(clazz);
+            field.valueProperty().addListener(new WeakInvalidationListener(invalidListener));
+            field.valueProperty().addListener(n -> commitEdit(field.valueProperty().get()));
         }
     }
 
@@ -205,7 +217,8 @@ public abstract class TronconChoicePrintPane extends BorderPane {
         final int index = extremite==ExtremiteTroncon.FIN ? 1:0;
         final ObjectProperty<Number> prProperty;
 
-        if(prCache.get(troncon.getId())==null) prCache.put(troncon.getId(), new ObjectProperty[2]);
+        if(prCache.get(troncon.getId())==null)
+            prCache.put(troncon.getId(), new ObjectProperty[2]);
 
         // Si le PR de l'extrémité voulue du tronçon n'a pas encore été calculé.
         if (prCache.get(troncon.getId())[index]==null) {

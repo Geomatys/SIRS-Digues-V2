@@ -18,10 +18,8 @@
  */
 package fr.sirs;
 
-import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.RefConduiteFermee;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.ClosingDaemon;
 import java.util.List;
@@ -189,6 +187,11 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
 
         countTask.set(t);
         TaskManager.INSTANCE.submit(t);
+    }
+
+    @Override
+    protected InvalidationListener getParameterListener() {
+        return parameterListener;
     }
 
     private class TypeConduitePredicate implements Predicate<ReseauHydrauliqueFerme> {

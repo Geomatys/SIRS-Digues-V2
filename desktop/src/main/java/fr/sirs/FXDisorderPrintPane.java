@@ -255,6 +255,11 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         }
     }
 
+    @Override
+    protected InvalidationListener getParameterListener() {
+        return parameterListener;
+    }
+
     /**
      * Check that the most recent observation defined on given disorder has an
      * {@link Observation#getUrgenceId() } compatible with user choice.
