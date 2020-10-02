@@ -239,13 +239,14 @@ public class FXLauncherPane extends BorderPane {
         uiProgressPlugins.setVisible(false);
 
         localRegistry = new DatabaseRegistry();
-        
+
         CouchSGBD sgbdInfo = localRegistry.getSGBDInfo();
-        
-        if(!sgbdInfo.getVersion().startsWith("2.") && Boolean.valueOf(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.CHECK_COUCHDB_VERSION))){
+
+        // Developped for couchdb 2.X but allow to try using use version 3.X
+        if(!sgbdInfo.getVersion().matches("(2|3).*") && Boolean.valueOf(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.CHECK_COUCHDB_VERSION))){
             alertCouchDBVersion(sgbdInfo);
         }
-        
+
 
         errorLabel.setTextFill(Color.RED);
         errorLabel.visibleProperty().bind(errorLabel.textProperty().isNotEmpty());
@@ -478,19 +479,19 @@ public class FXLauncherPane extends BorderPane {
         }
 
         final Task t = new TaskManager.MockTask("", () -> {
-            
+
             final String distantUrl = uiDistantUrl.getText();
             final String localUrl = SirsPreferences.INSTANCE.getProperty(
                             SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + uiLocalName.getText();
-            
+
             localRegistry.synchronizeSirsDatabases(distantUrl, localUrl, false);
-            
+
             /*
             HACK : par pricipe, la réponse à une requête de réplication non continue est synchrone alors que la réponse
             à une requête de réplicatoin continue est asynchrone (SYM-1820).
             MAIS le client souhaite attendre la "fin" de la réplication dans tous les cas avant de passer à l'onglet de
             connexion aux bases locales. Comme la "fin" d'une réplication continue n'a pas de sens, on commence par
-            réaliser une réplication non continue, on attend la fin, puis on renouvelle la requête pour la transformer 
+            réaliser une réplication non continue, on attend la fin, puis on renouvelle la requête pour la transformer
             en réplication continue.
             */
             if (uiDistantSync.isSelected()) {
@@ -984,10 +985,10 @@ public class FXLauncherPane extends BorderPane {
 
                                 if (!localRegistry.listSirsDatabases().contains(destDbName)
                                 || ButtonType.YES.equals(alert.showAndWait().get())) {
-                                    
+
                                     final TaskManager.MockTask<org.ektorp.ReplicationStatus> copyTask = new TaskManager.MockTask("Copie de base de données", () -> {
                                         return localRegistry.copyDatabase(
-                                                DatabaseRegistry.addAuthenticationInformation(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + sourceDb), 
+                                                DatabaseRegistry.addAuthenticationInformation(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + sourceDb),
                                                 DatabaseRegistry.addAuthenticationInformation(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + destDbName), false);
                                     });
 
@@ -1016,12 +1017,12 @@ public class FXLauncherPane extends BorderPane {
                                             alerte.setResizable(true);
                                             alerte.show();
                                         }
-                                        
+
                                         /*
                                         * ======================================
                                         * Si la base de données copiée est
-                                        * associé à une base distante 
-                                        * (synchronisable) on propose à 
+                                        * associé à une base distante
+                                        * (synchronisable) on propose à
                                         * l'utilisateur de conserver ou non
                                         * cette association sur la copie.
                                         * Redmine#6727
@@ -1229,15 +1230,15 @@ public class FXLauncherPane extends BorderPane {
             }
         }
     }
-    
+
     /**
      * Affichage de l'alerte de version de CouchDB.
-     * 
+     *
      * @param sgbdInfo
-     * @throws IOException 
+     * @throws IOException
      */
     private void alertCouchDBVersion(CouchSGBD sgbdInfo) throws IOException{
-        
+
         // 1- énumération des bases de données
         final StringJoiner list = new StringJoiner(System.lineSeparator());
         for(final String db : localRegistry.listSirsDatabases()){
@@ -1247,12 +1248,12 @@ public class FXLauncherPane extends BorderPane {
         // 2- préparation du contenu de l'avertissement à l'utilisateur : formatage de l'en-tête avec les information locales
         final StringBuilder textContent = new StringBuilder(String.format(
                           "           CHANGEMENT DE VERSION DU SGBD COUCHDB DU SIRSv2           " + System.lineSeparator()
-                        + "                    de CouchDB 1 vers CouchDB 2                      " + System.lineSeparator()
+                        + "                de CouchDB 1 vers CouchDB 2 ou plus                  " + System.lineSeparator()
                         + System.lineSeparator()
-                        + "Une version de CouchDB 2.x.x est dorénavant requise pour héberger les" + System.lineSeparator()
-                        + "données de la version courante du SIRSv2.                            " + System.lineSeparator()
+                        + "Une version minimale de CouchDB 2.x.x est dorénavant requise pour    " + System.lineSeparator()
+                        + "héberger les données de la version courante du SIRSv2.               " + System.lineSeparator()
                         + System.lineSeparator()
-                        + "La version de CouchDB trouvée sur le système est actuellement %s.               " + System.lineSeparator()
+                        + "La version de CouchDB trouvée sur le système est actuellement %s.    " + System.lineSeparator()
                         + System.lineSeparator()
                         + "Merci de mettre à niveau votre SGBD CouchDB vers une version CouchDB 2"+ System.lineSeparator()
                         + "en prenant soin de sauvegarder les fichiers de données de vos bases."  + System.lineSeparator()
@@ -1267,11 +1268,11 @@ public class FXLauncherPane extends BorderPane {
                         + System.lineSeparator()
                         + "%s" + System.lineSeparator()
                         + System.lineSeparator(),
-                sgbdInfo.getVersion(), 
-                SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR.name(), 
-                SirsCore.CONFIGURATION_PATH.toString(), 
-                SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR.name(), 
-                SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR.name()), 
+                sgbdInfo.getVersion(),
+                SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR.name(),
+                SirsCore.CONFIGURATION_PATH.toString(),
+                SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR.name(),
+                SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR.name()),
                 list.toString()));
 
         // 3- Indications de migration des données
