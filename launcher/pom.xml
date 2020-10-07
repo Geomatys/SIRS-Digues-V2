@@ -73,7 +73,7 @@
                     <additionalAppResources>
                         ${additional.resources}
                     </additionalAppResources>
-                    <!-- To activate back to allow the user to choose the install directory -->
+                    <!-- To activate back to allow the user to choose the install directory, only on windows -->
 <!--                    <bundleArguments>
                         <installdirChooser>true</installdirChooser>
                     </bundleArguments>-->

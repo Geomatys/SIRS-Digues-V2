@@ -29,6 +29,7 @@ import fr.sirs.util.referencing.HackCRSFactory;
 import fr.sirs.util.property.DocumentRoots;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.SirsPreferences;
+import fr.sirs.ui.MainFolderPane;
 import org.apache.sis.referencing.operation.HackCoordinateOperationFactory;
 import java.awt.Desktop;
 import java.beans.IntrospectionException;
@@ -39,6 +40,8 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -69,6 +72,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.image.Image;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -137,7 +143,53 @@ public class SirsCore {
 
     public static final Path CONFIGURATION_PATH;
     static {
-        Path tmpPath = Paths.get(System.getProperty("user.home"), "."+NAME);
+        //On ouvre le ficher de properties cencé contenir le chemin vers dossier de configuration
+        String rootPath = "";
+        String resStr = SirsCore.class.getResource("/fr/sirs/core/configuration/Configuration.properties").getPath();
+        Properties config = new Properties();
+        try (final FileReader reader = new FileReader(resStr)) {
+            config.load(reader);
+        } catch (IOException ex) {
+            SirsCore.LOGGER.log(Level.WARNING, "Error while reading sirs properties file.", ex);
+        }
+        rootPath = config.getProperty("path");
+
+        //Au premier lancement de l'application, on ouvre une popup afin de renseigner l'emplacement
+        //du dossier de configuration, puis on enregistre son chemin dans le fichier de properties
+        Path tmpPath;
+        if (rootPath != null && rootPath.equals("")) {
+            try {
+                final Dialog dialog    = new Dialog();
+                final DialogPane pane  = new DialogPane();
+                final MainFolderPane ipane = new MainFolderPane();
+                pane.setContent(ipane);
+                pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+                dialog.setDialogPane(pane);
+                dialog.setResizable(true);
+                dialog.setTitle("Emplacement du dossier de configuration");
+
+                final Optional opt = dialog.showAndWait();
+                if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+                    File f = new File(ipane.rootFolderField.getText());
+                    if (f.isDirectory()) {
+                        rootPath = f.getPath();
+                        config.setProperty("path", rootPath);
+                        try (final FileWriter writer = new FileWriter(resStr)) {
+                            config.store(writer, null);
+                        } catch (IOException ex) {
+                            LOGGER.log(Level.WARNING, "Error while writing sirs properties file.", ex);
+                        }
+                    }
+                }
+                tmpPath = Paths.get(rootPath, "."+NAME);
+            } catch (ExceptionInInitializerError ex) {
+                tmpPath = Paths.get(System.getProperty("user.home"), "."+NAME);
+                SirsCore.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+            }
+        } else {
+            tmpPath = Paths.get(System.getProperty("user.home"), "."+NAME);
+        }
+        
         if (!Files.isDirectory(tmpPath)) {
             try {
                 Files.createDirectory(tmpPath);
