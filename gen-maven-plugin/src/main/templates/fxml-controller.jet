@@ -966,8 +966,16 @@ else if (helper.isParcelleVegetation()){
                 if(Helper.isOwnerReference(eRef)){
 %>
         // Reference principale : prevoir la suppression des documents qui ne seraient plus references
-        final ObservableList<String> toDeleteList<%= Helper.ucFirst(eRef.getName())%> = FXCollections.observableArrayList(element.get<%= Helper.ucFirst(eRef.getName())%>());
-        element.get<%= Helper.ucFirst(eRef.getName())%>().clear();
+        final List<String> toDeletes = element.get<%= Helper.ucFirst(eRef.getName())%>();
+        final ObservableList<String> toDeleteList<%= Helper.ucFirst(eRef.getName())%>;
+        if(toDeletes != null) {
+            toDeleteList<%= Helper.ucFirst(eRef.getName())%> = FXCollections.observableArrayList(toDeletes.stream().filter(it -> it != null).collect(java.util.stream.Collectors.toList()));
+            element.get<%= Helper.ucFirst(eRef.getName())%>().clear();
+        } else {
+            toDeleteList<%= Helper.ucFirst(eRef.getName())%> = FXCollections.observableArrayList();
+        }
+        // final ObservableList<String> toDeleteList<%= Helper.ucFirst(eRef.getName())%> = FXCollections.observableArrayList(element.get<%= Helper.ucFirst(eRef.getName())%>());
+        // element.get<%= Helper.ucFirst(eRef.getName())%>().clear();
 <%
                 }
                 if(eRef.getEOpposite()!=null){

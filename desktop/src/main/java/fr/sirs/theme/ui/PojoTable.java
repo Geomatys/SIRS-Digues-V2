@@ -1672,6 +1672,8 @@ public class PojoTable extends BorderPane implements Printable {
             final Element parent = parentElementProperty.get();
             final Element owner = ownerElementProperty.get();
 
+            boolean mustAddToNotNullOwner = false;
+
             /* Dans le cas où on a un parent, il n'est pas nécessaire de faire
             addChild(), car la liste des éléments de la table est directement
             cette liste d'éléments enfants, sur laquelle on fait un add().*/
@@ -1681,11 +1683,13 @@ public class PojoTable extends BorderPane implements Printable {
                 if (parent instanceof AvecBornesTemporelles) {
                     timePeriod = (AvecBornesTemporelles) parent;
                 }
-            } /* Mais dans le cas où on a un référant principal, il faut faire un
+            } /*
+            ADD TO OWNER
+            Mais dans le cas où on a un référant principal, il faut faire un
             addChild(), car la liste des éléments de la table n'est pas une
             liste d'éléments enfants. Le référant principal n'a qu'une liste
             d'identifiants qu'il convient de mettre à jour avec addChild().*/ else if (owner != null) {
-                owner.addChild(newlyCreated);
+                mustAddToNotNullOwner = true;
                 if (owner instanceof AvecBornesTemporelles) {
                     timePeriod = (AvecBornesTemporelles) owner;
                 }
@@ -1743,6 +1747,17 @@ public class PojoTable extends BorderPane implements Printable {
                         Thread.currentThread().interrupt();
                     }
                 }
+            }
+            /*
+            ADD TO OWNER
+            -> le 'addChild' est effectué après avoir ajouté l'élément en base
+            afin de récupérer l'id attribué, nécessaire au addChild de certain
+            'owner'.
+            */
+            if (mustAddToNotNullOwner) {
+                owner.addChild(newlyCreated); //We already know that owner is not null.
+                final Class ownerClaz = owner.getClass();
+                Injector.getSession().getRepositoryForClass(ownerClaz).update(ownerClaz.cast(owner));
             }
 
             /*

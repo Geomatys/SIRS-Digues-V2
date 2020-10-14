@@ -37,7 +37,6 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import javafx.beans.InvalidationListener;
-import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -168,7 +167,7 @@ public abstract class TronconChoicePrintPane extends BorderPane {
 
         private PREditCell(final Class clazz, final InvalidationListener invalidListener) {
             super(clazz);
-            field.valueProperty().addListener(new WeakInvalidationListener(invalidListener));
+            field.valueProperty().addListener(invalidListener); //Or not WeakListener?
             field.valueProperty().addListener(n -> commitEdit(field.valueProperty().get()));
         }
     }
