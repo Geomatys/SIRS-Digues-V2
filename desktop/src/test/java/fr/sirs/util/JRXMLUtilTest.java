@@ -18,15 +18,40 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.core.SirsCore;
+import java.util.prefs.Preferences;
+import java.util.prefs.BackingStoreException;
+import org.junit.AfterClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
 /**
  *
  * @author Samuel Andrés (Geomatys) <samuel.andres at geomatys.com>
  */
 public class JRXMLUtilTest {
-    
+    @BeforeClass
+    public static void initConfigurationPreferences() throws BackingStoreException {
+        try {
+            Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
+            String cfp = "configuration_folder_path";
+            prefs.put(cfp, "/tmp/");
+            prefs.flush();
+        } catch (SecurityException ex) {
+            throw new SecurityException("A security manager refuses access to preferences. " + ex);
+        } catch (IllegalStateException ex) {
+            throw new IllegalStateException("The node for package 'SirsCore.class' has been removed." + ex);
+        }
+    }
+
+    @AfterClass
+    public static void clearConfigurationPreferences() throws BackingStoreException {
+        Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
+        prefs.clear();
+        prefs.flush();
+    }
+
     @Test
     public void test_extractDesignation() {
         assertEquals("27", JRXMLUtil.extractDesignation("TrD - 27 : Isère RD du pont RN90 (P 549) à amont pont de Pique Pierre (P 610)"));

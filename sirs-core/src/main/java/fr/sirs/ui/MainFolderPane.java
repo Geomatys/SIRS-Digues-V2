@@ -55,6 +55,9 @@ public class MainFolderPane extends GridPane {
     
     public MainFolderPane() {
         loadFXML(this, this.getClass());
+        final String userPath = System.getProperty("user.home");
+        rootFolderField.setText(userPath);
+        rootFolderField.setDisable(true);
     }
     
     private void loadFXML(Parent candidate, final Class fxmlClass) {

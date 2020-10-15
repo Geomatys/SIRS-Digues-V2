@@ -32,6 +32,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.prefs.Preferences;
+import java.util.prefs.BackingStoreException;
 import javafx.embed.swing.JFXPanel;
 import org.apache.sis.test.TestCase;
 
@@ -72,7 +74,7 @@ public abstract class CouchDBTestCase extends TestCase {
      */
     @Autowired
     protected SessionCore session;
-
+    
     @BeforeClass
     public static synchronized void initEnvironment() throws Exception {
         // Set http proxy / authentication managers
@@ -95,6 +97,20 @@ public abstract class CouchDBTestCase extends TestCase {
         }
     }
 
+    @BeforeClass
+    public static void initConfigurationPreferences() throws IOException, BackingStoreException {
+        try {
+            Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
+            String cfp = "configuration_folder_path";
+            prefs.put(cfp, "/tmp/");
+            prefs.flush();
+        } catch (SecurityException ex) {
+            throw new SecurityException("A security manager refuses access to preferences. " + ex);
+        } catch (IllegalStateException ex) {
+            throw new IllegalStateException("The node for package 'SirsCore.class' has been removed." + ex);
+        }
+    }
+
     @Before
     public void initTestDatabase() {
         APP_CTX.getAutowireCapableBeanFactory().autowireBean(this);
@@ -113,6 +129,13 @@ public abstract class CouchDBTestCase extends TestCase {
                 SirsCore.LOGGER.log(Level.WARNING, "A database cannot be deleted after tests !", e);
             }
         }
+    }
+
+    @AfterClass
+    public static void clearConfigurationPreferences() throws IOException, BackingStoreException {
+        Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
+        prefs.clear();
+        prefs.flush();
     }
 
     /**

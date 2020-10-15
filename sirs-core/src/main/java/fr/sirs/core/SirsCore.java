@@ -40,8 +40,6 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -67,6 +65,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -140,24 +139,27 @@ public class SirsCore {
     public static final String COMPONENT_PACKAGE="fr.sirs.core.component";
 
     public static final String SPRING_CONTEXT = "classpath:/fr/sirs/spring/application-context.xml";
-
+    
     public static final Path CONFIGURATION_PATH;
     static {
-        //On ouvre le ficher de properties cencé contenir le chemin vers dossier de configuration
-        String rootPath = "";
-        String resStr = SirsCore.class.getResource("/fr/sirs/core/configuration/Configuration.properties").getPath();
-        Properties config = new Properties();
-        try (final FileReader reader = new FileReader(resStr)) {
-            config.load(reader);
-        } catch (IOException ex) {
-            SirsCore.LOGGER.log(Level.WARNING, "Error while reading sirs properties file.", ex);
+        //On récupère la préférence utilisateur cencée contenir le chemin vers dossier de configuration
+        Preferences prefs;
+        String cfp;
+        String rootPath="";
+        try {
+            prefs = Preferences.userNodeForPackage(SirsCore.class);
+            cfp = "configuration_folder_path";
+            rootPath = prefs.get(cfp, "none");
+        } catch (SecurityException ex) {
+            throw new ExceptionInInitializerError("A security manager refuses access to preferences. " + ex);
+        } catch (IllegalStateException ex) {
+            throw new ExceptionInInitializerError("The node for package 'SirsCore.class' has been removed." + ex);
         }
-        rootPath = config.getProperty("path");
 
         //Au premier lancement de l'application, on ouvre une popup afin de renseigner l'emplacement
         //du dossier de configuration, puis on enregistre son chemin dans le fichier de properties
-        Path tmpPath;
-        if (rootPath != null && rootPath.equals("")) {
+        Path confPath = Paths.get("");
+        if (rootPath.equals("none")) {
             try {
                 final Dialog dialog    = new Dialog();
                 final DialogPane pane  = new DialogPane();
@@ -170,39 +172,34 @@ public class SirsCore {
 
                 final Optional opt = dialog.showAndWait();
                 if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
-                    File f = new File(ipane.rootFolderField.getText());
+                    final String currentPath = ipane.rootFolderField.getText();
+                    File f = new File(currentPath);
                     if (f.isDirectory()) {
                         rootPath = f.getPath();
-                        config.setProperty("path", rootPath);
-                        try (final FileWriter writer = new FileWriter(resStr)) {
-                            config.store(writer, null);
-                        } catch (IOException ex) {
-                            LOGGER.log(Level.WARNING, "Error while writing sirs properties file.", ex);
-                        }
+                        prefs.put(cfp, rootPath);
+                    } else {
+                        throw new ExceptionInInitializerError("The location " + currentPath + " is not a folder.");
                     }
+                    confPath = Paths.get(rootPath, "."+NAME);
+                } else {
+                    System.exit(0);
                 }
-                tmpPath = Paths.get(rootPath, "."+NAME);
             } catch (ExceptionInInitializerError ex) {
-                tmpPath = Paths.get(System.getProperty("user.home"), "."+NAME);
-                SirsCore.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                throw new ExceptionInInitializerError(ex);
             }
         } else {
-            tmpPath = Paths.get(System.getProperty("user.home"), "."+NAME);
+            confPath = Paths.get(rootPath, "."+NAME);
         }
-        
-        if (!Files.isDirectory(tmpPath)) {
+
+        if (!Files.isDirectory(confPath)) {
             try {
-                Files.createDirectory(tmpPath);
+                Files.createDirectory(confPath);
+                //Files.createDirectories(tmpPath);
             } catch (IOException ex) {
-                try {
-                    tmpPath = Files.createTempDirectory(NAME);
-                } catch (IOException ex1) {
-                    ex.addSuppressed(ex1);
-                    throw new ExceptionInInitializerError(ex);
-                }
+                throw new ExceptionInInitializerError(ex);
             }
         }
-        CONFIGURATION_PATH = tmpPath;
+        CONFIGURATION_PATH = confPath;
     }
 
     public static final Path DATABASE_PATH = CONFIGURATION_PATH.resolve("database");
