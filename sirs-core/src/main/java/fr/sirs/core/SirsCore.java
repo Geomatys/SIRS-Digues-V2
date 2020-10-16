@@ -193,8 +193,7 @@ public class SirsCore {
 
         if (!Files.isDirectory(confPath)) {
             try {
-                Files.createDirectory(confPath);
-                //Files.createDirectories(tmpPath);
+                Files.createDirectories(confPath);
             } catch (IOException ex) {
                 throw new ExceptionInInitializerError(ex);
             }
