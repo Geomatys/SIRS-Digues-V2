@@ -142,63 +142,7 @@ public class SirsCore {
     
     public static final Path CONFIGURATION_PATH;
     static {
-        //On récupère la préférence utilisateur cencée contenir le chemin vers dossier de configuration
-        Preferences prefs;
-        String cfp;
-        String rootPath="";
-        try {
-            prefs = Preferences.userNodeForPackage(SirsCore.class);
-            cfp = "configuration_folder_path";
-            rootPath = prefs.get(cfp, "none");
-        } catch (SecurityException ex) {
-            throw new ExceptionInInitializerError("A security manager refuses access to preferences. " + ex);
-        } catch (IllegalStateException ex) {
-            throw new ExceptionInInitializerError("The node for package 'SirsCore.class' has been removed." + ex);
-        }
-
-        //Au premier lancement de l'application, on ouvre une popup afin de renseigner l'emplacement
-        //du dossier de configuration, puis on enregistre son chemin dans le fichier de properties
-        Path confPath = Paths.get("");
-        if (rootPath.equals("none")) {
-            try {
-                final Dialog dialog    = new Dialog();
-                final DialogPane pane  = new DialogPane();
-                final MainFolderPane ipane = new MainFolderPane();
-                pane.setContent(ipane);
-                pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-                dialog.setDialogPane(pane);
-                dialog.setResizable(true);
-                dialog.setTitle("Emplacement du dossier de configuration");
-
-                final Optional opt = dialog.showAndWait();
-                if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
-                    final String currentPath = ipane.rootFolderField.getText();
-                    File f = new File(currentPath);
-                    if (f.isDirectory()) {
-                        rootPath = f.getPath();
-                        prefs.put(cfp, rootPath);
-                    } else {
-                        throw new ExceptionInInitializerError("The location " + currentPath + " is not a folder.");
-                    }
-                    confPath = Paths.get(rootPath, "."+NAME);
-                } else {
-                    System.exit(0);
-                }
-            } catch (ExceptionInInitializerError ex) {
-                throw new ExceptionInInitializerError(ex);
-            }
-        } else {
-            confPath = Paths.get(rootPath, "."+NAME);
-        }
-
-        if (!Files.isDirectory(confPath)) {
-            try {
-                Files.createDirectories(confPath);
-            } catch (IOException ex) {
-                throw new ExceptionInInitializerError(ex);
-            }
-        }
-        CONFIGURATION_PATH = confPath;
+        CONFIGURATION_PATH = SirsCore.initConfigurationFolderPath();
     }
 
     public static final Path DATABASE_PATH = CONFIGURATION_PATH.resolve("database");
@@ -340,9 +284,9 @@ public class SirsCore {
     protected static final String NTV2_RESOURCE = "/fr/sirs/ntv2/";
 
     /**
-     * User directory root folder.
+     * Configuration directory root folder.
      *
-     * @return {user.home}/.sirs
+     * @return le chemin vers le dossier de configuration .sirs
      */
     public static String getConfigPath(){
         return CONFIGURATION_PATH.toString();
@@ -383,8 +327,9 @@ public class SirsCore {
         Setup.initialize(noJavaPrefs);
 
         final String url = "jdbc:hsqldb:" + SirsCore.EPSG_PATH.resolve("db").toUri();
+        final String decodedUrl = java.net.URLDecoder.decode(url, "UTF-8");
         final JDBCDataSource ds = new JDBCDataSource();
-        ds.setDatabase(url);
+        ds.setDatabase(decodedUrl);
         JNDI.setEPSG(ds);
 
         // On tente d'installer la grille NTV2 pour améliorer la précision du géo-réferencement.
@@ -909,5 +854,66 @@ public class SirsCore {
             }
         } else
             return null;
+    }
+
+    private static Path initConfigurationFolderPath() {
+        //On récupère la préférence utilisateur cencée contenir le chemin vers dossier de configuration
+        Preferences prefs;
+        String cfp;
+        String rootPath="";
+        try {
+            prefs = Preferences.userNodeForPackage(SirsCore.class);
+            cfp = "configuration_folder_path";
+            rootPath = prefs.get(cfp, "none");
+        } catch (SecurityException ex) {
+            throw new ExceptionInInitializerError("A security manager refuses access to preferences. " + ex);
+        } catch (IllegalStateException ex) {
+            throw new ExceptionInInitializerError("The node for package 'SirsCore.class' has been removed." + ex);
+        }
+
+        //Au premier lancement de l'application, on ouvre une popup afin de renseigner l'emplacement
+        //du dossier de configuration, puis on enregistre son chemin dans le fichier de properties
+        Path confPath = Paths.get("");
+        if (rootPath.equals("none")) {
+            try {
+                final Dialog dialog    = new Dialog();
+                final DialogPane pane  = new DialogPane();
+                final MainFolderPane ipane = new MainFolderPane();
+                pane.setContent(ipane);
+                pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+                dialog.setDialogPane(pane);
+                dialog.setResizable(true);
+                dialog.setTitle("Emplacement du dossier de configuration");
+
+                final Optional opt = dialog.showAndWait();
+                if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+                    final String currentPath = ipane.rootFolderField.getText();
+                    File f = new File(currentPath);
+                    if (f.isDirectory()) {
+                        rootPath = f.getPath();
+                        prefs.put(cfp, rootPath);
+                    } else {
+                        throw new ExceptionInInitializerError("The location " + currentPath + " is not a folder.");
+                    }
+                    confPath = Paths.get(rootPath, "."+NAME);
+                } else {
+                    SirsCore.LOGGER.log(Level.INFO, "The configuration folder dialog is canceled.");
+                    System.exit(0);
+                }
+            } catch (ExceptionInInitializerError ex) {
+                throw new ExceptionInInitializerError(ex);
+            }
+        } else {
+            confPath = Paths.get(rootPath, "."+NAME);
+        }
+
+        if (!Files.isDirectory(confPath)) {
+            try {
+                Files.createDirectories(confPath);
+            } catch (IOException ex) {
+                throw new ExceptionInInitializerError(ex);
+            }
+        }
+        return confPath;
     }
 }
