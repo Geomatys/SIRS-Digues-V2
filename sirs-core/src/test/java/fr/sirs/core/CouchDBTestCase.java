@@ -98,11 +98,10 @@ public abstract class CouchDBTestCase extends TestCase {
     }
 
     @BeforeClass
-    public static void initConfigurationPreferences() throws IOException, BackingStoreException {
+    public static void initConfigurationPreferences() throws BackingStoreException {
         try {
             Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
-            String cfp = "configuration_folder_path";
-            prefs.put(cfp, "/tmp/");
+            prefs.put("CONFIGURATION_FOLDER_PATH", "/tmp/");
             prefs.flush();
         } catch (SecurityException ex) {
             throw new SecurityException("A security manager refuses access to preferences. " + ex);
@@ -132,7 +131,7 @@ public abstract class CouchDBTestCase extends TestCase {
     }
 
     @AfterClass
-    public static void clearConfigurationPreferences() throws IOException, BackingStoreException {
+    public static void clearConfigurationPreferences() throws BackingStoreException {
         Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
         prefs.clear();
         prefs.flush();

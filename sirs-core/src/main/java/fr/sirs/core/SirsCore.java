@@ -140,7 +140,7 @@ public class SirsCore {
 
     public static final String SPRING_CONTEXT = "classpath:/fr/sirs/spring/application-context.xml";
     
-    public static final Path CONFIGURATION_PATH;
+    public static Path CONFIGURATION_PATH;
     static {
         CONFIGURATION_PATH = SirsCore.initConfigurationFolderPath();
     }
@@ -863,8 +863,7 @@ public class SirsCore {
         String rootPath="";
         try {
             prefs = Preferences.userNodeForPackage(SirsCore.class);
-            cfp = "configuration_folder_path";
-            rootPath = prefs.get(cfp, "none");
+            rootPath = prefs.get("CONFIGURATION_FOLDER_PATH", "none");
         } catch (SecurityException ex) {
             throw new ExceptionInInitializerError("A security manager refuses access to preferences. " + ex);
         } catch (IllegalStateException ex) {
@@ -891,7 +890,7 @@ public class SirsCore {
                     File f = new File(currentPath);
                     if (f.isDirectory()) {
                         rootPath = f.getPath();
-                        prefs.put(cfp, rootPath);
+                        prefs.put("CONFIGURATION_FOLDER_PATH", rootPath);
                     } else {
                         throw new ExceptionInInitializerError("The location " + currentPath + " is not a folder.");
                     }
@@ -906,6 +905,7 @@ public class SirsCore {
         } else {
             confPath = Paths.get(rootPath, "."+NAME);
         }
+        SirsCore.LOGGER.log(Level.INFO, "The current configuration path is " + rootPath + ".");
 
         if (!Files.isDirectory(confPath)) {
             try {

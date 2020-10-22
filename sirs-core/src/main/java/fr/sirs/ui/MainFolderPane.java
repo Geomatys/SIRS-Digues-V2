@@ -34,6 +34,7 @@ import org.apache.sis.util.ArgumentChecks;
 
 /**
  * Popup load in SirsCore class once, to enter the path to the configuration folder .sirs
+ * 
  * @author maximegavens
  */
 public class MainFolderPane extends GridPane {
