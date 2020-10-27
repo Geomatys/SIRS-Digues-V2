@@ -44,6 +44,7 @@ import fr.sirs.maj.ModuleChecker;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
 import fr.sirs.util.SimpleButtonColumn;
+import fr.sirs.util.property.ConfigurationRoot;
 import fr.sirs.util.property.SirsPreferences;
 import java.io.BufferedReader;
 import java.io.File;
@@ -64,6 +65,7 @@ import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 import javafx.application.Platform;
@@ -107,6 +109,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -155,6 +158,10 @@ public class FXLauncherPane extends BorderPane {
     private Tab uiCreateTab;
     @FXML
     private Tab uiImportTab;
+    @FXML
+    private Tab uiPLuginsTab;
+    @FXML
+    private Tab uiConfTab;
 
     // onglet base locales
     @FXML
@@ -218,6 +225,18 @@ public class FXLauncherPane extends BorderPane {
 
     @FXML
     private BorderPane uiProgressPlugins;
+
+    // onglet base dossier de configuration
+    @FXML
+    private TextField confFolderField;
+    @FXML
+    private Button chooConfButton;
+    @FXML
+    private Label uiConfInfo;
+    @FXML
+    private Button uiRestartConfAppBtn;
+    @FXML
+    private Button uiUndoConfAppBtn;
 
     @FXML
     private Button uiPrefBtn;
@@ -364,6 +383,16 @@ public class FXLauncherPane extends BorderPane {
             if (KeyCode.F5.equals(evt.getCode()))
                 updateLocalDbList();
         });
+
+        final String oldRoot = ConfigurationRoot.getRoot();
+        confFolderField.setText(oldRoot);
+        confFolderField.setDisable(true);
+        uiConfInfo.setVisible(false);
+        uiRestartConfAppBtn.setVisible(false);
+        uiUndoConfAppBtn.setVisible(false);
+        chooConfButton.setOnAction(evt -> chooseRootFile());
+        uiRestartConfAppBtn.setOnAction(evt -> restartConf());
+        uiUndoConfAppBtn.setOnAction(evt -> undoConf());
     }
 
     private void restartApplicationNeeded() {
@@ -372,6 +401,7 @@ public class FXLauncherPane extends BorderPane {
         uiDistantTab.setDisable(true);
         uiCreateTab.setDisable(true);
         uiImportTab.setDisable(true);
+        uiConfTab.setDisable(true);
     }
 
     /**
@@ -385,6 +415,46 @@ public class FXLauncherPane extends BorderPane {
             uiLocalBaseTable.getSelectionModel().select(0);
         }
         uiConnectButton.setDisable(names.isEmpty());
+    }
+
+    /**
+     * Cherche le répertoire qui contiendra le dossier de configuration.
+     */
+    private void chooseRootFile() {
+        final DirectoryChooser fileChooser = new DirectoryChooser();
+        final File file = fileChooser.showDialog(null);
+        if (file != null) {
+            if (!(file.canExecute() && file.canRead() && file.canWrite())) {
+                final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le répertoire selectionné ne possède pas les permissions suffisantes.");
+                alert.setResizable(true);
+                alert.showAndWait();
+                return;
+            }
+            final String oldPath = ConfigurationRoot.getRoot();
+            final String newPath = file.getPath();
+            confFolderField.setText(newPath);
+            if (!oldPath.equals(newPath)) {
+                uiConfInfo.setVisible(true);
+                uiRestartConfAppBtn.setVisible(true);
+                uiUndoConfAppBtn.setVisible(true);
+
+                uiLocalTab.setDisable(true);
+                uiDistantTab.setDisable(true);
+                uiCreateTab.setDisable(true);
+                uiImportTab.setDisable(true);
+                uiPLuginsTab.setDisable(true);
+            } else {
+                uiConfInfo.setVisible(false);
+                uiRestartConfAppBtn.setVisible(false);
+                uiUndoConfAppBtn.setVisible(false);
+
+                uiLocalTab.setDisable(false);
+                uiDistantTab.setDisable(false);
+                uiCreateTab.setDisable(false);
+                uiImportTab.setDisable(false);
+                uiPLuginsTab.setDisable(false);
+            }
+        }
     }
 
     @FXML
@@ -785,6 +855,93 @@ public class FXLauncherPane extends BorderPane {
             GeotkFX.newExceptionDialog("Impossible de lister les bases locales.", e);
             return Collections.EMPTY_LIST;
         }
+    }
+
+    private void restartConf() {
+        final String oldRoot = ConfigurationRoot.getRoot();
+        final String confRootStr = confFolderField.getText();
+        if (confRootStr == null || confRootStr.isEmpty()) {
+            throw new RuntimeException("Unexpected behaviour. The configuration directory text field can't be null or empty.");
+        }
+        // check no change
+        if (oldRoot.equals(confRootStr)) return;
+        // check if the path provided does not already contains the .sirs folder
+        Path sirsPath = Paths.get(confRootStr, "." + SirsCore.NAME).toAbsolutePath();
+        if (Files.isDirectory(sirsPath)) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    final Alert alert1 = new Alert(Alert.AlertType.CONFIRMATION, "Le dossier de configuration " + SirsCore.NAME + " existe déjà dans le répertoire indiqué. Souhaitez-vous écraser le dossier existant ?", ButtonType.NO, ButtonType.YES);
+                    alert1.setResizable(true);
+                    final Optional<ButtonType> res = alert1.showAndWait();
+                    if (res.isPresent() && ButtonType.YES.equals(res.get())) {
+                        try {
+                            ConfigurationRoot.delete(sirsPath);
+                            ConfigurationRoot.setRootAndMove(oldRoot, confRootStr);
+                        } catch (IOException ex) {
+                            SirsCore.LOGGER.log(Level.SEVERE, null, ex);
+                        }
+                    } else {
+                        ConfigurationRoot.setRoot(confRootStr);
+                    }
+                    try {
+                        ConfigurationRoot.flush();
+                    } catch (BackingStoreException ex) {
+                        SirsCore.LOGGER.log(Level.SEVERE, null, ex);
+                    }
+
+                    // Restart the application
+                    SirsCore.LOGGER.log(Level.INFO, "The CONFIGURATION_FOLDER_PATH has changed. The application restart to update the global variables");
+                    try {
+                        restartCore();
+                    } catch (URISyntaxException ex) {
+                        SirsCore.LOGGER.log(Level.INFO, null, ex);
+                    } catch (IOException ex) {
+                        SirsCore.LOGGER.log(Level.INFO, null, ex);
+                    }
+                }
+            });
+        } else {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        ConfigurationRoot.setRootAndMove(oldRoot, confRootStr);
+                    } catch (IOException ex) {
+                        SirsCore.LOGGER.log(Level.SEVERE, null, ex);
+                    }
+                    try {
+                        ConfigurationRoot.flush();
+                    } catch (BackingStoreException ex) {
+                        SirsCore.LOGGER.log(Level.SEVERE, null, ex);
+                    }
+                    // Restart the application
+                    SirsCore.LOGGER.log(Level.INFO, "The CONFIGURATION_FOLDER_PATH has changed. The application restart to update the global variables");
+                    try {
+                        restartCore();
+                    } catch (URISyntaxException ex) {
+                        SirsCore.LOGGER.log(Level.INFO, null, ex);
+                    } catch (IOException ex) {
+                        SirsCore.LOGGER.log(Level.INFO, null, ex);
+                    }
+                }
+            });
+        }
+    }
+
+    private void undoConf() {
+        final String oldPath = ConfigurationRoot.getRoot();
+        confFolderField.setText(oldPath);
+
+        uiConfInfo.setVisible(false);
+        uiRestartConfAppBtn.setVisible(false);
+        uiUndoConfAppBtn.setVisible(false);
+
+        uiLocalTab.setDisable(false);
+        uiDistantTab.setDisable(false);
+        uiCreateTab.setDisable(false);
+        uiImportTab.setDisable(false);
+        uiPLuginsTab.setDisable(false);
     }
 
     /**

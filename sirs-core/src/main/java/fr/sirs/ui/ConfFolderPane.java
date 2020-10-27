@@ -25,7 +25,7 @@ import java.net.URL;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -37,41 +37,47 @@ import org.apache.sis.util.ArgumentChecks;
  * 
  * @author maximegavens
  */
-public class MainFolderPane extends GridPane {
-    
+public class ConfFolderPane extends GridPane {
+
     @FXML
     public TextField rootFolderField;
     
     @FXML
     private Button chooRootButton;
+    
+    public ConfFolderPane() {
+        loadFXML();
+        final String userPath = System.getProperty("user.home");
+        rootFolderField.setText(userPath);
+        rootFolderField.setDisable(true);
+    }
 
     @FXML
     public void chooseRootFile(ActionEvent event) {
         final DirectoryChooser fileChooser = new DirectoryChooser();
         final File file = fileChooser.showDialog(null);
+        if (!(file.canExecute() && file.canRead() && file.canWrite())) {
+            final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le répertoire selectionné ne possède pas les permissions suffisantes.");
+            alert.setResizable(true);
+            alert.showAndWait();
+            return;
+        }
         if (file != null) {
             rootFolderField.setText(file.getPath());
         }
     }
     
-    public MainFolderPane() {
-        loadFXML(this, this.getClass());
-        final String userPath = System.getProperty("user.home");
-        rootFolderField.setText(userPath);
-        rootFolderField.setDisable(true);
-    }
-    
-    private void loadFXML(Parent candidate, final Class fxmlClass) {
-        ArgumentChecks.ensureNonNull("JavaFX controller object", candidate);
-        final String fxmlpath = "/"+fxmlClass.getName().replace('.', '/')+".fxml";
-        final URL resource = fxmlClass.getResource(fxmlpath);
+    private void loadFXML() {
+        ArgumentChecks.ensureNonNull("JavaFX controller object", this);
+        final String fxmlpath = "/"+this.getClass().getName().replace('.', '/')+".fxml";
+        final URL resource = this.getClass().getResource(fxmlpath);
         if (resource == null) {
             throw new RuntimeException("No FXMl document can be found for path : "+fxmlpath);
         }
         final FXMLLoader loader = new FXMLLoader(resource);
-        loader.setController(candidate);
-        loader.setRoot(candidate);
-        loader.setClassLoader(fxmlClass.getClassLoader());
+        loader.setController(this);
+        loader.setRoot(this);
+        loader.setClassLoader(this.getClass().getClassLoader());
 
         fxRunAndWait(() -> {
             try {

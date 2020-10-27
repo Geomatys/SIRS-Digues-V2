@@ -19,8 +19,15 @@
 package fr.sirs.util;
 
 import fr.sirs.core.SirsCore;
+import static fr.sirs.core.SirsCore.NAME;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import java.util.prefs.BackingStoreException;
+import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -37,6 +44,14 @@ public class JRXMLUtilTest {
             Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
             prefs.put("CONFIGURATION_FOLDER_PATH", "/tmp/");
             prefs.flush();
+            Path confPath = Paths.get("/tmp", "."+NAME);
+            if (Files.isDirectory(confPath)) {
+                try {
+                    FileUtils.deleteDirectory(confPath.toFile());
+                } catch (IOException ex) {
+                    SirsCore.LOGGER.log(Level.WARNING, confPath + " no longer exists !", ex);
+                }
+            }
         } catch (SecurityException ex) {
             throw new SecurityException("A security manager refuses access to preferences. " + ex);
         } catch (IllegalStateException ex) {

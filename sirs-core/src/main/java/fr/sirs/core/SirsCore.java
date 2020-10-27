@@ -29,12 +29,12 @@ import fr.sirs.util.referencing.HackCRSFactory;
 import fr.sirs.util.property.DocumentRoots;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.SirsPreferences;
-import fr.sirs.ui.MainFolderPane;
 import org.apache.sis.referencing.operation.HackCoordinateOperationFactory;
 import java.awt.Desktop;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import fr.sirs.ui.ConfFolderPane;
 
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.File;
@@ -71,6 +71,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
@@ -102,6 +103,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.CoordinateOperationFactory;
 import org.opengis.util.FactoryException;
 import org.slf4j.bridge.SLF4JBridgeHandler;
+
+import org.apache.commons.io.FileUtils;
 
 
 public class SirsCore {
@@ -877,7 +880,7 @@ public class SirsCore {
             try {
                 final Dialog dialog    = new Dialog();
                 final DialogPane pane  = new DialogPane();
-                final MainFolderPane ipane = new MainFolderPane();
+                final ConfFolderPane ipane = new ConfFolderPane();
                 pane.setContent(ipane);
                 pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
                 dialog.setDialogPane(pane);
@@ -887,6 +890,23 @@ public class SirsCore {
                 final Optional opt = dialog.showAndWait();
                 if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
                     final String currentPath = ipane.rootFolderField.getText();
+
+                    //Vérifie si le dossier de conf n'existe pas déjà, si oui proposer de le supprimer.
+                    Path potentialConf = Paths.get(currentPath, "."+NAME);
+                    if (Files.isDirectory(potentialConf)) {
+                        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Le dossier de configuration ." + SirsCore.NAME + " existe déjà dans le répertoire indiqué. Souhaitez-vous écraser le dossier existant ?", ButtonType.NO, ButtonType.YES);
+                        alert.setResizable(true);
+                        final Optional<ButtonType> res = alert.showAndWait();
+                        if (res.isPresent() && ButtonType.YES.equals(res.get())) {
+                            try {
+                                FileUtils.deleteDirectory(confPath.toFile());
+                                Files.createDirectories(confPath);
+                            } catch (IOException ex) {
+                                throw new ExceptionInInitializerError(ex);
+                            }
+                        }
+                    }
+
                     File f = new File(currentPath);
                     if (f.isDirectory()) {
                         rootPath = f.getPath();
@@ -905,7 +925,7 @@ public class SirsCore {
         } else {
             confPath = Paths.get(rootPath, "."+NAME);
         }
-        SirsCore.LOGGER.log(Level.INFO, "The current configuration path is " + rootPath + ".");
+        SirsCore.LOGGER.log(Level.INFO, "The current configuration path is {0}.", rootPath);
 
         if (!Files.isDirectory(confPath)) {
             try {

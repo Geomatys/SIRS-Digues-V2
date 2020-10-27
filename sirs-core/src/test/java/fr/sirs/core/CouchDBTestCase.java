@@ -18,6 +18,7 @@
  */
 package fr.sirs.core;
 
+import static fr.sirs.core.SirsCore.NAME;
 import fr.sirs.core.authentication.SIRSAuthenticator;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
@@ -36,7 +37,10 @@ import java.util.prefs.Preferences;
 import java.util.prefs.BackingStoreException;
 import javafx.embed.swing.JFXPanel;
 import org.apache.sis.test.TestCase;
-
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
+import org.apache.commons.io.FileUtils;
 
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
@@ -103,6 +107,14 @@ public abstract class CouchDBTestCase extends TestCase {
             Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
             prefs.put("CONFIGURATION_FOLDER_PATH", "/tmp/");
             prefs.flush();
+            Path confPath = Paths.get("/tmp", "."+NAME);
+            if (Files.isDirectory(confPath)) {
+                try {
+                    FileUtils.deleteDirectory(confPath.toFile());
+                } catch (IOException ex) {
+                    SirsCore.LOGGER.log(Level.WARNING, confPath + " no longer exists !", ex);
+                }
+            }
         } catch (SecurityException ex) {
             throw new SecurityException("A security manager refuses access to preferences. " + ex);
         } catch (IllegalStateException ex) {
