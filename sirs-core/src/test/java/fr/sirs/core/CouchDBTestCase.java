@@ -103,23 +103,9 @@ public abstract class CouchDBTestCase extends TestCase {
 
     @BeforeClass
     public static void initConfigurationPreferences() throws BackingStoreException {
-        try {
-            Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
-            prefs.put("CONFIGURATION_FOLDER_PATH", "/tmp/");
-            prefs.flush();
-            Path confPath = Paths.get("/tmp", "."+NAME);
-            if (Files.isDirectory(confPath)) {
-                try {
-                    FileUtils.deleteDirectory(confPath.toFile());
-                } catch (IOException ex) {
-                    SirsCore.LOGGER.log(Level.WARNING, confPath + " no longer exists !", ex);
-                }
-            }
-        } catch (SecurityException ex) {
-            throw new SecurityException("A security manager refuses access to preferences. " + ex);
-        } catch (IllegalStateException ex) {
-            throw new IllegalStateException("The node for package 'SirsCore.class' has been removed." + ex);
-        }
+        Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
+        prefs.put("CONFIGURATION_FOLDER_PATH", "/tmp/");
+        prefs.flush();
     }
 
     @Before
