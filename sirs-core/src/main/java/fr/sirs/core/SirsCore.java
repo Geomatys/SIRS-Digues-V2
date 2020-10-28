@@ -861,17 +861,8 @@ public class SirsCore {
 
     private static Path initConfigurationFolderPath() {
         //On récupère la préférence utilisateur cencée contenir le chemin vers dossier de configuration
-        Preferences prefs;
-        String cfp;
-        String rootPath="";
-        try {
-            prefs = Preferences.userNodeForPackage(SirsCore.class);
-            rootPath = prefs.get("CONFIGURATION_FOLDER_PATH", "none");
-        } catch (SecurityException ex) {
-            throw new ExceptionInInitializerError("A security manager refuses access to preferences. " + ex);
-        } catch (IllegalStateException ex) {
-            throw new ExceptionInInitializerError("The node for package 'SirsCore.class' has been removed." + ex);
-        }
+        Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
+        String rootPath = prefs.get("CONFIGURATION_FOLDER_PATH", "none");
 
         //Au premier lancement de l'application, on ouvre une popup afin de renseigner l'emplacement
         //du dossier de configuration, puis on enregistre son chemin dans le fichier de properties
@@ -899,8 +890,8 @@ public class SirsCore {
                         final Optional<ButtonType> res = alert.showAndWait();
                         if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                             try {
-                                FileUtils.deleteDirectory(confPath.toFile());
-                                Files.createDirectories(confPath);
+                                FileUtils.deleteDirectory(potentialConf.toFile());
+                                Files.createDirectories(potentialConf);
                             } catch (IOException ex) {
                                 throw new ExceptionInInitializerError(ex);
                             }
