@@ -11,7 +11,7 @@ import fr.sirs.core.SirsCore;
 import ch.qos.logback.classic.jul.LevelChangePropagator;
 
 /**
- * This class is used to redirect the path of logs folder into the configuration folder.
+ * This class is used to configure the output of logs in the configuration folder.
  * 
  * @author maximegavens
  */
@@ -21,11 +21,14 @@ public class LoggerStartupListener extends LevelChangePropagator {
     public void start() {
         if (!isStarted()) {
             final Path logPath = SirsCore.CONFIGURATION_PATH;
-
-            if (logPath == null) return;
-
             final Context context = getContext();
-            context.putProperty("CONF_PATH", logPath.toString());
+
+            if (logPath == null) {
+                context.putProperty("CONF_PATH", "/tmp");
+                return;
+            } else {
+                context.putProperty("CONF_PATH", logPath.toString());
+            }
         }
         super.start();
     }

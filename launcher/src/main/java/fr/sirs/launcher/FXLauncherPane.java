@@ -391,7 +391,13 @@ public class FXLauncherPane extends BorderPane {
         uiRestartConfAppBtn.setVisible(false);
         uiUndoConfAppBtn.setVisible(false);
         chooConfButton.setOnAction(evt -> chooseRootFile());
-        uiRestartConfAppBtn.setOnAction(evt -> restartConf());
+        uiRestartConfAppBtn.setOnAction(evt -> {
+            try {
+                restartConf();
+            } catch (BackingStoreException | URISyntaxException | IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+            }
+        });
         uiUndoConfAppBtn.setOnAction(evt -> undoConf());
     }
 
@@ -857,9 +863,10 @@ public class FXLauncherPane extends BorderPane {
         }
     }
 
-    private void restartConf() {
+    private void restartConf() throws IOException, URISyntaxException, BackingStoreException {
         final String oldRoot = ConfigurationRoot.getRoot();
         final String confRootStr = confFolderField.getText();
+
         if (confRootStr == null || confRootStr.isEmpty()) {
             throw new RuntimeException("Unexpected behaviour. The configuration directory text field can't be null or empty.");
         }
@@ -868,65 +875,22 @@ public class FXLauncherPane extends BorderPane {
         // check if the path provided does not already contains the .sirs folder
         Path sirsPath = Paths.get(confRootStr, "." + SirsCore.NAME).toAbsolutePath();
         if (Files.isDirectory(sirsPath)) {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    final Alert alert1 = new Alert(Alert.AlertType.CONFIRMATION, "Le dossier de configuration " + SirsCore.NAME + " existe déjà dans le répertoire indiqué. Souhaitez-vous écraser le dossier existant ?", ButtonType.NO, ButtonType.YES);
-                    alert1.setResizable(true);
-                    final Optional<ButtonType> res = alert1.showAndWait();
-                    if (res.isPresent() && ButtonType.YES.equals(res.get())) {
-                        try {
-                            ConfigurationRoot.delete(sirsPath);
-                            ConfigurationRoot.setRootAndMove(oldRoot, confRootStr);
-                        } catch (IOException ex) {
-                            SirsCore.LOGGER.log(Level.SEVERE, null, ex);
-                        }
-                    } else {
-                        ConfigurationRoot.setRoot(confRootStr);
-                    }
-                    try {
-                        ConfigurationRoot.flush();
-                    } catch (BackingStoreException ex) {
-                        SirsCore.LOGGER.log(Level.SEVERE, null, ex);
-                    }
-
-                    // Restart the application
-                    SirsCore.LOGGER.log(Level.INFO, "The CONFIGURATION_FOLDER_PATH has changed. The application restart to update the global variables");
-                    try {
-                        restartCore();
-                    } catch (URISyntaxException ex) {
-                        SirsCore.LOGGER.log(Level.INFO, null, ex);
-                    } catch (IOException ex) {
-                        SirsCore.LOGGER.log(Level.INFO, null, ex);
-                    }
-                }
-            });
+            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Le dossier de configuration " + SirsCore.NAME + " existe déjà dans le répertoire indiqué. Souhaitez-vous écraser le dossier existant ?", ButtonType.NO, ButtonType.YES);
+            alert.setResizable(true);
+            final Optional<ButtonType> res = alert.showAndWait();
+            if (res.isPresent() && ButtonType.YES.equals(res.get())) {
+                ConfigurationRoot.delete(sirsPath);
+                ConfigurationRoot.setRootAndMove(oldRoot, confRootStr);
+            } else {
+                ConfigurationRoot.setRoot(confRootStr);
+            }
         } else {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        ConfigurationRoot.setRootAndMove(oldRoot, confRootStr);
-                    } catch (IOException ex) {
-                        SirsCore.LOGGER.log(Level.SEVERE, null, ex);
-                    }
-                    try {
-                        ConfigurationRoot.flush();
-                    } catch (BackingStoreException ex) {
-                        SirsCore.LOGGER.log(Level.SEVERE, null, ex);
-                    }
-                    // Restart the application
-                    SirsCore.LOGGER.log(Level.INFO, "The CONFIGURATION_FOLDER_PATH has changed. The application restart to update the global variables");
-                    try {
-                        restartCore();
-                    } catch (URISyntaxException ex) {
-                        SirsCore.LOGGER.log(Level.INFO, null, ex);
-                    } catch (IOException ex) {
-                        SirsCore.LOGGER.log(Level.INFO, null, ex);
-                    }
-                }
-            });
+            ConfigurationRoot.setRootAndMove(oldRoot, confRootStr);
         }
+        ConfigurationRoot.flush();
+        // Restart the application
+        SirsCore.LOGGER.log(Level.INFO, "The CONFIGURATION_FOLDER_PATH has changed. The application restart to update the global variables");
+        restartCore();
     }
 
     private void undoConf() {
