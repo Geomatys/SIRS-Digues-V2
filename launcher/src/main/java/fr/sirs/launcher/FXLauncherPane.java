@@ -127,6 +127,11 @@ import org.geotoolkit.referencing.IdentifiedObjects;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.apache.sis.referencing.CRS;
+import org.geotoolkit.internal.io.JNDI;
+import org.hsqldb.jdbc.JDBCDataSource;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  *
@@ -394,7 +399,7 @@ public class FXLauncherPane extends BorderPane {
         uiRestartConfAppBtn.setOnAction(evt -> {
             try {
                 restartConf();
-            } catch (BackingStoreException | URISyntaxException | IOException ex) {
+            } catch (SQLException | BackingStoreException | URISyntaxException | IOException ex) {
                 LOGGER.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
             }
         });
@@ -863,7 +868,7 @@ public class FXLauncherPane extends BorderPane {
         }
     }
 
-    private void restartConf() throws IOException, URISyntaxException, BackingStoreException {
+    private void restartConf() throws IOException, URISyntaxException, BackingStoreException, SQLException {
         final String oldRoot = ConfigurationRoot.getRoot();
         final String confRootStr = confFolderField.getText();
 
@@ -872,6 +877,10 @@ public class FXLauncherPane extends BorderPane {
         }
         // check no change
         if (oldRoot.equals(confRootStr)) return;
+        // close EPSG database connection
+        DataSource ds = JNDI.getEPSG();
+        Connection conn = ds.getConnection();
+        conn.close();
         // check if the path provided does not already contains the .sirs folder
         Path sirsPath = Paths.get(confRootStr, "." + SirsCore.NAME).toAbsolutePath();
         if (Files.isDirectory(sirsPath)) {

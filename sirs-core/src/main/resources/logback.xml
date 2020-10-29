@@ -1,4 +1,4 @@
-<configuration scan="true">
+<configuration>
 
   <contextListener class="fr.sirs.logging.LoggerStartupListener">
     <resetJUL>true</resetJUL>
