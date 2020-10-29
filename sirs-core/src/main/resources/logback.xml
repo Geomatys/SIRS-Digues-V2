@@ -11,7 +11,7 @@
     </encoder>
   </appender>
 
-  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+  <appender name="FILE" class="fr.sirs.logging.LoggerFileAppender">
     <file>${CONF_PATH}/logs/sirs.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
       <fileNamePattern>${CONF_PATH}/logs/sirs.%i.log.gz</fileNamePattern>

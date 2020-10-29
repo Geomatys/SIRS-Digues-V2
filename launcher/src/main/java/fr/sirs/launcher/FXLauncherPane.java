@@ -128,10 +128,10 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.apache.sis.referencing.CRS;
 import org.geotoolkit.internal.io.JNDI;
-import org.hsqldb.jdbc.JDBCDataSource;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import fr.sirs.logging.LoggerFileAppender;
 
 /**
  *
@@ -881,6 +881,7 @@ public class FXLauncherPane extends BorderPane {
         DataSource ds = JNDI.getEPSG();
         Connection conn = ds.getConnection();
         conn.close();
+        LoggerFileAppender.getInstance().stop();
         // check if the path provided does not already contains the .sirs folder
         Path sirsPath = Paths.get(confRootStr, "." + SirsCore.NAME).toAbsolutePath();
         if (Files.isDirectory(sirsPath)) {
