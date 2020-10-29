@@ -891,9 +891,8 @@ public class SirsCore {
                         if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                             try {
                                 FileUtils.deleteDirectory(potentialConf.toFile());
-                                Files.createDirectories(potentialConf);
                             } catch (IOException ex) {
-                                throw new ExceptionInInitializerError(ex);
+                                SirsCore.LOGGER.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
                             }
                         }
                     }

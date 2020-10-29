@@ -41,27 +41,16 @@ public class ConfigurationRoot {
         return rootStr;
     }
 
-    public static void setRootAndMove(String from, String to) throws IOException {
-        try {
-            ConfigurationRoot.move(from, to);
-            Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
-            prefs.put("CONFIGURATION_FOLDER_PATH", to);
-        } catch (SecurityException ex) {
-            //undo the movement performed
-            ConfigurationRoot.move(to, from);
-            throw new SecurityException("A security manager refuses access to preferences. " + ex);
-        } catch (IllegalStateException ex) {
-            //undo the movement performed
-            ConfigurationRoot.move(to, from);
-            throw new IllegalStateException("The node for package 'SirsCore.class' has been removed." + ex);
-        }
+    public static void setRootAndCopy(String from, String to) throws IOException {
+        ConfigurationRoot.copy(from, to);
+        setRoot(to);
     }
 
     public static void setRoot(String toSet) {
         getRootNode().put("CONFIGURATION_FOLDER_PATH", toSet);
     }
 
-    public static void move(String from, String to) throws IOException {
+    public static void copy(String from, String to) throws IOException {
         if (from == null || from.isEmpty()) {
             throw new IllegalArgumentException("from argument can't be null or empty");
         }
@@ -72,8 +61,7 @@ public class ConfigurationRoot {
         Path src = Paths.get(from, "." + SirsCore.NAME);
         Path dest = Paths.get(to, "." + SirsCore.NAME);
 
-        FileUtils.moveDirectory(src.toFile(), dest.toFile());
-        SirsCore.LOGGER.log(Level.INFO, "Directory " + src + " moved successfully to " + dest + ".");
+        FileUtils.copyDirectory(src.toFile(), dest.toFile());
     }
     
     /**

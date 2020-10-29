@@ -127,13 +127,7 @@ import org.geotoolkit.referencing.IdentifiedObjects;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.apache.sis.referencing.CRS;
-import org.geotoolkit.internal.io.JNDI;
-import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.SQLException;
-import fr.sirs.logging.LoggerFileAppender;
-import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.LoggerContext;
 
 /**
  *
@@ -877,32 +871,36 @@ public class FXLauncherPane extends BorderPane {
         if (confRootStr == null || confRootStr.isEmpty()) {
             throw new RuntimeException("Unexpected behaviour. The configuration directory text field can't be null or empty.");
         }
+
         // check no change
         if (oldRoot.equals(confRootStr)) return;
-        // close EPSG database connection
-        DataSource ds = JNDI.getEPSG();
-        Connection conn = ds.getConnection();
-        conn.close();
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-        loggerContext.stop();
+
         // check if the path provided does not already contains the .sirs folder
         Path sirsPath = Paths.get(confRootStr, "." + SirsCore.NAME).toAbsolutePath();
+
         if (Files.isDirectory(sirsPath)) {
             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Le dossier de configuration " + SirsCore.NAME + " existe déjà dans le répertoire indiqué. Souhaitez-vous écraser le dossier existant ?", ButtonType.NO, ButtonType.YES);
             alert.setResizable(true);
             final Optional<ButtonType> res = alert.showAndWait();
             if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                 ConfigurationRoot.delete(sirsPath);
-                ConfigurationRoot.setRootAndMove(oldRoot, confRootStr);
+                ConfigurationRoot.setRootAndCopy(oldRoot, confRootStr);
             } else {
                 ConfigurationRoot.setRoot(confRootStr);
             }
         } else {
-            ConfigurationRoot.setRootAndMove(oldRoot, confRootStr);
+            ConfigurationRoot.setRootAndCopy(oldRoot, confRootStr);
         }
         ConfigurationRoot.flush();
+
+        // Indicate with an alert that the previous folder must deleted manually
+        final Alert alert2 = new Alert(Alert.AlertType.INFORMATION, "L'ancien dossier de configuration " + Paths.get(oldRoot, "." + SirsCore.NAME).toAbsolutePath() + " doit être supprimé manuellement.");
+        alert2.setResizable(true);
+        alert2.showAndWait();
+
         // Restart the application
         SirsCore.LOGGER.log(Level.INFO, "The CONFIGURATION_FOLDER_PATH has changed. The application restart to update the global variables");
+
         restartCore();
     }
 
