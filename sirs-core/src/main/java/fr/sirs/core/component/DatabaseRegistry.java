@@ -67,9 +67,15 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import org.apache.http.params.HttpParams;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
@@ -78,6 +84,7 @@ import org.ektorp.ReplicationCommand;
 import org.ektorp.ReplicationStatus;
 import org.ektorp.ReplicationTask;
 import org.ektorp.http.HttpResponse;
+import org.ektorp.http.IdleConnectionMonitor;
 import org.ektorp.http.PreemptiveAuthRequestInterceptor;
 import org.ektorp.http.RestTemplate;
 import org.ektorp.http.StdHttpClient;
@@ -1256,6 +1263,36 @@ public class DatabaseRegistry {
             }
             return client;
         }
+
+        @Override
+        public ClientConnectionManager configureConnectionManager(
+                HttpParams params) {
+
+            if (conman == null) {
+                SchemeRegistry schemeRegistry = new SchemeRegistry();
+                schemeRegistry.register(configureScheme());
+                if (enableSSL) {
+                    /* In case where the proxy is accessible with a HTTP protocole
+                    * and the initial request use HTTPS, scheme registry doen't
+                    * recognized the requested Scheme 'http' - Redmine-7235.
+                    * An other (better?) solution would be to search https scheme
+                    * raiser than http one.
+                     */
+                    schemeRegistry.register(new Scheme("http", port, PlainSocketFactory.getSocketFactory()));
+                }
+
+                PoolingClientConnectionManager cm = new PoolingClientConnectionManager(schemeRegistry);
+                cm.setMaxTotal(maxConnections);
+                cm.setDefaultMaxPerRoute(maxConnections);
+                conman = cm;
+            }
+
+            if (cleanupIdleConnections) {
+                IdleConnectionMonitor.monitor(conman);
+            }
+            return conman;
+        }
+
     }
 
     private static class SirsFilters {}
