@@ -74,9 +74,9 @@
                         ${additional.resources}
                     </additionalAppResources>
                     <!-- To activate back to allow the user to choose the install directory, only on windows -->
-<!--                    <bundleArguments>
+                    <bundleArguments>
                         <installdirChooser>true</installdirChooser>
-                    </bundleArguments>-->
+                    </bundleArguments>
                     <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
                     <mainClass>fr.sirs.launcher.Launcher</mainClass>
                     <needMenu>true</needMenu>
