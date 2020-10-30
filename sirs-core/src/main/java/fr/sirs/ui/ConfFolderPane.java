@@ -33,9 +33,9 @@ import javafx.stage.DirectoryChooser;
 import org.apache.sis.util.ArgumentChecks;
 
 /**
- * Popup load in SirsCore class once, to enter the path to the configuration folder .sirs
+ * Popup loaded when the application is started for the first time, to enter the path to the configuration folder .sirs
  * 
- * @author maximegavens
+ * @author Maxime Gavens - Geomatys
  */
 public class ConfFolderPane extends GridPane {
 

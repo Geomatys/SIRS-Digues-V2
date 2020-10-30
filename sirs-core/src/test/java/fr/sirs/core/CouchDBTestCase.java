@@ -23,6 +23,7 @@ import fr.sirs.core.authentication.SIRSAuthenticator;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.util.SystemProxySelector;
+import java.io.File;
 import java.io.IOException;
 import java.net.Authenticator;
 import java.net.ProxySelector;
@@ -104,7 +105,8 @@ public abstract class CouchDBTestCase extends TestCase {
     @BeforeClass
     public static void initConfigurationPreferences() throws BackingStoreException {
         Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
-        prefs.put("CONFIGURATION_FOLDER_PATH", "/tmp/");
+        Path tmpPath = new File(System.getProperty("java.io.tmpdir")).toPath();
+        prefs.put("CONFIGURATION_FOLDER_PATH", tmpPath.toString());
         prefs.flush();
     }
 

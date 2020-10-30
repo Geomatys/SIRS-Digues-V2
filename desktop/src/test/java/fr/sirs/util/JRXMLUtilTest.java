@@ -19,6 +19,8 @@
 package fr.sirs.util;
 
 import fr.sirs.core.SirsCore;
+import java.io.File;
+import java.nio.file.Path;
 import java.util.prefs.Preferences;
 import java.util.prefs.BackingStoreException;
 import org.junit.AfterClass;
@@ -34,7 +36,8 @@ public class JRXMLUtilTest {
     @BeforeClass
     public static void initConfigurationPreferences() throws BackingStoreException {
         Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
-        prefs.put("CONFIGURATION_FOLDER_PATH", "/tmp/");
+        Path tmpPath = new File(System.getProperty("java.io.tmpdir")).toPath();
+        prefs.put("CONFIGURATION_FOLDER_PATH", tmpPath.toString());
         prefs.flush();
     }
 
