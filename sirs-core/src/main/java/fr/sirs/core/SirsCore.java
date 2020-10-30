@@ -143,7 +143,7 @@ public class SirsCore {
 
     public static final String SPRING_CONTEXT = "classpath:/fr/sirs/spring/application-context.xml";
     
-    public static Path CONFIGURATION_PATH;
+    public static final Path CONFIGURATION_PATH;
     static {
         CONFIGURATION_PATH = SirsCore.initConfigurationFolderPath();
     }
