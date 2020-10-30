@@ -34,6 +34,7 @@ import java.awt.Desktop;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import fr.sirs.ui.ConfFolderPane;
 
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.File;
@@ -64,11 +65,16 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.image.Image;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -97,6 +103,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.CoordinateOperationFactory;
 import org.opengis.util.FactoryException;
 import org.slf4j.bridge.SLF4JBridgeHandler;
+
+import org.apache.commons.io.FileUtils;
 
 
 public class SirsCore {
@@ -134,23 +142,10 @@ public class SirsCore {
     public static final String COMPONENT_PACKAGE="fr.sirs.core.component";
 
     public static final String SPRING_CONTEXT = "classpath:/fr/sirs/spring/application-context.xml";
-
+    
     public static final Path CONFIGURATION_PATH;
     static {
-        Path tmpPath = Paths.get(System.getProperty("user.home"), "."+NAME);
-        if (!Files.isDirectory(tmpPath)) {
-            try {
-                Files.createDirectory(tmpPath);
-            } catch (IOException ex) {
-                try {
-                    tmpPath = Files.createTempDirectory(NAME);
-                } catch (IOException ex1) {
-                    ex.addSuppressed(ex1);
-                    throw new ExceptionInInitializerError(ex);
-                }
-            }
-        }
-        CONFIGURATION_PATH = tmpPath;
+        CONFIGURATION_PATH = SirsCore.initConfigurationFolderPath();
     }
 
     public static final Path DATABASE_PATH = CONFIGURATION_PATH.resolve("database");
@@ -292,9 +287,9 @@ public class SirsCore {
     protected static final String NTV2_RESOURCE = "/fr/sirs/ntv2/";
 
     /**
-     * User directory root folder.
+     * Configuration directory root folder.
      *
-     * @return {user.home}/.sirs
+     * @return le chemin vers le dossier de configuration .sirs
      */
     public static String getConfigPath(){
         return CONFIGURATION_PATH.toString();
@@ -335,8 +330,9 @@ public class SirsCore {
         Setup.initialize(noJavaPrefs);
 
         final String url = "jdbc:hsqldb:" + SirsCore.EPSG_PATH.resolve("db").toUri();
+        final String decodedUrl = java.net.URLDecoder.decode(url, "UTF-8");
         final JDBCDataSource ds = new JDBCDataSource();
-        ds.setDatabase(url);
+        ds.setDatabase(decodedUrl);
         JNDI.setEPSG(ds);
 
         // On tente d'installer la grille NTV2 pour améliorer la précision du géo-réferencement.
@@ -861,5 +857,73 @@ public class SirsCore {
             }
         } else
             return null;
+    }
+
+    private static Path initConfigurationFolderPath() {
+        //On récupère la préférence utilisateur cencée contenir le chemin vers dossier de configuration
+        Preferences prefs = Preferences.userNodeForPackage(SirsCore.class);
+        String rootPath = prefs.get("CONFIGURATION_FOLDER_PATH", "none");
+
+        //Au premier lancement de l'application, on ouvre une popup afin de renseigner l'emplacement
+        //du dossier de configuration, puis on enregistre son chemin dans le fichier de properties
+        Path confPath = Paths.get("");
+        if (rootPath.equals("none")) {
+            try {
+                final Dialog dialog    = new Dialog();
+                final DialogPane pane  = new DialogPane();
+                final ConfFolderPane ipane = new ConfFolderPane();
+                pane.setContent(ipane);
+                pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+                dialog.setDialogPane(pane);
+                dialog.setResizable(true);
+                dialog.setTitle("Emplacement du dossier de configuration");
+
+                final Optional opt = dialog.showAndWait();
+                if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+                    final String currentPath = ipane.rootFolderField.getText();
+
+                    //Vérifie si le dossier de conf n'existe pas déjà, si oui proposer de le supprimer.
+                    Path potentialConf = Paths.get(currentPath, "."+NAME);
+                    if (Files.isDirectory(potentialConf)) {
+                        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Le dossier de configuration ." + SirsCore.NAME + " existe déjà dans le répertoire indiqué. Souhaitez-vous écraser le dossier existant ?", ButtonType.NO, ButtonType.YES);
+                        alert.setResizable(true);
+                        final Optional<ButtonType> res = alert.showAndWait();
+                        if (res.isPresent() && ButtonType.YES.equals(res.get())) {
+                            try {
+                                FileUtils.deleteDirectory(potentialConf.toFile());
+                            } catch (IOException ex) {
+                                SirsCore.LOGGER.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+                            }
+                        }
+                    }
+
+                    File f = new File(currentPath);
+                    if (f.isDirectory()) {
+                        rootPath = f.getPath();
+                        prefs.put("CONFIGURATION_FOLDER_PATH", rootPath);
+                    } else {
+                        throw new ExceptionInInitializerError("The location " + currentPath + " is not a folder.");
+                    }
+                    confPath = Paths.get(rootPath, "."+NAME);
+                } else {
+                    SirsCore.LOGGER.log(Level.INFO, "The configuration folder dialog is canceled.");
+                    System.exit(0);
+                }
+            } catch (ExceptionInInitializerError ex) {
+                throw new ExceptionInInitializerError(ex);
+            }
+        } else {
+            confPath = Paths.get(rootPath, "."+NAME);
+        }
+        SirsCore.LOGGER.log(Level.INFO, "The current configuration path is {0}.", rootPath);
+
+        if (!Files.isDirectory(confPath)) {
+            try {
+                Files.createDirectories(confPath);
+            } catch (IOException ex) {
+                throw new ExceptionInInitializerError(ex);
+            }
+        }
+        return confPath;
     }
 }
