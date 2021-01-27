@@ -18,11 +18,10 @@
  */
 package fr.sirs.theme.ui.pojotable;
 
+import fr.sirs.core.model.PointDZ;
 import fr.sirs.core.model.PointXYZ;
-import fr.sirs.theme.ui.FXAbstractImportPointLeve;
-import fr.sirs.theme.ui.FXImportDZ;
-import fr.sirs.theme.ui.FXImportXYZ;
-import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.core.model.ProfilTravers;
+import fr.sirs.theme.ui.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ButtonType;
@@ -47,8 +46,23 @@ public class ImportAction implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
         final FXAbstractImportPointLeve importCoord;
-        if(PointXYZ.class.isAssignableFrom(pojoClass)) importCoord = new FXImportXYZ(pojoTable);
-        else importCoord = new FXImportDZ(pojoTable);
+        if(PointXYZ.class.isAssignableFrom(pojoClass)) {
+            importCoord = new FXImportXYZ(pojoTable);
+        } else if (PointDZ.class.isAssignableFrom(pojoClass)) {
+            importCoord = new FXImportDZ(pojoTable);
+        } else {
+            final FXImportProfilTravers ic = new FXImportProfilTravers(pojoTable);
+            final Dialog dialog = new Dialog();
+            final DialogPane pane = new DialogPane();
+            pane.getButtonTypes().add(ButtonType.CLOSE);
+            pane.setContent(ic);
+            dialog.setDialogPane(pane);
+            dialog.setResizable(true);
+            dialog.setTitle("Import de points");
+            dialog.setOnCloseRequest(event1 -> dialog.hide());
+            dialog.show();
+            return;
+        }
 
         final Dialog dialog = new Dialog();
         final DialogPane pane = new DialogPane();
