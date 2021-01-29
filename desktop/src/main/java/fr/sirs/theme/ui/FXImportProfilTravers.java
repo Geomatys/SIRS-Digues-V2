@@ -20,7 +20,7 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.ProfilTraversRepository;
 import fr.sirs.core.model.*;
 
 import java.beans.PropertyChangeEvent;
@@ -31,10 +31,12 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import fr.sirs.ui.Growl;
+import fr.sirs.util.property.SirsPreferences;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -76,13 +78,17 @@ public class FXImportProfilTravers extends BorderPane {
 
     @FXML protected GridPane uiPaneConfig;
 
+    @FXML protected CheckBox uiCrushingCheck;
+
     protected FeatureStore store;
 
     protected final ObservableList<Feature> selectionProperty = FXCollections.observableArrayList();
     protected final PojoTable pojoTable;
 
-    protected final List<ProfilTravers> ptList;
-    protected final Map<String, String> ehDesignationAndId;
+    protected final Map<String, String> ehDesignationToId;
+
+    protected final Map<String, Map<String, String>> checkMap;
+    protected String designationCol;
 
 
     public FXImportProfilTravers(final PojoTable pojoTable) {
@@ -91,12 +97,14 @@ public class FXImportProfilTravers extends BorderPane {
         uiPaneConfig.setDisable(true);
         uiTable.setEditable(false);
         uiTable.setLoadAll(true);
+        uiCrushingCheck.setSelected(true);
 
         this.pojoTable = pojoTable;
 
-        ptList = this.pojoTable.repo.getAll();
         List<EvenementHydraulique> eh = this.pojoTable.session.getRepositoryForClass(EvenementHydraulique.class).getAll();
-        ehDesignationAndId = eh.stream().collect(Collectors.toMap(EvenementHydraulique::getDesignation, EvenementHydraulique::getId));
+        ehDesignationToId = eh.stream().collect(Collectors.toMap(EvenementHydraulique::getDesignation, EvenementHydraulique::getId));
+
+        checkMap = new HashMap<>();
     }
 
     @FXML
@@ -107,7 +115,7 @@ public class FXImportProfilTravers extends BorderPane {
             fileChooser.setInitialDirectory(prevPath);
         }
         final File file = fileChooser.showOpenDialog(getScene().getWindow());
-        if(file!=null){
+        if (file!=null) {
             setPreviousPath(file.getParentFile());
             uiPath.setText(file.getAbsolutePath());
         }
@@ -116,9 +124,9 @@ public class FXImportProfilTravers extends BorderPane {
     private static File getPreviousPath() {
         final Preferences prefs = Preferences.userNodeForPackage(FXImportProfilTravers.class);
         final String str = prefs.get("path", null);
-        if(str!=null){
+        if (str != null) {
             final File file = new File(str);
-            if(file.isDirectory()){
+            if (file.isDirectory()) {
                 return file;
             }
         }
@@ -147,16 +155,21 @@ public class FXImportProfilTravers extends BorderPane {
         final String url = uiPath.getText();
         final File file = new File(uiPath.getText());
 
-        uiPaneConfig.setDisable(true);
-
         selectionProperty.removeAll(selectionProperty);
 
-        try{
-            if(url.toLowerCase().endsWith(".txt") || url.toLowerCase().endsWith(".csv")){
+        // init control panel
+        uiPaneConfig.setDisable(true);
+        uiPaneConfig.getChildren().clear();
+        uiPaneConfig.add(new Label("Colonnes"), 0, 0);
+        uiPaneConfig.add(new Label("Types de paramètres hydrauliques"), 1, 0);
+        uiPaneConfig.add(new Label("Évènements hydrauliques"), 2, 0);
+
+        try {
+            if (url.toLowerCase().endsWith(".txt") || url.toLowerCase().endsWith(".csv")) {
                 final char separator = (uiSeparator.getText().isEmpty()) ? ';' : uiSeparator.getText().charAt(0);
                 store = new CSVFeatureStore(file, "no namespace", separator);
                 uiPaneConfig.setDisable(false);
-            }else{
+            } else {
                 final Alert alert = new Alert(Alert.AlertType.ERROR, "Le fichier sélectionné n'est pas un csv ou txt", ButtonType.OK);
                 alert.setResizable(true);
                 alert.showAndWait();
@@ -171,19 +184,18 @@ public class FXImportProfilTravers extends BorderPane {
 
             // liste des propriétés
             final ObservableList<PropertyType> properties = getPropertiesFromFeatures(col);
-            final List<String> ehDesignation = this.ehDesignationAndId.keySet().stream()
+            final List<String> ehDesignation = this.ehDesignationToId.keySet().stream()
                     .sorted(Comparator.comparingInt(Integer::parseInt)).collect(toList());
             ehDesignation.add(0, "");
             final ObservableList<String> ehObs = FXCollections.observableArrayList(ehDesignation);
-            final ObservableList<String> measureObs = FXCollections.observableArrayList("designation", "debit", "vitesse", "cote");
-
-            List<ComboBox<String>> measureTypes = new ArrayList<>();
-            List<ComboBox<String>> evenementHydrauliques = new ArrayList<>();
+            final ObservableList<String> measureObs = FXCollections.observableArrayList("designation", "debit", "cote", "vitesse");
 
             for (int i = 0; i < properties.size(); i++) {
                 Label label = new Label(properties.get(i).getName().toString());
                 ComboBox<String> measure = new ComboBox<>();
                 ComboBox<String> eh = new ComboBox<>();
+
+                label.setAlignment(Pos.CENTER);
 
                 measure.setItems(measureObs);
                 eh.setItems(ehObs);
@@ -192,9 +204,6 @@ public class FXImportProfilTravers extends BorderPane {
                     measure.getSelectionModel().clearAndSelect(0);
                     eh.getSelectionModel().clearAndSelect(0);
                 }
-
-                measureTypes.add(measure);
-                evenementHydrauliques.add(eh);
 
                 uiPaneConfig.add(label, 0, i+1);
                 uiPaneConfig.add(measure, 1, i+1);
@@ -209,7 +218,7 @@ public class FXImportProfilTravers extends BorderPane {
                 public void itemChange(CollectionChangeEvent<MapItem> event) {}
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
-                    if(!FeatureMapLayer.SELECTION_FILTER_PROPERTY.equals(evt.getPropertyName())) return;
+                    if (!FeatureMapLayer.SELECTION_FILTER_PROPERTY.equals(evt.getPropertyName())) return;
 
                     selectionProperty.removeAll(selectionProperty);
                     final Id filter = layer.getSelectionFilter();
@@ -226,82 +235,46 @@ public class FXImportProfilTravers extends BorderPane {
                 }
             });
 
-        }catch(Exception ex){
+        } catch (Exception ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
             final Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK);
             alert.setResizable(true);
             alert.showAndWait();
-            return;
         }
-
     }
 
     protected void saveSelectionProfilTravers(){
         final ObservableList<Feature> features = selectionProperty;
-        final fr.sirs.Session sirsSession = Injector.getSession();
-        final AbstractSIRSRepository<ProfilTravers> repo = this.pojoTable.repo;
+        final ProfilTraversRepository repo = (ProfilTraversRepository) this.pojoTable.session.getRepositoryForClass(ProfilTravers.class);
         final Set<ProfilTravers> toUpdate = new HashSet<>();
         final Set<String> storePtDesignation = new HashSet<>();
 
-        for(final Feature feature : features){
-            ProfilTravers currentPt = null;
-            Map<String, ParametreHydrauliqueProfilTravers> EHtoPH = new HashMap<>();
-            ObservableList<Node> childrens = this.uiPaneConfig.getChildren();
+        // check integrity
+        for (final Feature feature : features) {
 
-            for (int i = 3; i < childrens.size(); i += 3) {
-                final String col = ((Label) childrens.get(i)).getText();
-                final String mes = ((ComboBox<String>) childrens.get(i+1)).getValue();
-                final String ehd = ((ComboBox<String>) childrens.get(i+2)).getValue();
+            // retrieves designation
+            final String toCheck = String.valueOf(feature.getPropertyValue(this.designationCol));
 
-                if (mes.equals("designation")) {
-                    final String currentDesignation = String.valueOf(feature.getPropertyValue(col));
-                    ProfilTravers ptFound = getProfilTraversByDesignation(currentDesignation);
-                    if (ptFound == null) {
-                        alert("La désignation " + currentDesignation + " n'a pas été trouvée.");
-                        return;
-                    }
-                    // check doublon
-                    if (storePtDesignation.contains(currentDesignation)) {
-                        alert("La désignation " + currentDesignation + " a été trouvée deux fois.");
-                        return;
-                    } else {
-                        storePtDesignation.add(currentDesignation);
-                    }
-                    currentPt = ptFound;
-                } else {
-                    if (!EHtoPH.containsKey(ehd)) {
-                        ParametreHydrauliqueProfilTravers tmp = sirsSession.getElementCreator().createElement(ParametreHydrauliqueProfilTravers.class, true);
-                        tmp.setEvenementHydrauliqueId(this.ehDesignationAndId.get(ehd));
-                        EHtoPH.put(ehd, tmp);
-                    }
-                    switch (mes) {
-                        case "debit":
-                            EHtoPH.get(ehd).setDebitPointe(Float.valueOf(String.valueOf(feature.getPropertyValue(col))));
-                            break;
-                        case "vitesse":
-                            EHtoPH.get(ehd).setVitessePointe(Float.valueOf(String.valueOf(feature.getPropertyValue(col))));
-                            break;
-                        case "cote":
-                            EHtoPH.get(ehd).setCoteEau(Float.valueOf(String.valueOf(feature.getPropertyValue(col))));
-                            break;
-                        default:
-                            throw new RuntimeException("Unexpected behaviour: the measurement values should be designation, debit, vitesse or cote");
-                    }
-                }
+            // check doublon
+            if (storePtDesignation.contains(toCheck)) {
+                alert("La désignation " + toCheck + " a été trouvé deux fois.");
+                return;
+            } else {
+                storePtDesignation.add(toCheck);
             }
-            
-            // Complete ProfilTravers found with Author attribute and Valid attribute
-            for (ParametreHydrauliqueProfilTravers val: EHtoPH.values()) {
-                val.setAuthor(sirsSession.getUtilisateur() == null? null : sirsSession.getUtilisateur().getId());
-                val.setValid(sirsSession.createValidDocuments().get());
-            } 
 
-            // Ensure current ProfilTravers is non null
-            if (currentPt == null) throw new RuntimeException("Unexpected behaviour");
+            // check existence
+            final List<ProfilTravers> ptList = repo.getByDesignation(toCheck);
+            if (ptList.size() == 0) {
+                error("Le profil en travers " + toCheck + " n'existe pas.");
+                return;
+            }
 
-            // Update ProfilTravers
-            currentPt.parametresHydrauliques.addAll(EHtoPH.values());
-            toUpdate.add(currentPt);
+            // check only one ProfilTravers found
+            if (ptList.size() >= 2) {
+                error("La désignation " + toCheck + " correspond à plusieurs profils en travers stockés en base.");
+                return;
+            }
         }
 
         // Confirm save popup
@@ -309,64 +282,161 @@ public class FXImportProfilTravers extends BorderPane {
                 ButtonType.NO, ButtonType.YES);
         alert.setResizable(true);
         final ButtonType res = alert.showAndWait().get();
-        if (ButtonType.YES == res) {
-            try {
-                for (ProfilTravers toUp: toUpdate) {
-                    repo.update(toUp);
+        if (ButtonType.NO == res) {
+            return;
+        }
+
+        try {
+            // retrieve values
+            for (final Feature feature : features) {
+                // designation
+                final String currentDesignation = String.valueOf(feature.getPropertyValue(this.designationCol));
+                final List<ProfilTravers> ptList = repo.getByDesignation(currentDesignation);
+                final ProfilTravers currentPt = ptList.get(0);
+
+                // get param values
+                for (Map.Entry<String, Map<String, String>> entry: checkMap.entrySet()) {
+                    for (Map.Entry<String, String> entry2 : entry.getValue().entrySet()) {
+                        String col = entry2.getValue();
+                        String val = String.valueOf(feature.getPropertyValue(col));
+                        entry2.setValue(val);
+                    }
                 }
 
-                final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
-                growlInfo.showAndFade();
-            } catch (Exception e) {
-                final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
-                growlError.showAndFade();
-                GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
-                SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
+                // Update ProfilTravers
+                completeProfilTravers(currentPt, checkMap);
+                repo.update(currentPt);
+            }
+            final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
+            growlInfo.showAndFade();
+        } catch (Exception e) {
+            final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
+            growlError.showAndFade();
+            GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
+            SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
+        }
+    }
+
+    private void completeProfilTravers(final ProfilTravers pt, final Map<String, Map<String, String>> EHtoPH) {
+        if (uiCrushingCheck.isSelected()) {
+            for (Map.Entry<String, Map<String, String>> entry: EHtoPH.entrySet()) {
+                boolean find = false;
+                for (ParametreHydrauliqueProfilTravers ph: pt.getParametresHydrauliques()) {
+                    final String ehId = ehDesignationToId.get(entry.getKey());
+                    if (ehId.equals(ph.getEvenementHydrauliqueId())) {
+                        setParameters(ph, entry.getValue());
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find) {
+                    addParametreHydraulique(pt, entry);
+                }
+            }
+        } else {
+            for (Map.Entry<String, Map<String, String>> entry: EHtoPH.entrySet()) {
+                boolean find = false;
+                for (ParametreHydrauliqueProfilTravers ph: pt.getParametresHydrauliques()) {
+                    final String ehId = ehDesignationToId.get(entry.getKey());
+                    if (ehId.equals(ph.getEvenementHydrauliqueId())) {
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find) {
+                    addParametreHydraulique(pt, entry);
+                }
+            }
+        }
+    }
+
+    private void addParametreHydraulique(final ProfilTravers pt, final Map.Entry<String, Map<String, String>> newParams) {
+        final fr.sirs.Session sirsSession = Injector.getSession();
+        final ParametreHydrauliqueProfilTravers newPh = sirsSession.getElementCreator().createElement(ParametreHydrauliqueProfilTravers.class, true);
+
+        newPh.setEvenementHydrauliqueId(this.ehDesignationToId.get(newParams.getKey()));
+        newPh.setAuthor(sirsSession.getUtilisateur() == null? null : sirsSession.getUtilisateur().getId());
+        newPh.setValid(sirsSession.createValidDocuments().get());
+
+        setParameters(newPh, newParams.getValue());
+        pt.parametresHydrauliques.add(newPh);
+    }
+
+    private void setParameters(final ParametreHydrauliqueProfilTravers ph, final Map<String, String> newParams) {
+        for (Map.Entry<String, String> entry: newParams.entrySet()) {
+            switch (entry.getKey()) {
+                case "debit":
+                    ph.setDebitPointe(Float.valueOf(entry.getValue()));
+                    break;
+                case "cote":
+                    ph.setVitessePointe(Float.valueOf(entry.getValue()));
+                    break;
+                case "vitesse":
+                    ph.setCoteEau(Float.valueOf(entry.getValue()));
+                    break;
+                default:
+                    throw new RuntimeException("Unexpected behaviour: " + entry.getKey() + " unknown.");
             }
         }
     }
 
     private boolean checkPaneConfig() {
         ObservableList<Node> childrens = this.uiPaneConfig.getChildren();
-        Map<String, List<String>> checkMap = new HashMap<>();
-        boolean designationFound = false;
+        checkMap.clear();
+        designationCol = null;
 
+        // check auto increment preference true
+        final String propertyAutoIncrementStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.DESIGNATION_AUTO_INCREMENT);
+        if (Boolean.FALSE.equals(Boolean.valueOf(propertyAutoIncrementStr))) {
+            alert("Vous devez renseigner une colonne pour les désignations des paramètres hydrauliques ou activer l'auto incrémentation.");
+            return false;
+        }
+
+        // check configuration panel
         for (int i = 3; i < childrens.size(); i += 3) {
             final String col = ((Label) childrens.get(i)).getText();
             final String mes = ((ComboBox<String>) childrens.get(i + 1)).getValue();
             final String ehd = ((ComboBox<String>) childrens.get(i + 2)).getValue();
 
             if (mes.equals("designation")) {
-                // Vérification de l'unicité de la colonne désignation
-                if (designationFound) {
+                // Vérification de l'unicité de la colonne désignation des Profil en travers
+                if (designationCol != null) {
                     alert("Une seule colonne doit référencer la désignation des profils en travers.");
                     return false;
                 } else {
-                    designationFound = true;
+                    designationCol = col;
                 }
             } else if (ehd.isEmpty()) {
                 alert(String.format("Le paramètre hydraulique %s (colonne:%s) n'est associée à aucun évènement hydraulique.", mes, col));
                 return false;
             } else {
                 // Vérification de non doublon des paramètres hydrauliques pour un même évènement hydraulique
-                if (!checkMap.containsKey(ehd)) checkMap.put(ehd, new ArrayList<>());
-                if (checkMap.get(ehd).contains(mes)) {
+                if (!checkMap.containsKey(ehd)) checkMap.put(ehd, new HashMap<>());
+                if (checkMap.get(ehd).containsKey(mes)) {
                     alert(String.format("Le paramètre hydraulique %s est associé deux fois à l'évènement hydraulique %s", mes, ehd));
                     return false;
                 } else {
-                    checkMap.get(ehd).add(mes);
+                    checkMap.get(ehd).put(mes, col);
                 }
             }
+        }
+
+        // Check ProfilTravers designation found
+        if (designationCol == null) {
+            alert("Aucune colonne ne référence les désignations des profils en travers");
+            return false;
         }
         return true;
     }
 
-    private ProfilTravers getProfilTraversByDesignation(String designation) {
-        return this.ptList.stream().filter(pt -> designation.equals(pt.getDesignation())).findAny().orElse(null);
-    }
-
     private void alert(final String msg) {
         final Alert alert = new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK);
+        alert.setResizable(true);
+        alert.show();
+    }
+
+    private void error(final String msg) {
+        final Alert alert = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
         alert.setResizable(true);
         alert.show();
     }

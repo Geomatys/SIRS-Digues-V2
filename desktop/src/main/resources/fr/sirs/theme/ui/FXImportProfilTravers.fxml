@@ -50,13 +50,11 @@
                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                        </padding>
                      <children>
-                        <Label text="Colonne" />
-                        <Label text="Type de mesure" GridPane.columnIndex="1" />
-                        <Label text="Ev.Hydraulique" GridPane.columnIndex="2" />
                      </children>
                    </GridPane>
                </content>
             </ScrollPane>
+            <CheckBox fx:id="uiCrushingCheck" mnemonicParsing="false" text="Ecrasement des paramètres hydrauliques existant" />
          </children>
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
