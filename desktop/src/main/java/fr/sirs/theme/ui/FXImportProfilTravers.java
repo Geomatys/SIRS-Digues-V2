@@ -75,6 +75,11 @@ public class FXImportProfilTravers extends BorderPane {
     @FXML protected FXFeatureTable uiTable;
 
     @FXML protected GridPane uiPaneConfig;
+    @FXML protected ComboBox<String> uiPT;
+    @FXML protected ComboBox<String> uiAttCote;
+    @FXML protected ComboBox<String> uiAttDebit;
+    @FXML protected ComboBox<String> uiAttVitesse;
+    @FXML protected ComboBox<String> uiEH;
 
     @FXML protected CheckBox uiCrushingCheck;
 
@@ -84,12 +89,6 @@ public class FXImportProfilTravers extends BorderPane {
     protected final PojoTable pojoTable;
 
     protected final LinkedHashMap<String, String> ehMap;
-
-    @FXML protected ComboBox<String> uiPT;
-    @FXML protected ComboBox<String> uiAttCote;
-    @FXML protected ComboBox<String> uiAttDebit;
-    @FXML protected ComboBox<String> uiAttVitesse;
-    @FXML protected ComboBox<String> uiEH;
 
 
     public FXImportProfilTravers(final PojoTable pojoTable) {
@@ -326,7 +325,6 @@ public class FXImportProfilTravers extends BorderPane {
             GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
             SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
-
     }
 
     private void setParameters(final ParametreHydrauliqueProfilTravers ph, Feature feature) {
@@ -350,6 +348,11 @@ public class FXImportProfilTravers extends BorderPane {
         // check at least one measure selected
         if (uiAttCote.getValue().isEmpty() && uiAttDebit.getValue().isEmpty() && uiAttVitesse.getValue().isEmpty()) {
             alert("Vous devez renseigner au moins une colonnes pour les valeurs de debit, cote ou vitesse.");
+            return false;
+        }
+        // check evenenement hydraulique
+        if (uiEH.getValue().isEmpty()) {
+            error("Aucun évènement hydraulique n'a été trouvé en base.");
             return false;
         }
         return true;
