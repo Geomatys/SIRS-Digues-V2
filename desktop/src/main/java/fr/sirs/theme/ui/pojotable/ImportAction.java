@@ -58,7 +58,7 @@ public class ImportAction implements EventHandler<ActionEvent> {
             pane.setContent(ic);
             dialog.setDialogPane(pane);
             dialog.setResizable(true);
-            dialog.setTitle("Import de profils en travers");
+            dialog.setTitle("Import de paramètres hydrauliques");
             dialog.setOnCloseRequest(event1 -> dialog.hide());
             dialog.show();
             return;

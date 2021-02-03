@@ -83,7 +83,7 @@ public class FXImportProfilTravers extends BorderPane {
     protected final ObservableList<Feature> selectionProperty = FXCollections.observableArrayList();
     protected final PojoTable pojoTable;
 
-    protected final Map<String, String> ehMap;
+    protected final LinkedHashMap<String, String> ehMap;
 
     @FXML protected ComboBox<String> uiPT;
     @FXML protected ComboBox<String> uiAttCote;
@@ -98,13 +98,14 @@ public class FXImportProfilTravers extends BorderPane {
         uiPaneConfig.setDisable(true);
         uiTable.setEditable(false);
         uiTable.setLoadAll(true);
-        uiCrushingCheck.setSelected(true);
+        uiCrushingCheck.setSelected(false);
 
         this.pojoTable = pojoTable;
 
         SirsStringConverter ssc = new SirsStringConverter();
         List<EvenementHydraulique> eh = pojoTable.session.getRepositoryForClass(EvenementHydraulique.class).getAll();
-        ehMap = eh.stream().collect(Collectors.toMap(ssc::toString, EvenementHydraulique::getId));
+        eh.sort(Comparator.comparingInt(e -> Integer.parseInt(e.getDesignation())));
+        ehMap = eh.stream().collect(Collectors.toMap(ssc::toString, EvenementHydraulique::getId, (e1, e2) -> { throw new AssertionError("keys should be unique"); }, LinkedHashMap::new));
     }
 
     @FXML
