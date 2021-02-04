@@ -20,8 +20,11 @@ package fr.sirs.theme.ui.pojotable;
 
 import fr.sirs.core.model.PointDZ;
 import fr.sirs.core.model.PointXYZ;
-import fr.sirs.core.model.ProfilTravers;
-import fr.sirs.theme.ui.*;
+import fr.sirs.theme.ui.FXAbstractImportPointLeve;
+import fr.sirs.theme.ui.FXImportDZ;
+import fr.sirs.theme.ui.FXImportXYZ;
+import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.theme.ui.FXImportParametreHydrauliqueProfilTravers;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ButtonType;

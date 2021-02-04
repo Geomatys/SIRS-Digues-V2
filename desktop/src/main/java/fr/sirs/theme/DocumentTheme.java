@@ -19,9 +19,7 @@
 package fr.sirs.theme;
 
 import fr.sirs.Injector;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.SIRSDocument;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SimpleFXEditMode;
