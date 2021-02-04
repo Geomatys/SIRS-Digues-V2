@@ -51,11 +51,11 @@ public class ImportAction implements EventHandler<ActionEvent> {
         } else if (PointDZ.class.isAssignableFrom(pojoClass)) {
             importCoord = new FXImportDZ(pojoTable);
         } else {
-            final FXImportProfilTravers ic = new FXImportProfilTravers(pojoTable);
+            final FXImportParametreHydrauliqueProfilTravers iph = new FXImportParametreHydrauliqueProfilTravers(pojoTable);
             final Dialog dialog = new Dialog();
             final DialogPane pane = new DialogPane();
             pane.getButtonTypes().add(ButtonType.CLOSE);
-            pane.setContent(ic);
+            pane.setContent(iph);
             dialog.setDialogPane(pane);
             dialog.setResizable(true);
             dialog.setTitle("Import de paramètres hydrauliques");

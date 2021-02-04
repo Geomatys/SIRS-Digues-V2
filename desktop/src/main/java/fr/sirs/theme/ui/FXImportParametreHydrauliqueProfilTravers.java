@@ -67,7 +67,7 @@ import org.opengis.util.GenericName;
  *
  * @author Maxime Gavens (Geomatys)
  */
-public class FXImportProfilTravers extends BorderPane {
+public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
 
     @FXML protected TextField uiPath;
     @FXML protected TextField uiSeparator;
@@ -91,7 +91,7 @@ public class FXImportProfilTravers extends BorderPane {
     protected final LinkedHashMap<String, String> ehMap;
 
 
-    public FXImportProfilTravers(final PojoTable pojoTable) {
+    public FXImportParametreHydrauliqueProfilTravers(final PojoTable pojoTable) {
         SIRS.loadFXML(this);
 
         uiPaneConfig.setDisable(true);
@@ -122,7 +122,7 @@ public class FXImportProfilTravers extends BorderPane {
     }
 
     private static File getPreviousPath() {
-        final Preferences prefs = Preferences.userNodeForPackage(FXImportProfilTravers.class);
+        final Preferences prefs = Preferences.userNodeForPackage(FXImportParametreHydrauliqueProfilTravers.class);
         final String str = prefs.get("path", null);
         if (str != null) {
             final File file = new File(str);
@@ -134,7 +134,7 @@ public class FXImportProfilTravers extends BorderPane {
     }
 
     private static void setPreviousPath(final File path) {
-        final Preferences prefs = Preferences.userNodeForPackage(FXImportProfilTravers.class);
+        final Preferences prefs = Preferences.userNodeForPackage(FXImportParametreHydrauliqueProfilTravers.class);
         prefs.put("path", path.getAbsolutePath());
     }
 
