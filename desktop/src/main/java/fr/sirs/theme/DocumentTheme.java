@@ -56,14 +56,6 @@ public class DocumentTheme<T extends SIRSDocument> extends Theme {
 
         PojoTable pojoTable = new PojoTable(Injector.getSession().getRepositoryForClass(documentClass), getName(), (ObjectProperty<? extends Element>) null);
         pojoTable.editableProperty().bind(editMode.editionState());
-
-        Class<T> doc = Injector.getSession().getRepositoryForClass(documentClass).getModelClass();
-        Class<ProfilTravers> toCom = ProfilTravers.class;
-
-        if (doc.equals(toCom)) {
-            pojoTable.importPointProperty().set(true);
-        }
-
         return new BorderPane(pojoTable, topPane, null, null, null);
     }
 

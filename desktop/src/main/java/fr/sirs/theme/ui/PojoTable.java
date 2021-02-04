@@ -42,20 +42,7 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
-import fr.sirs.core.model.AbstractObservation;
-import fr.sirs.core.model.AbstractPhoto;
-import fr.sirs.core.model.AvecBornesTemporelles;
-import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.AvecGeometrie;
-import fr.sirs.core.model.AvecPhotos;
-import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.PointZ;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.SystemeEndiguement;
+import fr.sirs.core.model.*;
 import fr.sirs.theme.ColumnOrder;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.theme.ui.columns.ColumnState;
@@ -802,6 +789,10 @@ public class PojoTable extends BorderPane implements Printable {
         uiImport.visibleProperty().bind(importPointProperty);
         uiImport.managedProperty().bind(importPointProperty);
         uiImport.setOnAction(new ImportAction(pojoClass, this));
+
+        if (ProfilTravers.class.isAssignableFrom(pojoClass)) {
+            importPointProperty.set(true);
+        }
 
         uiExport.getStyleClass().add(BUTTON_STYLE);
         uiExport.disableProperty().bind(Bindings.isNull(uiTable.getSelectionModel().selectedItemProperty()));
