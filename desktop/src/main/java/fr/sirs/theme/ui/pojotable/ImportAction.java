@@ -18,16 +18,19 @@
  */
 package fr.sirs.theme.ui.pojotable;
 
+import fr.sirs.core.model.PointDZ;
 import fr.sirs.core.model.PointXYZ;
 import fr.sirs.theme.ui.FXAbstractImportPointLeve;
 import fr.sirs.theme.ui.FXImportDZ;
 import fr.sirs.theme.ui.FXImportXYZ;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.theme.ui.FXImportParametreHydrauliqueProfilTravers;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
+import javafx.scene.layout.BorderPane;
 
 /**
  * Comportement par défaut des pojotables à l'action sur le bouton d'import.
@@ -46,17 +49,47 @@ public class ImportAction implements EventHandler<ActionEvent> {
     
     @Override
     public void handle(ActionEvent event) {
-        final FXAbstractImportPointLeve importCoord;
-        if(PointXYZ.class.isAssignableFrom(pojoClass)) importCoord = new FXImportXYZ(pojoTable);
-        else importCoord = new FXImportDZ(pojoTable);
+        //final FXAbstractImportPointLeve importCoord;
+        if(PointXYZ.class.isAssignableFrom(pojoClass)) {
+            //importCoord = new FXImportXYZ(pojoTable);
+            showImportPane(new FXImportXYZ(pojoTable), "Import de points");
+        } else if (PointDZ.class.isAssignableFrom(pojoClass)) {
+            //importCoord = new FXImportDZ(pojoTable);
+            showImportPane(new FXImportDZ(pojoTable), "Import de points");
+        } else {
+            showImportPane(new FXImportParametreHydrauliqueProfilTravers(pojoTable), "Import de paramètres hydrauliques");
+//            final FXImportParametreHydrauliqueProfilTravers iph = new FXImportParametreHydrauliqueProfilTravers(pojoTable);
+//            final Dialog dialog = new Dialog();
+//            final DialogPane pane = new DialogPane();
+//            pane.getButtonTypes().add(ButtonType.CLOSE);
+//            pane.setContent(iph);
+//            dialog.setDialogPane(pane);
+//            dialog.setResizable(true);
+//            dialog.setTitle("Import de paramètres hydrauliques");
+//            dialog.setOnCloseRequest(event1 -> dialog.hide());
+//            dialog.show();
+//            return;
+        }
 
+//        final Dialog dialog = new Dialog();
+//        final DialogPane pane = new DialogPane();
+//        pane.getButtonTypes().add(ButtonType.CLOSE);
+//        pane.setContent(importCoord);
+//        dialog.setDialogPane(pane);
+//        dialog.setResizable(true);
+//        dialog.setTitle("Import de points");
+//        dialog.setOnCloseRequest(event1 -> dialog.hide());
+//        dialog.show();
+    }
+
+    private void showImportPane(final BorderPane bp, final String title) {
         final Dialog dialog = new Dialog();
         final DialogPane pane = new DialogPane();
         pane.getButtonTypes().add(ButtonType.CLOSE);
-        pane.setContent(importCoord);
+        pane.setContent(bp);
         dialog.setDialogPane(pane);
         dialog.setResizable(true);
-        dialog.setTitle("Import de points");
+        dialog.setTitle(title);
         dialog.setOnCloseRequest(event1 -> dialog.hide());
         dialog.show();
     }
