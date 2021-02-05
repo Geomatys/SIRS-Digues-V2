@@ -197,6 +197,9 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
                 uiAttVitesse.getSelectionModel().clearAndSelect(0);
             }
 
+            //Select all elements by default
+            selectionProperty.addAll(layer.getCollection());
+
             // on ecoute la selection
             layer.addLayerListener(new LayerListener() {
                 @Override
