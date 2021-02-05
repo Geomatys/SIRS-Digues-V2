@@ -32,7 +32,6 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import fr.sirs.ui.Growl;
-import fr.sirs.util.SirsStringConverter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -89,8 +88,6 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
     protected final ObservableList<Feature> selectionProperty = FXCollections.observableArrayList();
     protected final PojoTable pojoTable;
 
-    //protected final LinkedHashMap<String, String> ehMap;
-
 
     public FXImportParametreHydrauliqueProfilTravers(final PojoTable pojoTable) {
         SIRS.loadFXML(this);
@@ -104,11 +101,6 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
 
         final ObservableList<Preview> choices = SIRS.observableList(pojoTable.session.getPreviews().getByClass(EvenementHydraulique.class)).sorted();
         SIRS.initCombo(uiEvenementHydraulique, choices, null);
-
-//        SirsStringConverter ssc = new SirsStringConverter();
-//        List<EvenementHydraulique> eh = pojoTable.session.getRepositoryForClass(EvenementHydraulique.class).getAll();
-//        eh.sort(Comparator.comparingInt(e -> Integer.parseInt(e.getDesignation())));
-//        ehMap = eh.stream().collect(Collectors.toMap(ssc::toString, EvenementHydraulique::getId, (e1, e2) -> { throw new AssertionError("keys should be unique"); }, LinkedHashMap::new));
     }
 
     @FXML
@@ -203,7 +195,6 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
                 uiAttCote.getSelectionModel().clearAndSelect(0);
                 uiAttDebit.getSelectionModel().clearAndSelect(0);
                 uiAttVitesse.getSelectionModel().clearAndSelect(0);
-                //uiEvenementHydraulique.getSelectionModel().clearAndSelect(0);
             }
 
             // on ecoute la selection
