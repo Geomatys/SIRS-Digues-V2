@@ -340,30 +340,30 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
     }
 
     private void setParameters(final ParametreHydrauliqueProfilTravers ph, Feature feature) {
-        if (!uiAttVitesse.getValue().isEmpty()) {
+        if (uiAttVitesse.getValue() != null && !uiAttVitesse.getValue().isEmpty()) {
             ph.setVitessePointe(Float.parseFloat(String.valueOf(feature.getPropertyValue(uiAttVitesse.getValue()))));
         }
-        if (!uiAttCote.getValue().isEmpty()) {
+        if (uiAttCote.getValue() != null && !uiAttCote.getValue().isEmpty()) {
             ph.setCoteEau(Float.parseFloat(String.valueOf(feature.getPropertyValue(uiAttCote.getValue()))));
         }
-        if (!uiAttDebit.getValue().isEmpty()) {
+        if (uiAttDebit.getValue() != null && !uiAttDebit.getValue().isEmpty()) {
             ph.setDebitPointe(Float.parseFloat(String.valueOf(feature.getPropertyValue(uiAttDebit.getValue()))));
         }
     }
 
     private boolean checkPaneConfig() {
         // check ProfilTravers col
-        if (uiProfilTravers.getValue().isEmpty()) {
+        if (uiProfilTravers.getValue() == null || uiProfilTravers.getValue().isEmpty()) {
             alert("Vous devez attribuer une colonne au désignation des profils en travers.", Alert.AlertType.INFORMATION);
             return false;
         }
         // check at least one measure selected
-        if (uiAttCote.getValue().isEmpty() && uiAttDebit.getValue().isEmpty() && uiAttVitesse.getValue().isEmpty()) {
+        if ((uiAttCote.getValue() == null || uiAttCote.getValue().isEmpty()) && (uiAttDebit.getValue() == null || uiAttDebit.getValue().isEmpty()) && (uiAttVitesse.getValue() == null || uiAttVitesse.getValue().isEmpty())) {
             alert("Vous devez renseigner au moins une colonnes pour les valeurs de debit, cote ou vitesse.", Alert.AlertType.INFORMATION);
             return false;
         }
         // check evenenement hydraulique
-        if (uiEvenementHydraulique.valueProperty().get() == null) {
+        if (uiEvenementHydraulique.getValue() == null || uiEvenementHydraulique.valueProperty().get() == null) {
             alert("Vous devez sélectionner un évènement hydraulique.", Alert.AlertType.INFORMATION);
             return false;
         }
