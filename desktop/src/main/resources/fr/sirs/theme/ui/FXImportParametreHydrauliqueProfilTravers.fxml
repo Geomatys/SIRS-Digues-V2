@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import org.geotoolkit.gui.javafx.layer.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -50,13 +51,13 @@
                  </padding>
                  <children>
                      <Label text="Profil en travers" />
-                     <ComboBox fx:id="uiPT" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
+                     <ComboBox fx:id="uiProfilTravers" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
                      <Label text="Débit" GridPane.rowIndex="2" />
                      <Label text="Vitesse" GridPane.rowIndex="3" />
                      <ComboBox fx:id="uiAttDebit" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                      <ComboBox fx:id="uiAttVitesse" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                      <Label text="Evènement Hydraulique" GridPane.rowIndex="4" />
-                     <ComboBox fx:id="uiEH" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                     <ComboBox fx:id="uiEvenementHydraulique" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                      <Label text="Côte" GridPane.rowIndex="1" />
                      <ComboBox fx:id="uiAttCote" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                  </children>
@@ -69,7 +70,14 @@
       </VBox>
    </top>
    <center>
-      <FXFeatureTable fx:id="uiTable" maxWidth="1.7976931348623157E308" minHeight="200.0" minWidth="200.0" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+       <VBox spacing="10.0" BorderPane.alignment="CENTER">
+           <children>
+               <FXFeatureTable fx:id="uiTable" maxWidth="1.7976931348623157E308" minHeight="200.0" minWidth="200.0" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+               <Label alignment="TOP_LEFT" text="Cliquer sur les éléments de la table pour les sélectionner.">
+                   <font><Font name="System Bold" size="9.0" /></font>
+               </Label>
+           </children>
+       </VBox>
    </center>
    <bottom>
       <Button mnemonicParsing="false" onAction="#importSelection" text="Importer la sélection" BorderPane.alignment="CENTER" />

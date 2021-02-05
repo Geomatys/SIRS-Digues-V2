@@ -20,6 +20,7 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.component.EvenementHydrauliqueRepository;
 import fr.sirs.core.component.ProfilTraversRepository;
 import fr.sirs.core.model.*;
 
@@ -75,11 +76,11 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
     @FXML protected FXFeatureTable uiTable;
 
     @FXML protected GridPane uiPaneConfig;
-    @FXML protected ComboBox<String> uiPT;
+    @FXML protected ComboBox<String> uiProfilTravers;
     @FXML protected ComboBox<String> uiAttCote;
     @FXML protected ComboBox<String> uiAttDebit;
     @FXML protected ComboBox<String> uiAttVitesse;
-    @FXML protected ComboBox<String> uiEH;
+    @FXML protected ComboBox<Preview> uiEvenementHydraulique;
 
     @FXML protected CheckBox uiCrushingCheck;
 
@@ -88,7 +89,7 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
     protected final ObservableList<Feature> selectionProperty = FXCollections.observableArrayList();
     protected final PojoTable pojoTable;
 
-    protected final LinkedHashMap<String, String> ehMap;
+    //protected final LinkedHashMap<String, String> ehMap;
 
 
     public FXImportParametreHydrauliqueProfilTravers(final PojoTable pojoTable) {
@@ -101,10 +102,13 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
 
         this.pojoTable = pojoTable;
 
-        SirsStringConverter ssc = new SirsStringConverter();
-        List<EvenementHydraulique> eh = pojoTable.session.getRepositoryForClass(EvenementHydraulique.class).getAll();
-        eh.sort(Comparator.comparingInt(e -> Integer.parseInt(e.getDesignation())));
-        ehMap = eh.stream().collect(Collectors.toMap(ssc::toString, EvenementHydraulique::getId, (e1, e2) -> { throw new AssertionError("keys should be unique"); }, LinkedHashMap::new));
+        final ObservableList<Preview> choices = SIRS.observableList(pojoTable.session.getPreviews().getByClass(EvenementHydraulique.class)).sorted();
+        SIRS.initCombo(uiEvenementHydraulique, choices, null);
+
+//        SirsStringConverter ssc = new SirsStringConverter();
+//        List<EvenementHydraulique> eh = pojoTable.session.getRepositoryForClass(EvenementHydraulique.class).getAll();
+//        eh.sort(Comparator.comparingInt(e -> Integer.parseInt(e.getDesignation())));
+//        ehMap = eh.stream().collect(Collectors.toMap(ssc::toString, EvenementHydraulique::getId, (e1, e2) -> { throw new AssertionError("keys should be unique"); }, LinkedHashMap::new));
     }
 
     @FXML
@@ -186,8 +190,8 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
                     .observableArrayList(getPropertiesFromFeatures(col)
                             .stream().map(p -> p.getName().tip().toString()).collect(Collectors.toList()));
 
-            uiPT.setItems(FXCollections.observableArrayList(properties));
-            uiEH.setItems(FXCollections.observableArrayList(ehMap.keySet()));
+            uiProfilTravers.setItems(FXCollections.observableArrayList(properties));
+            //uiEvenementHydraulique.setItems(FXCollections.observableArrayList(ehMap.keySet()));
 
             properties.add(0, "");
             uiAttCote.setItems(properties);
@@ -195,11 +199,11 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
             uiAttVitesse.setItems(properties);
 
             if(properties.size() >= 2){
-                uiPT.getSelectionModel().clearAndSelect(0);
+                uiProfilTravers.getSelectionModel().clearAndSelect(0);
                 uiAttCote.getSelectionModel().clearAndSelect(0);
                 uiAttDebit.getSelectionModel().clearAndSelect(0);
                 uiAttVitesse.getSelectionModel().clearAndSelect(0);
-                uiEH.getSelectionModel().clearAndSelect(0);
+                //uiEvenementHydraulique.getSelectionModel().clearAndSelect(0);
             }
 
             // on ecoute la selection
@@ -239,17 +243,24 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
         final ObservableList<Feature> features = selectionProperty;
         final fr.sirs.Session sirsSession = Injector.getSession();
         final ProfilTraversRepository ptRepo = (ProfilTraversRepository) sirsSession.getRepositoryForClass(ProfilTravers.class);
+        final EvenementHydrauliqueRepository ehRepo = (EvenementHydrauliqueRepository) sirsSession.getRepositoryForClass(EvenementHydraulique.class);
         final Set<String> storePtDesignation = new HashSet<>();
+
+        // check if features selected is empty
+        if (features.isEmpty()) {
+            alert("Aucun élément sélectionné.", Alert.AlertType.INFORMATION);
+            return;
+        }
 
         // check integrity
         for (final Feature feature : features) {
 
             // retrieves designation
-            final String toCheck = String.valueOf(feature.getPropertyValue(uiPT.getValue()));
+            final String toCheck = String.valueOf(feature.getPropertyValue(uiProfilTravers.getValue()));
 
             // check doublon
             if (storePtDesignation.contains(toCheck)) {
-                alert("La désignation " + toCheck + " a été trouvé deux fois.");
+                alert("La désignation " + toCheck + " a été trouvé deux fois.", Alert.AlertType.INFORMATION);
                 return;
             } else {
                 storePtDesignation.add(toCheck);
@@ -258,13 +269,13 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
             // check existence
             final List<ProfilTravers> ptList = ptRepo.getByDesignation(toCheck);
             if (ptList.size() == 0) {
-                error("Le profil en travers " + toCheck + " n'existe pas.");
+                alert("Le profil en travers " + toCheck + " n'existe pas.", Alert.AlertType.ERROR);
                 return;
             }
 
             // check only one ProfilTravers found
             if (ptList.size() >= 2) {
-                error("La désignation " + toCheck + " correspond à plusieurs profils en travers stockés en base.");
+                alert("La désignation " + toCheck + " correspond à plusieurs profils en travers stockés en base.", Alert.AlertType.ERROR);
                 return;
             }
         }
@@ -286,12 +297,13 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
             boolean crushed = uiCrushingCheck.isSelected();
 
             // retrieve evenement hydraulique id selected
-            final String ehId = ehMap.get(uiEH.getValue());
+            final Preview preview = uiEvenementHydraulique.valueProperty().get();
+            final String ehId = ehRepo.get(preview.getDocId()).getId();
 
             // start collecting
             for (final Feature feature : features) {
                 // retrieve current ProfilTravers
-                final String currentDesignation = String.valueOf(feature.getPropertyValue(uiPT.getValue()));
+                final String currentDesignation = String.valueOf(feature.getPropertyValue(uiProfilTravers.getValue()));
                 final ProfilTravers currentPt = ptRepo.getByDesignation(currentDesignation).get(0);
 
                 // Update ProfilTravers
@@ -341,31 +353,25 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
 
     private boolean checkPaneConfig() {
         // check ProfilTravers col
-        if (uiPT.getValue().isEmpty()) {
-            alert("Vous devez attribuer une colonne au désignation des profils en travers.");
+        if (uiProfilTravers.getValue().isEmpty()) {
+            alert("Vous devez attribuer une colonne au désignation des profils en travers.", Alert.AlertType.INFORMATION);
             return false;
         }
         // check at least one measure selected
         if (uiAttCote.getValue().isEmpty() && uiAttDebit.getValue().isEmpty() && uiAttVitesse.getValue().isEmpty()) {
-            alert("Vous devez renseigner au moins une colonnes pour les valeurs de debit, cote ou vitesse.");
+            alert("Vous devez renseigner au moins une colonnes pour les valeurs de debit, cote ou vitesse.", Alert.AlertType.INFORMATION);
             return false;
         }
         // check evenenement hydraulique
-        if (uiEH.getValue().isEmpty()) {
-            error("Aucun évènement hydraulique n'a été trouvé en base.");
+        if (uiEvenementHydraulique.valueProperty().get() == null) {
+            alert("Vous devez sélectionner un évènement hydraulique.", Alert.AlertType.INFORMATION);
             return false;
         }
         return true;
     }
 
-    private void alert(final String msg) {
-        final Alert alert = new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK);
-        alert.setResizable(true);
-        alert.show();
-    }
-
-    private void error(final String msg) {
-        final Alert alert = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
+    private void alert(final String msg, final Alert.AlertType type) {
+        final Alert alert = new Alert(type, msg, ButtonType.OK);
         alert.setResizable(true);
         alert.show();
     }
