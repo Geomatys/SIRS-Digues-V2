@@ -31,7 +31,7 @@ Note2 : pour créer le tag, le script crée une branche temporaire qu'il efface 
 Pour compiler un éxecutable de l'application, vous devez tout d'abord vous rendre dans le dossier "launcher". Depuis ce dossier, vous avez 2 choix : 
 
 	- Créer un jar executable via la commande "mvn jfx:jar". Cela créera un jar éxecutable permettant de lance l'application dans le repertoire "target/jfx/app".
-	- Créer un paquet natif pour votre OS, via la commande "mvn jfx:native". Cela créera un installeur dans le dossier "target/jfx/native".
+	- Créer un paquet natif pour votre OS, via la commande "mvn jfx:native". Cela créera un installeur dans le dossier "target/jfx/native" (Note Windows: Au préalable, installer 'Inno Setup', depuis un executable 'innosetup-*.exe' accessible sur https://jrsoftware.org/isdl.php).
 
 Note : vous pouvez personnaliser les paramètres de la jvm pour l'application en modifiant le pom.xml de l'application. Dans la section configuration du plugin javafx-maven-plugin, vous pouvez ajouter des balises <jvmArg>votre parametre</jvmArgs>.
 
