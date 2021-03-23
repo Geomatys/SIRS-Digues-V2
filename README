@@ -10,6 +10,7 @@ Table des matières :
 2 - Compiler un paquet executable (jar ou natif)
 3 - Activer la détection de mise à jour
 4 - Créer un plugin
+5 - TroubleShot
 ---------------------
 
 ##
@@ -31,7 +32,8 @@ Note2 : pour créer le tag, le script crée une branche temporaire qu'il efface 
 Pour compiler un éxecutable de l'application, vous devez tout d'abord vous rendre dans le dossier "launcher". Depuis ce dossier, vous avez 2 choix : 
 
 	- Créer un jar executable via la commande "mvn jfx:jar". Cela créera un jar éxecutable permettant de lance l'application dans le repertoire "target/jfx/app".
-	- Créer un paquet natif pour votre OS, via la commande "mvn jfx:native". Cela créera un installeur dans le dossier "target/jfx/native".
+	- Créer un paquet natif pour votre OS, via la commande "mvn jfx:native". Cela créera un installeur dans le dossier "target/jfx/native"
+		Note Windows: Avant la création du paquet natif, installer 'Inno Setup', depuis un executable 'innosetup-*.exe' accessible sur https://jrsoftware.org/isdl.php.
 
 Note : vous pouvez personnaliser les paramètres de la jvm pour l'application en modifiant le pom.xml de l'application. Dans la section configuration du plugin javafx-maven-plugin, vous pouvez ajouter des balises <jvmArg>votre parametre</jvmArgs>.
 
@@ -76,3 +78,5 @@ La propriété ‘package’ est le paquet Java à générer pour votre projet. 
 ‘sirs-version’ est la version de l’application SIRS2 compatible avec votre plugin.
 
 Une fois toutes les propriétés spécifiées, maven vous demande confirmation. Confirmez, et la création de votre plugin est terminée.
+
+5 - Sur Windows en particulier, en fonction de la version de Java 8 utilisée, il se peut qu'il y ai des manquements au niveau des Dynamic Link Library (.dll) après le lancement de l'application. Si cela se produit, veuillez essayer une autre version de jdk 8 (Par exemple le jdk1.8.0_202, semble ne pas avoir cette erreur).
