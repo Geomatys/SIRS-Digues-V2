@@ -79,4 +79,4 @@ La propriété ‘package’ est le paquet Java à générer pour votre projet. 
 
 Une fois toutes les propriétés spécifiées, maven vous demande confirmation. Confirmez, et la création de votre plugin est terminée.
 
-5 - Sur Windows en particulier, en fonction de la version de Java 8 utilisée, il se peut qu'il y ai des manquements au niveau des Dynamic Link Library (.dll) après le lancement de l'application. Si cela se produit, veuillez essayer une autre version de jdk 8.
+5 - Sur Windows en particulier, en fonction de la version de Java 8 utilisée, il se peut qu'il y ai des manquements au niveau des Dynamic Link Library (.dll) après le lancement de l'application. Si cela se produit, veuillez essayer une autre version de jdk 8 (Par exemple le jdk1.8.0_202, semble ne pas avoir cette erreur).
