@@ -23,6 +23,7 @@ import fr.sirs.SIRS;
 import fr.sirs.core.component.EvenementHydrauliqueRepository;
 import fr.sirs.core.component.ProfilTraversRepository;
 import fr.sirs.core.model.*;
+import fr.sirs.util.AlphaNumComparator;
 
 import java.beans.PropertyChangeEvent;
 import java.io.File;
@@ -61,6 +62,7 @@ import org.geotoolkit.util.collection.CollectionChangeEvent;
 import org.opengis.feature.PropertyType;
 import org.opengis.filter.Id;
 import org.opengis.util.GenericName;
+import javafx.stage.Stage;
 
 
 /**
@@ -176,6 +178,10 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
             final FeatureCollection col = session.getFeatureCollection(QueryBuilder.all(typeName));
             final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultVectorStyle(col.getFeatureType()));
             uiTable.init(layer);
+            final Comparator comparator = new AlphaNumComparator();
+            for (TableColumn<Feature, ?> tableColumn :uiTable.getTable().getColumns()) {
+                tableColumn.setComparator(comparator);
+            }
 
             // liste des propriétés
             final ObservableList<String> properties = FXCollections
@@ -183,7 +189,6 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
                             .stream().map(p -> p.getName().tip().toString()).collect(Collectors.toList()));
 
             uiProfilTravers.setItems(FXCollections.observableArrayList(properties));
-            //uiEvenementHydraulique.setItems(FXCollections.observableArrayList(ehMap.keySet()));
 
             properties.add(0, "");
             uiAttCote.setItems(properties);
@@ -287,8 +292,11 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
             // element creator
             ElementCreator elementCreator = sirsSession.getElementCreator();
 
-            // is user select crushed option rewriting existing parametres hydrauliques
-            boolean crushed = uiCrushingCheck.isSelected();
+            // if user select crushed option rewriting existing parametres hydrauliques
+            final boolean crushed = uiCrushingCheck.isSelected();
+
+            // used to prevent user that no update was made in the case of no crushing check
+            boolean noUpdate = true;
 
             // retrieve evenement hydraulique id selected
             final Preview preview = uiEvenementHydraulique.valueProperty().get();
@@ -305,7 +313,10 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
                 for (ParametreHydrauliqueProfilTravers ph: currentPt.getParametresHydrauliques()) {
                     if (ehId.equals(ph.getEvenementHydrauliqueId())) {
                         // update parameter
-                        if (crushed) setParameters(ph, feature);
+                        if (crushed) {
+                            setParameters(ph, feature);
+                            noUpdate = false;
+                        }
                         find = true;
                         break;
                     }
@@ -320,14 +331,32 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
                     setParameters(newPh, feature);
 
                     currentPt.parametresHydrauliques.add(newPh);
+                    noUpdate = false;
                 }
                 ptRepo.update(currentPt);
             }
-            final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
-            growlInfo.showAndFade();
+            if (noUpdate) {
+                alert("Aucune donnée n'a été ajouté ou mise à jour.", Alert.AlertType.INFORMATION);
+            } else {
+                final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
+                growlInfo.showAndFade();
+                // Without knowing why, on windows OS, after an import, this scene is sent to background. 
+                // A supposition is that the Growl is position relative to the main window, wich calls an instance
+                // of the main windows and put it the foreground.
+                // Using this trick, remit the import window to the foreground as expected.
+                final Stage stage = (Stage) this.getScene().getWindow();
+                // Stage is setAlwaysOnTop(true) and right after to false to force the foreground position of the
+                // stage but to allow the user to replace it in the background thereafter.
+                stage.setAlwaysOnTop(true);
+                stage.setAlwaysOnTop(false);
+            }
         } catch (Exception e) {
             final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
             growlError.showAndFade();
+            // same trick here
+            final Stage stage = (Stage) this.getScene().getWindow();
+            stage.setAlwaysOnTop(true);
+            stage.setAlwaysOnTop(false);
             GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
             SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
         }

@@ -50,18 +50,23 @@
                      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                  </padding>
                  <children>
-                     <Label text="Profil en travers" />
+                     <Label text="Profil en travers (Désignation SIRS) *" />
                      <ComboBox fx:id="uiProfilTravers" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
                      <Label text="Débit" GridPane.rowIndex="2" />
                      <Label text="Vitesse" GridPane.rowIndex="3" />
                      <ComboBox fx:id="uiAttDebit" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                      <ComboBox fx:id="uiAttVitesse" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                     <Label text="Evènement Hydraulique" GridPane.rowIndex="4" />
+                     <Label text="Evènement Hydraulique *" GridPane.rowIndex="4" />
                      <ComboBox fx:id="uiEvenementHydraulique" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                      <Label text="Côte" GridPane.rowIndex="1" />
                      <ComboBox fx:id="uiAttCote" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                  </children>
              </GridPane>
+            <Label text="(*) Champ requis">
+               <font>
+                  <Font size="9.0" />
+               </font>
+            </Label>
             <CheckBox fx:id="uiCrushingCheck" mnemonicParsing="false" text="Ecrasement des paramètres hydrauliques existant" />
          </children>
          <BorderPane.margin>
