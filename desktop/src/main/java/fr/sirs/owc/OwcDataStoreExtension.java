@@ -55,6 +55,7 @@ import org.geotoolkit.security.ApiSecurity;
 import org.geotoolkit.security.BasicAuthenticationSecurity;
 
 /**
+ * Same object as geotk one but with a different way to store the clientSecurity parameters.
  *
  * @author Johann Sorel (Geomatys)
  * @author Maxime Gavens (Geomatys)

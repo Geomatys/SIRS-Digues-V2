@@ -22,9 +22,10 @@ import org.apache.sis.util.ArgumentChecks;
 
 /**
  * Basic authentication security.
+ * Same object as the geotk one but with getters.
  *
  * @author Johann Sorel (Geomatys)
- * @module pending
+ * @author Maxime Gavens (Geomatys)
  */
 public class BasicAuthenticationSecurity extends DefaultClientSecurity{
 
