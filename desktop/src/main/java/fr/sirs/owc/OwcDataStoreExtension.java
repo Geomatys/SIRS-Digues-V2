@@ -16,6 +16,8 @@
  */
 package fr.sirs.owc;
 
+import fr.sirs.core.authentication.PasswordDeserializer;
+import fr.sirs.core.authentication.PasswordSerializer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -111,7 +113,7 @@ public class OwcDataStoreExtension extends OwcExtension {
                 if(KEY_STOREFACTORY.equalsIgnoreCase(key)){
                     factoryName = (String)value;
                     params.put(key, factoryName);
-                }else if(KEY_DATANAME.equalsIgnoreCase(key)){
+                } else if(KEY_DATANAME.equalsIgnoreCase(key)){
                     typeName = (String)value;
                 } else if(KEY_USER.equalsIgnoreCase(key)) {
                     user = (String)value;
@@ -119,16 +121,19 @@ public class OwcDataStoreExtension extends OwcExtension {
                     password = (String)value;
                 } else if(KEY_API_KEY.equalsIgnoreCase(key)) {
                     apiKey = (String)value;
-                }else{
+                } else{
                     params.put(key, value);
                 }
             }
         }
 
         if (user != null && password != null) {
-            params.put("security", new BasicAuthenticationSecurity(user, password));
+            final String decryptUser = PasswordDeserializer.decode(user);
+            final String decryptPassword = PasswordDeserializer.decode(password);
+            params.put("security", new BasicAuthenticationSecurity(decryptUser, decryptPassword));
         } else if(apiKey != null) {
-            params.put("security", new ApiSecurity(apiKey));
+            final String decryptApiKey = PasswordDeserializer.decode(apiKey);
+            params.put("security", new ApiSecurity(decryptApiKey));
         }
 
         final DataStoreFactory ff = DataStores.getFactoryById(factoryName);
@@ -176,22 +181,26 @@ public class OwcDataStoreExtension extends OwcExtension {
                         if(value instanceof BasicAuthenticationSecurity) {
                             final String user = ((BasicAuthenticationSecurity) value).getUser();
                             final String password = ((BasicAuthenticationSecurity) value).getPassword();
+                            final String encryptUser = PasswordSerializer.encode(user);
+                            final String encryptPassword = PasswordSerializer.encode(password);
+
                             fieldList.add(new ParameterType(
-                                KEY_USER,
-                                user.getClass().getName(),
-                                user
+                                    KEY_USER,
+                                    user.getClass().getName(),
+                                    encryptUser
                             ));
                             fieldList.add(new ParameterType(
-                                KEY_PASSWORD,
-                                password.getClass().getName(),
-                                password
+                                    KEY_PASSWORD,
+                                    password.getClass().getName(),
+                                    encryptPassword
                             ));
                         } else if(value instanceof ApiSecurity) {
                             final String apiKey = ((ApiSecurity) value).getApikey();
+                            final String apiKeyPassword = PasswordSerializer.encode(apiKey);
                             fieldList.add(new ParameterType(
                                 KEY_API_KEY,
                                 apiKey.getClass().getName(),
-                                apiKey
+                                apiKeyPassword
                             ));
                         }
                     } else {
