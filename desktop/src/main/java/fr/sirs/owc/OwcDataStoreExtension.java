@@ -195,7 +195,7 @@ public class OwcDataStoreExtension extends OwcExtension {
                         }
                     } else {
                         fieldList.add(new ParameterType(
-                            pdesc.getName().getCode(), 
+                            pdesc.getName().getCode(),
                             pvdesc.getValueClass().getName(),
                             String.valueOf(value)));
                     }
