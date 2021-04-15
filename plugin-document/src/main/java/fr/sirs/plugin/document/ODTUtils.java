@@ -232,7 +232,7 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                 FileTreeItem file;
                 for (int i = 0; i < files.size(); i++) {
                     file = files.get(i);
-                    row = row.getNextRow();
+                    row = table.appendRow();
                     row.getCellByIndex(0).setStringValue(file.getLibelle());
                     row.getCellByIndex(1).setStringValue(file.getSize());
                     row.getCellByIndex(2).setStringValue(file.getInventoryNumber());
