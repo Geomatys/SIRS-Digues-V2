@@ -306,6 +306,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     public void remove(T entity) {
         ArgumentChecks.ensureNonNull("Document à supprimer", entity);
         cache.remove(entity.getId());
+        removeConflictingRevisions(entity);
         super.remove(entity);
     }
 
@@ -432,6 +433,29 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
             final StreamingViewIterator iterator = new StreamingViewIterator(query);
             ClosingDaemon.watchResource(iterator, iterator.result);
             return iterator;
+        }
+    }
+
+    /**
+     * Ensure to delete all conflicting revisions from the entity.
+     *
+     * This mechanism is necessary because actually once Couchdb delete a document
+     * by specifying its latest revision, the revision will get deleted as expected BUT
+     * the dormant conflicting revision will immediately revert as the active revision
+     * of the document. (origin of the issue 7490)
+     *
+     * @param entity
+     */
+    public void removeConflictingRevisions(final T entity) {
+        final List<List<String>> revisions = globalRepo.getConflictingRevisions(entity.getId());
+
+        if (!revisions.isEmpty()) {
+            // Must contains only one list
+            if (revisions.size() > 1) SirsCore.LOGGER.log(Level.WARNING, String.format("Found multiple list of conflicting revision IDs ( %s ) for the doc._id=%s", revisions.toString(), entity.getId()));
+            for (final String rev: revisions.get(0)) {
+                final T toDelete = super.get(entity.getId(), rev);
+                super.remove(toDelete);
+            }
         }
     }
 
