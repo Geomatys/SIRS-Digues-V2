@@ -1137,11 +1137,19 @@ public class FXLauncherPane extends BorderPane {
                                         }
                                     });
 
+                                    copyTask.setOnCancelled(evt -> {
+                                        localRegistry.cancelCopy(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + destDbName);
+                                    });
+
                                     copyTask.setOnSucceeded(evt -> SIRS.fxRun(false, () -> {
                                         final org.ektorp.ReplicationStatus status = copyTask.getValue();
 
                                         if (status == null || !status.isOk()) {
-                                            localRegistry.cancelCopy(status);
+                                            if (status != null && status.getId() != null) {
+                                                localRegistry.cancelCopy(status);
+                                            } else {
+                                                localRegistry.cancelCopy(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + destDbName);
+                                            }
                                             final Alert alerte = new Alert(
                                                     Alert.AlertType.WARNING,
                                                     "Un problème est survenu pendant la copie. Certaines données pourraient ne pas avoir été copiées.",
