@@ -165,9 +165,9 @@ public class FXCommentPhotoView extends SplitPane {
         if (!o1WithPhoto && !o2WithPhoto) {
             return 0;
         } else if (o1WithPhoto && !o2WithPhoto) {
-            return 2;
-        } else if (o2WithPhoto && !o1WithPhoto) {
             return -2;
+        } else if (o2WithPhoto && !o1WithPhoto) {
+            return 2;
         } else {
             return o2.getDate().compareTo(o1.getDate());
         }
