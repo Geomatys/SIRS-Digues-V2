@@ -43,9 +43,11 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.ProxySelector;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -59,6 +61,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -77,6 +80,7 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.apache.http.params.HttpParams;
 import org.apache.sis.util.ArgumentChecks;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.DbAccessException;
@@ -732,7 +736,19 @@ public class DatabaseRegistry {
                 // If the error has not been thrown back, it means it was not
                 // related to a replication execution. It can be an exception
                 // related to status parsing failing, for example.
-                SirsCore.LOGGER.log(Level.WARNING, "An error happened while submitting replication", e);
+
+                // Add an additional attempt if the exception is a read timeout exception.
+                Throwable cause = e.getCause();
+                if (cause instanceof SocketTimeoutException) {
+                    if (cause.getMessage() != null && cause.getMessage().equals("Read timed out")) {
+                        remainingAttempt++;
+                        SirsCore.LOGGER.log(Level.FINE, "Replication exceeds the socket timeout but continues nonetheless", e);
+                    } else {
+                        SirsCore.LOGGER.log(Level.WARNING, "An error happened while submitting replication", e);
+                    }
+                } else {
+                    SirsCore.LOGGER.log(Level.WARNING, "An error happened while submitting replication", e);
+                }
             }
         }
 
@@ -760,6 +776,24 @@ public class DatabaseRegistry {
                 .id(operationStatus.getId())
                 .cancel(true)
                 .build());
+    }
+
+    public ReplicationStatus cancelCopy(final String dstDbName) {
+        ReplicationStatus status = null;
+        Optional<ReplicationTask> task = null;
+
+        try {
+            task = getReplicationTasksByTarget(dstDbName).findFirst();
+        } catch (IOException ex) {
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot request active task.", ex);
+        }
+        if (task != null && task.isPresent()) {
+            status = couchDbInstance.replicate(new ReplicationCommand.Builder()
+                    .cancel(true)
+                    .id(task.get().getReplicationId())
+                    .build());
+        }
+        return status;
     }
 
     /**
@@ -867,6 +901,10 @@ public class DatabaseRegistry {
                         || cleanDatabaseName(t.getTargetDatabaseName()).equals(cleanedDst)));
     }
 
+    private Stream<ReplicationTask> getReplicationTasksByTarget(final String dst) throws IOException {
+        final String cleanedDst = cleanDatabaseName(dst);
+        return getReplicationTasks().filter(t -> (cleanDatabaseName(t.getTargetDatabaseName()).equals(cleanedDst)));
+    }
 
     ////////////////////////////////////////////////////////////////////////////
     //

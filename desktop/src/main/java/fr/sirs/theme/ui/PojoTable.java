@@ -861,7 +861,10 @@ public class PojoTable extends BorderPane implements Printable {
         uiCurrent.setTooltip(new Tooltip("Aller au numéro..."));
         uiDelete.setTooltip(new Tooltip("Supprimer les éléments sélectionnés"));
         uiFilter.setTooltip(new Tooltip("Filtrer les données"));
-
+        if (ProfilTravers.class.isAssignableFrom(pojoClass)) {
+            uiImport.setTooltip(new Tooltip("Importer des paramètres hydrauliques"));
+        }
+        
         if (BUG_JAVAFX_COLUMN_MOVE) {
             //Place toutes les colonnes non visible en fin de tableau (excepté le bouton de suppression)
             // afin de permettre un déplacement (manuel) de colonne intelligible.
