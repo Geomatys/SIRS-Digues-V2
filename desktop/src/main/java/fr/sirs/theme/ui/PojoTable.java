@@ -1371,7 +1371,7 @@ public class PojoTable extends BorderPane implements Printable {
         numberField.setEditable(true);
         numberField.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, tableSize, currentIndex));
         popup.getContent().add(numberField);
-        popup.setAutoHide(false);
+        popup.setAutoHide(true);
         numberField.setOnKeyReleased((k) -> {
             if (k.getCode() == KeyCode.ENTER) {
                 final int index = numberField.getValue() - 1;
