@@ -222,7 +222,7 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                     append(doc, child.getValue());
                 }
             } else {
-                final Table table = Table.newTable(doc, 1, TABLE_HEADERS.length);
+                final Table table = Table.newTable(doc, 1 + files.size(), TABLE_HEADERS.length);
                 // header
                 Row row = table.getRowByIndex(0);
                 for (int i = 0 ; i < TABLE_HEADERS.length ; i++) {
@@ -232,7 +232,7 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                 FileTreeItem file;
                 for (int i = 0; i < files.size(); i++) {
                     file = files.get(i);
-                    row = table.appendRow();
+                    row = row.getNextRow();
                     row.getCellByIndex(0).setStringValue(file.getLibelle());
                     row.getCellByIndex(1).setStringValue(file.getSize());
                     row.getCellByIndex(2).setStringValue(file.getInventoryNumber());
