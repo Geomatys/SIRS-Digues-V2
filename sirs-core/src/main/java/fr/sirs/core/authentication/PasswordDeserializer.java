@@ -46,8 +46,8 @@ public class PasswordDeserializer extends JsonDeserializer<String> {
     public static String decode(final String toDecode) {
         try {
             return new String(SerialParameters.getDecoder().doFinal(Base64.getDecoder().decode(toDecode)));
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot decode string", e);
+        } catch (Exception ex) {
+            throw new RuntimeException("Cannot decode string.", ex);
         }
     }
 }
