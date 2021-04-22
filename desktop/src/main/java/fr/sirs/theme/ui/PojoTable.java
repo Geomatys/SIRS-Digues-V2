@@ -136,6 +136,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Separator;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -148,6 +150,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -159,7 +162,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.util.Callback;
 import javafx.util.Duration;
-import jidefx.scene.control.field.NumberField;
 import org.apache.sis.feature.AbstractIdentifiedType;
 import org.apache.sis.feature.DefaultAssociationRole;
 import org.apache.sis.feature.DefaultAttributeType;
@@ -190,6 +192,7 @@ import org.opengis.filter.Filter;
  * @author Alexis Manin (Geomatys)
  * @author Samuel Andrés (Geomatys)
  * @author Matthieu Bastianelli (Geomatys)
+ * @author Maxime Gavens (Geomatys)
  */
 public class PojoTable extends BorderPane implements Printable {
 
@@ -1363,21 +1366,25 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     protected void goTo(ActionEvent event) {
+        final int tableSize = uiTable.getItems().size();
+        final int currentIndex = uiTable.getSelectionModel().getSelectedIndex() + 1;
         final Popup popup = new Popup();
-        NumberField indexEditor = new NumberField(NumberField.NumberType.Integer);
+        final Spinner<Integer> numberField = new Spinner<>();
 
-        popup.getContent().add(indexEditor);
-        popup.setAutoHide(false);
-
-        indexEditor.setOnAction((ActionEvent event1) -> {
-            final Number indexToSelect = indexEditor.valueProperty().get();
-            if (indexToSelect != null) {
-                final int index = indexToSelect.intValue();
-                if (index >= 0 && index < uiTable.getItems().size()) {
-                    uiTable.getSelectionModel().select(index);
+        numberField.setEditable(true);
+        numberField.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, tableSize, currentIndex));
+        popup.getContent().add(numberField);
+        popup.setAutoHide(true);
+        numberField.setOnKeyReleased((k) -> {
+            if (k.getCode() == KeyCode.ENTER) {
+                final int index = numberField.getValue() - 1;
+                if (index >= 0 && index < tableSize) {
+                    TableView.TableViewSelectionModel<Element> selectionModel = uiTable.getSelectionModel();
+                    selectionModel.select(index);
                 }
+                popup.hide();
+                updateFiche();
             }
-            popup.hide();
         });
         final Point2D sc = uiCurrent.localToScreen(0, 0);
         popup.show(uiSearch, sc.getX(), sc.getY());
