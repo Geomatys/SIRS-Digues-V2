@@ -133,7 +133,7 @@ public class PhotoDownload extends StackPane {
             final Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer le Téléchargement ?\nSi vous souhaitez choisir au préalable le(s) répertoire(s) de destination, Cliquez d'abord sur le bouton \"Estimer\".", ButtonType.NO, ButtonType.YES);
             confirmation.setResizable(true);
             final Optional<ButtonType> res = confirmation.showAndWait();
-            if (!((res.isPresent() && ButtonType.YES.equals(res.get())))) {
+            if (!(res.isPresent() && ButtonType.YES.equals(res.get()))) {
                 return;
             }
         }
