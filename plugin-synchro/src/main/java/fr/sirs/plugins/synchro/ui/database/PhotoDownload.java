@@ -123,9 +123,7 @@ public class PhotoDownload extends StackPane {
         uiCancel.setOnAction(evt -> t.cancel(true));
 
         TaskManager.INSTANCE.submit(t);
-        if (!estimated) {
-            estimated = true;
-        }
+        estimated = true;
     }
 
     void importPhotos() {
