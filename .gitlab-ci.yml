@@ -19,9 +19,8 @@ variables:
 build-linux:
   image: images.geomatys.com/ci/maven:3-jdk-8-openjfx
   stage: build
-  only:
-    refs:
-      - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_TAG != null
   script:
     - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS
     - cd launcher
@@ -39,9 +38,8 @@ build-windows:
   stage: build
   tags:
     - powershell
-  only:
-    refs:
-      - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_TAG != null
   script:
     - cd $env:CI_PROJECT_DIR\
     - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -DskipTests
