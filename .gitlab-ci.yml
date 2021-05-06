@@ -22,7 +22,11 @@ build-linux:
   rules:
     - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_TAG != null
   script:
+    # Import certificate to fulfill part 5 of the readme
+    - keytool -importcert -file $CERTIFICATE -alias certificate -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit -noprompt
+    # Do a clean build
     - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS
+    # Build native JFX packages
     - cd launcher
     - apt update
     - apt install -yqq fakeroot rpm
@@ -32,9 +36,6 @@ build-linux:
       - launcher/target/jfx/native
 
 build-windows:
-  #image:
-  #  name: csanchez/maven:3.6.3--windowsservercore-1809
-  #  entrypoint: [""]
   stage: build
   tags:
     - powershell
@@ -42,6 +43,7 @@ build-windows:
     - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_TAG != null
   script:
     - cd $env:CI_PROJECT_DIR\
+    - keytool -importcert -file $CERTIFICATE -alias certificate -storepass changeit -noprompt
     - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -DskipTests
     - cd launcher
     - mvn jfx:native $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -DskipTests
@@ -56,6 +58,7 @@ build-macosx:
   rules:
     - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_TAG != null
   script:
+    - keytool -importcert -file $CERTIFICATE -alias certificate -storepass changeit -noprompt
     - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS
     - cd launcher
     - mvn jfx:native $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS
