@@ -29,7 +29,7 @@ build-linux:
     - mvn jfx:native $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS
   artifacts:
     paths:
-      - launcher/target
+      - launcher/target/jfx/native
 
 build-windows:
   #image:
@@ -47,7 +47,7 @@ build-windows:
     - mvn jfx:native $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -DskipTests
   artifacts:
     paths:
-      - launcher/target
+      - launcher/target/jfx/native
 
 build-macosx:
   stage: build
@@ -61,7 +61,7 @@ build-macosx:
     - mvn jfx:native $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS
   artifacts:
     paths:
-      - launcher/target
+      - launcher/target/jfx/native
 
 quality:
   image: images.geomatys.com/ci/maven:3-jdk-8-openjfx
