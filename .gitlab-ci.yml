@@ -43,7 +43,7 @@ build-windows:
     - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_TAG != null
   script:
     - cd $env:CI_PROJECT_DIR\
-    - keytool -importcert -file $CERTIFICATE -alias certificate -storepass changeit -noprompt
+    #- keytool -importcert -file $CERTIFICATE -alias certificate -storepass changeit -noprompt
     - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -DskipTests
     - cd launcher
     - mvn jfx:native $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -DskipTests
@@ -58,7 +58,7 @@ build-macosx:
   rules:
     - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_TAG != null
   script:
-    - keytool -importcert -file $CERTIFICATE -alias certificate -storepass changeit -noprompt
+    #- keytool -importcert -file $CERTIFICATE -alias certificate -storepass changeit -noprompt
     - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS
     - cd launcher
     - mvn jfx:native $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS
