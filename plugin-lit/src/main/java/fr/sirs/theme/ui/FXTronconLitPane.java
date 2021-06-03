@@ -42,6 +42,7 @@ import fr.sirs.digue.FXSystemeReperagePane;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.AbstractTheme.ThemeManager;
 import fr.sirs.theme.TronconTheme;
+import fr.sirs.theme.ui.pojotable.ElementCopier;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
@@ -338,6 +339,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
             super(group.getDataClass(), group.getTableTitle(), container);
             foreignParentIdProperty.addListener(this::updateTable);
             this.group = group;
+            this.elementCopier = new ElementCopier(this.pojoClass, container, this.session, this.repo, TronconLit.class);
         }
 
         private void updateTable(ObservableValue<? extends String> observable, String oldValue, String newValue){
