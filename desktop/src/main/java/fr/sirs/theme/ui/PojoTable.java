@@ -1826,7 +1826,7 @@ public class PojoTable extends BorderPane implements Printable {
             col = new EnumColumn(desc);
         } else {
             col = new PropertyColumn(desc);
-            col.sortableProperty().bind(importPointProperty.not());
+            col.sortableProperty().setValue(Boolean.TRUE);
         }
         col.setId(desc.getName());
         return Optional.of(col);
