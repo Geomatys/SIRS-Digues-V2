@@ -26,6 +26,7 @@ import fr.sirs.core.model.TronconLit;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.TronconTheme;
 import fr.sirs.theme.ui.ForeignParentPojoTable;
+import fr.sirs.theme.ui.pojotable.ElementCopier;
 import fr.sirs.util.SimpleFXEditMode;
 import fr.sirs.util.SirsStringConverter;
 import java.util.List;
@@ -92,6 +93,7 @@ public class FXLitThemePane extends BorderPane {
             super(group.getDataClass(), group.getTableTitle(), container);
             foreignParentIdProperty.addListener(this::updateTable);
             this.group = group;
+            this.elementCopier = new ElementCopier(this.pojoClass, container, this.session, this.repo, TronconLit.class);
         }
 
         private void updateTable(ObservableValue<? extends String> observable, String oldValue, String newValue){
