@@ -394,7 +394,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
                 final ObservableList<BorneDigue> endItems = uiBorneEnd.getItems();
                 // Mise à jour des champs
                 updateFields();
-                // Réinjection de la liste filtrée.
+                // On réinjecte de la liste filtrée.
                 uiBorneStart.setItems(startItems);
                 uiBorneEnd.setItems(endItems);
             } else {
