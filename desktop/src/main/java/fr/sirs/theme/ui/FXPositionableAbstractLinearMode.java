@@ -187,11 +187,12 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
 
         uiSRs.getSelectionModel().selectedItemProperty().addListener(this::srsChange);
 
-        final ChangeListener chgListener = (ObservableValue observable, Object oldValue, Object newValue) -> coordChange();
+        final ChangeListener chgListener = (ObservableValue observable, Object oldValue, Object newValue) -> coordChange(false);
+        final ChangeListener borneChgListener = (ObservableValue observable, Object oldValue, Object newValue) -> coordChange(true);
         groupStart.selectedToggleProperty().addListener(chgListener);
         groupEnd.selectedToggleProperty().addListener(chgListener);
-        uiBorneStart.valueProperty().addListener(chgListener);
-        uiBorneEnd.valueProperty().addListener(chgListener);
+        uiBorneStart.valueProperty().addListener(borneChgListener);
+        uiBorneEnd.valueProperty().addListener(borneChgListener);
         uiDistanceStart.valueProperty().addListener(chgListener);
         uiDistanceEnd.valueProperty().addListener(chgListener);
     }
@@ -377,7 +378,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         ConvertPositionableCoordinates.computePositionableGeometryAndCoord(positionable);
     }
 
-    protected void coordChange() {
+    protected void coordChange(final boolean isBorne) {
         if (reseting) {return;}
         reseting = true;
         try {
@@ -386,7 +387,19 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         }catch(Exception e){
             SIRS.LOGGER.log(Level.WARNING, "Echec de la construction de la géométrie lors du changement de coordonnées.", e);
         }finally {
-            updateFields();
+            if (isBorne && uiBorneStart != null && uiBorneEnd != null) {
+                // La mise à jour des champs se déclenche après le mécanisme d'autocomplétion, ce qui a pour effet d'écraser la liste filtrée par l'autocompletion par la liste d'origine.
+                // Ici, on conserve simplement la liste filtrée par l'autocompletion pour la réinjecter après la mise à jour des champs.
+                final ObservableList<BorneDigue> startItems = uiBorneStart.getItems();
+                final ObservableList<BorneDigue> endItems = uiBorneEnd.getItems();
+                // Mise à jour des champs
+                updateFields();
+                // On réinjecte de la liste filtrée.
+                uiBorneStart.setItems(startItems);
+                uiBorneEnd.setItems(endItems);
+            } else {
+                updateFields();
+            }
             reseting = false;
         }
     }
