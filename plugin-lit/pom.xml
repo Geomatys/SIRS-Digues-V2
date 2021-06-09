@@ -19,7 +19,7 @@
     </parent>
 
     <properties>
-        <plugin.core.version.min>31</plugin.core.version.min>
+        <plugin.core.version.min>30</plugin.core.version.min>
     </properties>
 
     <dependencies>
