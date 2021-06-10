@@ -387,17 +387,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         }catch(Exception e){
             SIRS.LOGGER.log(Level.WARNING, "Echec de la construction de la géométrie lors du changement de coordonnées.", e);
         }finally {
-            if (isBorne && uiBorneStart != null && uiBorneEnd != null) {
-                // La mise à jour des champs se déclenche après le mécanisme d'autocomplétion, ce qui a pour effet d'écraser la liste filtrée par l'autocompletion par la liste d'origine.
-                // Ici, on conserve simplement la liste filtrée par l'autocompletion pour la réinjecter après la mise à jour des champs.
-                final ObservableList<BorneDigue> startItems = uiBorneStart.getItems();
-                final ObservableList<BorneDigue> endItems = uiBorneEnd.getItems();
-                // Mise à jour des champs
-                updateFields();
-                // On réinjecte de la liste filtrée.
-                uiBorneStart.setItems(startItems);
-                uiBorneEnd.setItems(endItems);
-            } else {
+            if (!isBorne) {
                 updateFields();
             }
             reseting = false;
