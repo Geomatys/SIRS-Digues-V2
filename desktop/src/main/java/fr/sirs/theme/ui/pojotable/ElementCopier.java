@@ -96,6 +96,15 @@ public class ElementCopier {
         }
     }
 
+    public ElementCopier(Class pojoClass, ObjectProperty<? extends Element> container, Session session, AbstractSIRSRepository pojoRepo, Class targetClass) {
+        this(pojoClass, container, session, pojoRepo);
+
+        ArgumentChecks.ensureNonNull("Target class", targetClass);
+
+        this.targetClass = Optional.of(targetClass);
+        this.targetRepo = session.getRepositoryForClass(targetClass);
+    }
+
     /**
      * Méthode permettant à l'utilisateur de choisir l'élément vers lequel il
      * veut faire une copie.

@@ -182,7 +182,7 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         Init list of bornes and SRs : must be done all the time to allow the user
         to change/choose the positionable SR and bornes among list elements.
         */
-        final Map<String, BorneDigue> borneMap = initSRBorneLists(t, defaultSR);
+        final Map<String, BorneDigue> borneMap = initSRBorneLists(t, defaultSR, false);
 
         if(MODE.equals(mode)){
             //on assigne les valeurs sans changement

@@ -246,6 +246,17 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
      */
     @Override
     public void updateFields() {
+        updateFields(false);
+    }
+
+    /**
+     * Le paramètre isBorne est nécéssaire pour empécher l'écrasement de la
+     * liste calculée par l'autocomplétion, qui est déclenché juste avant la
+     * mise à jour des champs. isBorne a pour valeur vrai uniquement pour les
+     * listeners des champs borneDebut et borneFin.
+     * @param isBorne
+     */
+    private void updateFields(final boolean isBorne) {
         reseting = true;
         try {
             final Positionable pos = posProperty.get();
@@ -266,10 +277,10 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
             uiSRs.setValue(defaultSR);
 
             /*
-        Init list of bornes and SRs : must be done all the time to allow the user
-        to change/choose the positionable SR and bornes among list elements.
+            Init list of bornes and SRs : must be done all the time to allow the user
+            to change/choose the positionable SR and bornes among list elements.
              */
-            final Map<String, BorneDigue> borneMap = initSRBorneLists(t, defaultSR);
+            final Map<String, BorneDigue> borneMap = initSRBorneLists(t, defaultSR, isBorne);
 
             if ((mode == null || getID().equals(mode)) && sameSR) {
                 //on assigne les valeurs sans changement
@@ -327,7 +338,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
      * @param defaultSR
      * @return
      */
-    protected Map<String, BorneDigue> initSRBorneLists(final TronconDigue t, final SystemeReperage defaultSR) {
+    protected Map<String, BorneDigue> initSRBorneLists(final TronconDigue t, final SystemeReperage defaultSR, final boolean isBorne) {
         final List<SystemeReperage> srs = ((SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class)).getByLinear(t);
         uiSRs.setItems(SIRS.observableList(srs));
         uiSRs.getSelectionModel().select(defaultSR);
@@ -342,10 +353,11 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
             }
             bornes.addAll(borneMap.values());
         }
-
-        bornes = bornes.sorted(new BorneComparator());
-        uiBorneStart.setItems(bornes);
-        uiBorneEnd.setItems(bornes);
+        if (!isBorne) {
+            bornes = bornes.sorted(new BorneComparator());
+            uiBorneStart.setItems(bornes);
+            uiBorneEnd.setItems(bornes);
+        }
         return borneMap;
     }
 
@@ -387,16 +399,10 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         }catch(Exception e){
             SIRS.LOGGER.log(Level.WARNING, "Echec de la construction de la géométrie lors du changement de coordonnées.", e);
         }finally {
-            if (isBorne && uiBorneStart != null && uiBorneEnd != null) {
-                // La mise à jour des champs se déclenche après le mécanisme d'autocomplétion, ce qui a pour effet d'écraser la liste filtrée par l'autocompletion par la liste d'origine.
-                // Ici, on conserve simplement la liste filtrée par l'autocompletion pour la réinjecter après la mise à jour des champs.
-                final ObservableList<BorneDigue> startItems = uiBorneStart.getItems();
-                final ObservableList<BorneDigue> endItems = uiBorneEnd.getItems();
-                // Mise à jour des champs
-                updateFields();
-                // On réinjecte de la liste filtrée.
-                uiBorneStart.setItems(startItems);
-                uiBorneEnd.setItems(endItems);
+            // Disjonction nécéssaire pour éviter l'écrasement de la liste
+            // calculée par l'autocomplétion des champs borneDebut et borneFin.
+            if (isBorne) {
+                updateFields(true);
             } else {
                 updateFields();
             }
