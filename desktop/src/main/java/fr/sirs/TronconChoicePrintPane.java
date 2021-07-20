@@ -44,6 +44,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -66,6 +67,9 @@ public abstract class TronconChoicePrintPane extends BorderPane {
 
     @FXML protected Tab uiTronconChoice;
     @FXML protected FXPrestationPredicater uiPrestationPredicater;
+
+    @FXML protected CheckBox uiOptionExcludeValid;
+    @FXML protected CheckBox uiOptionExcludeInvalid;
 
     // Garde en cache les PRs de début et de fin de sections de tronçons imprimables (ajustables pour limiter l'impression à des parties de tronçons seulement).
     protected final Map<String, ObjectProperty<Number>[]> ajustedPrsByTronconId = new HashMap<>();
@@ -342,6 +346,13 @@ public abstract class TronconChoicePrintPane extends BorderPane {
                 return false;
 
             return Float.isNaN(endPR) || candidate.getPrDebut() <= endPR;
+        }
+    }
+
+    final protected class ValidPredicate implements Predicate<Element> {
+        @Override
+        public boolean test(Element t) {
+            return (t.getValid() && !uiOptionExcludeValid.isSelected()) || (!t.getValid() && !uiOptionExcludeInvalid.isSelected());
         }
     }
 }

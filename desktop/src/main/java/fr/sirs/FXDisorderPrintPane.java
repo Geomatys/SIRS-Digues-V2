@@ -139,6 +139,8 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         uiOptionFin.valueProperty().addListener(parameterListener);
         uiOptionDebutArchive.valueProperty().addListener(parameterListener);
         uiOptionFinArchive.valueProperty().addListener(parameterListener);
+        uiOptionExcludeValid.selectedProperty().addListener(parameterListener);
+        uiOptionExcludeInvalid.selectedProperty().addListener(parameterListener);
         uiPrestationPredicater.uiOptionPrestation.selectedProperty().addListener(parameterListener);
 
         uiCountProgress.setVisible(false);
@@ -181,7 +183,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
 
     private Stream<Desordre> getData() {
         final Predicate userOptions = new TypePredicate()
-                .and(Desordre::getValid) // On n'autorise à l'impression uniquement les désordre valides.
+                .and(new ValidPredicate())
                 .and(new TemporalPredicate())
                 .and(new LinearPredicate<>())
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
