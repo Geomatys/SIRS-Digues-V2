@@ -221,7 +221,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> implements Cha
                     // Cas spécifique aux références vers les levés de profil en travers (depuis les tableaux de LevePositionProfilTravers) : on veut afficher la date (SYM-1587)
                     if(LeveProfilTravers.class.equals(refClass)){
                         final LeveProfilTravers lpt = Injector.getSession().getRepositoryForClass(LeveProfilTravers.class).get(item);
-                        text = new SimpleStringProperty(lpt.getDateLeve().toString());
+                        text = new SimpleStringProperty(lpt.getDateLeve() == null ? "" : lpt.getDateLeve().toString());
                         CACHED_VALUES.put(item, text);
                     }
                     else {
