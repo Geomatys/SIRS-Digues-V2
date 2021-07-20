@@ -18,9 +18,14 @@
  */
 package fr.sirs;
 
+import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.AvecBornesTemporelles;
+import fr.sirs.core.model.AvecObservations;
 import fr.sirs.util.DatePickerConverter;
+import fr.sirs.util.ObjectDataSource;
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -34,6 +39,7 @@ import org.apache.sis.measure.Range;
  * une période de temps.
  *
  * @author Samuel Andrés (Geomatys)
+ * @author Maxime Gavens (Geomatys)
  */
 public abstract class TemporalTronconChoicePrintPane extends TronconChoicePrintPane {
 
@@ -46,6 +52,11 @@ public abstract class TemporalTronconChoicePrintPane extends TronconChoicePrintP
     protected DatePicker uiOptionDebutArchive;
     @FXML
     protected DatePicker uiOptionFinArchive;
+
+    @FXML
+    protected DatePicker uiOptionDebutLastObservation;
+    @FXML
+    protected DatePicker uiOptionFinLastObservation;
 
     @FXML
     protected CheckBox uiOptionNonArchive;
@@ -83,6 +94,8 @@ public abstract class TemporalTronconChoicePrintPane extends TronconChoicePrintP
         DatePickerConverter.register(uiOptionFin);
         DatePickerConverter.register(uiOptionDebutArchive);
         DatePickerConverter.register(uiOptionFinArchive);
+        DatePickerConverter.register(uiOptionDebutLastObservation);
+        DatePickerConverter.register(uiOptionFinLastObservation);
     }
 
     /**
@@ -138,6 +151,36 @@ public abstract class TemporalTronconChoicePrintPane extends TronconChoicePrintP
                 return false;
 
             return selectedRange == null || selectedRange.contains(input.getDate_debut());
+        }
+    }
+
+    class LastObservationPredicate implements Predicate<AvecObservations> {
+
+        final Range<LocalDate> selectedRange;
+
+        public LastObservationPredicate() {
+            final LocalDate start = uiOptionDebutLastObservation.getValue();
+            final LocalDate end = uiOptionFinLastObservation.getValue();
+            if (start == null && end == null) {
+                selectedRange = null;
+            } else {
+                selectedRange = new Range<>(LocalDate.class, start == null? LocalDate.MIN : start, true, end == null? LocalDate.MAX : end, true);
+            }
+        }
+
+        @Override
+        public boolean test(AvecObservations t) {
+            final List<? extends AbstractObservation> observations = t.getObservations();
+
+            if ((observations!=null) && (observations.size() > 0)) {
+                final AbstractObservation lastObservation = Collections.min(observations, ObjectDataSource.OBSERVATION_COMPARATOR);
+                final LocalDate ld = lastObservation.getDate();
+
+                if (ld != null) {
+                    return selectedRange == null || selectedRange.contains(ld);
+                }
+            }
+            return selectedRange == null;
         }
     }
 }

@@ -139,6 +139,9 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         uiOptionFin.valueProperty().addListener(parameterListener);
         uiOptionDebutArchive.valueProperty().addListener(parameterListener);
         uiOptionFinArchive.valueProperty().addListener(parameterListener);
+        uiOptionDebutLastObservation.valueProperty().addListener(parameterListener);
+        uiOptionFinLastObservation.valueProperty().addListener(parameterListener);
+
         uiPrestationPredicater.uiOptionPrestation.selectedProperty().addListener(parameterListener);
 
         uiCountProgress.setVisible(false);
@@ -187,7 +190,8 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
                 .and(new PRPredicate<>())
                 .and(new UrgencePredicate())
-                .and(uiPrestationPredicater.getPredicate());
+                .and(uiPrestationPredicater.getPredicate())
+                .and(new LastObservationPredicate());
 
         final CloseableIterator<Desordre> it = Injector.getSession()
                 .getRepositoryForClass(Desordre.class)

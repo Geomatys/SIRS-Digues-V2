@@ -235,7 +235,7 @@ public class ObjectDataSource<T> implements JRDataSource {
      * Pour le classement des observations de la plus récente à la plus
      * ancienne.
      */
-    static final Comparator<AbstractObservation> OBSERVATION_COMPARATOR = (o1, o2) -> {
+    public static final Comparator<AbstractObservation> OBSERVATION_COMPARATOR = (o1, o2) -> {
         if (o1 == null && o2 == null) {
             return 0;
         } else if (o1 == null || o2 == null) {

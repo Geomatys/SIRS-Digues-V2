@@ -109,6 +109,8 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
         uiOptionFin.valueProperty().addListener(parameterListener);
         uiOptionDebutArchive.valueProperty().addListener(parameterListener);
         uiOptionFinArchive.valueProperty().addListener(parameterListener);
+        uiOptionDebutLastObservation.valueProperty().addListener(parameterListener);
+        uiOptionFinLastObservation.valueProperty().addListener(parameterListener);
 
         uiPrestationPredicater.uiOptionPrestation.selectedProperty().addListener(parameterListener);
 
@@ -149,7 +151,8 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
                 .and(new LinearPredicate<>())
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
                 .and(new PRPredicate<>())
-                .and(uiPrestationPredicater.getPredicate());
+                .and(uiPrestationPredicater.getPredicate())
+                .and(new LastObservationPredicate());
 
         final CloseableIterator<ReseauHydrauliqueFerme> it = Injector.getSession()
                 .getRepositoryForClass(ReseauHydrauliqueFerme.class)
