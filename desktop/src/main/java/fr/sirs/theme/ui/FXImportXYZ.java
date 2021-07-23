@@ -73,6 +73,9 @@ import org.opengis.util.GenericName;
  */
 public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
 
+    private static final String ATT_X_KEY = "attX";
+    private static final String ATT_Y_KEY = "attY";
+
     @FXML private ComboBox<PropertyType> uiAttX;
     @FXML private ComboBox<PropertyType> uiAttY;
 
@@ -83,8 +86,25 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
         uiAttY.setConverter(stringConverter);
     }
 
+    private void initFieldValue() {
+        // Init table with the previous file opened
+        // Must be before coordinate initialization because openFeatureStore fill the stringConverter
+        if ((uiPath.getText() != null && !uiPath.getText().isEmpty())) {
+            openFeatureStore();
+        }
+        // Init coordinate value with the previous one saved
+        fillFieldFromComboBox(ATT_X_KEY, uiAttX);
+        fillFieldFromComboBox(ATT_Y_KEY, uiAttY);
+        fillFieldFromComboBox(ATT_Z_KEY, uiAttZ);
+        fillFieldFromComboBox(ATT_DESIGNATION_KEY, uiAttDesignation);
+    }
+
     @FXML
     void openFeatureStore(ActionEvent event) {
+        openFeatureStore();
+    }
+
+    private void openFeatureStore() {
         final String url = uiPath.getText();
         final File file = new File(uiPath.getText());
 
@@ -160,7 +180,6 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
             alert.showAndWait();
             return;
         }
-
     }
 
     @Override
@@ -224,5 +243,15 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
             leves.add(leve);
         }
         return leves;
+    }
+
+    private void fillFieldFromComboBox(final String key, final ComboBox<PropertyType> combo) {
+        final String str = previousFieldValue(key);
+        if (str != null) {
+            final Object o = stringConverter.fromString(str);
+            if (o instanceof PropertyType) {
+                combo.getSelectionModel().select((PropertyType) o);
+            }
+        }
     }
 }

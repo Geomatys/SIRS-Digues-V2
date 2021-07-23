@@ -63,6 +63,8 @@ import org.opengis.util.GenericName;
  */
 public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
 
+    private static final String ATT_D_KEY = "attD";
+
     @FXML private ComboBox<PropertyType> uiAttD;
 
     public FXImportDZ(final PojoTable pojoTable) {
@@ -70,10 +72,27 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
 
         uiAttD.setConverter(stringConverter);
         uiCRS.setDisable(true);
+        initFieldValue();
+    }
+
+    private void initFieldValue() {
+        // Init table with the previous file opened
+        // Must be before coordinate initialization because openFeatureStore fill the stringConverter
+        if ((uiPath.getText() != null && !uiPath.getText().isEmpty())) {
+            openFeatureStore();
+        }
+        // Init coordinate value with the previous one saved
+        fillFieldFromComboBox(ATT_D_KEY, uiAttD);
+        fillFieldFromComboBox(ATT_Z_KEY, uiAttZ);
+        fillFieldFromComboBox(ATT_DESIGNATION_KEY, uiAttDesignation);
     }
 
     @FXML
     void openFeatureStore(ActionEvent event) {
+        openFeatureStore();
+    }
+
+    private void openFeatureStore() {
         final String url = uiPath.getText();
         final File file = new File(uiPath.getText());
 
@@ -104,7 +123,9 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
 
             //liste des propriétés
             final ObservableList<PropertyType> properties = getPropertiesFromFeatures(col);
-            
+
+            stringConverter.registerList(properties);
+
             uiAttDesignation.setItems(properties);
             uiAttD.setItems(properties);
             uiAttZ.setItems(properties);
@@ -149,6 +170,12 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
     }
 
     @Override
+    protected void saveFieldValue() {
+        super.saveFieldValue();
+        setFieldValue(ATT_D_KEY, stringConverter.toString(uiAttD.getSelectionModel().getSelectedItem()));
+    }
+
+    @Override
     protected ObservableList<PointDZ> getSelectionPoint(){
         final ObservableList<Feature> features = selectionProperty;
         final ObservableList<PointDZ> leves = FXCollections.observableArrayList();
@@ -175,5 +202,15 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
             leves.add(leve);
         }
         return leves;
+    }
+
+    private void fillFieldFromComboBox(final String key, final ComboBox<PropertyType> combo) {
+        final String str = previousFieldValue(key);
+        if (str != null) {
+            final Object o = stringConverter.fromString(str);
+            if (o instanceof PropertyType) {
+                combo.getSelectionModel().select((PropertyType) o);
+            }
+        }
     }
 }
