@@ -32,7 +32,7 @@
 		<band/>
 	</columnHeader>
 	<detail>
-		<band height="268" splitType="Stretch">
+		<band height="380" splitType="Stretch">
 			<frame>
 				<reportElement mode="Opaque" x="0" y="0" width="555" height="48" uuid="7e90d220-3a9a-4a61-b736-a6cad2b30566"/>
 				<staticText>
@@ -468,6 +468,13 @@
 					</textElement>
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{positionId})]]></textFieldExpression>
 				</textField>
+			</frame>
+                        <frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="268" width="555" height="110" uuid="591a68b9-fa1e-48f7-a50a-a773b516109d"/>
+				<image>
+					<reportElement x="403" y="0" width="152" height="110" uuid="b253817f-37a0-48de-b394-60be061ac430"/>
+					<imageExpression><![CDATA[$F{IMAGE_DATA_SOURCE}]]></imageExpression>
+				</image>
 			</frame>
 		</band>
 	</detail>

@@ -28,10 +28,12 @@ import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.DatabaseRegistry;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.ArticleJournal;
+import fr.sirs.core.model.AvecGeometrie;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
@@ -80,6 +82,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.digue.DiguesTab;
+import fr.sirs.map.FXMapPane;
 import fr.sirs.migration.HtmlRemoval;
 import fr.sirs.migration.upgrade.v2and23.UpgradeLink1NtoNN;
 import fr.sirs.migration.upgrade.v2and23.UpgradePrestationsCoordinates;
@@ -93,6 +96,9 @@ import fr.sirs.theme.Theme;
 import fr.sirs.theme.TronconTheme;
 import fr.sirs.util.FXFreeTab;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.RenderingHints;
+import java.awt.geom.Rectangle2D;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,6 +107,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -113,6 +120,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
+import javax.swing.SwingConstants;
 import org.apache.sis.measure.Units;
 import org.apache.sis.referencing.CRS;
 import org.apache.sis.referencing.CommonCRS;
@@ -126,12 +134,28 @@ import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.QueryBuilder;
+import org.geotoolkit.display.PortrayalException;
 import org.geotoolkit.display2d.GO2Utilities;
+import org.geotoolkit.display2d.canvas.J2DCanvas;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
+import org.geotoolkit.display2d.ext.northarrow.GraphicNorthArrowJ2D;
+import org.geotoolkit.display2d.ext.scalebar.GraphicScaleBarJ2D;
+import org.geotoolkit.display2d.service.CanvasDef;
+import org.geotoolkit.display2d.service.DefaultPortrayalService;
+import org.geotoolkit.display2d.service.PortrayalExtension;
+import org.geotoolkit.display2d.service.SceneDef;
+import org.geotoolkit.display2d.service.ViewDef;
+import org.geotoolkit.factory.Hints;
+import org.geotoolkit.feature.type.FeatureType;
+import org.geotoolkit.feature.type.GeometryDescriptor;
 import org.geotoolkit.filter.DefaultLiteral;
+import org.geotoolkit.filter.identity.DefaultFeatureId;
 import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.geometry.jts.JTSEnvelope2D;
+import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
+import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.style.MutableFeatureTypeStyle;
@@ -152,10 +176,13 @@ import static org.geotoolkit.style.StyleConstants.STROKE_CAP_BUTT;
 import static org.geotoolkit.style.StyleConstants.STROKE_CAP_ROUND;
 import static org.geotoolkit.style.StyleConstants.STROKE_CAP_SQUARE;
 import static org.geotoolkit.style.StyleConstants.STROKE_JOIN_BEVEL;
+import org.geotoolkit.util.NamesExt;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.FilterVisitor;
+import org.opengis.filter.Id;
 import org.opengis.filter.expression.Expression;
+import org.opengis.geometry.Envelope;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.style.Fill;
@@ -1193,5 +1220,145 @@ public class CorePlugin extends Plugin {
         }
 
         super.findUpgradeTasks(fromMajor, fromMinor, dbConnector, upgradeTasks);
+    }
+
+    public static java.awt.Image takePictureOfElement(Element e) {
+        try {
+            FXMapPane map = Injector.getSession().getFrame().getMapTab().getMap();
+            final FXMap uiMap =  map.getUiMap();
+            final MapLayer container = CorePlugin.getMapLayerForElement(e);
+            if (!(container instanceof FeatureMapLayer)) {
+                if (e instanceof AvecGeometrie) {
+                    Geometry geom = ((AvecGeometrie) e).getGeometry();
+                    if (geom != null) {
+                        final JTSEnvelope2D env = JTS.toEnvelope(geom);
+                        final Envelope selectionEnvelope = SIRS.pseudoBuffer(env);
+                        return cropImageFromMap(uiMap, selectionEnvelope);
+                    }
+                } else {
+                    SIRS.LOGGER.warning("L'élément (id: " + e.getId() + ") n'est présent dans aucune couche cartographique.");
+                    return null;
+                }
+            }
+            
+            final FeatureMapLayer fLayer = (FeatureMapLayer) container;
+            
+            final Id idFilter = GO2Utilities.FILTER_FACTORY.id(Collections.singleton(new DefaultFeatureId(e.getId())));
+            fLayer.setSelectionFilter(idFilter);
+            fLayer.setVisible(true);
+            
+            // Envelope spatiale
+            final FeatureType fType = fLayer.getCollection().getFeatureType();
+            final GenericName typeName = fType.getName();
+            QueryBuilder queryBuilder = new QueryBuilder(
+                    NamesExt.create(typeName.scope().toString(), typeName.head().toString()));
+            queryBuilder.setFilter(idFilter);
+            GeometryDescriptor geomDescriptor = fType.getGeometryDescriptor();
+            if (geomDescriptor != null) {
+                queryBuilder.setProperties(new GenericName[]{geomDescriptor.getName()});
+            } else {
+                // zoom impossible
+                return null;
+            }
+            
+            FeatureCollection subCollection = fLayer.getCollection().subCollection(queryBuilder.buildQuery());
+            Envelope tmpEnvelope = subCollection.getEnvelope();
+            if (tmpEnvelope == null) {
+                // Récupération de l'enveloppe impossible
+                return null;
+            }
+            return cropImageFromMap(uiMap, SIRS.pseudoBuffer(tmpEnvelope));
+        } catch (PortrayalException ex) {
+            SIRS.LOGGER.log(Level.WARNING, "Impossible de prendre une photo de l'élément: " + e.getId(), ex);
+        } catch (DataStoreException ex) {
+            SIRS.LOGGER.log(Level.WARNING, "Impossible de prendre une photo de l'élément: " + e.getId(), ex);
+        }
+        return null;
+    }
+
+    public static java.awt.Image cropImageFromMap(FXMap uiMap1, Envelope env) throws PortrayalException {
+        final Rectangle2D dispSize = uiMap1.getCanvas().getDisplayBounds();
+
+        final Hints hints = new Hints();
+        hints.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        hints.put(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        hints.put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        final PortrayalExtension ext = (J2DCanvas canvas) -> {
+            final GraphicScaleBarJ2D graphicScaleBarJ2D = new GraphicScaleBarJ2D(canvas);
+            graphicScaleBarJ2D.setPosition(SwingConstants.SOUTH_WEST);
+            final GraphicNorthArrowJ2D northArrowJ2D = new GraphicNorthArrowJ2D(canvas, Session.NORTH_ARROW_TEMPLATE);
+            northArrowJ2D.setPosition(SwingConstants.SOUTH_WEST);
+            northArrowJ2D.setOffset(10, 60);
+
+            try {
+                final double span = canvas.getVisibleEnvelope2D().getSpan(0);
+                if (span > 5000) {
+                    graphicScaleBarJ2D.setTemplate(Session.SCALEBAR_KILOMETER_TEMPLATE);
+                } else {
+                    graphicScaleBarJ2D.setTemplate(Session.SCALEBAR_METER_TEMPLATE);
+                }
+            } catch (Exception ex) {
+                SIRS.LOGGER.log(Level.INFO, ex.getMessage(), ex);
+            }
+            canvas.getContainer().getRoot().getChildren().add(graphicScaleBarJ2D);
+            canvas.getContainer().getRoot().getChildren().add(northArrowJ2D);
+        };
+
+        final CanvasDef cdef = new CanvasDef(new Dimension((int) dispSize.getWidth(), (int) dispSize.getHeight()), new Color(0, 0, 0, 0));
+        final SceneDef sdef = new SceneDef(uiMap1.getContainer().getContext(), hints, ext);
+        final ViewDef vdef = new ViewDef(env);
+        return DefaultPortrayalService.portray(cdef, sdef, vdef);
+    }
+
+    /**
+     * Try to get the map layer which contains {@link Element}s of given class.
+     * @param element The element we want to retrieve on map.
+     * @return The Map layer in which are contained elements of input type, or null.
+     */
+    public static MapLayer getMapLayerForElement(Element element) {
+        if (element.getClass().equals(TronconDigue.class)) {
+            return getMapLayerForElement(TRONCON_LAYER_NAME);
+        } else if (element instanceof BorneDigue) {
+            return getMapLayerForElement(BORNE_LAYER_NAME);
+        } else if (element instanceof AbstractPositionDocumentAssociable) {
+            final Previews previews = Injector.getSession().getPreviews();
+            final String documentId = ((AbstractPositionDocumentAssociable) element).getSirsdocument(); // IL est nécessaire qu'un document soit associé pour déterminer le type de la couche.
+            final Preview previewLabel = previews.get(documentId);
+            Class documentClass = null;
+            try {
+                documentClass = Class.forName(previewLabel.getElementClass(), true, Thread.currentThread().getContextClassLoader());
+            } catch (ClassNotFoundException ex) {
+                SIRS.LOGGER.log(Level.WARNING, null, ex);
+            }
+
+            final LabelMapper mapper = LabelMapper.get(documentClass);
+            return getMapLayerForElement(mapper.mapClassName());
+
+        } else {
+            final LabelMapper mapper = LabelMapper.get(element.getClass());
+            final MapLayer foundLayer = getMapLayerForElement(mapper.mapClassName());
+            if (foundLayer == null) {
+                return getMapLayerForElement(mapper.mapClassNamePlural());
+            } else {
+                return foundLayer;
+            }
+        }
+    }
+
+    /**
+     * Try to get the map layer using its name.
+     * @param layerName Identifier of the map layer to retrieve
+     * @return The matching map layer, or null.
+     */
+    public static MapLayer getMapLayerForElement(String layerName) {
+        final MapContext context = Injector.getSession().getMapContext();
+        if (context == null) return null;
+        for (MapLayer layer : context.layers()) {
+            if (layer.getName().equalsIgnoreCase(layerName)) {
+                return layer;
+            }
+        }
+        return null;
     }
 }

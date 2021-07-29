@@ -18,6 +18,7 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
 import static fr.sirs.core.SirsCore.DIGUE_ID_FIELD;
 import fr.sirs.core.component.Previews;
@@ -34,6 +35,7 @@ import fr.sirs.core.model.ProprieteObjet;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
+import static fr.sirs.util.JRDomWriterDesordreSheet.IMAGE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.RESEAU_FERME_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.DESORDRE_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.LENGTH_FIELD;
@@ -41,11 +43,15 @@ import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.MANAGER_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OWNER_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.PHOTO_DATA_SOURCE;
+import java.awt.Image;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
@@ -58,7 +64,9 @@ import org.geotoolkit.display.MeasureUtilities;
  * @author Samuel Andrés (Geomatys)
  */
 public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<OuvrageHydrauliqueAssocie> {
-    
+
+    private static Logger LOGGER = Logger.getLogger(OuvrageHydrauliqueAssocieDataSource.class.getName());
+
     private static final NumberFormat DISTANCE_FORMAT = new DecimalFormat("0.00");
     
 
@@ -199,6 +207,18 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
             }
             Collections.sort(desordreRows);
             return new ObjectDataSource<>(desordreRows, previewRepository, stringConverter);
+        } else if (IMAGE_DATA_SOURCE.equals(name)) {
+            final Image img = CorePlugin.takePictureOfElement(currentObject);
+            if (img != null) {
+                return img;
+            } else {
+                try {
+                    return javax.imageio.ImageIO.read(DesordreDataSource.class.getResource("/fr/sirs/images/imgNotFound.png"));
+                } catch (IOException ex) {
+                    LOGGER.log(Level.WARNING, null, ex);
+                    return null;
+                }
+            }
         }
         else return super.getFieldValue(jrf);
     }

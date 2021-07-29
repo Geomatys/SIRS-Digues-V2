@@ -24,6 +24,7 @@ import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;
 import static fr.sirs.util.JRUtils.TAG_BAND;
+import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -48,7 +49,9 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
     
     public static final String PHOTO_DATA_SOURCE = "PHOTO_DATA_SOURCE";
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
-    
+
+    public static final String IMAGE_DATA_SOURCE = "IMAGE_DATA_SOURCE";
+
     private final List<JRColumnParameter> observationFields;
     private final List<JRColumnParameter> reseauFields;
     private final List<JRColumnParameter> desordreFields;
@@ -98,6 +101,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         writeField(ObjectDataSource.class, OBSERVATION_TABLE_DATA_SOURCE, "Source de données des observations");
         if(printReseauOuvrage) writeField(ObjectDataSource.class, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, "Source de données des réseaux");
         writeField(ObjectDataSource.class, DESORDRE_TABLE_DATA_SOURCE, "Source de données des désordres");
+        writeField(Image.class, IMAGE_DATA_SOURCE, "Image de l'élément");
         
         // Modifies the title block.--------------------------------------------
         writeTitle();
