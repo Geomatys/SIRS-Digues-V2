@@ -44,6 +44,7 @@ import static fr.sirs.util.JRDomWriterDesordreSheet.PRESTATION_TABLE_DATA_SOURCE
 import static fr.sirs.util.JRDomWriterDesordreSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.VOIRIE_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.IMAGE_DATA_SOURCE;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -151,7 +152,7 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
             voirieList.sort(ELEMENT_COMPARATOR);
             return new ObjectDataSource<>(voirieList, previewRepository, stringConverter);
         } else if (IMAGE_DATA_SOURCE.equals(name)) {
-            final Image img = CorePlugin.takePictureOfElement(currentObject);
+            final Image img = CorePlugin.takePictureOfElement(currentObject, new Dimension(1750, 1200));
             if (img != null) {
                 return img;
             } else {

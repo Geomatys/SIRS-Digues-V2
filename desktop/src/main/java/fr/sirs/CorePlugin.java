@@ -1222,7 +1222,8 @@ public class CorePlugin extends Plugin {
         super.findUpgradeTasks(fromMajor, fromMinor, dbConnector, upgradeTasks);
     }
 
-    public static java.awt.Image takePictureOfElement(Element e) {
+    public static java.awt.Image takePictureOfElement(Element e, Dimension dim) {
+        if (e == null) return null;
         try {
             FXMapPane map = Injector.getSession().getFrame().getMapTab().getMap();
             final FXMap uiMap =  map.getUiMap();
@@ -1232,21 +1233,21 @@ public class CorePlugin extends Plugin {
                     Geometry geom = ((AvecGeometrie) e).getGeometry();
                     if (geom != null) {
                         final JTSEnvelope2D env = JTS.toEnvelope(geom);
-                        final Envelope selectionEnvelope = SIRS.pseudoBuffer(env);
-                        return cropImageFromMap(uiMap, selectionEnvelope);
+                        final Envelope selectionEnvelope = SIRS.pseudoBuffer(env, 50, 0.01);
+                        return cropImageFromMap(uiMap, selectionEnvelope, dim);
                     }
                 } else {
-                    SIRS.LOGGER.warning("L'élément (id: " + e.getId() + ") n'est présent dans aucune couche cartographique.");
+                    SIRS.LOGGER.log(Level.WARNING, "L'élément (id: {0}) n''est présent dans aucune couche cartographique.", e.getId());
                     return null;
                 }
             }
-            
+
             final FeatureMapLayer fLayer = (FeatureMapLayer) container;
-            
+
             final Id idFilter = GO2Utilities.FILTER_FACTORY.id(Collections.singleton(new DefaultFeatureId(e.getId())));
             fLayer.setSelectionFilter(idFilter);
             fLayer.setVisible(true);
-            
+
             // Envelope spatiale
             final FeatureType fType = fLayer.getCollection().getFeatureType();
             final GenericName typeName = fType.getName();
@@ -1260,14 +1261,14 @@ public class CorePlugin extends Plugin {
                 // zoom impossible
                 return null;
             }
-            
+
             FeatureCollection subCollection = fLayer.getCollection().subCollection(queryBuilder.buildQuery());
             Envelope tmpEnvelope = subCollection.getEnvelope();
             if (tmpEnvelope == null) {
                 // Récupération de l'enveloppe impossible
                 return null;
             }
-            return cropImageFromMap(uiMap, SIRS.pseudoBuffer(tmpEnvelope));
+            return cropImageFromMap(uiMap, SIRS.pseudoBuffer(tmpEnvelope, 50, 0.01), dim);
         } catch (PortrayalException ex) {
             SIRS.LOGGER.log(Level.WARNING, "Impossible de prendre une photo de l'élément: " + e.getId(), ex);
         } catch (DataStoreException ex) {
@@ -1276,7 +1277,7 @@ public class CorePlugin extends Plugin {
         return null;
     }
 
-    public static java.awt.Image cropImageFromMap(FXMap uiMap1, Envelope env) throws PortrayalException {
+    public static java.awt.Image cropImageFromMap(final FXMap uiMap1, final Envelope env, final Dimension dim) throws PortrayalException {
         final Rectangle2D dispSize = uiMap1.getCanvas().getDisplayBounds();
 
         final Hints hints = new Hints();
@@ -1305,7 +1306,7 @@ public class CorePlugin extends Plugin {
             canvas.getContainer().getRoot().getChildren().add(northArrowJ2D);
         };
 
-        final CanvasDef cdef = new CanvasDef(new Dimension((int) dispSize.getWidth(), (int) dispSize.getHeight()), new Color(0, 0, 0, 0));
+        final CanvasDef cdef = new CanvasDef(dim, new Color(0, 0, 0, 0));
         final SceneDef sdef = new SceneDef(uiMap1.getContainer().getContext(), hints, ext);
         final ViewDef vdef = new ViewDef(env);
         return DefaultPortrayalService.portray(cdef, sdef, vdef);

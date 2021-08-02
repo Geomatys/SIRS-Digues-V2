@@ -38,6 +38,7 @@ import static fr.sirs.util.JRDomWriterReseauFermeSheet.DESORDRE_TABLE_DATA_SOURC
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.PHOTO_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -154,7 +155,7 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
             Collections.sort(desordreRows);
             return new ObjectDataSource<>(desordreRows, previewRepository, stringConverter);
         } else if (IMAGE_DATA_SOURCE.equals(name)) {
-            final Image img = CorePlugin.takePictureOfElement(currentObject);
+            final Image img = CorePlugin.takePictureOfElement(currentObject, new Dimension(1750, 1080));
             if (img != null) {
                 return img;
             } else {

@@ -43,6 +43,7 @@ import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.MANAGER_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OWNER_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.PHOTO_DATA_SOURCE;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -208,7 +209,7 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
             Collections.sort(desordreRows);
             return new ObjectDataSource<>(desordreRows, previewRepository, stringConverter);
         } else if (IMAGE_DATA_SOURCE.equals(name)) {
-            final Image img = CorePlugin.takePictureOfElement(currentObject);
+            final Image img = CorePlugin.takePictureOfElement(currentObject, new Dimension(1750, 1080));
             if (img != null) {
                 return img;
             } else {
