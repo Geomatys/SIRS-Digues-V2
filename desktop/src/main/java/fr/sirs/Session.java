@@ -22,7 +22,6 @@ import fr.sirs.core.ModuleDescription;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
-import fr.sirs.core.authentication.SIRSAuthenticator;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.AvecLibelle;
@@ -46,7 +45,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
-import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,8 +87,6 @@ import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
-import org.geotoolkit.osmtms.OSMTileMapClient;
-import org.geotoolkit.security.ApiSecurity;
 import org.geotoolkit.storage.coverage.CoverageReference;
 import org.geotoolkit.storage.coverage.CoverageStore;
 import org.geotoolkit.style.DefaultDescription;
@@ -184,7 +180,6 @@ public class Session extends SessionCore {
                     new Dimension(100,100));
 
 
-
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
         super(couchDbConnector);
@@ -251,20 +246,19 @@ public class Session extends SessionCore {
 
             try{
                 //Fond de plan
+                final BasemapImporter bmi = new BasemapImporter();
                 backgroundGroup.setName("Fond de plan");
                 mapContext.items().add(0,backgroundGroup);
-//                final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
-//                final CoverageStore store = new OSMTileMapClient(new URL("http://c.tile.stamen.com/terrain"), null, 18, true);
-//                final CoverageStore store = new OSMTileMapClient(new URL("http://c.tile.stamen.com/toner"), null, 18, true);
-                final CoverageStore store = new OSMTileMapClient(new URL("https://tile.thunderforest.com/cycle"), new ApiSecurity(SIRSAuthenticator.getThunderForestApiKey()), 18, true);
+                final CoverageStore store = bmi.getStore();
+                final String basemapTitle = bmi.getTitle();
 
                 for (GenericName n : store.getNames()) {
                     final CoverageReference cr = store.getCoverageReference(n);
                     final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
-                    cml.setName("Thunderforest");
+                    cml.setName(basemapTitle);
                     cml.setDescription(new DefaultDescription(
-                            new SimpleInternationalString("Thunderforest"),
-                            new SimpleInternationalString("Thunderforest")));
+                            new SimpleInternationalString(basemapTitle),
+                            new SimpleInternationalString(basemapTitle)));
                     cml.setVisible(false);
                     backgroundGroup.items().add(cml);
                     break;

@@ -58,7 +58,12 @@ public class SirsPreferences extends Properties {
                 + " déterminée à partir de l'objet du même type ayant une désignation de forme numérique la plus haute trouvée dans la base de données, + 1.", Boolean.FALSE.toString()),
         
         ABSTRACT_SHOWCASE("Préférence pour la désignation des objets de l'application","Choix entre abrégé, nom complet ou les 2 pour la désignation des objet dans l'application.",
-           ShowCasePossibility.BOTH.name);
+           ShowCasePossibility.BOTH.name),
+        BASEMAP_WM_URL("Adresse WebMap du fond de carte", "Url du fond de carte, provenant d'un service WMS/WMTS, utilisée par défaut au démarage du SIRS.", ""),
+        BASEMAP_WM_TYPE("Type du service WMS/WMTS utilisé", "Type du service WMS/WMTS utilisé pour le chargement du fond de carte par défaut", ""),
+        BASEMAP_OTHER_URL("Adresse autre du fond de carte", "Url du fond de carte, provenant d'un service autre, utilisée par défaut au démarage du SIRS.", "http://c.tile.stamen.com/toner"),
+        BASEMAP_LOCAL_FILE("Chemin du fond de carte", "Chemin vers le fond de carte, provenant d'un fichier local, utilisée par défaut au démarage du SIRS.", ""),
+        BASEMAP_CHOICE("Choix du type de fond de carte", "Choix du type de fond de carte: wms/wmts, autre ou fichier", "autre");
         public final String title;
         public final String description;
         public final String defaultValue;
