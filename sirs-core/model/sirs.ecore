@@ -80,6 +80,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestions" upperBound="-1"
         eType="#//GestionTroncon" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="amenagementHydrauliqueId"
+        eType="#//AbstractAmenagementHydraulique" eOpposite="#//AbstractAmenagementHydraulique/tronconId"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SystemeReperage">
     <eAnnotations source="couchDBDocument">
@@ -1649,5 +1651,10 @@
   <eClassifiers xsi:type="ecore:EClass" name="AvecGeometrie" abstract="true" interface="true">
     <eOperations name="getGeometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
     <eOperations name="geometryProperty" eType="ecore:EDataType jts.ecore#//ObjectProperty"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractAmenagementHydraulique" abstract="true"
+      eSuperTypes="#//ObjetPhotographiable">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//TronconDigue"
+        eOpposite="#//TronconDigue/amenagementHydrauliqueId"/>
   </eClassifiers>
 </ecore:EPackage>

@@ -277,7 +277,7 @@ public class Launcher extends Application {
             return true;
         }
     }
-    
+
     /**
      * Check End User License Agreement. If user has not validated it yet, we
      * display the license until he accepts it.
