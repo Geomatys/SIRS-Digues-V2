@@ -172,19 +172,19 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
             if(currentObject.getPhotos()!=null && !currentObject.getPhotos().isEmpty()){
                 photos.addAll(currentObject.getPhotos());
             }
-            photos.sort(PHOTO_COMPARATOR);
+            photos.sort(SirsComparator.PHOTO_COMPARATOR);
             return new ObjectDataSource<>(photos, previewRepository, stringConverter);
         }
         else if(OBSERVATION_TABLE_DATA_SOURCE.equals(name)){
             final ObservableList<ObservationOuvrageHydrauliqueAssocie> observations = currentObject.getObservations();
-            observations.sort(OBSERVATION_COMPARATOR);
+            observations.sort(SirsComparator.OBSERVATION_COMPARATOR);
             return new ObjectDataSource<>(observations, previewRepository, stringConverter);
         }
         else if(RESEAU_FERME_TABLE_DATA_SOURCE.equals(name)){
 
             final List<ReseauHydrauliqueFerme> reseauOuvrageList = Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).get(currentObject.getReseauHydrauliqueFermeIds());
             
-            reseauOuvrageList.sort(ELEMENT_COMPARATOR);
+            reseauOuvrageList.sort(SirsComparator.ELEMENT_COMPARATOR);
             return new ObjectDataSource<>(reseauOuvrageList, previewRepository, stringConverter);
         }
         else if(DESORDRE_TABLE_DATA_SOURCE.equals(name)){

@@ -18,6 +18,7 @@
  */
 package fr.sirs;
 
+import fr.sirs.core.model.AvecObservations.LastObservationPredicate;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.RefOuvrageHydrauliqueAssocie;
@@ -155,7 +156,7 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
                     .and(new PRPredicate<>())
                     .and(uiPrestationPredicater.getPredicate())
-                    .and(new LastObservationPredicate());
+                    .and(new LastObservationPredicate(uiOptionDebutLastObservation.getValue(), uiOptionFinLastObservation.getValue()));
 
         final CloseableIterator<OuvrageHydrauliqueAssocie> it = Injector.getSession()
                 .getRepositoryForClass(OuvrageHydrauliqueAssocie.class)

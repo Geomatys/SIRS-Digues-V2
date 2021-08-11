@@ -19,6 +19,7 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.AvecObservations.LastObservationPredicate;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.Positionable;
@@ -191,7 +192,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                 .and(new PRPredicate<>())
                 .and(new UrgencePredicate())
                 .and(uiPrestationPredicater.getPredicate())
-                .and(new LastObservationPredicate());
+                .and(new LastObservationPredicate(uiOptionDebutLastObservation.getValue(), uiOptionFinLastObservation.getValue()));
 
         final CloseableIterator<Desordre> it = Injector.getSession()
                 .getRepositoryForClass(Desordre.class)

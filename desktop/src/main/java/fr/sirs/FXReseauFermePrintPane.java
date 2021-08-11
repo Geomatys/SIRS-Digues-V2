@@ -18,6 +18,7 @@
  */
 package fr.sirs;
 
+import fr.sirs.core.model.AvecObservations.LastObservationPredicate;
 import fr.sirs.core.model.RefConduiteFermee;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.ui.Growl;
@@ -152,7 +153,7 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
                 .and(new PRPredicate<>())
                 .and(uiPrestationPredicater.getPredicate())
-                .and(new LastObservationPredicate());
+                .and(new LastObservationPredicate(uiOptionDebutLastObservation.getValue(), uiOptionFinLastObservation.getValue()));
 
         final CloseableIterator<ReseauHydrauliqueFerme> it = Injector.getSession()
                 .getRepositoryForClass(ReseauHydrauliqueFerme.class)

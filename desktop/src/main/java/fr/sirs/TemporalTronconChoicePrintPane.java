@@ -18,14 +18,9 @@
  */
 package fr.sirs;
 
-import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.AvecBornesTemporelles;
-import fr.sirs.core.model.AvecObservations;
 import fr.sirs.util.DatePickerConverter;
-import fr.sirs.util.ObjectDataSource;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Predicate;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -151,44 +146,6 @@ public abstract class TemporalTronconChoicePrintPane extends TronconChoicePrintP
                 return false;
 
             return selectedRange == null || selectedRange.contains(input.getDate_debut());
-        }
-    }
-
-    /**
-     * Filtre les éléments par la date de leur derniere observation.
-     * L'élément est sélectionné si sa dernière observation a été créé à une date comprise dans l'interval donné.
-     */
-    class LastObservationPredicate implements Predicate<AvecObservations> {
-
-        final Range<LocalDate> selectedRange;
-
-        /**
-         * /!\ si aucune date de début ou date de fin n'est renseignée
-         * alors selectedRange est initialisé à null.
-         */
-        public LastObservationPredicate() {
-            final LocalDate start = uiOptionDebutLastObservation.getValue();
-            final LocalDate end = uiOptionFinLastObservation.getValue();
-            if (start == null && end == null) {
-                selectedRange = null;
-            } else {
-                selectedRange = new Range<>(LocalDate.class, start == null? LocalDate.MIN : start, true, end == null? LocalDate.MAX : end, true);
-            }
-        }
-
-        @Override
-        public boolean test(AvecObservations t) {
-            final List<? extends AbstractObservation> observations = t.getObservations();
-
-            if ((observations!=null) && (observations.size() > 0)) {
-                final AbstractObservation lastObservation = Collections.min(observations, ObjectDataSource.OBSERVATION_COMPARATOR);
-                final LocalDate ld = lastObservation.getDate();
-
-                if (ld != null) {
-                    return selectedRange == null || selectedRange.contains(ld);
-                }
-            }
-            return selectedRange == null;
         }
     }
 }
