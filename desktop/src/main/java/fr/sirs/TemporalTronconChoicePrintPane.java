@@ -162,6 +162,10 @@ public abstract class TemporalTronconChoicePrintPane extends TronconChoicePrintP
 
         final Range<LocalDate> selectedRange;
 
+        /**
+         * /!\ si aucune date de début ou date de fin n'est renseignée
+         * alors selectedRange est initialisé à null.
+         */
         public LastObservationPredicate() {
             final LocalDate start = uiOptionDebutLastObservation.getValue();
             final LocalDate end = uiOptionFinLastObservation.getValue();
