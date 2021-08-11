@@ -154,6 +154,10 @@ public abstract class TemporalTronconChoicePrintPane extends TronconChoicePrintP
         }
     }
 
+    /**
+     * Filtre les éléments par la date de leur derniere observation.
+     * L'élément est sélectionné si sa dernière observation a été créé à une date comprise dans l'interval donné.
+     */
     class LastObservationPredicate implements Predicate<AvecObservations> {
 
         final Range<LocalDate> selectedRange;
