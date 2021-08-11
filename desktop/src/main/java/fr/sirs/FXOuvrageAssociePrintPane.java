@@ -111,6 +111,8 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
         uiOptionFin.valueProperty().addListener(parameterListener);
         uiOptionDebutArchive.valueProperty().addListener(parameterListener);
         uiOptionFinArchive.valueProperty().addListener(parameterListener);
+        uiOptionExcludeValid.selectedProperty().addListener(parameterListener);
+        uiOptionExcludeInvalid.selectedProperty().addListener(parameterListener);
 
 
         uiPrestationPredicater.uiOptionPrestation.selectedProperty().addListener(parameterListener);
@@ -147,7 +149,7 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
 
     private Stream<OuvrageHydrauliqueAssocie> getData() {
             final Predicate userOptions = new TypeOuvragePredicate()
-                    .and(OuvrageHydrauliqueAssocie::getValid) // On n'autorise à l'impression uniquement les désordre valides.
+                    .and(new ValidPredicate())
                     .and(new TemporalPredicate())
                     .and(new LinearPredicate<>())
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
