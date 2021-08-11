@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -86,6 +87,19 @@ public abstract class TronconChoicePrintPane extends BorderPane {
         tronconsTable.commentAndPhotoProperty().set(false);
         uiTronconChoice.setContent(tronconsTable);
         tronconsTable.getSelectedItems().addListener((ListChangeListener.Change<? extends Element> ch) -> filterPrestations(ch));
+
+        uiOptionExcludeValid.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) uiOptionExcludeInvalid.selectedProperty().setValue(false);
+            }
+        });
+        uiOptionExcludeInvalid.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) uiOptionExcludeValid.selectedProperty().setValue(false);
+            }
+        });
     }
 
     private void filterPrestations(ListChangeListener.Change<? extends Element> ch) {
@@ -352,7 +366,12 @@ public abstract class TronconChoicePrintPane extends BorderPane {
     final protected class ValidPredicate implements Predicate<Element> {
         @Override
         public boolean test(Element t) {
-            return (t.getValid() && !uiOptionExcludeValid.isSelected()) || (!t.getValid() && !uiOptionExcludeInvalid.isSelected());
+            if (t.getValid()) {
+                if (!uiOptionExcludeValid.isSelected()) return true;
+            } else {
+                if (!uiOptionExcludeInvalid.isSelected()) return true;
+            }
+            return false;
         }
     }
 }
