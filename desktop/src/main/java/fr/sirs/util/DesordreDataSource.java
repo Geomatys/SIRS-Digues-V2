@@ -95,17 +95,17 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
                     photos.addAll(observation.photos);
                 }
             }
-            photos.sort(PHOTO_COMPARATOR);
+            photos.sort(SirsComparator.PHOTO_COMPARATOR);
             return new ObjectDataSource<>(photos, previewRepository, stringConverter);
         }
         else if(OBSERVATION_TABLE_DATA_SOURCE.equals(name)){
             final ObservableList<Observation> observations = currentObject.getObservations();
-            observations.sort(OBSERVATION_COMPARATOR);
+            observations.sort(SirsComparator.OBSERVATION_COMPARATOR);
             return new ObjectDataSource<>(observations, previewRepository, stringConverter);
         }
         else if(PRESTATION_TABLE_DATA_SOURCE.equals(name)){
             final List<Prestation> prestationList = Injector.getSession().getRepositoryForClass(Prestation.class).get(currentObject.getPrestationIds());
-            prestationList.sort(ELEMENT_COMPARATOR);
+            prestationList.sort(SirsComparator.ELEMENT_COMPARATOR);
             return new ObjectDataSource<>(prestationList, previewRepository, stringConverter);
         }
         else if(RESEAU_OUVRAGE_TABLE_DATA_SOURCE.equals(name)){
@@ -126,7 +126,7 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
                 }
             }
 
-            reseauOuvrageList.sort(ELEMENT_COMPARATOR);
+            reseauOuvrageList.sort(SirsComparator.ELEMENT_COMPARATOR);
             return new ObjectDataSource<>(reseauOuvrageList, previewRepository, stringConverter);
         }
         else if(VOIRIE_TABLE_DATA_SOURCE.equals(name)){
@@ -142,7 +142,7 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
                 }
             }
 
-            voirieList.sort(ELEMENT_COMPARATOR);
+            voirieList.sort(SirsComparator.ELEMENT_COMPARATOR);
             return new ObjectDataSource<>(voirieList, previewRepository, stringConverter);
         }
         else return super.getFieldValue(jrf);

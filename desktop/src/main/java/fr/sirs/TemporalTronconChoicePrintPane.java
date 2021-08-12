@@ -34,6 +34,7 @@ import org.apache.sis.measure.Range;
  * une période de temps.
  *
  * @author Samuel Andrés (Geomatys)
+ * @author Maxime Gavens (Geomatys)
  */
 public abstract class TemporalTronconChoicePrintPane extends TronconChoicePrintPane {
 
@@ -46,6 +47,11 @@ public abstract class TemporalTronconChoicePrintPane extends TronconChoicePrintP
     protected DatePicker uiOptionDebutArchive;
     @FXML
     protected DatePicker uiOptionFinArchive;
+
+    @FXML
+    protected DatePicker uiOptionDebutLastObservation;
+    @FXML
+    protected DatePicker uiOptionFinLastObservation;
 
     @FXML
     protected CheckBox uiOptionNonArchive;
@@ -83,6 +89,8 @@ public abstract class TemporalTronconChoicePrintPane extends TronconChoicePrintP
         DatePickerConverter.register(uiOptionFin);
         DatePickerConverter.register(uiOptionDebutArchive);
         DatePickerConverter.register(uiOptionFinArchive);
+        DatePickerConverter.register(uiOptionDebutLastObservation);
+        DatePickerConverter.register(uiOptionFinLastObservation);
     }
 
     /**

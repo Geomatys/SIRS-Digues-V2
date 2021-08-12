@@ -19,6 +19,7 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.AvecObservations.LastObservationPredicate;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.Positionable;
@@ -139,6 +140,8 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         uiOptionFin.valueProperty().addListener(parameterListener);
         uiOptionDebutArchive.valueProperty().addListener(parameterListener);
         uiOptionFinArchive.valueProperty().addListener(parameterListener);
+        uiOptionDebutLastObservation.valueProperty().addListener(parameterListener);
+        uiOptionFinLastObservation.valueProperty().addListener(parameterListener);
         uiOptionExcludeValid.selectedProperty().addListener(parameterListener);
         uiOptionExcludeInvalid.selectedProperty().addListener(parameterListener);
         uiPrestationPredicater.uiOptionPrestation.selectedProperty().addListener(parameterListener);
@@ -189,7 +192,8 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
                 .and(new PRPredicate<>())
                 .and(new UrgencePredicate())
-                .and(uiPrestationPredicater.getPredicate());
+                .and(uiPrestationPredicater.getPredicate())
+                .and(new LastObservationPredicate(uiOptionDebutLastObservation.getValue(), uiOptionFinLastObservation.getValue()));
 
         final CloseableIterator<Desordre> it = Injector.getSession()
                 .getRepositoryForClass(Desordre.class)
