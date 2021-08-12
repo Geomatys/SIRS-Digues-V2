@@ -160,6 +160,20 @@
                                                                 <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                                                             </padding>
                                                         </VBox>
+                                                        <VBox spacing="20.0">
+                                                            <children>
+                                                                <Label text="%optionSubtitleValid" underline="true">
+                                                                    <font>
+                                                                        <Font name="System Bold Italic" size="13.0" />
+                                                                    </font>
+                                                                </Label>
+                                                                <CheckBox fx:id="uiOptionExcludeValid" mnemonicParsing="false" text="%excludeValidOption" />
+                                                                <CheckBox fx:id="uiOptionExcludeInvalid" mnemonicParsing="false" text="%excludeInvalidOption" />
+                                                            </children>
+                                                            <padding>
+                                                                <Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
+                                                            </padding>
+                                                        </VBox>
                                                     </children>
                                                     <padding>
                                                         <Insets bottom="20.0" left="40.0" right="40.0" top="20.0" />

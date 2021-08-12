@@ -39,11 +39,13 @@ import java.util.stream.Collectors;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -67,6 +69,9 @@ public abstract class TronconChoicePrintPane extends BorderPane {
     @FXML protected Tab uiTronconChoice;
     @FXML protected FXPrestationPredicater uiPrestationPredicater;
 
+    @FXML protected CheckBox uiOptionExcludeValid;
+    @FXML protected CheckBox uiOptionExcludeInvalid;
+
     // Garde en cache les PRs de début et de fin de sections de tronçons imprimables (ajustables pour limiter l'impression à des parties de tronçons seulement).
     protected final Map<String, ObjectProperty<Number>[]> ajustedPrsByTronconId = new HashMap<>();
 
@@ -82,6 +87,19 @@ public abstract class TronconChoicePrintPane extends BorderPane {
         tronconsTable.commentAndPhotoProperty().set(false);
         uiTronconChoice.setContent(tronconsTable);
         tronconsTable.getSelectedItems().addListener((ListChangeListener.Change<? extends Element> ch) -> filterPrestations(ch));
+
+        uiOptionExcludeValid.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) uiOptionExcludeInvalid.selectedProperty().setValue(false);
+            }
+        });
+        uiOptionExcludeInvalid.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) uiOptionExcludeValid.selectedProperty().setValue(false);
+            }
+        });
     }
 
     private void filterPrestations(ListChangeListener.Change<? extends Element> ch) {
@@ -342,6 +360,18 @@ public abstract class TronconChoicePrintPane extends BorderPane {
                 return false;
 
             return Float.isNaN(endPR) || candidate.getPrDebut() <= endPR;
+        }
+    }
+
+    final protected class ValidPredicate implements Predicate<Element> {
+        @Override
+        public boolean test(Element t) {
+            if (t.getValid()) {
+                if (!uiOptionExcludeValid.isSelected()) return true;
+            } else {
+                if (!uiOptionExcludeInvalid.isSelected()) return true;
+            }
+            return false;
         }
     }
 }

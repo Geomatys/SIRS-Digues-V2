@@ -112,6 +112,8 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
         uiOptionFinArchive.valueProperty().addListener(parameterListener);
         uiOptionDebutLastObservation.valueProperty().addListener(parameterListener);
         uiOptionFinLastObservation.valueProperty().addListener(parameterListener);
+        uiOptionExcludeValid.selectedProperty().addListener(parameterListener);
+        uiOptionExcludeInvalid.selectedProperty().addListener(parameterListener);
 
         uiPrestationPredicater.uiOptionPrestation.selectedProperty().addListener(parameterListener);
 
@@ -147,7 +149,7 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
 
     private Stream<ReseauHydrauliqueFerme> getData() {
         final Predicate userOptions = new TypeConduitePredicate()
-                .and(ReseauHydrauliqueFerme::getValid) // On n'autorise à l'impression uniquement les éléments valides valides.
+                .and(new ValidPredicate()) // On n'autorise à l'impression uniquement les éléments valides valides.
                 .and(new TemporalPredicate())
                 .and(new LinearPredicate<>())
                 // /!\ It's important that pr filtering is done AFTER linear filtering.

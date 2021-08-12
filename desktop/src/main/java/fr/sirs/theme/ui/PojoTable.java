@@ -799,7 +799,7 @@ public class PojoTable extends BorderPane implements Printable {
 
         uiExport.getStyleClass().add(BUTTON_STYLE);
         uiExport.disableProperty().bind(Bindings.isNull(uiTable.getSelectionModel().selectedItemProperty()));
-        uiExport.setOnAction(new ExportAction(getStructBeanSupplier()));
+        uiExport.setOnAction(new ExportAction(getStructBeanSupplier(), getColumns()));
 
         if (PointZ.class.isAssignableFrom(pojoClass)) {
             uiTable.getColumns().add(new DistanceComputedPropertyColumn(DOUBLE_CELL_FACTORY, parentElementProperty, uiTable));
@@ -1944,7 +1944,7 @@ public class PojoTable extends BorderPane implements Printable {
 // INTERNAL CLASSES
 //
 ////////////////////////////////////////////////////////////////////////////////
-    private class EnumColumn extends TableColumn<Element, Object> {
+    public class EnumColumn extends TableColumn<Element, Object> {
 
         private final String name;
 
