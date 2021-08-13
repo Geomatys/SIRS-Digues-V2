@@ -32,6 +32,7 @@ import fr.sirs.core.component.CheminAccesDependanceRepository;
 import fr.sirs.core.component.OuvrageVoirieDependanceRepository;
 import fr.sirs.core.model.AbstractDependance;
 import fr.sirs.core.model.AireStockageDependance;
+import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.AutreDependance;
 import fr.sirs.core.model.CheminAccesDependance;
 import fr.sirs.core.model.OuvrageVoirieDependance;
@@ -99,6 +100,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
     private FeatureMapLayer autreLayer;
     private FeatureMapLayer cheminLayer;
     private FeatureMapLayer ouvrageLayer;
+    private FeatureMapLayer amenagementLayer;
 
     /**
      * La dépendance en cours.
@@ -189,6 +191,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
         autreLayer = PluginDependance.getAutreLayer();
         cheminLayer = PluginDependance.getCheminLayer();
         ouvrageLayer = PluginDependance.getOuvrageLayer();
+        amenagementLayer = PluginDependance.getAmenagementLayer();
     }
 
     /**
@@ -276,6 +279,8 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                                 helper = new EditionHelper(map, cheminLayer);
                             } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
                                 helper = new EditionHelper(map, ouvrageLayer);
+                            } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
+                                helper = new EditionHelper(map, amenagementLayer);
                             }
                         }
 
@@ -412,6 +417,8 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                         helper = new EditionHelper(map, cheminLayer);
                     } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, ouvrageLayer);
+                    } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, amenagementLayer);
                     }
 
                     final AbstractSIRSRepository<AbstractDependance> repodep = Injector.getSession().getRepositoryForClass(clazz);
@@ -441,6 +448,8 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                         helper = new EditionHelper(map, cheminLayer);
                     } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, ouvrageLayer);
+                    } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, amenagementLayer);
                     }
 
                     //action : suppression d'un noeud
@@ -527,6 +536,8 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                         helper = new EditionHelper(map, cheminLayer);
                     } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, ouvrageLayer);
+                    } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, amenagementLayer);
                     }
                 }
                 helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);

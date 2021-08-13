@@ -28,7 +28,9 @@ import fr.sirs.core.component.AutreDependanceRepository;
 import fr.sirs.core.component.CheminAccesDependanceRepository;
 import fr.sirs.core.component.DesordreDependanceRepository;
 import fr.sirs.core.component.OuvrageVoirieDependanceRepository;
+import fr.sirs.core.component.AmenagementHydrauliqueRepository;
 import fr.sirs.core.model.AireStockageDependance;
+import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.AutreDependance;
 import fr.sirs.core.model.CheminAccesDependance;
 import fr.sirs.core.model.DesordreDependance;
@@ -66,6 +68,7 @@ public class PluginDependance extends Plugin {
     private static FeatureMapLayer cheminLayer;
     private static FeatureMapLayer ouvrageLayer;
     private static FeatureMapLayer desordreLayer;
+    private static FeatureMapLayer amenagementLayer;
 
     public PluginDependance() {
         name = NAME;
@@ -105,6 +108,7 @@ public class PluginDependance extends Plugin {
         final AutreDependanceRepository autreRepo = Injector.getBean(AutreDependanceRepository.class);
         final CheminAccesDependanceRepository cheminRepo = Injector.getBean(CheminAccesDependanceRepository.class);
         final OuvrageVoirieDependanceRepository ouvrageRepo = Injector.getBean(OuvrageVoirieDependanceRepository.class);
+        final AmenagementHydrauliqueRepository amenagementRepo = Injector.getBean(AmenagementHydrauliqueRepository.class);
 
         try {
             final StructBeanSupplier ouvrageSupplier = new StructBeanSupplier(OuvrageVoirieDependance.class, ouvrageRepo::getAll);
@@ -154,6 +158,18 @@ public class PluginDependance extends Plugin {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
 
+        try {
+            final StructBeanSupplier amenagementSupplier = new StructBeanSupplier(AmenagementHydraulique.class, amenagementRepo::getAll);
+            final BeanStore amenagementStore = new BeanStore(amenagementSupplier);
+            amenagementLayer = MapBuilder.createFeatureLayer(amenagementStore.createSession(true)
+                    .getFeatureCollection(QueryBuilder.all(amenagementStore.getNames().iterator().next())));
+            amenagementLayer.setName(LabelMapper.get(AireStockageDependance.class).mapClassName());
+            amenagementLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            depGroup.items().add(4, amenagementLayer);
+        } catch(Exception ex) {
+            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+        }
+
         items.add(depGroup);
 
         final DesordreDependanceRepository desordreRepo = Injector.getBean(DesordreDependanceRepository.class);
@@ -190,6 +206,10 @@ public class PluginDependance extends Plugin {
 
     public static FeatureMapLayer getDesordreLayer() {
         return desordreLayer;
+    }
+
+    public static FeatureMapLayer getAmenagementLayer() {
+        return amenagementLayer;
     }
 
     @Override

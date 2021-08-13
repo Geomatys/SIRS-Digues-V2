@@ -81,7 +81,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestions" upperBound="-1"
         eType="#//GestionTroncon" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="amenagementHydrauliqueId"
-        eType="#//AbstractAmenagementHydraulique" eOpposite="#//AbstractAmenagementHydraulique/tronconId"/>
+        eType="#//AbstractAmenagementHydraulique" eOpposite="#//AbstractAmenagementHydraulique/linearId"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SystemeReperage">
     <eAnnotations source="couchDBDocument">
@@ -1653,8 +1653,8 @@
     <eOperations name="geometryProperty" eType="ecore:EDataType jts.ecore#//ObjectProperty"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AbstractAmenagementHydraulique" abstract="true"
-      eSuperTypes="#//ObjetPhotographiable">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconId" eType="#//TronconDigue"
+      eSuperTypes="#//Positionable">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="linearId" eType="#//TronconDigue"
         eOpposite="#//TronconDigue/amenagementHydrauliqueId"/>
   </eClassifiers>
 </ecore:EPackage>

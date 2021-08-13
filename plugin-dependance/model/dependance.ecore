@@ -74,7 +74,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType ../../sirs-core/model/jts.ecore#//Geometry"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="dependanceId" eType="#//AbstractDependance"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieuDit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
@@ -128,7 +127,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Desordre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="structureIds" upperBound="-1"
-        eType="#//Structure"/>
+        eType="#//StructureAH"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocie" eType="#//OuvrageAssocieAH"
         eOpposite="#//OuvrageAssocieAH/amenagementHydrauliqueAssocie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coursEauIds" upperBound="-1"
@@ -164,9 +163,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="observationIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Observation" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Structure" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetStructure">
+  <eClassifiers xsi:type="ecore:EClass" name="StructureAH" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetStructure">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType ../../sirs-core/model/jts.ecore#//Geometry"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="compositionMateriauxId"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
@@ -174,7 +172,6 @@
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Observation" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageAssocieAH" eSuperTypes="../../sirs-core/model/sirs.ecore#//AvecSettableGeometrie ../../sirs-core/model/sirs.ecore#//ObjetPhotographiable">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType ../../sirs-core/model/jts.ecore#//Geometry"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="superficie" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="profondeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
@@ -184,7 +181,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="compositionMateriauxId"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="structureDetaillee" upperBound="-1"
-        eType="#//Structure" containment="true"/>
+        eType="#//StructureAH" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="amenagementHydrauliqueAssocie"
         eType="#//AmenagementHydraulique" eOpposite="#//AmenagementHydraulique/ouvrageAssocie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreDependanceAssocie"
@@ -198,7 +195,6 @@
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cote" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//TypeOrganeProtectionCollective"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType ../../sirs-core/model/jts.ecore#//Geometry"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Observation" containment="true"/>
   </eClassifiers>

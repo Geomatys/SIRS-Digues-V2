@@ -25,6 +25,7 @@ import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AbstractDependance;
 import fr.sirs.core.model.AireStockageDependance;
+import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.AutreDependance;
 import fr.sirs.core.model.CheminAccesDependance;
 import fr.sirs.core.model.OuvrageVoirieDependance;
@@ -97,7 +98,7 @@ public class DependanceTransformHandler extends AbstractNavigationHandler {
                 public void visit(ProjectedFeature feature, RenderingContext2D context, SearchAreaJ2D area) {
                     final Feature f = feature.getCandidate();
                     // Choix du type de dépendance à créer
-                    final ChoiceDialog<String> dialog = new ChoiceDialog<>("Aires de stockage", "Aires de stockage", "Autres", "Chemins d'accès", "Ouvrages de voirie");
+                    final ChoiceDialog<String> dialog = new ChoiceDialog<>("Aires de stockage", "Aires de stockage", "Autres", "Chemins d'accès", "Ouvrages de voirie", "Aménagements hydrauliques");
                     dialog.setTitle("Création de dépendance");
                     dialog.setContentText("Choisir un type de dépendance");
                     Optional<String> result = dialog.showAndWait();
@@ -115,6 +116,9 @@ public class DependanceTransformHandler extends AbstractNavigationHandler {
                                 break;
                             case "Ouvrages de voirie":
                                 clazz = OuvrageVoirieDependance.class;
+                                break;
+                            case "Aménagements hydrauliques":
+                                clazz = AmenagementHydraulique.class;
                                 break;
                             default:
                                 clazz = AireStockageDependance.class;
