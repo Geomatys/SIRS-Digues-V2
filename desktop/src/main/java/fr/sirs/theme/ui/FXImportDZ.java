@@ -172,7 +172,7 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
     @Override
     protected void saveFieldValue() {
         super.saveFieldValue();
-        setFieldValue(ATT_D_KEY, stringConverter.toString(uiAttD.getSelectionModel().getSelectedItem()));
+        savePreference(ATT_D_KEY, stringConverter.toString(uiAttD.getSelectionModel().getSelectedItem()));
     }
 
     @Override
@@ -202,15 +202,5 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
             leves.add(leve);
         }
         return leves;
-    }
-
-    private void fillFieldFromComboBox(final String key, final ComboBox<PropertyType> combo) {
-        final String str = previousFieldValue(key);
-        if (str != null) {
-            final Object o = stringConverter.fromString(str);
-            if (o instanceof PropertyType) {
-                combo.getSelectionModel().select((PropertyType) o);
-            }
-        }
     }
 }

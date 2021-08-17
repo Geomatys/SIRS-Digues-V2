@@ -105,6 +105,13 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
     }
 
     private void openFeatureStore() {
+        if (uiPath == null) {
+            final Alert alert = new Alert(Alert.AlertType.ERROR, "Le fichier sélectionné n'est pas un shp, csv ou txt", ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
+            return;
+        }
+
         final String url = uiPath.getText();
         final File file = new File(uiPath.getText());
 
@@ -243,15 +250,5 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
             leves.add(leve);
         }
         return leves;
-    }
-
-    private void fillFieldFromComboBox(final String key, final ComboBox<PropertyType> combo) {
-        final String str = previousFieldValue(key);
-        if (str != null) {
-            final Object o = stringConverter.fromString(str);
-            if (o instanceof PropertyType) {
-                combo.getSelectionModel().select((PropertyType) o);
-            }
-        }
     }
 }

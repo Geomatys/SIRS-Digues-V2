@@ -251,17 +251,7 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
     @Override
     protected void saveFieldValue() {
         super.saveFieldValue();
-        setFieldValue(ATT_X_KEY, stringConverter.toString(uiAttX.getSelectionModel().getSelectedItem()));
-        setFieldValue(ATT_Y_KEY, stringConverter.toString(uiAttY.getSelectionModel().getSelectedItem()));
-    }
-
-    private void fillFieldFromComboBox(final String key, final ComboBox<PropertyType> combo) {
-        final String str = previousFieldValue(key);
-        if (str != null) {
-            final Object o = stringConverter.fromString(str);
-            if (o instanceof PropertyType) {
-                combo.getSelectionModel().select((PropertyType) o);
-            }
-        }
+        savePreference(ATT_X_KEY, stringConverter.toString(uiAttX.getSelectionModel().getSelectedItem()));
+        savePreference(ATT_Y_KEY, stringConverter.toString(uiAttY.getSelectionModel().getSelectedItem()));
     }
 }

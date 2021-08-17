@@ -24,6 +24,7 @@ import static fr.sirs.SIRS.CRS_WGS84;
 import fr.sirs.util.SirsStringConverter;
 import java.io.File;
 import java.util.Collection;
+import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -66,7 +67,7 @@ public abstract class FXAbstractImportCoordinate extends BorderPane {
     public FXAbstractImportCoordinate() {
         SIRS.loadFXML(this);
 
-        ObservableList<CoordinateReferenceSystem> crsList = FXCollections.observableArrayList(Injector.getSession().getProjection(), CRS_WGS84);
+        final ObservableList<CoordinateReferenceSystem> crsList = FXCollections.observableArrayList(Injector.getSession().getProjection(), CRS_WGS84);
         uiCRS.setItems(crsList);
         stringConverter.registerList(crsList);
         uiCRS.setConverter(stringConverter);
@@ -93,13 +94,15 @@ public abstract class FXAbstractImportCoordinate extends BorderPane {
             final Object o = stringConverter.fromString(crsString);
             if (o instanceof CoordinateReferenceSystem) {
                 uiCRS.getSelectionModel().select((CoordinateReferenceSystem) o);
+            } else {
+                SIRS.LOGGER.log(Level.WARNING, "Cannot convert " + crsString + " to CoordinateReferenceSystem object.");
             }
         }
     }
 
     protected void saveFieldValue() {
-        setFieldValue(SEPARATOR_KEY, uiSeparator.getText());
-        setFieldValue(CRS_KEY, stringConverter.toString(uiCRS.getSelectionModel().getSelectedItem()));
+        savePreference(SEPARATOR_KEY, uiSeparator.getText());
+        savePreference(CRS_KEY, stringConverter.toString(uiCRS.getSelectionModel().getSelectedItem()));
     }
 
     protected String previousFieldValue(final String key) {
@@ -107,7 +110,7 @@ public abstract class FXAbstractImportCoordinate extends BorderPane {
         return prefs.get(key, null);
     }
 
-    protected void setFieldValue(final String key, final String value) {
+    protected void savePreference(final String key, final String value) {
         final Preferences prefs = Preferences.userNodeForPackage(FXAbstractImportCoordinate.class);
         prefs.put(key, value);
     }
@@ -147,5 +150,17 @@ public abstract class FXAbstractImportCoordinate extends BorderPane {
         return FXCollections
                 .observableArrayList((Collection<PropertyType>) col.getFeatureType().getProperties(true))
                 .sorted((o1, o2) -> o1.getName().compareTo(o2.getName()));
+    }
+
+    protected void fillFieldFromComboBox(final String key, final ComboBox<PropertyType> combo) {
+        final String str = previousFieldValue(key);
+        if (str != null) {
+            final Object o = stringConverter.fromString(str);
+            if (o instanceof PropertyType) {
+                combo.getSelectionModel().select((PropertyType) o);
+            } else {
+                SIRS.LOGGER.log(Level.WARNING, "Cannot convert " + str + " to PropertyType object.");
+            }
+        }
     }
 }
