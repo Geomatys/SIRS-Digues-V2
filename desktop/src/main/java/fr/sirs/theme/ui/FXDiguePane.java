@@ -21,36 +21,38 @@ package fr.sirs.theme.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.AbstractAmenagementHydraulique;
-import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.util.SirsStringConverter;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.TableColumn;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
+ * @author Maxime Gavens (Geomatys)
  */
 public class FXDiguePane extends FXDiguePaneStub {
+
+    private static final String AH_COL = "amenagementHydrauliqueId";
 
     @Autowired private Session session;
 
@@ -103,7 +105,18 @@ public class FXDiguePane extends FXDiguePaneStub {
                 }
             });
 
-            getColumns().add(new TestColumn());
+            ObservableList<TableColumn<Element, ?>> columns = getColumns();
+            TableColumn<Element, ?> ahCol = null;
+            for (TableColumn<Element, ?> c: columns) {
+                if (c instanceof PropertyColumn) {
+                    if (AH_COL.equals(((PropertyColumn)c).getName())) {
+                        ahCol = c;
+                        break;
+                    }
+                }
+            }
+            if (ahCol != null) columns.remove(ahCol);
+            columns.add(new AmenagementHydrauliqueColumn());
         }
 
         @Override
@@ -112,69 +125,50 @@ public class FXDiguePane extends FXDiguePaneStub {
         }
     }
 
-    private class TestColumn extends TableColumn<Element, Element>{
+    private class AmenagementHydrauliqueColumn extends TableColumn<Element, Element>{
 
-        public TestColumn() {
-            super("Test");
+        public AmenagementHydrauliqueColumn() {
+            super("Amenagement Hydraulique");
             setEditable(false);
             setSortable(false);
             setResizable(true);
-            setPrefWidth(70);
+            setPrefWidth(200);
 
             setCellValueFactory((TableColumn.CellDataFeatures<Element, Element> param) -> {
                 return new SimpleObjectProperty<>(param.getValue());
             });
 
             setCellFactory((TableColumn<Element, Element> param) -> {
-                return new TestTableCell();
+                return new AmenagementHydrauliqueTableCell();
             });
         }
     }
 
-    private class TestTableCell extends FXTableCell<Element, Element> {
+    private class AmenagementHydrauliqueTableCell extends FXTableCell<Element, Element> {
 
-        private final CheckBox isAmenagementHydrauliqueCheckBox = new CheckBox();
+        //private final CheckBox isAmenagementHydrauliqueCheckBox = new CheckBox();
         private final ComboBox<Preview> uiAmenagementHydrauliqueBox = new ComboBox();
 
-        public TestTableCell() {
+        public AmenagementHydrauliqueTableCell() {
             super();
             HBox hb = new HBox();
             hb.getChildren().add(uiAmenagementHydrauliqueBox);
-            hb.getChildren().add(isAmenagementHydrauliqueCheckBox);
+            //hb.getChildren().add(isAmenagementHydrauliqueCheckBox);
             setGraphic(hb);
             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             setAlignment(Pos.CENTER);
 
-            uiAmenagementHydrauliqueBox.setItems(SIRS.observableList(
-                Injector.getSession().getPreviews().getByClass(AbstractAmenagementHydraulique.class)).sorted());
-            final SirsStringConverter stringConverter = new SirsStringConverter();
-            uiAmenagementHydrauliqueBox.setConverter(stringConverter);
+            // Used only to indicate if the troncon is an Amenagement hydraulique
+            // Autodetermined by the combobox
+            //isAmenagementHydrauliqueCheckBox.disableProperty().setValue(true);
 
-//            uiAmenagementHydrauliqueBox.valueProperty().addListener(this::updateAHList);
+            ObservableList<Preview> items = SIRS.observableList(Injector.getSession().getPreviews().getByClass(AmenagementHydraulique.class));
+            ObservableList<Preview> it = FXCollections.observableArrayList(items);
+            it.add(null);
+
+            uiAmenagementHydrauliqueBox.setItems(it.sorted());
+            uiAmenagementHydrauliqueBox.setConverter(new SirsStringConverter());
         }
-
-//        private void updateAHList(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue){
-//            if(newValue==null){
-//                uiAmenagementHydrauliqueBox.setItems(FXCollections.emptyObservableList());
-//            } else {
-//                final fr.sirs.Session session = Injector.getSession();
-//                final TronconDigue troncon = session.getRepositoryForClass(typeClass).get(newValue.getElementId());
-//                final List<SystemeReperage> srs = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinear(troncon);
-//                uiAmenagementHydrauliqueBox.setItems(FXCollections.observableArrayList(srs));
-//                uiAmenagementHydrauliqueBox.getItems().add(null);
-//                uiAmenagementHydrauliqueBox.getSelectionModel().selectFirst();
-//
-//                final String defaultSRID = troncon.getSystemeRepDefautId();
-//                if (defaultSRID != null) {
-//                    for (final SystemeReperage sr : srs) {
-//                        if (defaultSRID.equals(sr.getId())) {
-//                            uiAmenagementHydrauliqueBox.getSelectionModel().select(sr);
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
-//        }
 
         @Override
         protected void updateItem(Element item, boolean empty) {
@@ -185,14 +179,40 @@ public class FXDiguePane extends FXDiguePaneStub {
                 final String amenagementHydrauliqueId = td.getAmenagementHydrauliqueId();
 
                 if (amenagementHydrauliqueId == null) {
-                    isAmenagementHydrauliqueCheckBox.selectedProperty().setValue(false);
+                    //isAmenagementHydrauliqueCheckBox.selectedProperty().setValue(false);
                 } else {
-                    isAmenagementHydrauliqueCheckBox.selectedProperty().setValue(true);
+                    //isAmenagementHydrauliqueCheckBox.selectedProperty().setValue(true);
                     final Preview preview = Injector.getSession().getPreviews().get(amenagementHydrauliqueId);
                     SingleSelectionModel<Preview> selectionModel = uiAmenagementHydrauliqueBox.getSelectionModel();
                     selectionModel.select(preview);
                 }
             }
+            uiAmenagementHydrauliqueBox.valueProperty().addListener((ObservableValue<? extends Preview> ov, Preview oldValue, Preview newValue) -> {
+                if (item instanceof TronconDigue) {
+                    final TronconDigue troncon = (TronconDigue) item;
+                    final AbstractSIRSRepository<AmenagementHydraulique> ahRep = session.getRepositoryForClass(AmenagementHydraulique.class);
+                    if (newValue != null) {
+                        // Si la nouvelle valeur n'est pas vide, on set au
+                        // Troncon l'identifiant de l'aménagement hydraulique et
+                        // on set à l'AH l'identifiant du troncon.
+                        troncon.setAmenagementHydrauliqueId(newValue.getElementId());
+                        AmenagementHydraulique ah = ahRep.get(newValue.getElementId());
+                        ah.setLinearId(troncon.getId());
+                        ahRep.update(ah);
+                    } else {
+                        // Sinon on set au troncon la valeur null pour
+                        // l'identifiant AH et on set à l'ancienne valeur de l'AH
+                        // le null pour son linéaire.
+                        troncon.setAmenagementHydrauliqueId(null);
+                        if (oldValue != null) {
+                            AmenagementHydraulique oldAh = ahRep.get(oldValue.getElementId());
+                            oldAh.setLinearId(null);
+                            ahRep.update(oldAh);
+                        }
+                    }
+                    session.getRepositoryForClass(TronconDigue.class).update(troncon);
+                }
+            });
         }
     }
 }
