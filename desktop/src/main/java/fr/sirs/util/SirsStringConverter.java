@@ -41,6 +41,7 @@ import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.index.ElementHit;
 import fr.sirs.util.property.SirsPreferences;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -182,7 +183,16 @@ public class SirsStringConverter extends StringConverter {
         return result;
     }
 
-    
+    public void registerList(final List<? extends Object> objList) {
+        for (Object obj: objList) {
+            register(toString(obj), obj);
+        }
+    }
+
+    public void register(final String text, Object item) {
+        if (text != null && !text.isEmpty()) FROM_STRING.put(text, item);
+    }
+
     private static String getDesignation(Object item){
         if (item instanceof Element) {
             return getDesignation((Element)item);

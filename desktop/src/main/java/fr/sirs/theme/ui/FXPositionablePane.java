@@ -191,9 +191,13 @@ public class FXPositionablePane extends BorderPane {
             public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
                 if (oldValue != null) {
                     oldValue.geometryProperty().removeListener(geomListener);
+                    oldValue.positionDebutProperty().removeListener(geomListener);
+                    oldValue.positionFinProperty().addListener(geomListener);
                 }
                 if (newValue != null) {
                     newValue.geometryProperty().addListener(geomListener);
+                    newValue.positionDebutProperty().addListener(geomListener);
+                    newValue.positionFinProperty().addListener(geomListener);
                     ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test(newValue);
 
                     //on active le mode dont le type correspond
