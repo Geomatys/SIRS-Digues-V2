@@ -1683,13 +1683,12 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AmenagementHydraulique" eSuperTypes="#//Positionable">
     <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="superficie" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="capaciteStockage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="collectiviteCompetence"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="profondeurMoyenne" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fonctionnement" eType="#//FonctionnementAH"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//TypeAH"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="observationGenerale" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre"/>
@@ -1705,6 +1704,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaire" eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="linearId" eType="#//TronconDigue"
         eOpposite="#//TronconDigue/amenagementHydrauliqueId"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionnement" eType="#//RefFonctionnement"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//RefTypeAmenagementHydraulique"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//Objet">
     <eAnnotations source="couchDBDocument"/>
@@ -1738,14 +1739,6 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Vegetation" eSuperTypes="#//Objet">
     <eAnnotations source="couchDBDocument"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EEnum" name="FonctionnementAH">
-    <eLiterals name="FA"/>
-    <eLiterals name="FB"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EEnum" name="TypeAH">
-    <eLiterals name="TA"/>
-    <eLiterals name="TB"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AbstractDependance" abstract="true"
       eSuperTypes="#//AotCotAssociable #//AvecSettableGeometrie">
@@ -1799,5 +1792,11 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="chemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photographeId" eType="#//Contact"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefFonctionnement" eSuperTypes="#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeAmenagementHydraulique" eSuperTypes="#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
 </ecore:EPackage>

@@ -56,13 +56,11 @@
   <eClassifiers xsi:type="ecore:EClass" name="OrganeProtectionCollective" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetPhotographiable">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cote" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//TypeOrganeProtectionCollective"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Observation" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//RefTypeOrganeProtectionCollective"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EEnum" name="TypeOrganeProtectionCollective">
-    <eLiterals name="Echelles à crinoline"/>
-    <eLiterals name="points d'ancrage"/>
-    <eLiterals name="ligne de vie"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeOrganeProtectionCollective" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
 </ecore:EPackage>
