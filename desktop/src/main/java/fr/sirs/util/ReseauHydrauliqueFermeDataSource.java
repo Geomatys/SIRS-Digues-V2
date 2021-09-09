@@ -160,7 +160,7 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
                 return img;
             } else {
                 try {
-                    return javax.imageio.ImageIO.read(DesordreDataSource.class.getResource("/fr/sirs/images/imgNotFound.png"));
+                    return javax.imageio.ImageIO.read(ReseauHydrauliqueFermeDataSource.class.getResource("/fr/sirs/images/imgNotFound.png"));
                 } catch (IOException ex) {
                     LOGGER.log(Level.WARNING, null, ex);
                     return null;

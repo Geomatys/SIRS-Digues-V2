@@ -1277,8 +1277,11 @@ public class CorePlugin extends Plugin {
         return null;
     }
 
-    public static java.awt.Image cropImageFromMap(final FXMap uiMap1, final Envelope env, final Dimension dim) throws PortrayalException {
-        final Rectangle2D dispSize = uiMap1.getCanvas().getDisplayBounds();
+    public static java.awt.Image cropImageFromMap(final FXMap uiMap1, final Envelope env, Dimension dim) throws PortrayalException {
+        if (dim == null) {
+            final Rectangle2D dispSize = uiMap1.getCanvas().getDisplayBounds();
+            dim = new Dimension((int) dispSize.getWidth(), (int) dispSize.getHeight());
+        }
 
         final Hints hints = new Hints();
         hints.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1361,5 +1364,25 @@ public class CorePlugin extends Plugin {
             }
         }
         return null;
+    }
+
+    /**
+     * Makes the layer of an element visible in the map context.
+     * @param e
+     */
+    public static void modifyLayerVisibilityForElement(final Element e, final boolean visible) {
+        try {
+            final MapLayer layerForElement = CorePlugin.getMapLayerForElement(e);
+            final List<MapLayer> layers = Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
+
+            for (MapLayer layer: layers) {
+                if (layer.getName().equals(layerForElement.getName())) {
+                    layer.setVisible(visible);
+                    break;
+                }
+            }
+        } catch(NullPointerException ex) {
+            SIRS.LOGGER.log(Level.WARNING, "Impossible de rendre visible l'élément (id: {0}).", e.getId());
+        }
     }
 }

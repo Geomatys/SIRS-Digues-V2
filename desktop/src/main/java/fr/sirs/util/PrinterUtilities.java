@@ -18,6 +18,7 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCoreRuntimeException;
@@ -125,6 +126,7 @@ public class PrinterUtilities {
             }
 
             ouvrages.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
+            if (!ouvrages.isEmpty()) CorePlugin.modifyLayerVisibilityForElement(ouvrages.get(0), true);
             final JRDataSource source = new OuvrageHydrauliqueAssocieDataSource(ouvrages, previewLabelRepository, stringConverter);
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
         }
@@ -175,6 +177,7 @@ public class PrinterUtilities {
             }
 
             reseaux.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
+            if (!reseaux.isEmpty()) CorePlugin.modifyLayerVisibilityForElement(reseaux.get(0), true);
             final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter);
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
         }
@@ -224,6 +227,7 @@ public class PrinterUtilities {
             }
 
             desordres.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
+            if (!desordres.isEmpty()) CorePlugin.modifyLayerVisibilityForElement(desordres.get(0), true);
             final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter);
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
         }
