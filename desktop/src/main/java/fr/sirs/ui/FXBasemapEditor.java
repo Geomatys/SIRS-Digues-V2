@@ -8,41 +8,46 @@ package fr.sirs.ui;
 import fr.sirs.SIRS;
 import fr.sirs.util.SaveableConfiguration;
 import fr.sirs.util.property.SirsPreferences;
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.prefs.Preferences;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
-import org.geotoolkit.gui.javafx.util.FXDirectoryTextField;
+import javafx.stage.FileChooser;
 
 /**
+ * An editor used to configure the default basemap. Located in user preferences.
  *
  * @author maximegavens
  */
 public class FXBasemapEditor extends BorderPane implements SaveableConfiguration {
 
     public final static String WMS_WMTS_CHOICE = "wms/wmts";
-    public final static String OTHER_CHOICE = "autre";
+    public final static String OSM_TILE_CHOICE = "OSMTileMap";
     public final static String FILE_CHOICE = "ficher";
     public final static String WMS111 = "WMS - 1.1.1";
     public final static String WMS130 = "WMS - 1.3.0";
     public final static String WMTS100 = "WMTS - 1.0.0";
+    public final static String COVERAGE_FILE_TYPE = "File coverage";
+    public final static String HEXAGON_TYPE = "ECW/JPEG-2000";
 
     @FXML private RadioButton uiRadioButtonWM;
-    @FXML private RadioButton uiRadioButtonOther;
+    @FXML private RadioButton uiRadioButtonOsmTile;
     @FXML private RadioButton uiRadioButtonLocalFile;
 
     @FXML private ChoiceBox uiChoiceService;
+    @FXML private ChoiceBox uiChoiceFileType;
 
     @FXML private TextField uiBasemapUrlWM;
-    @FXML private TextField uiBasemapUrlOther;
-    @FXML private FXDirectoryTextField uiBasemapFile;
+    @FXML private TextField uiBasemapUrlOsmTile;
+    @FXML private TextField uiBasemapFile;
 
     public FXBasemapEditor() {
         SIRS.loadFXML(this);
@@ -51,51 +56,73 @@ public class FXBasemapEditor extends BorderPane implements SaveableConfiguration
 
     private void initField() {
         final String previousWMUrl = SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.BASEMAP_WM_URL);
-        final String previousOtherUrl = SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.BASEMAP_OTHER_URL);
+        final String previousOsmTileUrl = SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.BASEMAP_OSM_TILE_URL);
         final String previousLocalFile = SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.BASEMAP_LOCAL_FILE);
+        final String previousFileType = SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.BASEMAP_FILE_TYPE);
         final String previousChoice = SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.BASEMAP_CHOICE);
         final String previousWMType = SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.BASEMAP_WM_TYPE);
 
         uiBasemapUrlWM.setText(previousWMUrl);
-        uiBasemapUrlOther.setText(previousOtherUrl);
+        uiBasemapUrlOsmTile.setText(previousOsmTileUrl);
         uiBasemapFile.setText(previousLocalFile);
 
         ToggleGroup group = new ToggleGroup();
         uiRadioButtonWM.setToggleGroup(group);
-        uiRadioButtonOther.setToggleGroup(group);
+        uiRadioButtonOsmTile.setToggleGroup(group);
         uiRadioButtonLocalFile.setToggleGroup(group);
 
         if (WMS_WMTS_CHOICE.equals(previousChoice)) {
             uiRadioButtonWM.selectedProperty().setValue(true);
-            //uiCheckBoxOther.selectedProperty().setValue(false);
-            //uiCheckBoxLocalFile.selectedProperty().setValue(false);
-        } else if (OTHER_CHOICE.equals(previousChoice)) {
-            //uiCheckBoxWM.selectedProperty().setValue(false);
-            uiRadioButtonOther.selectedProperty().setValue(true);
-            //uiCheckBoxLocalFile.selectedProperty().setValue(false);
+        } else if (OSM_TILE_CHOICE.equals(previousChoice)) {
+            uiRadioButtonOsmTile.selectedProperty().setValue(true);
         } else if (FILE_CHOICE.equals(previousChoice)) {
-            //uiCheckBoxWM.selectedProperty().setValue(false);
-            //uiCheckBoxOther.selectedProperty().setValue(false);
             uiRadioButtonLocalFile.selectedProperty().setValue(true);
         } else {
-            throw new RuntimeException("Expected behaviour");
+            // default choice
+            uiRadioButtonOsmTile.selectedProperty().setValue(true);
         }
 
         uiChoiceService.setItems(FXCollections.observableList(Arrays.asList(new String[]{WMS111, WMS130, WMTS100})));
         uiChoiceService.getSelectionModel().select(previousWMType);
+        uiChoiceFileType.setItems(FXCollections.observableList(Arrays.asList(new String[]{COVERAGE_FILE_TYPE, HEXAGON_TYPE})));
+        uiChoiceFileType.getSelectionModel().select(previousFileType);
+    }
+
+    @FXML
+    protected void openFileChooser(ActionEvent event) {
+        final FileChooser fileChooser = new FileChooser();
+        String str = uiBasemapFile.getText();
+        // retrieve current folder
+        File prevFolder = null;
+        if (str != null) {
+            File file2 = new File(str);
+            if (file2.isDirectory()) {
+                prevFolder = file2;
+            } else if (file2.isFile()) {
+                prevFolder = file2.getParentFile();
+            }
+        }
+        if (prevFolder != null) {
+            fileChooser.setInitialDirectory(prevFolder);
+        }
+        final File choosenFile = fileChooser.showOpenDialog(getScene().getWindow());
+        if (choosenFile != null) {
+            uiBasemapFile.setText(choosenFile.getAbsolutePath());
+        }
     }
 
     @Override
     public void save() throws Exception {
         final Map<SirsPreferences.PROPERTIES, String> properties = new HashMap<>();
         properties.put(SirsPreferences.PROPERTIES.BASEMAP_WM_URL, uiBasemapUrlWM.getText());
-        properties.put(SirsPreferences.PROPERTIES.BASEMAP_OTHER_URL, uiBasemapUrlOther.getText());
-        properties.put(SirsPreferences.PROPERTIES.BASEMAP_LOCAL_FILE, uiRadioButtonLocalFile.getText());
+        properties.put(SirsPreferences.PROPERTIES.BASEMAP_OSM_TILE_URL, uiBasemapUrlOsmTile.getText());
+        properties.put(SirsPreferences.PROPERTIES.BASEMAP_LOCAL_FILE, uiBasemapFile.getText());
         properties.put(SirsPreferences.PROPERTIES.BASEMAP_WM_TYPE, (String) uiChoiceService.getSelectionModel().getSelectedItem());
+        properties.put(SirsPreferences.PROPERTIES.BASEMAP_FILE_TYPE, (String) uiChoiceFileType.getSelectionModel().getSelectedItem());
         if (uiRadioButtonWM.isSelected()) {
             properties.put(SirsPreferences.PROPERTIES.BASEMAP_CHOICE, WMS_WMTS_CHOICE);
-        } else if (uiRadioButtonOther.isSelected()) {
-            properties.put(SirsPreferences.PROPERTIES.BASEMAP_CHOICE, OTHER_CHOICE);
+        } else if (uiRadioButtonOsmTile.isSelected()) {
+            properties.put(SirsPreferences.PROPERTIES.BASEMAP_CHOICE, OSM_TILE_CHOICE);
         } else if (uiRadioButtonLocalFile.isSelected()) {
             properties.put(SirsPreferences.PROPERTIES.BASEMAP_CHOICE, FILE_CHOICE);
         }

@@ -35,19 +35,24 @@
               </rowConstraints>
                <children>
                   <RadioButton fx:id="uiRadioButtonWM" mnemonicParsing="false" text="WMS/WMTS" />
-                  <RadioButton fx:id="uiRadioButtonOther" mnemonicParsing="false" text="Autre URL" GridPane.rowIndex="1" />
+                  <RadioButton fx:id="uiRadioButtonOsmTile" mnemonicParsing="false" text="OSMTileMap" GridPane.rowIndex="1" />
                   <RadioButton fx:id="uiRadioButtonLocalFile" mnemonicParsing="false" text="Fichier local" GridPane.rowIndex="2" />
 
                   <ChoiceBox fx:id="uiChoiceService" GridPane.columnIndex="1" />
+                  <ChoiceBox fx:id="uiChoiceFileType" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
                   <Label text="URL:" GridPane.columnIndex="2" />
                   <Label text="Chemin:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                   <Label text="URL:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
 
                   <TextField fx:id="uiBasemapUrlWM" GridPane.columnIndex="3" />
-                  <TextField fx:id="uiBasemapUrlOther" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                  <FXDirectoryTextField fx:id="uiBasemapFile" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                  
+                  <TextField fx:id="uiBasemapUrlOsmTile" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  <HBox spacing="10.0" BorderPane.alignment="CENTER" GridPane.columnIndex="3" GridPane.rowIndex="2" >
+                    <children>
+                        <TextField fx:id="uiBasemapFile" maxWidth="1.7976931348623157E308" minWidth="30.0" HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#openFileChooser" text="..." />
+                    </children>
+                  </HBox>
                </children>
             </GridPane>
          </children>
