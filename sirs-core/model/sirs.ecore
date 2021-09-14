@@ -81,7 +81,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestions" upperBound="-1"
         eType="#//GestionTroncon" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="amenagementHydrauliqueId"
-        eType="#//AmenagementHydraulique" eOpposite="#//AmenagementHydraulique/linearId"/>
+        eType="#//AmenagementHydraulique" eOpposite="#//AmenagementHydraulique/tronconIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SystemeReperage">
     <eAnnotations source="couchDBDocument">
@@ -1661,27 +1661,29 @@
         eType="#//Observation" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageAssocieAmenagementHydraulique"
-      eSuperTypes="#//AvecSettableGeometrie #//ObjetPhotographiable">
+      eSuperTypes="#//ObjetPhotographiable">
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="superficie" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="profondeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nombre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrage" eType="#//RefOuvrageHydrauliqueAssocie"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="ouvrageDerversant" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="compositionMateriauxId"
-        eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="structureDetaillee" upperBound="-1"
         eType="#//StructureAmenagementHydraulique" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="amenagementHydrauliqueAssocie"
-        eType="#//AmenagementHydraulique" eOpposite="#//AmenagementHydraulique/ouvrageAssocie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="desordreDependanceAssocie"
-        eType="#//DesordreDependance" eOpposite="#//DesordreDependance/ouvrageAssocieAH"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="proprietaire" eType="#//Contact"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaire" eType="#//Organisme"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="amenagementHydrauliqueAssocieIds"
+        upperBound="-1" eType="#//AmenagementHydraulique"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="desordreDependanceAssocieIds"
+        upperBound="-1" eType="#//DesordreDependance" eOpposite="#//DesordreDependance/ouvrageAssocieIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="proprietaireIds" upperBound="-1"
+        eType="#//Contact"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaireIds" upperBound="-1"
+        eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="#//Observation" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="AmenagementHydraulique" eSuperTypes="#//Positionable">
+  <eClassifiers xsi:type="ecore:EClass" name="AmenagementHydraulique" eSuperTypes="#//ObjetPhotographiable">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="superficie" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
@@ -1689,50 +1691,48 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="collectiviteCompetence"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="profondeurMoyenne" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="observationGenerale" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="structureIds" upperBound="-1"
         eType="#//StructureAmenagementHydraulique"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocie" eType="#//OuvrageAssocieAmenagementHydraulique"
-        eOpposite="#//OuvrageAssocieAmenagementHydraulique/amenagementHydrauliqueAssocie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocieIds" upperBound="-1"
+        eType="#//OuvrageAssocieAmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coursEauIds" upperBound="-1"
         eType="#//CoursEau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="vegetationIds" upperBound="-1"
         eType="#//Vegetation"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="proprietaire" eType="#//Contact"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaire" eType="#//Organisme"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="linearId" eType="#//TronconDigue"
-        eOpposite="#//TronconDigue/amenagementHydrauliqueId"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaireIds" upperBound="-1"
+        eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionnement" eType="#//RefFonctionnement"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//RefTypeAmenagementHydraulique"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tronconIds" upperBound="-1"
+        eType="#//TronconDigue" eOpposite="#//TronconDigue/amenagementHydrauliqueId"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="observationIds" upperBound="-1"
+        eType="#//Observation" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
+        eType="#//Prestation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="proprietaireIds" upperBound="-1"
+        eType="#//Contact"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//Objet">
+  <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//Objet #//AvecPrestations">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="dependanceId" eType="#//AbstractDependance"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieuDit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-      <eAnnotations source="localDate"/>
-    </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-      <eAnnotations source="localDate"/>
-    </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-      <eAnnotations source="localDate"/>
-    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dependanceId" eType="#//AbstractDependance"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="#//ObservationDependance" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueIds"
         upperBound="-1" eType="#//EvenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cote" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocieAH" eType="#//OuvrageAssocieAmenagementHydraulique"
-        eOpposite="#//OuvrageAssocieAmenagementHydraulique/desordreDependanceAssocie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocieIds" upperBound="-1"
+        eType="#//OuvrageAssocieAmenagementHydraulique" eOpposite="#//OuvrageAssocieAmenagementHydraulique/desordreDependanceAssocieIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
         eType="#//Prestation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="categorieDesordreId" eType="#//RefCategorieDesordre"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeDesordreId" eType="#//RefTypeDesordre"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="articleIds" upperBound="-1"
+        eType="#//ArticleJournal"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="CoursEau" eSuperTypes="#//Objet">
     <eAnnotations source="couchDBDocument"/>

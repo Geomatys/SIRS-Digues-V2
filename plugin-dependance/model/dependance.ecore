@@ -47,11 +47,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="marcheId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Marche"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Desordre"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocieAmenagementHydraulique"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageAssocieAmenagementHydraulique"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="coursEauId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//CoursEau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="observationIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Observation" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocieAmenagementHydrauliqueIds"
+        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageAssocieAmenagementHydraulique"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="coursEauIds" upperBound="-1"
+        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//CoursEau"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OrganeProtectionCollective" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetPhotographiable">
     <eAnnotations source="couchDBDocument"/>
