@@ -104,19 +104,6 @@ public class FXDiguePane extends FXDiguePaneStub {
                     session.getRepositoryForClass((Class)input.getClass()).update(input);
                 }
             });
-
-            ObservableList<TableColumn<Element, ?>> columns = getColumns();
-            TableColumn<Element, ?> ahCol = null;
-            for (TableColumn<Element, ?> c: columns) {
-                if (c instanceof PropertyColumn) {
-                    if (AH_COL.equals(((PropertyColumn)c).getName())) {
-                        ahCol = c;
-                        break;
-                    }
-                }
-            }
-            if (ahCol != null) columns.remove(ahCol);
-            columns.add(new AmenagementHydrauliqueColumn());
         }
 
         @Override

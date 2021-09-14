@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import fr.sirs.theme.ui.FXValidityPeriodPane?>
+<?import fr.sirs.theme.ui.FXAmenagementHydrauliqueAttachementPane?>
 <?import fr.sirs.*?>
 <?import javafx.scene.effect.*?>
 <?import org.geotoolkit.gui.javafx.util.*?>
@@ -28,6 +29,7 @@
             <children>
 
   <FXValidityPeriodPane fx:id="uiValidityPeriod"/>
+  <FXAmenagementHydrauliqueAttachementPane fx:id="uiAmenagementHydrauliqueAttachement"/>
 
 <!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
 

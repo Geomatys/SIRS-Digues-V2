@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import org.geotoolkit.gui.javafx.util.*?>
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root maxWidth="1.7976931348623157E308" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <VBox fx:id="uiVbox" maxWidth="1.7976931348623157E308" spacing="10.0" styleClass="gray-light" BorderPane.alignment="CENTER">
+         <children>
+            <HBox alignment="CENTER" maxWidth="1.7976931348623157E308" spacing="10.0" styleClass="gray-light" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="Amenagement hydraulique:" />
+                  <RadioButton fx:id="uiAhOui" mnemonicParsing="false" text="oui" />
+                  <RadioButton fx:id="uiAhNon" mnemonicParsing="false" text="non" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </top>
+</fx:root>
