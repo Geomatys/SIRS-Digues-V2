@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
-package fr.sirs.plugin.berge.map;
+package fr.sirs.plugin.dependance.map;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -27,11 +27,11 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
-import fr.sirs.core.component.TraitBergeRepository;
-import fr.sirs.core.model.Berge;
+import fr.sirs.core.component.TraitAmenagementHydrauliqueRepository;
+import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.TraitBerge;
-import fr.sirs.plugin.berge.PluginBerge;
+import fr.sirs.core.model.TraitAmenagementHydraulique;
+import fr.sirs.plugin.dependance.PluginDependance;
 import java.awt.geom.Rectangle2D;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -78,10 +78,11 @@ import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
 /**
+ * Copy of the class TraitBergeEditHandler.
  *
- * @author Johann Sorel (Geomatys)
+ * @author Maxime Gavens (Geomatys)
  */
-public class TraitBergeEditHandler extends AbstractNavigationHandler {
+public class TraitAmenagementHydrauliqueEditHandler extends AbstractNavigationHandler {
 
     private static final int CROSS_SIZE = 5;
 
@@ -97,14 +98,14 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
         }
     };
 
-    private final TraitBergeRepository traitRepo = (TraitBergeRepository)Injector.getSession().getRepositoryForClass(TraitBerge.class);
-    private final FXTraitBerge pane = new FXTraitBerge();
+    private final TraitAmenagementHydrauliqueRepository traitRepo = (TraitAmenagementHydrauliqueRepository)Injector.getSession().getRepositoryForClass(TraitAmenagementHydraulique.class);
+    private final FXTraitAmenagementHydraulique pane = new FXTraitAmenagementHydraulique();
     private final Stage dialog = new Stage();
 
-    private FeatureMapLayer bergeLayer = null;
+    private FeatureMapLayer amenagementHydrauliqueLayer = null;
     private FeatureMapLayer traitLayer = null;
 
-    public TraitBergeEditHandler(final FXMap map) {
+    public TraitAmenagementHydrauliqueEditHandler(final FXMap map) {
 
         pane.importProperty().set(false);
         dialog.setScene(new Scene(pane));
@@ -120,7 +121,6 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
                 map.setHandler(new FXPanHandler(true));
             }
         });
-
     }
 
     /**
@@ -134,14 +134,14 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
         map.setCursor(Cursor.CROSSHAIR);
         map.addDecoration(0,decoration);
 
-        //on rend les couches berge selectionnables
+        //on rend les couches aménagement hydraulique selectionnables
         final MapContext context = map.getContainer().getContext();
         for(MapLayer layer : context.layers()){
             layer.setSelectable(false);
-            if(layer.getName().equalsIgnoreCase(PluginBerge.LAYER_BERGE_NAME)){
-                bergeLayer = (FeatureMapLayer) layer;
-                bergeLayer.setSelectable(true);
-            }else if(layer.getName().equalsIgnoreCase(PluginBerge.LAYER_TRAIT_NAME)){
+            if(layer.getName().equalsIgnoreCase(PluginDependance.LAYER_AH_NAME)){
+                amenagementHydrauliqueLayer = (FeatureMapLayer) layer;
+                amenagementHydrauliqueLayer.setSelectable(true);
+            }else if(layer.getName().equalsIgnoreCase(PluginDependance.LAYER_TRAIT_NAME)){
                 traitLayer = (FeatureMapLayer) layer;
                 traitLayer.setSelectable(true);
             }
@@ -170,7 +170,7 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
         private FXPanMouseListen subHandle = null;
 
         public MainMouseListen() {
-            super(TraitBergeEditHandler.this);
+            super(TraitAmenagementHydrauliqueEditHandler.this);
             popup.setAutoHide(true);
         }
 
@@ -183,8 +183,8 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
 
             final MouseButton button = e.getButton();
             if(button==MouseButton.PRIMARY){
-                if(pane.bergeProperty().get()==null){
-                    //on recupere une berge
+                if(pane.amenagementHydrauliqueProperty().get()==null){
+                    //on recupere un aménagement hydraulique
                     final GraphicVisitor visitor = new PickVisitor();
                     final Rectangle2D rect = new Rectangle2D.Double(getMouseX(e)-3, getMouseY(e)-3, 6, 6);
                     map.getCanvas().getGraphicsIn(rect, visitor, VisitFilter.INTERSECTS);
@@ -192,8 +192,8 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
                     //mode edition de geometry
                     if(pane.newProperty().get()){
                         //creation d'une geometry
-                        final TraitBerge trait = traitRepo.create();
-                        trait.setBergeId(pane.bergeProperty().get().getDocumentId());
+                        final TraitAmenagementHydraulique trait = traitRepo.create();
+                        trait.setAmenagementHydrauliqueId(pane.amenagementHydrauliqueProperty().get().getDocumentId());
                         trait.setDate_debut(LocalDate.now());
                         pane.traitProperty().set(trait);
 
@@ -285,13 +285,13 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
             if (!(bean instanceof Element) || !Injector.getSession().editionAuthorized((Element)bean))
                 return;
 
-            if(pane.bergeProperty().get()==null){
-                //on selectionne uniquement un object de type berge.
-                if(bean instanceof Berge){
-                    pane.bergeProperty().set((Berge)bean);
+            if(pane.amenagementHydrauliqueProperty().get()==null){
+                //on selectionne uniquement un object de type aménagement hydraulique.
+                if(bean instanceof AmenagementHydraulique){
+                    pane.amenagementHydrauliqueProperty().set((AmenagementHydraulique)bean);
                 }
             }else if(pane.importProperty().get()){
-                //on selectionne n'importe quelle geometry pour en faire un trait de berge.
+                //on selectionne n'importe quelle geometry pour en faire un trait d'aménagement hydraulique.
                 Geometry geom = (Geometry) f.getDefaultGeometryProperty().getValue();
                 if (geom != null) {
                     geom = LinearReferencingUtilities.asLineString(geom);
@@ -307,13 +307,13 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
                         JTS.setCRS(geom, session.getProjection());
 
 
-                        final TraitBerge trait = traitRepo.create();
-                        trait.setBergeId(pane.bergeProperty().get().getDocumentId());
+                        final TraitAmenagementHydraulique trait = traitRepo.create();
+                        trait.setAmenagementHydrauliqueId(pane.amenagementHydrauliqueProperty().get().getDocumentId());
                         trait.setDate_debut(LocalDate.now());
                         trait.setGeometry(geom);
                         pane.traitProperty().set(trait);
 
-                        //save trait de berge
+                        //save trait d'aménagement hydraulique
                         traitRepo.add(trait);
 
                         map.getCanvas().repaint();
@@ -322,9 +322,9 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
                     }
                 }
             }else if(pane.traitProperty().get()==null){
-                //on selectionne uniquement un object de type trait de berge.
-                if(bean instanceof TraitBerge){
-                    pane.traitProperty().set((TraitBerge)bean);
+                //on selectionne uniquement un object de type trait d'aménagement hydraulique.
+                if(bean instanceof TraitAmenagementHydraulique){
+                    pane.traitProperty().set((TraitAmenagementHydraulique)bean);
                     //edition d'une geometry existante
                     final EditMouseListen handler = new EditMouseListen();
                     handler.selection.geometry.bindBidirectional(pane.traitProperty().get().geometryProperty());
@@ -351,7 +351,7 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
         private MouseButton pressed = null;
 
         public EditMouseListen() {
-            super(TraitBergeEditHandler.this);
+            super(TraitAmenagementHydrauliqueEditHandler.this);
             this.helper = new EditionHelper(map, traitLayer);
         }
 
@@ -434,9 +434,7 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
                 modified = true;
             }
         }
-
     }
-
 
     private class CreateMouseListen extends FXPanMouseListen {
 
@@ -446,7 +444,7 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
         private boolean end = false;
 
         public CreateMouseListen() {
-            super(TraitBergeEditHandler.this);
+            super(TraitAmenagementHydrauliqueEditHandler.this);
             this.helper = new EditionHelper(map, traitLayer);
         }
 
@@ -502,9 +500,5 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
 
             super.mouseMoved(me);
         }
-
     }
-
-
 }
-

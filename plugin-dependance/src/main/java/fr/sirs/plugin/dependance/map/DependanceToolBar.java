@@ -18,6 +18,7 @@
  */
 package fr.sirs.plugin.dependance.map;
 
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
@@ -47,6 +48,14 @@ public class DependanceToolBar extends ToolBar {
         final ToggleButton buttonCreateDesorder = new DesordreCreateAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         buttonCreateDesorder.getStyleClass().add(RIGHT);
 
-        getItems().add(new HBox(buttonEdit, buttonTransform, buttonCreateDesorder));
+        final ToggleButton butEditTrait = new TraitAmenagementHydrauliqueEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
+        butEditTrait.setMaxHeight(Double.MAX_VALUE);
+        butEditTrait.getStyleClass().add(CENTER);
+
+        final Button importTrait = new ConvertGeomToTraitAction(map).createButton(ActionUtils.ActionTextBehavior.HIDE);
+        importTrait.setMaxHeight(Double.MAX_VALUE);
+        importTrait.getStyleClass().add(RIGHT);
+
+        getItems().add(new HBox(buttonEdit, buttonTransform, buttonCreateDesorder, butEditTrait, importTrait));
     }
 }

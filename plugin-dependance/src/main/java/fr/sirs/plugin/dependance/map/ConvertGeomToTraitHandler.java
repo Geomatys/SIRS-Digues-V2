@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
-package fr.sirs.plugin.berge.map;
+package fr.sirs.plugin.dependance.map;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -24,10 +24,10 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
-import fr.sirs.core.component.TraitBergeRepository;
-import fr.sirs.core.model.Berge;
-import fr.sirs.core.model.TraitBerge;
-import fr.sirs.plugin.berge.PluginBerge;
+import fr.sirs.core.component.TraitAmenagementHydrauliqueRepository;
+import fr.sirs.core.model.AmenagementHydraulique;
+import fr.sirs.core.model.TraitAmenagementHydraulique;
+import fr.sirs.plugin.dependance.PluginDependance;
 import java.awt.geom.Rectangle2D;
 import java.time.LocalDate;
 import java.util.logging.Level;
@@ -70,7 +70,7 @@ import org.opengis.util.FactoryException;
 
 /**
  *
- * @author Johann Sorel (Geomatys)
+ * @author Maxime Gavens (Geomatys)
  */
 public class ConvertGeomToTraitHandler extends AbstractNavigationHandler {
 
@@ -88,11 +88,11 @@ public class ConvertGeomToTraitHandler extends AbstractNavigationHandler {
         }
     };
 
-    private final TraitBergeRepository traitRepo = (TraitBergeRepository)Injector.getSession().getRepositoryForClass(TraitBerge.class);
-    private final FXTraitBerge pane = new FXTraitBerge();
+    private final TraitAmenagementHydrauliqueRepository traitRepo = (TraitAmenagementHydrauliqueRepository)Injector.getSession().getRepositoryForClass(TraitAmenagementHydraulique.class);
+    private final FXTraitAmenagementHydraulique pane = new FXTraitAmenagementHydraulique();
     private final Stage dialog = new Stage();
 
-    private FeatureMapLayer bergeLayer = null;
+    private FeatureMapLayer amenagementHydrauliqueLayer = null;
 
     public ConvertGeomToTraitHandler(final FXMap map) {
         super();
@@ -125,13 +125,13 @@ public class ConvertGeomToTraitHandler extends AbstractNavigationHandler {
         map.setCursor(Cursor.CROSSHAIR);
         map.addDecoration(0,geomlayer);
 
-        //on rend les couches berge selectionnables
+        //on rend les couches aménagement hydraulique selectionnables
         final MapContext context = map.getContainer().getContext();
         for(MapLayer layer : context.layers()){
             layer.setSelectable(false);
-            if(layer.getName().equalsIgnoreCase(PluginBerge.LAYER_BERGE_NAME)){
-                bergeLayer = (FeatureMapLayer) layer;
-                bergeLayer.setSelectable(true);
+            if(layer.getName().equalsIgnoreCase(PluginDependance.LAYER_AH_NAME)){
+                amenagementHydrauliqueLayer = (FeatureMapLayer) layer;
+                amenagementHydrauliqueLayer.setSelectable(true);
             }
         }
 
@@ -181,13 +181,13 @@ public class ConvertGeomToTraitHandler extends AbstractNavigationHandler {
             final Feature f = feature.getCandidate();
             final Object bean = feature.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
 
-            if(pane.bergeProperty().get()==null){
-                //on selectionne uniquement un object de type berge.
-                if(bean instanceof Berge){
-                    pane.bergeProperty().set((Berge)bean);
+            if(pane.amenagementHydrauliqueProperty().get()==null){
+                //on selectionne uniquement un object de type aménagement hydraulique.
+                if(bean instanceof AmenagementHydraulique){
+                    pane.amenagementHydrauliqueProperty().set((AmenagementHydraulique)bean);
                 }
             }else if(pane.importProperty().get()){
-                //on selectionne n'importe quelle geometry pour en faire un trait de berge.
+                //on selectionne n'importe quelle geometry pour en faire un trait d'aménagement hydraulique.
                 Geometry geom = (Geometry) f.getDefaultGeometryProperty().getValue();
                 if (geom != null) {
                     geom = LinearReferencingUtilities.asLineString(geom);
@@ -203,13 +203,13 @@ public class ConvertGeomToTraitHandler extends AbstractNavigationHandler {
                         JTS.setCRS(geom, session.getProjection());
 
 
-                        final TraitBerge trait = traitRepo.create();
-                        trait.setBergeId(pane.bergeProperty().get().getDocumentId());
+                        final TraitAmenagementHydraulique trait = traitRepo.create();
+                        trait.setAmenagementHydrauliqueId(pane.amenagementHydrauliqueProperty().get().getDocumentId());
                         trait.setDate_debut(LocalDate.now());
                         trait.setGeometry(geom);
                         pane.traitProperty().set(trait);
 
-                        //save trait de berge
+                        //save trait d'aménagement hydraulique
                         traitRepo.add(trait);
 
                         map.getCanvas().repaint();
@@ -218,9 +218,9 @@ public class ConvertGeomToTraitHandler extends AbstractNavigationHandler {
                     }
                 }
             }else if(pane.traitProperty().get()==null){
-                //on selectionne uniquement un object de type trait de berge.
-                if(bean instanceof TraitBerge){
-                    pane.traitProperty().set((TraitBerge)bean);
+                //on selectionne uniquement un object de type trait d'aménagement hydraulique.
+                if(bean instanceof TraitAmenagementHydraulique){
+                    pane.traitProperty().set((TraitAmenagementHydraulique)bean);
                 }
             }
         }

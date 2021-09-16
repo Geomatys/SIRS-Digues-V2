@@ -27,6 +27,7 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.AireStockageDependanceRepository;
+import fr.sirs.core.component.AmenagementHydrauliqueRepository;
 import fr.sirs.core.component.AutreDependanceRepository;
 import fr.sirs.core.component.CheminAccesDependanceRepository;
 import fr.sirs.core.component.OuvrageVoirieDependanceRepository;
@@ -378,7 +379,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     gridPane.setPadding(new Insets(10));
                     gridPane.add(new Label("Choisir un type de dépendance"), 0, 0);
                     final ComboBox<String> dependanceTypeBox = new ComboBox<>();
-                    dependanceTypeBox.setItems(FXCollections.observableArrayList("Ouvrages de voirie", "Chemins d'accès", "Aires de stockage", "Autres"));
+                    dependanceTypeBox.setItems(FXCollections.observableArrayList("Ouvrages de voirie", "Chemins d'accès", "Aires de stockage", "Aménagements hydrauliques", "Autres"));
                     dependanceTypeBox.getSelectionModel().selectFirst();
                     gridPane.add(dependanceTypeBox, 1, 0);
 
@@ -386,6 +387,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     geomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
                     geomTypeBox.getSelectionModel().selectFirst();
                     geomTypeBox.visibleProperty().bind(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Ouvrages de voirie")
+                            .or(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Aménagements hydrauliques"))
                             .or(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Autres")));
                     final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
                     geomChoiceLbl.visibleProperty().bind(geomTypeBox.visibleProperty());
@@ -406,6 +408,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                         case "Autres": clazz = AutreDependance.class; break;
                         case "Chemins d'accès": clazz = CheminAccesDependance.class; break;
                         case "Ouvrages de voirie": clazz = OuvrageVoirieDependance.class; break;
+                        case "Aménagements hydrauliques": clazz = AmenagementHydraulique.class; break;
                         default: clazz = AireStockageDependance.class;
                     }
 
@@ -505,6 +508,8 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                                 Injector.getBean(CheminAccesDependanceRepository.class).remove((CheminAccesDependance)dependance);
                             } else if (OuvrageVoirieDependance.class.isAssignableFrom(dependance.getClass())) {
                                 Injector.getBean(OuvrageVoirieDependanceRepository.class).remove((OuvrageVoirieDependance)dependance);
+                            } else if (AmenagementHydraulique.class.isAssignableFrom(dependance.getClass())) {
+                                Injector.getBean(AmenagementHydrauliqueRepository.class).remove((AmenagementHydraulique)dependance);
                             }
                             // On quitte le mode d'édition.
                             reset();

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.sirs.theme.ui.*?>
+<?import fr.sirs.util.FXFreeTab?>
+<?import fr.sirs.util.FXFileTextField?>
+<?import fr.sirs.util.FXComponentField?>
+<?import org.geotoolkit.gui.javafx.util.*?>
+<?import jidefx.scene.control.field.*?>
+<?import jfxtras.scene.control.*?>
+<?import javafx.scene.web.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+
+
+<fx:root fx:id="uiBorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+  <center>
+    <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <tabs>
+
+<!-- ATTRIBUTE TAB-->
+        <Tab text="Informations">
+          <ScrollPane>
+            <content>
+          <VBox spacing="30.0" BorderPane.alignment="CENTER">
+            <children>
+
+  <FXValidityPeriodPane fx:id="uiValidityPeriod"/>
+            <HBox fx:id="ui_parent_box" spacing="20.0" alignment="CENTER_LEFT" styleClass="gray-light">
+              <children>
+                <Label fx:id="linearId" text="%linearId" maxHeight="-Infinity" maxWidth="-Infinity"/>
+                <ComboBox fx:id="ui_linearId"/>
+                <Button fx:id="ui_linearId_link"/>
+              </children>
+              <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+              </padding>
+            </HBox>
+
+<!-- POSITIONEMENT -->
+    <FXPositionablePane fx:id="uiPositionable" />  
+
+<!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
+
+
+            <!-- AmenagementHydraulique -->
+            <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" />
+                <ColumnConstraints hgrow="ALWAYS" />
+              </columnConstraints>
+              <!--rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints-->
+              <children>
+                   <!-- EString -->                 
+                   <Label text="%libelle" GridPane.rowIndex="0" />
+                   <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="0"  />
+                   <!-- EFloat -->                 
+                   <Label text="%superficie" GridPane.rowIndex="1" />
+                   <Spinner fx:id="ui_superficie" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EFloat -->                 
+                   <Label text="%capaciteStockage" GridPane.rowIndex="2" />
+                   <Spinner fx:id="ui_capaciteStockage" GridPane.columnIndex="1" GridPane.rowIndex="2"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EString -->                 
+                   <Label text="%collectiviteCompetence" GridPane.rowIndex="3" />
+                   <TextField fx:id="ui_collectiviteCompetence" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EFloat -->                 
+                   <Label text="%profondeurMoyenne" GridPane.rowIndex="4" />
+                   <Spinner fx:id="ui_profondeurMoyenne" GridPane.columnIndex="1" GridPane.rowIndex="4"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <Label text="%fonctionnement" GridPane.rowIndex="5" />
+                   <ComboBox fx:id="ui_fonctionnement" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                   <Button fx:id="ui_fonctionnement_link" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                   <Label text="%type" GridPane.rowIndex="6" />
+                   <ComboBox fx:id="ui_type" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                   <Button fx:id="ui_type_link" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+
+              </children>
+              <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+              </padding>
+            </GridPane>
+            <TextArea fx:id="ui_commentaire" maxHeight="-Infinity"  prefHeight="200.0" />
+
+            </children>
+            <padding>
+              <Insets bottom="10.0" left="50.0" right="50.0" top="30.0" />
+            </padding>
+          </VBox>
+            </content>
+          </ScrollPane>
+        </Tab>
+
+<!-- REFERENCE TABS -->
+        <FXFreeTab fx:id="ui_desordreIds" text="%desordreIds"/>
+        <FXFreeTab fx:id="ui_structureIds" text="%structureIds"/>
+        <FXFreeTab fx:id="ui_ouvrageAssocieIds" text="%ouvrageAssocieIds"/>
+        <FXFreeTab fx:id="ui_coursEauIds" text="%coursEauIds"/>
+        <FXFreeTab fx:id="ui_vegetationIds" text="%vegetationIds"/>
+        <FXFreeTab fx:id="ui_gestionnaireIds" text="%gestionnaireIds"/>
+        <FXFreeTab fx:id="ui_tronconIds" text="%tronconIds"/>
+        <FXFreeTab fx:id="ui_observationIds" text="%observationIds"/>
+        <FXFreeTab fx:id="ui_prestationIds" text="%prestationIds"/>
+        <FXFreeTab fx:id="ui_proprietaireIds" text="%proprietaireIds"/>
+        <FXFreeTab fx:id="ui_photos" text="%photos"/>
+        <FXFreeTab fx:id="ui_traits" text="%traits"/>
+
+      </tabs>
+    </TabPane>
+  </center>
+
+</fx:root>
+

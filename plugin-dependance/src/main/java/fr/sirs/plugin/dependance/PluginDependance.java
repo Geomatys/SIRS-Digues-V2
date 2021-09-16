@@ -29,6 +29,7 @@ import fr.sirs.core.component.CheminAccesDependanceRepository;
 import fr.sirs.core.component.DesordreDependanceRepository;
 import fr.sirs.core.component.OuvrageVoirieDependanceRepository;
 import fr.sirs.core.component.AmenagementHydrauliqueRepository;
+import fr.sirs.core.component.TraitAmenagementHydrauliqueRepository;
 import fr.sirs.core.model.AireStockageDependance;
 import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.AutreDependance;
@@ -36,6 +37,7 @@ import fr.sirs.core.model.CheminAccesDependance;
 import fr.sirs.core.model.DesordreDependance;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.OuvrageVoirieDependance;
+import fr.sirs.core.model.TraitAmenagementHydraulique;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.dependance.map.DependanceToolBar;
 import java.io.IOException;
@@ -63,12 +65,17 @@ public class PluginDependance extends Plugin {
     private static final String NAME = "plugin-dependance";
     private static final String TITLE = "Module dépendance";
 
+    //doit avoir la meme valeur que dans le fichier Berge.properties classPlural
+    public static final String LAYER_AH_NAME = "Aménagements hydrauliques";
+    public static final String LAYER_TRAIT_NAME = "Traits d'aménagement hydraulique";
+
     private static FeatureMapLayer aireLayer;
     private static FeatureMapLayer autreLayer;
     private static FeatureMapLayer cheminLayer;
     private static FeatureMapLayer ouvrageLayer;
     private static FeatureMapLayer desordreLayer;
     private static FeatureMapLayer amenagementLayer;
+    private static FeatureMapLayer traitAmenagementLayer;
 
     public PluginDependance() {
         name = NAME;
@@ -109,6 +116,7 @@ public class PluginDependance extends Plugin {
         final CheminAccesDependanceRepository cheminRepo = Injector.getBean(CheminAccesDependanceRepository.class);
         final OuvrageVoirieDependanceRepository ouvrageRepo = Injector.getBean(OuvrageVoirieDependanceRepository.class);
         final AmenagementHydrauliqueRepository amenagementRepo = Injector.getBean(AmenagementHydrauliqueRepository.class);
+        final TraitAmenagementHydrauliqueRepository traitAmenagementRepo = Injector.getBean(TraitAmenagementHydrauliqueRepository.class);
 
         try {
             final StructBeanSupplier ouvrageSupplier = new StructBeanSupplier(OuvrageVoirieDependance.class, ouvrageRepo::getAll);
@@ -118,6 +126,18 @@ public class PluginDependance extends Plugin {
             ouvrageLayer.setName(LabelMapper.get(OuvrageVoirieDependance.class).mapClassName());
             ouvrageLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             depGroup.items().add(0, ouvrageLayer);
+        } catch(Exception ex) {
+            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+        }
+
+        try {
+            final StructBeanSupplier traitAmenagementSupplier = new StructBeanSupplier(TraitAmenagementHydraulique.class, traitAmenagementRepo::getAll);
+            final BeanStore traitAmenagementStore = new BeanStore(traitAmenagementSupplier);
+            traitAmenagementLayer = MapBuilder.createFeatureLayer(traitAmenagementStore.createSession(true)
+                    .getFeatureCollection(QueryBuilder.all(traitAmenagementStore.getNames().iterator().next())));
+            traitAmenagementLayer.setName(LAYER_TRAIT_NAME);
+            traitAmenagementLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            depGroup.items().add(0, traitAmenagementLayer);
         } catch(Exception ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
@@ -163,7 +183,7 @@ public class PluginDependance extends Plugin {
             final BeanStore amenagementStore = new BeanStore(amenagementSupplier);
             amenagementLayer = MapBuilder.createFeatureLayer(amenagementStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(amenagementStore.getNames().iterator().next())));
-            amenagementLayer.setName(LabelMapper.get(AireStockageDependance.class).mapClassName());
+            amenagementLayer.setName(LAYER_AH_NAME);
             amenagementLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             depGroup.items().add(4, amenagementLayer);
         } catch(Exception ex) {

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
-package fr.sirs.plugin.berge.map;
+package fr.sirs.plugin.dependance.map;
 
 import fr.sirs.Injector;
 import fr.sirs.Session;
@@ -29,14 +29,15 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXMapAction;
 
 /**
+ * Copy of the class ConvertGeomToTraitAction from the module Berge
  *
- * @author Johann Sorel (Geomatys)
+ * @author Maxime Gavens (Geomatys)
  */
 public class ConvertGeomToTraitAction extends FXMapAction {
         
     public ConvertGeomToTraitAction(FXMap map) {
-        super(map,"Géometrie vers Trait de berge","Convertir une géométrie en trait de berge",new Image("/fr/sirs/plugin/berge/geometrietraitberge.png"));
-        
+        super(map,"Géometrie vers Trait d'aménagement hydraulique","Convertir une géométrie en trait d'aménagement hydraulique",new Image("/fr/sirs/plugin/dependance/geometrietraitamenagementhydraulique.png"));
+
         final Session session = Injector.getSession();
         this.disabledProperty().bind(session.geometryEditionProperty().not());
         

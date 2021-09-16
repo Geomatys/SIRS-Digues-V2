@@ -1683,9 +1683,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="#//Observation" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="AmenagementHydraulique" eSuperTypes="#//ObjetPhotographiable">
+  <eClassifiers xsi:type="ecore:EClass" name="AmenagementHydraulique" eSuperTypes="#//AbstractDependance">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="superficie" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="capaciteStockage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="collectiviteCompetence"
@@ -1798,5 +1797,21 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeAmenagementHydraulique" eSuperTypes="#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TraitAmenagementHydraulique" eSuperTypes="#//AvecGeometrie">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="amenagementHydrauliqueId"
+        eType="#//AmenagementHydraulique"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
 </ecore:EPackage>

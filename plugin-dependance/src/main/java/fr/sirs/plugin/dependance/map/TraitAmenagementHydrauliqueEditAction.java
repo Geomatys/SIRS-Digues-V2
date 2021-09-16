@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
-package fr.sirs.plugin.berge.map;
+package fr.sirs.plugin.dependance.map;
 
 import fr.sirs.Injector;
 import javafx.beans.value.ChangeListener;
@@ -28,20 +28,21 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXMapAction;
 
 /**
+ * Copy of the TraitBergeEditAction.
  *
- * @author Johann Sorel (Geomatys)
+ * @author Maxime Gavens (Geomatys)
  */
-public class TraitBergeEditAction extends FXMapAction {
-        
-    public TraitBergeEditAction(FXMap map) {
-        super(map,"Trait de berge","Edition/Création de trait de berge",new Image("/fr/sirs/plugin/berge/traideberge.png"));
+public class TraitAmenagementHydrauliqueEditAction extends FXMapAction {
+
+    public TraitAmenagementHydrauliqueEditAction(FXMap map) {
+        super(map,"Trait d'aménagement hydraulique","Edition/Création de trait d'aménagement hydraulique",new Image("/fr/sirs/plugin/dependance/traitdamenagementhydraulique.png"));
         
         this.disabledProperty().bind(Injector.getSession().geometryEditionProperty().not());
         
         map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
             @Override
             public void changed(ObservableValue<? extends FXCanvasHandler> observable, FXCanvasHandler oldValue, FXCanvasHandler newValue) {
-                selectedProperty().set(newValue instanceof TraitBergeEditHandler);
+                selectedProperty().set(newValue instanceof TraitAmenagementHydrauliqueEditHandler);
             }
         });
     }
@@ -49,7 +50,7 @@ public class TraitBergeEditAction extends FXMapAction {
     @Override
     public void accept(ActionEvent event) {
         if (map != null) {
-            map.setHandler(new TraitBergeEditHandler(map));
+            map.setHandler(new TraitAmenagementHydrauliqueEditHandler(map));
         }
     }
     

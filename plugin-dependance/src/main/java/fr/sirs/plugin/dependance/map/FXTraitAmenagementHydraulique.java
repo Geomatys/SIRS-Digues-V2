@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
-package fr.sirs.plugin.berge.map;
+package fr.sirs.plugin.dependance.map;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.Berge;
-import fr.sirs.core.model.TraitBerge;
+import fr.sirs.core.model.AmenagementHydraulique;
+import fr.sirs.core.model.TraitAmenagementHydraulique;
 import fr.sirs.util.SirsStringConverter;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -41,17 +41,18 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 
 /**
+ * Copy of the class FXTraitBerge.
  *
- * @author Johann Sorel (Geomatys)
+ * @author Maxime Gavens (Geomatys)
  */
-public class FXTraitBerge extends GridPane{
+public class FXTraitAmenagementHydraulique extends GridPane{
 
-    private static final String MESSAGE_BERGE = "Sélectionner une berge sur la carte.";
-    private static final String MESSAGE_TRAIT = "Sélectionner un trait de berge sur la carte ou cliquer sur nouveau.";
-    private static final String MESSAGE_TRAIT_IMPORT = "Sélectionner une géometrie à convertir en trait de berge sur la carte.";
+    private static final String MESSAGE_AH = "Sélectionner un aménagement hydraulique sur la carte.";
+    private static final String MESSAGE_TRAIT = "Sélectionner un trait d'aménagement hydraulique sur la carte ou cliquer sur nouveau.";
+    private static final String MESSAGE_TRAIT_IMPORT = "Sélectionner une géometrie à convertir en trait d'aménagement hydraulique sur la carte.";
     private static final String MESSAGE_TRAIT_CREATE = "Cliquer sur la carte pour créer la géométrie, double-click pour terminer la creation.";
 
-    @FXML private Label uiLblBerge;
+    @FXML private Label uiLblAmenagementHydraulique;
     @FXML private Label uiLblTrait;
     @FXML private DatePicker uiDateDebut;
     @FXML private DatePicker uiDateFin;
@@ -60,34 +61,34 @@ public class FXTraitBerge extends GridPane{
     @FXML private ToggleButton uiBtnNew;
 
     private final BooleanProperty importProperty = new SimpleBooleanProperty(false);
-    private final ObjectProperty<Berge> bergeProperty = new SimpleObjectProperty<>();
-    private final ObjectProperty<TraitBerge> traitProperty = new SimpleObjectProperty<>();
+    private final ObjectProperty<AmenagementHydraulique> amenagementHydrauliqueProperty = new SimpleObjectProperty<>();
+    private final ObjectProperty<TraitAmenagementHydraulique> traitProperty = new SimpleObjectProperty<>();
     private final ObjectProperty<FXMap> mapProperty = new SimpleObjectProperty<>();
 
-    public FXTraitBerge(){
+    public FXTraitAmenagementHydraulique(){
         SIRS.loadFXML(this);
-        
+
         getStylesheets().add(SIRS.CSS_PATH);
         getStyleClass().add("blue-light");
 
-        uiLblBerge.setText(MESSAGE_BERGE);
-        bergeProperty.addListener(new ChangeListener<Berge>() {
+        uiLblAmenagementHydraulique.setText(MESSAGE_AH);
+        amenagementHydrauliqueProperty.addListener(new ChangeListener<AmenagementHydraulique>() {
             @Override
-            public void changed(ObservableValue<? extends Berge> observable, Berge oldValue, Berge newValue) {
+            public void changed(ObservableValue<? extends AmenagementHydraulique> observable, AmenagementHydraulique oldValue, AmenagementHydraulique newValue) {
                 if(newValue!=null){
-                    uiLblBerge.setText(new SirsStringConverter().toString(newValue));
+                    uiLblAmenagementHydraulique.setText(new SirsStringConverter().toString(newValue));
                     uiLblTrait.setText(importProperty.get() ? MESSAGE_TRAIT_IMPORT :MESSAGE_TRAIT );
                 }else{
-                    uiLblBerge.setText(MESSAGE_BERGE);
+                    uiLblAmenagementHydraulique.setText(MESSAGE_AH);
                     uiLblTrait.setText("");
                 }
             }
         });
 
         uiLblTrait.setText("");
-        traitProperty.addListener(new ChangeListener<TraitBerge>() {
+        traitProperty.addListener(new ChangeListener<TraitAmenagementHydraulique>() {
             @Override
-            public void changed(ObservableValue<? extends TraitBerge> observable, TraitBerge oldValue, TraitBerge newValue) {
+            public void changed(ObservableValue<? extends TraitAmenagementHydraulique> observable, TraitAmenagementHydraulique oldValue, TraitAmenagementHydraulique newValue) {
                 if(newValue!=null){
                     uiLblTrait.setText(new SirsStringConverter().toString(newValue));
                     uiDateDebut.setValue(newValue.getDate_debut());
@@ -109,7 +110,7 @@ public class FXTraitBerge extends GridPane{
             }
         });
 
-        uiBtnNew.disableProperty().bind(bergeProperty.isNull().or(traitProperty.isNotNull()).or(uiBtnNew.selectedProperty()));
+        uiBtnNew.disableProperty().bind(amenagementHydrauliqueProperty.isNull().or(traitProperty.isNotNull()).or(uiBtnNew.selectedProperty()));
         uiBtnNew.visibleProperty().bind(importProperty.not());
 
         uiDateDebut.disableProperty().bind(traitProperty.isNull());
@@ -123,11 +124,11 @@ public class FXTraitBerge extends GridPane{
         return importProperty;
     }
 
-    public ObjectProperty<Berge> bergeProperty(){
-        return bergeProperty;
+    public ObjectProperty<AmenagementHydraulique> amenagementHydrauliqueProperty(){
+        return amenagementHydrauliqueProperty;
     }
 
-    public ObjectProperty<TraitBerge> traitProperty(){
+    public ObjectProperty<TraitAmenagementHydraulique> traitProperty(){
         return traitProperty;
     }
 
@@ -141,24 +142,24 @@ public class FXTraitBerge extends GridPane{
 
     @FXML
     void delete(ActionEvent event) {
-        final TraitBerge traitBerge = traitProperty.get();
-        final AbstractSIRSRepository<TraitBerge> repo = Injector.getSession().getRepositoryForClass(TraitBerge.class);
-        if(!traitBerge.isNew()){
-            repo.remove(traitBerge);
+        final TraitAmenagementHydraulique traitAmenagementHydraulique = traitProperty.get();
+        final AbstractSIRSRepository<TraitAmenagementHydraulique> repo = Injector.getSession().getRepositoryForClass(TraitAmenagementHydraulique.class);
+        if(!traitAmenagementHydraulique.isNew()){
+            repo.remove(traitAmenagementHydraulique);
         }
         endEdition();
     }
 
     @FXML
     void save(ActionEvent event) {
-        final TraitBerge traitBerge = traitProperty.get();
-        traitBerge.setDate_debut(uiDateDebut.getValue());
-        traitBerge.setDate_fin(uiDateFin.getValue());
-        final AbstractSIRSRepository<TraitBerge> repo = Injector.getSession().getRepositoryForClass(TraitBerge.class);
-        if(traitBerge.isNew()){
-            repo.add(traitBerge);
+        final TraitAmenagementHydraulique traitAmenagementHydraulique = traitProperty.get();
+        traitAmenagementHydraulique.setDate_debut(uiDateDebut.getValue());
+        traitAmenagementHydraulique.setDate_fin(uiDateFin.getValue());
+        final AbstractSIRSRepository<TraitAmenagementHydraulique> repo = Injector.getSession().getRepositoryForClass(TraitAmenagementHydraulique.class);
+        if(traitAmenagementHydraulique.isNew()){
+            repo.add(traitAmenagementHydraulique);
         }else{
-            repo.update(traitBerge);
+            repo.update(traitAmenagementHydraulique);
         }
         endEdition();
     }
