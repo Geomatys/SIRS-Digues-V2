@@ -28,6 +28,7 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 
 /**
  * @author Cédric Briançon (Geomatys)
+ * @author Maxime Gavens (Geomatys)
  */
 public class DependanceToolBar extends ToolBar {
     private static final String LEFT = "buttongroup-left";
@@ -46,7 +47,7 @@ public class DependanceToolBar extends ToolBar {
         buttonTransform.getStyleClass().add(CENTER);
 
         final ToggleButton buttonCreateDesorder = new DesordreCreateAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
-        buttonCreateDesorder.getStyleClass().add(RIGHT);
+        buttonCreateDesorder.getStyleClass().add(CENTER);
 
         final ToggleButton butEditTrait = new TraitAmenagementHydrauliqueEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butEditTrait.setMaxHeight(Double.MAX_VALUE);

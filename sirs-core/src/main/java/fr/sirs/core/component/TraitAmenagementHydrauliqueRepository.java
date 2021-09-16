@@ -42,7 +42,7 @@ public class TraitAmenagementHydrauliqueRepository extends
 AbstractSIRSRepository
 <TraitAmenagementHydraulique> {
 
-    public static final String BY_AMENAGEMENT_HYDRAULIQUE_ID = "byBergeId";
+    public static final String BY_AMENAGEMENT_HYDRAULIQUE_ID = "byAmenagementHydrauliqueId";
         
     @Autowired
     private TraitAmenagementHydrauliqueRepository ( CouchDbConnector db) {
