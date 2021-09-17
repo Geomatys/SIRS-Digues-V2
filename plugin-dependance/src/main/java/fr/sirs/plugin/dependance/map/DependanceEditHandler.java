@@ -100,7 +100,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
     private FeatureMapLayer aireLayer;
     private FeatureMapLayer autreLayer;
     private FeatureMapLayer cheminLayer;
-    private FeatureMapLayer ouvrageLayer;
+    private FeatureMapLayer ouvrageVoirieLayer;
     private FeatureMapLayer amenagementLayer;
 
     /**
@@ -191,7 +191,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
         aireLayer = PluginDependance.getAireLayer();
         autreLayer = PluginDependance.getAutreLayer();
         cheminLayer = PluginDependance.getCheminLayer();
-        ouvrageLayer = PluginDependance.getOuvrageLayer();
+        ouvrageVoirieLayer = PluginDependance.getOuvrageVoirieLayer();
         amenagementLayer = PluginDependance.getAmenagementLayer();
     }
 
@@ -279,7 +279,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                             } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
                                 helper = new EditionHelper(map, cheminLayer);
                             } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
-                                helper = new EditionHelper(map, ouvrageLayer);
+                                helper = new EditionHelper(map, ouvrageVoirieLayer);
                             } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
                                 helper = new EditionHelper(map, amenagementLayer);
                             }
@@ -419,7 +419,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, cheminLayer);
                     } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
-                        helper = new EditionHelper(map, ouvrageLayer);
+                        helper = new EditionHelper(map, ouvrageVoirieLayer);
                     } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, amenagementLayer);
                     }
@@ -450,7 +450,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, cheminLayer);
                     } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
-                        helper = new EditionHelper(map, ouvrageLayer);
+                        helper = new EditionHelper(map, ouvrageVoirieLayer);
                     } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, amenagementLayer);
                     }
@@ -540,7 +540,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, cheminLayer);
                     } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
-                        helper = new EditionHelper(map, ouvrageLayer);
+                        helper = new EditionHelper(map, ouvrageVoirieLayer);
                     } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, amenagementLayer);
                     }

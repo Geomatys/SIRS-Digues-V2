@@ -1655,8 +1655,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="StructureAmenagementHydraulique" eSuperTypes="#//ObjetStructure">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="compositionMateriauxId"
-        eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="#//Observation" containment="true"/>
   </eClassifiers>
@@ -1670,8 +1669,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrage" eType="#//RefOuvrageHydrauliqueAssocie"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="ouvrageDerversant" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="structureDetaillee" upperBound="-1"
-        eType="#//StructureAmenagementHydraulique" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="structureDetaillees" upperBound="-1"
+        eType="#//StructureAHContained" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="amenagementHydrauliqueAssocieIds"
         upperBound="-1" eType="#//AmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreDependanceAssocieIds"
@@ -1813,5 +1812,11 @@
       <eAnnotations source="localDate"/>
     </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="StructureAHContained" eSuperTypes="#//ObjetStructure">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
+        eType="#//Observation" containment="true"/>
   </eClassifiers>
 </ecore:EPackage>
