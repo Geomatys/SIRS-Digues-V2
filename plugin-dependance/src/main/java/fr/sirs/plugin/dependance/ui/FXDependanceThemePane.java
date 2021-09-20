@@ -19,17 +19,22 @@
 package fr.sirs.plugin.dependance.ui;
 
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.AvecForeignParent;
+import fr.sirs.core.model.DescriptionAmenagementHydraulique;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.TronconTheme;
 import fr.sirs.theme.ui.ForeignParentPojoTable;
+import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.theme.ui.pojotable.ElementCopier;
 import fr.sirs.util.SimpleFXEditMode;
 import fr.sirs.util.SirsStringConverter;
 import java.util.List;
+import java.util.logging.Level;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -50,35 +55,50 @@ import javafx.scene.layout.Priority;
  */
 public class FXDependanceThemePane extends BorderPane {
 
-    private final StringProperty linearIdProperty = new SimpleStringProperty();
+    private final StringProperty ahIdProperty = new SimpleStringProperty();
     private final Session session = Injector.getBean(Session.class);
 
-    public StringProperty linearIdProperty(){return linearIdProperty;}
+    public StringProperty ahIdProperty(){return ahIdProperty;}
 
-    public FXDependanceThemePane(ComboBox<TronconDigue> uiLinearChoice, TronconTheme.ThemeManager theme) {
+    public FXDependanceThemePane(ComboBox<AmenagementHydraulique> uiAhChoice, AbstractTheme.ThemeManager theme) {
         setCenter(createContent(theme));
-        final List<TronconDigue> linearPreviews = session.getRepositoryForClass(TronconDigue.class).getAll();
-        uiLinearChoice.setItems(FXCollections.observableList(linearPreviews));
-        uiLinearChoice.setConverter(new SirsStringConverter());
+        final List<AmenagementHydraulique> ahPreviews = session.getRepositoryForClass(AmenagementHydraulique.class).getAll();
+        uiAhChoice.setItems(FXCollections.observableList(ahPreviews));
+        uiAhChoice.setConverter(new SirsStringConverter());
 
-        uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
-            linearIdProperty.set(newValue.getId());
+        uiAhChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends AmenagementHydraulique> observable, AmenagementHydraulique oldValue, AmenagementHydraulique newValue) -> {
+            ahIdProperty.set(newValue.getId());
         });
 
-        if(!linearPreviews.isEmpty()){
-            uiLinearChoice.getSelectionModel().select(linearPreviews.get(0));
+        if(!ahPreviews.isEmpty()){
+            uiAhChoice.getSelectionModel().select(ahPreviews.get(0));
         }
     }
 
-    protected class DependanceThemePojoTable<T extends AvecForeignParent> extends ForeignParentPojoTable<T>{
+    protected class DependanceThemePojoTable<T extends DescriptionAmenagementHydraulique> extends PojoTable{
 
+        protected final StringProperty ahIdProperty = new SimpleStringProperty();
         private final TronconTheme.ThemeManager<T> group;
+
+        public void setAhIdProperty(final String ahId) {
+            ahIdProperty.set(ahId);
+        }
+
+        public String getAhIdProperty() {
+            return ahIdProperty.get();
+        }
+
+        public StringProperty ahIdProperty() {
+            return ahIdProperty;
+        }
 
         public DependanceThemePojoTable(TronconTheme.ThemeManager<T> group, final ObjectProperty<? extends Element> container) {
             super(group.getDataClass(), group.getTableTitle(), container);
-            foreignParentIdProperty.addListener(this::updateTable);
+            ahIdProperty.addListener(this::updateTable);
             this.group = group;
-            this.elementCopier = new ElementCopier(this.pojoClass, container, this.session, this.repo, TronconDigue.class);
+
+            // Réécrire le copy des éléments, demander au client ce qu'il attend
+            // this.elementCopier = new ElementCopier(this.pojoClass, container, this.session, this.repo, TronconDigue.class);
         }
 
         private void updateTable(ObservableValue<? extends String> observable, String oldValue, String newValue){
@@ -92,6 +112,33 @@ public class FXDependanceThemePane extends BorderPane {
         public BooleanProperty getEditableProperty() {
             return editableProperty;
         }
+
+        @Override
+        protected T createPojo() {
+            T created = null;
+            if (repo != null) {
+                created = (T) repo.create();
+            } else if (pojoClass != null) {
+                try {
+                    created = (T) session.getElementCreator().createElement(pojoClass);
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if (created != null) {
+                created.setAmenagementHydrauliqueId(getAhIdProperty());
+                
+                try {
+                    repo.add(created);
+                } catch (NullPointerException e) {
+                    SIRS.LOGGER.log(Level.WARNING, "Repository introuvable", e);
+                }
+                getAllValues().add(created);
+            }
+            return created;
+        }
     }
 
     protected Parent createContent(AbstractTheme.ThemeManager manager) {
@@ -104,7 +151,7 @@ public class FXDependanceThemePane extends BorderPane {
         final DependanceThemePojoTable table = new DependanceThemePojoTable(manager, (ObjectProperty<? extends Element>) null);
         table.setDeletor(manager.getDeletor());
         table.getEditableProperty().bind(editMode.editionState());
-        table.foreignParentProperty().bindBidirectional(linearIdProperty);
+        table.ahIdProperty().bindBidirectional(ahIdProperty);
 
         return new BorderPane(table, topPane, null, null, null);
     }

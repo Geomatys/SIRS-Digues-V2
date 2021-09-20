@@ -19,7 +19,8 @@
 package fr.sirs.plugin.dependance.ui;
 
 import fr.sirs.SIRS;
-import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.AmenagementHydraulique;
+import fr.sirs.plugin.dependance.AbstractDescriptionTheme;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.BorderPane;
@@ -32,7 +33,7 @@ import fr.sirs.theme.AbstractTheme;
 public class AbstractDescriptionPane extends BorderPane {
 
     @FXML
-    private ComboBox<TronconDigue> tronconBox;
+    private ComboBox<AmenagementHydraulique> ahBox;
     
     @FXML
     private BorderPane uiCenter;
@@ -45,8 +46,8 @@ public class AbstractDescriptionPane extends BorderPane {
         SIRS.loadFXML(this);
 
         if (tableClass != null) {
-            final AbstractTheme.ThemeManager themeManager = AbstractTheme.generateThemeManager(tableName, tableClass);
-            final FXDependanceThemePane tab = new FXDependanceThemePane(tronconBox, themeManager);
+            final AbstractTheme.ThemeManager themeManager = AbstractDescriptionTheme.generateThemeManager(tableName, tableClass);
+            final FXDependanceThemePane tab = new FXDependanceThemePane(ahBox, themeManager);
             uiCenter.setCenter(tab);
         }
      }

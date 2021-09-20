@@ -284,7 +284,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             ui_collectiviteCompetence.textProperty().bindBidirectional(newElement.collectiviteCompetenceProperty());
             // * profondeurMoyenne
             ui_profondeurMoyenne.getValueFactory().valueProperty().bindBidirectional(newElement.profondeurMoyenneProperty());
-            final AbstractSIRSRepository<RefFonctionnement> fonctionnementRepo = session.getRepositoryForClass(RefFonctionnement.class);
+            final AbstractSIRSRepository<RefFonctionnementAH> fonctionnementRepo = session.getRepositoryForClass(RefFonctionnementAH.class);
             SIRS.initCombo(ui_fonctionnement, SIRS.observableList(fonctionnementRepo.getAll()), newElement.getFonctionnement() == null? null : fonctionnementRepo.get(newElement.getFonctionnement()));
             final AbstractSIRSRepository<RefTypeAmenagementHydraulique> typeRepo = session.getRepositoryForClass(RefTypeAmenagementHydraulique.class);
             SIRS.initCombo(ui_type, SIRS.observableList(typeRepo.getAll()), newElement.getType() == null? null : typeRepo.get(newElement.getType()));
