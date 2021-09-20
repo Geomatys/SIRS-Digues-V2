@@ -22,15 +22,10 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.model.AmenagementHydraulique;
-import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.DescriptionAmenagementHydraulique;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTheme;
-import fr.sirs.theme.TronconTheme;
-import fr.sirs.theme.ui.ForeignParentPojoTable;
 import fr.sirs.theme.ui.PojoTable;
-import fr.sirs.theme.ui.pojotable.ElementCopier;
 import fr.sirs.util.SimpleFXEditMode;
 import fr.sirs.util.SirsStringConverter;
 import java.util.List;
@@ -78,7 +73,7 @@ public class FXDependanceThemePane extends BorderPane {
     protected class DependanceThemePojoTable<T extends DescriptionAmenagementHydraulique> extends PojoTable{
 
         protected final StringProperty ahIdProperty = new SimpleStringProperty();
-        private final TronconTheme.ThemeManager<T> group;
+        private final AbstractTheme.ThemeManager<T> group;
 
         public void setAhIdProperty(final String ahId) {
             ahIdProperty.set(ahId);
@@ -92,7 +87,7 @@ public class FXDependanceThemePane extends BorderPane {
             return ahIdProperty;
         }
 
-        public DependanceThemePojoTable(TronconTheme.ThemeManager<T> group, final ObjectProperty<? extends Element> container) {
+        public DependanceThemePojoTable(AbstractTheme.ThemeManager<T> group, final ObjectProperty<? extends Element> container) {
             super(group.getDataClass(), group.getTableTitle(), container);
             ahIdProperty.addListener(this::updateTable);
             this.group = group;

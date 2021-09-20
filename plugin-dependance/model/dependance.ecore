@@ -49,8 +49,6 @@
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Desordre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocieAmenagementHydrauliqueIds"
         upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageAssocieAmenagementHydraulique"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="coursEauIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//CoursEau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Photo" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>

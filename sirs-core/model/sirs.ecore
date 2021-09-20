@@ -1705,10 +1705,6 @@
         eType="#//StructureAmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocieIds" upperBound="-1"
         eType="#//OuvrageAssocieAmenagementHydraulique"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="coursEauIds" upperBound="-1"
-        eType="#//CoursEau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="vegetationIds" upperBound="-1"
-        eType="#//Vegetation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaireIds" upperBound="-1"
         eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionnement" eType="#//RefFonctionnementAH"/>
@@ -1751,12 +1747,6 @@
         eType="#//Prestation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleIds" upperBound="-1"
         eType="#//ArticleJournal"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="CoursEau" eSuperTypes="#//Objet">
-    <eAnnotations source="couchDBDocument"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Vegetation" eSuperTypes="#//Objet">
-    <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AbstractDependance" abstract="true"
       eSuperTypes="#//AotCotAssociable #//AvecSettableGeometrie">

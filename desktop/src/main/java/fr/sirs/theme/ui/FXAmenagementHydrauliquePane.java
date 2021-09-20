@@ -47,10 +47,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
     protected ListeningPojoTable structureIdsTable;
     @FXML protected FXFreeTab ui_ouvrageAssocieIds;
     protected ListeningPojoTable ouvrageAssocieIdsTable;
-    @FXML protected FXFreeTab ui_coursEauIds;
-    protected ListeningPojoTable coursEauIdsTable;
-    @FXML protected FXFreeTab ui_vegetationIds;
-    protected ListeningPojoTable vegetationIdsTable;
     @FXML protected FXFreeTab ui_gestionnaireIds;
     protected ListeningPojoTable gestionnaireIdsTable;
     @FXML protected FXFreeTab ui_tronconIds;
@@ -138,24 +134,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             return ouvrageAssocieIdsTable;
         });
         ui_ouvrageAssocieIds.setClosable(false);
-
-        ui_coursEauIds.setContent(() -> {
-            coursEauIdsTable = new ListeningPojoTable(CoursEau.class, null, elementProperty());
-            coursEauIdsTable.editableProperty().bind(disableFieldsProperty().not());
-            coursEauIdsTable.createNewProperty().set(false);
-            updateCoursEauIdsTable(session, elementProperty.get());
-            return coursEauIdsTable;
-        });
-        ui_coursEauIds.setClosable(false);
-
-        ui_vegetationIds.setContent(() -> {
-            vegetationIdsTable = new ListeningPojoTable(Vegetation.class, null, elementProperty());
-            vegetationIdsTable.editableProperty().bind(disableFieldsProperty().not());
-            vegetationIdsTable.createNewProperty().set(false);
-            updateVegetationIdsTable(session, elementProperty.get());
-            return vegetationIdsTable;
-        });
-        ui_vegetationIds.setClosable(false);
 
         ui_gestionnaireIds.setContent(() -> {
             gestionnaireIdsTable = new ListeningPojoTable(Organisme.class, null, elementProperty());
@@ -304,8 +282,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         updateDesordreIdsTable(session, newElement);
         updateStructureIdsTable(session, newElement);
         updateOuvrageAssocieIdsTable(session, newElement);
-        updateCoursEauIdsTable(session, newElement);
-        updateVegetationIdsTable(session, newElement);
         updateGestionnaireIdsTable(session, newElement);
         updateTronconIdsTable(session, newElement);
         updateObservationIdsTable(session, newElement);
@@ -355,34 +331,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             final AbstractSIRSRepository<OuvrageAssocieAmenagementHydraulique> ouvrageAssocieIdsRepo = session.getRepositoryForClass(OuvrageAssocieAmenagementHydraulique.class);
             ouvrageAssocieIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getOuvrageAssocieIds(), ouvrageAssocieIdsRepo));
             ouvrageAssocieIdsTable.setObservableListToListen(newElement.getOuvrageAssocieIds());
-        }
-    }
-
-    protected void updateCoursEauIdsTable(final Session session, final AmenagementHydraulique newElement) {
-        if (coursEauIdsTable == null)
-            return;
-
-        if (newElement == null) {
-            coursEauIdsTable.setTableItems(null);
-        } else {
-            coursEauIdsTable.setParentElement(null);
-            final AbstractSIRSRepository<CoursEau> coursEauIdsRepo = session.getRepositoryForClass(CoursEau.class);
-            coursEauIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getCoursEauIds(), coursEauIdsRepo));
-            coursEauIdsTable.setObservableListToListen(newElement.getCoursEauIds());
-        }
-    }
-
-    protected void updateVegetationIdsTable(final Session session, final AmenagementHydraulique newElement) {
-        if (vegetationIdsTable == null)
-            return;
-
-        if (newElement == null) {
-            vegetationIdsTable.setTableItems(null);
-        } else {
-            vegetationIdsTable.setParentElement(null);
-            final AbstractSIRSRepository<Vegetation> vegetationIdsRepo = session.getRepositoryForClass(Vegetation.class);
-            vegetationIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getVegetationIds(), vegetationIdsRepo));
-            vegetationIdsTable.setObservableListToListen(newElement.getVegetationIds());
         }
     }
 
@@ -541,26 +489,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
                 currentOuvrageAssocieAmenagementHydrauliqueIdsList.add(ouvrageAssocieAmenagementHydraulique.getId());
             }
             element.setOuvrageAssocieIds(currentOuvrageAssocieAmenagementHydrauliqueIdsList);
-
-        }
-        if (coursEauIdsTable != null) {
-            // Manage opposite references for CoursEau...
-            final List<String> currentCoursEauIdsList = new ArrayList<>();
-            for(final Element elt : coursEauIdsTable.getAllValues()){
-                final CoursEau coursEau = (CoursEau) elt;
-                currentCoursEauIdsList.add(coursEau.getId());
-            }
-            element.setCoursEauIds(currentCoursEauIdsList);
-
-        }
-        if (vegetationIdsTable != null) {
-            // Manage opposite references for Vegetation...
-            final List<String> currentVegetationIdsList = new ArrayList<>();
-            for(final Element elt : vegetationIdsTable.getAllValues()){
-                final Vegetation vegetation = (Vegetation) elt;
-                currentVegetationIdsList.add(vegetation.getId());
-            }
-            element.setVegetationIds(currentVegetationIdsList);
 
         }
         if (gestionnaireIdsTable != null) {
