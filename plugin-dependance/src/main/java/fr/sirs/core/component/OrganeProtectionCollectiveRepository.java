@@ -19,13 +19,13 @@ import fr.sirs.core.model.OrganeProtectionCollective;
  * @author maximegavens
  */
 @View(name=BY_AMENAGEMENT_HYDRAULIQUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.OrganeProtectionCollective') {emit(doc.amenagementHydrauliqueId, doc._id)}}")
-@Component("fr.sirs.core.component.OrganeProtectionRepository")
-public class OrganeProtectionRepository extends DescriptionAmenagementHydrauliqueRepository<OrganeProtectionCollective> {
+@Component("fr.sirs.core.component.OrganeProtectionCollectiveRepository")
+public class OrganeProtectionCollectiveRepository extends DescriptionAmenagementHydrauliqueRepository<OrganeProtectionCollective> {
 
     public static final String BY_AMENAGEMENT_HYDRAULIQUE_ID = "byAmenagementHydrauliqueId";
 
     @Autowired
-    private OrganeProtectionRepository ( CouchDbConnector db) {
+    private OrganeProtectionCollectiveRepository ( CouchDbConnector db) {
        super(OrganeProtectionCollective.class, db);
        initStandardDesignDocument();
    }

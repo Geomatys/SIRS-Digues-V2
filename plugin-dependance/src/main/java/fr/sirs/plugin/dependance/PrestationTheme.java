@@ -18,7 +18,7 @@
  */
 package fr.sirs.plugin.dependance;
 
-import fr.sirs.core.model.Prestation;
+import fr.sirs.core.model.PrestationAmenagementHydraulique;
 import fr.sirs.plugin.dependance.ui.AbstractDescriptionPane;
 import javafx.scene.Parent;
 import javafx.scene.layout.BorderPane;
@@ -35,7 +35,7 @@ public class PrestationTheme extends AbstractDescriptionTheme {
 
     @Override
     public Parent createPane() {
-        final BorderPane borderPane = new AbstractDescriptionPane("Tableau des prestations", Prestation.class);
+        final BorderPane borderPane = new AbstractDescriptionPane("Tableau des prestations", PrestationAmenagementHydraulique.class);
         return borderPane;
     }
 }

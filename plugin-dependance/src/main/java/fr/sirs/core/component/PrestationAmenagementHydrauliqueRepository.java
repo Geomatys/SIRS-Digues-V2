@@ -11,7 +11,7 @@ import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import static fr.sirs.core.component.PrestationRepository.BY_AMENAGEMENT_HYDRAULIQUE_ID;
+import static fr.sirs.core.component.PrestationAmenagementHydrauliqueRepository.BY_AMENAGEMENT_HYDRAULIQUE_ID;
 import fr.sirs.core.model.PrestationAmenagementHydraulique;
 
 /**
@@ -19,13 +19,13 @@ import fr.sirs.core.model.PrestationAmenagementHydraulique;
  * @author maximegavens
  */
 @View(name=BY_AMENAGEMENT_HYDRAULIQUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.PrestationAmenagementHydraulique') {emit(doc.amenagementHydrauliqueId, doc._id)}}")
-@Component("fr.sirs.core.component.PrestationRepository")
-public class PrestationRepository extends DescriptionAmenagementHydrauliqueRepository<PrestationAmenagementHydraulique> {
+@Component("fr.sirs.core.component.PrestationAmenagementHydrauliqueRepository")
+public class PrestationAmenagementHydrauliqueRepository extends DescriptionAmenagementHydrauliqueRepository<PrestationAmenagementHydraulique> {
 
     public static final String BY_AMENAGEMENT_HYDRAULIQUE_ID = "byAmenagementHydrauliqueId";
 
     @Autowired
-    private PrestationRepository ( CouchDbConnector db) {
+    private PrestationAmenagementHydrauliqueRepository( CouchDbConnector db) {
        super(PrestationAmenagementHydraulique.class, db);
        initStandardDesignDocument();
    }

@@ -11,7 +11,7 @@ import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import static fr.sirs.core.component.StructureRepository.BY_AMENAGEMENT_HYDRAULIQUE_ID;
+import static fr.sirs.core.component.StructureAmenagementHydrauliqueRepository.BY_AMENAGEMENT_HYDRAULIQUE_ID;
 import fr.sirs.core.model.StructureAmenagementHydraulique;
 
 /**
@@ -19,13 +19,13 @@ import fr.sirs.core.model.StructureAmenagementHydraulique;
  * @author maximegavens
  */
 @View(name=BY_AMENAGEMENT_HYDRAULIQUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.StructureAmenagementHydraulique') {emit(doc.amenagementHydrauliqueId, doc._id)}}")
-@Component("fr.sirs.core.component.StructureRepository")
-public class StructureRepository extends DescriptionAmenagementHydrauliqueRepository<StructureAmenagementHydraulique> {
+@Component("fr.sirs.core.component.StructureAmenagementHydrauliqueRepository")
+public class StructureAmenagementHydrauliqueRepository extends DescriptionAmenagementHydrauliqueRepository<StructureAmenagementHydraulique> {
 
     public static final String BY_AMENAGEMENT_HYDRAULIQUE_ID = "byAmenagementHydrauliqueId";
 
     @Autowired
-    private StructureRepository ( CouchDbConnector db) {
+    private StructureAmenagementHydrauliqueRepository( CouchDbConnector db) {
        super(StructureAmenagementHydraulique.class, db);
        initStandardDesignDocument();
    }
