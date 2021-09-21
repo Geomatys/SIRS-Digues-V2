@@ -7,7 +7,8 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.model.AmenagementHydraulique;
+import fr.sirs.core.component.GlobalRepository;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.TronconDigue;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -41,7 +42,7 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
     @FXML private VBox uiVbox;
     @FXML private RadioButton uiAhOui;
     @FXML private RadioButton uiAhNon;
-    private ComboBox<AmenagementHydraulique> uiComboAh = new ComboBox<>();
+    private ComboBox<String> uiComboAh = new ComboBox<>();
     private Label uiLabelTypeAmenagementHydraulique = new Label();
     private Label uiLabelSuperficie = new Label();
     private Label uiLabelCapaciteStockage = new Label();
@@ -66,9 +67,9 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
 
         // Init ah combobox
         uiComboAh.disableProperty().bind(disableFieldsProperty);
-        ObservableList<AmenagementHydraulique> observableList = FXCollections.observableArrayList(SIRS.observableList(Injector.getSession().getRepositoryForClass(AmenagementHydraulique.class).getAll()));
-        SIRS.initCombo(uiComboAh, observableList, observableList.isEmpty() ? null : observableList.get(0));
-        uiComboAh.setOnAction((event) -> updateValue(uiComboAh.getValue()));
+        //ObservableList<AmenagementHydraulique> observableList = FXCollections.observableArrayList(SIRS.observableList(Injector.getSession().getRepositoryForClass(AmenagementHydraulique.class).getAll()));
+        //SIRS.initCombo(uiComboAh, observableList, observableList.isEmpty() ? null : observableList.get(0));
+        //uiComboAh.setOnAction((event) -> updateValue(uiComboAh.getValue()));
 
         // Init label
         initLabel(uiLabelTypeAmenagementHydraulique);
@@ -89,13 +90,14 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
 
     private void ahIdOnChange(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newElement) {
         // update value
+        GlobalRepository bean = Injector.getBean(GlobalRepository.class);
         if (newElement.getAmenagementHydrauliqueId() != null) {
-            AmenagementHydraulique ah = Injector.getSession().getRepositoryForClass(AmenagementHydraulique.class).get(newElement.getAmenagementHydrauliqueId());
-            updateValue(ah);
+            //AmenagementHydraulique ah = Injector.getSession().getRepositoryForClass(AmenagementHydraulique.class).get(newElement.getAmenagementHydrauliqueId());
+            //updateValue(ah);
             uiAhOui.setSelected(true);
-            uiComboAh.getSelectionModel().select(ah);
+            //uiComboAh.getSelectionModel().select(ah);
         } else {
-            updateValue(null);
+            //updateValue(null);
             uiAhOui.setSelected(false);
             uiComboAh.getSelectionModel().select(null);
         }
@@ -123,7 +125,7 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
 
     private void updateIsAh() {
         if (uiAhOui.isSelected()) {
-            tronconProperty.get().setAmenagementHydrauliqueId(uiComboAh.getValue() == null ? null : uiComboAh.getValue().getId());
+            //tronconProperty.get().setAmenagementHydrauliqueId(uiComboAh.getValue() == null ? null : uiComboAh.getValue().getId());
         } else {
             tronconProperty.get().setAmenagementHydrauliqueId(null);
         }
@@ -136,23 +138,23 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
         label.setPrefWidth(USE_COMPUTED_SIZE);
     }
 
-    private void updateValue(final AmenagementHydraulique ah) {
-        if (ah != null) {
-            uiLabelTypeAmenagementHydraulique.setText(ah.getType());
-            uiLabelSuperficie.setText(Float.toString(ah.getSuperficie()));
-            uiLabelCapaciteStockage.setText(Float.toString(ah.getCapaciteStockage()));
-            uiLabelProfondeurMoyenne.setText(Float.toString(ah.getProfondeurMoyenne()));
-            // update the value of ah of the current troncon
-            tronconProperty.get().setAmenagementHydrauliqueId(ah.getId());
-        } else {
-            uiLabelTypeAmenagementHydraulique.setText("");
-            uiLabelSuperficie.setText("");
-            uiLabelCapaciteStockage.setText("");
-            uiLabelProfondeurMoyenne.setText("");
-            // update the value of ah of the current troncon
-            tronconProperty.get().setAmenagementHydrauliqueId(null);
-        }
-    }
+//    private void updateValue(final AmenagementHydraulique ah) {
+//        if (ah != null) {
+//            uiLabelTypeAmenagementHydraulique.setText(ah.getType());
+//            uiLabelSuperficie.setText(Float.toString(ah.getSuperficie()));
+//            uiLabelCapaciteStockage.setText(Float.toString(ah.getCapaciteStockage()));
+//            uiLabelProfondeurMoyenne.setText(Float.toString(ah.getProfondeurMoyenne()));
+//            // update the value of ah of the current troncon
+//            tronconProperty.get().setAmenagementHydrauliqueId(ah.getId());
+//        } else {
+//            uiLabelTypeAmenagementHydraulique.setText("");
+//            uiLabelSuperficie.setText("");
+//            uiLabelCapaciteStockage.setText("");
+//            uiLabelProfondeurMoyenne.setText("");
+//            // update the value of ah of the current troncon
+//            tronconProperty.get().setAmenagementHydrauliqueId(null);
+//        }
+//    }
 
     private HBox buildHbox(final String labelString, final Node node) {
         final Label label = new Label(labelString);

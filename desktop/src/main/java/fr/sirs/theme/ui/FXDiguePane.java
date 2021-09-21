@@ -19,30 +19,16 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
-import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.model.AmenagementHydraulique;
-import fr.sirs.util.SirsStringConverter;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.SingleSelectionModel;
-import javafx.scene.control.TableColumn;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -52,7 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class FXDiguePane extends FXDiguePaneStub {
 
-    private static final String AH_COL = "amenagementHydrauliqueId";
+    //private static final String AH_COL = "amenagementHydrauliqueId";
 
     @Autowired private Session session;
 
