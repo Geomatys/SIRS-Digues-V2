@@ -11,7 +11,7 @@ import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import static fr.sirs.core.component.OrganeProtectionRepository.BY_AMENAGEMENT_HYDRAULIQUE_ID;
+import static fr.sirs.core.component.OrganeProtectionCollectiveRepository.BY_AMENAGEMENT_HYDRAULIQUE_ID;
 import fr.sirs.core.model.OrganeProtectionCollective;
 
 /**
