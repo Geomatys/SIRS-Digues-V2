@@ -19,6 +19,7 @@ import javafx.scene.control.*;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 import javafx.beans.property.ObjectProperty;
 
 /**
@@ -77,6 +78,8 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
     @FXML protected FXFreeTab ui_photos;
     protected PojoTable photosTable;
 
+    @FXML FXPositionDependancePane uiPosition;
+
     /**
      * Constructor. Initialize part of the UI which will not require update when
      * element edited change.
@@ -107,6 +110,9 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_fonctionnement_link.setVisible(false);
         ui_type.disableProperty().bind(disableFieldsProperty());
         ui_type_link.setVisible(false);
+        uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
+
+        uiPosition.dependanceProperty().bind(elementProperty);
 
         ui_desordreIds.setContent(() -> {
             desordreIdsTable = new ListeningPojoTable(Desordre.class, null, elementProperty());
@@ -146,7 +152,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
 
         ui_tronconIds.setContent(() -> {
             tronconIdsTable = new ListeningPojoTable(TronconDigue.class, null, elementProperty());
-            tronconIdsTable.editableProperty().set(false);
+            tronconIdsTable.editableProperty().bind(disableFieldsProperty().not());
             tronconIdsTable.fichableProperty().set(false);
             tronconIdsTable.createNewProperty().set(false);
             updateTronconIdsTable(session, elementProperty.get());
@@ -507,6 +513,11 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             * "opposes" pour les mettre � jour.
             */
             final List<TronconDigue> currentTronconDigueList = new ArrayList<>();
+            /*
+            * En cas d'écrasement de référence dans le troncon opposé, on
+            * s'assure de détruire le lien coté AH.
+            */
+            final List<AmenagementHydraulique> currentOppositeAhList = new ArrayList<>();
             // Manage opposite references for TronconDigue...
             /*
             * Si on est sur une reference principale, on a besoin du depot pour
@@ -515,18 +526,36 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             * les objets qui referencent l'objet courant en sens contraire.
             */
             final AbstractSIRSRepository<TronconDigue> tronconDigueRepository = session.getRepositoryForClass(TronconDigue.class);
+            final AbstractSIRSRepository<AmenagementHydraulique> ahRepository = Injector.getSession().getRepositoryForClass(AmenagementHydraulique.class);
             final List<String> currentTronconDigueIdsList = new ArrayList<>();
             for(final Element elt : tronconIdsTable.getAllValues()){
                 final TronconDigue tronconDigue = (TronconDigue) elt;
-                currentTronconDigueIdsList.add(tronconDigue.getId());
+                final String tronconId = tronconDigue.getId();
+                final String previousAhId = tronconDigue.getAmenagementHydrauliqueId();
+
+                currentTronconDigueIdsList.add(tronconId);
+                tronconDigue.setAmenagementHydrauliqueId(element.getId());
                 currentTronconDigueList.add(tronconDigue);
 
-                // Addition
-                //tronconDigue.getAmenagementHydrauliqueId().add(element.getId());
+                //clean the troncon list of the opposite AHs
+                if (previousAhId != null) {
+                    AmenagementHydraulique ah = ahRepository.get(previousAhId);
+                    ObservableList<String> tronconIds = ah.getTronconIds();
+                    tronconIds.removeIf(s -> s.equals(tronconId));
+                    ah.setTronconIds(tronconIds);
+                    currentOppositeAhList.add(ah);
+                }
             }
             tronconDigueRepository.executeBulk(currentTronconDigueList);
-            element.setTronconIds(currentTronconDigueIdsList);
+            ahRepository.executeBulk(currentOppositeAhList);
 
+            // Manage opposite references for the tronconDigue. Remove the ah
+            // reference when it's no more linked with
+            List<String> toRemoveIds = element.getTronconIds().stream().filter(id -> !currentTronconDigueIdsList.contains(id)).collect(Collectors.toList());
+            List<TronconDigue> toRemoveTroncons = tronconDigueRepository.get(toRemoveIds);
+            toRemoveTroncons.stream().forEach(tr -> tr.setAmenagementHydrauliqueId(null));
+            tronconDigueRepository.executeBulk(toRemoveTroncons);
+            element.setTronconIds(currentTronconDigueIdsList);
         }
         if (prestationIdsTable != null) {
             // Manage opposite references for Prestation...
