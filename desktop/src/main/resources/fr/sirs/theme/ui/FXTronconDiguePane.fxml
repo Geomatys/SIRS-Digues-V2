@@ -29,7 +29,7 @@
             <children>
 
   <FXValidityPeriodPane fx:id="uiValidityPeriod"/>
-  <!--<FXAmenagementHydrauliqueAttachementPane fx:id="uiAmenagementHydrauliqueAttachement"/>-->
+  <FXAmenagementHydrauliqueAttachementPane fx:id="uiAmenagementHydrauliqueAttachement"/>
 
 <!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
 

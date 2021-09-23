@@ -74,7 +74,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
 
     // Onglet "Information"
     @FXML FXValidityPeriodPane uiValidityPeriod;
-    //@FXML FXAmenagementHydrauliqueAttachementPane uiAmenagementHydrauliqueAttachement;
+    @FXML FXAmenagementHydrauliqueAttachementPane uiAmenagementHydrauliqueAttachement;
     @FXML TextField ui_libelle;
     @FXML TextArea ui_commentaire;
     @FXML ComboBox ui_digueId;
@@ -154,7 +154,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
 
         uiValidityPeriod.disableFieldsProperty().bind(disableFieldsProperty());
         uiValidityPeriod.targetProperty().bind(elementProperty());
-        //uiAmenagementHydrauliqueAttachement.targetProperty().bind(elementProperty());
+        uiAmenagementHydrauliqueAttachement.targetProperty().bind(elementProperty());
         //uiAmenagementHydrauliqueAttachement.disableFieldsProperty().bind(disableFieldsProperty());
 
         /*

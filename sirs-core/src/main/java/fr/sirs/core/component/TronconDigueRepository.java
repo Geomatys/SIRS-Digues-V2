@@ -27,6 +27,7 @@ import fr.sirs.core.SirsViewIterator;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.TronconDigue;
 import java.util.ArrayList;
+import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.support.Views;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +37,8 @@ import org.springframework.stereotype.Component;
  */
 @Views({
 @View(name = AbstractTronconDigueRepository.STREAM_LIGHT, map = "classpath:TronconDigueLight-map.js"),
-@View(name = AbstractTronconDigueRepository.ALL_TRONCON_IDS, map = "classpath:TronconDigue_ids.js")
+@View(name = AbstractTronconDigueRepository.ALL_TRONCON_IDS, map = "classpath:TronconDigue_ids.js"),
+@View(name = AbstractTronconDigueRepository.BY_AH_ID, map = "classpath:TronconDigue-ah-map.js")
 })
 @Component
 public class TronconDigueRepository extends AbstractTronconDigueRepository<TronconDigue> {
@@ -87,5 +89,8 @@ public class TronconDigueRepository extends AbstractTronconDigueRepository<Tronc
                 db.queryForStreamingView(createQuery(ALL_TRONCON_IDS)));
     }
 
-
+    public List<TronconDigue> getTronconDiguesByAhId(final String ahId) {
+        ArgumentChecks.ensureNonNull("Amenagement hydraulique", ahId);
+        return this.queryView(AbstractTronconDigueRepository.BY_AH_ID, ahId);
+    }
 }

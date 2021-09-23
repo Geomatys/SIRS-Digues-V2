@@ -90,6 +90,7 @@ public class AbstractTronconDigueRepository<T extends TronconDigue> extends Abst
     public static final String STREAM_LIGHT = "streamLight";
     public static final String BY_DIGUE_ID = "byDigueId";
     public static final String BY_BORNE_ID = "byBorneId";
+    public static final String BY_AH_ID = "byAhId";
 
     protected final ArrayList<WeakReference<T>> prUpdates = new ArrayList<>();
     protected final ConcurrentHashMap<T, PRComputer> prComputings = new ConcurrentHashMap<>();
