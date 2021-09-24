@@ -60,17 +60,6 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
         uiAhNon.setSelected(true);
         uiAhOui.setDisable(true);
         uiAhNon.setDisable(true);
-//        uiAhOui.disableProperty().bind(disableFieldsProperty);
-//        uiAhNon.disableProperty().bind(disableFieldsProperty);
-//        uiAhOui.setOnAction((event) -> updateIsAh());
-//        uiAhNon.setOnAction((event) -> updateIsAh());
-
-        // Init ah combobox
-//        uiComboAh.disableProperty().bind(disableFieldsProperty);
-//        final AmenagementHydrauliqueViewRepository repo = InjectorCore.getBean(AmenagementHydrauliqueViewRepository.class);
-//        ObservableList<AmenagementHydrauliqueView> observableList = FXCollections.observableArrayList(SIRS.observableList(repo.getAmenagementHydrauliqueView()));
-//        SIRS.initCombo(uiComboAh, observableList, observableList.isEmpty() ? null : observableList.get(0));
-//        uiComboAh.setOnAction((event) -> updateValue(uiComboAh.getValue()));
 
         // Init label
         initLabel(uiLabelAmenagementHydraulique);
@@ -86,10 +75,6 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
         return tronconProperty;
     }
 
-//    public BooleanProperty disableFieldsProperty(){
-//        return disableFieldsProperty;
-//    }
-
     private void ahIdOnChange(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newElement) {
         // update value
         if (newElement.getAmenagementHydrauliqueId() != null) {
@@ -98,16 +83,13 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
             if (!ahvList.isEmpty()) {
                 updateValue(ahvList.get(0));
                 uiAhOui.setSelected(true);
-//                uiCombuiLabelAmenagementHydrauliqueoAh.getSelectionModel().select(ahvList.get(0));
             } else {
                 updateValue(null);
                 uiAhOui.setSelected(false);
-//                uiComboAh.getSelectionModel().select(null);
             }
         } else {
             updateValue(null);
             uiAhOui.setSelected(false);
-//            uiComboAh.getSelectionModel().select(null);
         }
         // update ui
         displayAhDetail();
@@ -130,15 +112,6 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
             uiVbox.getChildren().add(h4);
         }
     }
-
-//    private void updateIsAh() {
-//        if (uiAhOui.isSelected()) {
-//            tronconProperty.get().setAmenagementHydrauliqueId(uiComboAh.getValue() == null ? null : uiComboAh.getValue().getId());
-//        } else {
-//            tronconProperty.get().setAmenagementHydrauliqueId(null);
-//        }
-//        displayAhDetail();
-//    }
 
     private void initLabel(final Label label) {
         label.setAlignment(Pos.CENTER);
@@ -178,6 +151,7 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
         sep.setVisible(false);
 
         hbox.getChildren().add(label);
+        hbox.getChildren().add(sep);
         hbox.getChildren().add(node);
         return hbox;
     }

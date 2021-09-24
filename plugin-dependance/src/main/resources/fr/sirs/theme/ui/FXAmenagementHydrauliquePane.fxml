@@ -106,8 +106,6 @@
         <FXFreeTab fx:id="ui_desordreIds" text="%desordreIds"/>
         <FXFreeTab fx:id="ui_structureIds" text="%structureIds"/>
         <FXFreeTab fx:id="ui_ouvrageAssocieIds" text="%ouvrageAssocieIds"/>
-        <FXFreeTab fx:id="ui_coursEauIds" text="%coursEauIds"/>
-        <FXFreeTab fx:id="ui_vegetationIds" text="%vegetationIds"/>
         <FXFreeTab fx:id="ui_gestionnaireIds" text="%gestionnaireIds"/>
         <FXFreeTab fx:id="ui_tronconIds" text="%tronconIds"/>
         <FXFreeTab fx:id="ui_observationIds" text="%observationIds"/>
