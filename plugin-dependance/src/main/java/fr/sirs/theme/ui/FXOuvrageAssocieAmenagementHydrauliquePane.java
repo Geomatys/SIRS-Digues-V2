@@ -45,13 +45,9 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
     @FXML protected Spinner ui_cote;
     @FXML protected Spinner ui_section;
     @FXML protected ComboBox ui_typeOuvrage;
-    @FXML protected Button ui_typeOuvrage_link;
     @FXML protected ComboBox ui_materiauId;
-    @FXML protected Button ui_materiauId_link;
     @FXML protected ComboBox ui_sourceId;
-    @FXML protected Button ui_sourceId_link;
     @FXML protected ComboBox ui_etat;
-    @FXML protected Button ui_etat_link;
     @FXML protected ComboBox ui_fonctionnement;
     @FXML protected Button ui_fonctionnement_link;
     @FXML protected FXFreeTab ui_amenagementHydrauliqueAssocieIds;
@@ -117,13 +113,9 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
         ui_section.setEditable(true);
         ui_section.setValueFactory(new FloatSpinnerValueFactory(0, Float.MAX_VALUE));
         ui_typeOuvrage.disableProperty().bind(disableFieldsProperty());
-        ui_typeOuvrage_link.setVisible(false);
         ui_materiauId.disableProperty().bind(disableFieldsProperty());
-        ui_materiauId_link.setVisible(false);
         ui_sourceId.disableProperty().bind(disableFieldsProperty());
-        ui_sourceId_link.setVisible(false);
         ui_etat.disableProperty().bind(disableFieldsProperty());
-        ui_etat_link.setVisible(false);
         ui_fonctionnement.disableProperty().bind(disableFieldsProperty());
         ui_fonctionnement_link.setVisible(false);
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
