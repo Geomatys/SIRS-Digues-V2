@@ -412,13 +412,19 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
             element.setFonctionnement(null);
         }
         if (amenagementHydrauliqueAssocieIdsTable != null) {
-        // Manage opposite references for AmenagementHydraulique...
         final List<String> currentAmenagementHydrauliqueIdsList = new ArrayList<>();
+        final List<AmenagementHydraulique> oppositeAhs = new ArrayList<>();
         for(final Element elt : amenagementHydrauliqueAssocieIdsTable.getAllValues()){
             final AmenagementHydraulique amenagementHydraulique = (AmenagementHydraulique) elt;
             currentAmenagementHydrauliqueIdsList.add(amenagementHydraulique.getId());
+
+            if (!amenagementHydraulique.getOuvrageAssocieIds().contains(element.getId())) {
+                amenagementHydraulique.getOuvrageAssocieIds().add(element.getId());
+            }
+            oppositeAhs.add(amenagementHydraulique);
         }
         element.setAmenagementHydrauliqueAssocieIds(currentAmenagementHydrauliqueIdsList);
+        Injector.getSession().getRepositoryForClass(AmenagementHydraulique.class).executeBulk(oppositeAhs);
 
         }
         if (desordreDependanceAssocieIdsTable != null) {

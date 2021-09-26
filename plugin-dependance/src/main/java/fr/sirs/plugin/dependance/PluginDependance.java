@@ -115,17 +115,28 @@ public class PluginDependance extends Plugin {
 
         depGroup.setName("Dépendances");
         depGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-        buildMapLayerDependance(OuvrageVoirieDependance.class, ouvrageVoirieLayer, 0, depGroup, LabelMapper.get(OuvrageVoirieDependance.class).mapClassName());
-        buildMapLayerDependance(TraitAmenagementHydraulique.class, traitAmenagementLayer, 1, depGroup, LAYER_TRAIT_NAME);
-        buildMapLayerDependance(CheminAccesDependance.class, cheminLayer, 2, depGroup, LabelMapper.get(CheminAccesDependance.class).mapClassName());
-        buildMapLayerDependance(AutreDependance.class, autreLayer, 3, depGroup, LabelMapper.get(AutreDependance.class).mapClassName());
-        buildMapLayerDependance(AireStockageDependance.class, aireLayer, 4, depGroup, LabelMapper.get(AireStockageDependance.class).mapClassName());
-        buildMapLayerDependance(AmenagementHydraulique.class, amenagementLayer, 5, depGroup, LAYER_AH_NAME);
-        buildMapLayerDependance(DesordreDependance.class, desordreLayer, 6, depGroup, LabelMapper.get(DesordreDependance.class).mapClassName());
-        buildMapLayerDependance(PrestationAmenagementHydraulique.class, prestationLayer, 7, depGroup, LabelMapper.get(PrestationAmenagementHydraulique.class).mapClassName());
-        buildMapLayerDependance(StructureAmenagementHydraulique.class, structureLayer, 8, depGroup, LabelMapper.get(StructureAmenagementHydraulique.class).mapClassName());
-        buildMapLayerDependance(OuvrageAssocieAmenagementHydraulique.class, ouvrageAssocieLayer, 9, depGroup, LabelMapper.get(OuvrageAssocieAmenagementHydraulique.class).mapClassName());
-        buildMapLayerDependance(OrganeProtectionCollective.class, organeProtectionLayer, 10, depGroup, LabelMapper.get(OrganeProtectionCollective.class).mapClassName());
+        ouvrageVoirieLayer = buildMapLayerDependance(OuvrageVoirieDependance.class, LabelMapper.get(OuvrageVoirieDependance.class).mapClassName());
+        traitAmenagementLayer = buildMapLayerDependance(TraitAmenagementHydraulique.class, LAYER_TRAIT_NAME);
+        cheminLayer = buildMapLayerDependance(CheminAccesDependance.class, LabelMapper.get(CheminAccesDependance.class).mapClassName());
+        autreLayer = buildMapLayerDependance(AutreDependance.class, LabelMapper.get(AutreDependance.class).mapClassName());
+        aireLayer = buildMapLayerDependance(AireStockageDependance.class, LabelMapper.get(AireStockageDependance.class).mapClassName());
+        amenagementLayer = buildMapLayerDependance(AmenagementHydraulique.class, LAYER_AH_NAME);
+        desordreLayer = buildMapLayerDependance(DesordreDependance.class, LabelMapper.get(DesordreDependance.class).mapClassName());
+        prestationLayer = buildMapLayerDependance(PrestationAmenagementHydraulique.class, LabelMapper.get(PrestationAmenagementHydraulique.class).mapClassName());
+        structureLayer = buildMapLayerDependance(StructureAmenagementHydraulique.class, LabelMapper.get(StructureAmenagementHydraulique.class).mapClassName());
+        ouvrageAssocieLayer = buildMapLayerDependance(OuvrageAssocieAmenagementHydraulique.class, LabelMapper.get(OuvrageAssocieAmenagementHydraulique.class).mapClassName());
+        organeProtectionLayer = buildMapLayerDependance(OrganeProtectionCollective.class, LabelMapper.get(OrganeProtectionCollective.class).mapClassName());
+        depGroup.items().add(ouvrageVoirieLayer);
+        depGroup.items().add(traitAmenagementLayer);
+        depGroup.items().add(cheminLayer);
+        depGroup.items().add(autreLayer);
+        depGroup.items().add(aireLayer);
+        depGroup.items().add(amenagementLayer);
+        depGroup.items().add(desordreLayer);
+        depGroup.items().add(prestationLayer);
+        depGroup.items().add(structureLayer);
+        depGroup.items().add(ouvrageAssocieLayer);
+        depGroup.items().add(organeProtectionLayer);
         items.add(depGroup);
         return items;
     }
@@ -180,19 +191,19 @@ public class PluginDependance extends Plugin {
         return Optional.of(image);
     }
 
-    private void buildMapLayerDependance(final Class clazz, FeatureMapLayer layer, final int position, final MapItem depGroup, final String name) {
-        final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(clazz);
-
+    private FeatureMapLayer buildMapLayerDependance(final Class clazz, final String name) {
         try {
+            final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(clazz);
             final StructBeanSupplier supplier = new StructBeanSupplier(clazz, repo::getAll);
             final BeanStore store = new BeanStore(supplier);
-            layer = MapBuilder.createFeatureLayer(store.createSession(true)
+            final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(store.getNames().iterator().next())));
             layer.setName(name);
             layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            depGroup.items().add(position, layer);
+            return layer;
         } catch(Exception ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+            return null;
         }
     }
 }

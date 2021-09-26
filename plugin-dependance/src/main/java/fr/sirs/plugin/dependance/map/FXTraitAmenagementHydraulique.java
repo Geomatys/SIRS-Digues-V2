@@ -156,17 +156,23 @@ public class FXTraitAmenagementHydraulique extends GridPane{
         traitAmenagementHydraulique.setDate_debut(uiDateDebut.getValue());
         traitAmenagementHydraulique.setDate_fin(uiDateFin.getValue());
         final AbstractSIRSRepository<TraitAmenagementHydraulique> repo = Injector.getSession().getRepositoryForClass(TraitAmenagementHydraulique.class);
-        if(traitAmenagementHydraulique.isNew()){
+        if (traitAmenagementHydraulique.isNew()){
             repo.add(traitAmenagementHydraulique);
-        }else{
+        } else {
             repo.update(traitAmenagementHydraulique);
         }
+
+        // update the current AH
+        final AmenagementHydraulique amenagement = amenagementHydrauliqueProperty.get();
+        amenagement.getTraitIds().add(traitAmenagementHydraulique.getId());
+        Injector.getSession().getRepositoryForClass(AmenagementHydraulique.class).update(amenagement);
+
         endEdition();
     }
 
     private void endEdition(){
         final FXMap map = mapProperty.get();
-        if(map!=null){
+        if(map != null){
             map.setHandler(new FXPanHandler(true));
         }
     }

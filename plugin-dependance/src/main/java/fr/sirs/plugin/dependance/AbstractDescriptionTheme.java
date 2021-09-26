@@ -41,7 +41,6 @@ import javafx.scene.layout.BorderPane;
  */
 public abstract class AbstractDescriptionTheme extends AbstractPluginsButtonTheme {
 
-    private final static Consumer<DescriptionAmenagementHydraulique> deletor = (DescriptionAmenagementHydraulique themeElement) -> Injector.getSession().getRepositoryForClass(DescriptionAmenagementHydraulique.class).remove(themeElement);
 
 
 
@@ -62,6 +61,10 @@ public abstract class AbstractDescriptionTheme extends AbstractPluginsButtonThem
         final Function<String, ObservableList<DescriptionAmenagementHydraulique>> extractor = (String ahId) -> {
             final List<DescriptionAmenagementHydraulique> result = ((DescriptionAmenagementHydrauliqueRepository) Injector.getSession().getRepositoryForClass(themeClass)).getByAmenagementHydrauliqueId(ahId);
             return FXCollections.observableList(result);
+        };
+
+        final Consumer<DescriptionAmenagementHydraulique> deletor = (DescriptionAmenagementHydraulique themeElement) -> {
+            Injector.getSession().getRepositoryForClass(themeClass).remove(themeElement);
         };
 
         return new AbstractTheme.ThemeManager<>(bundle.getString(BUNDLE_KEY_CLASS), tabTitle,

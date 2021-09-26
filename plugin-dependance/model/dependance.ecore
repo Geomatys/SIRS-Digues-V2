@@ -74,7 +74,6 @@
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeOrganeProtectionCollective" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  
   <eClassifiers xsi:type="ecore:EClass" name="StructureAmenagementHydraulique" eSuperTypes="#//DescriptionAmenagementHydraulique">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
@@ -140,6 +139,8 @@
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Prestation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="proprietaireIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Contact"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="traitIds" upperBound="-1"
+        eType="#//TraitAmenagementHydraulique" eOpposite="#//DescriptionAmenagementHydraulique/amenagementHydrauliqueId"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//DescriptionAmenagementHydraulique">
     <eAnnotations source="couchDBDocument"/>
@@ -172,7 +173,7 @@
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//ArticleJournal"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AbstractDependance" abstract="true"
-      eSuperTypes="ecore:EClass ../../sirs-core/model/sirs.ecore#//AotCotAssociable ecore:EClass ../../sirs-core/model/sirs.ecore#//AvecSettableGeometrie">
+      eSuperTypes="../../sirs-core/model/sirs.ecore#//AotCotAssociable ../../sirs-core/model/sirs.ecore#//AvecSettableGeometrie">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -212,7 +213,7 @@
       <eAnnotations source="photoType" references="#//PhotoDependance"/>
     </eStructuralFeatures>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PhotoDependance" eSuperTypes="ecore:EClass ../../sirs-core/model/sirs.ecore#//AbstractPhoto">
+  <eClassifiers xsi:type="ecore:EClass" name="PhotoDependance" eSuperTypes="../../sirs-core/model/sirs.ecore#//AbstractPhoto">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
@@ -224,10 +225,10 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photographeId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Contact"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefFonctionnementAH" eSuperTypes="ecore:EClass ../../sirs-core/model/sirs.ecore#//ReferenceType">
+  <eClassifiers xsi:type="ecore:EClass" name="RefFonctionnementAH" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefTypeAmenagementHydraulique" eSuperTypes="ecore:EClass ../../sirs-core/model/sirs.ecore#//ReferenceType">
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeAmenagementHydraulique" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TraitAmenagementHydraulique" eSuperTypes="#//DescriptionAmenagementHydraulique">
@@ -241,18 +242,18 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DescriptionAmenagementHydraulique" abstract="true"
-      eSuperTypes="ecore:EClass ../../sirs-core/model/sirs.ecore#//AvecSettableGeometrie">
+      eSuperTypes="../../sirs-core/model/sirs.ecore#//AvecSettableGeometrie">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType ../../sirs-core/model/jts.ecore#//Geometry"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="amenagementHydrauliqueId"
-        eType="#//AmenagementHydraulique"/>
+        eType="#//AmenagementHydraulique" eOpposite="#//AmenagementHydraulique/traitIds"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefEtat" eSuperTypes="ecore:EClass ../../sirs-core/model/sirs.ecore#//ReferenceType">
+  <eClassifiers xsi:type="ecore:EClass" name="RefEtat" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefFonctionnementOAAH" eSuperTypes="ecore:EClass ../../sirs-core/model/sirs.ecore#//ReferenceType">
+  <eClassifiers xsi:type="ecore:EClass" name="RefFonctionnementOAAH" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
 </ecore:EPackage>

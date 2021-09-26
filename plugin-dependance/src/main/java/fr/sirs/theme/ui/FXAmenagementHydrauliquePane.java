@@ -59,7 +59,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
     @FXML protected FXFreeTab ui_proprietaireIds;
     protected ListeningPojoTable proprietaireIdsTable;
     @FXML protected FXFreeTab ui_traits;
-    protected final PojoTable traitsTable;
+    protected PojoTable traitsTable;
 
     // Propriétés de AotCotAssociable
 
@@ -111,7 +111,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_type.disableProperty().bind(disableFieldsProperty());
         ui_type_link.setVisible(false);
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
-
         uiPosition.dependanceProperty().bind(elementProperty);
 
         ui_desordreIds.setContent(() -> {
@@ -212,9 +211,13 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             return photosTable;
         });
         ui_photos.setClosable(false);
-        traitsTable = new TraitTable(elementProperty());
-        traitsTable.editableProperty().bind(disableFieldsProperty().not());
-        ui_traits.setContent(traitsTable);
+
+        ui_traits.setContent(() -> {
+            traitsTable = new TraitTable(elementProperty());
+            traitsTable.editableProperty().bind(disableFieldsProperty().not());
+            updateTraitIdsTable(session, elementProperty.get());
+            return traitsTable;
+        });
         ui_traits.setClosable(false);
     }
 
@@ -280,9 +283,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             ui_commentaire.textProperty().bindBidirectional(newElement.commentaireProperty());
             // * libelle
             ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
-            traitsTable.setParentElement(newElement);
-            final TraitAmenagementHydrauliqueRepository traitrepo = (TraitAmenagementHydrauliqueRepository) session.getRepositoryForClass(TraitAmenagementHydraulique.class);
-            traitsTable.setTableItems(() -> FXCollections.observableArrayList(traitrepo.getByAmenagementHydrauliqueId(newElement.getId())));
         }
 
         updateDesordreIdsTable(session, newElement);
@@ -296,6 +296,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
 //        updateProprietesTable(session, newElement);
 //        updateGestionsTable(session, newElement);
         updatePhotosTable(session, newElement);
+        updateTraitIdsTable(session, newElement);
     }
 
     protected void updateDesordreIdsTable(final Session session, final AmenagementHydraulique newElement) {
@@ -394,6 +395,19 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         }
     }
 
+    protected void updateTraitIdsTable(final Session session, final AmenagementHydraulique newElement) {
+        if (traitsTable == null)
+            return;
+
+        if (newElement == null) {
+            traitsTable.setTableItems(null);
+        } else {
+            traitsTable.setParentElement(null);
+            final AbstractSIRSRepository<TraitAmenagementHydraulique> traitRepo = session.getRepositoryForClass(TraitAmenagementHydraulique.class);
+            traitsTable.setTableItems(()-> SIRS.toElementList(newElement.getTraitIds(), traitRepo));
+        }
+    }
+
     protected void updateProprietaireIdsTable(final Session session, final AmenagementHydraulique newElement) {
         if (proprietaireIdsTable == null)
             return;
@@ -443,6 +457,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             photosTable.setTableItems(()-> (ObservableList) newElement.getPhotos());
         }
     }
+
     @Override
     public void preSave() {
         final Session session = Injector.getBean(Session.class);
@@ -490,11 +505,18 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         if (ouvrageAssocieIdsTable != null) {
             // Manage opposite references for OuvrageAssocieAmenagementHydraulique...
             final List<String> currentOuvrageAssocieAmenagementHydrauliqueIdsList = new ArrayList<>();
+            final List<OuvrageAssocieAmenagementHydraulique> oppositeOAAHs = new ArrayList<>();
             for(final Element elt : ouvrageAssocieIdsTable.getAllValues()){
                 final OuvrageAssocieAmenagementHydraulique ouvrageAssocieAmenagementHydraulique = (OuvrageAssocieAmenagementHydraulique) elt;
                 currentOuvrageAssocieAmenagementHydrauliqueIdsList.add(ouvrageAssocieAmenagementHydraulique.getId());
+                
+                if (!ouvrageAssocieAmenagementHydraulique.getAmenagementHydrauliqueAssocieIds().contains(element.getId())) {
+                    ouvrageAssocieAmenagementHydraulique.getAmenagementHydrauliqueAssocieIds().add(element.getId());
+                }
+                oppositeOAAHs.add(ouvrageAssocieAmenagementHydraulique);
             }
             element.setOuvrageAssocieIds(currentOuvrageAssocieAmenagementHydrauliqueIdsList);
+            Injector.getSession().getRepositoryForClass(OuvrageAssocieAmenagementHydraulique.class).executeBulk(oppositeOAAHs);
 
         }
         if (gestionnaireIdsTable != null) {
@@ -565,7 +587,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
                 currentPrestationIdsList.add(prestation.getId());
             }
             element.setPrestationIds(currentPrestationIdsList);
-
         }
         if (proprietaireIdsTable != null) {
             // Manage opposite references for Contact...
@@ -575,7 +596,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
                 currentContactIdsList.add(contact.getId());
             }
             element.setProprietaireIds(currentContactIdsList);
-            
         }
     }
 
