@@ -41,10 +41,6 @@
                 <ColumnConstraints hgrow="NEVER" />
                 <ColumnConstraints hgrow="ALWAYS" />
               </columnConstraints>
-              <!--rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints-->
               <children>
                    <!-- EFloat -->                 
                    <Label text="%superficie" GridPane.rowIndex="0" />
@@ -77,10 +73,6 @@
                 <ColumnConstraints hgrow="NEVER" />
                 <ColumnConstraints hgrow="ALWAYS" />
               </columnConstraints>
-              <!--rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints-->
               <children>
                    <!-- EString -->                 
                    <Label text="%libelle" GridPane.rowIndex="0" />
