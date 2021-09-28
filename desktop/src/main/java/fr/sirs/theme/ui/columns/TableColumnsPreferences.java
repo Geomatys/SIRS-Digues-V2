@@ -89,9 +89,8 @@ import javafx.scene.control.TableColumn;
      *
      * @param columns
      */
-
     public void applyPreferencesToTableColumns(List<TableColumn<Element, ?>> columns) {
-        
+
         try{
         Map<String, TableColumn<Element, ?>> changedColumns = new HashMap<>();
         withPreferencesColumns.forEach((preferedPosition, columnState) -> {
@@ -112,7 +111,11 @@ import javafx.scene.control.TableColumn;
                             TableColumn<Element, ?> changedCol = col;
                             changedColumns.put(columnState.getName(), col);
                             columns.remove(col);
-                            columns.add(preferedPosition, col);
+                            if (preferedPosition > columns.size()) {
+                                columns.add(col);
+                            } else {
+                                columns.add(preferedPosition, col);
+                            }
                         }
                     });
         });

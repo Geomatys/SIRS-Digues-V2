@@ -69,11 +69,9 @@
 
                                                     <Label text="%sourceId" GridPane.rowIndex="1" />
                                                     <ComboBox fx:id="ui_sourceId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                    <Button fx:id="ui_sourceId_link" GridPane.columnIndex="2" GridPane.rowIndex="1" />
 
                                                     <Label text="%materiauId" GridPane.rowIndex="2" />
                                                     <ComboBox fx:id="ui_materiauId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                                    <Button fx:id="ui_materiauId_link" GridPane.columnIndex="2" GridPane.rowIndex="2" />
 
                                                     <Label text="%diametre" GridPane.rowIndex="3" />
                                                     <Spinner fx:id="ui_diametre" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
@@ -86,11 +84,9 @@
 
                                                     <Label text="%etat" GridPane.rowIndex="6" />
                                                     <ComboBox fx:id="ui_etat" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                                                    <Button fx:id="ui_etat_link" GridPane.columnIndex="2" GridPane.rowIndex="6" />
 
                                                     <Label text="%fonctionnement" GridPane.rowIndex="7" />
                                                     <ComboBox fx:id="ui_fonctionnement" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                                                    <Button fx:id="ui_fonctionnement_link" GridPane.columnIndex="2" GridPane.rowIndex="7" />
 
                                                 </children>
                                                 <padding>

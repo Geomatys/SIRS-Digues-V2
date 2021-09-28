@@ -308,7 +308,7 @@ public class DescriptionAmenagementHydrauliqueCreateHandler extends AbstractNavi
                     descriptionTypeBox.setItems(FXCollections.observableArrayList("Structure", "Ouvrage associé", "Désordre", "Prestation", "Organe de protection collective"));
                     descriptionTypeBox.getSelectionModel().selectFirst();
                     gridPane.add(descriptionTypeBox, 1, 0);
-                    
+
                     final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
                     gridPane.add(geomChoiceLbl, 0, 1);
                     final ComboBox<String> geomTypeBox = new ComboBox<>();
@@ -370,16 +370,24 @@ public class DescriptionAmenagementHydrauliqueCreateHandler extends AbstractNavi
                     popup.getItems().clear();
 
                     Class clazz = description.getClass();
+                    AbstractSIRSRepository repo;
                     if (StructureAmenagementHydraulique.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, structuresLayer);
+                        repo = Injector.getSession().getRepositoryForClass(StructureAmenagementHydraulique.class);
                     } else if (OuvrageAssocieAmenagementHydraulique.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, ouvrageAssociesLayer);
+                        repo = Injector.getSession().getRepositoryForClass(OuvrageAssocieAmenagementHydraulique.class);
                     } else if (DesordreDependance.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, desordresLayer);
+                        repo = Injector.getSession().getRepositoryForClass(DesordreDependance.class);
                     } else if (PrestationAmenagementHydraulique.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, prestationsLayer);
+                        repo = Injector.getSession().getRepositoryForClass(PrestationAmenagementHydraulique.class);
                     } else if (OrganeProtectionCollective.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, organeProtectionCollectivesLayer);
+                        repo = Injector.getSession().getRepositoryForClass(OrganeProtectionCollective.class);
+                    } else {
+                        throw new RuntimeException("Unexpected class (" + clazz.getSimpleName() + ") in the creation process.");
                     }
 
                     //action : suppression d'un noeud
@@ -399,11 +407,10 @@ public class DescriptionAmenagementHydrauliqueCreateHandler extends AbstractNavi
                     final MenuItem saveItem = new MenuItem("Sauvegarder");
                     saveItem.setOnAction((ActionEvent event) -> {
                         description.setGeometry(editGeometry.geometry.get());
-                        final DescriptionAmenagementHydrauliqueRepository repodes = Injector.getBean(DescriptionAmenagementHydrauliqueRepository.class);
                         if (description.getDocumentId() != null) {
-                            repodes.update(description);
+                            repo.update(description);
                         } else {
-                            repodes.add(description);
+                            repo.add(description);
                         }
                         // On quitte le mode d'édition.
                         reset();
@@ -421,7 +428,7 @@ public class DescriptionAmenagementHydrauliqueCreateHandler extends AbstractNavi
                         final Alert alert = new Alert(CONFIRMATION, "Voulez-vous vraiment supprimer l'objet sélectionné ?", YES, NO);
                         final Optional<ButtonType> result = alert.showAndWait();
                         if (result.isPresent() && result.get() == YES) {
-                            Injector.getBean(DescriptionAmenagementHydrauliqueRepository.class).remove(description);
+                            repo.remove(description);
                         }
                         // On quitte le mode d'édition.
                         reset();

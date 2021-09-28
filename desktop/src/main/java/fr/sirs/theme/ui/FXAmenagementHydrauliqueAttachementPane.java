@@ -25,6 +25,7 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 import javafx.scene.layout.VBox;
 
@@ -39,7 +40,7 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
     @FXML private VBox uiVbox;
     @FXML private RadioButton uiAhOui;
     @FXML private RadioButton uiAhNon;
-    //private ComboBox<AmenagementHydrauliqueView> uiComboAh = new ComboBox<>();
+
     private Label uiLabelAmenagementHydraulique = new Label();
     private Label uiLabelTypeAmenagementHydraulique = new Label();
     private Label uiLabelSuperficie = new Label();
@@ -47,7 +48,6 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
     private Label uiLabelProfondeurMoyenne = new Label();
 
     private final SimpleObjectProperty<TronconDigue> tronconProperty = new SimpleObjectProperty<TronconDigue>();
-    //private final SimpleBooleanProperty disableFieldsProperty = new SimpleBooleanProperty(false);
 
     public FXAmenagementHydrauliqueAttachementPane() {
         super();
@@ -100,8 +100,8 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
             uiVbox.getChildren().remove(1, uiVbox.getChildren().size());
         }
         if (uiAhOui.isSelected()) {
-            final HBox h0 = buildHbox("Aménagement hydraulique", uiLabelAmenagementHydraulique);
-            final HBox h1 = buildHbox("Type aménagement hydraulique", uiLabelTypeAmenagementHydraulique);
+            final HBox h0 = buildHbox("Nom", uiLabelAmenagementHydraulique);
+            final HBox h1 = buildHbox("Type", uiLabelTypeAmenagementHydraulique);
             final HBox h2 = buildHbox("Superficie (m²)", uiLabelSuperficie);
             final HBox h3 = buildHbox("Capacité de Stockage (m³)", uiLabelCapaciteStockage);
             final HBox h4 = buildHbox("Profondeur moyenne (m)", uiLabelProfondeurMoyenne);
@@ -143,16 +143,13 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
         final Label label = new Label(labelString);
         initLabel(label);
 
-        final HBox hbox = new HBox();
-        hbox.setPrefWidth(USE_COMPUTED_SIZE);
-
         final Separator sep = new Separator();
-        sep.setOrientation(Orientation.VERTICAL);
         sep.setVisible(false);
+        HBox.setHgrow(sep, Priority.ALWAYS);
 
-        hbox.getChildren().add(label);
-        hbox.getChildren().add(sep);
-        hbox.getChildren().add(node);
+        HBox hbox = new HBox(label, sep, node);
+        hbox.setPrefWidth(USE_COMPUTED_SIZE);
+        hbox.setPadding(new Insets(5));
         return hbox;
     }
 }

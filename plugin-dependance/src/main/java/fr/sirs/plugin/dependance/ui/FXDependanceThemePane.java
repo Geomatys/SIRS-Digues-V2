@@ -24,6 +24,7 @@ import fr.sirs.Session;
 import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.DescriptionAmenagementHydraulique;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Preview;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SimpleFXEditMode;
@@ -50,24 +51,32 @@ import javafx.scene.layout.Priority;
  */
 public class FXDependanceThemePane extends BorderPane {
 
+    private static final Preview EMPTY_PREVIEW = new Preview();
+
+    static {
+        EMPTY_PREVIEW.setElementClass(AmenagementHydraulique.class.getCanonicalName());
+        EMPTY_PREVIEW.setLibelle("   Pas d'aménagement hydraulique de rattachement - objets orphelins   ");
+    }
+
     private final StringProperty ahIdProperty = new SimpleStringProperty();
     private final Session session = Injector.getBean(Session.class);
 
     public StringProperty ahIdProperty(){return ahIdProperty;}
 
-    public FXDependanceThemePane(ComboBox<AmenagementHydraulique> uiAhChoice, AbstractTheme.ThemeManager theme) {
+    public FXDependanceThemePane(ComboBox<Preview> uiAhChoice, AbstractTheme.ThemeManager theme) {
         setCenter(createContent(theme));
-        final List<AmenagementHydraulique> ahPreviews = session.getRepositoryForClass(AmenagementHydraulique.class).getAll();
-        uiAhChoice.setItems(FXCollections.observableList(ahPreviews));
-        uiAhChoice.setConverter(new SirsStringConverter());
-
-        uiAhChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends AmenagementHydraulique> observable, AmenagementHydraulique oldValue, AmenagementHydraulique newValue) -> {
-            ahIdProperty.set(newValue.getId());
+        uiAhChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) -> {
+            if (newValue != null) {
+                ahIdProperty.set(newValue.getElementId());
+            }
         });
 
-        if(!ahPreviews.isEmpty()){
-            uiAhChoice.getSelectionModel().select(ahPreviews.get(0));
+        final List<Preview> rawAhPreviews = session.getPreviews().getByClass(AmenagementHydraulique.class);
+        if(!rawAhPreviews.contains(EMPTY_PREVIEW)){
+            rawAhPreviews.add(EMPTY_PREVIEW);
         }
+        final ObservableList<Preview> ahPreviews = SIRS.observableList(rawAhPreviews).sorted();
+        SIRS.initCombo(uiAhChoice, ahPreviews, ahPreviews.get(0));
     }
 
     protected class DependanceThemePojoTable<T extends DescriptionAmenagementHydraulique> extends PojoTable{
@@ -91,9 +100,6 @@ public class FXDependanceThemePane extends BorderPane {
             super(group.getDataClass(), group.getTableTitle(), container);
             ahIdProperty.addListener(this::updateTable);
             this.group = group;
-
-            // Réécrire le copy des éléments, demander au client ce qu'il attend
-            // this.elementCopier = new ElementCopier(this.pojoClass, container, this.session, this.repo, TronconDigue.class);
         }
 
         private void updateTable(ObservableValue<? extends String> observable, String oldValue, String newValue){

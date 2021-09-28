@@ -20,6 +20,7 @@ package fr.sirs.plugin.dependance.ui;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.model.AmenagementHydraulique;
+import fr.sirs.core.model.Preview;
 import fr.sirs.plugin.dependance.AbstractDescriptionTheme;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -33,15 +34,15 @@ import fr.sirs.theme.AbstractTheme;
 public class AbstractDescriptionPane extends BorderPane {
 
     @FXML
-    private ComboBox<AmenagementHydraulique> ahBox;
-    
+    private ComboBox<Preview> ahBox;
+
     @FXML
     private BorderPane uiCenter;
-    
+
     public AbstractDescriptionPane() {
        this(null, null);
     }
-     
+
     public AbstractDescriptionPane(final String tableName, final Class tableClass) {
         SIRS.loadFXML(this);
 

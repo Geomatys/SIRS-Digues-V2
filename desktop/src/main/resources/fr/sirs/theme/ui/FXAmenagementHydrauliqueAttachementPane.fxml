@@ -13,13 +13,16 @@
    <top>
       <VBox fx:id="uiVbox" maxWidth="1.7976931348623157E308" spacing="10.0" styleClass="gray-light" BorderPane.alignment="CENTER">
          <children>
-            <HBox alignment="CENTER" maxWidth="1.7976931348623157E308" spacing="10.0" styleClass="gray-light" HBox.hgrow="ALWAYS">
+            <HBox alignment="CENTER" maxWidth="1.7976931348623157E308"  spacing="10.0" styleClass="gray-light" HBox.hgrow="ALWAYS">
                <children>
                   <Label text="Amenagement hydraulique:" />
                   <Separator maxWidth="1.7976931348623157E308" minWidth="0.0" visible="false" HBox.hgrow="ALWAYS" />
                   <RadioButton fx:id="uiAhOui" mnemonicParsing="false" text="oui" />
                   <RadioButton fx:id="uiAhNon" mnemonicParsing="false" text="non" />
                </children>
+               <padding>
+                   <Insets right="5" left="5"/>
+               </padding>
             </HBox>
          </children>
       </VBox>

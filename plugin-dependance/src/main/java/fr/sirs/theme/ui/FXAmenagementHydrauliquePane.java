@@ -10,6 +10,7 @@ import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
 import fr.sirs.util.javafx.FloatSpinnerValueFactory;
 import fr.sirs.util.FXFreeTab;
+import fr.sirs.util.SirsStringConverter;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -21,6 +22,9 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.util.Callback;
 
 /**
  *
@@ -150,7 +154,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_gestionnaireIds.setClosable(false);
 
         ui_tronconIds.setContent(() -> {
-            tronconIdsTable = new ListeningPojoTable(TronconDigue.class, null, elementProperty());
+            tronconIdsTable = new TronconTable(TronconDigue.class, null, elementProperty());
             tronconIdsTable.editableProperty().bind(disableFieldsProperty().not());
             tronconIdsTable.fichableProperty().set(false);
             tronconIdsTable.createNewProperty().set(false);
@@ -605,6 +609,42 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             createNewProperty.set(false);
             detaillableProperty.set(false);
             uiAdd.setVisible(false);
+        }
+    }
+
+    private static final class TronconTable extends ListeningPojoTable {
+        public TronconTable(Class pojoClass, String title, final ObjectProperty<AmenagementHydraulique> container) {
+            super(pojoClass, title, container);
+
+            final SirsStringConverter converter = new SirsStringConverter();
+            final AbstractSIRSRepository<AmenagementHydraulique> repo = Injector.getSession().getRepositoryForClass(AmenagementHydraulique.class);
+
+            // On supprime la colonne des aménagements hydrauliques courantes
+            ObservableList<TableColumn<Element, ?>> columns = getColumns();
+            TableColumn ahCol = null;
+            for (TableColumn col : columns) {
+                if ("Aménagement hydraulique".equals(col.getId())) {
+                    ahCol = col;
+                    break;
+                }
+            }
+            columns.remove(ahCol);
+
+            // On ajoute la nouvelle colonne.
+            TableColumn newColumn = new TableColumn<>("Aménagement hydraulique");
+            newColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TronconDigue, String>, ObservableValue<String>>() {
+                @Override
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<TronconDigue, String> param) {
+                    if (param!=null && param.getValue()!=null) {
+                        final TronconDigue troncon = param.getValue();
+                        String amenagementHydrauliqueId = troncon.getAmenagementHydrauliqueId();
+                        AmenagementHydraulique amenagement = repo.get(amenagementHydrauliqueId);
+                        return new SimpleStringProperty(converter.toString(amenagement));
+                    }
+                    return null;
+                }
+            });
+            columns.add(newColumn);
         }
     }
 }
