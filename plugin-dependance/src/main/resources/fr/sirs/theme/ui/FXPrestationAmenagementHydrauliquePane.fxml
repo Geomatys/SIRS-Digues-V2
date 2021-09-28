@@ -37,10 +37,6 @@
                                             <ColumnConstraints hgrow="NEVER" />
                                             <ColumnConstraints hgrow="ALWAYS" />
                                         </columnConstraints>
-                                        <!--rowConstraints>
-                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                        </rowConstraints-->
                                         <children>
                                             <Label text="%amenagementHydrauliqueId" GridPane.rowIndex="0" />
                                             <ComboBox fx:id="ui_amenagementHydrauliqueId" GridPane.columnIndex="1" GridPane.rowIndex="0" />
@@ -62,10 +58,6 @@
                                             <ColumnConstraints hgrow="NEVER" />
                                             <ColumnConstraints hgrow="ALWAYS" />
                                         </columnConstraints>
-                                        <!--rowConstraints>
-                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                        </rowConstraints-->
                                         <children>
                                             <!-- EString -->                 
                                             <Label text="%libelle" GridPane.rowIndex="0" />

@@ -51,10 +51,28 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractSIRSEd
     public DescriptionAmenagementHydrauliqueEditHandler() {
         super(DescriptionAmenagementHydraulique.class);
     }
-
+    
     public DescriptionAmenagementHydrauliqueEditHandler(final DescriptionAmenagementHydraulique description) {
         this();
-        this.editedObjet = description;
+
+        if (description instanceof DesordreDependance) {
+            objetClass = DesordreDependance.class;
+            editedObjet = (DesordreDependance) description;
+        } else if (description instanceof StructureAmenagementHydraulique) {
+            objetClass = StructureAmenagementHydraulique.class;
+            editedObjet = (StructureAmenagementHydraulique) description;
+        } else if (description instanceof OuvrageAssocieAmenagementHydraulique) {
+            objetClass = OuvrageAssocieAmenagementHydraulique.class;
+            editedObjet = (OuvrageAssocieAmenagementHydraulique) description;
+        } else if (description instanceof PrestationAmenagementHydraulique) {
+            objetClass = PrestationAmenagementHydraulique.class;
+            editedObjet = (PrestationAmenagementHydraulique) description;
+        } else if (description instanceof OrganeProtectionCollective) {
+            objetClass = OrganeProtectionCollective.class;
+            editedObjet = (OrganeProtectionCollective) description;
+        } else {
+            throw new IllegalArgumentException("Not supported subclass of DescriptionAmenagementHydraulique.");
+        }
 
         if (description.getGeometry() != null) {
             editGeometry.geometry.set((Geometry)description.getGeometry().clone());
@@ -86,7 +104,7 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractSIRSEd
         } else if (editedObjet instanceof OrganeProtectionCollective) {
             objetLayer = PluginDependance.getOrganeProtectionLayer();
         } else {
-            throw new IllegalArgumentException("Récupération de la couche non supportée pour l'objet: " + (new SirsStringConverter()).toString(editedObjet));
+            throw new IllegalArgumentException("Récupération de la couche, non supportée pour l'objet: " + (new SirsStringConverter()).toString(editedObjet));
         }
     }
 

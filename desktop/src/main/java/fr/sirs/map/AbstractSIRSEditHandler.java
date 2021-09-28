@@ -38,7 +38,7 @@ public abstract class AbstractSIRSEditHandler<T extends AvecGeometrie> extends A
 
     private final int CROSS_SIZE = 5;
 
-    protected final Class<T> objetClass;
+    protected Class<T> objetClass;
     protected T editedObjet = null;
     protected final ObjectProperty<T> editedObjetProperty;
 
@@ -48,7 +48,6 @@ public abstract class AbstractSIRSEditHandler<T extends AvecGeometrie> extends A
     protected FeatureMapLayer objetLayer = null;
     protected EditionHelper helperObjet;
 
-//    protected FXPanMouseListen mouseInputListener;
     protected final EditionHelper.EditionGeometry editGeometry;
     protected final FXGeometryLayer geomLayer;
 
