@@ -103,7 +103,7 @@ public class FXDependanceThemePane extends BorderPane {
         }
 
         private void updateTable(ObservableValue<? extends String> observable, String oldValue, String newValue){
-            if(newValue==null || group==null) {
+            if(group==null) {
                 setTableItems(FXCollections::emptyObservableList);
             } else {
                 setTableItems(() -> (ObservableList) group.getExtractor().apply(newValue));

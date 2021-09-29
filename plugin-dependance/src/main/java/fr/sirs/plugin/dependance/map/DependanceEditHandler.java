@@ -161,7 +161,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                 newGeomType = LineString.class;
             }else {
                 //on demande a l'utilisateur
-                final ChoiceDialog<String> choice = new ChoiceDialog<>("Ponctuel", "Ponctuel","Linéaire","Surfacique");
+                final ChoiceDialog<String> choice = new ChoiceDialog<>("Ponctuel","Linéaire","Surfacique");
                 choice.setHeaderText("Choix de la forme géométrique de la dépendance.");
                 choice.setTitle("Type de géométrie");
                 final Optional<String> showAndWait = choice.showAndWait();

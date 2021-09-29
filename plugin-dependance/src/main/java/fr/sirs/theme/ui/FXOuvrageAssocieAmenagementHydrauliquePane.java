@@ -49,7 +49,6 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
     @FXML protected ComboBox ui_sourceId;
     @FXML protected ComboBox ui_etat;
     @FXML protected ComboBox ui_fonctionnement;
-    @FXML protected Button ui_fonctionnement_link;
     @FXML protected FXFreeTab ui_amenagementHydrauliqueAssocieIds;
     protected ListeningPojoTable amenagementHydrauliqueAssocieIdsTable;
     @FXML protected FXFreeTab ui_desordreDependanceAssocieIds;
@@ -117,7 +116,6 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
         ui_sourceId.disableProperty().bind(disableFieldsProperty());
         ui_etat.disableProperty().bind(disableFieldsProperty());
         ui_fonctionnement.disableProperty().bind(disableFieldsProperty());
-        ui_fonctionnement_link.setVisible(false);
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
         
         uiPosition.dependanceProperty().bind(elementProperty);

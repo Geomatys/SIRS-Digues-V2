@@ -31,6 +31,7 @@ import fr.sirs.core.component.TraitAmenagementHydrauliqueRepository;
 import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TraitAmenagementHydraulique;
+import fr.sirs.theme.ui.FXTraitAmenagementHydraulique;
 import fr.sirs.plugin.dependance.PluginDependance;
 import java.awt.geom.Rectangle2D;
 import java.time.LocalDate;

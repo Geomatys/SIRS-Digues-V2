@@ -24,7 +24,7 @@ public abstract class DescriptionAmenagementHydrauliqueRepository<T extends Desc
     }
     
     public List<T> getByAmenagementHydrauliqueId(final String ahId) {
-        ArgumentChecks.ensureNonNull("Amenagement hydraulique", ahId);
+        //ArgumentChecks.ensureNonNull("Amenagement hydraulique", ahId);
         return this.queryView(BY_AMENAGEMENT_HYDRAULIQUE_ID, ahId);
     }
 
