@@ -623,7 +623,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             ObservableList<TableColumn<Element, ?>> columns = getColumns();
             TableColumn ahCol = null;
             for (TableColumn col : columns) {
-                if ("Aménagement hydraulique".equals(col.getId())) {
+                if ("amenagementHydrauliqueId".equals(col.getId())) {
                     ahCol = col;
                     break;
                 }
@@ -638,8 +638,11 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
                     if (param!=null && param.getValue()!=null) {
                         final TronconDigue troncon = param.getValue();
                         String amenagementHydrauliqueId = troncon.getAmenagementHydrauliqueId();
-                        AmenagementHydraulique amenagement = repo.get(amenagementHydrauliqueId);
-                        return new SimpleStringProperty(converter.toString(amenagement));
+                        if (amenagementHydrauliqueId != null) {
+                            final AmenagementHydraulique amenagement = repo.get(amenagementHydrauliqueId);
+                            return amenagement == null ? new SimpleStringProperty() : new SimpleStringProperty(amenagement.getLibelle());
+                        }
+                        return new SimpleStringProperty();
                     }
                     return null;
                 }

@@ -24,6 +24,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
@@ -37,7 +38,7 @@ import javafx.scene.layout.VBox;
  */
 public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
 
-    @FXML private VBox uiVbox;
+    @FXML private GridPane uiGridPane;
     @FXML private RadioButton uiAhOui;
     @FXML private RadioButton uiAhNon;
 
@@ -96,21 +97,24 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
     }
 
     private void displayAhDetail() {
-        if (uiVbox.getChildren().size() >= 2) {
-            uiVbox.getChildren().remove(1, uiVbox.getChildren().size());
+        if (uiGridPane.getChildren().size() >= 4) {
+            uiGridPane.getChildren().remove(3, uiGridPane.getChildren().size());
         }
         if (uiAhOui.isSelected()) {
-            final HBox h0 = buildHbox("Nom", uiLabelAmenagementHydraulique);
-            final HBox h1 = buildHbox("Type", uiLabelTypeAmenagementHydraulique);
-            final HBox h2 = buildHbox("Superficie (m²)", uiLabelSuperficie);
-            final HBox h3 = buildHbox("Capacité de Stockage (m³)", uiLabelCapaciteStockage);
-            final HBox h4 = buildHbox("Profondeur moyenne (m)", uiLabelProfondeurMoyenne);
-            uiVbox.getChildren().add(h0);
-            uiVbox.getChildren().add(h1);
-            uiVbox.getChildren().add(h2);
-            uiVbox.getChildren().add(h3);
-            uiVbox.getChildren().add(h4);
+            appendRow(1, "Nom", uiLabelAmenagementHydraulique);
+            appendRow(2, "Type", uiLabelTypeAmenagementHydraulique);
+            appendRow(3, "Superficie (m²)", uiLabelSuperficie);
+            appendRow(4, "Capacité de Stockage (m³)", uiLabelCapaciteStockage);
+            appendRow(5, "Profondeur moyenne (m)", uiLabelProfondeurMoyenne);
         }
+    }
+
+    private void appendRow(final int posRow, final String title, final Node node) {
+        final Label label = new Label(title);
+
+        initLabel(label);
+        uiGridPane.add(label, 0, posRow);
+        uiGridPane.add(node, 2, posRow);
     }
 
     private void initLabel(final Label label) {
