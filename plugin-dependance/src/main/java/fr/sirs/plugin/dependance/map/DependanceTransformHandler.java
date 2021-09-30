@@ -98,7 +98,7 @@ public class DependanceTransformHandler extends AbstractNavigationHandler {
                 public void visit(ProjectedFeature feature, RenderingContext2D context, SearchAreaJ2D area) {
                     final Feature f = feature.getCandidate();
                     // Choix du type de dépendance à créer
-                    final ChoiceDialog<String> dialog = new ChoiceDialog<>("Aires de stockage", "Aires de stockage", "Autres", "Chemins d'accès", "Ouvrages de voirie", "Aménagements hydrauliques");
+                    final ChoiceDialog<String> dialog = new ChoiceDialog<>("Aires de stockage", "Autres", "Chemins d'accès", "Ouvrages de voirie", "Aménagements hydrauliques");
                     dialog.setTitle("Création de dépendance");
                     dialog.setContentText("Choisir un type de dépendance");
                     Optional<String> result = dialog.showAndWait();
