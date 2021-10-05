@@ -100,7 +100,7 @@
         <FXFreeTab fx:id="ui_ouvrageAssocieIds" text="%ouvrageAssocieIds"/>
         <FXFreeTab fx:id="ui_gestionnaireIds" text="%gestionnaireIds"/>
         <FXFreeTab fx:id="ui_tronconIds" text="%tronconIds"/>
-        <FXFreeTab fx:id="ui_observationIds" text="%observationIds"/>
+        <FXFreeTab fx:id="ui_observations" text="%observations"/>
         <FXFreeTab fx:id="ui_prestationIds" text="%prestationIds"/>
         <FXFreeTab fx:id="ui_proprietaireIds" text="%proprietaireIds"/>
         <!--<FXFreeTab fx:id="ui_proprietes" text="%proprietes"/>

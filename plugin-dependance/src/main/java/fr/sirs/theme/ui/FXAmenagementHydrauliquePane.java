@@ -13,7 +13,6 @@ import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsStringConverter;
 
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -22,7 +21,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.util.Callback;
 
@@ -56,8 +54,8 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
     protected ListeningPojoTable gestionnaireIdsTable;
     @FXML protected FXFreeTab ui_tronconIds;
     protected ListeningPojoTable tronconIdsTable;
-    @FXML protected FXFreeTab ui_observationIds;
-    protected PojoTable observationIdsTable;
+    @FXML protected FXFreeTab ui_observations;
+    protected PojoTable observationsTable;
     @FXML protected FXFreeTab ui_prestationIds;
     protected ListeningPojoTable prestationIdsTable;
     @FXML protected FXFreeTab ui_proprietaireIds;
@@ -163,13 +161,13 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         });
         ui_tronconIds.setClosable(false);
 
-        ui_observationIds.setContent(() -> {
-            observationIdsTable = new PojoTableExternalAddable(Observation.class, elementProperty());
-            observationIdsTable.editableProperty().bind(disableFieldsProperty().not());
-            updateObservationIdsTable(session, elementProperty.get());
-            return observationIdsTable;
+        ui_observations.setContent(() -> {
+            observationsTable = new PojoTableExternalAddable(Observation.class, elementProperty());
+            observationsTable.editableProperty().bind(disableFieldsProperty().not());
+            updateObservationsTable(session, elementProperty.get());
+            return observationsTable;
         });
-        ui_observationIds.setClosable(false);
+        ui_observations.setClosable(false);
         
         ui_prestationIds.setContent(() -> {
             prestationIdsTable = new ListeningPojoTable(Prestation.class, null, elementProperty());
@@ -294,7 +292,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         updateOuvrageAssocieIdsTable(session, newElement);
         updateGestionnaireIdsTable(session, newElement);
         updateTronconIdsTable(session, newElement);
-        updateObservationIdsTable(session, newElement);
+        updateObservationsTable(session, newElement);
         updatePrestationIdsTable(session, newElement);
         updateProprietaireIdsTable(session, newElement);
 //        updateProprietesTable(session, newElement);
@@ -373,15 +371,15 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         }
     }
 
-    protected void updateObservationIdsTable(final Session session, final AmenagementHydraulique newElement) {
-        if (observationIdsTable == null)
+    protected void updateObservationsTable(final Session session, final AmenagementHydraulique newElement) {
+        if (observationsTable == null)
             return;
 
         if (newElement == null) {
-            observationIdsTable.setTableItems(null);
+            observationsTable.setTableItems(null);
         } else {
-            observationIdsTable.setParentElement(newElement);
-            observationIdsTable.setTableItems(()-> (ObservableList) newElement.getObservationIds());
+            observationsTable.setParentElement(newElement);
+            observationsTable.setTableItems(()-> (ObservableList) newElement.getObservations());
         }
     }
 
