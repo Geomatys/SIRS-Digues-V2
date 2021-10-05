@@ -141,7 +141,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//RefTypeAmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="tronconIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//TronconDigue"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="observationIds" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Observation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Prestation"/>
