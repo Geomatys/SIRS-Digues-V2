@@ -155,7 +155,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         uiValidityPeriod.disableFieldsProperty().bind(disableFieldsProperty());
         uiValidityPeriod.targetProperty().bind(elementProperty());
         uiAmenagementHydrauliqueAttachement.targetProperty().bind(elementProperty());
-        //uiAmenagementHydrauliqueAttachement.disableFieldsProperty().bind(disableFieldsProperty());
 
         /*
          * Disabling rules.
