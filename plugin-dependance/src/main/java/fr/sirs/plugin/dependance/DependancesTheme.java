@@ -72,7 +72,7 @@ public final class DependancesTheme extends AbstractPluginsButtonTheme {
         accessPathTab.setClosable(false);
 
         final Tab arrangementsTab = new Tab("Aménagements hydrauliques");
-        arrangementsTab.setContent(createTablePane(AmenagementHydraulique.class, "Liste des aménagments hydrauliques"));
+        arrangementsTab.setContent(createTablePane(AmenagementHydraulique.class, "Liste des aménagements hydrauliques"));
         arrangementsTab.setClosable(false);
 
         final Tab othersTab = new Tab("Autres");
