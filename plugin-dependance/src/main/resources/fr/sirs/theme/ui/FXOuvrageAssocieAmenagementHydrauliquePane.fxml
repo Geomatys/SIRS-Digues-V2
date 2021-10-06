@@ -27,6 +27,8 @@
                             <VBox spacing="30.0" BorderPane.alignment="CENTER">
                                 <children>
 
+                                    <FXValidityPeriodPane fx:id="uiValidityPeriod"/>
+
                                     <!-- DescriptionAmenagementHydraulique -->
                                     <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
                                         <columnConstraints>

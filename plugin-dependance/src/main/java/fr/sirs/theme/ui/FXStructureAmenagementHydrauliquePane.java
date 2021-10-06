@@ -45,8 +45,9 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
     
     protected final Previews previewRepository;
     protected LabelMapper labelMapper;
-    
-    
+
+    @FXML private FXValidityPeriodPane uiValidityPeriod;
+
     // Propriétés de StructureAmenagementHydraulique
     @FXML protected Spinner ui_numCouche;
     @FXML protected ComboBox ui_materiauId;
@@ -77,8 +78,10 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
         final Session session = Injector.getBean(Session.class);
         previewRepository = session.getPreviews();
         elementProperty().addListener(this::initFields);
-        
-        
+
+        uiValidityPeriod.disableFieldsProperty().bind(disableFieldsProperty());
+        uiValidityPeriod.targetProperty().bind(elementProperty());
+
         /*
         * Disabling rules.
         */
