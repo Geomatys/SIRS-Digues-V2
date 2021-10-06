@@ -38,8 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class FXDiguePane extends FXDiguePaneStub {
 
-    //private static final String AH_COL = "amenagementHydrauliqueId";
-
     @Autowired private Session session;
 
     @FXML private VBox centerContent;
