@@ -1645,7 +1645,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/globalPrestationIds"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="test" eType="ecore:EDataType jts.ecore#//Geometry"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AvecObservations" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="AvecPrestations" abstract="true" interface="true"/>

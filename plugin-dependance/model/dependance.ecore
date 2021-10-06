@@ -34,7 +34,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="RefDestinationDependance" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PrestationAmenagementHydraulique" eSuperTypes="#//DescriptionAmenagementHydraulique">
+  <eClassifiers xsi:type="ecore:EClass" name="PrestationAmenagementHydraulique" eSuperTypes="#//AbstractAmenagementHydraulique">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="coutMetre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
@@ -54,7 +54,7 @@
       <eAnnotations source="photoType" references="#//PhotoDependance"/>
     </eStructuralFeatures>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="OrganeProtectionCollective" eSuperTypes="#//DescriptionAmenagementHydraulique">
+  <eClassifiers xsi:type="ecore:EClass" name="OrganeProtectionCollective" eSuperTypes="#//AbstractAmenagementHydraulique">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cote" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
@@ -68,7 +68,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeOrganeProtectionCollective" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="StructureAmenagementHydraulique" eSuperTypes="#//DescriptionAmenagementHydraulique">
+  <eClassifiers xsi:type="ecore:EClass" name="StructureAmenagementHydraulique" eSuperTypes="#//AbstractAmenagementHydraulique">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
@@ -81,7 +81,7 @@
     </eStructuralFeatures>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageAssocieAmenagementHydraulique"
-      eSuperTypes="#//DescriptionAmenagementHydraulique">
+      eSuperTypes="#//AbstractAmenagementHydraulique">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="superficie" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
@@ -138,9 +138,9 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="proprietaireIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Contact"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="traitIds" upperBound="-1"
-        eType="#//TraitAmenagementHydraulique" eOpposite="#//DescriptionAmenagementHydraulique/amenagementHydrauliqueId"/>
+        eType="#//TraitAmenagementHydraulique" eOpposite="#//TraitAmenagementHydraulique/amenagementHydrauliqueId"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//DescriptionAmenagementHydraulique">
+  <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//AbstractAmenagementHydraulique">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="dependanceId" eType="#//AbstractDependance"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieuDit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -219,17 +219,33 @@
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeAmenagementHydraulique" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="TraitAmenagementHydraulique" eSuperTypes="#//DescriptionAmenagementHydraulique">
+  <eClassifiers xsi:type="ecore:EClass" name="TraitAmenagementHydraulique" eSuperTypes="../../sirs-core/model/sirs.ecore#//AvecSettableGeometrie">
     <eAnnotations source="couchDBDocument"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="DescriptionAmenagementHydraulique" abstract="true"
-      eSuperTypes="../../sirs-core/model/sirs.ecore#//AvecSettableGeometrie">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType ../../sirs-core/model/jts.ecore#//Geometry"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="amenagementHydrauliqueId"
         eType="#//AmenagementHydraulique" eOpposite="#//AmenagementHydraulique/traitIds"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractAmenagementHydraulique" abstract="true"
+      eSuperTypes="../../sirs-core/model/sirs.ecore#//AvecSettableGeometrie">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType ../../sirs-core/model/jts.ecore#//Geometry"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="amenagementHydrauliqueId"
+        eType="#//AmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
       <eAnnotations source="localDate"/>
     </eStructuralFeatures>

@@ -38,7 +38,7 @@ public abstract class AbstractSIRSEditHandler<T extends AvecGeometrie> extends A
 
     private final int CROSS_SIZE = 5;
 
-    protected Class<T> objetClass;
+    protected final Class<T> objetClass;
     protected T editedObjet = null;
     protected final ObjectProperty<T> editedObjetProperty;
 

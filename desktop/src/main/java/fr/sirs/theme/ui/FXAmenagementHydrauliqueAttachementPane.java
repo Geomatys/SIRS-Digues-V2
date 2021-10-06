@@ -16,7 +16,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -28,7 +27,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
-import javafx.scene.layout.VBox;
 
 /**
  * Graphic component that configures the amenagement hydraulique for the current
@@ -39,8 +37,8 @@ import javafx.scene.layout.VBox;
 public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
 
     @FXML private GridPane uiGridPane;
-    @FXML private RadioButton uiAhOui;
-    @FXML private RadioButton uiAhNon;
+    @FXML private RadioButton uiWithAh;
+    @FXML private RadioButton uiWithoutAh;
 
     private Label uiLabelAmenagementHydraulique = new Label();
     private Label uiLabelTypeAmenagementHydraulique = new Label();
@@ -56,11 +54,11 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
 
         // Init toggle yes or not Ah
         ToggleGroup toggle = new ToggleGroup();
-        uiAhOui.setToggleGroup(toggle);
-        uiAhNon.setToggleGroup(toggle);
-        uiAhNon.setSelected(true);
-        uiAhOui.setDisable(true);
-        uiAhNon.setDisable(true);
+        uiWithAh.setToggleGroup(toggle);
+        uiWithoutAh.setToggleGroup(toggle);
+        uiWithoutAh.setSelected(true);
+        uiWithAh.setDisable(true);
+        uiWithoutAh.setDisable(true);
 
         // Init label
         initLabel(uiLabelAmenagementHydraulique);
@@ -69,30 +67,40 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
         initLabel(uiLabelCapaciteStockage);
         initLabel(uiLabelProfondeurMoyenne);
 
-        tronconProperty.addListener(this::ahIdOnChange);
+        tronconProperty.addListener(this::onTronconChange);
     }
 
     public SimpleObjectProperty<TronconDigue> targetProperty() {
         return tronconProperty;
     }
 
-    private void ahIdOnChange(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newElement) {
+    /*
+    * Updates the displayed information of the AH attached to the troncon
+    */
+    private void onTronconChange(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newElement) {
         // update value
         if (newElement.getAmenagementHydrauliqueId() != null) {
+            // If the current troncon is attached to a AH,
+            // we retrieve the view containing the information of the AH to display.
             final AmenagementHydrauliqueViewRepository repo = InjectorCore.getBean(AmenagementHydrauliqueViewRepository.class);
             List<AmenagementHydrauliqueView> ahvList = repo.getAmenagementHydrauliqueView(newElement.getAmenagementHydrauliqueId());
+            // The list is supposed to contain exactly one value.
             if (!ahvList.isEmpty()) {
                 updateValue(ahvList.get(0));
-                uiAhOui.setSelected(true);
+                uiWithAh.setSelected(true);
             } else {
+                // If not,
+                // the information sheet is empty
                 updateValue(null);
-                uiAhOui.setSelected(false);
+                uiWithAh.setSelected(false);
             }
         } else {
+            // If not,
+            // the infomrtation sheet is empty
             updateValue(null);
-            uiAhOui.setSelected(false);
+            uiWithAh.setSelected(false);
         }
-        // update ui
+        // update of the interface
         displayAhDetail();
     }
 
@@ -100,7 +108,7 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
         if (uiGridPane.getChildren().size() >= 4) {
             uiGridPane.getChildren().remove(3, uiGridPane.getChildren().size());
         }
-        if (uiAhOui.isSelected()) {
+        if (uiWithAh.isSelected()) {
             appendRow(1, "Nom", uiLabelAmenagementHydraulique);
             appendRow(2, "Type", uiLabelTypeAmenagementHydraulique);
             appendRow(3, "Superficie (m²)", uiLabelSuperficie);
