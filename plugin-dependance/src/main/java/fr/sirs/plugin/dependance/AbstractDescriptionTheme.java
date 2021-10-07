@@ -20,10 +20,10 @@ package fr.sirs.plugin.dependance;
 
 import fr.sirs.Injector;
 import static fr.sirs.core.SirsCore.BUNDLE_KEY_CLASS;
-import fr.sirs.core.model.DescriptionAmenagementHydraulique;
+import fr.sirs.core.model.AbstractAmenagementHydraulique;
 import fr.sirs.plugin.dependance.ui.AbstractDescriptionPane;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
-import fr.sirs.core.component.DescriptionAmenagementHydrauliqueRepository;
+import fr.sirs.core.component.AbstractAmenagementHydrauliqueRepository;
 import fr.sirs.theme.AbstractTheme;
 import java.util.List;
 import java.util.Locale;
@@ -54,16 +54,16 @@ public abstract class AbstractDescriptionTheme extends AbstractPluginsButtonThem
         return borderPane;
     }
 
-    public static AbstractTheme.ThemeManager<DescriptionAmenagementHydraulique> generateThemeManager(String tabTitle, final Class themeClass){
+    public static AbstractTheme.ThemeManager<AbstractAmenagementHydraulique> generateThemeManager(String tabTitle, final Class themeClass){
         final ResourceBundle bundle = ResourceBundle.getBundle(themeClass.getCanonicalName(), Locale.getDefault(),
                 Thread.currentThread().getContextClassLoader());
 
-        final Function<String, ObservableList<DescriptionAmenagementHydraulique>> extractor = (String ahId) -> {
-            final List<DescriptionAmenagementHydraulique> result = ((DescriptionAmenagementHydrauliqueRepository) Injector.getSession().getRepositoryForClass(themeClass)).getByAmenagementHydrauliqueId(ahId);
+        final Function<String, ObservableList<AbstractAmenagementHydraulique>> extractor = (String ahId) -> {
+            final List<AbstractAmenagementHydraulique> result = ((AbstractAmenagementHydrauliqueRepository) Injector.getSession().getRepositoryForClass(themeClass)).getByAmenagementHydrauliqueId(ahId);
             return FXCollections.observableList(result);
         };
 
-        final Consumer<DescriptionAmenagementHydraulique> deletor = (DescriptionAmenagementHydraulique themeElement) -> {
+        final Consumer<AbstractAmenagementHydraulique> deletor = (AbstractAmenagementHydraulique themeElement) -> {
             Injector.getSession().getRepositoryForClass(themeClass).remove(themeElement);
         };
 

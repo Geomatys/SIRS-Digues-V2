@@ -21,7 +21,7 @@ import fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique;
  */
 @View(name=BY_AMENAGEMENT_HYDRAULIQUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique') {emit(doc.amenagementHydrauliqueId, doc._id)}}")
 @Component("fr.sirs.core.component.OuvrageAssocieRepository")
-public class OuvrageAssocieRepository extends DescriptionAmenagementHydrauliqueRepository<OuvrageAssocieAmenagementHydraulique> {
+public class OuvrageAssocieRepository extends AbstractAmenagementHydrauliqueRepository<OuvrageAssocieAmenagementHydraulique> {
 
     public static final String BY_AMENAGEMENT_HYDRAULIQUE_ID = "byAmenagementHydrauliqueId";
 

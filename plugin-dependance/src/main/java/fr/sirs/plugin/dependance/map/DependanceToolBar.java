@@ -46,7 +46,7 @@ public class DependanceToolBar extends ToolBar {
         final ToggleButton buttonTransform = new DependanceTransformAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         buttonTransform.getStyleClass().add(CENTER);
 
-        final ToggleButton buttonCreateDesorder = new DescriptionAmenagementHydrauliqueEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
+        final ToggleButton buttonCreateDesorder = new AbstractAmenagementHydrauliqueEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         buttonCreateDesorder.getStyleClass().add(CENTER);
 
         final ToggleButton butEditTrait = new TraitAmenagementHydrauliqueEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);

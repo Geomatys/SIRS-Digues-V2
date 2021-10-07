@@ -77,7 +77,7 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
     protected ListeningPojoTable articleIdsTable;
 
     // Propriétés de AvecGeometrie
-    // Propriétés de DescriptionAmenagementHydraulique
+    // Propriétés de AbstractAmenagementHydraulique
     @FXML protected ComboBox ui_amenagementHydrauliqueId;
     @FXML protected Button ui_amenagementHydrauliqueId_link;
 
@@ -214,7 +214,7 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
             SIRS.initCombo(ui_typeDesordreId, SIRS.observableList(typeDesordreIdRepo.getAll()), newElement.getTypeDesordreId() == null? null : typeDesordreIdRepo.get(newElement.getTypeDesordreId()));
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
-            // Propriétés de DescriptionAmenagementHydraulique
+            // Propriétés de AbstractAmenagementHydraulique
             final Preview linearPreview = newElement.getAmenagementHydrauliqueId() == null ? null : previewRepository.get(newElement.getAmenagementHydrauliqueId());
             SIRS.initCombo(ui_amenagementHydrauliqueId, SIRS.observableList(
                     previewRepository.getByClass(linearPreview == null ? AmenagementHydraulique.class : linearPreview.getJavaClassOr(AmenagementHydraulique.class))).sorted(), linearPreview);

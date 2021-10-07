@@ -6,7 +6,7 @@
 package fr.sirs.core.component;
 
 import fr.sirs.core.model.AmenagementHydraulique;
-import fr.sirs.core.model.DescriptionAmenagementHydraulique;
+import fr.sirs.core.model.AbstractAmenagementHydraulique;
 import java.util.List;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
@@ -15,11 +15,11 @@ import org.ektorp.CouchDbConnector;
  *
  * @author maximegavens
  */
-public abstract class DescriptionAmenagementHydrauliqueRepository<T extends DescriptionAmenagementHydraulique> extends AbstractSIRSRepository<T> {
+public abstract class AbstractAmenagementHydrauliqueRepository<T extends AbstractAmenagementHydraulique> extends AbstractSIRSRepository<T> {
     
     public static final String BY_AMENAGEMENT_HYDRAULIQUE_ID = "byAmenagementHydrauliqueId";
 
-    public DescriptionAmenagementHydrauliqueRepository(Class<T> type, CouchDbConnector db) {
+    public AbstractAmenagementHydrauliqueRepository(Class<T> type, CouchDbConnector db) {
         super(type, db);
     }
     

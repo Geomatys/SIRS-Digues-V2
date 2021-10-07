@@ -28,21 +28,21 @@ import org.geotoolkit.gui.javafx.render2d.FXMapAction;
  * @author Cédric Briançon (Geomatys)
  * @author Maxime Gavens (Geomatys)
  */
-public class DescriptionAmenagementHydrauliqueEditAction extends FXMapAction {
-    public DescriptionAmenagementHydrauliqueEditAction(FXMap map) {
+public class AbstractAmenagementHydrauliqueEditAction extends FXMapAction {
+    public AbstractAmenagementHydrauliqueEditAction(FXMap map) {
         super(map,"Dépendance","Création / Modification de description d'aménagement hydraulique", SIRS.ICON_WARNING);
 
         this.disabledProperty().bind(Injector.getSession().geometryEditionProperty().not());
 
         map.getHandlerProperty().addListener((observable, oldValue, newValue) -> {
-            selectedProperty().set(newValue instanceof DescriptionAmenagementHydrauliqueEditHandler);
+            selectedProperty().set(newValue instanceof AbstractAmenagementHydrauliqueEditHandler);
         });
     }
 
     @Override
     public void accept(ActionEvent event) {
-        if (map != null && !(map.getHandler() instanceof DescriptionAmenagementHydrauliqueEditHandler)) {
-            map.setHandler(new DescriptionAmenagementHydrauliqueEditHandler());
+        if (map != null && !(map.getHandler() instanceof AbstractAmenagementHydrauliqueEditHandler)) {
+            map.setHandler(new AbstractAmenagementHydrauliqueEditHandler());
         }
     }
 }

@@ -22,7 +22,7 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.model.AmenagementHydraulique;
-import fr.sirs.core.model.DescriptionAmenagementHydraulique;
+import fr.sirs.core.model.AbstractAmenagementHydraulique;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
 import fr.sirs.theme.AbstractTheme;
@@ -79,7 +79,7 @@ public class FXDependanceThemePane extends BorderPane {
         SIRS.initCombo(uiAhChoice, ahPreviews, ahPreviews.get(0));
     }
 
-    protected class DependanceThemePojoTable<T extends DescriptionAmenagementHydraulique> extends PojoTable{
+    protected class DependanceThemePojoTable<T extends AbstractAmenagementHydraulique> extends PojoTable{
 
         protected final StringProperty ahIdProperty = new SimpleStringProperty();
         private final AbstractTheme.ThemeManager<T> group;

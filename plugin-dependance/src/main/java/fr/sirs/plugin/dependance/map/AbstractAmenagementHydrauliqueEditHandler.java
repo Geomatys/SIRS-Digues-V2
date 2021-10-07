@@ -26,7 +26,7 @@ import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.DescriptionAmenagementHydraulique;
+import fr.sirs.core.model.AbstractAmenagementHydraulique;
 import fr.sirs.core.model.DesordreDependance;
 import fr.sirs.core.model.OrganeProtectionCollective;
 import fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique;
@@ -86,14 +86,14 @@ import javafx.scene.control.ChoiceDialog;
  *
  * @author Maxime Gavens (Geomatys)
  */
-public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNavigationHandler {
+public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigationHandler {
     private final MouseListen mouseInputListener = new MouseListen();
     private final FXGeometryLayer decorationLayer = new FXGeometryLayer();
 
     /**
-     * La descriptionAmenagementHydraulique en cours.
+     * La abstractAmenagementHydraulique en cours.
      */
-    private DescriptionAmenagementHydraulique description;
+    private AbstractAmenagementHydraulique abstractAmenagement;
 
     /**
      * Outil d'aide pour éditer une {@linkplain #editGeometry géométrie} existante.
@@ -135,23 +135,23 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
     private FeatureMapLayer prestationsLayer;
     private FeatureMapLayer organeProtectionCollectivesLayer;
 
-    public DescriptionAmenagementHydrauliqueEditHandler() {
+    public AbstractAmenagementHydrauliqueEditHandler() {
         super();
     }
 
-    public DescriptionAmenagementHydrauliqueEditHandler(final DescriptionAmenagementHydraulique description) {
+    public AbstractAmenagementHydrauliqueEditHandler(final AbstractAmenagementHydraulique abstractAmenagement) {
         this();
-        this.description = description;
+        this.abstractAmenagement = abstractAmenagement;
         newDescription = true;
 
-        if (description.getGeometry() != null) {
-            editGeometry.geometry.set((Geometry)description.getGeometry().clone());
+        if (abstractAmenagement.getGeometry() != null) {
+            editGeometry.geometry.set((Geometry)abstractAmenagement.getGeometry().clone());
             decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
             newDescription = false;
         } else {
             // on demande à l'utilisateur le type de géométrie
             final ChoiceDialog<String> choice = new ChoiceDialog<>("Ponctuel","Linéaire","Surfacique");
-            choice.setHeaderText("Choix de la forme géométrique de la description.");
+            choice.setHeaderText("Choix de la forme géométrique de la abstractAmenagement.");
             choice.setTitle("Type de géométrie");
             final Optional<String> showAndWait = choice.showAndWait();
             if(showAndWait.isPresent()){
@@ -202,7 +202,7 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
         private MouseButton pressed;
 
         public MouseListen() {
-            super(DescriptionAmenagementHydrauliqueEditHandler.this);
+            super(AbstractAmenagementHydrauliqueEditHandler.this);
         }
 
         @Override
@@ -212,7 +212,7 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
             Class clazz = initHelper();
 
             if (MouseButton.PRIMARY.equals(e.getButton())) {
-                if (description == null) {
+                if (abstractAmenagement == null) {
                     // Recherche d'une couche de la carte qui contiendrait une géométrie là où l'utilisateur a cliqué
                     final Rectangle2D clickArea = new Rectangle2D.Double(e.getX()-2, e.getY()-2, 4, 4);
 
@@ -221,10 +221,10 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
                         @Override
                         public void visit(ProjectedFeature graphic, RenderingContext2D context, SearchAreaJ2D area) {
                             final Object candidate = graphic.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
-                            if(candidate instanceof DescriptionAmenagementHydraulique){
-                                description = (DescriptionAmenagementHydraulique)candidate;
+                            if(candidate instanceof AbstractAmenagementHydraulique){
+                                abstractAmenagement = (AbstractAmenagementHydraulique)candidate;
                                 // On récupère la géométrie de cet objet pour passer en mode édition
-                                editGeometry.geometry.set((Geometry)description.getGeometry().clone());
+                                editGeometry.geometry.set((Geometry)abstractAmenagement.getGeometry().clone());
                                 // Ajout de cette géométrie dans la couche d'édition sur la carte.
                                 decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
                                 newDescription = false;
@@ -232,7 +232,7 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
                         }
                         @Override
                         public boolean isStopRequested() {
-                            return description!=null;
+                            return abstractAmenagement!=null;
                         }
                         @Override
                         public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
@@ -286,12 +286,12 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
 
                         if (Point.class.isAssignableFrom(newGeomType)) {
                             // Pour un nouveau point ajouté, on termine l'édition directement.
-                            description.setGeometry(editGeometry.geometry.get());
+                            abstractAmenagement.setGeometry(editGeometry.geometry.get());
                             final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(clazz);
-                            if (description.getDocumentId() != null) {
-                                repo.update(description);
+                            if (abstractAmenagement.getDocumentId() != null) {
+                                repo.update(abstractAmenagement);
                             } else {
-                                repo.add(description);
+                                repo.add(abstractAmenagement);
                             }
                             // On quitte le mode d'édition.
                             reset();
@@ -313,7 +313,7 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
                     }
                 }
             } else if (MouseButton.SECONDARY.equals(e.getButton())) {
-                if (description == null) {
+                if (abstractAmenagement == null) {
                     // Le désordre n'existe pas, on en créé un nouveau après avoir choisi le type de géométrie à dessiner
                     final Stage stage = new Stage();
                     stage.getIcons().add(SIRS.ICON);
@@ -324,11 +324,11 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
                     gridPane.setVgap(10);
                     gridPane.setHgap(5);
                     gridPane.setPadding(new Insets(10));
-                    gridPane.add(new Label("Choisir un type de description d'aménagement hydraulique"), 0, 0);
-                    final ComboBox<String> descriptionTypeBox = new ComboBox<>();
-                    descriptionTypeBox.setItems(FXCollections.observableArrayList("Structure", "Ouvrage associé", "Désordre", "Prestation", "Organe de protection collective"));
-                    descriptionTypeBox.getSelectionModel().selectFirst();
-                    gridPane.add(descriptionTypeBox, 1, 0);
+                    gridPane.add(new Label("Choisir un type de abstractAmenagement d'aménagement hydraulique"), 0, 0);
+                    final ComboBox<String> abstractAmenagementTypeBox = new ComboBox<>();
+                    abstractAmenagementTypeBox.setItems(FXCollections.observableArrayList("Structure", "Ouvrage associé", "Désordre", "Prestation", "Organe de protection collective"));
+                    abstractAmenagementTypeBox.getSelectionModel().selectFirst();
+                    gridPane.add(abstractAmenagementTypeBox, 1, 0);
 
                     final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
                     gridPane.add(geomChoiceLbl, 0, 1);
@@ -346,7 +346,7 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
                     stage.showAndWait();
 
                     AbstractSIRSRepository repo;
-                    switch (descriptionTypeBox.getSelectionModel().getSelectedItem()) {
+                    switch (abstractAmenagementTypeBox.getSelectionModel().getSelectedItem()) {
                         case "Structure":
                             repo = Injector.getSession().getRepositoryForClass(StructureAmenagementHydraulique.class);
                             helper = new EditionHelper(map, structuresLayer);
@@ -372,7 +372,7 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
                             helper = new EditionHelper(map, desordresLayer);
                     }
 
-                    description = (DescriptionAmenagementHydraulique) repo.create();
+                    abstractAmenagement = (AbstractAmenagementHydraulique) repo.create();
                     newDescription = true;
 
                     switch (geomTypeBox.getSelectionModel().getSelectedItem()) {
@@ -402,15 +402,15 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
                     }
 
                     // action : sauvegarde
-                    // Sauvegarde de la description d'aménagement hydraulique ainsi que sa géométrie qui a éventuellement été éditée.
+                    // Sauvegarde de l' abstractAmenagement ainsi que sa géométrie qui a éventuellement été éditée.
                     final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(clazz);
                     final MenuItem saveItem = new MenuItem("Sauvegarder");
                     saveItem.setOnAction((ActionEvent event) -> {
-                        description.setGeometry(editGeometry.geometry.get());
-                        if (description.getDocumentId() != null) {
-                            repo.update(description);
+                        abstractAmenagement.setGeometry(editGeometry.geometry.get());
+                        if (abstractAmenagement.getDocumentId() != null) {
+                            repo.update(abstractAmenagement);
                         } else {
-                            repo.add(description);
+                            repo.add(abstractAmenagement);
                         }
                         // On quitte le mode d'édition.
                         reset();
@@ -428,7 +428,7 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
                         final Alert alert = new Alert(CONFIRMATION, "Voulez-vous vraiment supprimer l'objet sélectionné ?", YES, NO);
                         final Optional<ButtonType> result = alert.showAndWait();
                         if (result.isPresent() && result.get() == YES) {
-                            repo.remove(description);
+                            repo.remove(abstractAmenagement);
                         }
                         // On quitte le mode d'édition.
                         reset();
@@ -445,7 +445,7 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
             pressed = e.getButton();
             initHelper();
 
-            if(description != null && !newDescription && pressed == MouseButton.PRIMARY){
+            if(abstractAmenagement != null && !newDescription && pressed == MouseButton.PRIMARY){
                 // On va sélectionner un noeud sur lequel l'utilisateur a cliqué, s'il y en a un.
                 helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
                 decorationLayer.setNodeSelection(editGeometry);
@@ -458,7 +458,7 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
         public void mouseDragged(final MouseEvent e) {
             initHelper();
 
-            if(description != null && !newDescription && pressed == MouseButton.PRIMARY){
+            if(abstractAmenagement != null && !newDescription && pressed == MouseButton.PRIMARY){
                 // On déplace le noeud sélectionné
                 editGeometry.moveSelectedNode(helper.toCoord(e.getX(), e.getY()));
                 decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
@@ -470,20 +470,20 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
     }
 
     private Class initHelper() {
-        if (description != null) {
-            if (description instanceof StructureAmenagementHydraulique) {
+        if (abstractAmenagement != null) {
+            if (abstractAmenagement instanceof StructureAmenagementHydraulique) {
                 helper = new EditionHelper(map, structuresLayer);
                 return StructureAmenagementHydraulique.class;
-            } else if (description instanceof OuvrageAssocieAmenagementHydraulique) {
+            } else if (abstractAmenagement instanceof OuvrageAssocieAmenagementHydraulique) {
                 helper = new EditionHelper(map, ouvrageAssociesLayer);
                 return OuvrageAssocieAmenagementHydraulique.class;
-            } else if (description instanceof DesordreDependance) {
+            } else if (abstractAmenagement instanceof DesordreDependance) {
                 helper = new EditionHelper(map, desordresLayer);
                 return DesordreDependance.class;
-            } else if (description instanceof PrestationAmenagementHydraulique) {
+            } else if (abstractAmenagement instanceof PrestationAmenagementHydraulique) {
                 helper = new EditionHelper(map, prestationsLayer);
                 return PrestationAmenagementHydraulique.class;
-            } else if (description instanceof OrganeProtectionCollective) {
+            } else if (abstractAmenagement instanceof OrganeProtectionCollective) {
                 helper = new EditionHelper(map, organeProtectionCollectivesLayer);
                 return OrganeProtectionCollective.class;
             } else {
@@ -503,6 +503,6 @@ public class DescriptionAmenagementHydrauliqueEditHandler extends AbstractNaviga
         decorationLayer.setNodeSelection(null);
         coords.clear();
         editGeometry.reset();
-        description = null;
+        abstractAmenagement = null;
     }
 }

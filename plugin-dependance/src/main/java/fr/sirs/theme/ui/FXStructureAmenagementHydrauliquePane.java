@@ -63,7 +63,7 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
     
     // Propriétés de AvecSettableGeometrie
     
-    // Propriétés de DescriptionAmenagementHydraulique
+    // Propriétés de AbstractAmenagementHydraulique
     @FXML protected ComboBox ui_amenagementHydrauliqueId;
     @FXML protected Button ui_amenagementHydrauliqueId_link;
     
@@ -133,7 +133,7 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             ui_numCouche.getValueFactory().setValue(0);
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
-            // Propriétés de DescriptionAmenagementHydraulique
+            // Propriétés de AbstractAmenagementHydraulique
         }
         
         final Session session = Injector.getBean(Session.class);
@@ -158,7 +158,7 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             SIRS.initCombo(ui_sourceId, SIRS.observableList(sourceIdRepo.getAll()), newElement.getSourceId() == null? null : sourceIdRepo.get(newElement.getSourceId()));
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
-            // Propriétés de DescriptionAmenagementHydraulique
+            // Propriétés de AbstractAmenagementHydraulique
             {
             final Preview linearPreview = newElement.getAmenagementHydrauliqueId() == null ? null : previewRepository.get(newElement.getAmenagementHydrauliqueId());
             SIRS.initCombo(ui_amenagementHydrauliqueId, SIRS.observableList(

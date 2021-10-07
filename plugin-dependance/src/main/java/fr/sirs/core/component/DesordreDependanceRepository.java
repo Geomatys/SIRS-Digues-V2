@@ -20,7 +20,7 @@ import static fr.sirs.core.component.DesordreDependanceRepository.BY_AMENAGEMENT
  */
 @View(name=BY_AMENAGEMENT_HYDRAULIQUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.DesordreDependance') {emit(doc.amenagementHydrauliqueId, doc._id)}}")
 @Component("fr.sirs.core.component.DesordreDependanceRepository")
-public class DesordreDependanceRepository extends DescriptionAmenagementHydrauliqueRepository<DesordreDependance> {
+public class DesordreDependanceRepository extends AbstractAmenagementHydrauliqueRepository<DesordreDependance> {
 
     public static final String BY_AMENAGEMENT_HYDRAULIQUE_ID = "byAmenagementHydrauliqueId";
 
