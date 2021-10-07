@@ -16,21 +16,26 @@
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
-package fr.sirs.plugin.dependance.util;
+package fr.sirs.plugin.dependance;
+
+import fr.sirs.core.model.DesordreDependance;
+import fr.sirs.plugin.dependance.ui.AbstractDescriptionPane;
+import javafx.scene.Parent;
+import javafx.scene.layout.BorderPane;
 
 /**
  *
- * @author Maxime Gavens
+ * @author Gavens Maxime (Geomatys)
  */
-public class TabContent {
-    
-    public String tabName;
-    public String tableName;
-    public Class tableClass;
-    
-    public TabContent(String tabName, String tableName, Class tableClass) {
-        this.tabName    = tabName;
-        this.tableName  = tableName;
-        this.tableClass = tableClass;
+public class DesordreTheme extends AbstractDescriptionTheme {
+
+    public DesordreTheme() {
+        super("Désordres", "Désordres");
+    }
+
+    @Override
+    public Parent createPane() {
+        final BorderPane borderPane = new AbstractDescriptionPane("Tableau des désordres", DesordreDependance.class);
+        return borderPane;
     }
 }

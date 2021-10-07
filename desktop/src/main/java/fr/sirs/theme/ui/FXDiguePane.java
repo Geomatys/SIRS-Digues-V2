@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  *
  * @author Samuel Andrés (Geomatys)
- * @author Maxime Gavens (Geomatys)
  */
 public class FXDiguePane extends FXDiguePaneStub {
 

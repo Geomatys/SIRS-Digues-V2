@@ -32,7 +32,7 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
  * Graphic component that configures the amenagement hydraulique for the current
  * troncon.
  *
- * @author maximegavens
+ * @author Maxime Gavens (Geomatys)
  */
 public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
 

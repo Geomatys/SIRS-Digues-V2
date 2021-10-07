@@ -41,9 +41,6 @@ import javafx.scene.layout.BorderPane;
  */
 public abstract class AbstractDescriptionTheme extends AbstractPluginsButtonTheme {
 
-
-
-
     public AbstractDescriptionTheme(String name, String description) {
         super(name, description, null);
     }
@@ -55,8 +52,7 @@ public abstract class AbstractDescriptionTheme extends AbstractPluginsButtonThem
     }
 
     public static AbstractTheme.ThemeManager<AbstractAmenagementHydraulique> generateThemeManager(String tabTitle, final Class themeClass){
-        final ResourceBundle bundle = ResourceBundle.getBundle(themeClass.getCanonicalName(), Locale.getDefault(),
-                Thread.currentThread().getContextClassLoader());
+        final ResourceBundle bundle = ResourceBundle.getBundle(themeClass.getCanonicalName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
 
         final Function<String, ObservableList<AbstractAmenagementHydraulique>> extractor = (String ahId) -> {
             final List<AbstractAmenagementHydraulique> result = ((AbstractAmenagementHydrauliqueRepository) Injector.getSession().getRepositoryForClass(themeClass)).getByAmenagementHydrauliqueId(ahId);
@@ -67,7 +63,6 @@ public abstract class AbstractDescriptionTheme extends AbstractPluginsButtonThem
             Injector.getSession().getRepositoryForClass(themeClass).remove(themeElement);
         };
 
-        return new AbstractTheme.ThemeManager<>(bundle.getString(BUNDLE_KEY_CLASS), tabTitle,
-                themeClass, extractor, deletor);
+        return new AbstractTheme.ThemeManager<>(bundle.getString(BUNDLE_KEY_CLASS), tabTitle, themeClass, extractor, deletor);
     }
 }

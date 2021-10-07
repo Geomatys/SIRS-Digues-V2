@@ -21,7 +21,7 @@ package fr.sirs.core.component;
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
-import static fr.sirs.core.component.TraitAmenagementHydrauliqueRepository.BY_AMENAGEMENT_HYDRAULIQUE_ID;
+import static fr.sirs.core.component.AbstractAmenagementHydrauliqueRepository.BY_AMENAGEMENT_HYDRAULIQUE_ID;
 import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.TraitAmenagementHydraulique;
 import java.util.List;
@@ -42,8 +42,6 @@ public class TraitAmenagementHydrauliqueRepository extends
 AbstractSIRSRepository
 <TraitAmenagementHydraulique> {
 
-    public static final String BY_AMENAGEMENT_HYDRAULIQUE_ID = "byAmenagementHydrauliqueId";
-        
     @Autowired
     private TraitAmenagementHydrauliqueRepository ( CouchDbConnector db) {
        super(TraitAmenagementHydraulique.class, db);

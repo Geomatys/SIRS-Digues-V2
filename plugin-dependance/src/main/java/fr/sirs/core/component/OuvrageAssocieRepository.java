@@ -7,7 +7,6 @@ package fr.sirs.core.component;
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
-import fr.sirs.core.model.DesordreDependance;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +16,11 @@ import fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique;
 
 /**
  *
- * @author maximegavens
+ * @author Maxime Gavens (Geomatys)
  */
 @View(name=BY_AMENAGEMENT_HYDRAULIQUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique') {emit(doc.amenagementHydrauliqueId, doc._id)}}")
 @Component("fr.sirs.core.component.OuvrageAssocieRepository")
 public class OuvrageAssocieRepository extends AbstractAmenagementHydrauliqueRepository<OuvrageAssocieAmenagementHydraulique> {
-
-    public static final String BY_AMENAGEMENT_HYDRAULIQUE_ID = "byAmenagementHydrauliqueId";
 
     @Autowired
     private OuvrageAssocieRepository ( CouchDbConnector db) {

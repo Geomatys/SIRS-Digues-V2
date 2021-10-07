@@ -81,7 +81,7 @@ import javafx.scene.control.ChoiceDialog;
 
 /**
  * {@link AbstractNavigationHandler} permettant le contrôle les actions
- * possibles pour le bouton d'édition et de modification des description
+ * possibles pour le bouton d'édition et de modification des descriptions
  * d'aménagement hydraulique sur la carte.
  *
  * @author Maxime Gavens (Geomatys)

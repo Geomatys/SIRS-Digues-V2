@@ -37,7 +37,7 @@ public final class DescriptionDependanceAHTheme extends AbstractPluginsButtonThe
         super("Description dépendance et AH", "Description dépendance et AH", BUTTON_IMAGE);
         getSubThemes().add(new StructureTheme());
         getSubThemes().add(new OuvrageAssocieTheme());
-        getSubThemes().add(new DesordresTheme());
+        getSubThemes().add(new DesordreTheme());
         getSubThemes().add(new PrestationTheme());
         getSubThemes().add(new OrganeProtectionTheme());
     }
