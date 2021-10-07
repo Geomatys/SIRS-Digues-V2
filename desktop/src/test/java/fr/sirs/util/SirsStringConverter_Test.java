@@ -19,9 +19,6 @@
 package fr.sirs.util;
 
 import fr.sirs.core.model.AmenagementHydrauliqueView;
-import fr.sirs.core.model.AvecLibelle;
-import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import org.junit.Assert;
 import org.junit.Test;
@@ -65,7 +62,7 @@ public class SirsStringConverter_Test {
         final SirsStringConverter converter = new SirsStringConverter();
 
         final AmenagementHydrauliqueView ahView = new AmenagementHydrauliqueView();
-        ahView.setDesignation("ahViewdesignation1");
+        ahView.setDesignation("ahViewDesignation1");
         final String toString = converter.toString(ahView, true, true);
         final String toString2 = converter.toString(ahView, true, false);
         final String toString3 = converter.toString(ahView, false, true);
