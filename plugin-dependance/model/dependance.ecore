@@ -46,7 +46,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typePrestationId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefPrestation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="marcheId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Marche"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Desordre"/>
+        eType="#//DesordreDependance"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocieAmenagementHydrauliqueIds"
         upperBound="-1" eType="#//OuvrageAssocieAmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
@@ -120,7 +120,7 @@
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="profondeurMoyenne" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Desordre"/>
+        eType="#//DesordreDependance"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="structureIds" upperBound="-1"
         eType="#//StructureAmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocieIds" upperBound="-1"
@@ -134,7 +134,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Observation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Prestation"/>
+        eType="#//PrestationAmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="proprietaireIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Contact"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="traitIds" upperBound="-1"
@@ -156,7 +156,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocieIds" upperBound="-1"
         eType="#//OuvrageAssocieAmenagementHydraulique" eOpposite="#//OuvrageAssocieAmenagementHydraulique/desordreDependanceAssocieIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Prestation"/>
+        eType="#//PrestationAmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//ArticleJournal"/>
   </eClassifiers>
