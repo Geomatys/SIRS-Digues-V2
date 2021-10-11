@@ -25,7 +25,9 @@ import fr.sirs.util.property.SirsPreferences;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.Property;
@@ -88,7 +90,17 @@ public class FXSirsPreferenceEditor extends ScrollPane implements SaveableConfig
         propertyPane.setPadding(new Insets(10));
 
         int row = 0;
+        List basemapProperties = Arrays.asList(
+                    SirsPreferences.PROPERTIES.BASEMAP_CHOICE,
+                    SirsPreferences.PROPERTIES.BASEMAP_FILE_TYPE,
+                    SirsPreferences.PROPERTIES.BASEMAP_LOCAL_FILE,
+                    SirsPreferences.PROPERTIES.BASEMAP_OSM_TILE_URL,
+                    SirsPreferences.PROPERTIES.BASEMAP_WM_TYPE,
+                    SirsPreferences.PROPERTIES.BASEMAP_WM_URL
+                    );
         for (final SirsPreferences.PROPERTIES p : SirsPreferences.PROPERTIES.values()) {
+            // We don't want basemap properties appear in general property configuration.
+            if (basemapProperties.contains(p)) continue;
             final Label propLibelle = new Label(p.title);
             propLibelle.setTooltip(new Tooltip(p.description));
             propertyPane.add(propLibelle, 0, row);

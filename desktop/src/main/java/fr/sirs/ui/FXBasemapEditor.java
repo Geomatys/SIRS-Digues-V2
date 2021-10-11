@@ -71,15 +71,18 @@ public class FXBasemapEditor extends BorderPane implements SaveableConfiguration
         uiRadioButtonOsmTile.setToggleGroup(group);
         uiRadioButtonLocalFile.setToggleGroup(group);
 
-        if (WMS_WMTS_CHOICE.equals(previousChoice)) {
-            uiRadioButtonWM.selectedProperty().setValue(true);
-        } else if (OSM_TILE_CHOICE.equals(previousChoice)) {
-            uiRadioButtonOsmTile.selectedProperty().setValue(true);
-        } else if (FILE_CHOICE.equals(previousChoice)) {
-            uiRadioButtonLocalFile.selectedProperty().setValue(true);
-        } else {
-            // default choice
-            uiRadioButtonOsmTile.selectedProperty().setValue(true);
+        switch (previousChoice) {
+            case WMS_WMTS_CHOICE:
+                uiRadioButtonWM.selectedProperty().setValue(true);
+                break;
+            case OSM_TILE_CHOICE:
+                uiRadioButtonOsmTile.selectedProperty().setValue(true);
+            case FILE_CHOICE:
+                uiRadioButtonLocalFile.selectedProperty().setValue(true);
+            default:
+                // default choice
+                uiRadioButtonOsmTile.selectedProperty().setValue(true);
+                break;
         }
 
         uiChoiceService.setItems(FXCollections.observableList(Arrays.asList(new String[]{WMS111, WMS130, WMTS100})));
