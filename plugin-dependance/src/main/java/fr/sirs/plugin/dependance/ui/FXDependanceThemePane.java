@@ -68,6 +68,8 @@ public class FXDependanceThemePane extends BorderPane {
         uiAhChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) -> {
             if (newValue != null) {
                 ahIdProperty.set(newValue.getElementId());
+            } else {
+                ahIdProperty.set(null);
             }
         });
 
@@ -100,6 +102,9 @@ public class FXDependanceThemePane extends BorderPane {
             super(group.getDataClass(), group.getTableTitle(), container);
             ahIdProperty.addListener(this::updateTable);
             this.group = group;
+            if (ahIdProperty.get() == null) {
+                updateTable(null, null, null);
+            }
         }
 
         private void updateTable(ObservableValue<? extends String> observable, String oldValue, String newValue){
