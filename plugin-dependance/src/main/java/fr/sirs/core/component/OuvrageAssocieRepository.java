@@ -31,7 +31,7 @@ import fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique;
  *
  * @author Maxime Gavens (Geomatys)
  */
-@View(name=BY_AMENAGEMENT_HYDRAULIQUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique') { if(doc.amenagementHydrauliqueId==null) {emit('-1', doc._id)} else {emit(doc.amenagementHydrauliqueId, doc._id)}}}")
+@View(name=BY_AMENAGEMENT_HYDRAULIQUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique') {emit(doc.amenagementHydrauliqueId, doc._id)}}")
 @Component("fr.sirs.core.component.OuvrageAssocieRepository")
 public class OuvrageAssocieRepository extends AbstractAmenagementHydrauliqueRepository<OuvrageAssocieAmenagementHydraulique> {
 
