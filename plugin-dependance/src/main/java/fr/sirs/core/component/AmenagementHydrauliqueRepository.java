@@ -76,7 +76,7 @@ public class AmenagementHydrauliqueRepository extends AbstractSIRSRepository<Ame
             final AbstractAmenagementHydrauliqueRepository repo = (AbstractAmenagementHydrauliqueRepository) Injector.getSession().getRepositoryForClass(c);
             List<AbstractAmenagementHydraulique> aahList = repo.getByAmenagementHydrauliqueId(ID);
 
-            aahList.forEach(aah -> aah.setAmenagementHydrauliqueId("-1"));
+            aahList.forEach(aah -> aah.setAmenagementHydrauliqueId(null));
             repo.executeBulk(aahList);
         }
     }
