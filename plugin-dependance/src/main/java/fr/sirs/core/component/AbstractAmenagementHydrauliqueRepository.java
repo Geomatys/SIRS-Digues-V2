@@ -29,16 +29,21 @@ import org.ektorp.CouchDbConnector;
  * @author maximegavens
  */
 public abstract class AbstractAmenagementHydrauliqueRepository<T extends AbstractAmenagementHydraulique> extends AbstractSIRSRepository<T> {
-    
+
     public static final String BY_AMENAGEMENT_HYDRAULIQUE_ID = "byAmenagementHydrauliqueId";
 
     public AbstractAmenagementHydrauliqueRepository(Class<T> type, CouchDbConnector db) {
         super(type, db);
     }
-    
+
     public List<T> getByAmenagementHydrauliqueId(final String ahId) {
-        //ArgumentChecks.ensureNonNull("Amenagement hydraulique", ahId);
-        return this.queryView(BY_AMENAGEMENT_HYDRAULIQUE_ID, ahId);
+        List<T> result = this.queryView(BY_AMENAGEMENT_HYDRAULIQUE_ID, ahId);
+        // if the key is null, couchdb returns all the elements for this class,
+        // we don't want it so we operate oursleves the filtering
+        if (ahId == null) {
+            result.removeIf(aah -> aah.getAmenagementHydrauliqueId() != null);
+        }
+        return result;
     }
 
     public List<T> getByAmenagementHydraulique(final AmenagementHydraulique ah) {

@@ -24,7 +24,7 @@ import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import static fr.sirs.core.component.OuvrageAssocieRepository.BY_AMENAGEMENT_HYDRAULIQUE_ID;
+import static fr.sirs.core.component.OuvrageAssocieAmenagementHydrauliqueRepository.BY_AMENAGEMENT_HYDRAULIQUE_ID;
 import fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique;
 
 /**
@@ -32,11 +32,11 @@ import fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique;
  * @author Maxime Gavens (Geomatys)
  */
 @View(name=BY_AMENAGEMENT_HYDRAULIQUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique') {emit(doc.amenagementHydrauliqueId, doc._id)}}")
-@Component("fr.sirs.core.component.OuvrageAssocieRepository")
-public class OuvrageAssocieRepository extends AbstractAmenagementHydrauliqueRepository<OuvrageAssocieAmenagementHydraulique> {
+@Component("fr.sirs.core.component.OuvrageAssocieAmenagementHydrauliqueRepository")
+public class OuvrageAssocieAmenagementHydrauliqueRepository extends AbstractAmenagementHydrauliqueRepository<OuvrageAssocieAmenagementHydraulique> {
 
     @Autowired
-    private OuvrageAssocieRepository ( CouchDbConnector db) {
+    private OuvrageAssocieAmenagementHydrauliqueRepository ( CouchDbConnector db) {
        super(OuvrageAssocieAmenagementHydraulique.class, db);
        initStandardDesignDocument();
    }
