@@ -31,7 +31,7 @@ import javafx.scene.layout.BorderPane;
 public class OrganeProtectionTheme extends AbstractDescriptionTheme {
 
     public OrganeProtectionTheme() {
-        super("Organes de protection collective", "Organes de protection collective");
+        super("Organes de protection collective", "Organes de protection collective (AH)");
     }
 
     @Override

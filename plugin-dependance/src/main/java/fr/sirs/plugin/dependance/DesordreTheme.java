@@ -36,7 +36,7 @@ public class DesordreTheme extends AbstractDescriptionTheme {
 
     @Override
     public Parent createPane() {
-        final BorderPane borderPane = new AbstractDescriptionPane("Tableau des désordres", DesordreDependance.class);
+        final BorderPane borderPane = new AbstractDescriptionPane("Tableau des désordres (dépendance et AH)", DesordreDependance.class);
         return borderPane;
     }
 }

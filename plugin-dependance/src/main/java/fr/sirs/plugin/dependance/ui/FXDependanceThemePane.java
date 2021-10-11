@@ -56,6 +56,7 @@ public class FXDependanceThemePane extends BorderPane {
     static {
         EMPTY_PREVIEW.setElementClass(AmenagementHydraulique.class.getCanonicalName());
         EMPTY_PREVIEW.setLibelle("   Pas d'aménagement hydraulique de rattachement - objets orphelins   ");
+        EMPTY_PREVIEW.setElementId("-1");
     }
 
     private final StringProperty ahIdProperty = new SimpleStringProperty();

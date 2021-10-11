@@ -31,7 +31,7 @@ import static fr.sirs.core.component.DesordreDependanceRepository.BY_AMENAGEMENT
  *
  * @author Maxime Gavens (Geomatys)
  */
-@View(name=BY_AMENAGEMENT_HYDRAULIQUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.DesordreDependance') {emit(doc.amenagementHydrauliqueId, doc._id)}}")
+@View(name=BY_AMENAGEMENT_HYDRAULIQUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.DesordreDependance') { if(doc.amenagementHydrauliqueId==null) {emit('-1', doc._id)} else {emit(doc.amenagementHydrauliqueId, doc._id)}}}")
 @Component("fr.sirs.core.component.DesordreDependanceRepository")
 public class DesordreDependanceRepository extends AbstractAmenagementHydrauliqueRepository<DesordreDependance> {
 

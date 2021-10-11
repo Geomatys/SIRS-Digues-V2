@@ -19,8 +19,8 @@
           <children>
               <Label text="Amenagement hydraulique" />
               <HBox alignment="CENTER" GridPane.columnIndex="2">
-                  <RadioButton fx:id="uiAhOui" mnemonicParsing="false" text="oui" />
-                  <RadioButton fx:id="uiAhNon" mnemonicParsing="false" text="non" />
+                  <RadioButton fx:id="uiWithAh" mnemonicParsing="false" text="oui" />
+                  <RadioButton fx:id="uiWithoutAh" mnemonicParsing="false" text="non" />
               </HBox>
           </children>
           <padding>

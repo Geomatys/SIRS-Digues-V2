@@ -36,7 +36,7 @@ public class PrestationTheme extends AbstractDescriptionTheme {
 
     @Override
     public Parent createPane() {
-        final BorderPane borderPane = new AbstractDescriptionPane("Tableau des prestations", PrestationAmenagementHydraulique.class);
+        final BorderPane borderPane = new AbstractDescriptionPane("Tableau des prestations (AH)", PrestationAmenagementHydraulique.class);
         return borderPane;
     }
 }

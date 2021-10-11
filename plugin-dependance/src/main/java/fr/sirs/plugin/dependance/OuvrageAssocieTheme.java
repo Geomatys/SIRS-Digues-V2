@@ -36,7 +36,7 @@ public class OuvrageAssocieTheme extends AbstractDescriptionTheme {
 
     @Override
     public Parent createPane() {
-        final BorderPane borderPane = new AbstractDescriptionPane("Tableau des ouvrages associés",  OuvrageAssocieAmenagementHydraulique.class);
+        final BorderPane borderPane = new AbstractDescriptionPane("Tableau des ouvrages associés (AH)",  OuvrageAssocieAmenagementHydraulique.class);
         return borderPane;
     }
 }
