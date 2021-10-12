@@ -27,11 +27,13 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.AireStockageDependanceRepository;
+import fr.sirs.core.component.AmenagementHydrauliqueRepository;
 import fr.sirs.core.component.AutreDependanceRepository;
 import fr.sirs.core.component.CheminAccesDependanceRepository;
 import fr.sirs.core.component.OuvrageVoirieDependanceRepository;
 import fr.sirs.core.model.AbstractDependance;
 import fr.sirs.core.model.AireStockageDependance;
+import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.AutreDependance;
 import fr.sirs.core.model.CheminAccesDependance;
 import fr.sirs.core.model.OuvrageVoirieDependance;
@@ -98,7 +100,8 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
     private FeatureMapLayer aireLayer;
     private FeatureMapLayer autreLayer;
     private FeatureMapLayer cheminLayer;
-    private FeatureMapLayer ouvrageLayer;
+    private FeatureMapLayer ouvrageVoirieLayer;
+    private FeatureMapLayer amenagementLayer;
 
     /**
      * La dépendance en cours.
@@ -158,7 +161,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                 newGeomType = LineString.class;
             }else {
                 //on demande a l'utilisateur
-                final ChoiceDialog<String> choice = new ChoiceDialog<>("Ponctuel", "Ponctuel","Linéaire","Surfacique");
+                final ChoiceDialog<String> choice = new ChoiceDialog<>("Ponctuel","Linéaire","Surfacique");
                 choice.setHeaderText("Choix de la forme géométrique de la dépendance.");
                 choice.setTitle("Type de géométrie");
                 final Optional<String> showAndWait = choice.showAndWait();
@@ -188,7 +191,8 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
         aireLayer = PluginDependance.getAireLayer();
         autreLayer = PluginDependance.getAutreLayer();
         cheminLayer = PluginDependance.getCheminLayer();
-        ouvrageLayer = PluginDependance.getOuvrageLayer();
+        ouvrageVoirieLayer = PluginDependance.getOuvrageVoirieLayer();
+        amenagementLayer = PluginDependance.getAmenagementLayer();
     }
 
     /**
@@ -237,7 +241,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
             if (MouseButton.PRIMARY.equals(e.getButton())) {
                 if (dependance == null) {
                     // Recherche d'une couche de la carte qui contiendrait une géométrie là où l'utilisateur a cliqué
-                    final Rectangle2D clickArea = new Rectangle2D.Double(e.getX()-2, e.getY()-2, 4, 4);
+                    final Rectangle2D clickArea = new Rectangle2D.Double(x - 2, y - 2, 4, 4);
 
                     //recherche d'un object a editer
                     map.getCanvas().getGraphicsIn(clickArea, new AbstractGraphicVisitor() {
@@ -275,11 +279,13 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                             } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
                                 helper = new EditionHelper(map, cheminLayer);
                             } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
-                                helper = new EditionHelper(map, ouvrageLayer);
+                                helper = new EditionHelper(map, ouvrageVoirieLayer);
+                            } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
+                                helper = new EditionHelper(map, amenagementLayer);
                             }
                         }
 
-                        // La classe d'objet à dessiner est un polygone pour une aire de stockage, une ligne pour un chemin d'accès
+                        // La classe de l'objet à dessiner est un polygone pour une aire de stockage, une ligne pour un chemin d'accès
                         // sinon c'est le choix fait par l'utilisateur dans le panneau de création de dépendance.
                         final Class geomClass = AireStockageDependance.class.isAssignableFrom(clazz) ? Polygon.class :
                                                 CheminAccesDependance.class.isAssignableFrom(clazz) ? LineString.class : newGeomType;
@@ -373,7 +379,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     gridPane.setPadding(new Insets(10));
                     gridPane.add(new Label("Choisir un type de dépendance"), 0, 0);
                     final ComboBox<String> dependanceTypeBox = new ComboBox<>();
-                    dependanceTypeBox.setItems(FXCollections.observableArrayList("Ouvrages de voirie", "Chemins d'accès", "Aires de stockage", "Autres"));
+                    dependanceTypeBox.setItems(FXCollections.observableArrayList("Ouvrages de voirie", "Chemins d'accès", "Aires de stockage", "Aménagements hydrauliques", "Autres"));
                     dependanceTypeBox.getSelectionModel().selectFirst();
                     gridPane.add(dependanceTypeBox, 1, 0);
 
@@ -381,6 +387,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     geomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
                     geomTypeBox.getSelectionModel().selectFirst();
                     geomTypeBox.visibleProperty().bind(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Ouvrages de voirie")
+                            .or(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Aménagements hydrauliques"))
                             .or(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Autres")));
                     final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
                     geomChoiceLbl.visibleProperty().bind(geomTypeBox.visibleProperty());
@@ -401,6 +408,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                         case "Autres": clazz = AutreDependance.class; break;
                         case "Chemins d'accès": clazz = CheminAccesDependance.class; break;
                         case "Ouvrages de voirie": clazz = OuvrageVoirieDependance.class; break;
+                        case "Aménagements hydrauliques": clazz = AmenagementHydraulique.class; break;
                         default: clazz = AireStockageDependance.class;
                     }
 
@@ -411,7 +419,9 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, cheminLayer);
                     } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
-                        helper = new EditionHelper(map, ouvrageLayer);
+                        helper = new EditionHelper(map, ouvrageVoirieLayer);
+                    } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, amenagementLayer);
                     }
 
                     final AbstractSIRSRepository<AbstractDependance> repodep = Injector.getSession().getRepositoryForClass(clazz);
@@ -440,12 +450,14 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, cheminLayer);
                     } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
-                        helper = new EditionHelper(map, ouvrageLayer);
+                        helper = new EditionHelper(map, ouvrageVoirieLayer);
+                    } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, amenagementLayer);
                     }
 
                     //action : suppression d'un noeud
-                    if(editGeometry.geometry.get()!=null){
-                        helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
+                    if (editGeometry.geometry.get() != null){
+                        helper.grabGeometryNode(x, y, editGeometry);
                         if (editGeometry.selectedNode[0] >= 0) {
                             final MenuItem item = new MenuItem("Supprimer noeud");
                             item.setOnAction((ActionEvent event) -> {
@@ -496,6 +508,8 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                                 Injector.getBean(CheminAccesDependanceRepository.class).remove((CheminAccesDependance)dependance);
                             } else if (OuvrageVoirieDependance.class.isAssignableFrom(dependance.getClass())) {
                                 Injector.getBean(OuvrageVoirieDependanceRepository.class).remove((OuvrageVoirieDependance)dependance);
+                            } else if (AmenagementHydraulique.class.isAssignableFrom(dependance.getClass())) {
+                                Injector.getBean(AmenagementHydrauliqueRepository.class).remove((AmenagementHydraulique)dependance);
                             }
                             // On quitte le mode d'édition.
                             reset();
@@ -503,7 +517,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     });
                     popup.getItems().add(deleteItem);
 
-                    popup.show(decorationLayer, Side.TOP, e.getX(), e.getY());
+                    popup.show(decorationLayer, Side.TOP, x, y);
                 }
             }
         }
@@ -526,7 +540,9 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
                         helper = new EditionHelper(map, cheminLayer);
                     } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
-                        helper = new EditionHelper(map, ouvrageLayer);
+                        helper = new EditionHelper(map, ouvrageVoirieLayer);
+                    } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, amenagementLayer);
                     }
                 }
                 helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);

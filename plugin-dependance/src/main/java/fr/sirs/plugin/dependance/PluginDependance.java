@@ -23,17 +23,19 @@ import fr.sirs.Plugin;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
-import fr.sirs.core.component.AireStockageDependanceRepository;
-import fr.sirs.core.component.AutreDependanceRepository;
-import fr.sirs.core.component.CheminAccesDependanceRepository;
-import fr.sirs.core.component.DesordreDependanceRepository;
-import fr.sirs.core.component.OuvrageVoirieDependanceRepository;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AireStockageDependance;
+import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.AutreDependance;
 import fr.sirs.core.model.CheminAccesDependance;
 import fr.sirs.core.model.DesordreDependance;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.OuvrageVoirieDependance;
+import fr.sirs.core.model.TraitAmenagementHydraulique;
+import fr.sirs.core.model.PrestationAmenagementHydraulique;
+import fr.sirs.core.model.StructureAmenagementHydraulique;
+import fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique;
+import fr.sirs.core.model.OrganeProtectionCollective;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.dependance.map.DependanceToolBar;
 import java.io.IOException;
@@ -56,22 +58,34 @@ import org.geotoolkit.map.MapItem;
  *
  * @author Alexis Manin (Geomatys)
  * @author Cédric Briançon (Geomatys)
+ * @author Maxime Gavens (Geomatys)
  */
 public class PluginDependance extends Plugin {
     private static final String NAME = "plugin-dependance";
     private static final String TITLE = "Module dépendance";
 
+    //doit avoir la meme valeur que dans le fichier Berge.properties classPlural
+    public static final String LAYER_AH_NAME = "Aménagements hydrauliques";
+    public static final String LAYER_TRAIT_NAME = "Traits d'aménagement hydraulique";
+
     private static FeatureMapLayer aireLayer;
     private static FeatureMapLayer autreLayer;
     private static FeatureMapLayer cheminLayer;
-    private static FeatureMapLayer ouvrageLayer;
+    private static FeatureMapLayer ouvrageVoirieLayer;
+    private static FeatureMapLayer amenagementLayer;
+    private static FeatureMapLayer traitAmenagementLayer;
+
     private static FeatureMapLayer desordreLayer;
+    private static FeatureMapLayer prestationLayer;
+    private static FeatureMapLayer structureLayer;
+    private static FeatureMapLayer ouvrageAssocieLayer;
+    private static FeatureMapLayer organeProtectionLayer;
 
     public PluginDependance() {
         name = NAME;
         loadingMessage.set("module dépendance");
         themes.add(new DependancesTheme());
-        themes.add(new DesordresDependanceTheme());
+        themes.add(new DescriptionDependanceAHTheme());
     }
 
     @Override
@@ -98,77 +112,32 @@ public class PluginDependance extends Plugin {
     public List<MapItem> getMapItems() {
         final List<MapItem> items = new ArrayList<>();
         final MapItem depGroup = MapBuilder.createItem();
+
         depGroup.setName("Dépendances");
         depGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-
-        final AireStockageDependanceRepository aireRepo = Injector.getBean(AireStockageDependanceRepository.class);
-        final AutreDependanceRepository autreRepo = Injector.getBean(AutreDependanceRepository.class);
-        final CheminAccesDependanceRepository cheminRepo = Injector.getBean(CheminAccesDependanceRepository.class);
-        final OuvrageVoirieDependanceRepository ouvrageRepo = Injector.getBean(OuvrageVoirieDependanceRepository.class);
-
-        try {
-            final StructBeanSupplier ouvrageSupplier = new StructBeanSupplier(OuvrageVoirieDependance.class, ouvrageRepo::getAll);
-            final BeanStore ouvrageStore = new BeanStore(ouvrageSupplier);
-            ouvrageLayer = MapBuilder.createFeatureLayer(ouvrageStore.createSession(true)
-                    .getFeatureCollection(QueryBuilder.all(ouvrageStore.getNames().iterator().next())));
-            ouvrageLayer.setName(LabelMapper.get(OuvrageVoirieDependance.class).mapClassName());
-            ouvrageLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            depGroup.items().add(0, ouvrageLayer);
-        } catch(Exception ex) {
-            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-        }
-
-        try {
-            final StructBeanSupplier cheminSupplier = new StructBeanSupplier(CheminAccesDependance.class, cheminRepo::getAll);
-            final BeanStore cheminStore = new BeanStore(cheminSupplier);
-            cheminLayer = MapBuilder.createFeatureLayer(cheminStore.createSession(true)
-                    .getFeatureCollection(QueryBuilder.all(cheminStore.getNames().iterator().next())));
-            cheminLayer.setName(LabelMapper.get(CheminAccesDependance.class).mapClassName());
-            cheminLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            depGroup.items().add(1, cheminLayer);
-        } catch(Exception ex) {
-            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-        }
-
-        try {
-            final StructBeanSupplier autreSupplier = new StructBeanSupplier(AutreDependance.class, autreRepo::getAll);
-            final BeanStore autreStore = new BeanStore(autreSupplier);
-            autreLayer = MapBuilder.createFeatureLayer(autreStore.createSession(true)
-                    .getFeatureCollection(QueryBuilder.all(autreStore.getNames().iterator().next())));
-            autreLayer.setName(LabelMapper.get(AutreDependance.class).mapClassName());
-            autreLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            depGroup.items().add(2, autreLayer);
-        } catch(Exception ex) {
-            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-        }
-
-        try {
-            final StructBeanSupplier aireSupplier = new StructBeanSupplier(AireStockageDependance.class, aireRepo::getAll);
-            final BeanStore aireStore = new BeanStore(aireSupplier);
-            aireLayer = MapBuilder.createFeatureLayer(aireStore.createSession(true)
-                    .getFeatureCollection(QueryBuilder.all(aireStore.getNames().iterator().next())));
-            aireLayer.setName(LabelMapper.get(AireStockageDependance.class).mapClassName());
-            aireLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            depGroup.items().add(3, aireLayer);
-        } catch(Exception ex) {
-            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-        }
-
+        ouvrageVoirieLayer = buildMapLayerDependance(OuvrageVoirieDependance.class, LabelMapper.get(OuvrageVoirieDependance.class).mapClassName());
+        traitAmenagementLayer = buildMapLayerDependance(TraitAmenagementHydraulique.class, LAYER_TRAIT_NAME);
+        cheminLayer = buildMapLayerDependance(CheminAccesDependance.class, LabelMapper.get(CheminAccesDependance.class).mapClassName());
+        autreLayer = buildMapLayerDependance(AutreDependance.class, LabelMapper.get(AutreDependance.class).mapClassName());
+        aireLayer = buildMapLayerDependance(AireStockageDependance.class, LabelMapper.get(AireStockageDependance.class).mapClassName());
+        amenagementLayer = buildMapLayerDependance(AmenagementHydraulique.class, LAYER_AH_NAME);
+        desordreLayer = buildMapLayerDependance(DesordreDependance.class, LabelMapper.get(DesordreDependance.class).mapClassName());
+        prestationLayer = buildMapLayerDependance(PrestationAmenagementHydraulique.class, LabelMapper.get(PrestationAmenagementHydraulique.class).mapClassName());
+        structureLayer = buildMapLayerDependance(StructureAmenagementHydraulique.class, LabelMapper.get(StructureAmenagementHydraulique.class).mapClassName());
+        ouvrageAssocieLayer = buildMapLayerDependance(OuvrageAssocieAmenagementHydraulique.class, LabelMapper.get(OuvrageAssocieAmenagementHydraulique.class).mapClassName());
+        organeProtectionLayer = buildMapLayerDependance(OrganeProtectionCollective.class, LabelMapper.get(OrganeProtectionCollective.class).mapClassName());
+        depGroup.items().add(ouvrageVoirieLayer);
+        depGroup.items().add(traitAmenagementLayer);
+        depGroup.items().add(cheminLayer);
+        depGroup.items().add(autreLayer);
+        depGroup.items().add(aireLayer);
+        depGroup.items().add(amenagementLayer);
+        depGroup.items().add(desordreLayer);
+        depGroup.items().add(prestationLayer);
+        depGroup.items().add(structureLayer);
+        depGroup.items().add(ouvrageAssocieLayer);
+        depGroup.items().add(organeProtectionLayer);
         items.add(depGroup);
-
-        final DesordreDependanceRepository desordreRepo = Injector.getBean(DesordreDependanceRepository.class);
-        try {
-            final StructBeanSupplier desSupplier = new StructBeanSupplier(DesordreDependance.class, desordreRepo::getAll);
-            final BeanStore desStore = new BeanStore(desSupplier);
-            desordreLayer = MapBuilder.createFeatureLayer(desStore.createSession(true)
-                    .getFeatureCollection(QueryBuilder.all(desStore.getNames().iterator().next())));
-            desordreLayer.setName(LabelMapper.get(DesordreDependance.class).mapClassName());
-            desordreLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            depGroup.items().add(desordreLayer);
-        } catch(Exception ex) {
-            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-        }
-
         return items;
     }
 
@@ -184,12 +153,32 @@ public class PluginDependance extends Plugin {
         return cheminLayer;
     }
 
-    public static FeatureMapLayer getOuvrageLayer() {
-        return ouvrageLayer;
+    public static FeatureMapLayer getOuvrageVoirieLayer() {
+        return ouvrageVoirieLayer;
     }
 
     public static FeatureMapLayer getDesordreLayer() {
         return desordreLayer;
+    }
+
+    public static FeatureMapLayer getAmenagementLayer() {
+        return amenagementLayer;
+    }
+
+    public static FeatureMapLayer getPrestationLayer() {
+        return prestationLayer;
+    }
+
+    public static FeatureMapLayer getStructureLayer() {
+        return structureLayer;
+    }
+
+    public static FeatureMapLayer getOuvrageAssocieLayer() {
+        return ouvrageAssocieLayer;
+    }
+
+    public static FeatureMapLayer getOrganeProtectionLayer() {
+        return organeProtectionLayer;
     }
 
     @Override
@@ -200,5 +189,21 @@ public class PluginDependance extends Plugin {
             image = new Image(in);
         }
         return Optional.of(image);
+    }
+
+    private FeatureMapLayer buildMapLayerDependance(final Class clazz, final String name) {
+        try {
+            final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(clazz);
+            final StructBeanSupplier supplier = new StructBeanSupplier(clazz, repo::getAll);
+            final BeanStore store = new BeanStore(supplier);
+            final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(true)
+                    .getFeatureCollection(QueryBuilder.all(store.getNames().iterator().next())));
+            layer.setName(name);
+            layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            return layer;
+        } catch(Exception ex) {
+            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+            return null;
+        }
     }
 }

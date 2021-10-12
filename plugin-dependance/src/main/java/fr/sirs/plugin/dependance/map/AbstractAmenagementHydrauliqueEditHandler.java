@@ -1,20 +1,20 @@
-/**
+/*
  * This file is part of SIRS-Digues 2.
  *
- * Copyright (C) 2016, FRANCE-DIGUES,
+ *  Copyright (C) 2021, FRANCE-DIGUES,
  *
- * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ *  SIRS-Digues 2 is free software: you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the Free
+ *  Software Foundation, either version 3 of the License, or (at your option) any
+ *  later version.
  *
- * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ *  SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ *  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
  *
- * You should have received a copy of the GNU General Public License along with
- * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
+ *  You should have received a copy of the GNU General Public License along with
+ *  SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
 package fr.sirs.plugin.dependance.map;
 
@@ -25,8 +25,13 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.component.DesordreDependanceRepository;
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.AbstractAmenagementHydraulique;
 import fr.sirs.core.model.DesordreDependance;
+import fr.sirs.core.model.OrganeProtectionCollective;
+import fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique;
+import fr.sirs.core.model.PrestationAmenagementHydraulique;
+import fr.sirs.core.model.StructureAmenagementHydraulique;
 import fr.sirs.plugin.dependance.PluginDependance;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -72,25 +77,23 @@ import java.util.Optional;
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
+import javafx.scene.control.ChoiceDialog;
 
 /**
  * {@link AbstractNavigationHandler} permettant le contrôle les actions
- * possibles pour le bouton d'édition et de modification de dépendances sur la
- * carte.
+ * possibles pour le bouton d'édition et de modification des descriptions
+ * d'aménagement hydraulique sur la carte.
  *
- * Note : appelée dans l'application Sirs depuis le {@link ToggleButton} sur la
- * carte. Pourrait être regroupé avec {@link DesordreEditHandler}.
- *
- * @author Cédric Briançon (Geomatys)
+ * @author Maxime Gavens (Geomatys)
  */
-public class DesordreCreateHandler extends AbstractNavigationHandler {
+public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigationHandler {
     private final MouseListen mouseInputListener = new MouseListen();
     private final FXGeometryLayer decorationLayer = new FXGeometryLayer();
 
     /**
-     * Le désordre en cours.
+     * La abstractAmenagementHydraulique en cours.
      */
-    private DesordreDependance desordre;
+    private AbstractAmenagementHydraulique abstractAmenagement;
 
     /**
      * Outil d'aide pour éditer une {@linkplain #editGeometry géométrie} existante.
@@ -110,7 +113,7 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
     /**
      * Vrai si un désordre vient d'être créée.
      */
-    private boolean newDesordre = false;
+    private boolean newDescription = false;
 
     /**
      * Définit le type de géométries à dessiner.
@@ -126,10 +129,40 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
     /**
      * Couches présentant les désordres sur la carte.
      */
+    private FeatureMapLayer structuresLayer;
+    private FeatureMapLayer ouvrageAssociesLayer;
     private FeatureMapLayer desordresLayer;
+    private FeatureMapLayer prestationsLayer;
+    private FeatureMapLayer organeProtectionCollectivesLayer;
 
-    public DesordreCreateHandler() {
+    public AbstractAmenagementHydrauliqueEditHandler() {
         super();
+    }
+
+    public AbstractAmenagementHydrauliqueEditHandler(final AbstractAmenagementHydraulique abstractAmenagement) {
+        this();
+        this.abstractAmenagement = abstractAmenagement;
+        newDescription = true;
+
+        if (abstractAmenagement.getGeometry() != null) {
+            editGeometry.geometry.set((Geometry)abstractAmenagement.getGeometry().clone());
+            decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
+            newDescription = false;
+        } else {
+            // on demande à l'utilisateur le type de géométrie
+            final ChoiceDialog<String> choice = new ChoiceDialog<>("Ponctuel","Linéaire","Surfacique");
+            choice.setHeaderText("Choix de la forme géométrique de la abstractAmenagement.");
+            choice.setTitle("Type de géométrie");
+            final Optional<String> showAndWait = choice.showAndWait();
+            if(showAndWait.isPresent()){
+                switch (showAndWait.get()) {
+                    case "Ponctuel" : newGeomType = Point.class; break;
+                    case "Linéaire" : newGeomType = LineString.class; break;
+                    case "Surfacique" : newGeomType = Polygon.class; break;
+                    default: newGeomType = Point.class;
+                }
+            }
+        }
     }
 
     @Override
@@ -140,8 +173,11 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
         map.setCursor(Cursor.CROSSHAIR);
         map.addDecoration(0, decorationLayer);
 
+        structuresLayer = PluginDependance.getStructureLayer();
+        ouvrageAssociesLayer = PluginDependance.getOuvrageAssocieLayer();
         desordresLayer = PluginDependance.getDesordreLayer();
-        helper = new EditionHelper(map, desordresLayer);
+        prestationsLayer = PluginDependance.getPrestationLayer();
+        organeProtectionCollectivesLayer = PluginDependance.getOrganeProtectionLayer();
     }
 
     @Override
@@ -155,10 +191,8 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
             return true;
         }
-
         return false;
     }
-
 
     /**
      * Ecoute les évènements lancés par la souris.
@@ -168,16 +202,17 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
         private MouseButton pressed;
 
         public MouseListen() {
-            super(DesordreCreateHandler.this);
+            super(AbstractAmenagementHydrauliqueEditHandler.this);
         }
 
         @Override
         public void mouseClicked(MouseEvent e) {
             final double x = e.getX();
             final double y = e.getY();
+            final Class clazz = initHelper();
 
             if (MouseButton.PRIMARY.equals(e.getButton())) {
-                if (desordre == null) {
+                if (abstractAmenagement == null) {
                     // Recherche d'une couche de la carte qui contiendrait une géométrie là où l'utilisateur a cliqué
                     final Rectangle2D clickArea = new Rectangle2D.Double(e.getX()-2, e.getY()-2, 4, 4);
 
@@ -186,26 +221,26 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
                         @Override
                         public void visit(ProjectedFeature graphic, RenderingContext2D context, SearchAreaJ2D area) {
                             final Object candidate = graphic.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
-                            if(candidate instanceof DesordreDependance){
-                                desordre = (DesordreDependance)candidate;
+                            if(candidate instanceof AbstractAmenagementHydraulique){
+                                abstractAmenagement = (AbstractAmenagementHydraulique)candidate;
                                 // On récupère la géométrie de cet objet pour passer en mode édition
-                                editGeometry.geometry.set((Geometry)desordre.getGeometry().clone());
+                                editGeometry.geometry.set((Geometry)abstractAmenagement.getGeometry().clone());
                                 // Ajout de cette géométrie dans la couche d'édition sur la carte.
                                 decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
-                                newDesordre = false;
+                                newDescription = false;
                             }
                         }
                         @Override
                         public boolean isStopRequested() {
-                            return desordre!=null;
+                            return abstractAmenagement!=null;
                         }
                         @Override
                         public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
                     }, VisitFilter.INTERSECTS);
                 } else {
-                    // Le désordre existe, on peut travailler avec sa géométrie.
-                    if (newDesordre) {
-                        // On vient de créer le désordre, le clic gauche va permettre d'ajouter des points.
+                    // L'aménagement hydraulique existe, on peut travailler avec sa géométrie.
+                    if (newDescription) {
+                        // On vient de créer la description d'aménagement hydraulique, le clic gauche va permettre d'ajouter des points.
                         if (Point.class.isAssignableFrom(newGeomType)) {
                             coords.clear();
                             coords.add(helper.toCoord(x,y));
@@ -249,15 +284,14 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
                         JTS.setCRS(editGeometry.geometry.get(), map.getCanvas().getObjectiveCRS2D());
                         decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
 
-
                         if (Point.class.isAssignableFrom(newGeomType)) {
                             // Pour un nouveau point ajouté, on termine l'édition directement.
-                            desordre.setGeometry(editGeometry.geometry.get());
-                            final DesordreDependanceRepository repodes = Injector.getBean(DesordreDependanceRepository.class);
-                            if (desordre.getDocumentId() != null) {
-                                repodes.update(desordre);
+                            abstractAmenagement.setGeometry(editGeometry.geometry.get());
+                            final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(clazz);
+                            if (abstractAmenagement.getDocumentId() != null) {
+                                repo.update(abstractAmenagement);
                             } else {
-                                repodes.add(desordre);
+                                repo.add(abstractAmenagement);
                             }
                             // On quitte le mode d'édition.
                             reset();
@@ -279,7 +313,7 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
                     }
                 }
             } else if (MouseButton.SECONDARY.equals(e.getButton())) {
-                if (desordre == null) {
+                if (abstractAmenagement == null) {
                     // Le désordre n'existe pas, on en créé un nouveau après avoir choisi le type de géométrie à dessiner
                     final Stage stage = new Stage();
                     stage.getIcons().add(SIRS.ICON);
@@ -290,25 +324,56 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
                     gridPane.setVgap(10);
                     gridPane.setHgap(5);
                     gridPane.setPadding(new Insets(10));
+                    gridPane.add(new Label("Choisir un type de abstractAmenagement d'aménagement hydraulique"), 0, 0);
+                    final ComboBox<String> abstractAmenagementTypeBox = new ComboBox<>();
+                    abstractAmenagementTypeBox.setItems(FXCollections.observableArrayList("Structure", "Ouvrage associé", "Désordre", "Prestation", "Organe de protection collective"));
+                    abstractAmenagementTypeBox.getSelectionModel().selectFirst();
+                    gridPane.add(abstractAmenagementTypeBox, 1, 0);
 
                     final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
-                    gridPane.add(geomChoiceLbl, 0, 0);
+                    gridPane.add(geomChoiceLbl, 0, 1);
                     final ComboBox<String> geomTypeBox = new ComboBox<>();
                     geomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
                     geomTypeBox.getSelectionModel().selectFirst();
-                    gridPane.add(geomTypeBox, 1, 0);
+                    gridPane.add(geomTypeBox, 1, 1);
 
                     final Button validateBtn = new Button("Valider");
                     validateBtn.setOnAction(event -> stage.close());
-                    gridPane.add(validateBtn, 2, 2);
+                    gridPane.add(validateBtn, 2, 3);
 
                     final Scene sceneChoices = new Scene(gridPane);
                     stage.setScene(sceneChoices);
                     stage.showAndWait();
 
-                    final DesordreDependanceRepository repodep = Injector.getBean(DesordreDependanceRepository.class);
-                    desordre = repodep.create();
-                    newDesordre = true;
+                    AbstractSIRSRepository repo;
+                    switch (abstractAmenagementTypeBox.getSelectionModel().getSelectedItem()) {
+                        case "Structure":
+                            repo = Injector.getSession().getRepositoryForClass(StructureAmenagementHydraulique.class);
+                            helper = new EditionHelper(map, structuresLayer);
+                            break;
+                        case "Ouvrage associé":
+                            repo = Injector.getSession().getRepositoryForClass(OuvrageAssocieAmenagementHydraulique.class);
+                            helper = new EditionHelper(map, ouvrageAssociesLayer);
+                            break;
+                        case "Désordre":
+                            repo = Injector.getSession().getRepositoryForClass(DesordreDependance.class);
+                            helper = new EditionHelper(map, desordresLayer);
+                            break;
+                        case "Prestation":
+                            repo = Injector.getSession().getRepositoryForClass(PrestationAmenagementHydraulique.class);
+                            helper = new EditionHelper(map, prestationsLayer);
+                            break;
+                        case "Organe de protection collective":
+                            repo = Injector.getSession().getRepositoryForClass(OrganeProtectionCollective.class);
+                            helper = new EditionHelper(map, organeProtectionCollectivesLayer);
+                            break;
+                        default:
+                            repo = Injector.getSession().getRepositoryForClass(DesordreDependance.class);
+                            helper = new EditionHelper(map, desordresLayer);
+                    }
+
+                    abstractAmenagement = (AbstractAmenagementHydraulique) repo.create();
+                    newDescription = true;
 
                     switch (geomTypeBox.getSelectionModel().getSelectedItem()) {
                         case "Ponctuel" : newGeomType = Point.class; break;
@@ -325,27 +390,30 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
                     popup.getItems().clear();
 
                     //action : suppression d'un noeud
-                    helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
-                    if (editGeometry.selectedNode[0] >= 0) {
-                        final MenuItem item = new MenuItem("Supprimer noeud");
-                        item.setOnAction((ActionEvent event) -> {
-                            editGeometry.deleteSelectedNode();
-                            decorationLayer.setNodeSelection(null);
-                            decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
-                        });
-                        popup.getItems().add(item);
+                    if (editGeometry.geometry.get() != null){
+                        helper.grabGeometryNode(x, y, editGeometry);
+                        if (editGeometry.selectedNode[0] >= 0) {
+                            final MenuItem item = new MenuItem("Supprimer noeud");
+                            item.setOnAction((ActionEvent event) -> {
+                                coords.remove(editGeometry.selectedNode[0]);
+                                editGeometry.deleteSelectedNode();
+                                decorationLayer.setNodeSelection(null);
+                                decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
+                            });
+                            popup.getItems().add(item);
+                        }
                     }
 
                     // action : sauvegarde
-                    // Sauvegarde du désordre ainsi que sa géométrie qui a éventuellement été éditée.
+                    // Sauvegarde de l' abstractAmenagement ainsi que sa géométrie qui a éventuellement été éditée.
+                    final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(clazz);
                     final MenuItem saveItem = new MenuItem("Sauvegarder");
                     saveItem.setOnAction((ActionEvent event) -> {
-                        desordre.setGeometry(editGeometry.geometry.get());
-                        final DesordreDependanceRepository repodes = Injector.getBean(DesordreDependanceRepository.class);
-                        if (desordre.getDocumentId() != null) {
-                            repodes.update(desordre);
+                        abstractAmenagement.setGeometry(editGeometry.geometry.get());
+                        if (abstractAmenagement.getDocumentId() != null) {
+                            repo.update(abstractAmenagement);
                         } else {
-                            repodes.add(desordre);
+                            repo.add(abstractAmenagement);
                         }
                         // On quitte le mode d'édition.
                         reset();
@@ -358,12 +426,12 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
                     popup.getItems().add(cancelItem);
 
                     // action : suppression dépendance
-                    final MenuItem deleteItem = new MenuItem("Supprimer désordre", new ImageView(GeotkFX.ICON_DELETE));
+                    final MenuItem deleteItem = new MenuItem("Supprimer " + clazz.getSimpleName(), new ImageView(GeotkFX.ICON_DELETE));
                     deleteItem.setOnAction((ActionEvent event) -> {
-                        final Alert alert = new Alert(CONFIRMATION, "Voulez-vous vraiment supprimer le désordre sélectionné ?", YES, NO);
+                        final Alert alert = new Alert(CONFIRMATION, "Voulez-vous vraiment supprimer l'objet sélectionné ?", YES, NO);
                         final Optional<ButtonType> result = alert.showAndWait();
                         if (result.isPresent() && result.get() == YES) {
-                            Injector.getBean(DesordreDependanceRepository.class).remove(desordre);
+                            repo.remove(abstractAmenagement);
                         }
                         // On quitte le mode d'édition.
                         reset();
@@ -378,8 +446,9 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
         @Override
         public void mousePressed(final MouseEvent e) {
             pressed = e.getButton();
+            initHelper();
 
-            if(desordre != null && !newDesordre && pressed == MouseButton.PRIMARY){
+            if(abstractAmenagement != null && !newDescription && pressed == MouseButton.PRIMARY){
                 // On va sélectionner un noeud sur lequel l'utilisateur a cliqué, s'il y en a un.
                 helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
                 decorationLayer.setNodeSelection(editGeometry);
@@ -390,8 +459,9 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
 
         @Override
         public void mouseDragged(final MouseEvent e) {
+            initHelper();
 
-            if(desordre != null && !newDesordre && pressed == MouseButton.PRIMARY){
+            if(abstractAmenagement != null && !newDescription && pressed == MouseButton.PRIMARY){
                 // On déplace le noeud sélectionné
                 editGeometry.moveSelectedNode(helper.toCoord(e.getX(), e.getY()));
                 decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
@@ -402,16 +472,40 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
         }
     }
 
+    private Class initHelper() {
+        if (abstractAmenagement != null) {
+            if (abstractAmenagement instanceof StructureAmenagementHydraulique) {
+                helper = new EditionHelper(map, structuresLayer);
+                return StructureAmenagementHydraulique.class;
+            } else if (abstractAmenagement instanceof OuvrageAssocieAmenagementHydraulique) {
+                helper = new EditionHelper(map, ouvrageAssociesLayer);
+                return OuvrageAssocieAmenagementHydraulique.class;
+            } else if (abstractAmenagement instanceof DesordreDependance) {
+                helper = new EditionHelper(map, desordresLayer);
+                return DesordreDependance.class;
+            } else if (abstractAmenagement instanceof PrestationAmenagementHydraulique) {
+                helper = new EditionHelper(map, prestationsLayer);
+                return PrestationAmenagementHydraulique.class;
+            } else if (abstractAmenagement instanceof OrganeProtectionCollective) {
+                helper = new EditionHelper(map, organeProtectionCollectivesLayer);
+                return OrganeProtectionCollective.class;
+            } else {
+                throw new IllegalArgumentException("Unexpected subclass of AbstractAmenagementHydraulique.");
+            }
+        }
+        return null;
+    }
+
     /**
      * Réinitialise la carte et vide la géométrie en cours d'édition.
      */
     private void reset() {
-        newDesordre = false;
+        newDescription = false;
         justCreated = false;
         decorationLayer.getGeometries().clear();
         decorationLayer.setNodeSelection(null);
         coords.clear();
         editGeometry.reset();
-        desordre = null;
+        abstractAmenagement = null;
     }
 }

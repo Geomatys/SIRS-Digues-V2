@@ -30,10 +30,10 @@ import fr.sirs.core.model.AireStockageDependance;
 import fr.sirs.core.model.AvecGeometrie;
 import fr.sirs.core.model.AvecSettableGeometrie;
 import fr.sirs.core.model.CheminAccesDependance;
-import fr.sirs.core.model.DesordreDependance;
+import fr.sirs.core.model.AbstractAmenagementHydraulique;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.plugin.dependance.map.DependanceEditHandler;
-import fr.sirs.plugin.dependance.map.DesordreEditHandler;
+import fr.sirs.plugin.dependance.map.AbstractAmenagementHydrauliqueEditHandler;
 import fr.sirs.ui.Growl;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -151,8 +151,8 @@ public class FXPositionDependancePane<T extends AvecSettableGeometrie> extends B
         }
         if(dependance.get() instanceof AbstractDependance){
             tab.getMap().getUiMap().setHandler(new DependanceEditHandler((AbstractDependance) dependance.get()));
-        }else if(dependance.get() instanceof DesordreDependance){
-            tab.getMap().getUiMap().setHandler(new DesordreEditHandler((DesordreDependance) dependance.get()));
+        }else if(dependance.get() instanceof AbstractAmenagementHydraulique){
+            tab.getMap().getUiMap().setHandler(new AbstractAmenagementHydrauliqueEditHandler((AbstractAmenagementHydraulique) dependance.get()));
         }
     }
 

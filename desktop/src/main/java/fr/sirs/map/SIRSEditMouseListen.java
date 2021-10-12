@@ -88,8 +88,6 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
             if ( (editedObjet == null) || (NONE.equals(modeProperty.get())) ) {
                selectObjet(x, y);
             } else {
-                // L'objet existe, on peut travailler avec sa géométrie.
-//                if (newCreatedObjet) {
                 switch (modeProperty.get()) {
                     case CREATE_OBJET :
                         createNewGeometryForObjet(x, y);
@@ -159,7 +157,6 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
                 editGeometry.geometry.set((Geometry) editedObjet.getGeometry().clone());
                 // Ajout de cette géométrie dans la couche d'édition sur la carte.
                 geomLayer.getGeometries().setAll(editGeometry.geometry.get());
-//                        newCreatedObjet = false;
                 modeProperty.setValue(EDIT_OBJET);
 
             }

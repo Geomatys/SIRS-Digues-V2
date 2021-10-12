@@ -22,6 +22,7 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS_ABREGE;
 import fr.sirs.Session;
+import fr.sirs.core.model.AmenagementHydrauliqueView;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
@@ -200,6 +201,8 @@ public class SirsStringConverter extends StringConverter {
             return getDesignation((Preview) item);
         }  else if (item instanceof SQLQuery) {
             return ((SQLQuery)item).getLibelle();
+        } else if (item instanceof AmenagementHydrauliqueView) {
+            return getDesignation((AmenagementHydrauliqueView) item);
         } else return "";
     }
     
@@ -253,6 +256,16 @@ public class SirsStringConverter extends StringConverter {
             }
         }
 
+        return prefixedDesignation;
+    }
+    
+    public static String getDesignation(final AmenagementHydrauliqueView ahv) {
+        String prefixedDesignation = "AH";
+
+        if(ahv.getDesignation() != null){
+            prefixedDesignation += DESIGNATION_SEPARATOR;
+            prefixedDesignation += ahv.getDesignation();
+        }
         return prefixedDesignation;
     }
 
