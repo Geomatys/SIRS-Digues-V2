@@ -32,6 +32,8 @@ import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.property.Reference;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -108,7 +110,7 @@ public class ObjectDataSource<T> implements JRDataSource {
                 if (img != null) {
                     return SwingFXUtils.fromFXImage(img, null);
                 } else {
-                    return javax.imageio.ImageIO.read(ObjectDataSource.class.getResource("/fr/sirs/images/imgNotFound.png"));
+                    return noImage();
                 }
             }
 
@@ -316,4 +318,11 @@ public class ObjectDataSource<T> implements JRDataSource {
         return "Ni commentaire ni observation.";
     }
 
+    public static BufferedImage noImage() {
+        try {
+            return javax.imageio.ImageIO.read(ObjectDataSource.class.getResource("/fr/sirs/images/imgNotFound.png"));
+        } catch (IOException ex) {
+            throw new RuntimeException("Missing resource: /fr/sirs/images/imgNotFound.png", ex);
+        }
+    }
 }

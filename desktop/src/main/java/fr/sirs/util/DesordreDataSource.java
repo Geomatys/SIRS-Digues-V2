@@ -156,12 +156,7 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
             if (img != null) {
                 return img;
             } else {
-                try {
-                    return javax.imageio.ImageIO.read(DesordreDataSource.class.getResource("/fr/sirs/images/imgNotFound.png"));
-                } catch (IOException ex) {
-                    LOGGER.log(Level.WARNING, null, ex);
-                    return null;
-                }
+                return noImage();
             }
         }
         else return super.getFieldValue(jrf);

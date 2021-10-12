@@ -1222,7 +1222,20 @@ public class CorePlugin extends Plugin {
         super.findUpgradeTasks(fromMajor, fromMinor, dbConnector, upgradeTasks);
     }
 
+    /**
+     * Method that returns an image of the chosen element, depending on the
+     * state of the current map. From the current map, a zoom is performed on the element
+     * with a buffer of 50 meters around the element, then the image are resized with the
+     * given dimensions.
+     * Return null, if the element is null. Use a the default dimension, if dim is null.
+     * @param e
+     * @param dim
+     * @return BufferedImage image of the element
+     */
     public static java.awt.Image takePictureOfElement(Element e, Dimension dim) {
+        final double BUFFER_DISTANCE = 50;
+        final double DEFAULT_BUFFER_DISTANCE = 0.01;
+
         if (e == null) return null;
         try {
             FXMapPane map = Injector.getSession().getFrame().getMapTab().getMap();
@@ -1233,11 +1246,14 @@ public class CorePlugin extends Plugin {
                     Geometry geom = ((AvecGeometrie) e).getGeometry();
                     if (geom != null) {
                         final JTSEnvelope2D env = JTS.toEnvelope(geom);
-                        final Envelope selectionEnvelope = SIRS.pseudoBuffer(env, 50, 0.01);
+                        final Envelope selectionEnvelope = SIRS.pseudoBuffer(env, BUFFER_DISTANCE, DEFAULT_BUFFER_DISTANCE);
                         return cropImageFromMap(uiMap, selectionEnvelope, dim);
+                    } else {
+                        SIRS.LOGGER.log(Level.WARNING, "L'élément (id: {0}) ne possède pas de géométrie.", e.getId());
+                        return null;
                     }
                 } else {
-                    SIRS.LOGGER.log(Level.WARNING, "L'élément (id: {0}) n''est présent dans aucune couche cartographique.", e.getId());
+                    SIRS.LOGGER.log(Level.WARNING, "L'élément (id: {0}) n'est présent dans aucune couche cartographique.", e.getId());
                     return null;
                 }
             }
@@ -1269,15 +1285,26 @@ public class CorePlugin extends Plugin {
                 return null;
             }
             return cropImageFromMap(uiMap, SIRS.pseudoBuffer(tmpEnvelope, 50, 0.01), dim);
-        } catch (PortrayalException ex) {
-            SIRS.LOGGER.log(Level.WARNING, "Impossible de prendre une photo de l'élément: " + e.getId(), ex);
-        } catch (DataStoreException ex) {
+        } catch (PortrayalException | DataStoreException ex) {
             SIRS.LOGGER.log(Level.WARNING, "Impossible de prendre une photo de l'élément: " + e.getId(), ex);
         }
         return null;
     }
 
+    /**
+     * Method used to crop an image of the FXMap framed on the Envelope.
+     * Dimension is the dimension of the crop.
+     * @param uiMap1
+     * @param env
+     * @param dim
+     * @return
+     * @throws PortrayalException
+     */
     public static java.awt.Image cropImageFromMap(final FXMap uiMap1, final Envelope env, Dimension dim) throws PortrayalException {
+        if (uiMap1 == null || env == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Impossible de rogner l'image. les paramètres uiMap1 et env ne peuvent être null.");
+        }
+
         if (dim == null) {
             final Rectangle2D dispSize = uiMap1.getCanvas().getDisplayBounds();
             dim = new Dimension((int) dispSize.getWidth(), (int) dispSize.getHeight());
@@ -1303,7 +1330,7 @@ public class CorePlugin extends Plugin {
                     graphicScaleBarJ2D.setTemplate(Session.SCALEBAR_METER_TEMPLATE);
                 }
             } catch (Exception ex) {
-                SIRS.LOGGER.log(Level.INFO, ex.getMessage(), ex);
+                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             }
             canvas.getContainer().getRoot().getChildren().add(graphicScaleBarJ2D);
             canvas.getContainer().getRoot().getChildren().add(northArrowJ2D);
@@ -1321,6 +1348,7 @@ public class CorePlugin extends Plugin {
      * @return The Map layer in which are contained elements of input type, or null.
      */
     public static MapLayer getMapLayerForElement(Element element) {
+        if (element == null) return null;
         if (element.getClass().equals(TronconDigue.class)) {
             return getMapLayerForElement(TRONCON_LAYER_NAME);
         } else if (element instanceof BorneDigue) {

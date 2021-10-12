@@ -213,12 +213,7 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
             if (img != null) {
                 return img;
             } else {
-                try {
-                    return javax.imageio.ImageIO.read(OuvrageHydrauliqueAssocieDataSource.class.getResource("/fr/sirs/images/imgNotFound.png"));
-                } catch (IOException ex) {
-                    LOGGER.log(Level.WARNING, null, ex);
-                    return null;
-                }
+                return noImage();
             }
         }
         else return super.getFieldValue(jrf);
