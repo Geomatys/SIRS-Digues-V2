@@ -209,7 +209,7 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
         public void mouseClicked(MouseEvent e) {
             final double x = e.getX();
             final double y = e.getY();
-            Class clazz = initHelper();
+            final Class clazz = initHelper();
 
             if (MouseButton.PRIMARY.equals(e.getButton())) {
                 if (abstractAmenagement == null) {
@@ -240,7 +240,7 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
                 } else {
                     // L'aménagement hydraulique existe, on peut travailler avec sa géométrie.
                     if (newDescription) {
-                        // On vient de créer le désordre, le clic gauche va permettre d'ajouter des points.
+                        // On vient de créer la description d'aménagement hydraulique, le clic gauche va permettre d'ajouter des points.
                         if (Point.class.isAssignableFrom(newGeomType)) {
                             coords.clear();
                             coords.add(helper.toCoord(x,y));
@@ -390,15 +390,18 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
                     popup.getItems().clear();
 
                     //action : suppression d'un noeud
-                    helper.grabGeometryNode(x, y, editGeometry);
-                    if (editGeometry.selectedNode[0] >= 0) {
-                        final MenuItem item = new MenuItem("Supprimer noeud");
-                        item.setOnAction((ActionEvent event) -> {
-                            editGeometry.deleteSelectedNode();
-                            decorationLayer.setNodeSelection(null);
-                            decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
-                        });
-                        popup.getItems().add(item);
+                    if (editGeometry.geometry.get() != null){
+                        helper.grabGeometryNode(x, y, editGeometry);
+                        if (editGeometry.selectedNode[0] >= 0) {
+                            final MenuItem item = new MenuItem("Supprimer noeud");
+                            item.setOnAction((ActionEvent event) -> {
+                                coords.remove(editGeometry.selectedNode[0]);
+                                editGeometry.deleteSelectedNode();
+                                decorationLayer.setNodeSelection(null);
+                                decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
+                            });
+                            popup.getItems().add(item);
+                        }
                     }
 
                     // action : sauvegarde
@@ -487,7 +490,7 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
                 helper = new EditionHelper(map, organeProtectionCollectivesLayer);
                 return OrganeProtectionCollective.class;
             } else {
-                throw new IllegalArgumentException("Unexpected subclass of amenagement hydraulique description.");
+                throw new IllegalArgumentException("Unexpected subclass of AbstractAmenagementHydraulique.");
             }
         }
         return null;

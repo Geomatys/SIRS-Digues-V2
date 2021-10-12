@@ -241,7 +241,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
             if (MouseButton.PRIMARY.equals(e.getButton())) {
                 if (dependance == null) {
                     // Recherche d'une couche de la carte qui contiendrait une géométrie là où l'utilisateur a cliqué
-                    final Rectangle2D clickArea = new Rectangle2D.Double(e.getX()-2, e.getY()-2, 4, 4);
+                    final Rectangle2D clickArea = new Rectangle2D.Double(x - 2, y - 2, 4, 4);
 
                     //recherche d'un object a editer
                     map.getCanvas().getGraphicsIn(clickArea, new AbstractGraphicVisitor() {
@@ -285,7 +285,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                             }
                         }
 
-                        // La classe d'objet à dessiner est un polygone pour une aire de stockage, une ligne pour un chemin d'accès
+                        // La classe de l'objet à dessiner est un polygone pour une aire de stockage, une ligne pour un chemin d'accès
                         // sinon c'est le choix fait par l'utilisateur dans le panneau de création de dépendance.
                         final Class geomClass = AireStockageDependance.class.isAssignableFrom(clazz) ? Polygon.class :
                                                 CheminAccesDependance.class.isAssignableFrom(clazz) ? LineString.class : newGeomType;
@@ -456,8 +456,8 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     }
 
                     //action : suppression d'un noeud
-                    if(editGeometry.geometry.get()!=null){
-                        helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
+                    if (editGeometry.geometry.get() != null){
+                        helper.grabGeometryNode(x, y, editGeometry);
                         if (editGeometry.selectedNode[0] >= 0) {
                             final MenuItem item = new MenuItem("Supprimer noeud");
                             item.setOnAction((ActionEvent event) -> {
@@ -517,7 +517,7 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     });
                     popup.getItems().add(deleteItem);
 
-                    popup.show(decorationLayer, Side.TOP, e.getX(), e.getY());
+                    popup.show(decorationLayer, Side.TOP, x, y);
                 }
             }
         }
