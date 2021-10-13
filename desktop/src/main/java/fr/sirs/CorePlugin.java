@@ -1365,7 +1365,7 @@ public class CorePlugin extends Plugin {
             try {
                 documentClass = Class.forName(previewLabel.getElementClass(), true, Thread.currentThread().getContextClassLoader());
             } catch (ClassNotFoundException ex) {
-                SIRS.LOGGER.log(Level.WARNING, null, ex);
+                SIRS.LOGGER.log(Level.WARNING,"Impossible de charger la classe du document : "+documentId , ex);
             }
 
             final LabelMapper mapper = LabelMapper.get(documentClass);
