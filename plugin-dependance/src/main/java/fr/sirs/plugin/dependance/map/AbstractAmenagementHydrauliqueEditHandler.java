@@ -395,7 +395,10 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
                         if (editGeometry.selectedNode[0] >= 0) {
                             final MenuItem item = new MenuItem("Supprimer noeud");
                             item.setOnAction((ActionEvent event) -> {
-                                coords.remove(editGeometry.selectedNode[0]);
+                                // coord is fill only if suppression concerns a new item
+                                if (coords.size() > editGeometry.selectedNode[0]) {
+                                    coords.remove(editGeometry.selectedNode[0]);
+                                }
                                 editGeometry.deleteSelectedNode();
                                 decorationLayer.setNodeSelection(null);
                                 decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
