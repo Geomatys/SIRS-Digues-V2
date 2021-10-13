@@ -459,30 +459,33 @@ public class SirsCore {
      * @return An expanded envelope. If we cannot analyze CRS or it's unit on
      * horizontal axis, the same envelope is returned.
      */
-    public static Envelope pseudoBuffer(final Envelope input) {
-        double additionalDistance = 0.01;
-        if (input.getCoordinateReferenceSystem() != null) {
-            CoordinateReferenceSystem crs = input.getCoordinateReferenceSystem();
+    public static Envelope pseudoBuffer(final Envelope env) {
+        return pseudoBuffer(env, 1, 0.01);
+    }
+
+    public static Envelope pseudoBuffer(final Envelope env, final double distance, double defaultDistance) {
+        if (env.getCoordinateReferenceSystem() != null) {
+            CoordinateReferenceSystem crs = env.getCoordinateReferenceSystem();
             int firstAxis = CRSUtilities.firstHorizontalAxis(crs);
 
             if (firstAxis >=0) {
                 Unit unit = crs.getCoordinateSystem().getAxis(firstAxis).getUnit();
                 if (unit != null && Units.METRE.isCompatible(unit)) {
-                    additionalDistance = Units.METRE.getConverterTo(unit).convert(1);
+                    defaultDistance = Units.METRE.getConverterTo(unit).convert(distance);
                 }
 
-                final GeneralEnvelope result = new GeneralEnvelope(input);
+                final GeneralEnvelope result = new GeneralEnvelope(env);
                 result.setRange(firstAxis,
-                        result.getLower(firstAxis)-additionalDistance,
-                        result.getUpper(firstAxis)+additionalDistance);
-                final int secondAxis = firstAxis +1;
+                        result.getLower(firstAxis) - defaultDistance,
+                        result.getUpper(firstAxis) + defaultDistance);
+                final int secondAxis = firstAxis + 1;
                 result.setRange(secondAxis,
-                        result.getLower(secondAxis)-additionalDistance,
-                        result.getUpper(secondAxis)+additionalDistance);
+                        result.getLower(secondAxis) - defaultDistance,
+                        result.getUpper(secondAxis) + defaultDistance);
                 return result;
             }
         }
-        return input;
+        return env;
     }
 
     private static final Class[] SUPPORTED_TYPES = new Class[]{

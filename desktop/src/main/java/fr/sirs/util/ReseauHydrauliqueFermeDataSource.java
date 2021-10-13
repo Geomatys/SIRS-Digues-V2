@@ -18,6 +18,7 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
 import static fr.sirs.core.SirsCore.DIGUE_ID_FIELD;
 import fr.sirs.core.component.Previews;
@@ -32,15 +33,21 @@ import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.TronconDigue;
+import static fr.sirs.util.JRDomWriterDesordreSheet.IMAGE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.DESORDRE_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.PHOTO_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
@@ -51,7 +58,9 @@ import net.sf.jasperreports.engine.JRField;
  * @author Samuel Andrés (Geomatys)
  */
 public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHydrauliqueFerme> {
-    
+
+    private static Logger LOGGER = Logger.getLogger(ReseauHydrauliqueFermeDataSource.class.getName());
+
     /**
      * Groupe par désignation de désordre et classe par date décroissante à l'intérieur de chaque groupe.
      * Inutilisé (était utilisé pour ordonner les lignes du tableau des observations/désordres).
@@ -145,6 +154,13 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
             }
             Collections.sort(desordreRows);
             return new ObjectDataSource<>(desordreRows, previewRepository, stringConverter);
+        } else if (IMAGE_DATA_SOURCE.equals(name)) {
+            final Image img = CorePlugin.takePictureOfElement(currentObject, new Dimension(1750, 1080));
+            if (img != null) {
+                return img;
+            } else {
+                return noImage();
+            }
         }
         else return super.getFieldValue(jrf);
     }

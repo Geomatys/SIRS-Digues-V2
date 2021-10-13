@@ -19,12 +19,12 @@
 package fr.sirs.util;
 
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;
 import static fr.sirs.util.JRUtils.TAG_BAND;
+import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -53,7 +53,9 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
     public static final String LENGTH_FIELD = "ouvrage_hydraulique_associe_length";
     public static final String MANAGER_FIELD = "ouvrage_hydraulique_associe_manager";
     public static final String OWNER_FIELD = "ouvrage_hydraulique_associe_owner";
-    
+
+    public static final String IMAGE_DATA_SOURCE = "IMAGE_DATA_SOURCE";
+
     private final List<JRColumnParameter> observationFields;
     private final List<JRColumnParameter> reseauFermeFields;
     private final List<JRColumnParameter> desordreFields;
@@ -107,6 +109,7 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
         writeField(ObjectDataSource.class, OBSERVATION_TABLE_DATA_SOURCE, "Source de données des observations");
         if(printReseauFerme) writeField(ObjectDataSource.class, RESEAU_FERME_TABLE_DATA_SOURCE, "Source de données des réseaux fermés");
         writeField(ObjectDataSource.class, DESORDRE_TABLE_DATA_SOURCE, "Source de données des désordres");
+        writeField(Image.class, IMAGE_DATA_SOURCE, "Image de l'élément");
         
         // Modifies the title block.--------------------------------------------
         writeTitle();

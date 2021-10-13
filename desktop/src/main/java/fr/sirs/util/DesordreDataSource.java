@@ -18,8 +18,8 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
-import fr.sirs.SIRS;
 import static fr.sirs.core.SirsCore.DIGUE_ID_FIELD;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
@@ -43,9 +43,14 @@ import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTO_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PRESTATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.VOIRIE_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterDesordreSheet.IMAGE_DATA_SOURCE;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
@@ -56,6 +61,8 @@ import net.sf.jasperreports.engine.JRField;
  * @author Samuel Andrés (Geomatys)
  */
 public class DesordreDataSource extends ObjectDataSource<Desordre> {
+
+    private static Logger LOGGER = Logger.getLogger(DesordreDataSource.class.getName());
 
     public DesordreDataSource(Iterable<Desordre> iterable) {
         super(iterable);
@@ -83,7 +90,7 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
                     }
                 } catch (IllegalArgumentException e){
                     // SYM-1735 : problème d'impression des fiches de désordres attachés à des berges lorsque le module berges n'est pas chargé
-                    SIRS.LOGGER.log(Level.INFO, "un problème a été rencontré lors de l'extraction de la digue d'une fiche", e);
+                    LOGGER.log(Level.INFO, "un problème a été rencontré lors de l'extraction de la digue d'une fiche", e);
                 }
             }
             return null;
@@ -144,8 +151,14 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
 
             voirieList.sort(SirsComparator.ELEMENT_COMPARATOR);
             return new ObjectDataSource<>(voirieList, previewRepository, stringConverter);
+        } else if (IMAGE_DATA_SOURCE.equals(name)) {
+            final Image img = CorePlugin.takePictureOfElement(currentObject, new Dimension(1750, 1200));
+            if (img != null) {
+                return img;
+            } else {
+                return noImage();
+            }
         }
         else return super.getFieldValue(jrf);
     }
-    
 }
