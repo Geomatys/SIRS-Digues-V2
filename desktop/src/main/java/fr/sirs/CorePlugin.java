@@ -1241,6 +1241,10 @@ public class CorePlugin extends Plugin {
             FXMapPane map = Injector.getSession().getFrame().getMapTab().getMap();
             final FXMap uiMap =  map.getUiMap();
             final MapLayer container = CorePlugin.getMapLayerForElement(e);
+            if (container == null) {
+                SIRS.LOGGER.log(Level.SEVERE, "Impossible de récupérer la couche de l'élément (id: {0}).", e.getId());
+                return null;
+            }
             if (!(container instanceof FeatureMapLayer)) {
                 if (e instanceof AvecGeometrie) {
                     Geometry geom = ((AvecGeometrie) e).getGeometry();
