@@ -71,6 +71,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Duration;
 import org.apache.sis.measure.Units;
+import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
@@ -244,37 +245,59 @@ public class Session extends SessionCore {
                 }
             }
 
-            try{
-                //Fond de plan
-                final BasemapImporter bmi = new BasemapImporter();
-                backgroundGroup.setName("Fond de plan");
-                mapContext.items().add(0,backgroundGroup);
-                final CoverageStore store = bmi.getStore();
-                final String basemapTitle = bmi.getTitle();
-
-                for (GenericName n : store.getNames()) {
-                    final CoverageReference cr = store.getCoverageReference(n);
-                    final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
-                    cml.setName(basemapTitle);
-                    cml.setDescription(new DefaultDescription(
-                            new SimpleInternationalString(basemapTitle),
-                            new SimpleInternationalString(basemapTitle)));
-                    cml.setVisible(false);
-                    backgroundGroup.items().add(cml);
-                    break;
-                }
-            } catch(Exception ex){
-                SirsCore.LOGGER.log(Level.WARNING, "Cannot retrieve background layers.", ex);
-                final Runnable r = () -> GeotkFX.newExceptionDialog("Impossible de construire le fond de plan OpenStreetMap", ex).show();
-                if (Platform.isFxApplicationThread()) {
-                    r.run();
-                } else {
-                    Platform.runLater(r);
-                }
+            //Fond de plan
+            backgroundGroup.setName("Fond de plan");
+            mapContext.items().add(0, backgroundGroup);
+            final CoverageMapLayer basemapLayer = getBasemapLayer();
+            if (basemapLayer != null) {
+                backgroundGroup.items().add(basemapLayer);
             }
-
         }
         return mapContext;
+    }
+
+    public static CoverageMapLayer getBasemapLayer() {
+        try{
+            final BasemapImporter importer = new BasemapImporter();
+            importer.loadFromPreferences();
+            return getFirstCoverageMapLayer(importer.getStore(), importer.getTitle());
+        } catch(Exception ex){
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot retrieve background layers.", ex);
+            final Runnable r = () -> GeotkFX.newExceptionDialog("Impossible de construire le fond de carte. Veuillez vérifier le paramétrage du fond de carte par défaut. Chargement du fond de carte intial", ex).show();
+            if (Platform.isFxApplicationThread()) {
+                r.run();
+            } else {
+                Platform.runLater(r);
+            }
+            // Loading of initial basemap
+            try {
+                final BasemapImporter importer = new BasemapImporter();
+                return getFirstCoverageMapLayer(importer.getStore(), importer.getTitle());
+            } catch (Exception ex2) {
+                SIRS.LOGGER.log(Level.SEVERE, "Impossible to load the initial basemap.", ex2);
+                final Runnable r2 = () -> GeotkFX.newExceptionDialog("Impossible de charger le fond de carte initial.", ex2).show();
+                if (Platform.isFxApplicationThread()) {
+                    r2.run();
+                } else {
+                    Platform.runLater(r2);
+                }
+                return null;
+            }
+        }
+    }
+
+    private static CoverageMapLayer getFirstCoverageMapLayer(final CoverageStore store, final String title) throws DataStoreException {
+        for (GenericName n : store.getNames()) {
+            final CoverageReference cr = store.getCoverageReference(n);
+            final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
+            cml.setName(title);
+            cml.setDescription(new DefaultDescription(
+                    new SimpleInternationalString(title),
+                    new SimpleInternationalString(title)));
+            cml.setVisible(false);
+            return cml;
+        }
+        return null;
     }
 
     /**

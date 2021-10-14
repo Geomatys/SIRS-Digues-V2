@@ -5,11 +5,15 @@
  */
 package fr.sirs.ui;
 
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.map.FXMapTab;
 import fr.sirs.util.SaveableConfiguration;
 import fr.sirs.util.property.SirsPreferences;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.collections.FXCollections;
@@ -21,6 +25,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
+import org.geotoolkit.map.CoverageMapLayer;
+import org.geotoolkit.map.MapBuilder;
+import org.geotoolkit.map.MapItem;
 
 /**
  * An editor used to configure the default basemap. Located in user preferences.
@@ -32,6 +39,7 @@ public class FXBasemapEditor extends BorderPane implements SaveableConfiguration
     public final static String WMS_WMTS_CHOICE = "wms/wmts";
     public final static String OSM_TILE_CHOICE = "OSMTileMap";
     public final static String FILE_CHOICE = "ficher";
+    public final static String DEFAULT_CHOICE = "default";
     public final static String WMS111 = "WMS - 1.1.1";
     public final static String WMS130 = "WMS - 1.3.0";
     public final static String WMTS100 = "WMTS - 1.0.0";
@@ -41,6 +49,7 @@ public class FXBasemapEditor extends BorderPane implements SaveableConfiguration
     @FXML private RadioButton uiRadioButtonWM;
     @FXML private RadioButton uiRadioButtonOsmTile;
     @FXML private RadioButton uiRadioButtonLocalFile;
+    @FXML private RadioButton uiRadioButtonDefault;
 
     @FXML private ChoiceBox uiChoiceService;
     @FXML private ChoiceBox uiChoiceFileType;
@@ -70,19 +79,30 @@ public class FXBasemapEditor extends BorderPane implements SaveableConfiguration
         uiRadioButtonWM.setToggleGroup(group);
         uiRadioButtonOsmTile.setToggleGroup(group);
         uiRadioButtonLocalFile.setToggleGroup(group);
+        uiRadioButtonDefault.setToggleGroup(group);
 
-        switch (previousChoice) {
-            case WMS_WMTS_CHOICE:
-                uiRadioButtonWM.selectedProperty().setValue(true);
-                break;
-            case OSM_TILE_CHOICE:
-                uiRadioButtonOsmTile.selectedProperty().setValue(true);
-            case FILE_CHOICE:
-                uiRadioButtonLocalFile.selectedProperty().setValue(true);
-            default:
-                // default choice
-                uiRadioButtonOsmTile.selectedProperty().setValue(true);
-                break;
+        if (previousChoice == null) {
+            // default choice
+            uiRadioButtonDefault.selectedProperty().setValue(true);
+        } else {
+            switch (previousChoice) {
+                case WMS_WMTS_CHOICE:
+                    uiRadioButtonWM.selectedProperty().setValue(true);
+                    break;
+                case OSM_TILE_CHOICE:
+                    uiRadioButtonOsmTile.selectedProperty().setValue(true);
+                    break;
+                case FILE_CHOICE:
+                    uiRadioButtonLocalFile.selectedProperty().setValue(true);
+                    break;
+                case DEFAULT_CHOICE:
+                    uiRadioButtonDefault.selectedProperty().setValue(true);
+                    break;
+                default:
+                    // default choice
+                    uiRadioButtonDefault.selectedProperty().setValue(true);
+                    break;
+            }
         }
 
         uiChoiceService.setItems(FXCollections.observableList(Arrays.asList(new String[]{WMS111, WMS130, WMTS100})));
@@ -128,8 +148,37 @@ public class FXBasemapEditor extends BorderPane implements SaveableConfiguration
             properties.put(SirsPreferences.PROPERTIES.BASEMAP_CHOICE, OSM_TILE_CHOICE);
         } else if (uiRadioButtonLocalFile.isSelected()) {
             properties.put(SirsPreferences.PROPERTIES.BASEMAP_CHOICE, FILE_CHOICE);
+        } else if (uiRadioButtonDefault.isSelected()) {
+            properties.put(SirsPreferences.PROPERTIES.BASEMAP_CHOICE, DEFAULT_CHOICE);
         }
         SirsPreferences.INSTANCE.store(properties);
+        reloadBasemap();
+    }
+
+    private void reloadBasemap() {
+        final Session session = Injector.getSession();
+        session.getMapContext();
+        final FXMapTab mapTab = session.getFrame().getMapTab();
+        final Collection<MapItem> root = mapTab.getMap().getUiMap().getContainer().getContext().items();
+        final CoverageMapLayer basemapLayer = Session.getBasemapLayer();
+
+        if (basemapLayer != null) {
+            // Looking for basemap group
+            MapItem parent = null;
+            for (MapItem mi : root) {
+                if ("Fond de plan".equals(mi.getName())) {
+                    parent = mi;
+                    break;
+                }
+            }
+            if (parent == null) {
+                parent = MapBuilder.createItem();
+                parent.setName("Fond de plan");
+                root.add(parent);
+            }
+            parent.items().clear();
+            parent.items().add(basemapLayer);
+        }
     }
 
     @Override

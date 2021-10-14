@@ -51,22 +51,31 @@ public class BasemapImporter {
     private String title;
     private CoverageStore store;
 
-    public BasemapImporter() throws URISyntaxException, MalformedURLException, DataStoreException, IOException {
+    public BasemapImporter() throws MalformedURLException, IOException {
+        initDefaultStore();
+    }
+
+    public void loadFromPreferences() throws URISyntaxException, MalformedURLException, DataStoreException, IOException {
         final String storeType = SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.BASEMAP_CHOICE);
 
-        switch (storeType) {
-            case FXBasemapEditor.WMS_WMTS_CHOICE:
-                initStoreFromWebMapClientParameter();
-                break;
-            case FXBasemapEditor.FILE_CHOICE:
-                initStoreFromLocalFile();
-                break;
-            case FXBasemapEditor.OSM_TILE_CHOICE:
-                initStoreFromOsmTileMapClient();
-                break;
-            default:
-                LOGGER.info("No default basemap choice are already made.");
-                initDefaultStore();
+        if (storeType == null) {
+            LOGGER.info("No default basemap choice are already made.");
+            initDefaultStore();
+        } else {
+            switch (storeType) {
+                case FXBasemapEditor.WMS_WMTS_CHOICE:
+                    initStoreFromWebMapClientParameter();
+                    break;
+                case FXBasemapEditor.FILE_CHOICE:
+                    initStoreFromLocalFile();
+                    break;
+                case FXBasemapEditor.OSM_TILE_CHOICE:
+                    initStoreFromOsmTileMapClient();
+                    break;
+                default:
+                    LOGGER.info("No default basemap choice are already made.");
+                    initDefaultStore();
+            }
         }
     }
 
@@ -76,7 +85,7 @@ public class BasemapImporter {
 
         final Map<String, String> queryParams = parseQuery(baseUrl);
         final String withoutParam = getUrlWithoutParameters(baseUrl);
-        final URL url = new URL(baseUrl);
+        final URL url = new URL(withoutParam);
         title = url.getHost();
 
         final ClientSecurity security;
@@ -139,7 +148,7 @@ public class BasemapImporter {
     }
 
     private void initDefaultStore() throws MalformedURLException, IOException {
-        title = "stamen";
+        title = "Thunderforest";
         //store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
         //store = new OSMTileMapClient(new URL("http://c.tile.stamen.com/terrain"), null, 18, true);
         //store = new OSMTileMapClient(new URL("http://c.tile.stamen.com/toner"), null, 18, true);
@@ -147,8 +156,10 @@ public class BasemapImporter {
     }
 
     /**
-     * TODO: à utiliser si l'url fourni contient des paramètres.
+     * Retrieve query parameters for the given url.
      * @param url
+     * @return
+     * @throws URISyntaxException
      */
     private Map<String, String> parseQuery(final String url) throws URISyntaxException {
         final HashMap<String, String> queryMap = new HashMap<>();

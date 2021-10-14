@@ -23,8 +23,8 @@
          <children>
             <GridPane>
               <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="288.0" minWidth="10.0" prefWidth="141.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="183.0" minWidth="10.0" prefWidth="162.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="288.0" minWidth="10.0" prefWidth="123.0" />
                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="179.0" minWidth="10.0" prefWidth="48.0" />
                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="302.0" minWidth="10.0" prefWidth="302.0" />
               </columnConstraints>
@@ -32,11 +32,13 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="27.0" />
               </rowConstraints>
                <children>
                   <RadioButton fx:id="uiRadioButtonWM" mnemonicParsing="false" text="WMS/WMTS" />
                   <RadioButton fx:id="uiRadioButtonOsmTile" mnemonicParsing="false" text="OSMTileMap" GridPane.rowIndex="1" />
                   <RadioButton fx:id="uiRadioButtonLocalFile" mnemonicParsing="false" text="Fichier local" GridPane.rowIndex="2" />
+                  <RadioButton fx:id="uiRadioButtonDefault" mnemonicParsing="false" text="Fond de carte initial" GridPane.rowIndex="3" />
 
                   <ChoiceBox fx:id="uiChoiceService" GridPane.columnIndex="1" />
                   <ChoiceBox fx:id="uiChoiceFileType" GridPane.columnIndex="1" GridPane.rowIndex="2" />
@@ -47,7 +49,7 @@
 
                   <TextField fx:id="uiBasemapUrlWM" GridPane.columnIndex="3" />
                   <TextField fx:id="uiBasemapUrlOsmTile" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                  <HBox spacing="10.0" BorderPane.alignment="CENTER" GridPane.columnIndex="3" GridPane.rowIndex="2" >
+                  <HBox spacing="10.0" BorderPane.alignment="CENTER" GridPane.columnIndex="3" GridPane.rowIndex="2">
                     <children>
                         <TextField fx:id="uiBasemapFile" maxWidth="1.7976931348623157E308" minWidth="30.0" HBox.hgrow="ALWAYS" />
                         <Button mnemonicParsing="false" onAction="#openFileChooser" text="..." />
