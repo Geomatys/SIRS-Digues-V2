@@ -286,6 +286,8 @@ public class SirsCore {
 
     protected static final String NTV2_RESOURCE = "/fr/sirs/ntv2/";
 
+    public static final int GEO_CLIENT_TIMEOUT = 60000;
+
     /**
      * Configuration directory root folder.
      *

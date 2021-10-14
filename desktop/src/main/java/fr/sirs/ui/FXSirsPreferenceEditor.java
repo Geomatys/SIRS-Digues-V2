@@ -25,13 +25,15 @@ import fr.sirs.util.property.SirsPreferences;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.geometry.HPos;
@@ -40,7 +42,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -87,8 +88,20 @@ public class FXSirsPreferenceEditor extends ScrollPane implements SaveableConfig
         propertyPane.setHgap(10);
         propertyPane.setPadding(new Insets(10));
 
+        // We don't want basemap properties appear in general property configuration.
+        final List<SirsPreferences.PROPERTIES> withoutBasemapProp = Arrays.stream(SirsPreferences.PROPERTIES.values())
+                .filter(p ->
+                        !SirsPreferences.PROPERTIES.BASEMAP_CHOICE.equals(p) &&
+                        !SirsPreferences.PROPERTIES.BASEMAP_FILE_TYPE.equals(p) &&
+                        !SirsPreferences.PROPERTIES.BASEMAP_LOCAL_FILE.equals(p) &&
+                        !SirsPreferences.PROPERTIES.BASEMAP_OSM_TILE_URL.equals(p) &&
+                        !SirsPreferences.PROPERTIES.BASEMAP_WM_TYPE.equals(p) &&
+                        !SirsPreferences.PROPERTIES.BASEMAP_WM_URL.equals(p)
+                )
+                .collect(Collectors.toList());
+
         int row = 0;
-        for (final SirsPreferences.PROPERTIES p : SirsPreferences.PROPERTIES.values()) {
+        for (final SirsPreferences.PROPERTIES p : withoutBasemapProp) {
             final Label propLibelle = new Label(p.title);
             propLibelle.setTooltip(new Tooltip(p.description));
             propertyPane.add(propLibelle, 0, row);
