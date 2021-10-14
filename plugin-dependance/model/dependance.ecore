@@ -58,7 +58,7 @@
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cote" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Observation" containment="true"/>
+        eType="#//ObservationDependance" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//RefTypeOrganeProtectionCollective"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
         eType="#//PhotoDependance" containment="true">
@@ -73,7 +73,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Observation" containment="true"/>
+        eType="#//ObservationDependance" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
         eType="#//PhotoDependance" containment="true">
@@ -99,7 +99,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaireIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Observation" containment="true"/>
+        eType="#//ObservationDependance" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
         eType="#//PhotoDependance" containment="true">
       <eAnnotations source="photoType" references="#//PhotoDependance"/>
@@ -132,7 +132,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="tronconIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//TronconDigue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Observation" containment="true"/>
+        eType="#//ObservationDependance" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
         eType="#//PrestationAmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="proprietaireIds" upperBound="-1"

@@ -59,12 +59,15 @@ public class SirsPreferences extends Properties {
         
         ABSTRACT_SHOWCASE("Préférence pour la désignation des objets de l'application","Choix entre abrégé, nom complet ou les 2 pour la désignation des objet dans l'application.",
            ShowCasePossibility.BOTH.name),
+        /*
+        Préférences utilisés pour paramétrer le fond de carte par défaut.
+        */
         BASEMAP_WM_URL("Adresse WebMap du fond de carte", "Url du fond de carte, provenant d'un service WMS/WMTS, utilisée par défaut au démarage du SIRS.", ""),
-        BASEMAP_WM_TYPE("Type du service WMS/WMTS utilisé", "Type du service WMS/WMTS utilisé pour le chargement du fond de carte par défaut", ""),
-        BASEMAP_OSM_TILE_URL("Adresse de tuile OSM du fond de carte", "Url du fond de carte, provenant d'un service tuile Open Street Map, utilisée par défaut au démarage du SIRS.", "http://c.tile.stamen.com/toner"),
+        BASEMAP_WM_TYPE("Type du service WMS/WMTS utilisé", "Type du service WMS/WMTS utilisé pour le chargement du fond de carte par défaut", "WMS - 1.3.0"),
+        BASEMAP_OSM_TILE_URL("Adresse de tuile OSM du fond de carte", "Url du fond de carte, provenant d'un service tuile Open Street Map, utilisée par défaut au démarage du SIRS.", ""),
         BASEMAP_LOCAL_FILE("Chemin du fond de carte", "Chemin vers le fond de carte, provenant d'un fichier local, utilisée par défaut au démarage du SIRS.", ""),
         BASEMAP_FILE_TYPE("Type du fichier local", "Type du fichier local utilisé pour le chargement de fond de carte par défaut", "File coverage"),
-        BASEMAP_CHOICE("Choix du type de fond de carte", "Choix du type de fond de carte: wms/wmts, OSMTileMap ou fichier", "OSMTileMap");
+        BASEMAP_CHOICE("Choix du type de fond de carte", "Choix du type de fond de carte: wms/wmts, OSMTileMap, fichier ou defaut", "defaut");
         public final String title;
         public final String description;
         public final String defaultValue;

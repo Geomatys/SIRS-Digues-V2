@@ -2,7 +2,6 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.theme.ui.*;
-import fr.sirs.theme.ui.pojotable.PojoTableExternalAddable;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
@@ -162,7 +161,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_tronconIds.setClosable(false);
 
         ui_observations.setContent(() -> {
-            observationsTable = new PojoTableExternalAddable(Observation.class, elementProperty());
+            observationsTable = new PojoTable(ObservationDependance.class, null, elementProperty());
             observationsTable.editableProperty().bind(disableFieldsProperty().not());
             updateObservationsTable(session, elementProperty.get());
             return observationsTable;

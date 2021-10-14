@@ -39,7 +39,7 @@ public class FXBasemapEditor extends BorderPane implements SaveableConfiguration
     public final static String WMS_WMTS_CHOICE = "wms/wmts";
     public final static String OSM_TILE_CHOICE = "OSMTileMap";
     public final static String FILE_CHOICE = "ficher";
-    public final static String DEFAULT_CHOICE = "default";
+    public final static String DEFAULT_CHOICE = "defaut";
     public final static String WMS111 = "WMS - 1.1.1";
     public final static String WMS130 = "WMS - 1.3.0";
     public final static String WMTS100 = "WMTS - 1.0.0";
@@ -157,27 +157,29 @@ public class FXBasemapEditor extends BorderPane implements SaveableConfiguration
 
     private void reloadBasemap() {
         final Session session = Injector.getSession();
-        session.getMapContext();
-        final FXMapTab mapTab = session.getFrame().getMapTab();
-        final Collection<MapItem> root = mapTab.getMap().getUiMap().getContainer().getContext().items();
-        final CoverageMapLayer basemapLayer = Session.getBasemapLayer();
+        if (session != null) {
+            session.getMapContext();
+            final FXMapTab mapTab = session.getFrame().getMapTab();
+            final Collection<MapItem> root = mapTab.getMap().getUiMap().getContainer().getContext().items();
+            final CoverageMapLayer basemapLayer = Session.getBasemapLayer();
 
-        if (basemapLayer != null) {
-            // Looking for basemap group
-            MapItem parent = null;
-            for (MapItem mi : root) {
-                if ("Fond de plan".equals(mi.getName())) {
-                    parent = mi;
-                    break;
+            if (basemapLayer != null) {
+                // Looking for basemap group
+                MapItem parent = null;
+                for (MapItem mi : root) {
+                    if ("Fond de plan".equals(mi.getName())) {
+                        parent = mi;
+                        break;
+                    }
                 }
+                if (parent == null) {
+                    parent = MapBuilder.createItem();
+                    parent.setName("Fond de plan");
+                    root.add(parent);
+                }
+                parent.items().clear();
+                parent.items().add(basemapLayer);
             }
-            if (parent == null) {
-                parent = MapBuilder.createItem();
-                parent.setName("Fond de plan");
-                root.add(parent);
-            }
-            parent.items().clear();
-            parent.items().add(basemapLayer);
         }
     }
 

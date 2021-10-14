@@ -2,40 +2,22 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.theme.ui.*;
-import fr.sirs.theme.ui.pojotable.PojoTableExternalAddable;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
-import fr.sirs.util.FXFileTextField;
-import fr.sirs.util.FXComponentField;
-import fr.sirs.util.javafx.FloatSpinnerValueFactory;
-import fr.sirs.util.StreamingIterable;
 import fr.sirs.util.FXFreeTab;
-import fr.sirs.util.DatePickerConverter;
 
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.geometry.*;
 import javafx.event.ActionEvent;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
 
-import org.geotoolkit.gui.javafx.util.FXDateField;
-import org.geotoolkit.util.collection.CloseableIterator;
-
-import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.function.UnaryOperator;
-import java.util.logging.Level;
-import javafx.beans.value.ChangeListener;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -97,7 +79,7 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
         uiPosition.dependanceProperty().bind(elementProperty);
         
         ui_observations.setContent(() -> {
-            observationsTable = new PojoTableExternalAddable(Observation.class, elementProperty());
+            observationsTable = new PojoTable(ObservationDependance.class, null, elementProperty());
             observationsTable.editableProperty().bind(disableFieldsProperty().not());
             updateObservationsTable(session, elementProperty.get());
             return observationsTable;
@@ -159,13 +141,17 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
             // Propriétés de AbstractAmenagementHydraulique
-            {
-            final Preview linearPreview = newElement.getAmenagementHydrauliqueId() == null ? null : previewRepository.get(newElement.getAmenagementHydrauliqueId());
-            SIRS.initCombo(ui_amenagementHydrauliqueId, SIRS.observableList(
-                    previewRepository.getByClass(linearPreview == null ? AmenagementHydraulique.class : linearPreview.getJavaClassOr(AmenagementHydraulique.class))).sorted(), linearPreview);
+            Preview linearPreview = newElement.getAmenagementHydrauliqueId() == null ? null : previewRepository.get(newElement.getAmenagementHydrauliqueId());
+            final List<Preview> byClass = previewRepository.getByClass(linearPreview == null ? AmenagementHydraulique.class : linearPreview.getJavaClassOr(AmenagementHydraulique.class));
+            final List<Preview> withoutEmptyPreview = byClass.stream().filter(p -> p.getElementId() != null).collect(Collectors.toList());
+            final ObservableList<Preview> sorted = SIRS.observableList(withoutEmptyPreview).sorted();
+
+            if (linearPreview == null && sorted.size() >= 1) {
+                linearPreview = sorted.get(0);
+            }
+            SIRS.initCombo(ui_amenagementHydrauliqueId, sorted, linearPreview);
         }
-        }
-        
+
         updateObservationsTable(session, newElement);
         updatePhotosTable(session, newElement);
     }
