@@ -155,6 +155,7 @@ public class FXTraitAmenagementHydraulique extends GridPane{
         final TraitAmenagementHydraulique traitAmenagementHydraulique = traitProperty.get();
         traitAmenagementHydraulique.setDate_debut(uiDateDebut.getValue());
         traitAmenagementHydraulique.setDate_fin(uiDateFin.getValue());
+        traitAmenagementHydraulique.setAmenagementHydrauliqueId(amenagementHydrauliqueProperty.get() == null ? null : amenagementHydrauliqueProperty.get().getId());
         final AbstractSIRSRepository<TraitAmenagementHydraulique> repo = Injector.getSession().getRepositoryForClass(TraitAmenagementHydraulique.class);
         if (traitAmenagementHydraulique.isNew()){
             repo.add(traitAmenagementHydraulique);

@@ -5,10 +5,14 @@
  */
 package fr.sirs.theme.ui;
 
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.InjectorCore;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.AmenagementHydrauliqueViewRepository;
+import fr.sirs.core.component.ReferenceUsageRepository;
 import fr.sirs.core.model.AmenagementHydrauliqueView;
+import fr.sirs.core.model.ReferenceUsage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
 import java.util.List;
@@ -134,7 +138,7 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
     private void updateValue(final AmenagementHydrauliqueView ah) {
         if (ah != null) {
             uiLabelAmenagementHydraulique.setText((new SirsStringConverter()).toString(ah));
-            uiLabelTypeAmenagementHydraulique.setText(ah.getType());
+            uiLabelTypeAmenagementHydraulique.setText(getLabelFromType(ah.getType()));
             uiLabelSuperficie.setText(ah.getSuperficie());
             uiLabelCapaciteStockage.setText(ah.getCapaciteStockage());
             uiLabelProfondeurMoyenne.setText(ah.getProfondeurMoyenne());
@@ -163,5 +167,19 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
         hbox.setPrefWidth(USE_COMPUTED_SIZE);
         hbox.setPadding(new Insets(5));
         return hbox;
+    }
+
+    private String getLabelFromType(final String type) {
+        if (type == null) return null;
+
+        final ReferenceUsageRepository repo = InjectorCore.getBean(ReferenceUsageRepository.class);
+        List<ReferenceUsage> referenceUsages = repo.getReferenceUsages(type);
+
+        for (ReferenceUsage ref: referenceUsages) {
+            if (type.equals(ref.getObjectId())) {
+                return ref.getLabel();
+            }
+        }
+        return null;
     }
 }

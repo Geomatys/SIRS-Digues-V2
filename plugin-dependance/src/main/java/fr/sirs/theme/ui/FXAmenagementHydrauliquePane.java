@@ -403,7 +403,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         if (newElement == null) {
             traitsTable.setTableItems(null);
         } else {
-            traitsTable.setParentElement(null);
+            traitsTable.setParentElement(newElement);
             final AbstractSIRSRepository<TraitAmenagementHydraulique> traitRepo = session.getRepositoryForClass(TraitAmenagementHydraulique.class);
             traitsTable.setTableItems(()-> SIRS.toElementList(newElement.getTraitIds(), traitRepo));
         }
