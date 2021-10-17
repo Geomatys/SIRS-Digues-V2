@@ -163,11 +163,6 @@ public class FXTraitAmenagementHydraulique extends GridPane{
             repo.update(traitAmenagementHydraulique);
         }
 
-        // update the current AH
-        final AmenagementHydraulique amenagement = amenagementHydrauliqueProperty.get();
-        amenagement.getTraitIds().add(traitAmenagementHydraulique.getId());
-        Injector.getSession().getRepositoryForClass(AmenagementHydraulique.class).update(amenagement);
-
         endEdition();
     }
 

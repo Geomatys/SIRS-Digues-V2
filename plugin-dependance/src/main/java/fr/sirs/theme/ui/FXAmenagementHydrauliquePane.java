@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.util.Callback;
 
 /**
@@ -404,8 +405,8 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             traitsTable.setTableItems(null);
         } else {
             traitsTable.setParentElement(newElement);
-            final AbstractSIRSRepository<TraitAmenagementHydraulique> traitRepo = session.getRepositoryForClass(TraitAmenagementHydraulique.class);
-            traitsTable.setTableItems(()-> SIRS.toElementList(newElement.getTraitIds(), traitRepo));
+            final TraitAmenagementHydrauliqueRepository traitRepo = (TraitAmenagementHydrauliqueRepository) session.getRepositoryForClass(TraitAmenagementHydraulique.class);
+            traitsTable.setTableItems(()-> FXCollections.observableArrayList(traitRepo.getByAmenagementHydrauliqueId(newElement.getId())));
         }
     }
 

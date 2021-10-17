@@ -137,8 +137,6 @@
         eType="#//PrestationAmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="proprietaireIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Contact"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="traitIds" upperBound="-1"
-        eType="#//TraitAmenagementHydraulique" eOpposite="#//TraitAmenagementHydraulique/amenagementHydrauliqueId"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//AbstractAmenagementHydraulique">
     <eAnnotations source="couchDBDocument"/>
@@ -226,7 +224,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometry" eType="ecore:EDataType ../../sirs-core/model/jts.ecore#//Geometry"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="amenagementHydrauliqueId"
-        eType="#//AmenagementHydraulique" eOpposite="#//AmenagementHydraulique/traitIds"/>
+        eType="#//AmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
       <eAnnotations source="localDate"/>
     </eStructuralFeatures>

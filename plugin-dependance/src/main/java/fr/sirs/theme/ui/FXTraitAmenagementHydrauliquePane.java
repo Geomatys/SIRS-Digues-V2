@@ -15,8 +15,6 @@ import javafx.scene.control.*;
 import javafx.event.ActionEvent;
 import javafx.scene.image.ImageView;
 
-import javafx.beans.value.ChangeListener;
-
 /**
  *
  * @author Olivier Nouguier (Geomatys)
@@ -105,51 +103,17 @@ public class FXTraitAmenagementHydrauliquePane extends AbstractFXElementPane<Tra
     }
     @Override
     public void preSave() {
-        final Session session = Injector.getBean(Session.class);
         final TraitAmenagementHydraulique element = (TraitAmenagementHydraulique) elementProperty().get();
-        
-        
         element.setCommentaire(ui_commentaire.getText());
-        
         
         Object cbValue;
         cbValue = ui_amenagementHydrauliqueId.getValue();
         if (cbValue instanceof Preview) {
-            final String ahId = ((Preview)cbValue).getElementId();
-            element.setAmenagementHydrauliqueId(ahId);
-            updateParentAndOppositeAh(ahId);
+            element.setAmenagementHydrauliqueId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            final String ahId = ((Element)cbValue).getId();
-            element.setAmenagementHydrauliqueId(ahId);
-            updateParentAndOppositeAh(ahId);
+            element.setAmenagementHydrauliqueId(((Element)cbValue).getId());
         } else if (cbValue == null) {
             element.setAmenagementHydrauliqueId(null);
-            updateParentAndOppositeAh(null);
-        }
-    }
-    
-    private void updateParentAndOppositeAh(final String newAhId) {
-        final AbstractSIRSRepository<AmenagementHydraulique> repo = Injector.getSession().getRepositoryForClass(AmenagementHydraulique.class);
-        final String currentId = elementProperty.get().getId();
-
-        // Handle old value
-        if (oldValueAhId != null) {
-            if (oldValueAhId.equals(newAhId)) return;
-
-            final AmenagementHydraulique oldAh = repo.get(oldValueAhId);
-            final ObservableList<String> traitIds = oldAh.getTraitIds();
-            traitIds.remove(currentId);
-            repo.update(oldAh);
-        }
-
-        if (newAhId != null) {
-            final AmenagementHydraulique newAh = repo.get(newAhId);
-            final ObservableList<String> traitIds = newAh.getTraitIds();
-            
-            if (!traitIds.contains(currentId)) {
-                traitIds.add(currentId);
-                repo.update(newAh);
-            }
         }
     }
 }
