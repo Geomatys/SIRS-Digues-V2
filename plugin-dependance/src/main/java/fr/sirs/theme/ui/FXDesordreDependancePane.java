@@ -54,8 +54,6 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
     // Propriétés de DesordreDependance
     @FXML protected TextField ui_lieuDit;
     @FXML protected TextArea ui_commentaire;
-    @FXML protected ComboBox ui_dependanceId;
-    @FXML protected Button ui_dependanceId_link;
     @FXML protected Tab ui_observations;
     protected final PojoTable observationsTable;
     @FXML protected Tab ui_evenementHydrauliqueIds;
@@ -77,9 +75,9 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
     protected ListeningPojoTable articleIdsTable;
 
     // Propriétés de AvecGeometrie
-    // Propriétés de AbstractAmenagementHydraulique
-    @FXML protected ComboBox ui_amenagementHydrauliqueId;
-    @FXML protected Button ui_amenagementHydrauliqueId_link;
+    // Propriétés de AbstractDependance
+    @FXML protected ComboBox ui_abstractDependanceId;
+    @FXML protected Button ui_abstractDependanceId_link;
 
     /**
      * Constructor. Initialize part of the UI which will not require update when
@@ -99,10 +97,6 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
         */
         ui_lieuDit.disableProperty().bind(disableFieldsProperty());
         ui_commentaire.disableProperty().bind(disableFieldsProperty());
-        ui_dependanceId.disableProperty().bind(disableFieldsProperty());
-        ui_dependanceId_link.disableProperty().bind(ui_dependanceId.getSelectionModel().selectedItemProperty().isNull());
-        ui_dependanceId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
-        ui_dependanceId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_dependanceId.getSelectionModel().getSelectedItem()));
         observationsTable = new PojoTable(ObservationDependance.class, null, elementProperty());
         observationsTable.editableProperty().bind(disableFieldsProperty().not());
         ui_observations.setContent(observationsTable);
@@ -152,10 +146,10 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
             return articleIdsTable;
         });
         ui_articleIds.setClosable(false);
-        ui_amenagementHydrauliqueId.disableProperty().bind(disableFieldsProperty());
-        ui_amenagementHydrauliqueId_link.disableProperty().bind(ui_amenagementHydrauliqueId.getSelectionModel().selectedItemProperty().isNull());
-        ui_amenagementHydrauliqueId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
-        ui_amenagementHydrauliqueId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_amenagementHydrauliqueId.getSelectionModel().getSelectedItem()));
+        ui_abstractDependanceId.disableProperty().bind(disableFieldsProperty());
+        ui_abstractDependanceId_link.disableProperty().bind(ui_abstractDependanceId.getSelectionModel().selectedItemProperty().isNull());
+        ui_abstractDependanceId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
+        ui_abstractDependanceId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_abstractDependanceId.getSelectionModel().getSelectedItem()));
     }
 
     public FXDesordreDependancePane(final DesordreDependance desordreDependance){
@@ -184,12 +178,11 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
         if (newElement == null) {
             ui_lieuDit.setText(null);
             ui_commentaire.setText(null);
-            ui_dependanceId.setItems(null);
             ui_sourceId.setItems(null);
             ui_positionId.setItems(null);
             ui_categorieDesordreId.setItems(null);
             ui_typeDesordreId.setItems(null);
-            ui_amenagementHydrauliqueId.setItems(null);
+            ui_abstractDependanceId.setItems(null);
         } else {
             /*
             * Bind control properties to Element ones.
@@ -199,9 +192,6 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
             ui_lieuDit.textProperty().bindBidirectional(newElement.lieuDitProperty());
             // * commentaire
             ui_commentaire.textProperty().bindBidirectional(newElement.commentaireProperty());
-            List<Preview> abstractDependances = previewRepository.getByClass(AbstractDependance.class);
-            abstractDependances.removeIf(p -> "fr.sirs.core.model.AmenagementHydraulique".equals(p.getElementClass()));
-            SIRS.initCombo(ui_dependanceId, FXCollections.observableList(abstractDependances), newElement.getDependanceId() == null ? null : previewRepository.get(newElement.getDependanceId()));
             // * cote
             ui_cote.getValueFactory().valueProperty().bindBidirectional(newElement.coteProperty());
             final AbstractSIRSRepository<RefSource> sourceIdRepo = session.getRepositoryForClass(RefSource.class);
@@ -215,9 +205,13 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
             // Propriétés de AbstractAmenagementHydraulique
-            final Preview linearPreview = newElement.getAmenagementHydrauliqueId() == null ? null : previewRepository.get(newElement.getAmenagementHydrauliqueId());
-            SIRS.initCombo(ui_amenagementHydrauliqueId, SIRS.observableList(
-                    previewRepository.getByClass(linearPreview == null ? AmenagementHydraulique.class : linearPreview.getJavaClassOr(AmenagementHydraulique.class))).sorted(), linearPreview);
+            Preview amenagementOrDependancePreview = null;
+            if (newElement.getDependanceId() != null) {
+                amenagementOrDependancePreview = previewRepository.get(newElement.getDependanceId());
+            } else if (newElement.getAmenagementHydrauliqueId() != null) {
+                amenagementOrDependancePreview = previewRepository.get(newElement.getAmenagementHydrauliqueId());
+            }
+            SIRS.initCombo(ui_abstractDependanceId, FXCollections.observableList(previewRepository.getByClass(AbstractDependance.class)), amenagementOrDependancePreview);
         }
 
         updateObservationsTable(session, newElement);
@@ -301,14 +295,6 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
         final DesordreDependance element = (DesordreDependance) elementProperty().get();
 
         Object cbValue;
-        cbValue = ui_dependanceId.getValue();
-        if (cbValue instanceof Preview) {
-            element.setDependanceId(((Preview)cbValue).getElementId());
-        } else if (cbValue instanceof Element) {
-            element.setDependanceId(((Element)cbValue).getId());
-        } else if (cbValue == null) {
-            element.setDependanceId(null);
-        }
         cbValue = ui_sourceId.getValue();
         if (cbValue instanceof Preview) {
             element.setSourceId(((Preview)cbValue).getElementId());
@@ -412,13 +398,25 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
             }
             element.setArticleIds(currentArticleJournalIdsList);
         }
-        cbValue = ui_amenagementHydrauliqueId.getValue();
+        cbValue = ui_abstractDependanceId.getValue();
         if (cbValue instanceof Preview) {
-            element.setAmenagementHydrauliqueId(((Preview)cbValue).getElementId());
+            final Preview preview = (Preview) cbValue;
+            final String clazz = preview.getElementClass();
+            if ("fr.sirs.core.model.AmenagementHydraulique".equals(clazz)) {
+                element.setAmenagementHydrauliqueId(preview.getElementId());
+            } else {
+                element.setDependanceId(preview.getElementId());
+            }
         } else if (cbValue instanceof Element) {
-            element.setAmenagementHydrauliqueId(((Element)cbValue).getId());
+            final Element elem = (Element) cbValue;
+            if (elem instanceof AmenagementHydraulique) {
+                element.setAmenagementHydrauliqueId(elem.getId());
+            } else {
+                element.setDependanceId(elem.getId());
+            }
         } else if (cbValue == null) {
             element.setAmenagementHydrauliqueId(null);
+            element.setDependanceId(null);
         }
     }
 }

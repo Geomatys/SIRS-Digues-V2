@@ -9,6 +9,7 @@ import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
 import fr.sirs.util.javafx.FloatSpinnerValueFactory;
 import fr.sirs.util.FXFreeTab;
+import fr.sirs.util.StreamingIterable;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -20,6 +21,7 @@ import javafx.scene.image.ImageView;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import org.geotoolkit.util.collection.CloseableIterator;
 
 /**
  *
@@ -52,6 +54,14 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
     protected ListeningPojoTable ouvrageAssocieAmenagementHydrauliqueIdsTable;
     @FXML protected FXFreeTab ui_photos;
     protected PojoTable photosTable;
+    @FXML protected FXFreeTab ui_intervenantIds;
+    protected ListeningPojoTable intervenantIdsTable;
+    @FXML protected FXFreeTab ui_rapportEtudeIds;
+    protected ListeningPojoTable rapportEtudeIdsTable;
+    @FXML protected FXFreeTab ui_evenementHydrauliqueIds;
+    protected ListeningPojoTable evenementHydrauliqueIdsTable;
+    @FXML protected FXFreeTab ui_observations;
+    protected PojoTable observationsTable;
     
     // Propriétés de AvecGeometrie
     
@@ -94,7 +104,7 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
         ui_mesureDiverse.setEditable(true);
         ui_mesureDiverse.setValueFactory(new FloatSpinnerValueFactory(0, Float.MAX_VALUE));
         ui_commentaire.setWrapText(true);
-        ui_commentaire.editableProperty().bind(disableFieldsProperty().not());
+        ui_commentaire.editableProperty().bind(disableFieldsProperty());
         ui_sourceId.disableProperty().bind(disableFieldsProperty());
         ui_sourceId_link.setVisible(false);
         ui_typePrestationId.disableProperty().bind(disableFieldsProperty());
@@ -132,6 +142,42 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
             return photosTable;
         });
         ui_photos.setClosable(false);
+        
+        ui_intervenantIds.setContent(() -> {
+            intervenantIdsTable = new ListeningPojoTable(Contact.class, null, elementProperty());
+            intervenantIdsTable.editableProperty().bind(disableFieldsProperty().not());
+            intervenantIdsTable.createNewProperty().set(false);
+            updateIntervenantIdsTable(session, elementProperty.get());
+            return intervenantIdsTable;
+        });
+        ui_intervenantIds.setClosable(false);
+        
+        ui_rapportEtudeIds.setContent(() -> {
+            rapportEtudeIdsTable = new ListeningPojoTable(RapportEtude.class, null, elementProperty());
+            rapportEtudeIdsTable.editableProperty().bind(disableFieldsProperty().not());
+            rapportEtudeIdsTable.createNewProperty().set(false);
+            updateRapportEtudeIdsTable(session, elementProperty.get());
+            return rapportEtudeIdsTable;
+        });
+        ui_rapportEtudeIds.setClosable(false);
+        
+        ui_evenementHydrauliqueIds.setContent(() -> {
+            evenementHydrauliqueIdsTable = new ListeningPojoTable(EvenementHydraulique.class, null, elementProperty());
+            evenementHydrauliqueIdsTable.editableProperty().bind(disableFieldsProperty().not());
+            evenementHydrauliqueIdsTable.createNewProperty().set(false);
+            updateEvenementHydrauliqueIdsTable(session, elementProperty.get());
+            return evenementHydrauliqueIdsTable;
+        });
+        ui_evenementHydrauliqueIds.setClosable(false);
+        
+        ui_observations.setContent(() -> {
+            observationsTable = new PojoTable(ObservationDependance.class, null, elementProperty());
+            observationsTable.editableProperty().bind(disableFieldsProperty().not());
+            updateObservationsTable(session, elementProperty.get());
+            return observationsTable;
+        });
+        ui_observations.setClosable(false);
+        
         ui_amenagementHydrauliqueId.disableProperty().bind(disableFieldsProperty());
         ui_amenagementHydrauliqueId_link.disableProperty().bind(ui_amenagementHydrauliqueId.getSelectionModel().selectedItemProperty().isNull());
         ui_amenagementHydrauliqueId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
@@ -214,7 +260,7 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
             final List<Preview> byClass = previewRepository.getByClass(linearPreview == null ? AmenagementHydraulique.class : linearPreview.getJavaClassOr(AmenagementHydraulique.class));
             final List<Preview> withoutEmptyPreview = byClass.stream().filter(p -> p.getElementId() != null).collect(Collectors.toList());
             final ObservableList<Preview> sorted = SIRS.observableList(withoutEmptyPreview).sorted();
-
+            
             if (linearPreview == null && sorted.size() >= 1) {
                 linearPreview = sorted.get(0);
             }
@@ -224,6 +270,12 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
         updateDesordreIdsTable(session, newElement);
         updateOuvrageAssocieAmenagementHydrauliqueIdsTable(session, newElement);
         updatePhotosTable(session, newElement);
+        updateIntervenantIdsTable(session, newElement);
+        updateRapportEtudeIdsTable(session, newElement);
+        updateEvenementHydrauliqueIdsTable(session, newElement);
+        updateObservationsTable(session, newElement);
+        
+        
     }
     
     
@@ -268,6 +320,61 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
             photosTable.setTableItems(()-> (ObservableList) newElement.getPhotos());
         }
     }
+    
+    protected void updateIntervenantIdsTable(final Session session, final PrestationAmenagementHydraulique newElement) {
+        if (intervenantIdsTable == null)
+            return;
+        
+        if (newElement == null) {
+            intervenantIdsTable.setTableItems(null);
+        } else {
+            intervenantIdsTable.setParentElement(null);
+            final AbstractSIRSRepository<Contact> intervenantIdsRepo = session.getRepositoryForClass(Contact.class);
+            intervenantIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getIntervenantIds(), intervenantIdsRepo));
+            intervenantIdsTable.setObservableListToListen(newElement.getIntervenantIds());
+        }
+    }
+    
+    protected void updateRapportEtudeIdsTable(final Session session, final PrestationAmenagementHydraulique newElement) {
+        if (rapportEtudeIdsTable == null)
+            return;
+        
+        if (newElement == null) {
+            rapportEtudeIdsTable.setTableItems(null);
+        } else {
+            rapportEtudeIdsTable.setParentElement(null);
+            final AbstractSIRSRepository<RapportEtude> rapportEtudeIdsRepo = session.getRepositoryForClass(RapportEtude.class);
+            rapportEtudeIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getRapportEtudeIds(), rapportEtudeIdsRepo));
+            rapportEtudeIdsTable.setObservableListToListen(newElement.getRapportEtudeIds());
+        }
+    }
+    
+    protected void updateEvenementHydrauliqueIdsTable(final Session session, final PrestationAmenagementHydraulique newElement) {
+        if (evenementHydrauliqueIdsTable == null)
+            return;
+        
+        if (newElement == null) {
+            evenementHydrauliqueIdsTable.setTableItems(null);
+        } else {
+            evenementHydrauliqueIdsTable.setParentElement(null);
+            final AbstractSIRSRepository<EvenementHydraulique> evenementHydrauliqueIdsRepo = session.getRepositoryForClass(EvenementHydraulique.class);
+            evenementHydrauliqueIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getEvenementHydrauliqueIds(), evenementHydrauliqueIdsRepo));
+            evenementHydrauliqueIdsTable.setObservableListToListen(newElement.getEvenementHydrauliqueIds());
+        }
+    }
+    
+    protected void updateObservationsTable(final Session session, final PrestationAmenagementHydraulique newElement) {
+        if (observationsTable == null)
+            return;
+        
+        if (newElement == null) {
+            observationsTable.setTableItems(null);
+        } else {
+            observationsTable.setParentElement(newElement);
+            observationsTable.setTableItems(()-> (ObservableList) newElement.getObservations());
+        }
+    }
+    
     @Override
     public void preSave() {
         final Session session = Injector.getBean(Session.class);
@@ -322,6 +429,70 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
             element.setOuvrageAssocieAmenagementHydrauliqueIds(currentOuvrageAssocieAmenagementHydrauliqueIdsList);
             
         }
+        if (intervenantIdsTable != null) {
+            // Manage opposite references for Contact...
+            final List<String> currentContactIdsList = new ArrayList<>();
+            for(final Element elt : intervenantIdsTable.getAllValues()){
+                final Contact contact = (Contact) elt;
+                currentContactIdsList.add(contact.getId());
+            }
+            element.setIntervenantIds(currentContactIdsList);
+        }
+        if (rapportEtudeIdsTable != null) {
+            /*
+            * En cas de reference opposee on se prepare a stocker les objets
+            * "opposes" pour les mettre � jour.
+            */
+            final List<RapportEtude> currentRapportEtudeList = new ArrayList<>();
+            // Manage opposite references for RapportEtude...
+            /*
+            * Si on est sur une reference principale, on a besoin du depot pour
+            * supprimer reellement les elements que l'on va retirer du tableau.
+            * Si on a une reference opposee, on a besoin du depot pour mettre a jour
+            * les objets qui referencent l'objet courant en sens contraire.
+            */
+            final AbstractSIRSRepository<RapportEtude> rapportEtudeRepository = session.getRepositoryForClass(RapportEtude.class);
+            final List<String> currentRapportEtudeIdsList = new ArrayList<>();
+            for(final Element elt : rapportEtudeIdsTable.getAllValues()){
+                final RapportEtude rapportEtude = (RapportEtude) elt;
+                currentRapportEtudeIdsList.add(rapportEtude.getId());
+                currentRapportEtudeList.add(rapportEtude);
+                
+                // Addition
+                if(!rapportEtude.getPrestationIds().contains(element.getId())){
+                    rapportEtude.getPrestationIds().add(element.getId());
+                }
+            }
+            rapportEtudeRepository.executeBulk(currentRapportEtudeList);
+            element.setRapportEtudeIds(currentRapportEtudeIdsList);
+            
+            // Deletion
+            final StreamingIterable<RapportEtude> listRapportEtude = rapportEtudeRepository.getAllStreaming();
+            try (final CloseableIterator<RapportEtude> it = listRapportEtude.iterator()) {
+                while (it.hasNext()) {
+                    final RapportEtude i = it.next();
+                    if(i.getPrestationIds().contains(element.getId())
+                            || element.getRapportEtudeIds().contains(i.getId())){
+                        if(!rapportEtudeIdsTable.getAllValues().contains(i)){
+                            element.getRapportEtudeIds().remove(i.getId()); //Normalement inutile du fait du  clear avant les op�rations d'ajout
+                            i.getPrestationIds().remove(element.getId());
+                            rapportEtudeRepository.update(i);
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (evenementHydrauliqueIdsTable != null) {
+            // Manage opposite references for EvenementHydraulique...
+            final List<String> currentEvenementHydrauliqueIdsList = new ArrayList<>();
+            for(final Element elt : evenementHydrauliqueIdsTable.getAllValues()){
+                final EvenementHydraulique evenementHydraulique = (EvenementHydraulique) elt;
+                currentEvenementHydrauliqueIdsList.add(evenementHydraulique.getId());
+            }
+            element.setEvenementHydrauliqueIds(currentEvenementHydrauliqueIdsList);
+        }
+        
         cbValue = ui_amenagementHydrauliqueId.getValue();
         if (cbValue instanceof Preview) {
             element.setAmenagementHydrauliqueId(((Preview)cbValue).getElementId());

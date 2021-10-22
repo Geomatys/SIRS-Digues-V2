@@ -116,7 +116,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         uiPosition.dependanceProperty().bind(elementProperty);
 
         ui_desordreIds.setContent(() -> {
-            desordreIdsTable = new ListeningPojoTable(Desordre.class, null, elementProperty());
+            desordreIdsTable = new ListeningPojoTable(Desordre.class, "Désordre d'un tronçon affectant l'AH", elementProperty());
             desordreIdsTable.editableProperty().bind(disableFieldsProperty().not());
             desordreIdsTable.createNewProperty().set(false);
             updateDesordreIdsTable(session, elementProperty.get());
@@ -125,7 +125,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_desordreIds.setClosable(false);
 
         ui_structureIds.setContent(() -> {
-            structureIdsTable = new ListeningPojoTable(StructureAmenagementHydraulique.class, null, elementProperty());
+            structureIdsTable = new ListeningPojoTable(StructureAmenagementHydraulique.class, "Structure d'un tronçon affectant l'AH", elementProperty());
             structureIdsTable.editableProperty().bind(disableFieldsProperty().not());
             structureIdsTable.createNewProperty().set(false);
             updateStructureIdsTable(session, elementProperty.get());
@@ -134,7 +134,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_structureIds.setClosable(false);
 
         ui_ouvrageAssocieIds.setContent(() -> {
-            ouvrageAssocieIdsTable = new ListeningPojoTable(OuvrageAssocieAmenagementHydraulique.class, null, elementProperty());
+            ouvrageAssocieIdsTable = new ListeningPojoTable(OuvrageAssocieAmenagementHydraulique.class, "Ouvrage associé d'un tronçon affectant l'AH", elementProperty());
             ouvrageAssocieIdsTable.editableProperty().bind(disableFieldsProperty().not());
             ouvrageAssocieIdsTable.createNewProperty().set(false);
             updateOuvrageAssocieIdsTable(session, elementProperty.get());
@@ -168,9 +168,9 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             return observationsTable;
         });
         ui_observations.setClosable(false);
-        
+
         ui_prestationIds.setContent(() -> {
-            prestationIdsTable = new ListeningPojoTable(Prestation.class, null, elementProperty());
+            prestationIdsTable = new ListeningPojoTable(Prestation.class, "Prestation d'un tronçon affectant l'AH", elementProperty());
             prestationIdsTable.editableProperty().bind(disableFieldsProperty().not());
             prestationIdsTable.createNewProperty().set(false);
             updatePrestationIdsTable(session, elementProperty.get());

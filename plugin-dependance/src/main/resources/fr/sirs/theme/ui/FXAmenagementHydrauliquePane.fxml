@@ -95,18 +95,26 @@
         </Tab>
 
 <!-- REFERENCE TABS -->
-        <FXFreeTab fx:id="ui_desordreIds" text="%desordreIds"/>
-        <FXFreeTab fx:id="ui_structureIds" text="%structureIds"/>
-        <FXFreeTab fx:id="ui_ouvrageAssocieIds" text="%ouvrageAssocieIds"/>
+
         <FXFreeTab fx:id="ui_gestionnaireIds" text="%gestionnaireIds"/>
         <FXFreeTab fx:id="ui_tronconIds" text="%tronconIds"/>
         <FXFreeTab fx:id="ui_observations" text="%observations"/>
-        <FXFreeTab fx:id="ui_prestationIds" text="%prestationIds"/>
         <FXFreeTab fx:id="ui_proprietaireIds" text="%proprietaireIds"/>
         <!--<FXFreeTab fx:id="ui_proprietes" text="%proprietes"/>
         <FXFreeTab fx:id="ui_gestions" text="%gestions"/>-->
         <FXFreeTab fx:id="ui_photos" text="%photos"/>
         <FXFreeTab fx:id="ui_traits" text="%traits"/>
+
+        <Tab text="Objet/évènement d'un troncon affectant l'AH">
+            <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+                <tabs>
+                    <FXFreeTab fx:id="ui_desordreIds" text="%desordreIds"/>
+                    <FXFreeTab fx:id="ui_structureIds" text="%structureIds"/>
+                    <FXFreeTab fx:id="ui_ouvrageAssocieIds" text="%ouvrageAssocieIds"/>
+                    <FXFreeTab fx:id="ui_prestationIds" text="%prestationIds"/>
+                </tabs>
+            </TabPane>
+        </Tab>
 
       </tabs>
     </TabPane>

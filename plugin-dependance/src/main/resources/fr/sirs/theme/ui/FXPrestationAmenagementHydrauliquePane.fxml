@@ -105,8 +105,12 @@
                 </Tab>
 
                 <!-- REFERENCE TABS -->
+                <FXFreeTab fx:id="ui_intervenantsIds" text="%intervenantsIds"/>
+                <FXFreeTab fx:id="ui_rapportEtudeIds" text="%rapportEtudeIds"/>
+                <FXFreeTab fx:id="ui_evenementHydrauliqueIds" text="%evenementHydrauliqueIds"/>
                 <FXFreeTab fx:id="ui_desordreIds" text="%desordreIds"/>
                 <FXFreeTab fx:id="ui_ouvrageAssocieAmenagementHydrauliqueIds" text="%ouvrageAssocieAmenagementHydrauliqueIds"/>
+                <FXFreeTab fx:id="ui_observations" text="%observations"/>
                 <FXFreeTab fx:id="ui_photos" text="%photos"/>
 
             </tabs>

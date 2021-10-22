@@ -34,10 +34,10 @@ import fr.sirs.theme.AbstractTheme;
 public class AbstractDescriptionPane extends BorderPane {
 
     @FXML
-    private ComboBox<Preview> ahBox;
+    protected ComboBox<Preview> ahBox;
 
     @FXML
-    private BorderPane uiCenter;
+    protected BorderPane uiCenter;
 
     public AbstractDescriptionPane() {
        this(null, null);
