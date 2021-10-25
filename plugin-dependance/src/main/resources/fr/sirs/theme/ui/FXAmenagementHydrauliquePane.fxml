@@ -54,12 +54,12 @@
                    <!-- EFloat -->                 
                    <Label text="%profondeurMoyenne" GridPane.rowIndex="3" />
                    <Spinner fx:id="ui_profondeurMoyenne" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <Label text="%fonctionnement" GridPane.rowIndex="4" />
-                   <ComboBox fx:id="ui_fonctionnement" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                   <Button fx:id="ui_fonctionnement_link" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                   <Label text="%type" GridPane.rowIndex="5" />
-                   <ComboBox fx:id="ui_type" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                   <Button fx:id="ui_type_link" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                   <Label text="%fonctionnementId" GridPane.rowIndex="4" />
+                   <ComboBox fx:id="ui_fonctionnementId" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                   <Button fx:id="ui_fonctionnementId_link" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                   <Label text="%typeId" GridPane.rowIndex="5" />
+                   <ComboBox fx:id="ui_typeId" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                   <Button fx:id="ui_typeId_link" GridPane.columnIndex="2" GridPane.rowIndex="5" />
 
               </children>
               <padding>

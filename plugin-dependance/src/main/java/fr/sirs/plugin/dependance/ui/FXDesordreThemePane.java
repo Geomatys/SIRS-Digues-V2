@@ -20,6 +20,7 @@ package fr.sirs.plugin.dependance.ui;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.model.AbstractDependance;
+import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.DesordreDependance;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
@@ -43,6 +44,12 @@ import javafx.scene.layout.Priority;
  */
 public class FXDesordreThemePane extends FXDependanceThemePane {
 
+    protected static final Preview ORPHELIN_PREVIEW = new Preview();
+
+    static {
+        ORPHELIN_PREVIEW.setLibelle("   Objets orphelins   ");
+    }
+
     public FXDesordreThemePane(ComboBox<Preview> uiDependanceAhChoice, AbstractTheme.ThemeManager theme) {
         super(theme);
         uiDependanceAhChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) -> {
@@ -54,8 +61,8 @@ public class FXDesordreThemePane extends FXDependanceThemePane {
         });
 
         final List<Preview> previews = session.getPreviews().getByClass(AbstractDependance.class);
-        if(!previews.contains(EMPTY_PREVIEW)){
-            previews.add(EMPTY_PREVIEW);
+        if(!previews.contains(ORPHELIN_PREVIEW)){
+            previews.add(ORPHELIN_PREVIEW);
         }
         final ObservableList<Preview> previewsWithEmpty = SIRS.observableList(previews).sorted();
         SIRS.initCombo(uiDependanceAhChoice, previewsWithEmpty, previewsWithEmpty.get(0));

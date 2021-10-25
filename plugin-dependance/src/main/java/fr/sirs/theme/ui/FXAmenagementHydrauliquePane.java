@@ -40,10 +40,10 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
     @FXML protected Spinner ui_capaciteStockage;
     @FXML protected TextField ui_collectiviteCompetence;
     @FXML protected Spinner ui_profondeurMoyenne;
-    @FXML protected ComboBox ui_fonctionnement;
-    @FXML protected Button ui_fonctionnement_link;
-    @FXML protected ComboBox ui_type;
-    @FXML protected Button ui_type_link;
+    @FXML protected ComboBox ui_fonctionnementId;
+    @FXML protected Button ui_fonctionnementId_link;
+    @FXML protected ComboBox ui_typeId;
+    @FXML protected Button ui_typeId_link;
     @FXML protected FXFreeTab ui_desordreIds;
     protected ListeningPojoTable desordreIdsTable;
     @FXML protected FXFreeTab ui_structureIds;
@@ -108,10 +108,10 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_profondeurMoyenne.disableProperty().bind(disableFieldsProperty());
         ui_profondeurMoyenne.setEditable(true);
         ui_profondeurMoyenne.setValueFactory(new FloatSpinnerValueFactory(0, Float.MAX_VALUE));
-        ui_fonctionnement.disableProperty().bind(disableFieldsProperty());
-        ui_fonctionnement_link.setVisible(false);
-        ui_type.disableProperty().bind(disableFieldsProperty());
-        ui_type_link.setVisible(false);
+        ui_fonctionnementId.disableProperty().bind(disableFieldsProperty());
+        ui_fonctionnementId_link.setVisible(false);
+        ui_typeId.disableProperty().bind(disableFieldsProperty());
+        ui_typeId_link.setVisible(false);
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
         uiPosition.dependanceProperty().bind(elementProperty);
 
@@ -257,8 +257,8 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         
         if (newElement == null) {
 
-            ui_fonctionnement.setItems(null);
-            ui_type.setItems(null);
+            ui_fonctionnementId.setItems(null);
+            ui_typeId.setItems(null);
         } else {
 
             /*
@@ -274,9 +274,9 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             // * profondeurMoyenne
             ui_profondeurMoyenne.getValueFactory().valueProperty().bindBidirectional(newElement.profondeurMoyenneProperty());
             final AbstractSIRSRepository<RefFonctionnementAH> fonctionnementRepo = session.getRepositoryForClass(RefFonctionnementAH.class);
-            SIRS.initCombo(ui_fonctionnement, SIRS.observableList(fonctionnementRepo.getAll()), newElement.getFonctionnement() == null? null : fonctionnementRepo.get(newElement.getFonctionnement()));
+            SIRS.initCombo(ui_fonctionnementId, SIRS.observableList(fonctionnementRepo.getAll()), newElement.getFonctionnementId() == null? null : fonctionnementRepo.get(newElement.getFonctionnementId()));
             final AbstractSIRSRepository<RefTypeAmenagementHydraulique> typeRepo = session.getRepositoryForClass(RefTypeAmenagementHydraulique.class);
-            SIRS.initCombo(ui_type, SIRS.observableList(typeRepo.getAll()), newElement.getType() == null? null : typeRepo.get(newElement.getType()));
+            SIRS.initCombo(ui_typeId, SIRS.observableList(typeRepo.getAll()), newElement.getTypeId() == null? null : typeRepo.get(newElement.getTypeId()));
             // Propriétés de AotCotAssociable
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
@@ -468,21 +468,21 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         element.setCommentaire(ui_commentaire.getText());
 
         Object cbValue;
-        cbValue = ui_fonctionnement.getValue();
+        cbValue = ui_fonctionnementId.getValue();
         if (cbValue instanceof Preview) {
-            element.setFonctionnement(((Preview)cbValue).getElementId());
+            element.setFonctionnementId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            element.setFonctionnement(((Element)cbValue).getId());
+            element.setFonctionnementId(((Element)cbValue).getId());
         } else if (cbValue == null) {
-            element.setFonctionnement(null);
+            element.setFonctionnementId(null);
         }
-        cbValue = ui_type.getValue();
+        cbValue = ui_typeId.getValue();
         if (cbValue instanceof Preview) {
-            element.setType(((Preview)cbValue).getElementId());
+            element.setTypeId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            element.setType(((Element)cbValue).getId());
+            element.setTypeId(((Element)cbValue).getId());
         } else if (cbValue == null) {
-            element.setType(null);
+            element.setTypeId(null);
         }
         if (desordreIdsTable != null) {
             // Manage opposite references for Desordre...

@@ -49,7 +49,7 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
     @FXML protected ComboBox ui_materiauId;
     @FXML protected ComboBox ui_sourceId;
     @FXML protected ComboBox ui_etatId;
-    @FXML protected ComboBox ui_fonctionnement;
+    @FXML protected ComboBox ui_fonctionnementId;
     @FXML protected TextArea ui_commentaire;
     @FXML protected FXFreeTab ui_amenagementHydrauliqueAssocieIds;
     protected ListeningPojoTable amenagementHydrauliqueAssocieIdsTable;
@@ -119,7 +119,7 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
         ui_materiauId.disableProperty().bind(disableFieldsProperty());
         ui_sourceId.disableProperty().bind(disableFieldsProperty());
         ui_etatId.disableProperty().bind(disableFieldsProperty());
-        ui_fonctionnement.disableProperty().bind(disableFieldsProperty());
+        ui_fonctionnementId.disableProperty().bind(disableFieldsProperty());
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
         ui_commentaire.disableProperty().bind(disableFieldsProperty());
         ui_commentaire.setWrapText(true);
@@ -227,7 +227,7 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
             ui_materiauId.setItems(null);
             ui_sourceId.setItems(null);
             ui_etatId.setItems(null);
-            ui_fonctionnement.setItems(null);
+            ui_fonctionnementId.setItems(null);
             ui_amenagementHydrauliqueId.setItems(null);
             ui_commentaire.setText(null);
         } else {
@@ -266,7 +266,7 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
             final AbstractSIRSRepository<RefEtat> etatRepo = session.getRepositoryForClass(RefEtat.class);
             SIRS.initCombo(ui_etatId, SIRS.observableList(etatRepo.getAll()), newElement.getEtatId() == null? null : etatRepo.get(newElement.getEtatId()));
             final AbstractSIRSRepository<RefFonctionnementOAAH> fonctionnementRepo = session.getRepositoryForClass(RefFonctionnementOAAH.class);
-            SIRS.initCombo(ui_fonctionnement, SIRS.observableList(fonctionnementRepo.getAll()), newElement.getFonctionnement() == null? null : fonctionnementRepo.get(newElement.getFonctionnement()));
+            SIRS.initCombo(ui_fonctionnementId, SIRS.observableList(fonctionnementRepo.getAll()), newElement.getFonctionnementId() == null? null : fonctionnementRepo.get(newElement.getFonctionnementId()));
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
             // Propriétés de AbstractAmenagementHydraulique
@@ -415,13 +415,13 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
         } else if (cbValue == null) {
             element.setEtatId(null);
         }
-        cbValue = ui_fonctionnement.getValue();
+        cbValue = ui_fonctionnementId.getValue();
         if (cbValue instanceof Preview) {
-            element.setFonctionnement(((Preview)cbValue).getElementId());
+            element.setFonctionnementId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            element.setFonctionnement(((Element)cbValue).getId());
+            element.setFonctionnementId(((Element)cbValue).getId());
         } else if (cbValue == null) {
-            element.setFonctionnement(null);
+            element.setFonctionnementId(null);
         }
         if (amenagementHydrauliqueAssocieIdsTable != null) {
             final List<String> currentAmenagementHydrauliqueIdsList = new ArrayList<>();

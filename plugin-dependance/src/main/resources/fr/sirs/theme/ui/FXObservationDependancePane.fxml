@@ -57,16 +57,20 @@
               <children>
                   <!-- EDate -->                 
                    <Label text="%date" GridPane.rowIndex="0" />
-                   <DatePicker fx:id="ui_date" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <DatePicker fx:id="ui_date" GridPane.columnIndex="1" GridPane.rowIndex="0"  maxHeight="-Infinity" maxWidth="-Infinity"/>
                    <!-- EString -->                 
                    <Label text="%evolution" GridPane.rowIndex="1" />
-                   <TextArea fx:id="ui_evolution" GridPane.columnIndex="1" GridPane.rowIndex="0"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <TextArea fx:id="ui_evolution" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
                    <!-- EString -->                 
                    <Label text="%suite" GridPane.rowIndex="2" />
                    <TextArea fx:id="ui_suite" GridPane.columnIndex="1" GridPane.rowIndex="2"  maxHeight="-Infinity" maxWidth="-Infinity"/>
                    <!-- EInt -->                 
                    <Label text="%nombreDesordres" GridPane.rowIndex="3" />
                    <Spinner fx:id="ui_nombreDesordres" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+
+                   <Label text="%urgenceId" GridPane.rowIndex="4" />
+                   <ComboBox fx:id="ui_urgenceId" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                   <Button fx:id="ui_urgenceId_link" GridPane.columnIndex="2" GridPane.rowIndex="4" />
 
               </children>
               <padding>

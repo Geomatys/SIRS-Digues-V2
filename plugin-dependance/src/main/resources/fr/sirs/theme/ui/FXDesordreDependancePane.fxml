@@ -42,9 +42,9 @@
                                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                         </rowConstraints-->
                                         <children>
-                                            <Label text="%amenagementHydrauliqueId" GridPane.rowIndex="0" />
-                                            <ComboBox fx:id="ui_amenagementHydrauliqueId" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                                            <Button fx:id="ui_amenagementHydrauliqueId_link" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                            <Label text="%abstractDependanceId" GridPane.rowIndex="0" />
+                                            <ComboBox fx:id="ui_abstractDependanceId" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                            <Button fx:id="ui_abstractDependanceId_link" GridPane.columnIndex="2" GridPane.rowIndex="0" />
 
                                         </children>
                                         <padding>

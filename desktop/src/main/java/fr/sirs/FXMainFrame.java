@@ -525,7 +525,7 @@ public class FXMainFrame extends BorderPane {
         button.setWrapText(true);
         button.setMinWidth(USE_PREF_SIZE);
         button.setMinHeight(USE_COMPUTED_SIZE);
-        button.setPrefWidth(115);
+        button.setPrefWidth(170);
         button.setPrefHeight(USE_COMPUTED_SIZE);
         button.setMaxWidth(USE_PREF_SIZE);
         button.setMaxHeight(Double.MAX_VALUE);

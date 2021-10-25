@@ -18,9 +18,7 @@
  */
 package fr.sirs.plugin.dependance.ui;
 
-import fr.sirs.SIRS;
-import fr.sirs.core.model.DesordreDependance;
-import fr.sirs.plugin.dependance.AbstractDescriptionTheme;
+import fr.sirs.plugin.dependance.DesordreDependanceAndAHTheme;
 import fr.sirs.theme.AbstractTheme;
 
 /**
@@ -36,7 +34,9 @@ public class DesordreDependanceAndAHPane extends AbstractDescriptionPane {
     public DesordreDependanceAndAHPane(String tableName) {
         super();
 
-        final AbstractTheme.ThemeManager themeManager = AbstractDescriptionTheme.generateThemeManager(tableName, DesordreDependance.class);
+        ahLabel.setWrapText(true);
+
+        final AbstractTheme.ThemeManager themeManager = DesordreDependanceAndAHTheme.generateThemeManager(tableName);
         final FXDesordreThemePane tab = new FXDesordreThemePane(ahBox, themeManager);
         uiCenter.setCenter(tab);
     }

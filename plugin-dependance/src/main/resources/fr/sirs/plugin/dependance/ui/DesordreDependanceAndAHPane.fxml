@@ -18,7 +18,7 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label minWidth="40.0" contentDisplay="TOP" styleClass="label-text" text="Aménagement hydraulique ou Dépendance" GridPane.hgrow="NEVER">
+            <Label fx:id="ahLabel" minWidth="40.0" contentDisplay="TOP" styleClass="label-text" text="Dépendance ou AH" GridPane.hgrow="NEVER">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>

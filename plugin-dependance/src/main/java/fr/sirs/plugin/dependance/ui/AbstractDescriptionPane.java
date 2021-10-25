@@ -25,6 +25,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.BorderPane;
 import fr.sirs.theme.AbstractTheme;
+import javafx.scene.control.Label;
 
 /**
  * Couche d'abstraction pour les panneaux des descriptions d'aménagements hydrauliques.
@@ -32,6 +33,9 @@ import fr.sirs.theme.AbstractTheme;
  * @author Maxime Gavens (Geomatys)
  */
 public class AbstractDescriptionPane extends BorderPane {
+
+    @FXML
+    protected Label ahLabel;
 
     @FXML
     protected ComboBox<Preview> ahBox;

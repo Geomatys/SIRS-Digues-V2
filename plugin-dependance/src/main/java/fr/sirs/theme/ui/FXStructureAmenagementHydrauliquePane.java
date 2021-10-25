@@ -8,6 +8,7 @@ import fr.sirs.Injector;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
 import fr.sirs.util.FXFreeTab;
+import fr.sirs.util.javafx.FloatSpinnerValueFactory;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -36,6 +37,9 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
     @FXML protected Button ui_materiauId_link;
     @FXML protected ComboBox ui_sourceId;
     @FXML protected Button ui_sourceId_link;
+    @FXML protected Spinner ui_epaisseur;
+    @FXML protected ComboBox ui_fonctionId;
+    @FXML protected ComboBox ui_natureId;
     @FXML protected FXFreeTab ui_observations;
     protected PojoTable observationsTable;
     @FXML protected FXFreeTab ui_photos;
@@ -70,10 +74,15 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
         ui_numCouche.disableProperty().bind(disableFieldsProperty());
         ui_numCouche.setEditable(true);
         ui_numCouche.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
+        ui_epaisseur.disableProperty().bind(disableFieldsProperty());
+        ui_epaisseur.setEditable(true);
+        ui_epaisseur.setValueFactory(new FloatSpinnerValueFactory(0, Float.MAX_VALUE));
         ui_materiauId.disableProperty().bind(disableFieldsProperty());
         ui_materiauId_link.setVisible(false);
         ui_sourceId.disableProperty().bind(disableFieldsProperty());
         ui_sourceId_link.setVisible(false);
+        ui_fonctionId.disableProperty().bind(disableFieldsProperty());
+        ui_natureId.disableProperty().bind(disableFieldsProperty());
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
         
         uiPosition.dependanceProperty().bind(elementProperty);
@@ -113,6 +122,8 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             // Propriétés de StructureAmenagementHydraulique
             ui_numCouche.getValueFactory().valueProperty().unbindBidirectional(oldElement.numCoucheProperty());
             ui_numCouche.getValueFactory().setValue(0);
+            ui_epaisseur.getValueFactory().valueProperty().unbindBidirectional(oldElement.epaisseurProperty());
+            ui_epaisseur.getValueFactory().setValue(0);
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
             // Propriétés de AbstractAmenagementHydraulique
@@ -124,6 +135,8 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             
             ui_materiauId.setItems(null);
             ui_sourceId.setItems(null);
+            ui_fonctionId.setItems(null);
+            ui_natureId.setItems(null);
             ui_amenagementHydrauliqueId.setItems(null);
         } else {
             
@@ -134,10 +147,15 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             // Propriétés de StructureAmenagementHydraulique
             // * numCouche
             ui_numCouche.getValueFactory().valueProperty().bindBidirectional(newElement.numCoucheProperty());
+            ui_epaisseur.getValueFactory().valueProperty().bindBidirectional(newElement.epaisseurProperty());
             final AbstractSIRSRepository<RefMateriau> materiauIdRepo = session.getRepositoryForClass(RefMateriau.class);
             SIRS.initCombo(ui_materiauId, SIRS.observableList(materiauIdRepo.getAll()), newElement.getMateriauId() == null? null : materiauIdRepo.get(newElement.getMateriauId()));
             final AbstractSIRSRepository<RefSource> sourceIdRepo = session.getRepositoryForClass(RefSource.class);
             SIRS.initCombo(ui_sourceId, SIRS.observableList(sourceIdRepo.getAll()), newElement.getSourceId() == null? null : sourceIdRepo.get(newElement.getSourceId()));
+            final AbstractSIRSRepository<RefFonction> fonctionIdRepo = session.getRepositoryForClass(RefFonction.class);
+            SIRS.initCombo(ui_fonctionId, SIRS.observableList(fonctionIdRepo.getAll()), newElement.getFonctionId() == null? null : fonctionIdRepo.get(newElement.getFonctionId()));
+            final AbstractSIRSRepository<RefNature> natureIdRepo = session.getRepositoryForClass(RefNature.class);
+            SIRS.initCombo(ui_natureId, SIRS.observableList(natureIdRepo.getAll()), newElement.getNatureId() == null? null : natureIdRepo.get(newElement.getNatureId()));
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
             // Propriétés de AbstractAmenagementHydraulique
@@ -205,6 +223,22 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             element.setSourceId(((Element)cbValue).getId());
         } else if (cbValue == null) {
             element.setSourceId(null);
+        }
+        cbValue = ui_fonctionId.getValue();
+        if (cbValue instanceof Preview) {
+            element.setFonctionId(((Preview)cbValue).getElementId());
+        } else if (cbValue instanceof Element) {
+            element.setFonctionId(((Element)cbValue).getId());
+        } else if (cbValue == null) {
+            element.setFonctionId(null);
+        }
+        cbValue = ui_natureId.getValue();
+        if (cbValue instanceof Preview) {
+            element.setNatureId(((Preview)cbValue).getElementId());
+        } else if (cbValue instanceof Element) {
+            element.setNatureId(((Element)cbValue).getId());
+        } else if (cbValue == null) {
+            element.setNatureId(null);
         }
         cbValue = ui_amenagementHydrauliqueId.getValue();
         if (cbValue instanceof Preview) {
