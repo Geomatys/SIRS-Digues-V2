@@ -116,7 +116,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         uiPosition.dependanceProperty().bind(elementProperty);
 
         ui_desordreIds.setContent(() -> {
-            desordreIdsTable = new ListeningPojoTable(Desordre.class, "Désordre d'un tronçon affectant l'AH", elementProperty());
+            desordreIdsTable = new ListeningPojoTable(DesordreDependance.class, "Désordre affectant l'AH", elementProperty());
             desordreIdsTable.editableProperty().bind(disableFieldsProperty().not());
             desordreIdsTable.createNewProperty().set(false);
             updateDesordreIdsTable(session, elementProperty.get());
@@ -125,7 +125,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_desordreIds.setClosable(false);
 
         ui_structureIds.setContent(() -> {
-            structureIdsTable = new ListeningPojoTable(StructureAmenagementHydraulique.class, "Structure d'un tronçon affectant l'AH", elementProperty());
+            structureIdsTable = new ListeningPojoTable(StructureAmenagementHydraulique.class, "Structure affectant l'AH", elementProperty());
             structureIdsTable.editableProperty().bind(disableFieldsProperty().not());
             structureIdsTable.createNewProperty().set(false);
             updateStructureIdsTable(session, elementProperty.get());
@@ -134,7 +134,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_structureIds.setClosable(false);
 
         ui_ouvrageAssocieIds.setContent(() -> {
-            ouvrageAssocieIdsTable = new ListeningPojoTable(OuvrageAssocieAmenagementHydraulique.class, "Ouvrage associé d'un tronçon affectant l'AH", elementProperty());
+            ouvrageAssocieIdsTable = new ListeningPojoTable(OuvrageAssocieAmenagementHydraulique.class, "Ouvrage associé affectant l'AH", elementProperty());
             ouvrageAssocieIdsTable.editableProperty().bind(disableFieldsProperty().not());
             ouvrageAssocieIdsTable.createNewProperty().set(false);
             updateOuvrageAssocieIdsTable(session, elementProperty.get());
@@ -170,7 +170,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_observations.setClosable(false);
 
         ui_prestationIds.setContent(() -> {
-            prestationIdsTable = new ListeningPojoTable(Prestation.class, "Prestation d'un tronçon affectant l'AH", elementProperty());
+            prestationIdsTable = new ListeningPojoTable(PrestationAmenagementHydraulique.class, "Prestation affectant l'AH", elementProperty());
             prestationIdsTable.editableProperty().bind(disableFieldsProperty().not());
             prestationIdsTable.createNewProperty().set(false);
             updatePrestationIdsTable(session, elementProperty.get());
@@ -309,7 +309,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             desordreIdsTable.setTableItems(null);
         } else {
             desordreIdsTable.setParentElement(null);
-            final AbstractSIRSRepository<Desordre> desordreIdsRepo = session.getRepositoryForClass(Desordre.class);
+            final AbstractSIRSRepository<DesordreDependance> desordreIdsRepo = session.getRepositoryForClass(DesordreDependance.class);
             desordreIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getDesordreIds(), desordreIdsRepo));
             desordreIdsTable.setObservableListToListen(newElement.getDesordreIds());
         }
@@ -391,7 +391,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             prestationIdsTable.setTableItems(null);
         } else {
             prestationIdsTable.setParentElement(null);
-            final AbstractSIRSRepository<Prestation> prestationIdsRepo = session.getRepositoryForClass(Prestation.class);
+            final AbstractSIRSRepository<PrestationAmenagementHydraulique> prestationIdsRepo = session.getRepositoryForClass(PrestationAmenagementHydraulique.class);
             prestationIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getPrestationIds(), prestationIdsRepo));
             prestationIdsTable.setObservableListToListen(newElement.getPrestationIds());
         }
@@ -488,7 +488,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             // Manage opposite references for Desordre...
             final List<String> currentDesordreIdsList = new ArrayList<>();
             for(final Element elt : desordreIdsTable.getAllValues()){
-                final Desordre desordre = (Desordre) elt;
+                final DesordreDependance desordre = (DesordreDependance) elt;
                 currentDesordreIdsList.add(desordre.getId());
             }
             element.setDesordreIds(currentDesordreIdsList);
@@ -585,7 +585,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             // Manage opposite references for Prestation...
             final List<String> currentPrestationIdsList = new ArrayList<>();
             for(final Element elt : prestationIdsTable.getAllValues()){
-                final Prestation prestation = (Prestation) elt;
+                final PrestationAmenagementHydraulique prestation = (PrestationAmenagementHydraulique) elt;
                 currentPrestationIdsList.add(prestation.getId());
             }
             element.setPrestationIds(currentPrestationIdsList);

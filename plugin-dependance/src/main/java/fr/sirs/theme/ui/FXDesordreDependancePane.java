@@ -130,7 +130,7 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
         ui_ouvrageAssocieIds.setClosable(false);
 
         ui_prestationIds.setContent(() -> {
-            prestationIdsTable = new ListeningPojoTable(Prestation.class, null, elementProperty());
+            prestationIdsTable = new ListeningPojoTable(PrestationAmenagementHydraulique.class, null, elementProperty());
             prestationIdsTable.editableProperty().bind(disableFieldsProperty().not());
             prestationIdsTable.createNewProperty().set(false);
             updatePrestationIdsTable(session, elementProperty.get());
@@ -269,8 +269,8 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
             prestationIdsTable.setTableItems(null);
         } else {
             prestationIdsTable.setParentElement(null);
-            final AbstractSIRSRepository<Prestation> prestationIdsRepo = session.getRepositoryForClass(Prestation.class);
-            prestationIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getPrestationIds(), prestationIdsRepo));
+            final AbstractSIRSRepository<PrestationAmenagementHydraulique> prestationRepo = session.getRepositoryForClass(PrestationAmenagementHydraulique.class);
+            prestationIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getPrestationIds(), prestationRepo));
             prestationIdsTable.setObservableListToListen(newElement.getPrestationIds());
         }
     }
@@ -384,7 +384,7 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
             // Manage opposite references for Prestation...
             final List<String> currentPrestationIdsList = new ArrayList<>();
             for(final Element elt : prestationIdsTable.getAllValues()){
-                final Prestation prestation = (Prestation) elt;
+                final PrestationAmenagementHydraulique prestation = (PrestationAmenagementHydraulique) elt;
                 currentPrestationIdsList.add(prestation.getId());
             }
             element.setPrestationIds(currentPrestationIdsList);

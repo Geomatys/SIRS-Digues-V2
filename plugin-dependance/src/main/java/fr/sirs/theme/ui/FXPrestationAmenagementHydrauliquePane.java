@@ -118,7 +118,7 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
         uiPosition.dependanceProperty().bind(elementProperty);
         
         ui_desordreIds.setContent(() -> {
-            desordreIdsTable = new ListeningPojoTable(Desordre.class, null, elementProperty());
+            desordreIdsTable = new ListeningPojoTable(DesordreDependance.class, null, elementProperty());
             desordreIdsTable.editableProperty().bind(disableFieldsProperty().not());
             desordreIdsTable.createNewProperty().set(false);
             updateDesordreIdsTable(session, elementProperty.get());
@@ -287,8 +287,8 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
             desordreIdsTable.setTableItems(null);
         } else {
             desordreIdsTable.setParentElement(null);
-            final AbstractSIRSRepository<Desordre> desordreIdsRepo = session.getRepositoryForClass(Desordre.class);
-            desordreIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getDesordreIds(), desordreIdsRepo));
+            final AbstractSIRSRepository<DesordreDependance> desordreRepo = session.getRepositoryForClass(DesordreDependance.class);
+            desordreIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getDesordreIds(), desordreRepo));
             desordreIdsTable.setObservableListToListen(newElement.getDesordreIds());
         }
     }
@@ -413,7 +413,7 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
             // Manage opposite references for Desordre...
             final List<String> currentDesordreIdsList = new ArrayList<>();
             for(final Element elt : desordreIdsTable.getAllValues()){
-                final Desordre desordre = (Desordre) elt;
+                final DesordreDependance desordre = (DesordreDependance) elt;
                 currentDesordreIdsList.add(desordre.getId());
             }
             element.setDesordreIds(currentDesordreIdsList);
