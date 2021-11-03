@@ -229,9 +229,7 @@
 				</staticText>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="172" width="380" height="12" backcolor="#FFFFFF" uuid="9a5c9dcb-362d-4582-b623-e2dc4851a4d3">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="172" width="380" height="12" backcolor="#FFFFFF" uuid="9a5c9dcb-362d-4582-b623-e2dc4851a4d3"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="47354525-ae0e-4bfa-99b0-a8a5ff298881"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -274,9 +272,7 @@
 			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="208" width="380" height="12" backcolor="#DFD8E8" uuid="eb6e93f0-e640-48be-b20b-2ea7290d6109"/>
 				<staticText>
-					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="df6998e9-1d13-4ad0-badc-cb7a2026a600">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="df6998e9-1d13-4ad0-badc-cb7a2026a600"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -290,9 +286,7 @@
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayPR($F{prDebut})]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement positionType="Float" x="180" y="0" width="90" height="12" uuid="0e1215e7-a658-48e4-b0ce-2c4d045c6c73">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="180" y="0" width="90" height="12" uuid="0e1215e7-a658-48e4-b0ce-2c4d045c6c73"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -309,9 +303,7 @@
 			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="220" width="380" height="12" backcolor="#FFFFFF" uuid="67b2fbed-89e0-4d70-b400-57e0de20b423"/>
 				<staticText>
-					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="f9df8c90-3cab-4c1d-a240-4aac3b97d602">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="f9df8c90-3cab-4c1d-a240-4aac3b97d602"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -325,9 +317,7 @@
 					<textFieldExpression><![CDATA[($F{positionDebut}==null || ((com.vividsolutions.jts.geom.Point) $F{positionDebut}).getCoordinate()==null) ? "-" : ((com.vividsolutions.jts.geom.Point) $F{positionDebut}).getCoordinate().x]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement positionType="Float" x="180" y="0" width="90" height="12" uuid="ee33b827-aa7c-4eee-90e7-91bb559c6b36">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="180" y="0" width="90" height="12" uuid="ee33b827-aa7c-4eee-90e7-91bb559c6b36"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -344,9 +334,7 @@
 			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="232" width="380" height="12" backcolor="#DFD8E8" uuid="76fe1118-6c07-4f81-aa6c-d365abebad59"/>
 				<staticText>
-					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="4d154de6-156c-4ad5-bacb-e4203e816aab">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="4d154de6-156c-4ad5-bacb-e4203e816aab"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -360,9 +348,7 @@
 					<textFieldExpression><![CDATA[($F{positionFin}==null || ((com.vividsolutions.jts.geom.Point) $F{positionFin}).getCoordinate()==null) ? "-" : ((com.vividsolutions.jts.geom.Point) $F{positionFin}).getCoordinate().x]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement positionType="Float" x="180" y="0" width="90" height="12" uuid="be178574-126c-4f05-b0f2-c4f561aa3265">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="180" y="0" width="90" height="12" uuid="be178574-126c-4f05-b0f2-c4f561aa3265"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -379,9 +365,7 @@
 			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="244" width="380" height="12" backcolor="#FFFFFF" uuid="cb205cc8-4443-44de-8e90-4da41022d5f6"/>
 				<staticText>
-					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="0696493d-99fc-413a-a5f6-2e67e21ff935">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="0696493d-99fc-413a-a5f6-2e67e21ff935"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -412,9 +396,7 @@
 			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="256" width="380" height="12" backcolor="#DFD8E8" uuid="0e1acf57-eccd-4210-8f1d-62cff5a475f1"/>
 				<staticText>
-					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="d1bc4e45-b009-45da-974f-911164385de5">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="d1bc4e45-b009-45da-974f-911164385de5"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -445,36 +427,28 @@
 			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="268" width="380" height="12" backcolor="#FFFFFF" uuid="0e5f620d-ae56-4464-a0d2-b9d3ac85412b"/>
 				<staticText>
-					<reportElement positionType="Float" x="10" y="0" width="50" height="12" uuid="a9c8b115-9926-4cb9-bf49-5fd53252f997">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="10" y="0" width="50" height="12" uuid="a9c8b115-9926-4cb9-bf49-5fd53252f997"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
 					<text><![CDATA[Côté]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="60" y="0" width="120" height="12" uuid="edb278aa-9d56-40fb-a2d1-a6e647a3235a">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="60" y="0" width="120" height="12" uuid="edb278aa-9d56-40fb-a2d1-a6e647a3235a"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{coteId})]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement positionType="Float" x="180" y="0" width="50" height="12" uuid="07f91b3c-882f-4f9d-bc50-1c7e23969d43">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="180" y="0" width="50" height="12" uuid="07f91b3c-882f-4f9d-bc50-1c7e23969d43"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
 					<text><![CDATA[Position]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="230" y="0" width="150" height="12" uuid="d9b019ce-21cd-4632-a9dc-bfead597cc51">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="230" y="0" width="150" height="12" uuid="d9b019ce-21cd-4632-a9dc-bfead597cc51"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
@@ -482,11 +456,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement mode="Opaque" x="0" y="196" width="380" height="12" uuid="ea9fb9e9-3be3-4ed1-9e3f-876427dcbbd1">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="196" width="380" height="12" uuid="ea9fb9e9-3be3-4ed1-9e3f-876427dcbbd1"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="120" height="12" uuid="65d666fd-fad7-497f-845e-1b2b8f5962f8"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">

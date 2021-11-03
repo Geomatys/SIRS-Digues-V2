@@ -395,10 +395,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement mode="Opaque" x="0" y="172" width="380" height="12" backcolor="#FFFFFF" uuid="537751bd-26e4-45d7-b5c5-ed698eaee7f4">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="172" width="380" height="12" backcolor="#FFFFFF" uuid="537751bd-26e4-45d7-b5c5-ed698eaee7f4"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="120" height="12" uuid="cf521574-9ffa-48e5-b760-0c0ce5f5cacf"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -415,10 +412,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement mode="Opaque" x="0" y="256" width="380" height="12" backcolor="#D2EAF1" uuid="40488d96-b8b3-40ba-b115-4e31f56ec0fb">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="256" width="380" height="12" backcolor="#D2EAF1" uuid="40488d96-b8b3-40ba-b115-4e31f56ec0fb"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="17c35dba-be53-4ddc-893d-fdbf44195ea8"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">

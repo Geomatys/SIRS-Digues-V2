@@ -221,9 +221,7 @@
 			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="158" width="555" height="14" backcolor="#76923C" uuid="62e862ef-7bf7-4e55-82f0-e1ecb659c0f1"/>
 				<staticText>
-					<reportElement x="10" y="1" width="545" height="12" uuid="cd0f4df6-f9f6-40c0-884e-053ad25fcb32">
-						<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					</reportElement>
+					<reportElement x="10" y="1" width="545" height="12" uuid="cd0f4df6-f9f6-40c0-884e-053ad25fcb32"/>
 					<textElement verticalAlignment="Middle">
 						<font size="9" isBold="true" isItalic="false" isUnderline="false"/>
 					</textElement>
@@ -240,18 +238,14 @@
 					<text><![CDATA[Tronçon]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="80" y="0" width="110" height="12" uuid="8ef77866-e00c-46a6-812d-288968bce4d6">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="80" y="0" width="110" height="12" uuid="8ef77866-e00c-46a6-812d-288968bce4d6"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayDesignation($F{linearId})]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="190" y="0" width="190" height="12" uuid="cf55d95d-d2c2-43a0-bdc2-d088849a8c32">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="190" y="0" width="190" height="12" uuid="cf55d95d-d2c2-43a0-bdc2-d088849a8c32"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
@@ -292,9 +286,7 @@
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayPR($F{prDebut})]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement positionType="Float" x="180" y="0" width="90" height="12" uuid="0e1215e7-a658-48e4-b0ce-2c4d045c6c73">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="180" y="0" width="90" height="12" uuid="0e1215e7-a658-48e4-b0ce-2c4d045c6c73"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -342,9 +334,7 @@
 			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="232" width="380" height="12" backcolor="#D6E3BC" uuid="76fe1118-6c07-4f81-aa6c-d365abebad59"/>
 				<staticText>
-					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="4d154de6-156c-4ad5-bacb-e4203e816aab">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="4d154de6-156c-4ad5-bacb-e4203e816aab"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -382,27 +372,21 @@
 					<text><![CDATA[Borne début]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="80" y="0" width="100" height="12" uuid="85f7f084-05ec-4e25-ae2e-c76f46689324">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="80" y="0" width="100" height="12" uuid="85f7f084-05ec-4e25-ae2e-c76f46689324"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{borneDebutId})]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="180" y="0" width="100" height="12" uuid="b7fd2eea-1058-4ea7-9d62-66bb7058e328">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="180" y="0" width="100" height="12" uuid="b7fd2eea-1058-4ea7-9d62-66bb7058e328"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayAmontAval($F{borne_debut_aval})]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="280" y="0" width="100" height="12" uuid="f15736be-6875-44cd-97d6-5dfc2f5270f0">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="280" y="0" width="100" height="12" uuid="f15736be-6875-44cd-97d6-5dfc2f5270f0"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
@@ -443,9 +427,7 @@
 			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="280" width="555" height="12" backcolor="#D6E3BC" uuid="0e5f620d-ae56-4464-a0d2-b9d3ac85412b"/>
 				<staticText>
-					<reportElement positionType="Float" x="10" y="0" width="50" height="12" uuid="a9c8b115-9926-4cb9-bf49-5fd53252f997">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="10" y="0" width="50" height="12" uuid="a9c8b115-9926-4cb9-bf49-5fd53252f997"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -459,9 +441,7 @@
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{coteId})]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement positionType="Float" x="180" y="0" width="50" height="12" uuid="07f91b3c-882f-4f9d-bc50-1c7e23969d43">
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="180" y="0" width="50" height="12" uuid="07f91b3c-882f-4f9d-bc50-1c7e23969d43"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -476,10 +456,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement mode="Opaque" x="0" y="196" width="380" height="12" uuid="835cfbf2-110f-49af-adde-32150a795269">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="196" width="380" height="12" uuid="835cfbf2-110f-49af-adde-32150a795269"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="120" height="12" uuid="98ea26a9-aa57-4726-8a48-7a77fe338938"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -496,15 +473,9 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement mode="Opaque" x="0" y="268" width="380" height="12" uuid="ca171c63-eadd-44fb-8f83-f1ca1f632c69">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="268" width="380" height="12" uuid="ca171c63-eadd-44fb-8f83-f1ca1f632c69"/>
 				<staticText>
-					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="872f4f6c-5193-4eba-a821-02275a29a2eb">
-						<property name="com.jaspersoft.studio.unit.x" value="px"/>
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					</reportElement>
+					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="872f4f6c-5193-4eba-a821-02275a29a2eb"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -519,14 +490,9 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="380" y="172" width="175" height="108" uuid="591a68b9-fa1e-48f7-a50a-a773b516109d">
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement positionType="Float" mode="Opaque" x="380" y="172" width="175" height="108" uuid="591a68b9-fa1e-48f7-a50a-a773b516109d"/>
 				<image>
-					<reportElement x="0" y="0" width="175" height="108" uuid="b253817f-37a0-48de-b394-60be061ac430">
-						<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					</reportElement>
+					<reportElement x="0" y="0" width="175" height="108" uuid="b253817f-37a0-48de-b394-60be061ac430"/>
 					<imageExpression><![CDATA[$F{IMAGE_DATA_SOURCE}]]></imageExpression>
 				</image>
 			</frame>
