@@ -491,6 +491,12 @@
 			</frame>
 			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="380" y="172" width="175" height="108" uuid="591a68b9-fa1e-48f7-a50a-a773b516109d"/>
+                                <box>
+                                    <topPen lineWidth="1.0"/>
+                                    <leftPen lineWidth="1.0"/>
+                                    <bottomPen lineWidth="1.0"/>
+                                    <rightPen lineWidth="1.0"/>
+                                </box>
 				<image>
 					<reportElement x="0" y="0" width="175" height="108" uuid="b253817f-37a0-48de-b394-60be061ac430"/>
 					<imageExpression><![CDATA[$F{IMAGE_DATA_SOURCE}]]></imageExpression>
