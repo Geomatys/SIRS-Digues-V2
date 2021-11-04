@@ -40,10 +40,10 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
     @FXML protected Spinner ui_capaciteStockage;
     @FXML protected TextField ui_collectiviteCompetence;
     @FXML protected Spinner ui_profondeurMoyenne;
-    @FXML protected ComboBox ui_fonctionnement;
-    @FXML protected Button ui_fonctionnement_link;
-    @FXML protected ComboBox ui_type;
-    @FXML protected Button ui_type_link;
+    @FXML protected ComboBox ui_fonctionnementId;
+    @FXML protected Button ui_fonctionnementId_link;
+    @FXML protected ComboBox ui_typeId;
+    @FXML protected Button ui_typeId_link;
     @FXML protected FXFreeTab ui_desordreIds;
     protected ListeningPojoTable desordreIdsTable;
     @FXML protected FXFreeTab ui_structureIds;
@@ -108,15 +108,15 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_profondeurMoyenne.disableProperty().bind(disableFieldsProperty());
         ui_profondeurMoyenne.setEditable(true);
         ui_profondeurMoyenne.setValueFactory(new FloatSpinnerValueFactory(0, Float.MAX_VALUE));
-        ui_fonctionnement.disableProperty().bind(disableFieldsProperty());
-        ui_fonctionnement_link.setVisible(false);
-        ui_type.disableProperty().bind(disableFieldsProperty());
-        ui_type_link.setVisible(false);
+        ui_fonctionnementId.disableProperty().bind(disableFieldsProperty());
+        ui_fonctionnementId_link.setVisible(false);
+        ui_typeId.disableProperty().bind(disableFieldsProperty());
+        ui_typeId_link.setVisible(false);
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
         uiPosition.dependanceProperty().bind(elementProperty);
 
         ui_desordreIds.setContent(() -> {
-            desordreIdsTable = new ListeningPojoTable(Desordre.class, null, elementProperty());
+            desordreIdsTable = new ListeningPojoTable(DesordreDependance.class, "Désordre affectant l'AH", elementProperty());
             desordreIdsTable.editableProperty().bind(disableFieldsProperty().not());
             desordreIdsTable.createNewProperty().set(false);
             updateDesordreIdsTable(session, elementProperty.get());
@@ -125,7 +125,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_desordreIds.setClosable(false);
 
         ui_structureIds.setContent(() -> {
-            structureIdsTable = new ListeningPojoTable(StructureAmenagementHydraulique.class, null, elementProperty());
+            structureIdsTable = new ListeningPojoTable(StructureAmenagementHydraulique.class, "Structure affectant l'AH", elementProperty());
             structureIdsTable.editableProperty().bind(disableFieldsProperty().not());
             structureIdsTable.createNewProperty().set(false);
             updateStructureIdsTable(session, elementProperty.get());
@@ -134,7 +134,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_structureIds.setClosable(false);
 
         ui_ouvrageAssocieIds.setContent(() -> {
-            ouvrageAssocieIdsTable = new ListeningPojoTable(OuvrageAssocieAmenagementHydraulique.class, null, elementProperty());
+            ouvrageAssocieIdsTable = new ListeningPojoTable(OuvrageAssocieAmenagementHydraulique.class, "Ouvrage associé affectant l'AH", elementProperty());
             ouvrageAssocieIdsTable.editableProperty().bind(disableFieldsProperty().not());
             ouvrageAssocieIdsTable.createNewProperty().set(false);
             updateOuvrageAssocieIdsTable(session, elementProperty.get());
@@ -168,9 +168,9 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             return observationsTable;
         });
         ui_observations.setClosable(false);
-        
+
         ui_prestationIds.setContent(() -> {
-            prestationIdsTable = new ListeningPojoTable(Prestation.class, null, elementProperty());
+            prestationIdsTable = new ListeningPojoTable(PrestationAmenagementHydraulique.class, "Prestation affectant l'AH", elementProperty());
             prestationIdsTable.editableProperty().bind(disableFieldsProperty().not());
             prestationIdsTable.createNewProperty().set(false);
             updatePrestationIdsTable(session, elementProperty.get());
@@ -257,8 +257,8 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         
         if (newElement == null) {
 
-            ui_fonctionnement.setItems(null);
-            ui_type.setItems(null);
+            ui_fonctionnementId.setItems(null);
+            ui_typeId.setItems(null);
         } else {
 
             /*
@@ -274,9 +274,9 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             // * profondeurMoyenne
             ui_profondeurMoyenne.getValueFactory().valueProperty().bindBidirectional(newElement.profondeurMoyenneProperty());
             final AbstractSIRSRepository<RefFonctionnementAH> fonctionnementRepo = session.getRepositoryForClass(RefFonctionnementAH.class);
-            SIRS.initCombo(ui_fonctionnement, SIRS.observableList(fonctionnementRepo.getAll()), newElement.getFonctionnement() == null? null : fonctionnementRepo.get(newElement.getFonctionnement()));
+            SIRS.initCombo(ui_fonctionnementId, SIRS.observableList(fonctionnementRepo.getAll()), newElement.getFonctionnementId() == null? null : fonctionnementRepo.get(newElement.getFonctionnementId()));
             final AbstractSIRSRepository<RefTypeAmenagementHydraulique> typeRepo = session.getRepositoryForClass(RefTypeAmenagementHydraulique.class);
-            SIRS.initCombo(ui_type, SIRS.observableList(typeRepo.getAll()), newElement.getType() == null? null : typeRepo.get(newElement.getType()));
+            SIRS.initCombo(ui_typeId, SIRS.observableList(typeRepo.getAll()), newElement.getTypeId() == null? null : typeRepo.get(newElement.getTypeId()));
             // Propriétés de AotCotAssociable
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
@@ -309,7 +309,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             desordreIdsTable.setTableItems(null);
         } else {
             desordreIdsTable.setParentElement(null);
-            final AbstractSIRSRepository<Desordre> desordreIdsRepo = session.getRepositoryForClass(Desordre.class);
+            final AbstractSIRSRepository<DesordreDependance> desordreIdsRepo = session.getRepositoryForClass(DesordreDependance.class);
             desordreIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getDesordreIds(), desordreIdsRepo));
             desordreIdsTable.setObservableListToListen(newElement.getDesordreIds());
         }
@@ -391,7 +391,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             prestationIdsTable.setTableItems(null);
         } else {
             prestationIdsTable.setParentElement(null);
-            final AbstractSIRSRepository<Prestation> prestationIdsRepo = session.getRepositoryForClass(Prestation.class);
+            final AbstractSIRSRepository<PrestationAmenagementHydraulique> prestationIdsRepo = session.getRepositoryForClass(PrestationAmenagementHydraulique.class);
             prestationIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getPrestationIds(), prestationIdsRepo));
             prestationIdsTable.setObservableListToListen(newElement.getPrestationIds());
         }
@@ -468,27 +468,27 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         element.setCommentaire(ui_commentaire.getText());
 
         Object cbValue;
-        cbValue = ui_fonctionnement.getValue();
+        cbValue = ui_fonctionnementId.getValue();
         if (cbValue instanceof Preview) {
-            element.setFonctionnement(((Preview)cbValue).getElementId());
+            element.setFonctionnementId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            element.setFonctionnement(((Element)cbValue).getId());
+            element.setFonctionnementId(((Element)cbValue).getId());
         } else if (cbValue == null) {
-            element.setFonctionnement(null);
+            element.setFonctionnementId(null);
         }
-        cbValue = ui_type.getValue();
+        cbValue = ui_typeId.getValue();
         if (cbValue instanceof Preview) {
-            element.setType(((Preview)cbValue).getElementId());
+            element.setTypeId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            element.setType(((Element)cbValue).getId());
+            element.setTypeId(((Element)cbValue).getId());
         } else if (cbValue == null) {
-            element.setType(null);
+            element.setTypeId(null);
         }
         if (desordreIdsTable != null) {
             // Manage opposite references for Desordre...
             final List<String> currentDesordreIdsList = new ArrayList<>();
             for(final Element elt : desordreIdsTable.getAllValues()){
-                final Desordre desordre = (Desordre) elt;
+                final DesordreDependance desordre = (DesordreDependance) elt;
                 currentDesordreIdsList.add(desordre.getId());
             }
             element.setDesordreIds(currentDesordreIdsList);
@@ -585,7 +585,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             // Manage opposite references for Prestation...
             final List<String> currentPrestationIdsList = new ArrayList<>();
             for(final Element elt : prestationIdsTable.getAllValues()){
-                final Prestation prestation = (Prestation) elt;
+                final PrestationAmenagementHydraulique prestation = (PrestationAmenagementHydraulique) elt;
                 currentPrestationIdsList.add(prestation.getId());
             }
             element.setPrestationIds(currentPrestationIdsList);

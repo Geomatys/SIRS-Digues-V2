@@ -167,9 +167,12 @@ public class Preview implements AvecLibelle, Comparable {
             final Preview other = (Preview) o;
 
             // Class comparison
-            final int classComparison = elementClass == null ?
-                    other.elementClass == null? 0 : 1
-                    : elementClass.compareTo(other.elementClass);
+            int classComparison;
+            if (elementClass == null) {
+                classComparison = other.elementClass == null ? 0 : 1;
+            } else {
+                classComparison = other.elementClass == null ? -1 : elementClass.compareTo(other.elementClass);
+            }
             if (classComparison != 0) {
                 return classComparison;
             }

@@ -39,7 +39,7 @@ public abstract class AbstractAmenagementHydrauliqueRepository<T extends Abstrac
     public List<T> getByAmenagementHydrauliqueId(final String ahId) {
         List<T> result = this.queryView(BY_AMENAGEMENT_HYDRAULIQUE_ID, ahId);
         // if the key is null, couchdb returns all the elements for this class,
-        // we don't want it so we operate oursleves the filtering
+        // we don't want it so we operate ourselves the filtering
         if (ahId == null) {
             result.removeIf(aah -> aah.getAmenagementHydrauliqueId() != null);
         }

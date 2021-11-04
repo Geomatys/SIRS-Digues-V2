@@ -84,11 +84,11 @@
                                                     <Label text="%section" GridPane.rowIndex="5" />
                                                     <Spinner fx:id="ui_section" GridPane.columnIndex="1" GridPane.rowIndex="5"  maxHeight="-Infinity" maxWidth="-Infinity"/>
 
-                                                    <Label text="%etat" GridPane.rowIndex="6" />
-                                                    <ComboBox fx:id="ui_etat" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                                    <Label text="%etatId" GridPane.rowIndex="6" />
+                                                    <ComboBox fx:id="ui_etatId" GridPane.columnIndex="1" GridPane.rowIndex="6" />
 
-                                                    <Label text="%fonctionnement" GridPane.rowIndex="7" />
-                                                    <ComboBox fx:id="ui_fonctionnement" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                                                    <Label text="%fonctionnementId" GridPane.rowIndex="7" />
+                                                    <ComboBox fx:id="ui_fonctionnementId" GridPane.columnIndex="1" GridPane.rowIndex="7" />
 
                                                 </children>
                                                 <padding>
@@ -117,16 +117,18 @@
                                             <Label text="%nombre" GridPane.rowIndex="3" />
                                             <Spinner fx:id="ui_nombre" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
                                             
-                                            <Label text="%ouvrageDerversant" GridPane.rowIndex="4" />
-                                            <CheckBox fx:id="ui_ouvrageDerversant" GridPane.columnIndex="1" GridPane.rowIndex="4"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                                            <Label text="%ouvrageDeversant" GridPane.rowIndex="4" />
+                                            <CheckBox fx:id="ui_ouvrageDeversant" GridPane.columnIndex="1" GridPane.rowIndex="4"  maxHeight="-Infinity" maxWidth="-Infinity"/>
                                             
-                                            <Label text="%typeOuvrage" GridPane.rowIndex="5" />
-                                            <ComboBox fx:id="ui_typeOuvrage" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                            <Label text="%typeId" GridPane.rowIndex="5" />
+                                            <ComboBox fx:id="ui_typeId" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                                         </children>
                                         <padding>
                                             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                         </padding>
                                     </GridPane>
+                                    
+                                    <TextArea fx:id="ui_commentaire" maxHeight="-Infinity"  prefHeight="200.0" />
 
                                 </children>
                                 <padding>

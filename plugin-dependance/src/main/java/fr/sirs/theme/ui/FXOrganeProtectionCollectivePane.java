@@ -29,11 +29,11 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
     protected LabelMapper labelMapper;
     
     @FXML private FXValidityPeriodPane uiValidityPeriod;
-    
+
     // Propriétés de OrganeProtectionCollective
     @FXML protected Spinner ui_cote;
-    @FXML protected ComboBox ui_type;
-    @FXML protected Button ui_type_link;
+    @FXML protected ComboBox ui_typeId;
+    @FXML protected ComboBox ui_etatId;
     @FXML protected FXFreeTab ui_observations;
     protected PojoTable observationsTable;
     @FXML protected FXFreeTab ui_photos;
@@ -68,8 +68,8 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
         ui_cote.disableProperty().bind(disableFieldsProperty());
         ui_cote.setEditable(true);
         ui_cote.setValueFactory(new FloatSpinnerValueFactory(0, Float.MAX_VALUE));
-        ui_type.disableProperty().bind(disableFieldsProperty());
-        ui_type_link.setVisible(false);
+        ui_typeId.disableProperty().bind(disableFieldsProperty());
+        ui_etatId.disableProperty().bind(disableFieldsProperty());
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
         
         uiPosition.dependanceProperty().bind(elementProperty);
@@ -118,7 +118,8 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
         
         if (newElement == null) {
             
-            ui_type.setItems(null);
+            ui_typeId.setItems(null);
+            ui_etatId.setItems(null);
             ui_amenagementHydrauliqueId.setItems(null);
         } else {
             
@@ -130,7 +131,9 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
             // * cote
             ui_cote.getValueFactory().valueProperty().bindBidirectional(newElement.coteProperty());
             final AbstractSIRSRepository<RefTypeOrganeProtectionCollective> typeRepo = session.getRepositoryForClass(RefTypeOrganeProtectionCollective.class);
-            SIRS.initCombo(ui_type, SIRS.observableList(typeRepo.getAll()), newElement.getType() == null? null : typeRepo.get(newElement.getType()));
+            SIRS.initCombo(ui_typeId, SIRS.observableList(typeRepo.getAll()), newElement.getTypeId() == null? null : typeRepo.get(newElement.getTypeId()));
+            final AbstractSIRSRepository<RefEtat> etatRepo = session.getRepositoryForClass(RefEtat.class);
+            SIRS.initCombo(ui_etatId, SIRS.observableList(etatRepo.getAll()), newElement.getEtatId() == null? null : etatRepo.get(newElement.getEtatId()));
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
             // Propriétés de AbstractAmenagementHydraulique
@@ -183,13 +186,21 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
         
         
         Object cbValue;
-        cbValue = ui_type.getValue();
+        cbValue = ui_typeId.getValue();
         if (cbValue instanceof Preview) {
-            element.setType(((Preview)cbValue).getElementId());
+            element.setTypeId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            element.setType(((Element)cbValue).getId());
+            element.setTypeId(((Element)cbValue).getId());
         } else if (cbValue == null) {
-            element.setType(null);
+            element.setTypeId(null);
+        }
+        cbValue = ui_etatId.getValue();
+        if (cbValue instanceof Preview) {
+            element.setEtatId(((Preview)cbValue).getElementId());
+        } else if (cbValue instanceof Element) {
+            element.setEtatId(((Element)cbValue).getId());
+        } else if (cbValue == null) {
+            element.setEtatId(null);
         }
         cbValue = ui_amenagementHydrauliqueId.getValue();
         if (cbValue instanceof Preview) {

@@ -40,16 +40,17 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
     @FXML protected Spinner ui_hauteur;
     @FXML protected Spinner ui_profondeur;
     @FXML protected Spinner ui_nombre;
-    @FXML protected CheckBox ui_ouvrageDerversant;
+    @FXML protected CheckBox ui_ouvrageDeversant;
     @FXML protected Spinner ui_numCouche;
     @FXML protected Spinner ui_diametre;
     @FXML protected Spinner ui_cote;
     @FXML protected Spinner ui_section;
-    @FXML protected ComboBox ui_typeOuvrage;
+    @FXML protected ComboBox ui_typeId;
     @FXML protected ComboBox ui_materiauId;
     @FXML protected ComboBox ui_sourceId;
-    @FXML protected ComboBox ui_etat;
-    @FXML protected ComboBox ui_fonctionnement;
+    @FXML protected ComboBox ui_etatId;
+    @FXML protected ComboBox ui_fonctionnementId;
+    @FXML protected TextArea ui_commentaire;
     @FXML protected FXFreeTab ui_amenagementHydrauliqueAssocieIds;
     protected ListeningPojoTable amenagementHydrauliqueAssocieIdsTable;
     @FXML protected FXFreeTab ui_desordreDependanceAssocieIds;
@@ -101,7 +102,7 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
         ui_nombre.disableProperty().bind(disableFieldsProperty());
         ui_nombre.setEditable(true);
         ui_nombre.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
-        ui_ouvrageDerversant.disableProperty().bind(disableFieldsProperty());
+        ui_ouvrageDeversant.disableProperty().bind(disableFieldsProperty());
         ui_numCouche.disableProperty().bind(disableFieldsProperty());
         ui_numCouche.setEditable(true);
         ui_numCouche.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
@@ -114,12 +115,14 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
         ui_section.disableProperty().bind(disableFieldsProperty());
         ui_section.setEditable(true);
         ui_section.setValueFactory(new FloatSpinnerValueFactory(0, Float.MAX_VALUE));
-        ui_typeOuvrage.disableProperty().bind(disableFieldsProperty());
+        ui_typeId.disableProperty().bind(disableFieldsProperty());
         ui_materiauId.disableProperty().bind(disableFieldsProperty());
         ui_sourceId.disableProperty().bind(disableFieldsProperty());
-        ui_etat.disableProperty().bind(disableFieldsProperty());
-        ui_fonctionnement.disableProperty().bind(disableFieldsProperty());
+        ui_etatId.disableProperty().bind(disableFieldsProperty());
+        ui_fonctionnementId.disableProperty().bind(disableFieldsProperty());
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
+        ui_commentaire.disableProperty().bind(disableFieldsProperty());
+        ui_commentaire.setWrapText(true);
         
         uiPosition.dependanceProperty().bind(elementProperty);
         
@@ -200,8 +203,8 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
             ui_profondeur.getValueFactory().setValue(0);
             ui_nombre.getValueFactory().valueProperty().unbindBidirectional(oldElement.nombreProperty());
             ui_nombre.getValueFactory().setValue(0);
-            ui_ouvrageDerversant.selectedProperty().unbindBidirectional(oldElement.ouvrageDerversantProperty());
-            ui_ouvrageDerversant.setSelected(false);
+            ui_ouvrageDeversant.selectedProperty().unbindBidirectional(oldElement.ouvrageDeversantProperty());
+            ui_ouvrageDeversant.setSelected(false);
             ui_numCouche.getValueFactory().valueProperty().unbindBidirectional(oldElement.numCoucheProperty());
             ui_numCouche.getValueFactory().setValue(0);
             ui_diametre.getValueFactory().valueProperty().unbindBidirectional(oldElement.diametreProperty());
@@ -210,6 +213,8 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
             ui_cote.getValueFactory().setValue(0);
             ui_section.getValueFactory().valueProperty().unbindBidirectional(oldElement.sectionProperty());
             ui_section.getValueFactory().setValue(0);
+            ui_commentaire.textProperty().unbindBidirectional(oldElement.commentaireProperty());
+            ui_commentaire.setText(null);
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
             // Propriétés de AbstractAmenagementHydraulique
@@ -218,13 +223,13 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
         final Session session = Injector.getBean(Session.class);
         
         if (newElement == null) {
-            
-            ui_typeOuvrage.setItems(null);
+            ui_typeId.setItems(null);
             ui_materiauId.setItems(null);
             ui_sourceId.setItems(null);
-            ui_etat.setItems(null);
-            ui_fonctionnement.setItems(null);
+            ui_etatId.setItems(null);
+            ui_fonctionnementId.setItems(null);
             ui_amenagementHydrauliqueId.setItems(null);
+            ui_commentaire.setText(null);
         } else {
             
             
@@ -240,26 +245,28 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
             ui_profondeur.getValueFactory().valueProperty().bindBidirectional(newElement.profondeurProperty());
             // * nombre
             ui_nombre.getValueFactory().valueProperty().bindBidirectional(newElement.nombreProperty());
-            // * ouvrageDerversant
-            ui_ouvrageDerversant.selectedProperty().bindBidirectional(newElement.ouvrageDerversantProperty());
+            // * ouvrageDeversant
+            ui_ouvrageDeversant.selectedProperty().bindBidirectional(newElement.ouvrageDeversantProperty());
             // * numCouche
             ui_numCouche.getValueFactory().valueProperty().bindBidirectional(newElement.numCoucheProperty());
             // * diametre
             ui_diametre.getValueFactory().valueProperty().bindBidirectional(newElement.diametreProperty());
             // * cote
             ui_cote.getValueFactory().valueProperty().bindBidirectional(newElement.coteProperty());
+            // * commentaire
+            ui_commentaire.textProperty().bindBidirectional(newElement.commentaireProperty());
             // * section
             ui_section.getValueFactory().valueProperty().bindBidirectional(newElement.sectionProperty());
-            final AbstractSIRSRepository<RefOuvrageHydrauliqueAssocie> typeOuvrageRepo = session.getRepositoryForClass(RefOuvrageHydrauliqueAssocie.class);
-            SIRS.initCombo(ui_typeOuvrage, SIRS.observableList(typeOuvrageRepo.getAll()), newElement.getTypeOuvrage() == null? null : typeOuvrageRepo.get(newElement.getTypeOuvrage()));
+            final AbstractSIRSRepository<RefOuvrageAssocieAH> typeIdRepo = session.getRepositoryForClass(RefOuvrageAssocieAH.class);
+            SIRS.initCombo(ui_typeId, SIRS.observableList(typeIdRepo.getAll()), newElement.getTypeId() == null? null : typeIdRepo.get(newElement.getTypeId()));
             final AbstractSIRSRepository<RefMateriau> materiauIdRepo = session.getRepositoryForClass(RefMateriau.class);
             SIRS.initCombo(ui_materiauId, SIRS.observableList(materiauIdRepo.getAll()), newElement.getMateriauId() == null? null : materiauIdRepo.get(newElement.getMateriauId()));
             final AbstractSIRSRepository<RefSource> sourceIdRepo = session.getRepositoryForClass(RefSource.class);
             SIRS.initCombo(ui_sourceId, SIRS.observableList(sourceIdRepo.getAll()), newElement.getSourceId() == null? null : sourceIdRepo.get(newElement.getSourceId()));
             final AbstractSIRSRepository<RefEtat> etatRepo = session.getRepositoryForClass(RefEtat.class);
-            SIRS.initCombo(ui_etat, SIRS.observableList(etatRepo.getAll()), newElement.getEtat() == null? null : etatRepo.get(newElement.getEtat()));
+            SIRS.initCombo(ui_etatId, SIRS.observableList(etatRepo.getAll()), newElement.getEtatId() == null? null : etatRepo.get(newElement.getEtatId()));
             final AbstractSIRSRepository<RefFonctionnementOAAH> fonctionnementRepo = session.getRepositoryForClass(RefFonctionnementOAAH.class);
-            SIRS.initCombo(ui_fonctionnement, SIRS.observableList(fonctionnementRepo.getAll()), newElement.getFonctionnement() == null? null : fonctionnementRepo.get(newElement.getFonctionnement()));
+            SIRS.initCombo(ui_fonctionnementId, SIRS.observableList(fonctionnementRepo.getAll()), newElement.getFonctionnementId() == null? null : fonctionnementRepo.get(newElement.getFonctionnementId()));
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
             // Propriétés de AbstractAmenagementHydraulique
@@ -376,13 +383,13 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
         
         
         Object cbValue;
-        cbValue = ui_typeOuvrage.getValue();
+        cbValue = ui_typeId.getValue();
         if (cbValue instanceof Preview) {
-            element.setTypeOuvrage(((Preview)cbValue).getElementId());
+            element.setTypeId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            element.setTypeOuvrage(((Element)cbValue).getId());
+            element.setTypeId(((Element)cbValue).getId());
         } else if (cbValue == null) {
-            element.setTypeOuvrage(null);
+            element.setTypeId(null);
         }
         cbValue = ui_materiauId.getValue();
         if (cbValue instanceof Preview) {
@@ -400,21 +407,21 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
         } else if (cbValue == null) {
             element.setSourceId(null);
         }
-        cbValue = ui_etat.getValue();
+        cbValue = ui_etatId.getValue();
         if (cbValue instanceof Preview) {
-            element.setEtat(((Preview)cbValue).getElementId());
+            element.setEtatId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            element.setEtat(((Element)cbValue).getId());
+            element.setEtatId(((Element)cbValue).getId());
         } else if (cbValue == null) {
-            element.setEtat(null);
+            element.setEtatId(null);
         }
-        cbValue = ui_fonctionnement.getValue();
+        cbValue = ui_fonctionnementId.getValue();
         if (cbValue instanceof Preview) {
-            element.setFonctionnement(((Preview)cbValue).getElementId());
+            element.setFonctionnementId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            element.setFonctionnement(((Element)cbValue).getId());
+            element.setFonctionnementId(((Element)cbValue).getId());
         } else if (cbValue == null) {
-            element.setFonctionnement(null);
+            element.setFonctionnementId(null);
         }
         if (amenagementHydrauliqueAssocieIdsTable != null) {
             final List<String> currentAmenagementHydrauliqueIdsList = new ArrayList<>();

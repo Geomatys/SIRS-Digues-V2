@@ -51,17 +51,21 @@ import javafx.scene.layout.Priority;
  */
 public class FXDependanceThemePane extends BorderPane {
 
-    private static final Preview EMPTY_PREVIEW = new Preview();
+    protected static final Preview EMPTY_PREVIEW = new Preview();
 
     static {
         EMPTY_PREVIEW.setElementClass(AmenagementHydraulique.class.getCanonicalName());
-        EMPTY_PREVIEW.setLibelle("   Pas d'aménagement hydraulique de rattachement - objets orphelins   ");
+        EMPTY_PREVIEW.setLibelle("   Objets orphelins   ");
     }
 
-    private final StringProperty ahIdProperty = new SimpleStringProperty();
-    private final Session session = Injector.getBean(Session.class);
+    protected final StringProperty ahIdProperty = new SimpleStringProperty();
+    protected final Session session = Injector.getBean(Session.class);
 
     public StringProperty ahIdProperty(){return ahIdProperty;}
+
+    public FXDependanceThemePane(AbstractTheme.ThemeManager theme) {
+        setCenter(createContent(theme));
+    }
 
     public FXDependanceThemePane(ComboBox<Preview> uiAhChoice, AbstractTheme.ThemeManager theme) {
         setCenter(createContent(theme));
@@ -79,6 +83,21 @@ public class FXDependanceThemePane extends BorderPane {
         }
         final ObservableList<Preview> ahPreviews = SIRS.observableList(rawAhPreviews).sorted();
         SIRS.initCombo(uiAhChoice, ahPreviews, ahPreviews.get(0));
+    }
+
+    protected Parent createContent(AbstractTheme.ThemeManager manager) {
+        final Separator separator = new Separator();
+        separator.setVisible(false);
+        final SimpleFXEditMode editMode = new SimpleFXEditMode();
+        final HBox topPane = new HBox(separator, editMode);
+        HBox.setHgrow(separator, Priority.ALWAYS);
+
+        final DependanceThemePojoTable table = new DependanceThemePojoTable(manager, (ObjectProperty<? extends Element>) null);
+        table.setDeletor(manager.getDeletor());
+        table.getEditableProperty().bind(editMode.editionState());
+        table.ahIdProperty().bindBidirectional(ahIdProperty);
+
+        return new BorderPane(table, topPane, null, null, null);
     }
 
     protected class DependanceThemePojoTable<T extends AbstractAmenagementHydraulique> extends PojoTable{
@@ -148,20 +167,5 @@ public class FXDependanceThemePane extends BorderPane {
             }
             return created;
         }
-    }
-
-    protected Parent createContent(AbstractTheme.ThemeManager manager) {
-        final Separator separator = new Separator();
-        separator.setVisible(false);
-        final SimpleFXEditMode editMode = new SimpleFXEditMode();
-        final HBox topPane = new HBox(separator, editMode);
-        HBox.setHgrow(separator, Priority.ALWAYS);
-
-        final DependanceThemePojoTable table = new DependanceThemePojoTable(manager, (ObjectProperty<? extends Element>) null);
-        table.setDeletor(manager.getDeletor());
-        table.getEditableProperty().bind(editMode.editionState());
-        table.ahIdProperty().bindBidirectional(ahIdProperty);
-
-        return new BorderPane(table, topPane, null, null, null);
     }
 }
