@@ -42,24 +42,24 @@
                 <ColumnConstraints hgrow="ALWAYS" />
               </columnConstraints>
               <children>
-                   <!-- EFloat -->                 
+
                    <Label text="%superficie" GridPane.rowIndex="0" />
                    <Spinner fx:id="ui_superficie" GridPane.columnIndex="1" GridPane.rowIndex="0"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <!-- EFloat -->                 
+
                    <Label text="%capaciteStockage" GridPane.rowIndex="1" />
                    <Spinner fx:id="ui_capaciteStockage" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <!-- EString -->                 
-                   <Label text="%collectiviteCompetence" GridPane.rowIndex="2" />
-                   <TextField fx:id="ui_collectiviteCompetence" GridPane.columnIndex="1" GridPane.rowIndex="2"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <!-- EFloat -->                 
-                   <Label text="%profondeurMoyenne" GridPane.rowIndex="3" />
-                   <Spinner fx:id="ui_profondeurMoyenne" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+
+                   <Label text="%profondeurMoyenne" GridPane.rowIndex="2" />
+                   <Spinner fx:id="ui_profondeurMoyenne" GridPane.columnIndex="1" GridPane.rowIndex="2"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+
+                   <Label text="%organismeId" GridPane.rowIndex="3" />
+                   <ComboBox fx:id="ui_organismeId" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
                    <Label text="%fonctionnementId" GridPane.rowIndex="4" />
                    <ComboBox fx:id="ui_fonctionnementId" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                   <Button fx:id="ui_fonctionnementId_link" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+
                    <Label text="%typeId" GridPane.rowIndex="5" />
                    <ComboBox fx:id="ui_typeId" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                   <Button fx:id="ui_typeId_link" GridPane.columnIndex="2" GridPane.rowIndex="5" />
 
               </children>
               <padding>
