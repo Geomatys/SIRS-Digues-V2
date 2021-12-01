@@ -128,8 +128,6 @@
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="superficie" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="capaciteStockage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="collectiviteCompetence"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="profondeurMoyenne" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//DesordreDependance"/>
@@ -149,6 +147,7 @@
         eType="#//PrestationAmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="proprietaireIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Contact"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="organismeId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Organisme"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//AbstractAmenagementHydraulique">
     <eAnnotations source="couchDBDocument"/>

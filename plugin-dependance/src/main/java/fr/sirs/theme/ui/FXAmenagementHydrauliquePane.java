@@ -38,8 +38,8 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
     // Propriétés de AmenagementHydraulique
     @FXML protected Spinner ui_superficie;
     @FXML protected Spinner ui_capaciteStockage;
-    @FXML protected TextField ui_collectiviteCompetence;
     @FXML protected Spinner ui_profondeurMoyenne;
+    @FXML protected ComboBox ui_organismeId;
     @FXML protected ComboBox ui_fonctionnementId;
     @FXML protected Button ui_fonctionnementId_link;
     @FXML protected ComboBox ui_typeId;
@@ -104,12 +104,12 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_capaciteStockage.disableProperty().bind(disableFieldsProperty());
         ui_capaciteStockage.setEditable(true);
         ui_capaciteStockage.setValueFactory(new FloatSpinnerValueFactory(0, Float.MAX_VALUE));
-        ui_collectiviteCompetence.disableProperty().bind(disableFieldsProperty());
         ui_profondeurMoyenne.disableProperty().bind(disableFieldsProperty());
         ui_profondeurMoyenne.setEditable(true);
         ui_profondeurMoyenne.setValueFactory(new FloatSpinnerValueFactory(0, Float.MAX_VALUE));
         ui_fonctionnementId.disableProperty().bind(disableFieldsProperty());
         ui_fonctionnementId_link.setVisible(false);
+        ui_organismeId.disableProperty().bind(disableFieldsProperty());
         ui_typeId.disableProperty().bind(disableFieldsProperty());
         ui_typeId_link.setVisible(false);
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
@@ -239,8 +239,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             ui_superficie.getValueFactory().setValue(0);
             ui_capaciteStockage.getValueFactory().valueProperty().unbindBidirectional(oldElement.capaciteStockageProperty());
             ui_capaciteStockage.getValueFactory().setValue(0);
-            ui_collectiviteCompetence.textProperty().unbindBidirectional(oldElement.collectiviteCompetenceProperty());
-            ui_collectiviteCompetence.setText(null);
             ui_profondeurMoyenne.getValueFactory().valueProperty().unbindBidirectional(oldElement.profondeurMoyenneProperty());
             ui_profondeurMoyenne.getValueFactory().setValue(0);
             // Propriétés de AotCotAssociable
@@ -259,6 +257,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
 
             ui_fonctionnementId.setItems(null);
             ui_typeId.setItems(null);
+            ui_organismeId.setItems(null);
         } else {
 
             /*
@@ -269,12 +268,12 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             ui_superficie.getValueFactory().valueProperty().bindBidirectional(newElement.superficieProperty());
             // * capaciteStockage
             ui_capaciteStockage.getValueFactory().valueProperty().bindBidirectional(newElement.capaciteStockageProperty());
-            // * collectiviteCompetence
-            ui_collectiviteCompetence.textProperty().bindBidirectional(newElement.collectiviteCompetenceProperty());
             // * profondeurMoyenne
             ui_profondeurMoyenne.getValueFactory().valueProperty().bindBidirectional(newElement.profondeurMoyenneProperty());
             final AbstractSIRSRepository<RefFonctionnementAH> fonctionnementRepo = session.getRepositoryForClass(RefFonctionnementAH.class);
             SIRS.initCombo(ui_fonctionnementId, SIRS.observableList(fonctionnementRepo.getAll()), newElement.getFonctionnementId() == null? null : fonctionnementRepo.get(newElement.getFonctionnementId()));
+            final AbstractSIRSRepository<Organisme> organismeRepo = session.getRepositoryForClass(Organisme.class);
+            SIRS.initCombo(ui_organismeId, SIRS.observableList(organismeRepo.getAll()), newElement.getOrganismeId() == null? null : organismeRepo.get(newElement.getOrganismeId()));
             final AbstractSIRSRepository<RefTypeAmenagementHydraulique> typeRepo = session.getRepositoryForClass(RefTypeAmenagementHydraulique.class);
             SIRS.initCombo(ui_typeId, SIRS.observableList(typeRepo.getAll()), newElement.getTypeId() == null? null : typeRepo.get(newElement.getTypeId()));
             // Propriétés de AotCotAssociable
@@ -483,6 +482,14 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             element.setTypeId(((Element)cbValue).getId());
         } else if (cbValue == null) {
             element.setTypeId(null);
+        }
+        cbValue = ui_organismeId.getValue();
+        if (cbValue instanceof Preview) {
+            element.setOrganismeId(((Preview)cbValue).getElementId());
+        } else if (cbValue instanceof Element) {
+            element.setOrganismeId(((Element)cbValue).getId());
+        } else if (cbValue == null) {
+            element.setOrganismeId(null);
         }
         if (desordreIdsTable != null) {
             // Manage opposite references for Desordre...
