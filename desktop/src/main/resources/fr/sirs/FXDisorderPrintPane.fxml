@@ -58,6 +58,25 @@
                                                                     </font>
                                                                 </Label>
                                                                 <CheckBox fx:id="uiOptionNonArchive" mnemonicParsing="false" text="%nonArchiveOption" />
+                                                                <GridPane hgap="20.0" vgap="20.0">
+                                                                    <columnConstraints>
+                                                                        <ColumnConstraints hgrow="NEVER" minWidth="10.0" prefWidth="100.0" />
+                                                                        <ColumnConstraints hgrow="ALWAYS" />
+                                                                    </columnConstraints>
+                                                                    <rowConstraints>
+                                                                        <RowConstraints vgrow="SOMETIMES" />
+                                                                        <RowConstraints vgrow="SOMETIMES" />
+                                                                    </rowConstraints>
+                                                                    <children>
+                                                                        <Label text="%beginNonArchiveOption" />
+                                                                        <Label text="%endNonArchiveOption" GridPane.rowIndex="1" />
+                                                                        <DatePicker fx:id="uiOptionDebutNonArchive" GridPane.columnIndex="1" />
+                                                                        <DatePicker fx:id="uiOptionFinNonArchive" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                                    </children>
+                                                                    <padding>
+                                                                        <Insets bottom="20.0" left="20.0" right="20.0" />
+                                                                    </padding>
+                                                                </GridPane>
                                                                 <CheckBox fx:id="uiOptionArchive" mnemonicParsing="false" text="%archiveOption" />
                                                                 <GridPane hgap="20.0" vgap="20.0">
                                                                     <columnConstraints>
