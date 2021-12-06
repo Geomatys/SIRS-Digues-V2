@@ -140,6 +140,8 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         uiOptionFin.valueProperty().addListener(parameterListener);
         uiOptionDebutArchive.valueProperty().addListener(parameterListener);
         uiOptionFinArchive.valueProperty().addListener(parameterListener);
+        uiOptionDebutNonArchive.valueProperty().addListener(parameterListener);
+        uiOptionFinNonArchive.valueProperty().addListener(parameterListener);
         uiOptionDebutLastObservation.valueProperty().addListener(parameterListener);
         uiOptionFinLastObservation.valueProperty().addListener(parameterListener);
         uiOptionExcludeValid.selectedProperty().addListener(parameterListener);
