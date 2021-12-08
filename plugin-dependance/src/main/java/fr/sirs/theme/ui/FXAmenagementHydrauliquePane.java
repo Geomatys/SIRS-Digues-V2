@@ -41,9 +41,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
     @FXML protected Spinner ui_profondeurMoyenne;
     @FXML protected ComboBox ui_organismeId;
     @FXML protected ComboBox ui_fonctionnementId;
-    @FXML protected Button ui_fonctionnementId_link;
     @FXML protected ComboBox ui_typeId;
-    @FXML protected Button ui_typeId_link;
     @FXML protected FXFreeTab ui_desordreIds;
     protected ListeningPojoTable desordreIdsTable;
     @FXML protected FXFreeTab ui_structureIds;
@@ -108,10 +106,8 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_profondeurMoyenne.setEditable(true);
         ui_profondeurMoyenne.setValueFactory(new FloatSpinnerValueFactory(0, Float.MAX_VALUE));
         ui_fonctionnementId.disableProperty().bind(disableFieldsProperty());
-        ui_fonctionnementId_link.setVisible(false);
         ui_organismeId.disableProperty().bind(disableFieldsProperty());
         ui_typeId.disableProperty().bind(disableFieldsProperty());
-        ui_typeId_link.setVisible(false);
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
         uiPosition.dependanceProperty().bind(elementProperty);
 
@@ -215,7 +211,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_photos.setClosable(false);
 
         ui_traits.setContent(() -> {
-            traitsTable = new TraitTable(elementProperty());
+            traitsTable = new PojoTable(TraitAmenagementHydraulique.class, null, elementProperty());
             traitsTable.editableProperty().bind(disableFieldsProperty().not());
             updateTraitIdsTable(session, elementProperty.get());
             return traitsTable;
@@ -605,15 +601,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
                 currentContactIdsList.add(contact.getId());
             }
             element.setProprietaireIds(currentContactIdsList);
-        }
-    }
-
-    private static final class TraitTable extends PojoTable{
-        public TraitTable(final ObjectProperty<? extends Element> container) {
-            super(TraitAmenagementHydraulique.class, null, container);
-            createNewProperty.set(false);
-            detaillableProperty.set(false);
-            uiAdd.setVisible(false);
         }
     }
 
