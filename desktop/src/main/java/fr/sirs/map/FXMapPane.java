@@ -620,6 +620,11 @@ public class FXMapPane extends BorderPane implements Printable {
             updateMessage("Recherche de la couche correspondante");
 
             final MapLayer container = CorePlugin.getMapLayerForElement(toFocusOn);
+            if (container == null) {
+                final Growl growlInfo = new Growl(Growl.Type.INFO, "Aucune couche de données n'a encore été créée pour cet élément.");
+                Platform.runLater(growlInfo::showAndFade);
+                return false;
+            }
             if (!(container instanceof FeatureMapLayer)) {
                 if (toFocusOn instanceof AvecGeometrie) {
                     Geometry geom = ((AvecGeometrie) toFocusOn).getGeometry();
@@ -635,7 +640,7 @@ public class FXMapPane extends BorderPane implements Printable {
                         return true;
                     }
                 } else {
-                    final Growl growlInfo = new Growl(Growl.Type.WARNING, "L'objet n'est présent dans aucune couche cartographique.");
+                    final Growl growlInfo = new Growl(Growl.Type.WARNING, "L'objet n'a pas de géométrie.");
                     Platform.runLater(growlInfo::showAndFade);
                     return false;
                 }

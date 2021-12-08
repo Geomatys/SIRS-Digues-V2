@@ -39,6 +39,7 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.util.SIRSAreaComputer;
+import static fr.sirs.util.SIRSAreaComputer.getGeometryInfo;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -221,29 +222,6 @@ public class FXPositionablePane extends BorderPane {
 
     private LinearReferencing.SegmentInfo[] getSourceLinear(final SystemeReperage source) {
         return ConvertPositionableCoordinates.getSourceLinear(source, posProperty.get());
-    }
-
-    /**
-     * Returns a label specifying the geometry area if the geometry is a Polygon
-     * or MultiPolygon, or the geometry length otherwise.
-     *
-     * @param geometry
-     */
-    private static String getGeometryInfo(final Geometry geometry) {
-        if (geometry != null) {
-            if (geometry instanceof Polygon || geometry instanceof MultiPolygon) {
-                final String surface = NumberFormat.getNumberInstance().format(
-                        SIRSAreaComputer.calculateArea(geometry, Injector.getSession().getProjection(), Units.SQUARE_METRE)) + " m²";
-                return "Surface : " + surface;
-            } else {
-                final String longueur = NumberFormat.getNumberInstance().format(
-                        MeasureUtilities.calculateLenght(geometry,
-                                Injector.getSession().getProjection(), Units.METRE)) + " m";
-                return "Longueur : " + longueur;
-            }
-        } else {
-            return "";
-        }
     }
 
     /**
