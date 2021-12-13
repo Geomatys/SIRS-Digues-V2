@@ -1,9 +1,22 @@
 from pyecore.resources import ResourceSet, URI, global_registry
-import pyecore.ecore as Ecore  # We get a reference to the Ecore metamodle implem.
+from style.updateUserPreferenceStyles import update_style_from_data
+import pyecore.ecore as Ecore  # We get a reference to the Ecore metamodel implementation.
 import json
 import sys
 import glob
 import os
+import shutil
+import re
+
+QGIS_PLUGIN_PROJECT_PATH = ""
+#QGIS_PLUGIN_PROJECT_PATH = "/home/maximegavens/GEOMATYS/qgis-plugin-couchdb-project/qgis-plugin-couchdb/couchdb_importer"
+
+
+def unicodize(seg):
+    if re.match(r'\\u[0-9a-f]{4}', seg):
+        return seg.decode('unicode-escape')
+
+    return seg.decode('utf-8')
 
 
 class LabelLoader:
@@ -26,16 +39,14 @@ class LabelLoader:
             self.propertieDictionnary[clazz] = {}
             self.classes.append(clazz)
 
-
-            with open(path) as propertieFile:
+            with open(path, "r") as propertieFile:
                 propertieFileStr = propertieFile.read()
+                propertieFileStr = propertieFileStr.encode("UTF-8").decode("unicode_escape")
+
                 rows = propertieFileStr.split('\n')[2:-1]
             for row in rows:
                 r = row.split('=')
                 self.propertieDictionnary[clazz][r[0]] = r[1]
-
-            # Does not exist in properties file
-            self.propertieDictionnary[clazz]["_id"] = "_id (ne pas modifier/supprimer)"
 
     def to_label(self, clazz, attribute):
         try:
@@ -43,8 +54,25 @@ class LabelLoader:
         except KeyError:
             return ""
 
+    def load_user_preferences_from_labels(self):
+        user_preferences = {}
+
+        for clazz in self.propertieDictionnary:
+            user_preferences[clazz] = {"attributes": {}}
+
+            # Does not exist in propertie file
+            user_preferences[clazz]["attributes"]["_id"] = True
+            user_preferences[clazz]["attributes"]["_rev"] = True
+            user_preferences[clazz]["attributes"]["@class"] = True
+
+            for attribute in self.propertieDictionnary[clazz]:
+                user_preferences[clazz]["attributes"][attribute] = True
+        return user_preferences
+
 
 def check_argument():
+    copy2plugin = False
+    general_filter = False
     plugins = ['dependance', 'aot-cot', 'lit', 'carto', 'berge', 'reglementary', 'vegetation', 'core']
     ecore_paths = []
     properties_paths = []
@@ -52,36 +80,17 @@ def check_argument():
     argv = sys.argv
 
     if argv[-1] == "--help":
-        print("### Description")
-        print("Ce script permet de créer le fichier formTemplatePilote.json à partir des différents diagrammes ecore de l'application.")
-        print("formTemplatePilote.json contient l'objet formTemplatePilote utilisé par l'application mobile dans le service formstemplate.service.ts .")
-        print("formTemplatePilote est une feuille de route qui permet de générer les composants des formulaires d'édition de l'application mobile.")
-        print("formTemplatePilote, dans le service formstemplate.service.ts, doit être mis à jour à chaque modification du modèle SIRS.")
-        print("Attention, actuellement ce fonctionnement ne concerne que les classes:")
-        print("\tCore")
-        print("\t\tPrestation")
-        print("\tPlugin-dependance")
-        print("\t\tAmenagementHydraulique")
-        print("\t\tDesordreDependance")
-        print("\t\tPrestationAmenagementHydraulique")
-        print("\t\tStructureAmenagementHydraulique")
-        print("\t\tOuvrageAssocieAmenagementHydraulique")
-        print("\t\tOrganeProtectionCollective")
-        print("")
-        print("### Usage")
-        print("Ce script doit être lancé depuis le dossier SirsMobile qui doit se trouver à la racine du projet Sirs.")
-        print("Sans option, ce script génére TOUS les objets pilotes de TOUS les plugins et du coeur.")
-        print("Il est possible de limiter les classes concernées à un plugin (ou coeur):")
-        print("-p <nom_du_plugin> : limite la porté de la génération au plugin désigné parmi la liste: 'dependance', 'aot-cot', 'lit', 'carto', 'berge', 'reglementary', 'vegetation', 'core'")
+        with open("README.txt", "r") as f:
+            content = f.read()
+            print(content)
         sys.exit(0)
 
-    for i in range(len(argv)-1):
-        if argv[i] == "-p":
-            if argv[i+1] in plugins:
-                P = argv[i+1]
-            else:
-                print("Plugins available: " + str(plugins))
-            
+    for i in range(len(argv)):
+        if argv[i] == "-f":
+            general_filter = True
+        if argv[i] == "-c":
+            copy2plugin = True
+
     if P != "all":
         if P == "aot-cot":
             ecore_paths.append("../plugin-aot-cot/model/aot_cot.ecore")
@@ -103,7 +112,7 @@ def check_argument():
                 ecore_paths.append("../plugin-" + plugin + "/model/" + plugin + ".ecore")
             properties_paths.append("../plugin-" + plugin + "/src/main/resources/fr/sirs/core/model/*")
 
-    return ecore_paths, properties_paths
+    return ecore_paths, properties_paths, general_filter, copy2plugin
     
 
 def is_general_attribute(name):
@@ -135,47 +144,67 @@ class WrapReference(object):
         self.containment = reference.containment
 
 
-def transform(classifier: Ecore.EClassifier, result, clazz, ll):
-    if type(classifier) == Ecore.EClass:
+def build_preferences(formTemplatePilote, preferences):
+    for clazz in formTemplatePilote:
+        preferences[clazz] = {"attributes": {}}
+        for attribute in formTemplatePilote[clazz]:
+            preferences[clazz]["attributes"][attribute] = True
+
+
+def transform(classifier: Ecore.EClassifier, result, clazz, ll, filter_general):
+    if type(classifier) == Ecore.EClass or type(classifier) == Ecore.EProxy:
         super_types: Ecore.EOrderedSet = classifier.eAllSuperTypes()
         for st in super_types:
-            transform(st, result, clazz, ll)
+            transform(st, result, clazz, ll, filter_general)
         content = list(classifier.eAllContents())
         for obj in content:
             if type(obj) == Ecore.EAttribute:
                 a = WrapAttribute(clazz, obj, ll)
-                if not is_general_attribute(a.name):
+                if not (filter_general and is_general_attribute(a.name)):
                     result[clazz][a.name] = a.__dict__
             if type(obj) == Ecore.EReference:
                 r = WrapReference(clazz, obj, ll)
-                if not is_general_attribute(r.name):
+                if not (filter_general and is_general_attribute(r.name)):
                     result[clazz][r.name] = r.__dict__
 
 
-def engine(formTemplatePilote, resourceSet, path_to_ecore, path_to_properties):
+def engine(formTemplatePilote, resourceSet, path_to_ecore, path_to_properties, filter_general):
     resource = resourceSet.get_resource(URI(path_to_ecore))
     graphMMRoot = resource.contents[0]  # We get the root (an EPackage here)
     ll = LabelLoader()
     ll.complete_dict(path_to_properties)
+    p = ll.load_user_preferences_from_labels()
 
     for clazz in ll.classes:
         classifier: Ecore.EClassifier = graphMMRoot.getEClassifier(clazz)
         formTemplatePilote[clazz] = {}
-        transform(classifier, formTemplatePilote, clazz, ll)
+        transform(classifier, formTemplatePilote, clazz, ll, filter_general)
     
 
 if __name__ == "__main__":
-    ecore_paths, properties_paths = check_argument()
+    ecore_paths, properties_paths, filter_general, copy2plugin = check_argument()
     formTemplatePilote = {}
-
+    preferences = {}
     global_registry[Ecore.nsURI] = Ecore  # We load the Ecore metamodel first
     rset = ResourceSet()
+
     for i in range(len(ecore_paths)):
-        engine(formTemplatePilote, rset, ecore_paths[i], properties_paths[i])
-    dump = json.dumps(formTemplatePilote, indent=2, ensure_ascii=False)
+        engine(formTemplatePilote, rset, ecore_paths[i], properties_paths[i], filter_general)
 
-    with open("formTemplatePilote.json", "w") as f:
-         f.write(dump)
+    build_preferences(formTemplatePilote, preferences)
+    update_style_from_data(preferences)
 
+    with open("formTemplatePilote.json", "w") as ftp:
+        dump = json.dumps(formTemplatePilote, indent=2, ensure_ascii=False)
+        ftp.write(dump)
 
-    
+    with open("user_preference_correspondence.json", "w") as lc:
+        dump = json.dumps(preferences, indent=2, ensure_ascii=False)
+        lc.write(dump)
+
+    try:
+        if copy2plugin:
+            shutil.copy("formTemplatePilote.json", QGIS_PLUGIN_PROJECT_PATH)
+            shutil.copy("user_preference_correspondence.json", QGIS_PLUGIN_PROJECT_PATH)
+    except TypeError or FileNotFoundError:
+        print("Impossible de copier les fichiers générés vers le plugin QGIS. Vérifiez que la variable QGIS_PLUGIN_PROJECT_PATH est un chemin valide.")
