@@ -27,6 +27,9 @@ nbproject/
 .idea/
 *.iml
 
+# Pycharm
+SirsMobile/style/__pycache__/
+
 # SirsMobile and plugin QGIS conf file
 SirsMobile/formTemplatePilote.json
 SirsMobile/user_preference_correspondence.json
