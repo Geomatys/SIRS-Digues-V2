@@ -26,3 +26,7 @@ nbproject/
 # IntelliJ files
 .idea/
 *.iml
+
+# SirsMobile and plugin QGIS conf file
+SirsMobile/formTemplatePilote.json
+SirsMobile/user_preference_correspondence.json
