@@ -112,10 +112,10 @@ public class FXPositionDependancePane<T extends AvecSettableGeometrie> extends B
             } else {
                 final Geometry geom = newValue.getGeometry();
                 setGeomLabel(geom != null);
-                uiGeomInfo.setText(getGeometryInfo(geom));
+                uiGeomInfo.setText(getGeometryInfoWrapped(geom));
                 newValue.geometryProperty().addListener((observable1, oldValue1, newValue1) -> {
                     setGeomLabel(newValue1 != null);
-                    uiGeomInfo.setText(getGeometryInfo((Geometry) newValue1));
+                    uiGeomInfo.setText(getGeometryInfoWrapped((Geometry) newValue1));
                 });
             }
         });
@@ -243,5 +243,13 @@ public class FXPositionDependancePane<T extends AvecSettableGeometrie> extends B
 
     public BooleanProperty disableFieldsProperty(){
         return disableFieldsProperty;
+    }
+
+    private String getGeometryInfoWrapped(final Geometry geometry) {
+        try {
+            return getGeometryInfo(geometry);
+        } catch (IllegalArgumentException ex) {
+            return "calcul impossible avec la projection actuelle";
+        }
     }
 }

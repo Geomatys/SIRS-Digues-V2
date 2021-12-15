@@ -1,7 +1,6 @@
 
 package fr.sirs.theme.ui;
 
-import fr.sirs.theme.ui.*;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
@@ -42,24 +41,20 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
     @FXML protected ComboBox ui_organismeId;
     @FXML protected ComboBox ui_fonctionnementId;
     @FXML protected ComboBox ui_typeId;
-    @FXML protected FXFreeTab ui_desordreIds;
-    protected ListeningPojoTable desordreIdsTable;
-    @FXML protected FXFreeTab ui_structureIds;
-    protected ListeningPojoTable structureIdsTable;
-    @FXML protected FXFreeTab ui_ouvrageAssocieIds;
-    protected ListeningPojoTable ouvrageAssocieIdsTable;
     @FXML protected FXFreeTab ui_gestionnaireIds;
     protected ListeningPojoTable gestionnaireIdsTable;
     @FXML protected FXFreeTab ui_tronconIds;
     protected ListeningPojoTable tronconIdsTable;
     @FXML protected FXFreeTab ui_observations;
     protected PojoTable observationsTable;
-    @FXML protected FXFreeTab ui_prestationIds;
-    protected ListeningPojoTable prestationIdsTable;
     @FXML protected FXFreeTab ui_proprietaireIds;
     protected ListeningPojoTable proprietaireIdsTable;
     @FXML protected FXFreeTab ui_traits;
     protected PojoTable traitsTable;
+//    @FXML protected FXFreeTab ui_desordreIds;
+//    protected ListeningPojoTable desordreIdsTable;
+//    @FXML protected FXFreeTab ui_prestationIds;
+//    protected ListeningPojoTable prestationIdsTable;
 
     // Propriétés de AotCotAssociable
 
@@ -111,33 +106,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
         uiPosition.dependanceProperty().bind(elementProperty);
 
-        ui_desordreIds.setContent(() -> {
-            desordreIdsTable = new ListeningPojoTable(DesordreDependance.class, "Désordre affectant l'AH", elementProperty());
-            desordreIdsTable.editableProperty().bind(disableFieldsProperty().not());
-            desordreIdsTable.createNewProperty().set(false);
-            updateDesordreIdsTable(session, elementProperty.get());
-            return desordreIdsTable;
-        });
-        ui_desordreIds.setClosable(false);
-
-        ui_structureIds.setContent(() -> {
-            structureIdsTable = new ListeningPojoTable(StructureAmenagementHydraulique.class, "Structure affectant l'AH", elementProperty());
-            structureIdsTable.editableProperty().bind(disableFieldsProperty().not());
-            structureIdsTable.createNewProperty().set(false);
-            updateStructureIdsTable(session, elementProperty.get());
-            return structureIdsTable;
-        });
-        ui_structureIds.setClosable(false);
-
-        ui_ouvrageAssocieIds.setContent(() -> {
-            ouvrageAssocieIdsTable = new ListeningPojoTable(OuvrageAssocieAmenagementHydraulique.class, "Ouvrage associé affectant l'AH", elementProperty());
-            ouvrageAssocieIdsTable.editableProperty().bind(disableFieldsProperty().not());
-            ouvrageAssocieIdsTable.createNewProperty().set(false);
-            updateOuvrageAssocieIdsTable(session, elementProperty.get());
-            return ouvrageAssocieIdsTable;
-        });
-        ui_ouvrageAssocieIds.setClosable(false);
-
         ui_gestionnaireIds.setContent(() -> {
             gestionnaireIdsTable = new ListeningPojoTable(Organisme.class, null, elementProperty());
             gestionnaireIdsTable.editableProperty().bind(disableFieldsProperty().not());
@@ -164,15 +132,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             return observationsTable;
         });
         ui_observations.setClosable(false);
-
-        ui_prestationIds.setContent(() -> {
-            prestationIdsTable = new ListeningPojoTable(PrestationAmenagementHydraulique.class, "Prestation affectant l'AH", elementProperty());
-            prestationIdsTable.editableProperty().bind(disableFieldsProperty().not());
-            prestationIdsTable.createNewProperty().set(false);
-            updatePrestationIdsTable(session, elementProperty.get());
-            return prestationIdsTable;
-        });
-        ui_prestationIds.setClosable(false);
 
         ui_proprietaireIds.setContent(() -> {
             proprietaireIdsTable = new ListeningPojoTable(Contact.class, null, elementProperty());
@@ -217,6 +176,24 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             return traitsTable;
         });
         ui_traits.setClosable(false);
+
+//        ui_desordreIds.setContent(() -> {
+//            desordreIdsTable = new ListeningPojoTable(DesordreDependance.class, "Désordre affectant l'AH", elementProperty());
+//            desordreIdsTable.editableProperty().bind(disableFieldsProperty().not());
+//            desordreIdsTable.createNewProperty().set(false);
+//            updateDesordreIdsTable(session, elementProperty.get());
+//            return desordreIdsTable;
+//        });
+//        ui_desordreIds.setClosable(false);
+//
+//        ui_prestationIds.setContent(() -> {
+//            prestationIdsTable = new ListeningPojoTable(PrestationAmenagementHydraulique.class, "Prestation affectant l'AH", elementProperty());
+//            prestationIdsTable.editableProperty().bind(disableFieldsProperty().not());
+//            prestationIdsTable.createNewProperty().set(false);
+//            updatePrestationIdsTable(session, elementProperty.get());
+//            return prestationIdsTable;
+//        });
+//        ui_prestationIds.setClosable(false);
     }
 
     public FXAmenagementHydrauliquePane(final AmenagementHydraulique amenagementHydraulique){
@@ -282,61 +259,44 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
         }
 
-        updateDesordreIdsTable(session, newElement);
-        updateStructureIdsTable(session, newElement);
-        updateOuvrageAssocieIdsTable(session, newElement);
         updateGestionnaireIdsTable(session, newElement);
         updateTronconIdsTable(session, newElement);
         updateObservationsTable(session, newElement);
-        updatePrestationIdsTable(session, newElement);
         updateProprietaireIdsTable(session, newElement);
 //        updateProprietesTable(session, newElement);
 //        updateGestionsTable(session, newElement);
         updatePhotosTable(session, newElement);
         updateTraitIdsTable(session, newElement);
+//        updateDesordreIdsTable(session, newElement);
+//        updatePrestationIdsTable(session, newElement);
     }
 
-    protected void updateDesordreIdsTable(final Session session, final AmenagementHydraulique newElement) {
-        if (desordreIdsTable == null)
-            return;
-
-        if (newElement == null) {
-            desordreIdsTable.setTableItems(null);
-        } else {
-            desordreIdsTable.setParentElement(null);
-            final AbstractSIRSRepository<DesordreDependance> desordreIdsRepo = session.getRepositoryForClass(DesordreDependance.class);
-            desordreIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getDesordreIds(), desordreIdsRepo));
-            desordreIdsTable.setObservableListToListen(newElement.getDesordreIds());
-        }
-    }
-
-    protected void updateStructureIdsTable(final Session session, final AmenagementHydraulique newElement) {
-        if (structureIdsTable == null)
-            return;
-
-        if (newElement == null) {
-            structureIdsTable.setTableItems(null);
-        } else {
-            structureIdsTable.setParentElement(null);
-            final AbstractSIRSRepository<StructureAmenagementHydraulique> structureIdsRepo = session.getRepositoryForClass(StructureAmenagementHydraulique.class);
-            structureIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getStructureIds(), structureIdsRepo));
-            structureIdsTable.setObservableListToListen(newElement.getStructureIds());
-        }
-    }
-
-    protected void updateOuvrageAssocieIdsTable(final Session session, final AmenagementHydraulique newElement) {
-        if (ouvrageAssocieIdsTable == null)
-            return;
-
-        if (newElement == null) {
-            ouvrageAssocieIdsTable.setTableItems(null);
-        } else {
-            ouvrageAssocieIdsTable.setParentElement(null);
-            final AbstractSIRSRepository<OuvrageAssocieAmenagementHydraulique> ouvrageAssocieIdsRepo = session.getRepositoryForClass(OuvrageAssocieAmenagementHydraulique.class);
-            ouvrageAssocieIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getOuvrageAssocieIds(), ouvrageAssocieIdsRepo));
-            ouvrageAssocieIdsTable.setObservableListToListen(newElement.getOuvrageAssocieIds());
-        }
-    }
+//    protected void updateDesordreIdsTable(final Session session, final AmenagementHydraulique newElement) {
+//        if (desordreIdsTable == null)
+//            return;
+//
+//        if (newElement == null) {
+//            desordreIdsTable.setTableItems(null);
+//        } else {
+//            desordreIdsTable.setParentElement(null);
+//            final AbstractSIRSRepository<DesordreDependance> desordreIdsRepo = session.getRepositoryForClass(DesordreDependance.class);
+//            desordreIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getDesordreIds(), desordreIdsRepo));
+//            desordreIdsTable.setObservableListToListen(newElement.getDesordreIds());
+//        }
+//    }
+//    protected void updatePrestationIdsTable(final Session session, final AmenagementHydraulique newElement) {
+//        if (prestationIdsTable == null)
+//            return;
+//
+//        if (newElement == null) {
+//            prestationIdsTable.setTableItems(null);
+//        } else {
+//            prestationIdsTable.setParentElement(null);
+//            final AbstractSIRSRepository<PrestationAmenagementHydraulique> prestationIdsRepo = session.getRepositoryForClass(PrestationAmenagementHydraulique.class);
+//            prestationIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getPrestationIds(), prestationIdsRepo));
+//            prestationIdsTable.setObservableListToListen(newElement.getPrestationIds());
+//        }
+//    }
 
     protected void updateGestionnaireIdsTable(final Session session, final AmenagementHydraulique newElement) {
         if (gestionnaireIdsTable == null)
@@ -375,20 +335,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         } else {
             observationsTable.setParentElement(newElement);
             observationsTable.setTableItems(()-> (ObservableList) newElement.getObservations());
-        }
-    }
-
-    protected void updatePrestationIdsTable(final Session session, final AmenagementHydraulique newElement) {
-        if (prestationIdsTable == null)
-            return;
-
-        if (newElement == null) {
-            prestationIdsTable.setTableItems(null);
-        } else {
-            prestationIdsTable.setParentElement(null);
-            final AbstractSIRSRepository<PrestationAmenagementHydraulique> prestationIdsRepo = session.getRepositoryForClass(PrestationAmenagementHydraulique.class);
-            prestationIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getPrestationIds(), prestationIdsRepo));
-            prestationIdsTable.setObservableListToListen(newElement.getPrestationIds());
         }
     }
 
@@ -487,43 +433,25 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         } else if (cbValue == null) {
             element.setOrganismeId(null);
         }
-        if (desordreIdsTable != null) {
-            // Manage opposite references for Desordre...
-            final List<String> currentDesordreIdsList = new ArrayList<>();
-            for(final Element elt : desordreIdsTable.getAllValues()){
-                final DesordreDependance desordre = (DesordreDependance) elt;
-                currentDesordreIdsList.add(desordre.getId());
-            }
-            element.setDesordreIds(currentDesordreIdsList);
-
-        }
-        if (structureIdsTable != null) {
-            // Manage opposite references for StructureAmenagementHydraulique...
-            final List<String> currentStructureAmenagementHydrauliqueIdsList = new ArrayList<>();
-            for(final Element elt : structureIdsTable.getAllValues()){
-                final StructureAmenagementHydraulique structureAmenagementHydraulique = (StructureAmenagementHydraulique) elt;
-                currentStructureAmenagementHydrauliqueIdsList.add(structureAmenagementHydraulique.getId());
-            }
-            element.setStructureIds(currentStructureAmenagementHydrauliqueIdsList);
-
-        }
-        if (ouvrageAssocieIdsTable != null) {
-            // Manage opposite references for OuvrageAssocieAmenagementHydraulique...
-            final List<String> currentOuvrageAssocieAmenagementHydrauliqueIdsList = new ArrayList<>();
-            final List<OuvrageAssocieAmenagementHydraulique> oppositeOAAHs = new ArrayList<>();
-            for(final Element elt : ouvrageAssocieIdsTable.getAllValues()){
-                final OuvrageAssocieAmenagementHydraulique ouvrageAssocieAmenagementHydraulique = (OuvrageAssocieAmenagementHydraulique) elt;
-                currentOuvrageAssocieAmenagementHydrauliqueIdsList.add(ouvrageAssocieAmenagementHydraulique.getId());
-                
-                if (!ouvrageAssocieAmenagementHydraulique.getAmenagementHydrauliqueAssocieIds().contains(element.getId())) {
-                    ouvrageAssocieAmenagementHydraulique.getAmenagementHydrauliqueAssocieIds().add(element.getId());
-                }
-                oppositeOAAHs.add(ouvrageAssocieAmenagementHydraulique);
-            }
-            element.setOuvrageAssocieIds(currentOuvrageAssocieAmenagementHydrauliqueIdsList);
-            Injector.getSession().getRepositoryForClass(OuvrageAssocieAmenagementHydraulique.class).executeBulk(oppositeOAAHs);
-
-        }
+//        if (desordreIdsTable != null) {
+//            // Manage opposite references for Desordre...
+//            final List<String> currentDesordreIdsList = new ArrayList<>();
+//            for(final Element elt : desordreIdsTable.getAllValues()){
+//                final DesordreDependance desordre = (DesordreDependance) elt;
+//                currentDesordreIdsList.add(desordre.getId());
+//            }
+//            element.setDesordreIds(currentDesordreIdsList);
+//
+//        }
+//        if (prestationIdsTable != null) {
+//            // Manage opposite references for Prestation...
+//            final List<String> currentPrestationIdsList = new ArrayList<>();
+//            for(final Element elt : prestationIdsTable.getAllValues()){
+//                final PrestationAmenagementHydraulique prestation = (PrestationAmenagementHydraulique) elt;
+//                currentPrestationIdsList.add(prestation.getId());
+//            }
+//            element.setPrestationIds(currentPrestationIdsList);
+//        }
         if (gestionnaireIdsTable != null) {
             // Manage opposite references for Organisme...
             final List<String> currentOrganismeIdsList = new ArrayList<>();
@@ -583,15 +511,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             toRemoveTroncons.stream().forEach(tr -> tr.setAmenagementHydrauliqueId(null));
             tronconDigueRepository.executeBulk(toRemoveTroncons);
             element.setTronconIds(currentTronconDigueIdsList);
-        }
-        if (prestationIdsTable != null) {
-            // Manage opposite references for Prestation...
-            final List<String> currentPrestationIdsList = new ArrayList<>();
-            for(final Element elt : prestationIdsTable.getAllValues()){
-                final PrestationAmenagementHydraulique prestation = (PrestationAmenagementHydraulique) elt;
-                currentPrestationIdsList.add(prestation.getId());
-            }
-            element.setPrestationIds(currentPrestationIdsList);
         }
         if (proprietaireIdsTable != null) {
             // Manage opposite references for Contact...
