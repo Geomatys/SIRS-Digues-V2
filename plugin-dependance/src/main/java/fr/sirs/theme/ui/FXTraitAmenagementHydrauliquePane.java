@@ -32,11 +32,10 @@ public class FXTraitAmenagementHydrauliquePane extends AbstractFXElementPane<Tra
     @FXML protected TextArea ui_commentaire;
     @FXML protected ComboBox ui_amenagementHydrauliqueId;
     @FXML protected Button ui_amenagementHydrauliqueId_link;
-    
-    // Propriétés de AvecGeometrie
-    
-    // Propriétés de AvecSettableGeometrie
-    
+
+    // Maybe to come
+    //@FXML FXPositionDependancePane uiPosition;
+
     /**
      * Constructor. Initialize part of the UI which will not require update when
      * element edited change.
@@ -46,10 +45,10 @@ public class FXTraitAmenagementHydrauliquePane extends AbstractFXElementPane<Tra
         final Session session = Injector.getBean(Session.class);
         previewRepository = session.getPreviews();
         elementProperty().addListener(this::initFields);
-        
+
         uiValidityPeriod.disableFieldsProperty().bind(disableFieldsProperty());
         uiValidityPeriod.targetProperty().bind(elementProperty());
-        
+
         /*
         * Disabling rules.
         */
@@ -59,6 +58,9 @@ public class FXTraitAmenagementHydrauliquePane extends AbstractFXElementPane<Tra
         ui_amenagementHydrauliqueId_link.disableProperty().bind(ui_amenagementHydrauliqueId.getSelectionModel().selectedItemProperty().isNull());
         ui_amenagementHydrauliqueId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
         ui_amenagementHydrauliqueId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_amenagementHydrauliqueId.getSelectionModel().getSelectedItem()));
+        //uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
+
+        //uiPosition.dependanceProperty().bind(elementProperty);
     }
     
     public FXTraitAmenagementHydrauliquePane(final TraitAmenagementHydraulique traitAmenagementHydraulique){

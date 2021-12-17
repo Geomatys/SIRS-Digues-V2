@@ -36,6 +36,7 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
     @FXML private FXValidityPeriodPane uiValidityPeriod;
 
     // Propriétés de OuvrageAssocieAmenagementHydraulique
+    @FXML protected TextField ui_libelle;
     @FXML protected Spinner ui_superficie;
     @FXML protected Spinner ui_hauteur;
     @FXML protected Spinner ui_profondeur;
@@ -90,6 +91,7 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
         /*
         * Disabling rules.
         */
+        ui_libelle.disableProperty().bind(disableFieldsProperty());
         ui_superficie.disableProperty().bind(disableFieldsProperty());
         ui_superficie.setEditable(true);
         ui_superficie.setValueFactory(new FloatSpinnerValueFactory(0, Float.MAX_VALUE));
@@ -195,6 +197,8 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
         // Unbind fields bound to previous element.
         if (oldElement != null) {
             // Propriétés de OuvrageAssocieAmenagementHydraulique
+            ui_libelle.textProperty().unbindBidirectional(oldElement.libelleProperty());
+            ui_libelle.setText(null);
             ui_superficie.getValueFactory().valueProperty().unbindBidirectional(oldElement.superficieProperty());
             ui_superficie.getValueFactory().setValue(0);
             ui_hauteur.getValueFactory().valueProperty().unbindBidirectional(oldElement.hauteurProperty());
@@ -230,6 +234,7 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
             ui_fonctionnementId.setItems(null);
             ui_amenagementHydrauliqueId.setItems(null);
             ui_commentaire.setText(null);
+            ui_libelle.setText(null);
         } else {
             
             
@@ -237,6 +242,8 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
             * Bind control properties to Element ones.
             */
             // Propriétés de OuvrageAssocieAmenagementHydraulique
+            // * libellé
+            ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
             // * superficie
             ui_superficie.getValueFactory().valueProperty().bindBidirectional(newElement.superficieProperty());
             // * hauteur
@@ -425,19 +432,11 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
         }
         if (amenagementHydrauliqueAssocieIdsTable != null) {
             final List<String> currentAmenagementHydrauliqueIdsList = new ArrayList<>();
-            final List<AmenagementHydraulique> oppositeAhs = new ArrayList<>();
             for(final Element elt : amenagementHydrauliqueAssocieIdsTable.getAllValues()){
                 final AmenagementHydraulique amenagementHydraulique = (AmenagementHydraulique) elt;
                 currentAmenagementHydrauliqueIdsList.add(amenagementHydraulique.getId());
-                
-                if (!amenagementHydraulique.getOuvrageAssocieIds().contains(element.getId())) {
-                    amenagementHydraulique.getOuvrageAssocieIds().add(element.getId());
-                }
-                oppositeAhs.add(amenagementHydraulique);
             }
             element.setAmenagementHydrauliqueAssocieIds(currentAmenagementHydrauliqueIdsList);
-            Injector.getSession().getRepositoryForClass(AmenagementHydraulique.class).executeBulk(oppositeAhs);
-            
         }
         if (desordreDependanceAssocieIdsTable != null) {
             /*

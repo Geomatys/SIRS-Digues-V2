@@ -37,6 +37,7 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.util.SIRSAreaComputer;
+import static fr.sirs.util.SIRSAreaComputer.getGeometryInfo;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;

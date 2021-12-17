@@ -8,8 +8,11 @@ import os
 import shutil
 import re
 
-QGIS_PLUGIN_PROJECT_PATH = ""
-#QGIS_PLUGIN_PROJECT_PATH = "/home/maximegavens/GEOMATYS/qgis-plugin-couchdb-project/qgis-plugin-couchdb/couchdb_importer"
+#QGIS_PLUGIN_PROJECT_PATH = ""
+QGIS_PLUGIN_PROJECT_PATH = "/home/maximegavens/GEOMATYS/qgis-plugin-couchdb-project/qgis-plugin-couchdb/couchdb_importer"
+
+all_positionable = []
+containment_classes_from_positionable = set()
 
 all_positionable = []
 containment_classes_from_positionable = set()
@@ -153,6 +156,32 @@ def build_preferences(formTemplatePilote, preferences):
             preferences[clazz]["attributes"][attribute] = True
 
 
+def is_child_of(classifier: Ecore.EClassifier, parentName):
+    if classifier.name == parentName:
+        return True
+    if type(classifier) == Ecore.EClass or type(classifier) == Ecore.EProxy:
+        super_types: Ecore.EOrderedSet = classifier.eAllSuperTypes()
+        for st in super_types:
+            if is_child_of(st, parentName):
+                return True
+    return False
+
+
+def find_containment_classes(classifier: Ecore.EClassifier):
+    if type(classifier) == Ecore.EClass or type(classifier) == Ecore.EProxy:
+        super_types: Ecore.EOrderedSet = classifier.eAllSuperTypes()
+        for st in super_types:
+            for super_c in find_containment_classes(st):
+                yield super_c
+    content = list(classifier.eAllContents())
+    for obj in content:
+        try:
+            if obj.containment:
+                yield obj.eType.name
+        except AttributeError:
+            pass
+
+
 def transform(classifier: Ecore.EClassifier, result, clazz, ll, filter_general):
     if type(classifier) == Ecore.EClass or type(classifier) == Ecore.EProxy:
         super_types: Ecore.EOrderedSet = classifier.eAllSuperTypes()
@@ -175,13 +204,22 @@ def engine(formTemplatePilote, resourceSet, path_to_ecore, path_to_properties, f
     graphMMRoot = resource.contents[0]  # We get the root (an EPackage here)
     ll = LabelLoader()
     ll.complete_dict(path_to_properties)
-    p = ll.load_user_preferences_from_labels()
 
     for clazz in ll.classes:
+        # Retrieve the corresponding classifier from the graph
         classifier: Ecore.EClassifier = graphMMRoot.getEClassifier(clazz)
+        if classifier is None:
+            print(f"class {clazz} not found in {path_to_ecore}")
+            continue
+        # Complete the formTemplatePilote object
         formTemplatePilote[clazz] = {}
         transform(classifier, formTemplatePilote, clazz, ll, filter_general)
-    
+        # Check if the current class is positionable (implement WithGeometrie and not abstract)
+        if is_child_of(classifier, "AvecGeometrie") and not classifier.abstract:
+            all_positionable.append(clazz)
+            for c in find_containment_classes(classifier):
+                containment_classes_from_positionable.add(c)
+
 
 if __name__ == "__main__":
     ecore_paths, properties_paths, filter_general, copy2plugin = check_argument()
@@ -210,3 +248,10 @@ if __name__ == "__main__":
             shutil.copy("user_preference_correspondence.json", QGIS_PLUGIN_PROJECT_PATH)
     except TypeError or FileNotFoundError:
         print("Impossible de copier les fichiers générés vers le plugin QGIS. Vérifiez que la variable QGIS_PLUGIN_PROJECT_PATH est un chemin valide.")
+    print("All positionable classes of the plugin Qgis")
+    all_positionable.sort()
+    for p in all_positionable:
+        print(p)
+    print("All containment classes from positionable")
+    print(containment_classes_from_positionable)
+

@@ -46,6 +46,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
+import org.geotoolkit.map.MapItem;
 
 /**
  * Designed to verify compatibility between installed plugins and database modules.
@@ -122,6 +123,7 @@ public class ModuleChecker extends Task<Boolean> {
                 t.get();
             }
 
+            info.getModuleDescriptions().get(upgrade.toUpgrade.getConfiguration().getName()).setLayers(getLayers(upgrade.toUpgrade));
             info.getModuleDescriptions().get(upgrade.toUpgrade.getConfiguration().getName()).setVersion(getVersion(upgrade.toUpgrade));
             connector.update(info);
         }

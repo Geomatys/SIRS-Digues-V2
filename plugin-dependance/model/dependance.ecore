@@ -123,20 +123,13 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="section" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="etatId" eType="#//RefEtat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionnementId" eType="#//RefFonctionnementOAAH"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AmenagementHydraulique" eSuperTypes="#//AbstractDependance">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="superficie" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="capaciteStockage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="collectiviteCompetence"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="profondeurMoyenne" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
-        eType="#//DesordreDependance"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="structureIds" upperBound="-1"
-        eType="#//StructureAmenagementHydraulique"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocieIds" upperBound="-1"
-        eType="#//OuvrageAssocieAmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaireIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionnementId" eType="#//RefFonctionnementAH"/>
@@ -145,10 +138,9 @@
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//TronconDigue"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="#//ObservationDependance" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
-        eType="#//PrestationAmenagementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="proprietaireIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Contact"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="organismeId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Organisme"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//AbstractAmenagementHydraulique">
     <eAnnotations source="couchDBDocument"/>

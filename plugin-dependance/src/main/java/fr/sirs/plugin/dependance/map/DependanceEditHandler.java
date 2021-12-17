@@ -395,45 +395,51 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     gridPane.add(geomTypeBox, 1, 1);
 
                     final Button validateBtn = new Button("Valider");
-                    validateBtn.setOnAction(event -> stage.close());
+                    validateBtn.setOnAction((event) -> {
+                        stage.close();
+                        final Class clazz;
+                        switch (dependanceTypeBox.getSelectionModel().getSelectedItem()) {
+                            case "Aires de stockage": clazz = AireStockageDependance.class; break;
+                            case "Autres": clazz = AutreDependance.class; break;
+                            case "Chemins d'accès": clazz = CheminAccesDependance.class; break;
+                            case "Ouvrages de voirie": clazz = OuvrageVoirieDependance.class; break;
+                            case "Aménagements hydrauliques": clazz = AmenagementHydraulique.class; break;
+                            default: clazz = AireStockageDependance.class;
+                        }
+
+                        if (AireStockageDependance.class.isAssignableFrom(clazz)) {
+                            helper = new EditionHelper(map, aireLayer);
+                        } else if (AutreDependance.class.isAssignableFrom(clazz)) {
+                            helper = new EditionHelper(map, autreLayer);
+                        } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
+                            helper = new EditionHelper(map, cheminLayer);
+                        } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
+                            helper = new EditionHelper(map, ouvrageVoirieLayer);
+                        } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
+                            helper = new EditionHelper(map, amenagementLayer);
+                        }
+
+                        final AbstractSIRSRepository<AbstractDependance> repodep = Injector.getSession().getRepositoryForClass(clazz);
+                        dependance = repodep.create();
+                        newDependance = true;
+
+                        switch (geomTypeBox.getSelectionModel().getSelectedItem()) {
+                            case "Ponctuel" : newGeomType = Point.class; break;
+                            case "Linéaire" : newGeomType = LineString.class; break;
+                            case "Surfacique" : newGeomType = Polygon.class; break;
+                            default: newGeomType = Point.class;
+                        }
+                    });
                     gridPane.add(validateBtn, 2, 3);
 
                     final Scene sceneChoices = new Scene(gridPane);
                     stage.setScene(sceneChoices);
+                    stage.setOnCloseRequest((onCloseEvent) -> {
+                        helper = null;
+                    });
                     stage.showAndWait();
 
-                    final Class clazz;
-                    switch (dependanceTypeBox.getSelectionModel().getSelectedItem()) {
-                        case "Aires de stockage": clazz = AireStockageDependance.class; break;
-                        case "Autres": clazz = AutreDependance.class; break;
-                        case "Chemins d'accès": clazz = CheminAccesDependance.class; break;
-                        case "Ouvrages de voirie": clazz = OuvrageVoirieDependance.class; break;
-                        case "Aménagements hydrauliques": clazz = AmenagementHydraulique.class; break;
-                        default: clazz = AireStockageDependance.class;
-                    }
 
-                    if (AireStockageDependance.class.isAssignableFrom(clazz)) {
-                        helper = new EditionHelper(map, aireLayer);
-                    } else if (AutreDependance.class.isAssignableFrom(clazz)) {
-                        helper = new EditionHelper(map, autreLayer);
-                    } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
-                        helper = new EditionHelper(map, cheminLayer);
-                    } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
-                        helper = new EditionHelper(map, ouvrageVoirieLayer);
-                    } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
-                        helper = new EditionHelper(map, amenagementLayer);
-                    }
-
-                    final AbstractSIRSRepository<AbstractDependance> repodep = Injector.getSession().getRepositoryForClass(clazz);
-                    dependance = repodep.create();
-                    newDependance = true;
-
-                    switch (geomTypeBox.getSelectionModel().getSelectedItem()) {
-                        case "Ponctuel" : newGeomType = Point.class; break;
-                        case "Linéaire" : newGeomType = LineString.class; break;
-                        case "Surfacique" : newGeomType = Polygon.class; break;
-                        default: newGeomType = Point.class;
-                    }
                 } else {
                     // popup :
                     // -suppression d'un noeud
