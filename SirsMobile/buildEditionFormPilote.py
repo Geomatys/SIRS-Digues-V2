@@ -11,6 +11,8 @@ import re
 QGIS_PLUGIN_PROJECT_PATH = ""
 #QGIS_PLUGIN_PROJECT_PATH = "/home/maximegavens/GEOMATYS/qgis-plugin-couchdb-project/qgis-plugin-couchdb/couchdb_importer"
 
+all_positionable = []
+containment_classes_from_positionable = set()
 
 def unicodize(seg):
     if re.match(r'\\u[0-9a-f]{4}', seg):

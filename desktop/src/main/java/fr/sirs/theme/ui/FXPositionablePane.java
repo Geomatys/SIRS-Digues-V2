@@ -20,9 +20,7 @@ package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.CRS_WGS84;
@@ -67,9 +65,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
-import org.apache.sis.measure.Units;
 import org.apache.sis.referencing.CRS;
-import org.geotoolkit.display.MeasureUtilities;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.LinearReferencing;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -221,29 +217,6 @@ public class FXPositionablePane extends BorderPane {
 
     private LinearReferencing.SegmentInfo[] getSourceLinear(final SystemeReperage source) {
         return ConvertPositionableCoordinates.getSourceLinear(source, posProperty.get());
-    }
-
-    /**
-     * Returns a label specifying the geometry area if the geometry is a Polygon
-     * or MultiPolygon, or the geometry length otherwise.
-     *
-     * @param geometry
-     */
-    private static String getGeometryInfo(final Geometry geometry) {
-        if (geometry != null) {
-            if (geometry instanceof Polygon || geometry instanceof MultiPolygon) {
-                final String surface = NumberFormat.getNumberInstance().format(
-                        SIRSAreaComputer.calculateArea(geometry, Injector.getSession().getProjection(), Units.SQUARE_METRE)) + " m²";
-                return "Surface : " + surface;
-            } else {
-                final String longueur = NumberFormat.getNumberInstance().format(
-                        MeasureUtilities.calculateLenght(geometry,
-                                Injector.getSession().getProjection(), Units.METRE)) + " m";
-                return "Longueur : " + longueur;
-            }
-        } else {
-            return "";
-        }
     }
 
     /**
