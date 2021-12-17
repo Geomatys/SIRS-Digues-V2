@@ -247,7 +247,9 @@ if __name__ == "__main__":
     except TypeError or FileNotFoundError:
         print("Impossible de copier les fichiers générés vers le plugin QGIS. Vérifiez que la variable QGIS_PLUGIN_PROJECT_PATH est un chemin valide.")
     print("All positionable classes of the plugin Qgis")
-    print(all_positionable)
+    all_positionable.sort()
+    for p in all_positionable:
+        print(p)
     print("All containment classes from positionable")
     print(containment_classes_from_positionable)
 
