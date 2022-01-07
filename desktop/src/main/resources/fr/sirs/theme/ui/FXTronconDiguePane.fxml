@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import fr.sirs.util.FXFreeTab?>
 <?import fr.sirs.theme.ui.FXValidityPeriodPane?>
 <?import fr.sirs.theme.ui.FXAmenagementHydrauliqueAttachementPane?>
 <?import fr.sirs.*?>
@@ -112,6 +113,7 @@
                         <Tab fx:id="uiGestionsTab" text="Gestionnaires" />
                         <Tab fx:id="uiProprietesTab" text="Propriétaires" />
                         <Tab fx:id="uiGardesTab" text="Gardiens" />
+                        <FXFreeTab fx:id="ui_photos" text="Photos" />
                     </tabs>
                     <BorderPane.margin>
                         <Insets />
