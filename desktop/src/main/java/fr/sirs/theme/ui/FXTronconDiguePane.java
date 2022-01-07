@@ -21,6 +21,7 @@ package fr.sirs.theme.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.util.FXFreeTab;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.TronconUtils.ArchiveMode;
 import fr.sirs.core.component.Previews;
@@ -30,6 +31,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.GestionTroncon;
+import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.RefRive;
@@ -97,6 +99,8 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     private final ForeignParentPojoTable<ProprieteTroncon> uiProprietesTable;
     @FXML private Tab uiGardesTab;
     private final ForeignParentPojoTable<GardeTroncon> uiGardesTable;
+    @FXML protected FXFreeTab ui_photos;
+    private PojoTable photosTable;
 
     // Booleen déterminant s'il est nécessaire de calculer l'état d'archivage du tronçon et des objets qui s'y réfèrent lors de l'enregistrement.
     protected LocalDate initialArchiveDate;
@@ -182,6 +186,14 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         uiProprietesTable.editableProperty().bind(disableFieldsProperty().not());
         uiGardesTable = new ForeignParentPojoTable<>(GardeTroncon.class, "Période de gardiennage", elementProperty());
         uiGardesTable.editableProperty().bind(disableFieldsProperty().not());
+
+        ui_photos.setContent(() -> {
+            photosTable = new PojoTable(Photo.class, null, elementProperty());
+            photosTable.editableProperty().bind(disableFieldsProperty().not());
+            updatePhotosTable(elementProperty.get());
+            return photosTable;
+        });
+        ui_photos.setClosable(false);
 
         // Troncon change listener
         elementProperty.addListener(this::initFields);
@@ -319,6 +331,20 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             uiProprietesTable.setTableItems(() -> (ObservableList) SIRS.observableList(session.getProprietesByTronconId(newElement.getId())));
             uiGardesTable.setForeignParentId(newElement.getId());
             uiGardesTable.setTableItems(() -> (ObservableList) SIRS.observableList(session.getGardesByTronconId(newElement.getId())));
+        }
+
+        updatePhotosTable(newElement);
+    }
+
+    private void updatePhotosTable(final TronconDigue newElement) {
+        if (photosTable == null)
+            return;
+
+        if (newElement == null) {
+            photosTable.setTableItems(null);
+        } else {
+            photosTable.setParentElement(newElement);
+            photosTable.setTableItems(()-> (ObservableList) newElement.getPhotos());
         }
     }
 

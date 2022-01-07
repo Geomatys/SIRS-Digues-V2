@@ -28,6 +28,7 @@ import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.DatabaseRegistry;
+import fr.sirs.core.component.PhotoRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
@@ -58,6 +59,7 @@ import fr.sirs.core.model.OuvrageParticulier;
 import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.OuvrageTelecomEnergie;
 import fr.sirs.core.model.OuvrageVoirie;
+import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.PositionProfilTravers;
@@ -205,6 +207,7 @@ public class CorePlugin extends Plugin {
 
     public static final String TRONCON_LAYER_NAME = "Tronçons";
     public static final String BORNE_LAYER_NAME = "Bornes";
+    public static final String PHOTO_TRONCON_LAYER_NAME = "Photos des tronçons";
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
 
@@ -402,6 +405,10 @@ public class CorePlugin extends Plugin {
             }
             final BeanStore tronconStore = new BeanStore(tronconFeatureSupplier);
             sirsGroup.items().addAll(buildLayers(tronconStore,TRONCON_LAYER_NAME,createTronconStyle(),createTronconSelectionStyle(false),true));
+
+            // Special request to add a layer for the photos of the 'troncon'
+            final BeanStore photoTronconStore = new BeanStore(photoTronconSupplier());
+            sirsGroup.items().addAll(buildLayers(photoTronconStore, PHOTO_TRONCON_LAYER_NAME, createPhotoTronconStyle(), createDefaultSelectionStyle(),true));
 
             //bornes
             final BeanStore borneStore = new BeanStore(suppliers.get(BorneDigue.class));
@@ -830,6 +837,34 @@ public class CorePlugin extends Plugin {
         return super.getThemes();
     }
 
+    private static MutableStyle createPhotoTronconStyle() throws URISyntaxException {
+        //the visual element
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(16);
+
+        final List<GraphicalSymbol> symbols = new ArrayList<>();
+        final Stroke stroke = null;
+        final Fill fill = SF.fill(Color.BLACK);
+        final Mark mark = SF.mark(StyleConstants.MARK_TRIANGLE, fill, stroke);
+        symbols.add(mark);
+        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
+                size, LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
+
+        final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",(String) null,DEFAULT_DESCRIPTION,Units.POINT,graphic);
+
+        final MutableRule ruleSmallObjects = SF.rule(pointSymbolizer);
+        ruleSmallObjects.setFilter(
+                FF.lessOrEqual(
+                        FF.function("length", FF.property("geometry")),
+                        FF.literal(SirsCore.LINE_MIN_LENGTH)
+                )
+        );
+
+        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
+        fts.rules().add(ruleSmallObjects);
+        final MutableStyle style = SF.style();
+        style.featureTypeStyles().add(fts);
+        return style;
+    }
 
 
     private static MutableStyle createBorneStyle() throws URISyntaxException{
@@ -1357,6 +1392,8 @@ public class CorePlugin extends Plugin {
             return getMapLayerForElement(TRONCON_LAYER_NAME);
         } else if (element instanceof BorneDigue) {
             return getMapLayerForElement(BORNE_LAYER_NAME);
+        } else if (isPhotoTroncon(element)) {
+            return getMapLayerForElement(PHOTO_TRONCON_LAYER_NAME);
         } else if (element instanceof AbstractPositionDocumentAssociable) {
             final Previews previews = Injector.getSession().getPreviews();
             final String documentId = ((AbstractPositionDocumentAssociable) element).getSirsdocument(); // IL est nécessaire qu'un document soit associé pour déterminer le type de la couche.
@@ -1416,5 +1453,18 @@ public class CorePlugin extends Plugin {
         } catch(NullPointerException ex) {
             SIRS.LOGGER.log(Level.WARNING, "Impossible de rendre visible l'élément (id: {0}).", e.getId());
         }
+    }
+
+    private StructBeanSupplier photoTronconSupplier() {
+        final PhotoRepository repository = (PhotoRepository) getSession().getRepositoryForClass(Photo.class);
+        return new StructBeanSupplier(Photo.class,() -> repository.getAllTronconPhotos());
+    }
+
+    private static boolean isPhotoTroncon(final Element e) {
+        final Element p = e.getParent();
+        if (p != null) {
+            return p.getClass().equals(TronconDigue.class);
+        }
+        return false;
     }
 }
