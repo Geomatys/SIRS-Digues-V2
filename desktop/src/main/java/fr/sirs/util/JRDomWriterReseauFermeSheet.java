@@ -52,6 +52,8 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
 
     public static final String IMAGE_DATA_SOURCE = "IMAGE_DATA_SOURCE";
 
+    public static final String SECURITE_ID_FIELD = "SECURITE_ID_FIELD";
+
     private final List<JRColumnParameter> observationFields;
     private final List<JRColumnParameter> reseauFields;
     private final List<JRColumnParameter> desordreFields;
@@ -102,6 +104,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         if(printReseauOuvrage) writeField(ObjectDataSource.class, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, "Source de données des réseaux");
         writeField(ObjectDataSource.class, DESORDRE_TABLE_DATA_SOURCE, "Source de données des désordres");
         writeField(Image.class, IMAGE_DATA_SOURCE, "Image de l'élément");
+        writeField(ObjectDataSource.class, SECURITE_ID_FIELD, "Champ calculé pour le niveau de sécurité de l'ouvrage associé.");
         
         // Modifies the title block.--------------------------------------------
         writeTitle();

@@ -29,6 +29,7 @@ import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.Photo;
+import fr.sirs.core.model.RefSecurite;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.StationPompage;
@@ -38,15 +39,14 @@ import static fr.sirs.util.JRDomWriterReseauFermeSheet.DESORDRE_TABLE_DATA_SOURC
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.PHOTO_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterReseauFermeSheet.SECURITE_ID_FIELD;
 import java.awt.Dimension;
 import java.awt.Image;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import net.sf.jasperreports.engine.JRException;
@@ -161,6 +161,11 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
             } else {
                 return noImage();
             }
+        } else if (SECURITE_ID_FIELD.equals(name)) {
+            if(currentObject != null && currentObject.getSecuriteId() != null){
+                return parsePropertyValue(currentObject.getSecuriteId(), RefSecurite.class, String.class);
+            }
+            return null;
         }
         else return super.getFieldValue(jrf);
     }

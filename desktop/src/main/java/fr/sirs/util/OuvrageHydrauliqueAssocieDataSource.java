@@ -32,12 +32,14 @@ import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.ProprieteObjet;
+import fr.sirs.core.model.RefSecurite;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
 import static fr.sirs.util.JRDomWriterDesordreSheet.IMAGE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.RESEAU_FERME_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.DESORDRE_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.SECURITE_ID_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.LENGTH_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.MANAGER_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OBSERVATION_TABLE_DATA_SOURCE;
@@ -215,6 +217,11 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
             } else {
                 return noImage();
             }
+        } else if(SECURITE_ID_FIELD.equals(name)){
+            if(currentObject != null && currentObject.getSecuriteId() != null){
+                return parsePropertyValue(currentObject.getSecuriteId(), RefSecurite.class, String.class);
+            }
+            return null;
         }
         else return super.getFieldValue(jrf);
     }
