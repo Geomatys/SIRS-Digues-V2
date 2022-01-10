@@ -1608,6 +1608,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
         eType="#//Photo" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="suiteApporterId" eType="#//RefSuiteApporter"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauHydrauliqueCielOuvert"
       eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
@@ -1637,6 +1638,14 @@
     <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
       <details key="documentation" value="Classe parente des observations sur les réseau et ouvrages. Mise en place pour permettre d'ajouter des spécification sur ce type d'observations."/>
     </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="etatOuvrageId" eType="#//RefEtatOuvAccGC"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="etatAccesoireId" eType="#//RefEtatOuvAccGC"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="etatGenieCivilId" eType="#//RefEtatOuvAccGC"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="manoeuvreOuvrageId" eType="#//RefManoeuvre"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="etatOuvrageCom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="etatAccesoireCom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="etatGenieCivilCom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="manoeuvreOuvrageCom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="GlobalPrestation" eSuperTypes="#//AvecPrestations">
     <eAnnotations source="couchDBDocument">
@@ -1684,5 +1693,18 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefSecurite" eSuperTypes="#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefSuiteApporter" eSuperTypes="#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefEtatOuvAccGC" eSuperTypes="#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefManoeuvre" eSuperTypes="#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
 </ecore:EPackage>
