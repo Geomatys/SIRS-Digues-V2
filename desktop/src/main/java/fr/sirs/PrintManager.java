@@ -289,12 +289,13 @@ public class PrintManager {
         avoidDesordreFields.add(DATE_MAJ_FIELD);
 
         final List<JRColumnParameter> observationFields = new ArrayList<>();
-        observationFields.add(new JRColumnParameter("date", 1.2f, true));
-        observationFields.add(new JRColumnParameter("observateurId", .8f));
-        observationFields.add(new JRColumnParameter("nombreDesordres",.9f));
+        observationFields.add(new JRColumnParameter("date", .9f, true));
+        observationFields.add(new JRColumnParameter("observateurId", .9f));
+        observationFields.add(new JRColumnParameter("nombreDesordres",.7f));
         observationFields.add(new JRColumnParameter("urgenceId", .9f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
-        observationFields.add(new JRColumnParameter("evolution", 2.f));
-        observationFields.add(new JRColumnParameter("suite", 2f));
+        observationFields.add(new JRColumnParameter("evolution", 1.8f));
+        observationFields.add(new JRColumnParameter("suiteApporterId", 1.2f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
+        observationFields.add(new JRColumnParameter("suite", 2.2f));
 
         final List<JRColumnParameter> prestationFields = new ArrayList<>();
         prestationFields.add(new JRColumnParameter("designation", .7f, true));
@@ -364,7 +365,8 @@ public class PrintManager {
         observationFields.add(new JRColumnParameter("date", 1.1f, true));
         observationFields.add(new JRColumnParameter("observateurId", .8f));
         observationFields.add(new JRColumnParameter("evolution", 2.f));
-        observationFields.add(new JRColumnParameter("suite", 2.5f));
+        observationFields.add(new JRColumnParameter("suiteApporterId", 1.2f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
+        observationFields.add(new JRColumnParameter("suite", 2.f));
 
         final List<JRColumnParameter> reseauFields = new ArrayList<>();
         reseauFields.add(new JRColumnParameter("designation"));
@@ -433,7 +435,8 @@ public class PrintManager {
         observationFields.add(new JRColumnParameter("date", 1.1f, true));
         observationFields.add(new JRColumnParameter("observateurId", .8f));
         observationFields.add(new JRColumnParameter("evolution", 2.f));
-        observationFields.add(new JRColumnParameter("suite", 2.5f));
+        observationFields.add(new JRColumnParameter("suiteApporterId", 1.2f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
+        observationFields.add(new JRColumnParameter("suite", 2.f));
 
         final List<JRColumnParameter> reseauFields = new ArrayList<>();
         reseauFields.add(new JRColumnParameter("typeConduiteFermeeId", 2.3f, true));
