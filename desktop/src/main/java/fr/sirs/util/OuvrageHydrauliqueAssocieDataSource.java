@@ -43,17 +43,16 @@ import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.SECURITE_ID_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.LENGTH_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.MANAGER_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OBSERVATION_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OBSERVATION_SPEC_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OWNER_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.PHOTO_DATA_SOURCE;
 import java.awt.Dimension;
 import java.awt.Image;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import net.sf.jasperreports.engine.JRException;
@@ -186,7 +185,7 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
             photos.sort(SirsComparator.PHOTO_COMPARATOR);
             return new ObjectDataSource<>(photos, previewRepository, stringConverter);
         }
-        else if(OBSERVATION_TABLE_DATA_SOURCE.equals(name)){
+        else if(OBSERVATION_TABLE_DATA_SOURCE.equals(name) || OBSERVATION_SPEC_TABLE_DATA_SOURCE.equals(name)){
             final ObservableList<ObservationOuvrageHydrauliqueAssocie> observations = currentObject.getObservations();
             observations.sort(SirsComparator.OBSERVATION_COMPARATOR);
             return new ObjectDataSource<>(observations, previewRepository, stringConverter);

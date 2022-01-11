@@ -19,6 +19,7 @@
 		</conditionalStyle>
 	</style>
 	<subDataset name="Observation Dataset" uuid="f87f5cd0-3234-40c4-9ea3-250724f36d5e"/>
+        <subDataset name="Observation Specification Dataset" uuid="8e182dec-1fbf-4e55-a942-782b6ecb6176"/>
 	<subDataset name="ReseauFerme Dataset" uuid="df00eaba-db68-4b08-8235-09c8aa0b6e8c"/>
 	<subDataset name="Desordre Dataset" uuid="50a50ee9-90dd-41b1-aabc-cdfdecbccc33"/>
 	<parameter name="PHOTO_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>

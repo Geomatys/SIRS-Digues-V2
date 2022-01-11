@@ -37,16 +37,19 @@ import org.xml.sax.SAXException;
  * @author Samuel Andrés (Geomatys)
  */
 public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecificSheetWithPhotoReport<ReseauHydrauliqueFerme> {
-    
+
     public static final String OBSERVATION_DATASET = "Observation Dataset";
     public static final String OBSERVATION_TABLE_DATA_SOURCE = "OBSERVATION_TABLE_DATA_SOURCE";
-    
+
+    public static final String OBSERVATION_SPEC_DATASET = "Observation Specification Dataset";
+    public static final String OBSERVATION_SPEC_TABLE_DATA_SOURCE = "OBSERVATION_SPEC_TABLE_DATA_SOURCE";
+
     public static final String RESEAU_OUVRAGE_DATASET = "ReseauOuvrage Dataset";
     public static final String RESEAU_OUVRAGE_TABLE_DATA_SOURCE = "RESEAU_OUVRAGE_TABLE_DATA_SOURCE";
-    
+
     public static final String DESORDRE_DATASET = "Desordre Dataset";
     public static final String DESORDRE_TABLE_DATA_SOURCE = "DESORDRE_TABLE_DATA_SOURCE";
-    
+
     public static final String PHOTO_DATA_SOURCE = "PHOTO_DATA_SOURCE";
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
 
@@ -55,16 +58,18 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
     public static final String SECURITE_ID_FIELD = "SECURITE_ID_FIELD";
 
     private final List<JRColumnParameter> observationFields;
+    private final List<JRColumnParameter> observationSpecFields;
     private final List<JRColumnParameter> reseauFields;
     private final List<JRColumnParameter> desordreFields;
-    
+
     private final boolean printPhoto;
     private final boolean printReseauOuvrage;
-    
+
     private JRDomWriterReseauFermeSheet(final Class<ReseauHydrauliqueFerme> classToMap){
         super(classToMap);
         
         observationFields = null;
+        observationSpecFields = null;
         reseauFields = null;
         desordreFields = null;
         printPhoto = printReseauOuvrage = true;
@@ -73,6 +78,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
     public JRDomWriterReseauFermeSheet(final InputStream stream,
             final List<String> avoidFields,
             final List<JRColumnParameter> observationFields,
+            final List<JRColumnParameter> observationSpecFields,
             final List<JRColumnParameter> reseauFields,
             final List<JRColumnParameter> desordreFields,
             final boolean printPhoto, 
@@ -80,6 +86,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         super(ReseauHydrauliqueFerme.class, stream, avoidFields, "#b2a1c7");
         
         this.observationFields = observationFields;
+        this.observationSpecFields = observationSpecFields;
         this.reseauFields = reseauFields;
         this.printPhoto = printPhoto;
         this.printReseauOuvrage = printReseauOuvrage;
@@ -91,16 +98,18 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
      */
     @Override
     protected void writeObject() {
-        
+
         writeSubDataset(ObservationReseauHydrauliqueFerme.class, observationFields, true, 0);
-        writeSubDataset(ObjetReseau.class, reseauFields, true, 1);
-        writeSubDataset(JRDesordreTableRow.class, desordreFields, true, 2);
-        
+        writeSubDataset(ObservationReseauHydrauliqueFerme.class, observationSpecFields, true, 1);
+        writeSubDataset(ObjetReseau.class, reseauFields, true, 2);
+        writeSubDataset(JRDesordreTableRow.class, desordreFields, true, 3);
+
         // Sets the initial fields used by the template.------------------------
         writeFields();
         writeField(String.class, SirsCore.DIGUE_ID_FIELD, "Champ ajouté de force pour prendre en compte l'intitulé de la digue.");// Ajout d'un champ pour l'intitulé de la digue.
         if(printPhoto) writeField(ObjectDataSource.class, PHOTO_DATA_SOURCE, "Source de données des photos");
         writeField(ObjectDataSource.class, OBSERVATION_TABLE_DATA_SOURCE, "Source de données des observations");
+        writeField(ObjectDataSource.class, OBSERVATION_SPEC_TABLE_DATA_SOURCE, "Source de données des spécifications d'observations");
         if(printReseauOuvrage) writeField(ObjectDataSource.class, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, "Source de données des réseaux");
         writeField(ObjectDataSource.class, DESORDRE_TABLE_DATA_SOURCE, "Source de données des désordres");
         writeField(Image.class, IMAGE_DATA_SOURCE, "Image de l'élément");
@@ -137,9 +146,18 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         currentY+=24;
         writeSectionTitle("Observations", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
         currentY+=2;
-        writeTable(ObservationReseauHydrauliqueFerme.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 
+        writeTable(ObservationReseauHydrauliqueFerme.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET,
                 TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
-        
+
+        /*----------------------------------------------------------------------
+        TABLEAU DES SPECIFICATIONS D'OBSERVATIONS
+        ----------------------------------------------------------------------*/
+        currentY+=24;
+        writeSectionTitle("Observations (spécification ouvrage/réseau)", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
+        currentY+=2;
+        writeTable(ObservationReseauHydrauliqueFerme.class, observationSpecFields, true, OBSERVATION_SPEC_TABLE_DATA_SOURCE, OBSERVATION_SPEC_DATASET,
+                TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
+
         /*----------------------------------------------------------------------
         SOUS-RAPPORTS DES PHOTOS
         ----------------------------------------------------------------------*/
