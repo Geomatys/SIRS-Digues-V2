@@ -97,6 +97,7 @@ public class PrinterUtilities {
 
     public static File printOuvrageAssocie(final List<String> avoidReseauFields,
             final List<JRColumnParameter> observationFields,
+            final List<JRColumnParameter> observationSpecFields,
             final List<JRColumnParameter> reseauFields,
             final List<JRColumnParameter> desordreFields,
             final Previews previewLabelRepository,
@@ -112,7 +113,7 @@ public class PrinterUtilities {
         try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateOuvrageAssocie.jrxml")) {
 
             final JRDomWriterOuvrageAssocieSheet templateWriter = new JRDomWriterOuvrageAssocieSheet(metaTemplateStream,
-                    avoidReseauFields, observationFields, reseauFields, desordreFields, printPhoto, printReseauFerme);
+                    avoidReseauFields, observationFields, observationSpecFields, reseauFields, desordreFields, printPhoto, printReseauFerme);
             templateWriter.setOutput(templateFile);
             templateWriter.write();
 
@@ -147,6 +148,7 @@ public class PrinterUtilities {
 
     public static File printReseauFerme(final List<String> avoidReseauFields,
             final List<JRColumnParameter> observationFields,
+            final List<JRColumnParameter> observationSpecFields,
             final List<JRColumnParameter> reseauFields,
             final List<JRColumnParameter> desordreFields,
             final Previews previewLabelRepository,
@@ -162,7 +164,7 @@ public class PrinterUtilities {
         try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateReseauFerme.jrxml")){
 
             final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(metaTemplateStream,
-                    avoidReseauFields, observationFields, reseauFields, desordreFields, printPhoto, printReseauOuvrage);
+                    avoidReseauFields, observationFields, observationSpecFields, reseauFields, desordreFields, printPhoto, printReseauOuvrage);
             
             templateWriter.setOutput(templateFile);
             templateWriter.write();

@@ -19,6 +19,7 @@
 package fr.sirs.util;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.ObservationOuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
@@ -40,6 +41,9 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
     
     public static final String OBSERVATION_DATASET = "Observation Dataset";
     public static final String OBSERVATION_TABLE_DATA_SOURCE = "OBSERVATION_TABLE_DATA_SOURCE";
+
+    public static final String OBSERVATION_SPEC_DATASET = "Observation Specification Dataset";
+    public static final String OBSERVATION_SPEC_TABLE_DATA_SOURCE = "OBSERVATION_SPEC_TABLE_DATA_SOURCE";
     
     public static final String RESEAU_FERME_DATASET = "ReseauFerme Dataset";
     public static final String RESEAU_FERME_TABLE_DATA_SOURCE = "RESEAU_FERME_TABLE_DATA_SOURCE";
@@ -59,9 +63,10 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
     public static final String SECURITE_ID_FIELD = "SECURITY_FIELD";
 
     private final List<JRColumnParameter> observationFields;
+    private final List<JRColumnParameter> observationSpecFields;
     private final List<JRColumnParameter> reseauFermeFields;
     private final List<JRColumnParameter> desordreFields;
-    
+
     private final boolean printPhoto;
     private final boolean printReseauFerme;
     
@@ -69,6 +74,7 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
         super(classToMap);
         
         observationFields = null;
+        observationSpecFields = null;
         reseauFermeFields = null;
         desordreFields = null;
         printPhoto = printReseauFerme = true;
@@ -77,6 +83,7 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
     public JRDomWriterOuvrageAssocieSheet(final InputStream stream,
             final List<String> avoidFields,
             final List<JRColumnParameter> observationFields,
+            final List<JRColumnParameter> observationSpecFields,
             final List<JRColumnParameter> reseauFermeFields,
             final List<JRColumnParameter> desordreFields,
             final boolean printPhoto, 
@@ -84,6 +91,7 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
         super(OuvrageHydrauliqueAssocie.class, stream, avoidFields, "#76923c");
         
         this.observationFields = observationFields;
+        this.observationSpecFields = observationSpecFields;
         this.reseauFermeFields = reseauFermeFields;
         this.printPhoto = printPhoto;
         this.printReseauFerme = printReseauFerme;
@@ -96,11 +104,12 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
      */
     @Override
     protected void writeObject() {
-        
-        writeSubDataset(ObservationReseauHydrauliqueFerme.class, observationFields, true, 0);
-        writeSubDataset(ReseauHydrauliqueFerme.class, reseauFermeFields, true, 1);
-        writeSubDataset(JRDesordreTableRow.class, desordreFields, true, 2);
-        
+
+        writeSubDataset(ObservationOuvrageHydrauliqueAssocie.class, observationFields, true, 0);
+        writeSubDataset(ObservationOuvrageHydrauliqueAssocie.class, observationSpecFields, true, 1);
+        writeSubDataset(ReseauHydrauliqueFerme.class, reseauFermeFields, true, 2);
+        writeSubDataset(JRDesordreTableRow.class, desordreFields, true, 3);
+
         // Sets the initial fields used by the template.------------------------
         writeFields();
         writeField(String.class, SirsCore.DIGUE_ID_FIELD, "Champ ajouté de force pour prendre en compte l'intitulé de la digue.");// Ajout d'un champ pour l'intitulé de la digue.
@@ -109,6 +118,7 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
         writeField(String.class, OWNER_FIELD, "Champ calculé pour le propriétaire de l'ouvrage hydraulique associé.");
         if(printPhoto) writeField(ObjectDataSource.class, PHOTO_DATA_SOURCE, "Source de données des photos");
         writeField(ObjectDataSource.class, OBSERVATION_TABLE_DATA_SOURCE, "Source de données des observations");
+        writeField(ObjectDataSource.class, OBSERVATION_SPEC_TABLE_DATA_SOURCE, "Source de données des spécifications d'observations");
         if(printReseauFerme) writeField(ObjectDataSource.class, RESEAU_FERME_TABLE_DATA_SOURCE, "Source de données des réseaux fermés");
         writeField(ObjectDataSource.class, DESORDRE_TABLE_DATA_SOURCE, "Source de données des désordres");
         writeField(Image.class, IMAGE_DATA_SOURCE, "Image de l'élément");
@@ -135,19 +145,28 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
      * @throws Exception 
      */
     private void writeDetail() {
-        
+
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         currentY = Integer.valueOf(band.getAttribute(ATT_HEIGHT));
-        
+
         /*----------------------------------------------------------------------
         TABLEAU DES OBSERVATIONS
         ----------------------------------------------------------------------*/
         currentY+=24;
         writeSectionTitle("Observations", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
         currentY+=2;
-        writeTable(ObservationReseauHydrauliqueFerme.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 
+        writeTable(ObservationOuvrageHydrauliqueAssocie.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET,
                 TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
-        
+
+        /*----------------------------------------------------------------------
+        TABLEAU DES SPECIFICATIONS D'OBSERVATIONS
+        ----------------------------------------------------------------------*/
+        currentY+=24;
+        writeSectionTitle("Observations (spécification ouvrage/réseau)", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
+        currentY+=2;
+        writeTable(ObservationOuvrageHydrauliqueAssocie.class, observationSpecFields, true, OBSERVATION_SPEC_TABLE_DATA_SOURCE, OBSERVATION_SPEC_DATASET,
+                TABLE_HEIGHT, TABLE_FONT_SIZE, 36, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
+
         /*----------------------------------------------------------------------
         SOUS-RAPPORTS DES PHOTOS
         ----------------------------------------------------------------------*/
