@@ -161,7 +161,7 @@
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
-					<text><![CDATA[Diamètre (mm)]]></text>
+					<text><![CDATA[Diamètre global (mm)]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
 					<reportElement positionType="Float" x="230" y="0" width="100" height="12" uuid="03d7cc2a-93c3-44da-8bda-a6e22c997ff2"/>
@@ -188,32 +188,32 @@
                         <frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="110" width="555" height="12" backcolor="#FFFFFF" uuid="e423bc72-aff4-4491-b057-3140660fd441"/>
 				<staticText>
-					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="a9c8b115-9926-4cb9-bf49-5fd53252f997"/>
+					<reportElement positionType="Float" x="10" y="0" width="140" height="12" uuid="a9c8b115-9926-4cb9-bf49-5fd53252f997"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
-					<text><![CDATA[Diamètre]]></text>
+					<text><![CDATA[Dimension verticale/Diamètre]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="80" y="0" width="150" height="12" uuid="edb278aa-9d56-40fb-a2d1-a6e647a3235a"/>
+					<reportElement positionType="Float" x="150" y="0" width="80" height="12" uuid="edb278aa-9d56-40fb-a2d1-a6e647a3235a"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{dimensionVerticale}+" m"]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{dimensionVerticale}+" mm"]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement positionType="Float" x="230" y="0" width="105" height="12" uuid="07f91b3c-882f-4f9d-bc50-1c7e23969d43"/>
+					<reportElement positionType="Float" x="230" y="0" width="115" height="12" uuid="07f91b3c-882f-4f9d-bc50-1c7e23969d43"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
 					<text><![CDATA[Dimension horizontale]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="335" y="0" width="195" height="12" uuid="d9b019ce-21cd-4632-a9dc-bfead597cc51"/>
+					<reportElement positionType="Float" x="345" y="0" width="185" height="12" uuid="d9b019ce-21cd-4632-a9dc-bfead597cc51"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{dimensionHorizontale}+" m"]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{dimensionHorizontale}+" mm"]]></textFieldExpression>
 				</textField>
 			</frame>
                         <frame>

@@ -28,7 +28,6 @@ import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.DatabaseRegistry;
-import fr.sirs.core.component.PhotoRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
@@ -1456,7 +1455,7 @@ public class CorePlugin extends Plugin {
     }
 
     private StructBeanSupplier photoTronconSupplier() {
-        final PhotoRepository repository = (PhotoRepository) getSession().getRepositoryForClass(Photo.class);
+        final TronconDigueRepository repository = (TronconDigueRepository) getSession().getRepositoryForClass(TronconDigue.class);
         return new StructBeanSupplier(Photo.class,() -> repository.getAllTronconPhotos());
     }
 

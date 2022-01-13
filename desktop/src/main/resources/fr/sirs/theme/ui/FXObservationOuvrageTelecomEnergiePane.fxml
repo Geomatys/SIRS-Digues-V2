@@ -106,34 +106,34 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints-->
-              <children>
+                            <children>
                    <Label text="%etatOuvrageId" GridPane.rowIndex="0" />
                    <ComboBox fx:id="ui_etatOuvrageId" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                    <Button fx:id="ui_etatOuvrageId_link" GridPane.columnIndex="2" GridPane.rowIndex="0" />
                    <!-- EString -->
                    <Label text="%etatOuvrageCom" GridPane.rowIndex="1" />
-                   <TextField fx:id="ui_etatOuvrageCom" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <TextArea fx:id="ui_etatOuvrageCom" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
 
-                   <Label text="%etatAccesoireId" GridPane.rowIndex="2" />
-                   <ComboBox fx:id="ui_etatAccesoireId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                   <Button fx:id="ui_etatAccesoireId_link" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                   <Label text="%etatAccessoireId" GridPane.rowIndex="2" />
+                   <ComboBox fx:id="ui_etatAccessoireId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                   <Button fx:id="ui_etatAccessoireId_link" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                    <!-- EString -->
-                   <Label text="%etatAccesoireCom" GridPane.rowIndex="3" />
-                   <TextField fx:id="ui_etatAccesoireCom" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <Label text="%etatAccessoireCom" GridPane.rowIndex="3" />
+                   <TextArea fx:id="ui_etatAccessoireCom" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
 
                    <Label text="%etatGenieCivilId" GridPane.rowIndex="4" />
                    <ComboBox fx:id="ui_etatGenieCivilId" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                    <Button fx:id="ui_etatGenieCivilId_link" GridPane.columnIndex="2" GridPane.rowIndex="4" />
                    <!-- EString -->
                    <Label text="%etatGenieCivilCom" GridPane.rowIndex="5" />
-                   <TextField fx:id="ui_etatGenieCivilCom" GridPane.columnIndex="1" GridPane.rowIndex="5"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <TextArea fx:id="ui_etatGenieCivilCom" GridPane.columnIndex="1" GridPane.rowIndex="5"  maxHeight="-Infinity" maxWidth="-Infinity"/>
 
                    <Label text="%manoeuvreOuvrageId" GridPane.rowIndex="6" />
                    <ComboBox fx:id="ui_manoeuvreOuvrageId" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                    <Button fx:id="ui_manoeuvreOuvrageId_link" GridPane.columnIndex="2" GridPane.rowIndex="6" />
                    <!-- EString -->
                    <Label text="%manoeuvreOuvrageCom" GridPane.rowIndex="7" />
-                   <TextField fx:id="ui_manoeuvreOuvrageCom" GridPane.columnIndex="1" GridPane.rowIndex="7"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <TextArea fx:id="ui_manoeuvreOuvrageCom" GridPane.columnIndex="1" GridPane.rowIndex="7"  maxHeight="-Infinity" maxWidth="-Infinity"/>
               </children>
               <padding>
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

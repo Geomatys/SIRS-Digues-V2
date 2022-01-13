@@ -20,7 +20,6 @@ package fr.sirs.util;
 
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.ObservationOuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;

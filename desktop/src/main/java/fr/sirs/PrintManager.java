@@ -369,15 +369,15 @@ public class PrintManager {
         observationFields.add(new JRColumnParameter("suite", 2.f));
 
         final List<JRColumnParameter> observationSpecFields = new ArrayList<>();
-        observationSpecFields.add(new JRColumnParameter("date", 1.1f, true));
+        observationSpecFields.add(new JRColumnParameter("date", 1.2f, true));
         observationSpecFields.add(new JRColumnParameter("etatOuvrageId", 1.1f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
-        observationSpecFields.add(new JRColumnParameter("etatOuvrageCom", 1.8f));
-        observationSpecFields.add(new JRColumnParameter("etatAccesoireId", 1.1f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
-        observationSpecFields.add(new JRColumnParameter("etatAccesoireCom", 1.8f));
+        observationSpecFields.add(new JRColumnParameter("etatOuvrageCom", 1.6f));
+        observationSpecFields.add(new JRColumnParameter("etatAccessoireId", 1.1f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
+        observationSpecFields.add(new JRColumnParameter("etatAccessoireCom", 1.6f));
         observationSpecFields.add(new JRColumnParameter("etatGenieCivilId", 1.1f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
-        observationSpecFields.add(new JRColumnParameter("etatGenieCivilCom", 1.8f));
+        observationSpecFields.add(new JRColumnParameter("etatGenieCivilCom", 1.6f));
         observationSpecFields.add(new JRColumnParameter("manoeuvreOuvrageId", 1.1f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
-        observationSpecFields.add(new JRColumnParameter("manoeuvreOuvrageCom", 1.8f));
+        observationSpecFields.add(new JRColumnParameter("manoeuvreOuvrageCom", 1.6f));
 
         final List<JRColumnParameter> reseauFields = new ArrayList<>();
         reseauFields.add(new JRColumnParameter("designation"));
@@ -451,15 +451,15 @@ public class PrintManager {
         observationFields.add(new JRColumnParameter("suite", 2.f));
 
         final List<JRColumnParameter> observationSpecFields = new ArrayList<>();
-        observationSpecFields.add(new JRColumnParameter("date", 1.1f, true));
+        observationSpecFields.add(new JRColumnParameter("date", 1.2f, true));
         observationSpecFields.add(new JRColumnParameter("etatOuvrageId", 1.1f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
-        observationSpecFields.add(new JRColumnParameter("etatOuvrageCom", 1.8f));
-        observationSpecFields.add(new JRColumnParameter("etatAccesoireId", 1.1f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
-        observationSpecFields.add(new JRColumnParameter("etatAccesoireCom", 1.8f));
+        observationSpecFields.add(new JRColumnParameter("etatOuvrageCom", 1.6f));
+        observationSpecFields.add(new JRColumnParameter("etatAccessoireId", 1.1f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
+        observationSpecFields.add(new JRColumnParameter("etatAccessoireCom", 1.6f));
         observationSpecFields.add(new JRColumnParameter("etatGenieCivilId", 1.1f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
-        observationSpecFields.add(new JRColumnParameter("etatGenieCivilCom", 1.8f));
+        observationSpecFields.add(new JRColumnParameter("etatGenieCivilCom", 1.6f));
         observationSpecFields.add(new JRColumnParameter("manoeuvreOuvrageId", 1.1f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
-        observationSpecFields.add(new JRColumnParameter("manoeuvreOuvrageCom", 1.8f));
+        observationSpecFields.add(new JRColumnParameter("manoeuvreOuvrageCom", 1.6f));
 
         final List<JRColumnParameter> reseauFields = new ArrayList<>();
         reseauFields.add(new JRColumnParameter("typeConduiteFermeeId", 2.3f, true));

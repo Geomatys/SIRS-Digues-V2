@@ -1641,11 +1641,11 @@
       <details key="documentation" value="Classe parente des observations sur les réseau et ouvrages. Mise en place pour permettre d'ajouter des spécification sur ce type d'observations."/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EReference" name="etatOuvrageId" eType="#//RefEtatOuvAccGC"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="etatAccesoireId" eType="#//RefEtatOuvAccGC"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="etatAccessoireId" eType="#//RefEtatOuvAccGC"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="etatGenieCivilId" eType="#//RefEtatOuvAccGC"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="manoeuvreOuvrageId" eType="#//RefManoeuvre"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="etatOuvrageCom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="etatAccesoireCom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="etatAccessoireCom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="etatGenieCivilCom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="manoeuvreOuvrageCom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>

@@ -156,7 +156,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         writeSectionTitle("Observations (spécification ouvrage/réseau)", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
         currentY+=2;
         writeTable(ObservationReseauHydrauliqueFerme.class, observationSpecFields, true, OBSERVATION_SPEC_TABLE_DATA_SOURCE, OBSERVATION_SPEC_DATASET,
-                TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
+                TABLE_HEIGHT, TABLE_FONT_SIZE, 36, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
 
         /*----------------------------------------------------------------------
         SOUS-RAPPORTS DES PHOTOS
