@@ -38,7 +38,7 @@ public class DependanceToolBar extends ToolBar {
     public DependanceToolBar(final FXMap map) {
         getStylesheets().add("/org/geotoolkit/gui/javafx/buttonbar.css");
 
-        getItems().add(new Label("Dépendance"));
+        getItems().add(new Label("Dépendance et AH"));
 
         final ToggleButton buttonEdit = new DependanceEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         buttonEdit.getStyleClass().add(LEFT);
