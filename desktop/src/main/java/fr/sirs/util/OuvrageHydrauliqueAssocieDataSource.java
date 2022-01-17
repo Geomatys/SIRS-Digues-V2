@@ -70,18 +70,23 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
     private static Logger LOGGER = Logger.getLogger(OuvrageHydrauliqueAssocieDataSource.class.getName());
 
     private static final NumberFormat DISTANCE_FORMAT = new DecimalFormat("0.00");
-    
 
-    public OuvrageHydrauliqueAssocieDataSource(Iterable<OuvrageHydrauliqueAssocie> iterable) {
+    private final boolean printLocationInsert;
+
+
+    public OuvrageHydrauliqueAssocieDataSource(Iterable<OuvrageHydrauliqueAssocie> iterable, final boolean printLocationInsert) {
         super(iterable);
+        this.printLocationInsert = printLocationInsert;
     }
 
-    public OuvrageHydrauliqueAssocieDataSource(final Iterable<OuvrageHydrauliqueAssocie> iterable, final Previews previewLabelRepository){
+    public OuvrageHydrauliqueAssocieDataSource(final Iterable<OuvrageHydrauliqueAssocie> iterable, final Previews previewLabelRepository, final boolean printLocationInsert){
         super(iterable, previewLabelRepository);
+        this.printLocationInsert = printLocationInsert;
     }
 
-    public OuvrageHydrauliqueAssocieDataSource(final Iterable<OuvrageHydrauliqueAssocie> iterable, final Previews previewLabelRepository, final SirsStringConverter stringConverter){
+    public OuvrageHydrauliqueAssocieDataSource(final Iterable<OuvrageHydrauliqueAssocie> iterable, final Previews previewLabelRepository, final SirsStringConverter stringConverter, final boolean printLocationInsert){
         super(iterable, previewLabelRepository, stringConverter);
+        this.printLocationInsert = printLocationInsert;
     }
 
     @Override
@@ -210,11 +215,15 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
             Collections.sort(desordreRows);
             return new ObjectDataSource<>(desordreRows, previewRepository, stringConverter);
         } else if (IMAGE_DATA_SOURCE.equals(name)) {
-            final Image img = CorePlugin.takePictureOfElement(currentObject, new Dimension(1750, 1080));
-            if (img != null) {
-                return img;
+            if (this.printLocationInsert) {
+                final Image img = CorePlugin.takePictureOfElement(currentObject, new Dimension(1750, 1080));
+                if (img != null) {
+                    return img;
+                } else {
+                    return noImage();
+                }
             } else {
-                return noImage();
+                return null;
             }
         } else if(SECURITE_ID_FIELD.equals(name)){
             if(currentObject != null && currentObject.getSecuriteId() != null){
@@ -224,5 +233,4 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
         }
         else return super.getFieldValue(jrf);
     }
-
 }

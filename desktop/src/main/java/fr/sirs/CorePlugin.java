@@ -1267,8 +1267,8 @@ public class CorePlugin extends Plugin {
      * @return BufferedImage image of the element
      */
     public static java.awt.Image takePictureOfElement(Element e, Dimension dim) {
-        final double BUFFER_DISTANCE = 50;
-        final double DEFAULT_BUFFER_DISTANCE = 0.01;
+        final double BUFFER_DISTANCE = 100;
+        final double DEFAULT_BUFFER_DISTANCE = 100;
 
         if (e == null) return null;
         try {
@@ -1322,7 +1322,7 @@ public class CorePlugin extends Plugin {
                 // Récupération de l'enveloppe impossible
                 return null;
             }
-            return cropImageFromMap(uiMap, SIRS.pseudoBuffer(tmpEnvelope, 50, 0.01), dim);
+            return cropImageFromMap(uiMap, SIRS.pseudoBuffer(tmpEnvelope, BUFFER_DISTANCE, DEFAULT_BUFFER_DISTANCE), dim);
         } catch (PortrayalException | DataStoreException ex) {
             SIRS.LOGGER.log(Level.WARNING, "Impossible de prendre une photo de l'élément: " + e.getId(), ex);
         }

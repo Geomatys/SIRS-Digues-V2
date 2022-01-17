@@ -59,6 +59,7 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
 
     @FXML private CheckBox uiOptionPhoto;
     @FXML private CheckBox uiOptionReseauxFermes;
+    @FXML private CheckBox uiOptionLocationInsert;
 
     private final TypeChoicePojoTable ouvrageTypesTable = new TypeChoicePojoTable(RefOuvrageHydrauliqueAssocie.class, "Types d'ouvrages associés");
 
@@ -141,7 +142,7 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
             }
 
             if (!toPrint.isEmpty() && !Thread.currentThread().isInterrupted()) {
-                Injector.getSession().getPrintManager().printOuvragesAssocies(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauxFermes.isSelected());
+                Injector.getSession().getPrintManager().printOuvragesAssocies(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauxFermes.isSelected(), uiOptionLocationInsert.isSelected());
             }
 
             return !toPrint.isEmpty();

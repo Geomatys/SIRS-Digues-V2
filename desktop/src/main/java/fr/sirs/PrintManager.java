@@ -257,7 +257,7 @@ public class PrintManager {
      * @param printReseauOuvrage
      * @param printVoirie
      */
-    public final void printDesordres(final List<Desordre> desordres, final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie) throws Exception {
+    public final void printDesordres(final List<Desordre> desordres, final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie, final boolean printLocationInsert) throws Exception {
 
         final List<String> avoidDesordreFields = new ArrayList<>();
         avoidDesordreFields.add(GEOMETRY_FIELD);
@@ -319,7 +319,7 @@ public class PrintManager {
                 reseauFields,
                 Injector.getSession().getPreviews(),
                 new SirsStringConverter(),
-                desordres, printPhoto, printReseauOuvrage, printVoirie);
+                desordres, printPhoto, printReseauOuvrage, printVoirie, printLocationInsert);
         SIRS.openFile(fileToPrint);
     }
 
@@ -330,7 +330,7 @@ public class PrintManager {
      * @param printPhoto
      * @param printReseauOuvrage
      */
-    public final void printReseaux(final List<ReseauHydrauliqueFerme> reseauxFermes, final boolean printPhoto, final boolean printReseauOuvrage) throws Exception {
+    public final void printReseaux(final List<ReseauHydrauliqueFerme> reseauxFermes, final boolean printPhoto, final boolean printReseauOuvrage, final boolean printLocationInsert) throws Exception {
 
         final List<String> avoidReseauFields = new ArrayList<>();
         avoidReseauFields.add(GEOMETRY_FIELD);
@@ -401,7 +401,7 @@ public class PrintManager {
                 desordreFields,
                 Injector.getSession().getPreviews(),
                 new SirsStringConverter(),
-                reseauxFermes, printPhoto, printReseauOuvrage);
+                reseauxFermes, printPhoto, printReseauOuvrage, printLocationInsert);
         SIRS.openFile(fileToPrint);
     }
 
@@ -412,7 +412,7 @@ public class PrintManager {
      * @param printPhoto
      * @param printReseauxFermes
      */
-    public final void printOuvragesAssocies(final List<OuvrageHydrauliqueAssocie> ouvrages, final boolean printPhoto, final boolean printReseauxFermes) throws Exception {
+    public final void printOuvragesAssocies(final List<OuvrageHydrauliqueAssocie> ouvrages, final boolean printPhoto, final boolean printReseauxFermes, final boolean printLocationInsert) throws Exception {
 
         final List<String> avoidReseauFields = new ArrayList<>();
         avoidReseauFields.add(GEOMETRY_FIELD);
@@ -484,7 +484,7 @@ public class PrintManager {
                 desordreFields,
                 Injector.getSession().getPreviews(),
                 new SirsStringConverter(),
-                ouvrages, printPhoto, printReseauxFermes);
+                ouvrages, printPhoto, printReseauxFermes, printLocationInsert);
         SIRS.openFile(fileToPrint);
     }
 }

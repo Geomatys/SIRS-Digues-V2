@@ -64,16 +64,21 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
 
     private static Logger LOGGER = Logger.getLogger(DesordreDataSource.class.getName());
 
-    public DesordreDataSource(Iterable<Desordre> iterable) {
+    private final boolean printLocationInsert;
+
+    public DesordreDataSource(Iterable<Desordre> iterable, final boolean printLocationInsert) {
         super(iterable);
+        this.printLocationInsert = printLocationInsert;
     }
 
-    public DesordreDataSource(final Iterable<Desordre> iterable, final Previews previewLabelRepository){
+    public DesordreDataSource(final Iterable<Desordre> iterable, final Previews previewLabelRepository, final boolean printLocationInsert){
         super(iterable, previewLabelRepository);
+        this.printLocationInsert = printLocationInsert;
     }
-    
-    public DesordreDataSource(final Iterable<Desordre> iterable, final Previews previewLabelRepository, final SirsStringConverter stringConverter){
+
+    public DesordreDataSource(final Iterable<Desordre> iterable, final Previews previewLabelRepository, final SirsStringConverter stringConverter, final boolean printLocationInsert){
         super(iterable, previewLabelRepository, stringConverter);
+        this.printLocationInsert = printLocationInsert;
     }
 
     @Override
@@ -152,11 +157,15 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
             voirieList.sort(SirsComparator.ELEMENT_COMPARATOR);
             return new ObjectDataSource<>(voirieList, previewRepository, stringConverter);
         } else if (IMAGE_DATA_SOURCE.equals(name)) {
-            final Image img = CorePlugin.takePictureOfElement(currentObject, new Dimension(1750, 1200));
-            if (img != null) {
-                return img;
+            if (this.printLocationInsert) {
+                final Image img = CorePlugin.takePictureOfElement(currentObject, new Dimension(1750, 1200));
+                if (img != null) {
+                    return img;
+                } else {
+                    return noImage();
+                }
             } else {
-                return noImage();
+                return null;
             }
         }
         else return super.getFieldValue(jrf);

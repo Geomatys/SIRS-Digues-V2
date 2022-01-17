@@ -205,6 +205,19 @@
                                 <AnchorPane layoutX="451.0" layoutY="10.0" minHeight="0.0" minWidth="0.0" prefHeight="264.0" prefWidth="561.0">
                                     <children>
                                         <FXPrestationPredicater fx:id="uiPrestationPredicater" AnchorPane.bottomAnchor="-194.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-92.0" AnchorPane.topAnchor="-11.0" />
+                                        <VBox spacing="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="460.0">
+                                            <children>
+                                                <Label text="%optionSubtitleLocationInsert" underline="true">
+                                                    <font>
+                                                        <Font name="System Bold Italic" size="13.0" />
+                                                    </font>
+                                                </Label>
+                                                <CheckBox fx:id="uiOptionLocationInsert" mnemonicParsing="false" text="%locationInsertOption"/>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="40.0" right="40.0" top="20.0" />
+                                            </padding>
+                                        </VBox>
                                     </children>
                                 </AnchorPane>
                             </children>

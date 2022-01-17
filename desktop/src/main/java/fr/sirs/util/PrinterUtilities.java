@@ -103,7 +103,8 @@ public class PrinterUtilities {
             final Previews previewLabelRepository,
             final SirsStringConverter stringConverter,
             final List<OuvrageHydrauliqueAssocie> ouvrages,
-            final boolean printPhoto, final boolean printReseauFerme) throws IOException, ParserConfigurationException, SAXException, TransformerException, JRException {
+            final boolean printPhoto, final boolean printReseauFerme, final boolean printLocationInsert
+    ) throws IOException, ParserConfigurationException, SAXException, TransformerException, JRException {
 
         // Creates the Jasper Reports specific template from the generic template.
         final File templateFile = File.createTempFile(ReseauHydrauliqueFerme.class.getName(), JRXML_EXTENSION);
@@ -128,7 +129,7 @@ public class PrinterUtilities {
 
             ouvrages.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
             if (!ouvrages.isEmpty()) CorePlugin.modifyLayerVisibilityForElement(ouvrages.get(0), true);
-            final JRDataSource source = new OuvrageHydrauliqueAssocieDataSource(ouvrages, previewLabelRepository, stringConverter);
+            final JRDataSource source = new OuvrageHydrauliqueAssocieDataSource(ouvrages, previewLabelRepository, stringConverter, printLocationInsert);
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
         }
 
@@ -154,7 +155,8 @@ public class PrinterUtilities {
             final Previews previewLabelRepository,
             final SirsStringConverter stringConverter,
             final List<ReseauHydrauliqueFerme> reseaux,
-            final boolean printPhoto, final boolean printReseauOuvrage) throws IOException, ParserConfigurationException, SAXException, TransformerException, JRException {
+            final boolean printPhoto, final boolean printReseauOuvrage, final boolean printLocationInsert
+    ) throws IOException, ParserConfigurationException, SAXException, TransformerException, JRException {
 
         // Creates the Jasper Reports specific template from the generic template.
         final File templateFile = File.createTempFile(ReseauHydrauliqueFerme.class.getName(), JRXML_EXTENSION);
@@ -180,7 +182,7 @@ public class PrinterUtilities {
 
             reseaux.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
             if (!reseaux.isEmpty()) CorePlugin.modifyLayerVisibilityForElement(reseaux.get(0), true);
-            final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter);
+            final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter, printLocationInsert);
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
         }
 
@@ -205,7 +207,11 @@ public class PrinterUtilities {
             final Previews previewLabelRepository,
             final SirsStringConverter stringConverter,
             final List<Desordre> desordres,
-            final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie)
+            final boolean printPhoto,
+            final boolean printReseauOuvrage,
+            final boolean printVoirie,
+            final boolean printLocationInsert
+    )
         throws ParserConfigurationException, SAXException, JRException, TransformerException, IOException {
 
         // Creates the Jasper Reports specific template from the generic template.
@@ -230,7 +236,7 @@ public class PrinterUtilities {
 
             desordres.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
             if (!desordres.isEmpty()) CorePlugin.modifyLayerVisibilityForElement(desordres.get(0), true);
-            final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter);
+            final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter, printLocationInsert);
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
         }
 

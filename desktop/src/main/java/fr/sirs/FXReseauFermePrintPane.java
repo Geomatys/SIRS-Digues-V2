@@ -57,6 +57,7 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
 
     @FXML private CheckBox uiOptionPhoto;
     @FXML private CheckBox uiOptionReseauOuvrage;
+    @FXML private CheckBox uiOptionLocationInsert;
 
     private final TypeChoicePojoTable conduiteTypesTable = new TypeChoicePojoTable(RefConduiteFermee.class, "Types de conduites fermées");
 
@@ -139,7 +140,7 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
             }
 
             if (!toPrint.isEmpty() && !Thread.currentThread().isInterrupted()) {
-                Injector.getSession().getPrintManager().printReseaux(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected());
+                Injector.getSession().getPrintManager().printReseaux(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionLocationInsert.isSelected());
             }
 
             return !toPrint.isEmpty();

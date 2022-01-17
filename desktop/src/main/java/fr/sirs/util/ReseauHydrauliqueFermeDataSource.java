@@ -62,6 +62,8 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
 
     private static Logger LOGGER = Logger.getLogger(ReseauHydrauliqueFermeDataSource.class.getName());
 
+    private final boolean printLocationInsert;
+
     /**
      * Groupe par désignation de désordre et classe par date décroissante à l'intérieur de chaque groupe.
      * Inutilisé (était utilisé pour ordonner les lignes du tableau des observations/désordres).
@@ -82,16 +84,19 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
         }
     };
 
-    public ReseauHydrauliqueFermeDataSource(Iterable<ReseauHydrauliqueFerme> iterable) {
+    public ReseauHydrauliqueFermeDataSource(Iterable<ReseauHydrauliqueFerme> iterable, final boolean printLocationInsert) {
         super(iterable);
+        this.printLocationInsert = printLocationInsert;
     }
 
-    public ReseauHydrauliqueFermeDataSource(final Iterable<ReseauHydrauliqueFerme> iterable, final Previews previewLabelRepository){
+    public ReseauHydrauliqueFermeDataSource(final Iterable<ReseauHydrauliqueFerme> iterable, final Previews previewLabelRepository, final boolean printLocationInsert){
         super(iterable, previewLabelRepository);
+        this.printLocationInsert = printLocationInsert;
     }
 
-    public ReseauHydrauliqueFermeDataSource(final Iterable<ReseauHydrauliqueFerme> iterable, final Previews previewLabelRepository, final SirsStringConverter stringConverter){
+    public ReseauHydrauliqueFermeDataSource(final Iterable<ReseauHydrauliqueFerme> iterable, final Previews previewLabelRepository, final SirsStringConverter stringConverter, final boolean printLocationInsert){
         super(iterable, previewLabelRepository, stringConverter);
+        this.printLocationInsert = printLocationInsert;
     }
 
     @Override
@@ -156,11 +161,15 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
             Collections.sort(desordreRows);
             return new ObjectDataSource<>(desordreRows, previewRepository, stringConverter);
         } else if (IMAGE_DATA_SOURCE.equals(name)) {
-            final Image img = CorePlugin.takePictureOfElement(currentObject, new Dimension(1750, 1080));
-            if (img != null) {
-                return img;
+            if (this.printLocationInsert) {
+                final Image img = CorePlugin.takePictureOfElement(currentObject, new Dimension(1750, 1080));
+                if (img != null) {
+                    return img;
+                } else {
+                    return noImage();
+                }
             } else {
-                return noImage();
+                return null;
             }
         } else if (SECURITE_ID_FIELD.equals(name)) {
             if(currentObject != null && currentObject.getSecuriteId() != null){
@@ -170,5 +179,4 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
         }
         else return super.getFieldValue(jrf);
     }
-
 }

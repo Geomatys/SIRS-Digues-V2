@@ -38,17 +38,17 @@ import org.xml.sax.SAXException;
  * @author Samuel Andrés (Geomatys)
  */
 public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSheetWithPhotoReport<Desordre> {
-    
+
     public static final String OBSERVATION_DATASET = "Observation Dataset";
     public static final String OBSERVATION_TABLE_DATA_SOURCE = "OBSERVATION_TABLE_DATA_SOURCE";
     public static final String PRESTATION_DATASET = "Prestation Dataset";
     public static final String PRESTATION_TABLE_DATA_SOURCE = "PRESTATION_TABLE_DATA_SOURCE";
-    
+
     public static final String RESEAU_OUVRAGE_DATASET = "ReseauOuvrage Dataset";
     public static final String RESEAU_OUVRAGE_TABLE_DATA_SOURCE = "RESEAU_OUVRAGE_TABLE_DATA_SOURCE";
     public static final String VOIRIE_DATASET = "Voirie Dataset";
     public static final String VOIRIE_TABLE_DATA_SOURCE = "VOIRIE_TABLE_DATA_SOURCE";
-    
+
     public static final String PHOTO_DATA_SOURCE = "PHOTO_DATA_SOURCE";
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
 
@@ -57,20 +57,20 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
     private final List<JRColumnParameter> observationFields;
     private final List<JRColumnParameter> prestationFields;
     private final List<JRColumnParameter> reseauFields;
-    
+
     private final boolean printPhoto;
     private final boolean printReseauOuvrage;
     private final boolean printVoirie;
-    
+
     private JRDomWriterDesordreSheet(final Class<Desordre> classToMap){
         super(classToMap);
-        
+
         observationFields = null;
         prestationFields = null;
         reseauFields = null;
         printPhoto = printReseauOuvrage = printVoirie = true;
     }
-    
+
     public JRDomWriterDesordreSheet(final InputStream stream,
             final List<String> avoidFields,
             final List<JRColumnParameter> observationFields,
@@ -94,13 +94,12 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
      */
     @Override
     protected void writeObject() {
-        
+
         writeSubDataset(Observation.class, observationFields, true,0);
         writeSubDataset(Prestation.class, prestationFields, true, 1);
         writeSubDataset(ObjetReseau.class, reseauFields, true, 2);
         writeSubDataset(ObjetReseau.class, reseauFields, true, 3);
-        
-        
+
         // Sets the initial fields used by the template.------------------------
         writeFields();
         writeField(String.class, SirsCore.DIGUE_ID_FIELD, "Champ ajouté de force pour prendre en compte l'intitulé de la digue.");// Ajout d'un champ pour l'intitulé de la digue.
@@ -113,11 +112,11 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
 
         // Modifies the title block.--------------------------------------------
         writeTitle();
-        
+
         // Writes the headers.--------------------------------------------------
         writePageHeader();
         writeColumnHeader();
-        
+
         // Builds the body of the Jasper Reports template.----------------------
         writeDetail();
 
@@ -125,7 +124,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         writeColumnFooter();
         writePageFooter();
     }
-    
+
     /**
      * <p>This method writes the content of the detail element.</p>
      * @param classToMap

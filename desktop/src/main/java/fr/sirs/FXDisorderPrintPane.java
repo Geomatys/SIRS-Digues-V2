@@ -84,6 +84,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
     @FXML private CheckBox uiOptionPhoto;
     @FXML private CheckBox uiOptionReseauOuvrage;
     @FXML private CheckBox uiOptionVoirie;
+    @FXML private CheckBox uiOptionLocationInsert;
     @FXML private Button uiPrint;
     @FXML private Button uiCancel;
     @FXML private Label uiCountLabel;
@@ -168,7 +169,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                 }
 
                 if (!toPrint.isEmpty() && !Thread.currentThread().isInterrupted())
-                    Injector.getSession().getPrintManager().printDesordres(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected());
+                    Injector.getSession().getPrintManager().printDesordres(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected(), uiOptionLocationInsert.isSelected());
 
                 return !toPrint.isEmpty();
 
