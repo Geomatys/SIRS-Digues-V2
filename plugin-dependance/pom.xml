@@ -8,8 +8,8 @@
     <version>2.3</version>
     <packaging>jar</packaging>
 
-    <name>Plugin dépendance</name>
-    <description>Gestion de dépendances</description>
+    <name>Plugin dépendance et AH</name>
+    <description>Gestion de dépendances et des aménagements hydrauliques</description>
     <!--url>http://www.myorganization.org</url-->
 
     <parent>
