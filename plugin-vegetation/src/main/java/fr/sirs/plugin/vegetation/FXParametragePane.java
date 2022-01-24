@@ -149,8 +149,9 @@ public class FXParametragePane extends SplitPane {
             newPlan.setAnneeFin(LocalDate.now().getYear()+10);
 
             planRepo.add(newPlan);
-            refreshPlanList();
             uiPlanList.getSelectionModel().select(newPlan);
+            //refreshPlanList();
+            uiPlanList.refresh();
 
             final Growl growlInfo = new Growl(Growl.Type.INFO, "Le plan a été créé.");
             growlInfo.showAndFade();
