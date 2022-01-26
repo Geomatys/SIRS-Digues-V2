@@ -209,7 +209,7 @@ def engine(formTemplatePilote, resourceSet, path_to_ecore, path_to_properties, f
         # Retrieve the corresponding classifier from the graph
         classifier: Ecore.EClassifier = graphMMRoot.getEClassifier(clazz)
         if classifier is None:
-            print(f"class {clazz} not found in {path_to_ecore}")
+            print(f"class {clazz} has a property file, but model not found in {path_to_ecore}")
             continue
         # Complete the formTemplatePilote object
         formTemplatePilote[clazz] = {}
@@ -248,10 +248,12 @@ if __name__ == "__main__":
             shutil.copy("user_preference_correspondence.json", QGIS_PLUGIN_PROJECT_PATH)
     except TypeError or FileNotFoundError:
         print("Impossible de copier les fichiers générés vers le plugin QGIS. Vérifiez que la variable QGIS_PLUGIN_PROJECT_PATH est un chemin valide.")
-    print("All positionable classes of the plugin Qgis")
+    print("\nAll positionable classes of the plugin Qgis")
     all_positionable.sort()
     for p in all_positionable:
-        print(p)
-    print("All containment classes from positionable")
+        print("\t" + p)
+    print("\nAll containment classes from positionable")
     print(containment_classes_from_positionable)
+    print()
+    print("Exécuté avec succés!")
 
