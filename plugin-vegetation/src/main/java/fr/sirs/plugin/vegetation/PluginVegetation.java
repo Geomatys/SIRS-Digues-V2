@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -440,43 +441,12 @@ public class PluginVegetation extends Plugin {
     ////////////////////////////////////////////////////////////////////////////
 
 
-    /**
-     * Méthode d'initialisation des comboboxes de sous-types de traitements
-     * de manière à préserver la cohérence des choix qu'elles proposent en
-     * fonction d'un choix de traitement.
-     *
-     * @param typeTraitementId
-     * @param sousTypeTraitementId
-     * @param sousTraitementPreviews
-     * @param sousTraitements
-     * @param comboBox
-     */
-    public static void initComboSousTraitement(final String typeTraitementId, final String sousTypeTraitementId,
-            final List<Preview> sousTraitementPreviews,
-            final Map<String, RefSousTraitementVegetation> sousTraitements, final ComboBox comboBox){
-
-
-        // 1- si le type est null, on ne peut charger aucune liste de sous-types
-        if(typeTraitementId == null){
-            SIRS.initCombo(comboBox, FXCollections.emptyObservableList(),null);
-        }
-        // 2- sinon on va chercher ses éventuels sous-types
-        else {
-            Preview selectedPreview = null;
-            final List<Preview> sousTypes = new ArrayList<>();
-            for(final Preview sousType : sousTraitementPreviews){
-                final String sousTypeId = sousType.getElementId();
-                if(sousTypeId!=null){
-                    final RefSousTraitementVegetation sousTraitement = sousTraitements.get(sousTypeId);
-                    if(typeTraitementId.equals(sousTraitement.getTypeTraitementId())){
-                        sousTypes.add(sousType);
-                    }
-
-                    if(sousTypeId.equals(sousTypeTraitementId)) selectedPreview = sousType;
-                }
-            }
-            SIRS.initCombo(comboBox, FXCollections.observableList(sousTypes), selectedPreview);
-        }
+    public static List<RefSousTraitementVegetation> sousTypeTraitementFromTypeTraitementId(final String typeTraitementId) {
+        if (typeTraitementId == null) return new ArrayList<>();
+        final AbstractSIRSRepository<RefSousTraitementVegetation> repoSousTraitements = Injector.getSession().getRepositoryForClass(RefSousTraitementVegetation.class);
+        final List<RefSousTraitementVegetation> allSousTraitement = repoSousTraitements.getAll();
+        return allSousTraitement.stream().filter(s -> typeTraitementId.equals(s.getTypeTraitementId()))
+                .collect(Collectors.toList());
     }
 
     /**

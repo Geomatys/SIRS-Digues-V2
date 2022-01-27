@@ -6,7 +6,7 @@ import fr.sirs.Injector;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
 import fr.sirs.plugin.vegetation.PluginVegetation;
-import java.util.HashMap;
+import static fr.sirs.plugin.vegetation.PluginVegetation.sousTypeTraitementFromTypeTraitementId;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -94,14 +94,11 @@ public class FXParamFrequenceTraitementVegetationPane extends AbstractFXElementP
 
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                if(newValue instanceof Preview){
-                    final AbstractSIRSRepository<RefSousTraitementVegetation> sousTypeRepo = Injector.getSession().getRepositoryForClass(RefSousTraitementVegetation.class);
-                    final String traitementId = ((Preview) newValue).getElementId();
-                    if(traitementId!=null){
-                        final List<RefSousTraitementVegetation> sousTypesDispos = sousTypeRepo.getAll();
-                        sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTypeTraitementId()));
-                        SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.observableList(sousTypesDispos), null);
-                    }
+                if(newValue instanceof RefTraitementVegetation){
+                    final List<RefSousTraitementVegetation> sousTraitements = sousTypeTraitementFromTypeTraitementId(((RefTraitementVegetation) newValue).getId());
+                    SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.observableList(sousTraitements), null);
+                } else {
+                    SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.emptyObservableList(), null);
                 }
             }
         });
@@ -198,24 +195,16 @@ public class FXParamFrequenceTraitementVegetationPane extends AbstractFXElementP
         SIRS.initCombo(ui_typeVegetationId, FXCollections.observableList(previewRepository.getByClass(TypeZoneVegetation.class)), newElement.getTypeVegetationId() == null ? null : previewRepository.get(newElement.getTypeVegetationId()));
         final AbstractSIRSRepository<RefTraitementVegetation> typeTraitementIdRepo = session.getRepositoryForClass(RefTraitementVegetation.class);
         SIRS.initCombo(ui_typeTraitementId, SIRS.observableList(typeTraitementIdRepo.getAll()), newElement.getTypeTraitementId() == null? null : typeTraitementIdRepo.get(newElement.getTypeTraitementId()));
-        final AbstractSIRSRepository<RefSousTraitementVegetation> sousTypeTraitementIdRepo = session.getRepositoryForClass(RefSousTraitementVegetation.class);
-        SIRS.initCombo(ui_sousTypeTraitementId, SIRS.observableList(sousTypeTraitementIdRepo.getAll()), newElement.getSousTypeTraitementId() == null? null : sousTypeTraitementIdRepo.get(newElement.getSousTypeTraitementId()));
         final AbstractSIRSRepository<RefFrequenceTraitementVegetation> frequenceIdRepo = session.getRepositoryForClass(RefFrequenceTraitementVegetation.class);
         SIRS.initCombo(ui_frequenceId, SIRS.observableList(frequenceIdRepo.getAll()), newElement.getFrequenceId() == null? null : frequenceIdRepo.get(newElement.getFrequenceId()));
         }
 
         SIRS.initCombo(ui_type, PluginVegetation.zoneVegetationClasses(), newElement.getType() == null ? null : newElement.getType());
 
-        // Initialisation des sous-types
         final AbstractSIRSRepository<RefSousTraitementVegetation> repoSousTraitements = Injector.getSession().getRepositoryForClass(RefSousTraitementVegetation.class);
-        final Map<String, RefSousTraitementVegetation> sousTraitements = new HashMap<>();
-
-        for(final RefSousTraitementVegetation sousTraitement : repoSousTraitements.getAll()){
-            sousTraitements.put(sousTraitement.getId(), sousTraitement);
-        }
-        final List<Preview> sousTraitementPreviews = previewRepository.getByClass(RefSousTraitementVegetation.class);
-
-        PluginVegetation.initComboSousTraitement(newElement.getTypeTraitementId(), newElement.getSousTypeTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementId);
+        final List<RefSousTraitementVegetation> sousTraitements = sousTypeTraitementFromTypeTraitementId(newElement.getTypeTraitementId());
+        final RefSousTraitementVegetation currentSousTraitement = newElement.getSousTypeTraitementId() == null ? null : repoSousTraitements.get(newElement.getSousTypeTraitementId());
+        SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.observableList(sousTraitements), currentSousTraitement);
     }
     @Override
     public void preSave() {
