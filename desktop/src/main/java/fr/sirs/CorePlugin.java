@@ -193,6 +193,7 @@ import org.opengis.style.GraphicalSymbol;
 import org.opengis.style.LineSymbolizer;
 import org.opengis.style.Mark;
 import org.opengis.style.PointSymbolizer;
+import org.opengis.style.PolygonSymbolizer;
 import org.opengis.style.Stroke;
 import org.opengis.style.TextSymbolizer;
 import org.opengis.util.FactoryException;
@@ -904,7 +905,6 @@ public class CorePlugin extends Plugin {
 
     private static MutableStyle createBorneSelectionStyle(){
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(10);
-
         final List<GraphicalSymbol> symbols = new ArrayList<>();
         final Stroke stroke = SF.stroke(Color.BLACK, 1);
         final Fill fill = SF.fill(Color.GREEN);
@@ -912,18 +912,14 @@ public class CorePlugin extends Plugin {
         symbols.add(mark);
         final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
                 size, LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
-
         final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",(String)null,DEFAULT_DESCRIPTION,Units.POINT,graphic);
-
         final TextSymbolizer ts = SF.textSymbolizer(
                 SF.fill(Color.BLACK), SF.font(13),
                 SF.halo(Color.GREEN, 2),
                 FF.property("libelle"),
                 SF.pointPlacement(SF.anchorPoint(0, 0.25), SF.displacement(5, 0), FF.literal(0)), null);
-
         final MutableRule ruleClose = SF.rule(pointSymbolizer, ts);
         ruleClose.setMaxScaleDenominator(50000);
-
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
         fts.rules().add(ruleClose);
         final MutableStyle style = SF.style();
@@ -936,48 +932,26 @@ public class CorePlugin extends Plugin {
     }
 
     public static MutableStyle createDefaultSelectionStyle(final boolean withRealPosition){
-        // Stroke to use for lines and point perimeter
-        final Stroke stroke = SF.stroke(SF.literal(Color.GREEN),LITERAL_ONE_FLOAT,FF.literal(13),
-                STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
-        final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
-                (String)null,DEFAULT_DESCRIPTION,Units.POINT,stroke,LITERAL_ONE_FLOAT);
+        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
+        final MutableStyle style = SF.style();
+        final MutableRule longRule = createSelectionLongRule();
+        final MutableRule smallObjectRule = createSelectionSmallObjectRule();
 
-        // Definition of point symbolizer
-        final Expression size = GO2Utilities.FILTER_FACTORY.literal(24);
-        final List<GraphicalSymbol> symbols = new ArrayList<>();
-        final Fill fill = SF.fill(new Color(0, 0, 0, 0));
-        final Mark mark = SF.mark(StyleConstants.MARK_CIRCLE, fill, stroke);
-        symbols.add(mark);
-        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
-                size, LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
-
-        final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",(String)null,DEFAULT_DESCRIPTION,Units.POINT,graphic);
-
-        final MutableRule ruleLongObjects = SF.rule(line1);
-        ruleLongObjects.setFilter(
+        if(withRealPosition) addRealPositionStyles(fts,  Color.GREEN);
+        longRule.setFilter(
                 FF.greater(
                         FF.function("length", FF.property("geometry")),
                         FF.literal(2.0)
                 )
         );
-
-        final MutableRule ruleSmallObjects = SF.rule(pointSymbolizer);
-        ruleSmallObjects.setFilter(
-                FF.less(
+        smallObjectRule.setFilter(
+                FF.lessOrEqual(
                         FF.function("length", FF.property("geometry")),
                         FF.literal(2.0)
                 )
         );
-
-        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
-        if(withRealPosition) {
-
-            addRealPositionStyles(fts,  Color.GREEN);
-        }
-        fts.rules().add(ruleLongObjects);
-        fts.rules().add(ruleSmallObjects);
-
-        final MutableStyle style = SF.style();
+        fts.rules().add(longRule);
+        fts.rules().add(smallObjectRule);
         style.featureTypeStyles().add(fts);
         return style;
     }
@@ -1004,58 +978,104 @@ public class CorePlugin extends Plugin {
     }
 
     public static MutableStyle createDefaultStyle(final Color color, final String geometryName, final boolean withRealPosition) {
+        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
+        final MutableStyle style = SF.style();
+        final MutableRule longRule = createDefaultLongRule(color, geometryName);
+        final MutableRule smallObjectRule = createDefaultSmallObjectRule(color, geometryName);
 
-        final Stroke line1Stroke = SF.stroke(SF.literal(color),LITERAL_ONE_FLOAT,GO2Utilities.FILTER_FACTORY.literal(8),
-                STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, null,LITERAL_ZERO_FLOAT);
-        final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
-                geometryName,DEFAULT_DESCRIPTION,Units.POINT,line1Stroke,LITERAL_ZERO_FLOAT);
-
-        final Stroke line2Stroke = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,GO2Utilities.FILTER_FACTORY.literal(1),
-                STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, null,LITERAL_ZERO_FLOAT);
-        final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
-                geometryName,DEFAULT_DESCRIPTION,Units.POINT,line2Stroke,LITERAL_ZERO_FLOAT);
-
-        //the visual element
-        final Expression size = GO2Utilities.FILTER_FACTORY.literal(16);
-
-        final List<GraphicalSymbol> symbols = new ArrayList<>();
-        final Stroke stroke = null;
-        final Fill fill = SF.fill(color);
-        final Mark mark = SF.mark(StyleConstants.MARK_TRIANGLE, fill, stroke);
-        symbols.add(mark);
-        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
-                size, LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
-
-        final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",geometryName,DEFAULT_DESCRIPTION,Units.POINT,graphic);
-
-        final MutableRule ruleLongObjects = SF.rule(line1,line2);
-        ruleLongObjects.setFilter(
+        // test et préparation pour SYM-1776
+        if(withRealPosition) addRealPositionStyles(fts, color);
+        longRule.setFilter(
                 FF.greater(
                         FF.function("length", FF.property("geometry")),
                         FF.literal(SirsCore.LINE_MIN_LENGTH)
                 )
         );
-
-        final MutableRule ruleSmallObjects = SF.rule(pointSymbolizer);
-        ruleSmallObjects.setFilter(
+        smallObjectRule.setFilter(
                 FF.lessOrEqual(
                         FF.function("length", FF.property("geometry")),
                         FF.literal(SirsCore.LINE_MIN_LENGTH)
                 )
         );
-
-        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
-//        // test et préparation pour SYM-1776
-        if(withRealPosition) {
-            addRealPositionStyles(fts, color);
-        }
-
-        fts.rules().add(ruleLongObjects);
-        fts.rules().add(ruleSmallObjects);
-
-        final MutableStyle style = SF.style();
+        fts.rules().add(longRule);
+        fts.rules().add(smallObjectRule);
         style.featureTypeStyles().add(fts);
         return style;
+    }
+
+    public static MutableRule createDefaultSmallObjectRule(final Color color, final String geometryName) {
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(16);
+        final List<GraphicalSymbol> symbols = new ArrayList<>();
+        final Fill fill = SF.fill(color);
+        final Mark mark = SF.mark(StyleConstants.MARK_TRIANGLE, fill, null);
+        symbols.add(mark);
+        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
+                size, LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
+        final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol", geometryName, DEFAULT_DESCRIPTION,Units.POINT,graphic);
+        final MutableRule ruleSmallObjects = SF.rule(pointSymbolizer);
+
+        return ruleSmallObjects;
+    }
+
+    public static MutableRule createSelectionSmallObjectRule() {
+        final Stroke stroke = SF.stroke(SF.literal(Color.GREEN), LITERAL_ONE_FLOAT, FF.literal(13),
+                STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null, LITERAL_ZERO_FLOAT);
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(24);
+        final List<GraphicalSymbol> symbols = new ArrayList<>();
+        final Fill fill = SF.fill(new Color(0, 0, 0, 0));
+        final Mark mark = SF.mark(StyleConstants.MARK_CIRCLE, fill, stroke);
+        symbols.add(mark);
+        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
+                size, LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
+        final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",(String)null,DEFAULT_DESCRIPTION,Units.POINT,graphic);
+        final MutableRule ruleSmallObject = SF.rule(pointSymbolizer);
+
+        return ruleSmallObject;
+    }
+
+    public static MutableRule createDefaultLongRule(final Color color, final String geometryName) {
+        final Stroke line1Stroke = SF.stroke(SF.literal(color), LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(8),
+                STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, null, LITERAL_ZERO_FLOAT);
+        final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
+                geometryName, DEFAULT_DESCRIPTION, Units.POINT, line1Stroke, LITERAL_ZERO_FLOAT);
+
+        final Stroke line2Stroke = SF.stroke(SF.literal(Color.BLACK), LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(1),
+                STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, null, LITERAL_ZERO_FLOAT);
+        final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
+                geometryName, DEFAULT_DESCRIPTION, Units.POINT, line2Stroke, LITERAL_ZERO_FLOAT);
+
+        final MutableRule ruleLongObjects = SF.rule(line1, line2);
+
+        return ruleLongObjects;
+    }
+
+    public static MutableRule createSelectionLongRule() {
+        final Stroke stroke = SF.stroke(SF.literal(Color.GREEN), LITERAL_ONE_FLOAT, FF.literal(13),
+                STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null, LITERAL_ZERO_FLOAT);
+        final LineSymbolizer line = SF.lineSymbolizer("symbol",
+                (String) null, DEFAULT_DESCRIPTION, Units.POINT, stroke, LITERAL_ONE_FLOAT);
+        final MutableRule ruleLongObject = SF.rule(line);
+
+        return ruleLongObject;
+    }
+
+    public static MutableRule createDefaultPlanRule(final Color color, final String geometryName) {
+        final Stroke stroke = SF.stroke(Color.BLACK, 1);
+        final Fill fill = SF.fill(color);
+        final PolygonSymbolizer polygonSymbolizer = SF.polygonSymbolizer(stroke, fill, geometryName);
+        final MutableRule rulePlanObjects = SF.rule(polygonSymbolizer);
+
+        return rulePlanObjects;
+    }
+
+    public static MutableRule createSelectionPlanRule() {
+        final Stroke stroke = SF.stroke(SF.literal(Color.GREEN), LITERAL_ONE_FLOAT, FF.literal(13),
+                STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null, LITERAL_ZERO_FLOAT);
+        final Fill fill = SF.fill(Color.GREEN);
+        final PolygonSymbolizer polygonSymbolizer = SF.polygonSymbolizer(stroke, fill, null);
+        final MutableRule rulePlanObjects = SF.rule(polygonSymbolizer);
+
+        return rulePlanObjects;
     }
 
     /**
@@ -1069,7 +1089,6 @@ public class CorePlugin extends Plugin {
      */
     private static void addRealPositionStyles(final MutableFeatureTypeStyle fts, final Color color) {
         try {
-
             final MutableRule shortRule = createExactShortRule(SirsCore.POSITION_DEBUT_FIELD, color, StyleConstants.MARK_TRIANGLE);
             final MutableRule longRule  = createExactLongRule(SirsCore.POSITION_DEBUT_FIELD, SirsCore.POSITION_FIN_FIELD, color, StyleConstants.MARK_TRIANGLE);
 
@@ -1086,23 +1105,20 @@ public class CorePlugin extends Plugin {
                             FF.literal(SirsCore.LINE_MIN_LENGTH)
                     )
             );
-
             fts.rules().add(shortRule);
             fts.rules().add(longRule);
-
         } catch (Exception e) {
             SirsCore.LOGGER.log(Level.WARNING, NAME, e);
         }
     }
 
-    private static PointSymbolizer createExactPointSymbolizer(final String pointName, final String geometryProperty, final Color color, final Expression wellKnownName){
+    private static PointSymbolizer createExactPointSymbolizer(final String pointName, final String geometryProperty, final Color color, final Expression wellKnownName) {
         return SF.pointSymbolizer(pointName, geometryProperty, DEFAULT_DESCRIPTION, Units.POINT,
                         SF.graphic(Arrays.asList(SF.mark(wellKnownName, SF.fill(Color.WHITE), SF.stroke(color, 2))),
                                 LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(20), LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT));
     }
 
-    public static MutableRule createExactLongRule(final String geometryStartProperty, final String geometryEndProperty, final Color color, final Expression wellKnownName){
-
+    public static MutableRule createExactLongRule(final String geometryStartProperty, final String geometryEndProperty, final Color color, final Expression wellKnownName) {
         final Stroke realLineStroke = SF.stroke(SF.literal(color), LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(5),
                 STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, new float[]{15.f, 15.f}, LITERAL_ZERO_FLOAT);
 
@@ -1121,8 +1137,7 @@ public class CorePlugin extends Plugin {
         );
     }
 
-    public static MutableRule createExactShortRule(final String geometryStartProperty, final Color color, final Expression wellKnownName){
-
+    public static MutableRule createExactShortRule(final String geometryStartProperty, final Color color, final Expression wellKnownName) {
         return SF.rule(
                 createExactPointSymbolizer("start", geometryStartProperty, color, wellKnownName),
                 SF.textSymbolizer(SF.fill(color), DEFAULT_FONT, SF.halo(Color.WHITE, 1), FF.property("designation"),
