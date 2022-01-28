@@ -62,9 +62,9 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
                 if(newValue instanceof RefTraitementVegetation){
                     final List<RefSousTraitementVegetation> sousTraitements = sousTypeTraitementFromTypeTraitementId(((RefTraitementVegetation) newValue).getId());
-                    SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.observableList(sousTraitements), null);
+                    SIRS.initCombo(ui_sousTypeTraitementPonctuelId, FXCollections.observableList(sousTraitements), null);
                 } else {
-                    SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.emptyObservableList(), null);
+                    SIRS.initCombo(ui_sousTypeTraitementPonctuelId, FXCollections.emptyObservableList(), null);
                 }
             }
         });
