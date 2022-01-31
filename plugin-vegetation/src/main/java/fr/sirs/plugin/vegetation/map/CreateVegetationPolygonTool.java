@@ -77,6 +77,7 @@ import org.opengis.util.FactoryException;
 /**
  *
  * @author Johann Sorel (Geomatys)
+ * @author Maxime Gavens (Geomatys)
  * @param <T>
  */
 public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> extends AbstractEditionTool{
@@ -104,9 +105,8 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     //geometry en cours
     private EditionHelper helper;
     private final FXGeometryLayer geomLayer = new FXGeometryLayer();
-    private Polygon geometry = null;
+    private final EditionHelper.EditionGeometry editGeometry = new EditionHelper.EditionGeometry();
     private final List<Coordinate> coords = new ArrayList<>();
-    private boolean justCreated = false;
     private final BooleanProperty ended = new SimpleBooleanProperty(false);
 
     /** List of layers deactivated on tool install. They will be activated back at uninstallation. */
@@ -164,31 +164,28 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         wizard.setCenter(vbox);
     }
 
-    protected T newVegetation(){
+    protected T newVegetation() {
         final T candidate = Injector.getSession().getElementCreator().createElement(vegetationClass);
         candidate.setTraitement(Injector.getSession().getElementCreator().createElement(TraitementZoneVegetation.class));
         return candidate;
     }
 
-    private void reset(){
+    private void reset() {
         vegetation = newVegetation();
         parcelle = null;
         lblParcelle.setText("Sélectionner une parcelle sur la carte");
         lblGeom.setText("");
         if(parcelleLayer!=null) parcelleLayer.setSelectionFilter(null);
 
-        geometry = null;
+        editGeometry.reset();
         coords.clear();
-        justCreated = false;
         ended.set(false);
         geomLayer.getGeometries().clear();
     }
 
-    private void startGeometry(){
-
-        geometry = null;
+    private void startGeometry() {
+        editGeometry.reset();
         coords.clear();
-        justCreated = false;
         ended.set(false);
         geomLayer.getGeometries().clear();
 
@@ -198,13 +195,12 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         parcelleLayer.setSelectionFilter(GO2Utilities.FILTER_FACTORY.id(
                 Collections.singleton(new DefaultFeatureId(parcelle.getDocumentId()))));
 
-        final Geometry constraint = parcelle.getGeometry().buffer(1000000,10,BufferParameters.CAP_FLAT);
+        final Geometry constraint = parcelle.getGeometry().buffer(1000000, 10, BufferParameters.CAP_FLAT);
         try {
             JTS.setCRS(constraint, JTS.findCoordinateReferenceSystem(parcelle.getGeometry()));
         } catch (FactoryException ex) {
             Loggers.JAVAFX.log(Level.WARNING, ex.getMessage(), ex);
         }
-
         helper.setConstraint(constraint);
     }
 
@@ -230,8 +226,8 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         
         //on rend les couches troncon et borne selectionnables
         final MapContext context = component.getContainer().getContext();
-        for(MapLayer layer : context.layers()){
-            if(layer.getName().equalsIgnoreCase(PluginVegetation.PARCELLE_LAYER_NAME)){
+        for (MapLayer layer : context.layers()) {
+            if (layer.getName().equalsIgnoreCase(PluginVegetation.PARCELLE_LAYER_NAME)) {
                 parcelleLayer = (FeatureMapLayer) layer;
             } 
             else if (layer.isSelectable()) {
@@ -269,83 +265,79 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            if(ended.get()) return;
+            if (ended.get()) return;
 
             mousebutton = e.getButton();
-            if(mousebutton!=MouseButton.PRIMARY){
-                super.mouseClicked(e);
-                return;
-            }
+            if (MouseButton.PRIMARY.equals(mousebutton)) {
+                if (parcelle == null) {
+                    final Rectangle2D clickArea = new Rectangle2D.Double(e.getX()-2, e.getY()-2, 4, 4);
 
-            if(parcelle==null){
-                final Rectangle2D clickArea = new Rectangle2D.Double(e.getX()-2, e.getY()-2, 4, 4);
-
-                parcelleLayer.setSelectable(true);
-                //recherche une parcelle sous la souris
-                map.getCanvas().getGraphicsIn(clickArea, new AbstractGraphicVisitor() {
-                    @Override
-                    public void visit(ProjectedFeature graphic, RenderingContext2D context, SearchAreaJ2D area) {
-                        final Object bean = graphic.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
-                        if(bean instanceof ParcelleVegetation){
-                            //on recupere l'object complet
-                            parcelle = (ParcelleVegetation) bean;
-                            //on recupere l'object complet
-                            parcelle = parcelleRepo.get(parcelle.getDocumentId());
-                            startGeometry();
+                    parcelleLayer.setSelectable(true);
+                    //recherche une parcelle sous la souris
+                    map.getCanvas().getGraphicsIn(clickArea, new AbstractGraphicVisitor() {
+                        @Override
+                        public void visit(ProjectedFeature graphic, RenderingContext2D context, SearchAreaJ2D area) {
+                            final Object bean = graphic.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
+                            if(bean instanceof ParcelleVegetation){
+                                //on recupere l'object complet
+                                parcelle = (ParcelleVegetation) bean;
+                                //on recupere l'object complet
+                                parcelle = parcelleRepo.get(parcelle.getDocumentId());
+                                startGeometry();
+                            }
                         }
-                    }
-                    @Override
-                    public boolean isStopRequested() {
-                        return parcelle!=null;
-                    }
-                    @Override
-                    public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
-                }, VisitFilter.INTERSECTS);
-            }else if(parcelle!=null){
-
-                if(e.getClickCount()>1){
-                    //on sauvegarde
-                    if(geometry.isEmpty() || !geometry.isValid()){
-                        //il faut un polygon valid
-                        return;
-                    }
-
-                    vegetation.setExplicitGeometry(geometry);
-                    vegetation.setGeometry(geometry);
-                    ended.set(true);
-                }else{
-
-                    final double x = getMouseX(e);
-                    final double y = getMouseY(e);
-                    mousebutton = e.getButton();
-
-                    if(mousebutton == MouseButton.PRIMARY){
-
-                        if(justCreated){
-                            justCreated = false;
-                            //we must modify the second point since two point where added at the start
-                            coords.remove(2);
-                            coords.remove(1);
-                            coords.add(helper.toCoord(x,y));
-                            coords.add(helper.toCoord(x,y));
-
-                        }else if(coords.isEmpty()){
-                            justCreated = true;
-                            //this is the first point of the geometry we create
-                            //add 3 points that will be used when moving the mouse around
-                            coords.add(helper.toCoord(x,y));
-                            coords.add(helper.toCoord(x,y));
-                            coords.add(helper.toCoord(x,y));
-                        }else{
-                            justCreated = false;
-                            coords.add(helper.toCoord(x,y));
+                        @Override
+                        public boolean isStopRequested() {
+                            return parcelle!=null;
+                        }
+                        @Override
+                        public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
+                    }, VisitFilter.INTERSECTS);
+                } else if (parcelle != null) {
+                    if (e.getClickCount() > 1) {
+                        //on sauvegarde
+                        if (editGeometry.geometry.get().isEmpty() || !editGeometry.geometry.get().isValid() || !(editGeometry.geometry.get() instanceof Polygon)) {
+                            //il faut un polygon valid
+                            return;
                         }
 
-                        geometry = EditionHelper.createPolygon(coords);
-                        JTS.setCRS(geometry, map.getCanvas().getObjectiveCRS2D());
-                        geomLayer.getGeometries().setAll(geometry);
+                        vegetation.setExplicitGeometry(editGeometry.geometry.get());
+                        vegetation.setGeometry(editGeometry.geometry.get());
+                        ended.set(true);
+                    } else {
+                        final double x = getMouseX(e);
+                        final double y = getMouseY(e);
+
+                        if (coords.isEmpty()) {
+                            coords.add(helper.toCoord(x,y));
+                            coords.add(helper.toCoord(x,y));
+                        } else {
+                            coords.add(helper.toCoord(x,y));
+                        }
                     }
                 }
+            } else if (MouseButton.SECONDARY.equals(mousebutton)) {
+                if (parcelle != null) {
+                    if (coords.size() == 2) {
+                        coords.remove(coords.size() - 1);
+                        coords.remove(coords.size() - 1);
+                    } else if (coords.size() >= 3) {
+                        coords.remove(coords.size() - 2);
+                    }
+                    refreshGeometryFromCoords();
+//                    final double x = getMouseX(e);
+//                    final double y = getMouseY(e);
+//
+//                    helper.grabGeometryNode(x, y, editGeometry);
+//                    if (editGeometry.selectedNode[0] >= 0) {
+//                        if (coords.size() > editGeometry.selectedNode[0]) {
+//                            coords.remove(editGeometry.selectedNode[0]);
+//                        }
+//                    }
+                }
+            } else {
+                super.mouseClicked(e);
+                return;
             }
         }
 
@@ -354,27 +346,36 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
             if(ended.get()) return;
             final MouseButton button = e.getButton();
             if(button!=MouseButton.PRIMARY) super.mouseMoved(e);
+            final double x = getMouseX(e);
+            final double y = getMouseY(e);
 
-            if(coords.size() > 2){
-                final double x = getMouseX(e);
-                final double y = getMouseY(e);
-                if(justCreated){
-                    coords.remove(coords.size()-1);
-                    coords.remove(coords.size()-1);
-                    coords.add(helper.toCoord(x,y));
-                    coords.add(helper.toCoord(x,y));
-                }else{
-                    coords.remove(coords.size()-1);
-                    coords.add(helper.toCoord(x,y));
-                }
-                geometry = EditionHelper.createPolygon(coords);
-                JTS.setCRS(geometry, map.getCanvas().getObjectiveCRS2D());
-                geomLayer.getGeometries().setAll(geometry);
-                return;
+            if (coords.size() >= 2) {
+                coords.remove(coords.size() - 1);
+                coords.add(helper.toCoord(x, y));
+            } else {
+                super.mouseMoved(e);
             }
-            super.mouseMoved(e);
+            refreshGeometryFromCoords();
         }
 
+        private void refreshGeometryFromCoords() {
+            if (coords.isEmpty()) {
+                editGeometry.reset();
+                ended.set(false);
+                geomLayer.getGeometries().clear();
+            } else if (coords.size() == 1) {
+                editGeometry.geometry.set(EditionHelper.createPoint(coords.get(0)));
+                JTS.setCRS(editGeometry.geometry.get(), map.getCanvas().getObjectiveCRS2D());
+                geomLayer.getGeometries().setAll(editGeometry.geometry.get());
+            } else if (coords.size() == 2) {
+                editGeometry.geometry.set(EditionHelper.createLine(coords));
+                JTS.setCRS(editGeometry.geometry.get(), map.getCanvas().getObjectiveCRS2D());
+                geomLayer.getGeometries().setAll(editGeometry.geometry.get());
+            } else if (coords.size() >= 3) {
+                editGeometry.geometry.set(EditionHelper.createPolygon(coords));
+                JTS.setCRS(editGeometry.geometry.get(), map.getCanvas().getObjectiveCRS2D());
+                geomLayer.getGeometries().setAll(editGeometry.geometry.get());
+            }
+        }
     }
-
 }
