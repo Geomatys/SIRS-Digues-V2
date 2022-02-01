@@ -311,9 +311,10 @@ public class PluginDependance extends Plugin {
             return createSelectionStyleType3();
         } else if (TraitAmenagementHydraulique.class.getSimpleName().equals(name)) {
             return createSelectionStyleType2();
-        } else if (CheminAccesDependance.class.getSimpleName().equals(name)
-                || AireStockageDependance.class.getSimpleName().equals(name)) {
-            return createSelectionStyleType1();
+        } else if (CheminAccesDependance.class.getSimpleName().equals(name)) {
+            return createSelectionLineStyle();
+        } else if (AireStockageDependance.class.getSimpleName().equals(name)) {
+            return createSelectionPlanStyle();
         } else {
             return null;
         }
@@ -331,9 +332,10 @@ public class PluginDependance extends Plugin {
             return createStyleType3(color);
         } else if (TraitAmenagementHydraulique.class.getSimpleName().equals(name)) {
             return createTraitAHStyle();
-        } else if (CheminAccesDependance.class.getSimpleName().equals(name)
-                || AireStockageDependance.class.getSimpleName().equals(name)) {
-            return createStyleType1(color);
+        } else if (CheminAccesDependance.class.getSimpleName().equals(name)) {
+            return createLineStyle(color);
+        } else if (AireStockageDependance.class.getSimpleName().equals(name)) {
+            return createPlanStyle(color);
         } else {
             return null;
         }
@@ -495,5 +497,45 @@ public class PluginDependance extends Plugin {
                 (String)null, DEFAULT_DESCRIPTION, Units.POINT, stroke, LITERAL_ONE_FLOAT);
 
         return SF.style(line1);
+    }
+
+    public static MutableStyle createSelectionLineStyle() {
+        final MutableFeatureTypeStyle fts   = SF.featureTypeStyle();
+        final MutableStyle style            = SF.style();
+        final MutableRule longRule          = createSelectionLongRule();
+
+        fts.rules().add(longRule);
+        style.featureTypeStyles().add(fts);
+        return style;
+    }
+
+    public static MutableStyle createSelectionPlanStyle() {
+        final MutableFeatureTypeStyle fts   = SF.featureTypeStyle();
+        final MutableStyle style            = SF.style();
+        final MutableRule planRule          = createSelectionPlanRule();
+
+        fts.rules().add(planRule);
+        style.featureTypeStyles().add(fts);
+        return style;
+    }
+
+    public static MutableStyle createLineStyle(final Color color) {
+        final MutableFeatureTypeStyle fts   = SF.featureTypeStyle();
+        final MutableStyle style            = SF.style();
+        final MutableRule longRule          = createDefaultLongRule(color, null);
+
+        fts.rules().add(longRule);
+        style.featureTypeStyles().add(fts);
+        return style;
+    }
+
+    public static MutableStyle createPlanStyle(final Color color) {
+        final MutableFeatureTypeStyle fts   = SF.featureTypeStyle();
+        final MutableStyle style            = SF.style();
+        final MutableRule planRule          = createDefaultPlanRule(color, null);
+
+        fts.rules().add(planRule);
+        style.featureTypeStyles().add(fts);
+        return style;
     }
 }
