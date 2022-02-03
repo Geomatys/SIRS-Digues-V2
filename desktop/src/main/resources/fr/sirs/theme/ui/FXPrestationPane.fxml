@@ -113,7 +113,7 @@
         <Tab text="Ouvrages et réseaux associés">
             <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
               <tabs>
-                <FXFreeTab fx:id="ui_stationPompageIds" text="stationPompageIds"/>
+                <FXFreeTab fx:id="ui_stationPompageIds" text="%stationPompageIds"/>
                 <FXFreeTab fx:id="ui_reseauHydrauliqueFermeIds" text="%reseauHydrauliqueFermeIds"/>
                 <FXFreeTab fx:id="ui_ouvrageHydrauliqueAssocieIds" text="%ouvrageHydrauliqueAssocieIds"/>
                 <FXFreeTab fx:id="ui_reseauTelecomEnergieIds" text="%reseauTelecomEnergieIds"/>
@@ -130,7 +130,7 @@
               <tabs>
                 <FXFreeTab fx:id="ui_voieAccesIds" text="%voieAccesIds"/>
                 <FXFreeTab fx:id="ui_ouvrageFranchissementIds" text="%ouvrageFranchissementIds"/>
-                <FXFreeTab fx:id="ui_ouvertureBatardableIds" text="ouvertureBatardableIds"/>
+                <FXFreeTab fx:id="ui_ouvertureBatardableIds" text="%ouvertureBatardableIds"/>
                 <FXFreeTab fx:id="ui_voieDigueIds" text="%voieDigueIds"/>
                 <FXFreeTab fx:id="ui_ouvrageVoirieIds" text="%ouvrageVoirieIds"/>
               </tabs>

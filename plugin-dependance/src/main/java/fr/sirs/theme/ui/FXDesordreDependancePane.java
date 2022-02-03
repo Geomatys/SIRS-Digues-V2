@@ -417,13 +417,40 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
             }
         }
         if (prestationIdsTable != null) {
-            // Manage opposite references for Prestation...
+            final List<PrestationAmenagementHydraulique> currentPrestationList = new ArrayList<>();
+            final AbstractSIRSRepository<PrestationAmenagementHydraulique> prestationRepository = session.getRepositoryForClass(PrestationAmenagementHydraulique.class);
             final List<String> currentPrestationIdsList = new ArrayList<>();
+
             for(final Element elt : prestationIdsTable.getAllValues()){
                 final PrestationAmenagementHydraulique prestation = (PrestationAmenagementHydraulique) elt;
+
                 currentPrestationIdsList.add(prestation.getId());
+                currentPrestationList.add(prestation);
+
+                // Addition
+                if(!prestation.getDesordreIds().contains(element.getId())){
+                    prestation.getDesordreIds().add(element.getId());
+                }
             }
+            prestationRepository.executeBulk(currentPrestationList);
             element.setPrestationIds(currentPrestationIdsList);
+
+            // Deletion
+            final StreamingIterable<PrestationAmenagementHydraulique> listPrestation = prestationRepository.getAllStreaming();
+
+            try (final CloseableIterator<PrestationAmenagementHydraulique> it = listPrestation.iterator()) {
+                while (it.hasNext()) {
+                    final PrestationAmenagementHydraulique i = it.next();
+                    if(i.getDesordreIds().contains(element.getId())
+                            || element.getPrestationIds().contains(i.getId())){
+                        if(!prestationIdsTable.getAllValues().contains(i)){
+                            element.getPrestationIds().remove(i.getId()); //Normalement inutile du fait du  clear avant les op�rations d'ajout
+                            i.getDesordreIds().remove(element.getId());
+                            prestationRepository.update(i);
+                        }
+                    }
+                }
+            }
         }
         if (articleIdsTable != null) {
             // Manage opposite references for ArticleJournal...
