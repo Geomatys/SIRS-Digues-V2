@@ -93,6 +93,7 @@ import javafx.scene.control.ChoiceDialog;
 public class DependanceEditHandler extends AbstractNavigationHandler {
     private final MouseListen mouseInputListener = new MouseListen();
     private final FXGeometryLayer decorationLayer = new FXGeometryLayer();
+    private Stage creationDependanceStage;
 
     /**
      * Couches présentant les dépendances sur la carte.
@@ -366,80 +367,8 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                 }
             } else if (MouseButton.SECONDARY.equals(e.getButton())) {
                 if (dependance == null) {
-                    // La dépendance n'existe pas, on en créé une nouvelle après avoir choisi son type et le type de géométrie
-                    // à dessiner
-                    final Stage stage = new Stage();
-                    stage.getIcons().add(SIRS.ICON);
-                    stage.setTitle("Création de dépendance");
-                    stage.initModality(Modality.WINDOW_MODAL);
-                    stage.setAlwaysOnTop(true);
-                    final GridPane gridPane = new GridPane();
-                    gridPane.setVgap(10);
-                    gridPane.setHgap(5);
-                    gridPane.setPadding(new Insets(10));
-                    gridPane.add(new Label("Choisir un type de dépendance"), 0, 0);
-                    final ComboBox<String> dependanceTypeBox = new ComboBox<>();
-                    dependanceTypeBox.setItems(FXCollections.observableArrayList("Ouvrages de voirie", "Chemins d'accès", "Aires de stockage", "Aménagements hydrauliques", "Autres"));
-                    dependanceTypeBox.getSelectionModel().selectFirst();
-                    gridPane.add(dependanceTypeBox, 1, 0);
-
-                    final ComboBox<String> geomTypeBox = new ComboBox<>();
-                    geomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
-                    geomTypeBox.getSelectionModel().selectFirst();
-                    geomTypeBox.visibleProperty().bind(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Ouvrages de voirie")
-                            .or(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Aménagements hydrauliques"))
-                            .or(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Autres")));
-                    final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
-                    geomChoiceLbl.visibleProperty().bind(geomTypeBox.visibleProperty());
-                    gridPane.add(geomChoiceLbl, 0, 1);
-                    gridPane.add(geomTypeBox, 1, 1);
-
-                    final Button validateBtn = new Button("Valider");
-                    validateBtn.setOnAction((event) -> {
-                        stage.close();
-                        final Class clazz;
-                        switch (dependanceTypeBox.getSelectionModel().getSelectedItem()) {
-                            case "Aires de stockage": clazz = AireStockageDependance.class; break;
-                            case "Autres": clazz = AutreDependance.class; break;
-                            case "Chemins d'accès": clazz = CheminAccesDependance.class; break;
-                            case "Ouvrages de voirie": clazz = OuvrageVoirieDependance.class; break;
-                            case "Aménagements hydrauliques": clazz = AmenagementHydraulique.class; break;
-                            default: clazz = AireStockageDependance.class;
-                        }
-
-                        if (AireStockageDependance.class.isAssignableFrom(clazz)) {
-                            helper = new EditionHelper(map, aireLayer);
-                        } else if (AutreDependance.class.isAssignableFrom(clazz)) {
-                            helper = new EditionHelper(map, autreLayer);
-                        } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
-                            helper = new EditionHelper(map, cheminLayer);
-                        } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
-                            helper = new EditionHelper(map, ouvrageVoirieLayer);
-                        } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
-                            helper = new EditionHelper(map, amenagementLayer);
-                        }
-
-                        final AbstractSIRSRepository<AbstractDependance> repodep = Injector.getSession().getRepositoryForClass(clazz);
-                        dependance = repodep.create();
-                        newDependance = true;
-
-                        switch (geomTypeBox.getSelectionModel().getSelectedItem()) {
-                            case "Ponctuel" : newGeomType = Point.class; break;
-                            case "Linéaire" : newGeomType = LineString.class; break;
-                            case "Surfacique" : newGeomType = Polygon.class; break;
-                            default: newGeomType = Point.class;
-                        }
-                    });
-                    gridPane.add(validateBtn, 2, 3);
-
-                    final Scene sceneChoices = new Scene(gridPane);
-                    stage.setScene(sceneChoices);
-                    stage.setOnCloseRequest((onCloseEvent) -> {
-                        helper = null;
-                    });
-                    stage.showAndWait();
-
-
+                    if (creationDependanceStage == null) initCreationDependanceStage();
+                    creationDependanceStage.showAndWait();
                 } else {
                     // popup :
                     // -suppression d'un noeud
@@ -587,5 +516,80 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
         editGeometry.reset();
         dependance = null;
         helper = null;
+        creationDependanceStage = null;
+    }
+
+    private void initCreationDependanceStage() {
+        // La dépendance n'existe pas, on en créé une nouvelle après avoir choisi son type et le type de géométrie
+        // à dessiner
+        creationDependanceStage = new Stage();
+        creationDependanceStage.getIcons().add(SIRS.ICON);
+        creationDependanceStage.setTitle("Création de dépendance");
+        creationDependanceStage.initModality(Modality.WINDOW_MODAL);
+        creationDependanceStage.setAlwaysOnTop(true);
+        final GridPane gridPane = new GridPane();
+        gridPane.setVgap(10);
+        gridPane.setHgap(5);
+        gridPane.setPadding(new Insets(10));
+        gridPane.add(new Label("Choisir un type de dépendance"), 0, 0);
+        final ComboBox<String> dependanceTypeBox = new ComboBox<>();
+        dependanceTypeBox.setItems(FXCollections.observableArrayList("Ouvrages de voirie", "Chemins d'accès", "Aires de stockage", "Aménagements hydrauliques", "Autres"));
+        dependanceTypeBox.getSelectionModel().selectFirst();
+        gridPane.add(dependanceTypeBox, 1, 0);
+
+        final ComboBox<String> geomTypeBox = new ComboBox<>();
+        geomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
+        geomTypeBox.getSelectionModel().selectFirst();
+        geomTypeBox.visibleProperty().bind(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Ouvrages de voirie")
+                .or(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Aménagements hydrauliques"))
+                .or(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Autres")));
+        final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
+        geomChoiceLbl.visibleProperty().bind(geomTypeBox.visibleProperty());
+        gridPane.add(geomChoiceLbl, 0, 1);
+        gridPane.add(geomTypeBox, 1, 1);
+
+        final Button validateBtn = new Button("Valider");
+        validateBtn.setOnAction((event) -> {
+            creationDependanceStage.close();
+            final Class clazz;
+            switch (dependanceTypeBox.getSelectionModel().getSelectedItem()) {
+                case "Aires de stockage": clazz = AireStockageDependance.class; break;
+                case "Autres": clazz = AutreDependance.class; break;
+                case "Chemins d'accès": clazz = CheminAccesDependance.class; break;
+                case "Ouvrages de voirie": clazz = OuvrageVoirieDependance.class; break;
+                case "Aménagements hydrauliques": clazz = AmenagementHydraulique.class; break;
+                default: clazz = AireStockageDependance.class;
+            }
+
+            if (AireStockageDependance.class.isAssignableFrom(clazz)) {
+                helper = new EditionHelper(map, aireLayer);
+            } else if (AutreDependance.class.isAssignableFrom(clazz)) {
+                helper = new EditionHelper(map, autreLayer);
+            } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
+                helper = new EditionHelper(map, cheminLayer);
+            } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
+                helper = new EditionHelper(map, ouvrageVoirieLayer);
+            } else if (AmenagementHydraulique.class.isAssignableFrom(clazz)) {
+                helper = new EditionHelper(map, amenagementLayer);
+            }
+
+            final AbstractSIRSRepository<AbstractDependance> repodep = Injector.getSession().getRepositoryForClass(clazz);
+            dependance = repodep.create();
+            newDependance = true;
+
+            switch (geomTypeBox.getSelectionModel().getSelectedItem()) {
+                case "Ponctuel" : newGeomType = Point.class; break;
+                case "Linéaire" : newGeomType = LineString.class; break;
+                case "Surfacique" : newGeomType = Polygon.class; break;
+                default: newGeomType = Point.class;
+            }
+        });
+        gridPane.add(validateBtn, 2, 3);
+
+        final Scene sceneChoices = new Scene(gridPane);
+        creationDependanceStage.setScene(sceneChoices);
+        creationDependanceStage.setOnCloseRequest((onCloseEvent) -> {
+            helper = null;
+        });
     }
 }
