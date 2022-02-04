@@ -65,6 +65,9 @@ public class VegetationToolBar extends ToolBar {
     private static final String CENTER = "buttongroup-center";
     private static final String RIGHT = "buttongroup-right";
 
+    private Stage editionVegetationStage;
+    private Stage searchVegetationStage;
+
     public VegetationToolBar() {
         getStylesheets().add("/org/geotoolkit/gui/javafx/buttonbar.css");
         getItems().add(new Label("Végétation"));
@@ -102,13 +105,18 @@ public class VegetationToolBar extends ToolBar {
         return true;
     }
 
+    private void showEditor(final ActionEvent act) {
+        if(!checkPlan()) return;
+        if (editionVegetationStage == null) initEditionVegetationStage();
+        editionVegetationStage.show();
+        editionVegetationStage.requestFocus();
+    }
+
     private void showSearchDialog(final ActionEvent act) {
         if(!checkPlan()) return;
-        
-        final Stage d = createDialog("Recherche de végétation", new FXPlanLayerPane());
-
-        d.show();
-        d.requestFocus();
+        if (searchVegetationStage == null) searchVegetationStage = createDialog("Recherche de végétation", new FXPlanLayerPane());
+        searchVegetationStage.show();
+        searchVegetationStage.requestFocus();
     }
 
     private Stage createDialog(final String title, final Node content) {
@@ -139,12 +147,10 @@ public class VegetationToolBar extends ToolBar {
         return dialog;
     }
 
-    private void showEditor(final ActionEvent act) {
-        if(!checkPlan()) return;
-        
+    private void initEditionVegetationStage() {
         final FXMap uiMap = Injector.getSession().getFrame().getMapTab().getMap().getUiMap();
-
         final FXToolBox toolbox = new FXToolBox(uiMap, MapBuilder.createEmptyMapLayer());
+
         toolbox.commitRollbackVisibleProperty().setValue(false);
         toolbox.getToolPerRow().set(6);
         toolbox.getTools().add(CreateParcelleTool.SPI);
@@ -159,14 +165,11 @@ public class VegetationToolBar extends ToolBar {
             toolbox.getTools().add(ite.next());
         }
 
-        final Stage d = createDialog("Edition de végétation", toolbox);
-        d.setOnHidden(evt -> {
+        editionVegetationStage = createDialog("Edition de végétation", toolbox);
+        editionVegetationStage.setMinHeight(360);
+        editionVegetationStage.setOnHidden(evt -> {
             if (uiMap.getHandler() != null && uiMap.getHandler().getClass().getPackage().getName().contains("vegetation"))
                 uiMap.setHandler(new FXPanHandler(true));
         });
-
-        d.setMinHeight(360);
-        d.show();
-        d.requestFocus();
     }
 }
