@@ -89,15 +89,15 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     private final SirsStringConverter cvt = new SirsStringConverter();
 
     private final MouseListen mouseInputListener = new MouseListen();
-    private final BorderPane wizard = new BorderPane();
-    private final Class<T> vegetationClass;
+    protected final BorderPane wizard = new BorderPane();
+    protected final Class<T> vegetationClass;
 
-    private T vegetation = null;
+    protected T vegetation = null;
     protected ParcelleVegetation parcelle = null;
     private final Label lblParcelle = new Label();
     private final Label lblGeom = new Label();
 
-    private final Button end = new Button("Enregistrer");
+    protected final Button end = new Button("Enregistrer");
     private final Button cancel = new Button("Annuler");
 
     private FeatureMapLayer parcelleLayer = null;
@@ -183,7 +183,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         geomLayer.getGeometries().clear();
     }
 
-    private void startGeometry() {
+    protected void startGeometry() {
         editGeometry.reset();
         coords.clear();
         ended.set(false);
