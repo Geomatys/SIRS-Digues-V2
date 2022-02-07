@@ -27,6 +27,10 @@ couche, le style des couches dans Qgis par type et par géométrie et le project
 
 ### Usage
 Ce script doit être lancé depuis le dossier SirsMobile qui doit se trouver à la racine du projet Sirs.
--c : permet de copier les fichiers de configuration formTemplatePilote.json et user_preference_correspondence.json dans le module Qgis
+-plugin : permet de copier les fichiers de configuration formTemplatePilote.json et user_preference_correspondence.json dans le module Qgis
 (vous devez renseigner le chemin absolu du plugin dans la variable QGIS_PLUGIN_PROJECT_PATH de ce script)
+-mobile : permet de remplacer le fichier de configuration form-template-pilotes.ts dans le projet SIRSMOBILEV2
+(vous devez renseigner le chemin absolu du plugin dans la variable SIRS_MOBILE_PROJECT_PATH de ce script et choisir les classes qui apparaitront
+dans le fichier form-template-pilote.ts dans la variable FORM_TEMPLATE_MOBILE_CLASS)
+-filter-general : permet de d'enlever des classes générées les attributs généraux: geometry, date_debut, date_fin, dateMaj, commentaire, designation, valid, author.
 
