@@ -53,6 +53,7 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
     @FXML private FXPositionDependancePane uiPosition;
 
     // Propriétés de DesordreDependance
+    @FXML protected TextField ui_libelle;
     @FXML protected TextField ui_lieuDit;
     @FXML protected TextArea ui_commentaire;
     @FXML protected Tab ui_observations;
@@ -96,6 +97,7 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
         /*
         * Disabling rules.
         */
+        ui_libelle.disableProperty().bind(disableFieldsProperty());
         ui_lieuDit.disableProperty().bind(disableFieldsProperty());
         ui_commentaire.disableProperty().bind(disableFieldsProperty());
         observationsTable = new PojoTable(ObservationDependance.class, null, elementProperty());
@@ -200,6 +202,8 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
         // Unbind fields bound to previous element.
         if (oldElement != null) {
             // Propriétés de DesordreDependance
+            ui_libelle.textProperty().unbindBidirectional(oldElement.libelleProperty());
+            ui_libelle.setText(null);
             ui_lieuDit.textProperty().unbindBidirectional(oldElement.lieuDitProperty());
             ui_lieuDit.setText(null);
             ui_commentaire.textProperty().unbindBidirectional(oldElement.commentaireProperty());
@@ -224,6 +228,8 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
             * Bind control properties to Element ones.
             */
             // Propriétés de DesordreDependance
+            // * libelle
+            ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
             // * lieuDit
             ui_lieuDit.textProperty().bindBidirectional(newElement.lieuDitProperty());
             // * commentaire

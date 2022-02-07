@@ -67,13 +67,16 @@
                                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                         </rowConstraints-->
                                         <children>
+                                            <!-- EString -->
+                                            <Label text="%libelle" GridPane.rowIndex="0" />
+                                            <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="0"  />
                                             <!-- EFloat -->                 
-                                            <Label text="%cote" GridPane.rowIndex="0" />
-                                            <Spinner fx:id="ui_cote" GridPane.columnIndex="1" GridPane.rowIndex="0"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                                            <Label text="%typeId" GridPane.rowIndex="1" />
-                                            <ComboBox fx:id="ui_typeId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                            <Label text="%etatId" GridPane.rowIndex="2" />
-                                            <ComboBox fx:id="ui_etatId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                            <Label text="%cote" GridPane.rowIndex="1" />
+                                            <Spinner fx:id="ui_cote" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                                            <Label text="%typeId" GridPane.rowIndex="2" />
+                                            <ComboBox fx:id="ui_typeId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                            <Label text="%etatId" GridPane.rowIndex="3" />
+                                            <ComboBox fx:id="ui_etatId" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                                         </children>
                                         <padding>
