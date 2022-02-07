@@ -410,14 +410,40 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
             element.setMarcheId(null);
         }
         if (desordreIdsTable != null) {
-            // Manage opposite references for Desordre...
+            final List<DesordreDependance> currentDesordreList = new ArrayList<>();
+            final AbstractSIRSRepository<DesordreDependance> desordreRepository = session.getRepositoryForClass(DesordreDependance.class);
             final List<String> currentDesordreIdsList = new ArrayList<>();
+
             for(final Element elt : desordreIdsTable.getAllValues()){
                 final DesordreDependance desordre = (DesordreDependance) elt;
+
                 currentDesordreIdsList.add(desordre.getId());
+                currentDesordreList.add(desordre);
+
+                // Addition
+                if(!desordre.getPrestationIds().contains(element.getId())){
+                    desordre.getPrestationIds().add(element.getId());
+                }
             }
+            desordreRepository.executeBulk(currentDesordreList);
             element.setDesordreIds(currentDesordreIdsList);
-            
+
+            // Deletion
+            final StreamingIterable<DesordreDependance> listDesordre = desordreRepository.getAllStreaming();
+
+            try (final CloseableIterator<DesordreDependance> it = listDesordre.iterator()) {
+                while (it.hasNext()) {
+                    final DesordreDependance i = it.next();
+                    if(i.getPrestationIds().contains(element.getId())
+                            || element.getDesordreIds().contains(i.getId())){
+                        if(!desordreIdsTable.getAllValues().contains(i)){
+                            element.getDesordreIds().remove(i.getId()); //Normalement inutile du fait du  clear avant les op�rations d'ajout
+                            i.getPrestationIds().remove(element.getId());
+                            desordreRepository.update(i);
+                        }
+                    }
+                }
+            }
         }
         if (ouvrageAssocieAmenagementHydrauliqueIdsTable != null) {
             // Manage opposite references for OuvrageAssocieAmenagementHydraulique...
