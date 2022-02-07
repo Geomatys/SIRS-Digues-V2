@@ -73,12 +73,12 @@ Une fois toutes les propriétés spécifiées, maven vous demande confirmation. 
 
 ### 5 - TroubleShot
 
-##### .dll (Windows only)
-Après le lancement de l'application, s'il se produit une erreur concernant les Dynamic Link Library (.dll), essayer un version différente de jdk 8 (ex: jdk1.8.0_202) peut résoudre ce problème.
+##### missing .dll
+Un manquement sur les Dynamic Link Library peut provenir de la version du jdk utilisée.
 
-##### service WMS (ceux de l'IGN par ex)
-En utilisant le plugin cartographique, s'il se produit une exception ```SunCertPathBuilderException: unable to find valid certification path to requested target```, essayez
- de régénérer le certificat manquant pour le service en question: <br/>
+##### service WMS et certificat
+```SunCertPathBuilderException: unable to find valid certification path to requested target``` <br/>
+Essayez de régénérer le certificat manquant pour le service concerné: <br/>
 ```openssl x509 -in <(openssl s_client -connect wxs.ign.fr:443 -prexit 2>/dev/null) -out ~/example.crt``` Remplacer le wxs.ign.fr par l'host du service en question et 443 par le port utilisé (souvent http -> 80; https -> 443) <br/>
 ```sudo keytool -importcert -file ~/example.crt -alias example -keystore <PATH_TO_JDK>/jre/lib/security/cacerts -storepass changeit``` <br/>
 Rebuild avec le jdk en question.
