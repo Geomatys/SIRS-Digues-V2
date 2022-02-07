@@ -32,6 +32,7 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
     @FXML private FXValidityPeriodPane uiValidityPeriod;
 
     // Propriétés de StructureAmenagementHydraulique
+    @FXML protected TextField ui_libelle;
     @FXML protected Spinner ui_numCouche;
     @FXML protected ComboBox ui_materiauId;
     @FXML protected Button ui_materiauId_link;
@@ -71,6 +72,7 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
         /*
         * Disabling rules.
         */
+        ui_libelle.disableProperty().bind(disableFieldsProperty());
         ui_numCouche.disableProperty().bind(disableFieldsProperty());
         ui_numCouche.setEditable(true);
         ui_numCouche.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
@@ -120,6 +122,8 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
         // Unbind fields bound to previous element.
         if (oldElement != null) {
             // Propriétés de StructureAmenagementHydraulique
+            ui_libelle.textProperty().unbindBidirectional(oldElement.libelleProperty());
+            ui_libelle.setText(null);
             ui_numCouche.getValueFactory().valueProperty().unbindBidirectional(oldElement.numCoucheProperty());
             ui_numCouche.getValueFactory().setValue(0);
             ui_epaisseur.getValueFactory().valueProperty().unbindBidirectional(oldElement.epaisseurProperty());
@@ -145,6 +149,8 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             * Bind control properties to Element ones.
             */
             // Propriétés de StructureAmenagementHydraulique
+            // * libelle
+            ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
             // * numCouche
             ui_numCouche.getValueFactory().valueProperty().bindBidirectional(newElement.numCoucheProperty());
             ui_epaisseur.getValueFactory().valueProperty().bindBidirectional(newElement.epaisseurProperty());

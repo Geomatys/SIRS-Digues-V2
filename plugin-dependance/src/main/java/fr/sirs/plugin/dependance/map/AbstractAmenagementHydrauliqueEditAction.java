@@ -30,7 +30,7 @@ import org.geotoolkit.gui.javafx.render2d.FXMapAction;
  */
 public class AbstractAmenagementHydrauliqueEditAction extends FXMapAction {
     public AbstractAmenagementHydrauliqueEditAction(FXMap map) {
-        super(map,"Dépendance","Création / Modification de description d'aménagement hydraulique", SIRS.ICON_WARNING);
+        super(map,"Objet de dépendance ou AH","Création/modification d'un objet lié au AH ou dépendance", SIRS.ICON_WARNING);
 
         this.disabledProperty().bind(Injector.getSession().geometryEditionProperty().not());
 

@@ -31,6 +31,7 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
     @FXML private FXValidityPeriodPane uiValidityPeriod;
 
     // Propriétés de OrganeProtectionCollective
+    @FXML protected TextField ui_libelle;
     @FXML protected Spinner ui_cote;
     @FXML protected ComboBox ui_typeId;
     @FXML protected ComboBox ui_etatId;
@@ -65,6 +66,7 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
         /*
         * Disabling rules.
         */
+        ui_libelle.disableProperty().bind(disableFieldsProperty());
         ui_cote.disableProperty().bind(disableFieldsProperty());
         ui_cote.setEditable(true);
         ui_cote.setValueFactory(new FloatSpinnerValueFactory(0, Float.MAX_VALUE));
@@ -107,6 +109,8 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
         // Unbind fields bound to previous element.
         if (oldElement != null) {
             // Propriétés de OrganeProtectionCollective
+            ui_libelle.textProperty().unbindBidirectional(oldElement.libelleProperty());
+            ui_libelle.setText(null);
             ui_cote.getValueFactory().valueProperty().unbindBidirectional(oldElement.coteProperty());
             ui_cote.getValueFactory().setValue(0);
             // Propriétés de AvecGeometrie
@@ -128,6 +132,8 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
             * Bind control properties to Element ones.
             */
             // Propriétés de OrganeProtectionCollective
+            // * libelle
+            ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
             // * cote
             ui_cote.getValueFactory().valueProperty().bindBidirectional(newElement.coteProperty());
             final AbstractSIRSRepository<RefTypeOrganeProtectionCollective> typeRepo = session.getRepositoryForClass(RefTypeOrganeProtectionCollective.class);

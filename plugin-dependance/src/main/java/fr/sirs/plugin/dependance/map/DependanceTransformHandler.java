@@ -84,7 +84,6 @@ public class DependanceTransformHandler extends AbstractNavigationHandler {
         return true;
     }
 
-
     private class MouseListen extends FXPanMouseListen {
         public MouseListen() {
             super(DependanceTransformHandler.this);
@@ -99,8 +98,8 @@ public class DependanceTransformHandler extends AbstractNavigationHandler {
                     final Feature f = feature.getCandidate();
                     // Choix du type de dépendance à créer
                     final ChoiceDialog<String> dialog = new ChoiceDialog<>("Aires de stockage", "Autres", "Chemins d'accès", "Ouvrages de voirie", "Aménagements hydrauliques");
-                    dialog.setTitle("Création de dépendance");
-                    dialog.setContentText("Choisir un type de dépendance");
+                    dialog.setTitle("Création de dépendance ou AH");
+                    dialog.setContentText("Choisir un type de dépendance ou AH");
                     Optional<String> result = dialog.showAndWait();
                     result.ifPresent(type -> {
                         final Class clazz;

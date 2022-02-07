@@ -26,11 +26,15 @@ import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractAmenagementHydraulique;
+import fr.sirs.core.model.AbstractDependance;
+import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.DesordreDependance;
 import fr.sirs.core.model.OrganeProtectionCollective;
 import fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique;
 import fr.sirs.core.model.PrestationAmenagementHydraulique;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.StructureAmenagementHydraulique;
 import fr.sirs.plugin.dependance.PluginDependance;
 import javafx.collections.FXCollections;
@@ -73,6 +77,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javafx.beans.value.ChangeListener;
 
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
@@ -89,6 +94,8 @@ import javafx.scene.control.ChoiceDialog;
 public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigationHandler {
     private final MouseListen mouseInputListener = new MouseListen();
     private final FXGeometryLayer decorationLayer = new FXGeometryLayer();
+    private Stage creationDependanceAHObjectStage;
+    private ComboBox<Preview> dependanceAhBox;
 
     /**
      * La abstractAmenagementHydraulique en cours.
@@ -314,77 +321,8 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
                 }
             } else if (MouseButton.SECONDARY.equals(e.getButton())) {
                 if (abstractAmenagement == null) {
-                    // Le désordre n'existe pas, on en créé un nouveau après avoir choisi le type de géométrie à dessiner
-                    final Stage stage = new Stage();
-                    stage.getIcons().add(SIRS.ICON);
-                    stage.setTitle("Création de description d'aménagement hydraulique");
-                    stage.initModality(Modality.WINDOW_MODAL);
-                    stage.setAlwaysOnTop(true);
-                    final GridPane gridPane = new GridPane();
-                    gridPane.setVgap(10);
-                    gridPane.setHgap(5);
-                    gridPane.setPadding(new Insets(10));
-                    gridPane.add(new Label("Choisir un type de description d'aménagement hydraulique"), 0, 0);
-                    final ComboBox<String> abstractAmenagementTypeBox = new ComboBox<>();
-                    abstractAmenagementTypeBox.setItems(FXCollections.observableArrayList("Structure", "Ouvrage associé", "Désordre", "Prestation", "Organe de protection collective"));
-                    abstractAmenagementTypeBox.getSelectionModel().selectFirst();
-                    gridPane.add(abstractAmenagementTypeBox, 1, 0);
-
-                    final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
-                    gridPane.add(geomChoiceLbl, 0, 1);
-                    final ComboBox<String> geomTypeBox = new ComboBox<>();
-                    geomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
-                    geomTypeBox.getSelectionModel().selectFirst();
-                    gridPane.add(geomTypeBox, 1, 1);
-
-                    final Button validateBtn = new Button("Valider");
-                    validateBtn.setOnAction((event) -> {
-                        stage.close();
-                        AbstractSIRSRepository repo;
-                        switch (abstractAmenagementTypeBox.getSelectionModel().getSelectedItem()) {
-                            case "Structure":
-                                repo = Injector.getSession().getRepositoryForClass(StructureAmenagementHydraulique.class);
-                                helper = new EditionHelper(map, structuresLayer);
-                                break;
-                            case "Ouvrage associé":
-                                repo = Injector.getSession().getRepositoryForClass(OuvrageAssocieAmenagementHydraulique.class);
-                                helper = new EditionHelper(map, ouvrageAssociesLayer);
-                                break;
-                            case "Désordre":
-                                repo = Injector.getSession().getRepositoryForClass(DesordreDependance.class);
-                                helper = new EditionHelper(map, desordresLayer);
-                                break;
-                            case "Prestation":
-                                repo = Injector.getSession().getRepositoryForClass(PrestationAmenagementHydraulique.class);
-                                helper = new EditionHelper(map, prestationsLayer);
-                                break;
-                            case "Organe de protection collective":
-                                repo = Injector.getSession().getRepositoryForClass(OrganeProtectionCollective.class);
-                                helper = new EditionHelper(map, organeProtectionCollectivesLayer);
-                                break;
-                            default:
-                                repo = Injector.getSession().getRepositoryForClass(DesordreDependance.class);
-                                helper = new EditionHelper(map, desordresLayer);
-                        }
-
-                        abstractAmenagement = (AbstractAmenagementHydraulique) repo.create();
-                        newDescription = true;
-                        
-                        switch (geomTypeBox.getSelectionModel().getSelectedItem()) {
-                            case "Ponctuel" : newGeomType = Point.class; break;
-                            case "Linéaire" : newGeomType = LineString.class; break;
-                            case "Surfacique" : newGeomType = Polygon.class; break;
-                            default: newGeomType = Point.class;
-                        }
-                    });
-                    gridPane.add(validateBtn, 2, 3);
-
-                    final Scene sceneChoices = new Scene(gridPane);
-                    stage.setScene(sceneChoices);
-                    stage.setOnCloseRequest((onCloseEvent) -> {
-                        helper = null;
-                    });
-                    stage.showAndWait();
+                    if (creationDependanceAHObjectStage == null) initCreationDependanceAHObjectStage();
+                    creationDependanceAHObjectStage.showAndWait();
                 } else {
                     // popup :
                     // -suppression d'un noeud
@@ -514,5 +452,110 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
         coords.clear();
         editGeometry.reset();
         abstractAmenagement = null;
+        creationDependanceAHObjectStage = null;
+    }
+
+    private void initCreationDependanceAHObjectStage() {
+        // Le désordre n'existe pas, on en créé un nouveau après avoir choisi le type de géométrie à dessiner
+        creationDependanceAHObjectStage = new Stage();
+        creationDependanceAHObjectStage.getIcons().add(SIRS.ICON);
+        creationDependanceAHObjectStage.setTitle("Création d'un objet lié au AH ou dépendance");
+        creationDependanceAHObjectStage.initModality(Modality.WINDOW_MODAL);
+        creationDependanceAHObjectStage.setAlwaysOnTop(true);
+        final GridPane gridPane = new GridPane();
+        gridPane.setVgap(10);
+        gridPane.setHgap(5);
+        gridPane.setPadding(new Insets(10));
+
+        gridPane.add(new Label("Choisir un type de description d'aménagement hydraulique"), 0, 0);
+        final ComboBox<String> abstractAmenagementTypeBox = new ComboBox<>();
+        abstractAmenagementTypeBox.setItems(FXCollections.observableArrayList("Structure", "Ouvrage associé", "Désordre", "Prestation", "Organe de protection collective"));
+        abstractAmenagementTypeBox.getSelectionModel().selectFirst();
+        gridPane.add(abstractAmenagementTypeBox, 1, 0);
+
+        gridPane.add(new Label("Choisir une forme géométrique"), 0, 1);
+        final ComboBox<String> geomTypeBox = new ComboBox<>();
+        geomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
+        geomTypeBox.getSelectionModel().selectFirst();
+        gridPane.add(geomTypeBox, 1, 1);
+
+        gridPane.add(new Label("Choisir un AH (une dépendance ou AH pour un désordre)"), 0, 2);
+        dependanceAhBox = new ComboBox();
+        gridPane.add(geomTypeBox, 1, 2);
+
+        //on ecoute les changements de troncon et de plan
+        final ChangeListener<String> chgListener = (observable, oldValue, newValue) -> {
+            final Previews previewRepository = Injector.getSession().getPreviews();
+            if ("Désordre".equals(newValue)) {
+                SIRS.initCombo(dependanceAhBox, FXCollections.observableList(previewRepository.getByClass(AbstractDependance.class)), null);
+            } else {
+                SIRS.initCombo(dependanceAhBox, FXCollections.observableList(previewRepository.getByClass(AmenagementHydraulique.class)), null);
+            }
+        };
+        abstractAmenagementTypeBox.valueProperty().addListener(chgListener);
+
+        final Button validateBtn = new Button("Valider");
+        validateBtn.setOnAction((event) -> {
+            creationDependanceAHObjectStage.close();
+            AbstractSIRSRepository repo;
+            switch (abstractAmenagementTypeBox.getSelectionModel().getSelectedItem()) {
+                case "Structure":
+                    repo = Injector.getSession().getRepositoryForClass(StructureAmenagementHydraulique.class);
+                    helper = new EditionHelper(map, structuresLayer);
+                    break;
+                case "Ouvrage associé":
+                    repo = Injector.getSession().getRepositoryForClass(OuvrageAssocieAmenagementHydraulique.class);
+                    helper = new EditionHelper(map, ouvrageAssociesLayer);
+                    break;
+                case "Désordre":
+                    repo = Injector.getSession().getRepositoryForClass(DesordreDependance.class);
+                    helper = new EditionHelper(map, desordresLayer);
+                    break;
+                case "Prestation":
+                    repo = Injector.getSession().getRepositoryForClass(PrestationAmenagementHydraulique.class);
+                    helper = new EditionHelper(map, prestationsLayer);
+                    break;
+                case "Organe de protection collective":
+                    repo = Injector.getSession().getRepositoryForClass(OrganeProtectionCollective.class);
+                    helper = new EditionHelper(map, organeProtectionCollectivesLayer);
+                    break;
+                default:
+                    repo = Injector.getSession().getRepositoryForClass(DesordreDependance.class);
+                    helper = new EditionHelper(map, desordresLayer);
+            }
+
+            abstractAmenagement = (AbstractAmenagementHydraulique) repo.create();
+            newDescription = true;
+
+            final Preview dependanceAhPreview = dependanceAhBox.getSelectionModel().getSelectedItem();
+            if (dependanceAhPreview != null) {
+                if (abstractAmenagement instanceof DesordreDependance) {
+                    final Class clazz = dependanceAhPreview.getJavaClassOr(null);
+                    if (AmenagementHydraulique.class.equals(clazz)) {
+                        abstractAmenagement.setAmenagementHydrauliqueId(dependanceAhPreview.getElementId());
+                    } else if (AbstractDependance.class.isAssignableFrom(AbstractDependance.class)) {
+                        ((DesordreDependance) abstractAmenagement).setDependanceId(dependanceAhPreview.getElementId());
+                    } else {
+                        SIRS.LOGGER.warning("Unexpected behavior: unexpected value for dependanceAhBox combobox");
+                    }
+                } else {
+                    abstractAmenagement.setAmenagementHydrauliqueId(dependanceAhPreview.getElementId());
+                }
+            }
+
+            switch (geomTypeBox.getSelectionModel().getSelectedItem()) {
+                case "Ponctuel" : newGeomType = Point.class; break;
+                case "Linéaire" : newGeomType = LineString.class; break;
+                case "Surfacique" : newGeomType = Polygon.class; break;
+                default: newGeomType = Point.class;
+            }
+        });
+        gridPane.add(validateBtn, 2, 3);
+
+        final Scene sceneChoices = new Scene(gridPane);
+        creationDependanceAHObjectStage.setScene(sceneChoices);
+        creationDependanceAHObjectStage.setOnCloseRequest((onCloseEvent) -> {
+            helper = null;
+        });
     }
 }

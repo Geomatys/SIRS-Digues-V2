@@ -18,11 +18,24 @@
  */
 package fr.sirs.plugin.vegetation.map;
 
+import fr.sirs.Injector;
+import fr.sirs.SIRS;
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.PeuplementVegetation;
+import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.RefTypePeuplementVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_PEUPLEMENT_VEGETATION_TYPE;
+import fr.sirs.theme.ui.FXPositionableExplicitMode;
 import fr.sirs.util.ResourceInternationalString;
+import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.layout.VBox;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.edition.AbstractEditionToolSpi;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
@@ -34,6 +47,8 @@ import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
 public class CreatePeuplementTool extends CreateVegetationPolygonTool<PeuplementVegetation>{
 
     public static final Spi SPI = new Spi();
+
+    private final ComboBox<Preview> comboTypeVegetation = new ComboBox();
 
     public static final class Spi extends AbstractEditionToolSpi{
 
@@ -59,6 +74,33 @@ public class CreatePeuplementTool extends CreateVegetationPolygonTool<Peuplement
 
     public CreatePeuplementTool(FXMap map) {
         super(map,SPI, PeuplementVegetation.class);
+
+        final Previews previewRepository = Injector.getSession().getPreviews();
+        SIRS.initCombo(comboTypeVegetation, FXCollections.observableList(
+            previewRepository.getByClass(RefTypePeuplementVegetation.class)),
+            previewRepository.get(DEFAULT_PEUPLEMENT_VEGETATION_TYPE));
+
+        final Label label = new Label("Type de végétation :");
+        label.getStyleClass().add("label-header");
+
+        final VBox center = (VBox) wizard.getCenter();
+        center.getChildren().add(4, label);
+        center.getChildren().add(5, comboTypeVegetation);
+
+        // Override save action to include vegetation type
+        end.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                //on sauvegarde
+                vegetation.setGeometryMode(FXPositionableExplicitMode.MODE);
+                vegetation.setValid(true);
+                vegetation.setForeignParentId(parcelle.getDocumentId());
+                vegetation.setTypeVegetationId(comboTypeVegetation.getSelectionModel().getSelectedItem().getElementId());
+                final AbstractSIRSRepository vegetationRepo = Injector.getSession().getRepositoryForClass(vegetationClass);
+                vegetationRepo.add(vegetation);
+                startGeometry();
+            }
+        });
     }
 
     @Override
