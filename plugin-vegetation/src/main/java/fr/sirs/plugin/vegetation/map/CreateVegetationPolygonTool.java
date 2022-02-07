@@ -191,7 +191,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
 
         vegetation = newVegetation();
         lblParcelle.setText(cvt.toString(parcelle));
-        lblGeom.setText("Cliquer sur la carte pour créer la géométrie, faire un double click pour terminer la géométrie");
+        lblGeom.setText("Cliquer sur la carte pour créer la géométrie, faire un double clic pour terminer la géométrie, faire un clic droit pour supprimer le dernier point.");
         parcelleLayer.setSelectionFilter(GO2Utilities.FILTER_FACTORY.id(
                 Collections.singleton(new DefaultFeatureId(parcelle.getDocumentId()))));
 
