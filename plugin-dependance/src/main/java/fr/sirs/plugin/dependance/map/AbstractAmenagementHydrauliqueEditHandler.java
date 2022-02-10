@@ -37,6 +37,8 @@ import fr.sirs.core.model.PrestationAmenagementHydraulique;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.StructureAmenagementHydraulique;
 import fr.sirs.plugin.dependance.PluginDependance;
+import fr.sirs.plugin.dependance.ui.FXDependanceThemePane;
+import fr.sirs.plugin.dependance.ui.FXDesordreThemePane;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -77,7 +79,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javafx.beans.value.ChangeListener;
 
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
@@ -158,7 +159,7 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
         } else {
             // on demande à l'utilisateur le type de géométrie
             final ChoiceDialog<String> choice = new ChoiceDialog<>("Ponctuel","Linéaire","Surfacique");
-            choice.setHeaderText("Choix de la forme géométrique de la abstractAmenagement.");
+            choice.setHeaderText("Choix de la forme géométrique de l'objet lié à un AH ou une dépendance.");
             choice.setTitle("Type de géométrie");
             final Optional<String> showAndWait = choice.showAndWait();
             if(showAndWait.isPresent()){
@@ -459,7 +460,7 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
         // Le désordre n'existe pas, on en créé un nouveau après avoir choisi le type de géométrie à dessiner
         creationDependanceAHObjectStage = new Stage();
         creationDependanceAHObjectStage.getIcons().add(SIRS.ICON);
-        creationDependanceAHObjectStage.setTitle("Création d'un objet lié au AH ou dépendance");
+        creationDependanceAHObjectStage.setTitle("Création d'un objet lié à un AH ou une dépendance");
         creationDependanceAHObjectStage.initModality(Modality.WINDOW_MODAL);
         creationDependanceAHObjectStage.setAlwaysOnTop(true);
         final GridPane gridPane = new GridPane();
@@ -467,7 +468,7 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
         gridPane.setHgap(5);
         gridPane.setPadding(new Insets(10));
 
-        gridPane.add(new Label("Choisir un type de description d'aménagement hydraulique"), 0, 0);
+        gridPane.add(new Label("Choisir un type d'objet lié à un AH ou une dépendance"), 0, 0);
         final ComboBox<String> abstractAmenagementTypeBox = new ComboBox<>();
         abstractAmenagementTypeBox.setItems(FXCollections.observableArrayList("Structure", "Ouvrage associé", "Désordre", "Prestation", "Organe de protection collective"));
         abstractAmenagementTypeBox.getSelectionModel().selectFirst();
@@ -479,20 +480,12 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
         geomTypeBox.getSelectionModel().selectFirst();
         gridPane.add(geomTypeBox, 1, 1);
 
-        gridPane.add(new Label("Choisir un AH (une dépendance ou AH pour un désordre)"), 0, 2);
+        gridPane.add(new Label("Choisir un AH (une dépendance ou un AH pour un désordre)"), 0, 2);
         dependanceAhBox = new ComboBox();
-        gridPane.add(geomTypeBox, 1, 2);
-
-        //on ecoute les changements de troncon et de plan
-        final ChangeListener<String> chgListener = (observable, oldValue, newValue) -> {
-            final Previews previewRepository = Injector.getSession().getPreviews();
-            if ("Désordre".equals(newValue)) {
-                SIRS.initCombo(dependanceAhBox, FXCollections.observableList(previewRepository.getByClass(AbstractDependance.class)), null);
-            } else {
-                SIRS.initCombo(dependanceAhBox, FXCollections.observableList(previewRepository.getByClass(AmenagementHydraulique.class)), null);
-            }
-        };
-        abstractAmenagementTypeBox.valueProperty().addListener(chgListener);
+        initAhDependanceBox(true);
+        gridPane.add(dependanceAhBox, 1, 2);
+        abstractAmenagementTypeBox.valueProperty()
+                .addListener((observable, oldValue, newValue) -> initAhDependanceBox(!("Désordre".equals(newValue))));
 
         final Button validateBtn = new Button("Valider");
         validateBtn.setOnAction((event) -> {
@@ -557,5 +550,21 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
         creationDependanceAHObjectStage.setOnCloseRequest((onCloseEvent) -> {
             helper = null;
         });
+    }
+
+    private void initAhDependanceBox(final boolean onlyAh) {
+        final Previews previewRepository = Injector.getSession().getPreviews();
+        final List<Preview> previews;
+
+        if (onlyAh) {
+            previews = previewRepository.getByClass(AmenagementHydraulique.class);
+            if (!previews.contains(FXDependanceThemePane.EMPTY_PREVIEW)) previews.add(FXDependanceThemePane.EMPTY_PREVIEW);
+        } else {
+            previews = previewRepository.getByClass(AbstractDependance.class);
+            if (!previews.contains(FXDesordreThemePane.EMPTY_PREVIEW)) previews.add(FXDesordreThemePane.EMPTY_PREVIEW);
+        }
+        SIRS.initCombo(dependanceAhBox, FXCollections.observableList(previews), null);
+        dependanceAhBox.setEditable(false);
+        dependanceAhBox.getSelectionModel().selectFirst();
     }
 }

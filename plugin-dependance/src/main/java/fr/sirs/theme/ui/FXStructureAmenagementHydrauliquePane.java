@@ -41,6 +41,7 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
     @FXML protected Spinner ui_epaisseur;
     @FXML protected ComboBox ui_fonctionId;
     @FXML protected ComboBox ui_natureId;
+    @FXML protected TextArea ui_commentaire;
     @FXML protected FXFreeTab ui_observations;
     protected PojoTable observationsTable;
     @FXML protected FXFreeTab ui_photos;
@@ -86,6 +87,8 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
         ui_fonctionId.disableProperty().bind(disableFieldsProperty());
         ui_natureId.disableProperty().bind(disableFieldsProperty());
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
+        ui_commentaire.disableProperty().bind(disableFieldsProperty());
+        ui_commentaire.setWrapText(true);
         
         uiPosition.dependanceProperty().bind(elementProperty);
         
@@ -128,6 +131,8 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             ui_numCouche.getValueFactory().setValue(0);
             ui_epaisseur.getValueFactory().valueProperty().unbindBidirectional(oldElement.epaisseurProperty());
             ui_epaisseur.getValueFactory().setValue(0);
+            ui_commentaire.textProperty().unbindBidirectional(oldElement.commentaireProperty());
+            ui_commentaire.setText(null);
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
             // Propriétés de AbstractAmenagementHydraulique
@@ -142,6 +147,7 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             ui_fonctionId.setItems(null);
             ui_natureId.setItems(null);
             ui_amenagementHydrauliqueId.setItems(null);
+            ui_commentaire.setText(null);
         } else {
             
             
@@ -154,6 +160,8 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             // * numCouche
             ui_numCouche.getValueFactory().valueProperty().bindBidirectional(newElement.numCoucheProperty());
             ui_epaisseur.getValueFactory().valueProperty().bindBidirectional(newElement.epaisseurProperty());
+            // * commentaire
+            ui_commentaire.textProperty().bindBidirectional(newElement.commentaireProperty());
             final AbstractSIRSRepository<RefMateriau> materiauIdRepo = session.getRepositoryForClass(RefMateriau.class);
             SIRS.initCombo(ui_materiauId, SIRS.observableList(materiauIdRepo.getAll()), newElement.getMateriauId() == null? null : materiauIdRepo.get(newElement.getMateriauId()));
             final AbstractSIRSRepository<RefSource> sourceIdRepo = session.getRepositoryForClass(RefSource.class);

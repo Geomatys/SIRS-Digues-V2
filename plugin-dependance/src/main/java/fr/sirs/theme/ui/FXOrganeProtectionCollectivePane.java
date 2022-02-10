@@ -35,6 +35,7 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
     @FXML protected Spinner ui_cote;
     @FXML protected ComboBox ui_typeId;
     @FXML protected ComboBox ui_etatId;
+    @FXML protected TextArea ui_commentaire;
     @FXML protected FXFreeTab ui_observations;
     protected PojoTable observationsTable;
     @FXML protected FXFreeTab ui_photos;
@@ -73,7 +74,9 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
         ui_typeId.disableProperty().bind(disableFieldsProperty());
         ui_etatId.disableProperty().bind(disableFieldsProperty());
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
-        
+        ui_commentaire.disableProperty().bind(disableFieldsProperty());
+        ui_commentaire.setWrapText(true);
+
         uiPosition.dependanceProperty().bind(elementProperty);
         
         ui_observations.setContent(() -> {
@@ -113,6 +116,8 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
             ui_libelle.setText(null);
             ui_cote.getValueFactory().valueProperty().unbindBidirectional(oldElement.coteProperty());
             ui_cote.getValueFactory().setValue(0);
+            ui_commentaire.textProperty().unbindBidirectional(oldElement.commentaireProperty());
+            ui_commentaire.setText(null);
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
             // Propriétés de AbstractAmenagementHydraulique
@@ -125,6 +130,7 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
             ui_typeId.setItems(null);
             ui_etatId.setItems(null);
             ui_amenagementHydrauliqueId.setItems(null);
+            ui_commentaire.setText(null);
         } else {
             
             
@@ -136,6 +142,8 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
             ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
             // * cote
             ui_cote.getValueFactory().valueProperty().bindBidirectional(newElement.coteProperty());
+            // * commentaire
+            ui_commentaire.textProperty().bindBidirectional(newElement.commentaireProperty());
             final AbstractSIRSRepository<RefTypeOrganeProtectionCollective> typeRepo = session.getRepositoryForClass(RefTypeOrganeProtectionCollective.class);
             SIRS.initCombo(ui_typeId, SIRS.observableList(typeRepo.getAll()), newElement.getTypeId() == null? null : typeRepo.get(newElement.getTypeId()));
             final AbstractSIRSRepository<RefEtat> etatRepo = session.getRepositoryForClass(RefEtat.class);

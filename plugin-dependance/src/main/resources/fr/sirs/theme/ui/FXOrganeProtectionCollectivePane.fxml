@@ -84,6 +84,8 @@
                                         </padding>
                                     </GridPane>
 
+                                    <TextArea fx:id="ui_commentaire" maxHeight="-Infinity"  prefHeight="200.0" />
+
                                 </children>
                                 <padding>
                                     <Insets bottom="10.0" left="50.0" right="50.0" top="30.0" />

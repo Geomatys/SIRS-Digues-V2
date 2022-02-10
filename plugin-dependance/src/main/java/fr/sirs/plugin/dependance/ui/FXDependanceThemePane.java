@@ -51,7 +51,7 @@ import javafx.scene.layout.Priority;
  */
 public class FXDependanceThemePane extends BorderPane {
 
-    protected static final Preview EMPTY_PREVIEW = new Preview();
+    public static final Preview EMPTY_PREVIEW = new Preview();
 
     static {
         EMPTY_PREVIEW.setElementClass(AmenagementHydraulique.class.getCanonicalName());

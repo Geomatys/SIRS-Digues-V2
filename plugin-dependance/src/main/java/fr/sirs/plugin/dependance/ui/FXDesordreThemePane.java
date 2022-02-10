@@ -44,7 +44,7 @@ import javafx.scene.layout.Priority;
  */
 public class FXDesordreThemePane extends FXDependanceThemePane {
 
-    protected static final Preview ORPHELIN_PREVIEW = new Preview();
+    public static final Preview ORPHELIN_PREVIEW = new Preview();
 
     static {
         ORPHELIN_PREVIEW.setLibelle("   Objets orphelins   ");
