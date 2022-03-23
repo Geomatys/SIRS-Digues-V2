@@ -67,6 +67,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import org.apache.http.client.HttpClient;
@@ -644,7 +646,7 @@ public class DatabaseRegistry {
 
                 final Map<String, ModuleDescription> srcModules = srcInfo.getModuleDescriptions();
                 final Map<String, ModuleDescription> dstModules = dstInfo.getModuleDescriptions();
-                final int dstModuleListSize = dstModules == null ? 0 : dstModules.size();
+                //final int dstModuleListSize = dstModules == null ? 0 : dstModules.size();
 
                 if (dstModules == null && srcModules != null) {
                     modules = srcModules;
@@ -660,10 +662,11 @@ public class DatabaseRegistry {
                      */
                     for (final Map.Entry<String, ModuleDescription> entry : srcModules.entrySet()) {
                         final ModuleDescription desc = dstModules.get(entry.getKey());
+
                         if (desc == null) {
                             dstModules.put(entry.getKey(), entry.getValue());
-                        }
-                        else if (!desc.getVersion().equals(entry.getValue().getVersion())) {
+                        //Currently ModuleChecker ensure this never happen (?)
+                        } else if (!desc.getVersion().equals(entry.getValue().getVersion())) {
                             throwException = true;
                             moduleError.append(System.lineSeparator())
                                     .append(desc.title.get())
@@ -676,16 +679,20 @@ public class DatabaseRegistry {
                                     .append(" (")
                                     .append(cleanDatabaseName(sourceDb))
                                     .append(')');
+                        } else {
+                            //Merge layers content
+                            final String k = entry.getKey();
+                            final ModuleDescription desc2 = entry.getValue();
+
+                            this.mergeModuleDescriptions(desc, desc2);
+                            dstModules.put(k, desc2);
                         }
                     }
 
                     if (throwException) {
                         throw new IllegalArgumentException(moduleError.toString());
                     }
-                    else if (dstModuleListSize < dstModules.size()) {
-                        // module description have changed, we must trigger its update.
-                        modules = dstModules;
-                    }
+                    modules = dstModules;
                 }
             } else if (srcSRID != null) {
                 sridToSet = srcSRID;
@@ -904,6 +911,42 @@ public class DatabaseRegistry {
     private Stream<ReplicationTask> getReplicationTasksByTarget(final String dst) throws IOException {
         final String cleanedDst = cleanDatabaseName(dst);
         return getReplicationTasks().filter(t -> (cleanDatabaseName(t.getTargetDatabaseName()).equals(cleanedDst)));
+    }
+
+    /**
+     * Merge ModuleDescription layers into desc2
+     * @param desc1
+     * @param desc2
+     */
+    private void mergeModuleDescriptions(ModuleDescription desc1, ModuleDescription desc2) {
+        mergeLayers(desc1.layers, desc2.layers);
+    }
+
+    /**
+     * Merge layers1 and layers 2 into layers2
+     * @param layers1
+     * @param layers2
+     */
+    private void mergeLayers(List<ModuleDescription.Layer> layers1, List<ModuleDescription.Layer> layers2) {
+        List<ModuleDescription.Layer> toAdd = new ArrayList<>();
+
+        if (layers1.isEmpty()) {
+            return;
+        }
+        for (ModuleDescription.Layer l1: layers1) {
+            boolean found = false;
+
+            for (ModuleDescription.Layer l2: layers2) {
+                if (l1.title.equals(l2.title)) {
+                    found = true;
+                    mergeLayers(l1.children, l2.children);
+                }
+            }
+            if (!found) {
+                toAdd.add(l1);
+            }
+        }
+        layers2.addAll(toAdd);
     }
 
     ////////////////////////////////////////////////////////////////////////////

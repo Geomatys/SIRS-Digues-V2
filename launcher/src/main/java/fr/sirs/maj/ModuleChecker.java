@@ -123,7 +123,6 @@ public class ModuleChecker extends Task<Boolean> {
                 t.get();
             }
 
-            info.getModuleDescriptions().get(upgrade.toUpgrade.getConfiguration().getName()).setLayers(getLayers(upgrade.toUpgrade));
             info.getModuleDescriptions().get(upgrade.toUpgrade.getConfiguration().getName()).setVersion(getVersion(upgrade.toUpgrade));
             connector.update(info);
         }
@@ -288,20 +287,6 @@ public class ModuleChecker extends Task<Boolean> {
         } else {
             return new StringBuilder().append(conf.getVersionMajor()).append('.').append(conf.getVersionMinor()).toString();
         }
-    }
-
-    /**
-     * @param p NOTNULL A plugin to extract a list of layer.
-     * @return a list of the current plugin layer.
-     */
-    public static List<ModuleDescription.Layer> getLayers(final Plugin plugin) {
-        List<ModuleDescription.Layer> layers = new ArrayList<>();
-
-        List<MapItem> mapItems = plugin.getMapItems();
-        for (final MapItem item : mapItems) {
-            ModuleDescription.getLayerDescription(item).ifPresent(l -> layers.add(l));
-        }
-        return layers;
     }
 
     public static class ModuleVersion implements Comparable<PluginInfo> {
