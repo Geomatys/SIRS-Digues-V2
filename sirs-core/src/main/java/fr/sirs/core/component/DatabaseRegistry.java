@@ -930,14 +930,13 @@ public class DatabaseRegistry {
     private void mergeLayers(List<ModuleDescription.Layer> layers1, List<ModuleDescription.Layer> layers2) {
         List<ModuleDescription.Layer> toAdd = new ArrayList<>();
 
-        if (layers1.isEmpty()) {
-            return;
-        }
+        if (layers1.isEmpty()) return;
+
         for (ModuleDescription.Layer l1: layers1) {
             boolean found = false;
 
             for (ModuleDescription.Layer l2: layers2) {
-                if (l1.title.equals(l2.title)) {
+                if (l1.getTitle() != null && l1.getTitle().equals(l2.getTitle())) {
                     found = true;
                     mergeLayers(l1.children, l2.children);
                 }
