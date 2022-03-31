@@ -85,6 +85,7 @@ import fr.sirs.core.model.VoieDigue;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.migration.HtmlRemoval;
+import fr.sirs.migration.RemoveOldDependanceConf;
 import fr.sirs.migration.upgrade.v2and23.UpgradeLink1NtoNN;
 import fr.sirs.migration.upgrade.v2and23.UpgradePrestationsCoordinates;
 import fr.sirs.migration.upgrade.v2and23.Upgrades1NtoNNSupported;
@@ -1265,9 +1266,10 @@ public class CorePlugin extends Plugin {
             upgradeTasks.add(new UpgradePrestationsCoordinates(dbRegistry[0], dbConnector.getDatabaseName(), 2,23));
             findUpgradeTasks(2, 23, dbConnector, upgradeTasks); //Reccursive call to findUpgradeTasks from the 2.23 version of the plugin reached with the previous Task.
             return;
-
         }
-
+        if (fromMajor >= 3 || (fromMajor == 2 && fromMinor >= 35)) {
+            upgradeTasks.add(new RemoveOldDependanceConf(dbConnector));
+        }
         super.findUpgradeTasks(fromMajor, fromMinor, dbConnector, upgradeTasks);
     }
 
