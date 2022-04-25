@@ -1259,15 +1259,12 @@ public class CorePlugin extends Plugin {
 
         if (fromMajor < 2 || (fromMajor == 2 && fromMinor < 7)) {
             upgradeTasks.add(new HtmlRemoval(dbConnector, "commentaire"));
-            findUpgradeTasks(2, 7, dbConnector, upgradeTasks); //Reccursive call to findUpgradeTasks from the 2.7 version of the plugin reached with the previous Task.
-            return;
-        } else if (fromMajor < 2 || (fromMajor == 2 && fromMinor < 23)) {
+        }
+        if (fromMajor < 2 || (fromMajor == 2 && fromMinor < 23)) {
             upgradeTasks.add(new UpgradeLink1NtoNN(dbRegistry[0], dbConnector.getDatabaseName(), Upgrades1NtoNNSupported.DESORDRE));
             upgradeTasks.add(new UpgradePrestationsCoordinates(dbRegistry[0], dbConnector.getDatabaseName(), 2,23));
-            findUpgradeTasks(2, 23, dbConnector, upgradeTasks); //Reccursive call to findUpgradeTasks from the 2.23 version of the plugin reached with the previous Task.
-            return;
         }
-        if (fromMajor >= 3 || (fromMajor == 2 && fromMinor >= 35)) {
+        if (fromMajor < 2 || (fromMajor == 2 && fromMinor < 36)) {
             upgradeTasks.add(new RemoveOldDependanceConf(dbConnector));
         }
         super.findUpgradeTasks(fromMajor, fromMinor, dbConnector, upgradeTasks);
