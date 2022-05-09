@@ -98,6 +98,7 @@ class LabelLoader:
 def check_argument():
     copy2plugin = False
     copy2mobile = False
+    printInfo = False
     argv = sys.argv
 
     #parse arguments
@@ -107,13 +108,17 @@ def check_argument():
             print(content)
         sys.exit(0)
     for i in range(len(argv)):
-        if argv[i] == "--plugin":
+        if i == 0:
+            continue
+        elif argv[i] == "--plugin":
             copy2plugin = True
         elif argv[i] == "--mobile":
             copy2mobile = True
+        elif argv[i] == "--info":
+            printInfo = True
         else:
             print("WARNING unknown argument " + argv[i])
-    return copy2plugin, copy2mobile
+    return copy2plugin, copy2mobile, printInfo
 
 
 def collect_model_and_properties_paths():
@@ -229,42 +234,39 @@ export const formTemplatePilote = '''
     with open("form-template-pilote.ts", "w") as ftp:
         dump = json.dumps(filtered_by_attribute, indent=4, ensure_ascii=False)
         ftp.write(header + dump)
-        print("INFO form-template-pilote.ts imprimés avec succés")
+        print("INFO form-template-pilote.ts imprimé avec succés")
 
 
 def print_information(positionables, containment_classes):
-    print("\nINFO All generated positionable classes of the plugin Qgis")
-    positionables.sort()
+    print("INFO All generated positionable classes of the plugin Qgis")
     for p in positionables:
         print("\t" + p)
-    print("\nINFO All generated containment classes from positionable classes")
+    print("INFO All generated containment classes from positionable classes")
     containment_classes_list = list(containment_classes)
     containment_classes_list.sort()
     for cc in containment_classes_list:
         print("\t" + cc)
 
 
-def copy_to_plugin(copy2plugin):
-    if copy2plugin:
-        try:
-            shutil.copy("formTemplatePilote.json", QGIS_PLUGIN_PROJECT_PATH)
-            shutil.copy("user_preference_correspondence.json", QGIS_PLUGIN_PROJECT_PATH)
-            print("\nINFO formTemplatePilote.json et user_preference_correspondence.json copiés avec succés dans " + QGIS_PLUGIN_PROJECT_PATH)
-        except TypeError or FileNotFoundError:
-            print("ERROR Impossible de copier les fichiers générés vers le plugin QGIS. Vérifiez que la variable QGIS_PLUGIN_PROJECT_PATH est un chemin valide.")
+def copy_to_plugin():
+    try:
+        shutil.copy("formTemplatePilote.json", QGIS_PLUGIN_PROJECT_PATH)
+        shutil.copy("user_preference_correspondence.json", QGIS_PLUGIN_PROJECT_PATH)
+        print("INFO formTemplatePilote.json et user_preference_correspondence.json copiés avec succés dans " + QGIS_PLUGIN_PROJECT_PATH)
+    except TypeError or FileNotFoundError:
+        print("ERROR Impossible de copier les fichiers générés vers le plugin QGIS. Vérifiez que la variable QGIS_PLUGIN_PROJECT_PATH est un chemin valide.")
 
 
-def copy_to_mobile(copy2ToMobile):
-    if copy2ToMobile:
-        try:
-            path = SIRS_MOBILE_PROJECT_PATH
-            if path[-1] == "/":
-                path = path[:-1]
-            path = path + "/src/app/utils"
-            shutil.copy("form-template-pilote.ts", path)
-            print("\nINFO form-template-pilote.ts copiés avec succés dans " + path)
-        except TypeError or FileNotFoundError:
-            print("ERROR Impossible de copier le fichier form-template-pilote.ts dans le projet Sirs mobile. Vérifiez que la variable SIRS_MOBILE_PROJECT_PATH est un chemin valide.")
+def copy_to_mobile():
+    try:
+        path = SIRS_MOBILE_PROJECT_PATH
+        if path[-1] == "/":
+            path = path[:-1]
+        path = path + "/src/app/utils"
+        shutil.copy("form-template-pilote.ts", path)
+        print("INFO form-template-pilote.ts copiés avec succés dans " + path)
+    except TypeError or FileNotFoundError:
+        print("ERROR Impossible de copier le fichier form-template-pilote.ts dans le projet Sirs mobile. Vérifiez que la variable SIRS_MOBILE_PROJECT_PATH est un chemin valide.")
 
 
 def engine(formTemplatePilote, resourceSet, ecore_paths, properties_paths):
@@ -311,7 +313,7 @@ def print_files(formTemplatePilote, preferences):
 
 if __name__ == "__main__":
     # Récupération des arguments
-    copy2plugin, copy2mobile = check_argument()
+    copy2plugin, copy2mobile, printInfo = check_argument()
 
     # Initialisation
     formTemplatePilote = {}
@@ -333,8 +335,11 @@ if __name__ == "__main__":
     print_files(formTemplatePilote, preferences)
 
     # Copie des fichiers de sortie
-    copy_to_plugin(copy2plugin)
-    copy_to_mobile(copy2mobile)
+    if copy2plugin:
+        copy_to_plugin()
+    if copy2mobile:
+        copy_to_mobile()
 
     # Impression des informations
-    print_information(all_positionable, containment_classes_from_positionable)
+    if printInfo:
+        print_information(all_positionable, containment_classes_from_positionable)

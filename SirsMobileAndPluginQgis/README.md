@@ -16,13 +16,13 @@ form-template-pilotes.ts contient l'objet formTemplatePilote (utilisé par le se
 formTemplatePilote est une "feuille de route" pour le composant générique base-form, qui produit une partie du formulaire d'édition
 pour certains objets (actuellemement tous les objets ne sont pas concernés).
 Actuellement les objets concernés sont:
-	Prestation				(Core)
-	AmenagementHydraulique			(Plugin-dependance)
-	DesordreDependance			(Plugin-dependance)
-	PrestationAmenagementHydraulique	(Plugin-dependance)
-	StructureAmenagementHydraulique		(Plugin-dependance)
+	Prestation								(Core)
+	AmenagementHydraulique					(Plugin-dependance)
+	DesordreDependance						(Plugin-dependance)
+	PrestationAmenagementHydraulique		(Plugin-dependance)
+	StructureAmenagementHydraulique			(Plugin-dependance)
 	OuvrageAssocieAmenagementHydraulique	(Plugin-dependance)
-	OrganeProtectionCollective		(Plugin-dependance)
+	OrganeProtectionCollective				(Plugin-dependance)
 
 ##### Plugin QGIS
 formTemplatePilote.json et user_preference_correspondence.json sont des fichiers de configuration à la racine du plugin QGIS.
@@ -43,9 +43,10 @@ Specifiquement pour le plugin QGIS:
 
 ##### Command
 Commande:
-	`python [--help|--plugin|--mobile] buildEditionFormPilote.py`
+	`python [--help|--info|--plugin|--mobile] buildEditionFormPilote.py`
 
  --help: Affiche cette documentation.
+ --info: Affiche la liste des objets traités et la liste des objets "contenus" traités.
  --plugin : Copie formTemplatePilote.json et user_preference_correspondence.json dans le module Qgis 	(variable d'environnement à renseigner: QGIS_PLUGIN_PROJECT_PATH).
  --mobile : Copie le fichier form-template-pilotes.ts dans le projet SIRSMOBILEV2 			(variable d'environnement à renseigner: SIRS_MOBILE_PROJECT_PATH).
 
