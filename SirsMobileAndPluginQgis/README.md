@@ -3,7 +3,7 @@
 Ce dossier contient le script buildEditionFormPilote.py qui sert à créer des fichiers de configuration qui servent à:
 	- piloter la construction de certains composants dans SirsMobile
 	- piloter la construction de modèles dans le plugin QGIS.
-Ce script est placé dans SIRS (desktop) pour utiliser les diagrammes ecore et les fichier de properties.
+Ce script est placé dans SIRS (desktop) pour utiliser les diagrammes ecore et les fichier de propriétés.
 Ce script est motivé pour faciliter les répercutions de mise à jour du modèle de SirsDesktop dans SirsMobile et le plugin QGIS.
 Ce script crée:
  - Le fichier form-template-pilotes.ts: fichier typescript contient la variable formTemplatePilote.
@@ -35,7 +35,8 @@ Specifiquement pour le plugin QGIS:
 
 
 ### Usage
-##### Requirements
+##### Prérequis
+/!\Ce script doit être lancé sur un système UNIX ou MacOS/!\
 /!\Ce script doit être lancé depuis ce dossier/!\
 /!\Le binaire d'execution doit être python version 3.6 ou plus/!\
 /!\Installer le module pyecore (ex: `python -m pip install pyecore`)
@@ -44,6 +45,7 @@ Specifiquement pour le plugin QGIS:
 Commande:
 	`python [--help|--plugin|--mobile] buildEditionFormPilote.py`
 
+ --help: Affiche cette documentation.
  --plugin : Copie formTemplatePilote.json et user_preference_correspondence.json dans le module Qgis 	(variable d'environnement à renseigner: QGIS_PLUGIN_PROJECT_PATH).
  --mobile : Copie le fichier form-template-pilotes.ts dans le projet SIRSMOBILEV2 			(variable d'environnement à renseigner: SIRS_MOBILE_PROJECT_PATH).
 
