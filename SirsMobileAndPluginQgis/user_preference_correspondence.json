@@ -6068,13 +6068,35 @@
     },
     "crs": "EPSG:2154"
   },
-  "RefEtat": {
+  "PositionConvention": {
     "attributes": {
-      "libelle": true,
-      "dateMaj": true,
+      "borneDebutId": true,
+      "borne_debut_aval": true,
+      "borne_debut_distance": true,
+      "positionDebut": true,
+      "prDebut": true,
+      "borneFinId": true,
+      "borne_fin_aval": true,
+      "borne_fin_distance": true,
+      "positionFin": true,
+      "prFin": true,
+      "geometry": true,
+      "systemeRepId": true,
+      "valid": true,
       "author": true,
       "designation": true,
-      "valid": true
+      "longitudeMin": true,
+      "longitudeMax": true,
+      "latitudeMin": true,
+      "latitudeMax": true,
+      "geometryMode": true,
+      "editedGeoCoordinate": true,
+      "linearId": true,
+      "sirsdocument": true,
+      "date_debut": true,
+      "date_fin": true,
+      "objetId": true,
+      "commentaire": true
     },
     "style": {
       "point": {
@@ -6090,6 +6112,187 @@
       },
       "polygon": {
         "color": "#ffbf4",
+        "outline_color": "black"
+      }
+    },
+    "crs": "EPSG:2154"
+  },
+  "RefConventionPJ": {
+    "attributes": {
+      "libelle": true,
+      "dateMaj": true,
+      "author": true,
+      "designation": true,
+      "valid": true
+    },
+    "style": {
+      "point": {
+        "name": "circle",
+        "color": "#ff17e8"
+      },
+      "line": {
+        "color": "#ff17e8",
+        "width": "1.0",
+        "capstyle": "round",
+        "line_style": "solid",
+        "joinstyle": "round"
+      },
+      "polygon": {
+        "color": "#ff17e8",
+        "outline_color": "black"
+      }
+    },
+    "crs": "EPSG:2154"
+  },
+  "AssociationConvention": {
+    "attributes": {
+      "date_debut": true,
+      "date_fin": true,
+      "objetId": true,
+      "commentaire": true,
+      "valid": true,
+      "designation": true,
+      "author": true
+    },
+    "style": {
+      "point": {
+        "name": "circle",
+        "color": "#ff22dd"
+      },
+      "line": {
+        "color": "#ff22dd",
+        "width": "1.0",
+        "capstyle": "round",
+        "line_style": "solid",
+        "joinstyle": "round"
+      },
+      "polygon": {
+        "color": "#ff22dd",
+        "outline_color": "black"
+      }
+    },
+    "crs": "EPSG:2154"
+  },
+  "RefConvention": {
+    "attributes": {
+      "libelle": true,
+      "dateMaj": true,
+      "author": true,
+      "designation": true,
+      "valid": true
+    },
+    "style": {
+      "point": {
+        "name": "circle",
+        "color": "#ff2ed1"
+      },
+      "line": {
+        "color": "#ff2ed1",
+        "width": "1.0",
+        "capstyle": "round",
+        "line_style": "solid",
+        "joinstyle": "round"
+      },
+      "polygon": {
+        "color": "#ff2ed1",
+        "outline_color": "black"
+      }
+    },
+    "crs": "EPSG:2154"
+  },
+  "Convention": {
+    "attributes": {
+      "referencePapier": true,
+      "chemin": true,
+      "author": true,
+      "designation": true,
+      "valid": true,
+      "date_debut": true,
+      "date_fin": true,
+      "typeConventionId": true,
+      "libelle": true,
+      "commentaire": true,
+      "dateMaj": true,
+      "organismeSignataireIds": true,
+      "contactSignataireIds": true,
+      "piecesJointes": true,
+      "dossierComplet": true,
+      "dateSignature": true,
+      "taciteReconduction": true,
+      "exonerationRedevance": true,
+      "montantRedevance": true,
+      "associations": true
+    },
+    "style": {
+      "point": {
+        "name": "circle",
+        "color": "#ff3ac5"
+      },
+      "line": {
+        "color": "#ff3ac5",
+        "width": "1.0",
+        "capstyle": "round",
+        "line_style": "solid",
+        "joinstyle": "round"
+      },
+      "polygon": {
+        "color": "#ff3ac5",
+        "outline_color": "black"
+      }
+    },
+    "crs": "EPSG:2154"
+  },
+  "ConventionPJ": {
+    "attributes": {
+      "libelle": true,
+      "date": true,
+      "designation": true,
+      "author": true,
+      "valid": true,
+      "chemin": true,
+      "typeConventionPJId": true
+    },
+    "style": {
+      "point": {
+        "name": "circle",
+        "color": "#ff45ba"
+      },
+      "line": {
+        "color": "#ff45ba",
+        "width": "1.0",
+        "capstyle": "round",
+        "line_style": "solid",
+        "joinstyle": "round"
+      },
+      "polygon": {
+        "color": "#ff45ba",
+        "outline_color": "black"
+      }
+    },
+    "crs": "EPSG:2154"
+  },
+  "RefEtat": {
+    "attributes": {
+      "libelle": true,
+      "dateMaj": true,
+      "author": true,
+      "designation": true,
+      "valid": true
+    },
+    "style": {
+      "point": {
+        "name": "circle",
+        "color": "#ff51ae"
+      },
+      "line": {
+        "color": "#ff51ae",
+        "width": "1.0",
+        "capstyle": "round",
+        "line_style": "solid",
+        "joinstyle": "round"
+      },
+      "polygon": {
+        "color": "#ff51ae",
         "outline_color": "black"
       }
     },
@@ -6131,17 +6334,17 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ff17e8"
+        "color": "#ff5da2"
       },
       "line": {
-        "color": "#ff17e8",
+        "color": "#ff5da2",
         "width": "1.0",
         "capstyle": "round",
         "line_style": "solid",
         "joinstyle": "round"
       },
       "polygon": {
-        "color": "#ff17e8",
+        "color": "#ff5da2",
         "outline_color": "black"
       }
     },
@@ -6165,17 +6368,17 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ff22dd"
+        "color": "#ff6897"
       },
       "line": {
-        "color": "#ff22dd",
+        "color": "#ff6897",
         "width": "1.0",
         "capstyle": "round",
         "line_style": "solid",
         "joinstyle": "round"
       },
       "polygon": {
-        "color": "#ff22dd",
+        "color": "#ff6897",
         "outline_color": "black"
       }
     },
@@ -6195,17 +6398,17 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ff2ed1"
+        "color": "#ff748b"
       },
       "line": {
-        "color": "#ff2ed1",
+        "color": "#ff748b",
         "width": "1.0",
         "capstyle": "round",
         "line_style": "solid",
         "joinstyle": "round"
       },
       "polygon": {
-        "color": "#ff2ed1",
+        "color": "#ff748b",
         "outline_color": "black"
       }
     },
@@ -6222,17 +6425,17 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ff3ac5"
+        "color": "#ff8080"
       },
       "line": {
-        "color": "#ff3ac5",
+        "color": "#ff8080",
         "width": "1.0",
         "capstyle": "round",
         "line_style": "solid",
         "joinstyle": "round"
       },
       "polygon": {
-        "color": "#ff3ac5",
+        "color": "#ff8080",
         "outline_color": "black"
       }
     },
@@ -6249,17 +6452,17 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ff45ba"
+        "color": "#ff8b74"
       },
       "line": {
-        "color": "#ff45ba",
+        "color": "#ff8b74",
         "width": "1.0",
         "capstyle": "round",
         "line_style": "solid",
         "joinstyle": "round"
       },
       "polygon": {
-        "color": "#ff45ba",
+        "color": "#ff8b74",
         "outline_color": "black"
       }
     },
@@ -6276,17 +6479,17 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ff51ae"
+        "color": "#ff9768"
       },
       "line": {
-        "color": "#ff51ae",
+        "color": "#ff9768",
         "width": "1.0",
         "capstyle": "round",
         "line_style": "solid",
         "joinstyle": "round"
       },
       "polygon": {
-        "color": "#ff51ae",
+        "color": "#ff9768",
         "outline_color": "black"
       }
     },
@@ -6323,17 +6526,17 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ff5da2"
+        "color": "#ffa25d"
       },
       "line": {
-        "color": "#ff5da2",
+        "color": "#ffa25d",
         "width": "1.0",
         "capstyle": "round",
         "line_style": "solid",
         "joinstyle": "round"
       },
       "polygon": {
-        "color": "#ff5da2",
+        "color": "#ffa25d",
         "outline_color": "black"
       }
     },
@@ -6366,17 +6569,17 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ff6897"
+        "color": "#ffae51"
       },
       "line": {
-        "color": "#ff6897",
+        "color": "#ffae51",
         "width": "1.0",
         "capstyle": "round",
         "line_style": "solid",
         "joinstyle": "round"
       },
       "polygon": {
-        "color": "#ff6897",
+        "color": "#ffae51",
         "outline_color": "black"
       }
     },
@@ -6399,17 +6602,17 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ff748b"
+        "color": "#ffba45"
       },
       "line": {
-        "color": "#ff748b",
+        "color": "#ffba45",
         "width": "1.0",
         "capstyle": "round",
         "line_style": "solid",
         "joinstyle": "round"
       },
       "polygon": {
-        "color": "#ff748b",
+        "color": "#ffba45",
         "outline_color": "black"
       }
     },
@@ -6443,17 +6646,17 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ff8080"
+        "color": "#ffc53a"
       },
       "line": {
-        "color": "#ff8080",
+        "color": "#ffc53a",
         "width": "1.0",
         "capstyle": "round",
         "line_style": "solid",
         "joinstyle": "round"
       },
       "polygon": {
-        "color": "#ff8080",
+        "color": "#ffc53a",
         "outline_color": "black"
       }
     },
@@ -6479,17 +6682,17 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ff8b74"
+        "color": "#ffd12e"
       },
       "line": {
-        "color": "#ff8b74",
+        "color": "#ffd12e",
         "width": "1.0",
         "capstyle": "round",
         "line_style": "solid",
         "joinstyle": "round"
       },
       "polygon": {
-        "color": "#ff8b74",
+        "color": "#ffd12e",
         "outline_color": "black"
       }
     },
@@ -6519,17 +6722,17 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ff9768"
+        "color": "#ffdd22"
       },
       "line": {
-        "color": "#ff9768",
+        "color": "#ffdd22",
         "width": "1.0",
         "capstyle": "round",
         "line_style": "solid",
         "joinstyle": "round"
       },
       "polygon": {
-        "color": "#ff9768",
+        "color": "#ffdd22",
         "outline_color": "black"
       }
     },
@@ -6551,17 +6754,17 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ffa25d"
+        "color": "#ffe817"
       },
       "line": {
-        "color": "#ffa25d",
+        "color": "#ffe817",
         "width": "1.0",
         "capstyle": "round",
         "line_style": "solid",
         "joinstyle": "round"
       },
       "polygon": {
-        "color": "#ffa25d",
+        "color": "#ffe817",
         "outline_color": "black"
       }
     },
@@ -6585,180 +6788,6 @@
     "style": {
       "point": {
         "name": "circle",
-        "color": "#ffae51"
-      },
-      "line": {
-        "color": "#ffae51",
-        "width": "1.0",
-        "capstyle": "round",
-        "line_style": "solid",
-        "joinstyle": "round"
-      },
-      "polygon": {
-        "color": "#ffae51",
-        "outline_color": "black"
-      }
-    },
-    "crs": "EPSG:2154"
-  },
-  "RefFonctionnementOAAH": {
-    "attributes": {
-      "libelle": true,
-      "dateMaj": true,
-      "author": true,
-      "designation": true,
-      "valid": true
-    },
-    "style": {
-      "point": {
-        "name": "circle",
-        "color": "#ffba45"
-      },
-      "line": {
-        "color": "#ffba45",
-        "width": "1.0",
-        "capstyle": "round",
-        "line_style": "solid",
-        "joinstyle": "round"
-      },
-      "polygon": {
-        "color": "#ffba45",
-        "outline_color": "black"
-      }
-    },
-    "crs": "EPSG:2154"
-  },
-  "RefOuvrageAssocieAH": {
-    "attributes": {
-      "libelle": true,
-      "dateMaj": true,
-      "author": true,
-      "designation": true,
-      "valid": true
-    },
-    "style": {
-      "point": {
-        "name": "circle",
-        "color": "#ffc53a"
-      },
-      "line": {
-        "color": "#ffc53a",
-        "width": "1.0",
-        "capstyle": "round",
-        "line_style": "solid",
-        "joinstyle": "round"
-      },
-      "polygon": {
-        "color": "#ffc53a",
-        "outline_color": "black"
-      }
-    },
-    "crs": "EPSG:2154"
-  },
-  "OuvrageVoirieDependance": {
-    "attributes": {
-      "valid": true,
-      "designation": true,
-      "author": true,
-      "geometry": true,
-      "date_fin": true,
-      "date_debut": true,
-      "commentaire": true,
-      "libelle": true,
-      "proprietes": true,
-      "gestions": true,
-      "photos": true,
-      "typeId": true
-    },
-    "style": {
-      "point": {
-        "name": "circle",
-        "color": "#ffd12e"
-      },
-      "line": {
-        "color": "#ffd12e",
-        "width": "1.0",
-        "capstyle": "round",
-        "line_style": "solid",
-        "joinstyle": "round"
-      },
-      "polygon": {
-        "color": "#ffd12e",
-        "outline_color": "black"
-      }
-    },
-    "crs": "EPSG:2154"
-  },
-  "MateriauDependance": {
-    "attributes": {
-      "valid": true,
-      "author": true,
-      "designation": true,
-      "volume": true,
-      "date": true,
-      "typeMateriauId": true
-    },
-    "style": {
-      "point": {
-        "name": "circle",
-        "color": "#ffdd22"
-      },
-      "line": {
-        "color": "#ffdd22",
-        "width": "1.0",
-        "capstyle": "round",
-        "line_style": "solid",
-        "joinstyle": "round"
-      },
-      "polygon": {
-        "color": "#ffdd22",
-        "outline_color": "black"
-      }
-    },
-    "crs": "EPSG:2154"
-  },
-  "TraitAmenagementHydraulique": {
-    "attributes": {
-      "author": true,
-      "valid": true,
-      "designation": true,
-      "geometry": true,
-      "amenagementHydrauliqueId": true,
-      "date_debut": true,
-      "date_fin": true,
-      "dateMaj": true,
-      "commentaire": true
-    },
-    "style": {
-      "point": {
-        "name": "circle",
-        "color": "#ffe817"
-      },
-      "line": {
-        "color": "#ffe817",
-        "width": "1.0",
-        "capstyle": "round",
-        "line_style": "solid",
-        "joinstyle": "round"
-      },
-      "polygon": {
-        "color": "#ffe817",
-        "outline_color": "black"
-      }
-    },
-    "crs": "EPSG:2154"
-  },
-  "RefTypeAmenagementHydraulique": {
-    "attributes": {
-      "libelle": true,
-      "dateMaj": true,
-      "author": true,
-      "designation": true,
-      "valid": true
-    },
-    "style": {
-      "point": {
-        "name": "circle",
         "color": "#fff4b"
       },
       "line": {
@@ -6775,7 +6804,7 @@
     },
     "crs": "EPSG:2154"
   },
-  "RefDestinationDependance": {
+  "RefFonctionnementOAAH": {
     "attributes": {
       "libelle": true,
       "dateMaj": true,
@@ -6802,19 +6831,13 @@
     },
     "crs": "EPSG:2154"
   },
-  "AbstractDependance": {
+  "RefOuvrageAssocieAH": {
     "attributes": {
-      "valid": true,
-      "designation": true,
-      "author": true,
-      "geometry": true,
-      "date_fin": true,
-      "date_debut": true,
-      "commentaire": true,
       "libelle": true,
-      "proprietes": true,
-      "gestions": true,
-      "photos": true
+      "dateMaj": true,
+      "author": true,
+      "designation": true,
+      "valid": true
     },
     "style": {
       "point": {
@@ -6835,23 +6858,20 @@
     },
     "crs": "EPSG:2154"
   },
-  "OrganeProtectionCollective": {
+  "OuvrageVoirieDependance": {
     "attributes": {
-      "author": true,
       "valid": true,
       "designation": true,
+      "author": true,
       "geometry": true,
-      "amenagementHydrauliqueId": true,
-      "date_debut": true,
       "date_fin": true,
-      "dateMaj": true,
+      "date_debut": true,
       "commentaire": true,
       "libelle": true,
-      "cote": true,
-      "observations": true,
-      "typeId": true,
+      "proprietes": true,
+      "gestions": true,
       "photos": true,
-      "etatId": true
+      "typeId": true
     },
     "style": {
       "point": {
@@ -6872,35 +6892,14 @@
     },
     "crs": "EPSG:2154"
   },
-  "PositionConvention": {
+  "MateriauDependance": {
     "attributes": {
-      "borneDebutId": true,
-      "borne_debut_aval": true,
-      "borne_debut_distance": true,
-      "positionDebut": true,
-      "prDebut": true,
-      "borneFinId": true,
-      "borne_fin_aval": true,
-      "borne_fin_distance": true,
-      "positionFin": true,
-      "prFin": true,
-      "geometry": true,
-      "systemeRepId": true,
       "valid": true,
       "author": true,
       "designation": true,
-      "longitudeMin": true,
-      "longitudeMax": true,
-      "latitudeMin": true,
-      "latitudeMax": true,
-      "geometryMode": true,
-      "editedGeoCoordinate": true,
-      "linearId": true,
-      "sirsdocument": true,
-      "date_debut": true,
-      "date_fin": true,
-      "objetId": true,
-      "commentaire": true
+      "volume": true,
+      "date": true,
+      "typeMateriauId": true
     },
     "style": {
       "point": {
@@ -6921,13 +6920,17 @@
     },
     "crs": "EPSG:2154"
   },
-  "RefConventionPJ": {
+  "TraitAmenagementHydraulique": {
     "attributes": {
-      "libelle": true,
-      "dateMaj": true,
       "author": true,
+      "valid": true,
       "designation": true,
-      "valid": true
+      "geometry": true,
+      "amenagementHydrauliqueId": true,
+      "date_debut": true,
+      "date_fin": true,
+      "dateMaj": true,
+      "commentaire": true
     },
     "style": {
       "point": {
@@ -6948,15 +6951,13 @@
     },
     "crs": "EPSG:2154"
   },
-  "AssociationConvention": {
+  "RefTypeAmenagementHydraulique": {
     "attributes": {
-      "date_debut": true,
-      "date_fin": true,
-      "objetId": true,
-      "commentaire": true,
-      "valid": true,
+      "libelle": true,
+      "dateMaj": true,
+      "author": true,
       "designation": true,
-      "author": true
+      "valid": true
     },
     "style": {
       "point": {
@@ -6977,7 +6978,7 @@
     },
     "crs": "EPSG:2154"
   },
-  "RefConvention": {
+  "RefDestinationDependance": {
     "attributes": {
       "libelle": true,
       "dateMaj": true,
@@ -7004,28 +7005,19 @@
     },
     "crs": "EPSG:2154"
   },
-  "Convention": {
+  "AbstractDependance": {
     "attributes": {
-      "referencePapier": true,
-      "chemin": true,
-      "author": true,
-      "designation": true,
       "valid": true,
-      "date_debut": true,
+      "designation": true,
+      "author": true,
+      "geometry": true,
       "date_fin": true,
-      "typeConventionId": true,
-      "libelle": true,
+      "date_debut": true,
       "commentaire": true,
-      "dateMaj": true,
-      "organismeSignataireIds": true,
-      "contactSignataireIds": true,
-      "piecesJointes": true,
-      "dossierComplet": true,
-      "dateSignature": true,
-      "taciteReconduction": true,
-      "exonerationRedevance": true,
-      "montantRedevance": true,
-      "associations": true
+      "libelle": true,
+      "proprietes": true,
+      "gestions": true,
+      "photos": true
     },
     "style": {
       "point": {
@@ -7046,15 +7038,23 @@
     },
     "crs": "EPSG:2154"
   },
-  "ConventionPJ": {
+  "OrganeProtectionCollective": {
     "attributes": {
-      "libelle": true,
-      "date": true,
-      "designation": true,
       "author": true,
       "valid": true,
-      "chemin": true,
-      "typeConventionPJId": true
+      "designation": true,
+      "geometry": true,
+      "amenagementHydrauliqueId": true,
+      "date_debut": true,
+      "date_fin": true,
+      "dateMaj": true,
+      "commentaire": true,
+      "libelle": true,
+      "cote": true,
+      "observations": true,
+      "typeId": true,
+      "photos": true,
+      "etatId": true
     },
     "style": {
       "point": {
