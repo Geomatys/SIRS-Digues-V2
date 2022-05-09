@@ -8,9 +8,11 @@ import os
 import shutil
 import re
 
-#QGIS_PLUGIN_PROJECT_PATH = ""
-QGIS_PLUGIN_PROJECT_PATH = "/home/maximegavens/GEOMATYS/qgis-plugin-couchdb-project/qgis-plugin-couchdb/couchdb_importer"
-SIRS_MOBILE_PROJECT_PATH = "/home/maximegavens/GEOMATYS/sirsMobile-project/sirsmobilev2"
+
+#QGIS_PLUGIN_PROJECT_PATH = "/home/maximegavens/GEOMATYS/qgis-plugin-couchdb-project/qgis-plugin-couchdb/couchdb_importer"
+QGIS_PLUGIN_PROJECT_PATH = os.environ.get('QGIS_PLUGIN_PROJECT_PATH')
+#SIRS_MOBILE_PROJECT_PATH = "/home/maximegavens/GEOMATYS/sirsMobile-project/sirsmobilev2"
+SIRS_MOBILE_PROJECT_PATH = os.environ.get('SIRS_MOBILE_PROJECT_PATH')
 FORM_TEMPLATE_MOBILE_CLASS = [
     "AmenagementHydraulique",
     "PrestationAmenagementHydraulique",
@@ -19,6 +21,16 @@ FORM_TEMPLATE_MOBILE_CLASS = [
     "DesordreDependance",
     "OuvrageAssocieAmenagementHydraulique",
     "Prestation"
+]
+NO_FORM_TEMPLATE_MOBILE_ATTRIBUTE = [
+    "geometry",
+    "date_debut",
+    "date_fin",
+    "dateMaj",
+    "commentaire",
+    "designation",
+    "valid",
+    "author"
 ]
 
 all_positionable = []
@@ -86,54 +98,40 @@ class LabelLoader:
 def check_argument():
     copy2plugin = False
     copy2mobile = False
-    general_filter = False
-    plugins = ['dependance', 'aot-cot', 'lit', 'carto', 'berge', 'reglementary', 'vegetation', 'core']
-    ecore_paths = []
-    properties_paths = []
-    P = "all"
     argv = sys.argv
 
+    #parse arguments
     if argv[-1] == "--help":
-        with open("README.txt", "r") as f:
+        with open("README.md", "r") as f:
             content = f.read()
             print(content)
         sys.exit(0)
-
     for i in range(len(argv)):
-        if argv[i] == "-filter-general":
-            general_filter = True
-        if argv[i] == "-plugin":
+        if argv[i] == "--plugin":
             copy2plugin = True
-        if argv[i] == "-mobile":
+        elif argv[i] == "--mobile":
             copy2mobile = True
-
-    if P != "all":
-        if P == "aot-cot":
-            ecore_paths.append("../plugin-aot-cot/model/aot_cot.ecore")
-            properties_paths.append("../plugin-" + P + "/src/main/resources/fr/sirs/core/model/*")
-        elif P == "core":
-            ecore_paths.append("../sirs-core/model/sirs.ecore")
-            properties_paths.append("../sirs-core/src/main/resources/fr/sirs/core/model/*")
         else:
-            ecore_paths.append("../plugin-" + P + "/model/" + P + ".ecore")
-            properties_paths.append("../plugin-" + P + "/src/main/resources/fr/sirs/core/model/*")
-    else:
-        del plugins[-1]
-        ecore_paths.append("../sirs-core/model/sirs.ecore")
-        properties_paths.append("../sirs-core/src/main/resources/fr/sirs/core/model/*")
-        for plugin in plugins:
-            if plugin == "aot-cot":
-                ecore_paths.append("../plugin-aot-cot/model/aot_cot.ecore")
-            else:
-                ecore_paths.append("../plugin-" + plugin + "/model/" + plugin + ".ecore")
-            properties_paths.append("../plugin-" + plugin + "/src/main/resources/fr/sirs/core/model/*")
+            print("WARNING unknown argument " + argv[i])
+    return copy2plugin, copy2mobile
 
-    return ecore_paths, properties_paths, general_filter, copy2plugin, copy2mobile
-    
 
-def is_general_attribute(name):
-    return name in ["geometry", "date_debut", "date_fin", "dateMaj", "commentaire", "designation", "valid", "author"]
+def collect_model_and_properties_paths():
+    plugins_without_aot_cot = ['dependance', 'lit', 'carto', 'berge', 'reglementary', 'vegetation']
+    ecore_paths = []
+    properties_paths = []
 
+    #core paths
+    ecore_paths.append("../sirs-core/model/sirs.ecore")
+    properties_paths.append("../sirs-core/src/main/resources/fr/sirs/core/model/*")
+    #plugin aot-cot paths
+    ecore_paths.append("../plugin-aot-cot/model/aot_cot.ecore")
+    properties_paths.append("../plugin-aot-cot/src/main/resources/fr/sirs/core/model/*")
+    #other plugins paths
+    for plugin in plugins_without_aot_cot:
+        ecore_paths.append("../plugin-" + plugin + "/model/" + plugin + ".ecore")
+        properties_paths.append("../plugin-" + plugin + "/src/main/resources/fr/sirs/core/model/*")
+    return ecore_paths, properties_paths
 
 class WrapAttribute(object):
     def __init__(self, clazz, attribute: Ecore.EAttribute, labels):
@@ -193,107 +191,127 @@ def find_containment_classes(classifier: Ecore.EClassifier):
             pass
 
 
-def transform(classifier: Ecore.EClassifier, result, clazz, ll, general_filter):
+def transform(classifier: Ecore.EClassifier, result, clazz, ll):
     if type(classifier) == Ecore.EClass or type(classifier) == Ecore.EProxy:
         super_types: Ecore.EOrderedSet = classifier.eAllSuperTypes()
         for st in super_types:
-            transform(st, result, clazz, ll, general_filter)
+            transform(st, result, clazz, ll)
         content = list(classifier.eAllContents())
         for obj in content:
             if type(obj) == Ecore.EAttribute:
                 a = WrapAttribute(clazz, obj, ll)
-                if not (general_filter and is_general_attribute(a.name)):
-                    result[clazz][a.name] = a.__dict__
+                result[clazz][a.name] = a.__dict__
             if type(obj) == Ecore.EReference:
                 r = WrapReference(clazz, obj, ll)
-                if not (general_filter and is_general_attribute(r.name)):
-                    result[clazz][r.name] = r.__dict__
+                result[clazz][r.name] = r.__dict__
 
 
 def filter_by_class(object_pilote, classes):
     return {k: v for k, v in object_pilote.items() if k in classes}
 
 
+def filter_by_attribute(object_pilote, without_those_attributes):
+    return {k: {k2: v2 for k2, v2 in v.items() if k2 not in without_those_attributes} for k, v in object_pilote.items()}
+
+
 def build_form_template_for_mobile(original_pilot):
-    filter_pilot = filter_by_class(original_pilot, FORM_TEMPLATE_MOBILE_CLASS)
+    filtered_by_class = filter_by_class(original_pilot, FORM_TEMPLATE_MOBILE_CLASS)
+    filtered_by_attribute = filter_by_attribute(filtered_by_class, NO_FORM_TEMPLATE_MOBILE_ATTRIBUTE)
+    #don't touch the header indentation here!
     header = '''/* eslint-disable no-console */
 /**
- * This object pilote the component BaseForm that is a generic
- * component which build edition.
+ * Object used by the component BaseForm, a generic component for building edit forms.
  *
- * !WARNING!
- * You can generate this object by running the script /SirsMobile/buildEditionFormPilote.py founded
- * at the root of the desktop project.
+ * /!\I'm a script generated by SIRS DESKTOP! Take a look at the folder 'SirsMobileAndPluginQgis' within the desktop project.
  */
 export const formTemplatePilote = '''
 
     with open("form-template-pilote.ts", "w") as ftp:
-        dump = json.dumps(filter_pilot, indent=4, ensure_ascii=False)
+        dump = json.dumps(filtered_by_attribute, indent=4, ensure_ascii=False)
         ftp.write(header + dump)
+        print("INFO form-template-pilote.ts imprimés avec succés")
 
 
-def print_information(positionables, containment_classes, plugin_succeed, mobile_succeed):
-    print("\nAll positionable classes of the plugin Qgis")
+def print_information(positionables, containment_classes):
+    print("\nINFO All generated positionable classes of the plugin Qgis")
     positionables.sort()
     for p in positionables:
         print("\t" + p)
-    print("\nAll containment classes from positionable")
-    print(containment_classes)
-    print()
-    if not plugin_succeed:
-        print("Impossible de copier les fichiers générés vers le plugin QGIS. Vérifiez que la variable QGIS_PLUGIN_PROJECT_PATH est un chemin valide.")
-    if not mobile_succeed:
-        print("Impossible de copier le fichier form-template-pilote.ts dans le projet Sirs mobile. Vérifiez que la variable SIRS_MOBILE_PROJECT_PATH est un chemin valide.")
-    if plugin_succeed and mobile_succeed:
-        print("Exécuté avec succés!")
+    print("\nINFO All generated containment classes from positionable classes")
+    containment_classes_list = list(containment_classes)
+    containment_classes_list.sort()
+    for cc in containment_classes_list:
+        print("\t" + cc)
 
 
-def copy_to_plugin():
-    try:
-        shutil.copy("formTemplatePilote.json", QGIS_PLUGIN_PROJECT_PATH)
-        shutil.copy("user_preference_correspondence.json", QGIS_PLUGIN_PROJECT_PATH)
-        return True
-    except TypeError or FileNotFoundError:
-        return False
+def copy_to_plugin(copy2plugin):
+    if copy2plugin:
+        try:
+            shutil.copy("formTemplatePilote.json", QGIS_PLUGIN_PROJECT_PATH)
+            shutil.copy("user_preference_correspondence.json", QGIS_PLUGIN_PROJECT_PATH)
+            print("\nINFO formTemplatePilote.json et user_preference_correspondence.json copiés avec succés dans " + QGIS_PLUGIN_PROJECT_PATH)
+        except TypeError or FileNotFoundError:
+            print("ERROR Impossible de copier les fichiers générés vers le plugin QGIS. Vérifiez que la variable QGIS_PLUGIN_PROJECT_PATH est un chemin valide.")
 
 
-def copy_to_mobile():
-    try:
-        path = SIRS_MOBILE_PROJECT_PATH
-        if path[-1] == "/":
-            path = path[:-1]
-        path = path + "/src/app/utils"
-        shutil.copy("form-template-pilote.ts", path)
-        return True
-    except TypeError or FileNotFoundError:
-        return False
+def copy_to_mobile(copy2ToMobile):
+    if copy2ToMobile:
+        try:
+            path = SIRS_MOBILE_PROJECT_PATH
+            if path[-1] == "/":
+                path = path[:-1]
+            path = path + "/src/app/utils"
+            shutil.copy("form-template-pilote.ts", path)
+            print("\nINFO form-template-pilote.ts copiés avec succés dans " + path)
+        except TypeError or FileNotFoundError:
+            print("ERROR Impossible de copier le fichier form-template-pilote.ts dans le projet Sirs mobile. Vérifiez que la variable SIRS_MOBILE_PROJECT_PATH est un chemin valide.")
 
 
-def engine(formTemplatePilote, resourceSet, path_to_ecore, path_to_properties, general_filter):
-    resource = resourceSet.get_resource(URI(path_to_ecore))
-    graphMMRoot = resource.contents[0]  # We get the root (an EPackage here)
-    ll = LabelLoader()
-    ll.complete_dict(path_to_properties)
+def engine(formTemplatePilote, resourceSet, ecore_paths, properties_paths):
+    for i in range(len(ecore_paths)):
+        #paths
+        path_to_ecore = ecore_paths[i]
+        path_to_properties = properties_paths[i]
+        #ecore diagrams
+        resource = resourceSet.get_resource(URI(path_to_ecore))
+        graphMMRoot = resource.contents[0]  # We get the root (an EPackage here)
+        #labels
+        ll = LabelLoader()
+        ll.complete_dict(path_to_properties)
 
-    for clazz in ll.classes:
-        # Retrieve the corresponding classifier from the graph
-        classifier: Ecore.EClassifier = graphMMRoot.getEClassifier(clazz)
-        if classifier is None:
-            print(f"class {clazz} has a property file, but model not found in {path_to_ecore}")
-            continue
-        # Complete the formTemplatePilote object
-        formTemplatePilote[clazz] = {}
-        transform(classifier, formTemplatePilote, clazz, ll, general_filter)
-        # Check if the current class is positionable (implement WithGeometrie and not abstract)
-        if is_child_of(classifier, "AvecGeometrie") and not classifier.abstract:
-            all_positionable.append(clazz)
-            for c in find_containment_classes(classifier):
-                containment_classes_from_positionable.add(c)
+        for clazz in ll.classes:
+            #retrieve the corresponding classifier from the graph
+            classifier: Ecore.EClassifier = graphMMRoot.getEClassifier(clazz)
+            if classifier is None:
+                print(f"WARNING The class {clazz} has a file .properties but its model is not found in {path_to_ecore}")
+                continue
+            #complete the formTemplatePilote object
+            formTemplatePilote[clazz] = {}
+            transform(classifier, formTemplatePilote, clazz, ll)
+            #check if the current class is positionable (implement WithGeometrie and not abstract)
+            if is_child_of(classifier, "AvecGeometrie") and not classifier.abstract:
+                all_positionable.append(clazz)
+                for c in find_containment_classes(classifier):
+                    containment_classes_from_positionable.add(c)
+
+
+def print_files(formTemplatePilote, preferences):
+    with open("formTemplatePilote.json", "w") as ftp:
+        dump = json.dumps(formTemplatePilote, indent=2, ensure_ascii=False)
+        ftp.write(dump)
+        print("INFO formTemplatePilote.json imprimé avec succés")
+    with open("user_preference_correspondence.json", "w") as lc:
+        dump = json.dumps(preferences, indent=2, ensure_ascii=False)
+        lc.write(dump)
+        print("INFO user_preference_correspondence.json imprimé avec succés")
+
+    # Construction et impression du fichier mobile
+    build_form_template_for_mobile(formTemplatePilote)
 
 
 if __name__ == "__main__":
     # Récupération des arguments
-    ecore_paths, properties_paths, general_filter, copy2plugin, copy2mobile = check_argument()
+    copy2plugin, copy2mobile = check_argument()
 
     # Initialisation
     formTemplatePilote = {}
@@ -301,32 +319,22 @@ if __name__ == "__main__":
     global_registry[Ecore.nsURI] = Ecore  # We load the Ecore metamodel first
     rset = ResourceSet()
 
-    # Construction du fichier formTemplatePilote.json
-    for i in range(len(ecore_paths)):
-        engine(formTemplatePilote, rset, ecore_paths[i], properties_paths[i], general_filter)
+    # Collecte des chemins vers les modeles et les fichiers de propriétés
+    ecore_paths, properties_paths = collect_model_and_properties_paths()
+
+    # Construction de l'objet formTemplatePilote
+    engine(formTemplatePilote, rset, ecore_paths, properties_paths)
 
     # Construction du ficher user_preference_correspondance.json
     build_preferences(formTemplatePilote, preferences)
     update_style_from_data(preferences)
 
     # Impression des fichiers de sortie
-    with open("formTemplatePilote.json", "w") as ftp:
-        dump = json.dumps(formTemplatePilote, indent=2, ensure_ascii=False)
-        ftp.write(dump)
-    with open("user_preference_correspondence.json", "w") as lc:
-        dump = json.dumps(preferences, indent=2, ensure_ascii=False)
-        lc.write(dump)
-
-    # Construction et impression du fichier mobile
-    build_form_template_for_mobile(formTemplatePilote)
+    print_files(formTemplatePilote, preferences)
 
     # Copie des fichiers de sortie
-    pluginSucceed = True
-    mobileSucceed = True
-    if copy2plugin:
-        pluginSucceed = copy_to_plugin()
-    if copy2mobile:
-        mobileSuceed = copy_to_mobile()
+    copy_to_plugin(copy2plugin)
+    copy_to_mobile(copy2mobile)
 
     # Impression des informations
-    print_information(all_positionable, containment_classes_from_positionable, pluginSucceed, mobileSucceed)
+    print_information(all_positionable, containment_classes_from_positionable)
