@@ -72,15 +72,23 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
 
         uiAttD.setConverter(stringConverter);
         uiCRS.setDisable(true);
-        initFieldValue();
+        this.initFieldValue();
+        this.getScene().getWindow().setOnCloseRequest(ev -> this.saveFieldValue());
     }
 
     private void initFieldValue() {
         // Init table with the previous file opened
-        // Must be before coordinate initialization because openFeatureStore fill the stringConverter
         if ((uiPath.getText() != null && !uiPath.getText().isEmpty())) {
+            // Must be done before fillFieldFromComboBox
             openFeatureStore();
         }
+
+        // Must be done after openFeatureStore
+        // Must be done before fillFieldFromComboBox
+        stringConverter.registerList(uiAttD.getItems());
+        stringConverter.registerList(uiAttZ.getItems());
+        stringConverter.registerList(uiAttDesignation.getItems());
+
         // Init coordinate value with the previous one saved
         fillFieldFromComboBox(ATT_D_KEY, uiAttD);
         fillFieldFromComboBox(ATT_Z_KEY, uiAttZ);
@@ -98,7 +106,7 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
 
         uiPaneConfig.setDisable(true);
 
-        selectionProperty.removeAll(selectionProperty);
+        selectionProperty.clear();
 
         try{
             if(url.toLowerCase().endsWith(".shp")){
@@ -146,7 +154,7 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
                 public void propertyChange(PropertyChangeEvent evt) {
                     if(!FeatureMapLayer.SELECTION_FILTER_PROPERTY.equals(evt.getPropertyName())) return;
 
-                    selectionProperty.removeAll(selectionProperty);
+                    selectionProperty.clear();
                     final Id filter = layer.getSelectionFilter();
                     try {
                         final FeatureCollection selection = layer.getCollection().subCollection(QueryBuilder.filtered(typeName, filter));

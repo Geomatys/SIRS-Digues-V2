@@ -81,18 +81,26 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
 
     public FXImportXYZ(final PojoTable pojoTable) {
         super(pojoTable);
-
         uiAttX.setConverter(stringConverter);
         uiAttY.setConverter(stringConverter);
+        this.initFieldValue();
+        this.getScene().getWindow().setOnCloseRequest(ev -> this.saveFieldValue());
     }
 
-    private void initFieldValue() {
+    protected void initFieldValue() {
         // Init table with the previous file opened
-        // Must be before coordinate initialization because openFeatureStore fill the stringConverter
         if ((uiPath.getText() != null && !uiPath.getText().isEmpty())) {
+            // Must be done before fillFieldFromComboBox
             openFeatureStore();
         }
-        // Init coordinate value with the previous one saved
+
+        // Must be done after openFeatureStore
+        // Must be done before fillFieldFromComboBox
+        stringConverter.registerList(uiAttX.getItems());
+        stringConverter.registerList(uiAttY.getItems());
+        stringConverter.registerList(uiAttZ.getItems());
+        stringConverter.registerList(uiAttDesignation.getItems());
+
         fillFieldFromComboBox(ATT_X_KEY, uiAttX);
         fillFieldFromComboBox(ATT_Y_KEY, uiAttY);
         fillFieldFromComboBox(ATT_Z_KEY, uiAttZ);
@@ -117,7 +125,7 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
 
         uiPaneConfig.setDisable(true);
 
-        selectionProperty.removeAll(selectionProperty);
+        selectionProperty.clear();
 
         try{
             if(url.toLowerCase().endsWith(".shp")){
@@ -165,7 +173,7 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
                 public void propertyChange(PropertyChangeEvent evt) {
                     if(!FeatureMapLayer.SELECTION_FILTER_PROPERTY.equals(evt.getPropertyName())) return;
 
-                    selectionProperty.removeAll(selectionProperty);
+                    selectionProperty.clear();
                     final Id filter = layer.getSelectionFilter();
                     try {
                         final FeatureCollection selection = layer.getCollection().subCollection(QueryBuilder.filtered(typeName, filter));
@@ -250,5 +258,12 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
             leves.add(leve);
         }
         return leves;
+    }
+
+    @Override
+    protected void saveFieldValue() {
+        super.saveFieldValue();
+        savePreference(ATT_X_KEY, stringConverter.toString(uiAttX.getSelectionModel().getSelectedItem()));
+        savePreference(ATT_Y_KEY, stringConverter.toString(uiAttY.getSelectionModel().getSelectedItem()));
     }
 }

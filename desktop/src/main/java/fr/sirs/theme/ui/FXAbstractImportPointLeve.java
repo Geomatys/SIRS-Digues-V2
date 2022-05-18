@@ -37,18 +37,19 @@ public abstract class FXAbstractImportPointLeve<T extends PointZ> extends FXAbst
     protected static final String ATT_Z_KEY = "attZ";
     protected static final String ATT_DESIGNATION_KEY = "attDesignation";
 
-    protected final ObservableList<Feature> selectionProperty = FXCollections.observableArrayList();
+    protected final ObservableList<Feature> selectionProperty;
     protected final PojoTable pojoTable;
     @FXML protected ComboBox<PropertyType> uiAttDesignation;
     @FXML protected ComboBox<PropertyType> uiAttZ;
-    
+
     FXAbstractImportPointLeve(final PojoTable pojoTable) {
         super();
         this.pojoTable = pojoTable;
         uiAttDesignation.setConverter(stringConverter);
         uiAttZ.setConverter(stringConverter);
+        selectionProperty = FXCollections.observableArrayList();
     }
-    
+
     @FXML
     void importSelection(ActionEvent event) {
         saveFieldValue();
