@@ -19,9 +19,15 @@
 package fr.sirs.plugin.dependance.map;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AbstractDependance;
 import fr.sirs.core.model.AireStockageDependance;
@@ -128,21 +134,27 @@ public class DependanceTransformHandler extends AbstractNavigationHandler {
                         final AbstractDependance dependance = repodep.create();
 
                         Geometry geom = (Geometry) f.getDefaultGeometryProperty().getValue();
-
-                        //conversion du CRS de la donnée vers le CRS de la base
-                        try {
-                            geom = JTS.transform(geom, CRS.findOperation(
-                                    f.getDefaultGeometryProperty().getType().getCoordinateReferenceSystem(),
-                                    session.getProjection(), null).getMathTransform());
-                            JTS.setCRS(geom, session.getProjection());
-                        } catch (TransformException | FactoryException ex) {
-                            SIRS.LOGGER.log(Level.WARNING, ex.getLocalizedMessage(), ex);
+                        if (geom != null) {
+                            geom = dependanceGeometryConverter(geom, clazz);
+                            if (geom != null) {
+                                //conversion du CRS de la donnée vers le CRS de la base
+                                try {
+                                    geom = JTS.transform(geom, CRS.findOperation(
+                                            f.getDefaultGeometryProperty().getType().getCoordinateReferenceSystem(),
+                                            session.getProjection(), null).getMathTransform());
+                                    JTS.setCRS(geom, session.getProjection());
+                                } catch (TransformException | FactoryException ex) {
+                                    SIRS.LOGGER.log(Level.WARNING, ex.getLocalizedMessage(), ex);
+                                }
+                                dependance.setGeometry(geom);
+                                repodep.add(dependance);
+                                map.getCanvas().repaint();
+                            } else {
+                                SIRS.LOGGER.log(Level.WARNING, "Can't find statify conversion for the geometry selected");
+                            }
+                        } else {
+                            SIRS.LOGGER.log(Level.INFO, "Geometry selected is null");
                         }
-
-                        dependance.setGeometry(geom);
-                        repodep.add(dependance);
-
-                        map.getCanvas().repaint();
                     });
                 }
 
@@ -152,6 +164,50 @@ public class DependanceTransformHandler extends AbstractNavigationHandler {
 
             final Rectangle2D clickArea = new Rectangle2D.Double(e.getX()-2, e.getY()-2, 4, 4);
             map.getCanvas().getGraphicsIn(clickArea, visitor, VisitFilter.INTERSECTS);
+        }
+    }
+
+    private static Geometry dependanceGeometryConverter(final Geometry toFormat, final Class clazz) {
+        if (AireStockageDependance.class.equals(clazz)) {
+            //Polygon only
+            return asPolygon(toFormat);
+        } else if (CheminAccesDependance.class.equals(clazz)) {
+            //Linear only
+            return LinearReferencingUtilities.asLineString(toFormat);
+        } else if (AutreDependance.class.equals(clazz)
+                || OuvrageVoirieDependance.class.equals(clazz)
+                || AmenagementHydraulique.class.equals(clazz)) {
+            //Ponctual, linear or polygon
+            final Polygon asPolygon = asPolygon(toFormat);
+            if (asPolygon != null) return asPolygon;
+            final Point asPoint = asPoint(toFormat);
+            if (asPoint != null) return asPoint;
+            return LinearReferencingUtilities.asLineString(toFormat);
+        } else {
+            throw new IllegalArgumentException("Class input must be type of AireStockageDependance, "
+                    + "AutreDependance, CheminAccesDependance, OuvrageVoirieDependance or AmenagementHydraulique");
+        }
+    }
+
+    private static Point asPoint(final Geometry geom) {
+        if (geom instanceof Point) {
+            return (Point) geom;
+        } else if (geom instanceof GeometryCollection) {
+            //Treat multipoint only if it contains 1 geometry
+            return geom.getNumGeometries() == 1 ? asPoint(geom.getGeometryN(0)) : null;
+        } else {
+            return null;
+        }
+    }
+
+    private static Polygon asPolygon(final Geometry geom) {
+        if (geom instanceof Polygon) {
+            return (Polygon) geom;
+        } else if (geom instanceof GeometryCollection) {
+            //Treat multipoint only if it contains 1 geometry
+            return geom.getNumGeometries() == 1 ? asPolygon(geom.getGeometryN(0)) : null;
+        } else {
+            return null;
         }
     }
 }
