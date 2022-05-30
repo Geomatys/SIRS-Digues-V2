@@ -118,13 +118,15 @@ public class OwcExtensionSirs extends OwcExtension {
                 final ParameterType param = (ParameterType) field;
                 if (Plugin.PLUGIN_FLAG.equals(param.getKey())) {
                     pluginName = param.getValue();
+                    if (pluginName.equals("plugin-dependance")) pluginName = "plugin-dependance-ah";
                 } else if (KEY_LAYER_NAME.equals(param.getKey())) {
                     layerName = param.getValue();
+                    if (layerName.equals("Désordre (dépendance)")) layerName = "Désordre (dépendance et AH)";
                 } else if (KEY_SQLQUERY.equals(param.getKey())) {
                     sqlQuery = param.getValue();
                 }
             }
-            if(field instanceof FilterType){
+            if (field instanceof FilterType) {
                 try {
 //                    final StyleXmlIO io = new StyleXmlIO();
                     filter = STYLE_XML_IO.getTransformer110().visitFilter((FilterType)field);
