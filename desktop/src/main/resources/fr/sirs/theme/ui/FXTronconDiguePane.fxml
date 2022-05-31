@@ -57,8 +57,10 @@
                                                     <ComboBox fx:id="ui_typeRiveId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                     <Label text="%typeTronconId" GridPane.rowIndex="3" />
                                                     <ComboBox fx:id="ui_typeTronconId" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                                    <Label text="%systemeRepDefautId" GridPane.rowIndex="4" />
-                                                    <ComboBox fx:id="ui_systemeRepDefautId" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                                    <Label text="%typologieTronconId" GridPane.rowIndex="4" />
+                                                    <ComboBox fx:id="ui_typologieTronconId" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                                    <Label text="%systemeRepDefautId" GridPane.rowIndex="5" />
+                                                    <ComboBox fx:id="ui_systemeRepDefautId" GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
                                                 </children>
                                                 <padding>
