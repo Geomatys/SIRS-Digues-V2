@@ -49,8 +49,8 @@
                    <Label text="%capaciteStockage" GridPane.rowIndex="1" />
                    <Spinner fx:id="ui_capaciteStockage" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
 
-                   <Label text="%profondeurMoyenne" GridPane.rowIndex="2" />
-                   <Spinner fx:id="ui_profondeurMoyenne" GridPane.columnIndex="1" GridPane.rowIndex="2"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <Label text="%profondeurMaximum" GridPane.rowIndex="2" />
+                   <Spinner fx:id="ui_profondeurMaximum" GridPane.columnIndex="1" GridPane.rowIndex="2"  maxHeight="-Infinity" maxWidth="-Infinity"/>
 
                    <Label text="%organismeId" GridPane.rowIndex="3" />
                    <ComboBox fx:id="ui_organismeId" GridPane.columnIndex="1" GridPane.rowIndex="3" />

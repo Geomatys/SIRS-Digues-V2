@@ -25,8 +25,8 @@ public class AmenagementHydrauliqueView {
     @JsonProperty("capaciteStockage")
     private String capaciteStockage;
 
-    @JsonProperty("profondeurMoyenne")
-    private String profondeurMoyenne;
+    @JsonProperty("profondeurMaximum")
+    private String profondeurMaximum;
 
     @JsonProperty("designation")
     private String designation;
@@ -47,8 +47,8 @@ public class AmenagementHydrauliqueView {
         return capaciteStockage;
     }
 
-    public String getProfondeurMoyenne() {
-        return profondeurMoyenne;
+    public String getProfondeurMaximum() {
+        return profondeurMaximum;
     }
 
     public String getDesignation() {
@@ -71,11 +71,12 @@ public class AmenagementHydrauliqueView {
         this.capaciteStockage = capaciteStockage;
     }
 
-    public void setProfondeurMoyenne(String profondeurMoyenne) {
-        this.profondeurMoyenne = profondeurMoyenne;
+    public void setProfondeurMaximum(String profondeurMaximum) {
+        this.profondeurMaximum = profondeurMaximum;
     }
 
     public void setDesignation(String designation) {
         this.designation = designation;
     }
+
 }
