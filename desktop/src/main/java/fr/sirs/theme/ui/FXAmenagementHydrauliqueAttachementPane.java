@@ -117,7 +117,8 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
             appendRow(2, "Type", uiLabelTypeAmenagementHydraulique);
             appendRow(3, "Superficie (m²)", uiLabelSuperficie);
             appendRow(4, "Capacité de Stockage (m³)", uiLabelCapaciteStockage);
-            appendRow(5, "Profondeur moyenne (m)", uiLabelProfondeurMoyenne);
+            // https://redmine.geomatys.com/issues/7544 label modified to Profondeur max (m) by the client - see note of the 2022/04/24
+            appendRow(5, "Profondeur max (m)", uiLabelProfondeurMoyenne);
         }
     }
 
