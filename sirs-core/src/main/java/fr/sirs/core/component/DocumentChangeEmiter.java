@@ -20,7 +20,9 @@ package fr.sirs.core.component;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 
 import org.ektorp.CouchDbConnector;
@@ -33,6 +35,11 @@ import fr.sirs.core.DocHelper;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
 import java.io.InputStreamReader;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -152,29 +159,16 @@ public class DocumentChangeEmiter {
         final Map<Class, List<Element>> changedElements = Collections.unmodifiableMap(tmpChangedElements);
         removedElements = Collections.unmodifiableSet(removedElements);
 
-        List<DocumentListener> docCreated = new ArrayList<>();
-        List<DocumentListener> docChanged = new ArrayList<>();
-        List<DocumentListener> docDeleted = new ArrayList<>();
         for (DocumentListener listener : getListenersUnmodifiable()) {
             if (!addedElements.isEmpty()) {
-                docCreated.add(listener);
+                listener.documentCreated(addedElements);
             }
             if (!changedElements.isEmpty()) {
-                docChanged.add(listener);
+                listener.documentChanged(changedElements);
             }
             if (!removedElements.isEmpty()) {
-                docDeleted.add(listener);
+                listener.documentDeleted(removedElements);
             }
-        }
-
-        for (DocumentListener dl : docCreated) {
-            dl.documentCreated(addedElements);
-        }
-        for (DocumentListener dl : docChanged) {
-            dl.documentChanged(changedElements);
-        }
-        for (DocumentListener dl : docDeleted) {
-            dl.documentDeleted(removedElements);
         }
     }
 
