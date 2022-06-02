@@ -48,7 +48,7 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
     private Label uiLabelTypeAmenagementHydraulique = new Label();
     private Label uiLabelSuperficie = new Label();
     private Label uiLabelCapaciteStockage = new Label();
-    private Label uiLabelProfondeurMaximum = new Label();
+    private Label uiLabelProfondeurMoyenne = new Label();
 
     private final SimpleObjectProperty<TronconDigue> tronconProperty = new SimpleObjectProperty<TronconDigue>();
 
@@ -69,7 +69,7 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
         initLabel(uiLabelTypeAmenagementHydraulique);
         initLabel(uiLabelSuperficie);
         initLabel(uiLabelCapaciteStockage);
-        initLabel(uiLabelProfondeurMaximum);
+        initLabel(uiLabelProfondeurMoyenne);
 
         tronconProperty.addListener(this::onTronconChange);
     }
@@ -117,7 +117,7 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
             appendRow(2, "Type", uiLabelTypeAmenagementHydraulique);
             appendRow(3, "Superficie (m²)", uiLabelSuperficie);
             appendRow(4, "Capacité de Stockage (m³)", uiLabelCapaciteStockage);
-            appendRow(5, "Profondeur max (m)", uiLabelProfondeurMaximum);
+            appendRow(5, "Profondeur moyenne (m)", uiLabelProfondeurMoyenne);
         }
     }
 
@@ -141,7 +141,7 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
             uiLabelTypeAmenagementHydraulique.setText(getLabelFromType(ah.getType()));
             uiLabelSuperficie.setText(ah.getSuperficie());
             uiLabelCapaciteStockage.setText(ah.getCapaciteStockage());
-            uiLabelProfondeurMaximum.setText(ah.getProfondeurMaximum());
+            uiLabelProfondeurMoyenne.setText(ah.getProfondeurMoyenne());
             // update the value of ah of the current troncon
             tronconProperty.get().setAmenagementHydrauliqueId(ah.getId());
         } else {
@@ -149,7 +149,7 @@ public class FXAmenagementHydrauliqueAttachementPane extends BorderPane {
             uiLabelTypeAmenagementHydraulique.setText("");
             uiLabelSuperficie.setText("");
             uiLabelCapaciteStockage.setText("");
-            uiLabelProfondeurMaximum.setText("");
+            uiLabelProfondeurMoyenne.setText("");
             // update the value of ah of the current troncon
             tronconProperty.get().setAmenagementHydrauliqueId(null);
         }
