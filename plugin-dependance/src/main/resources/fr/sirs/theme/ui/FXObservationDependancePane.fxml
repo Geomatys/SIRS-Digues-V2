@@ -69,10 +69,10 @@
                    <Label text="%suite" GridPane.rowIndex="3" />
                    <TextArea fx:id="ui_suite" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
                    <!-- EInt -->                 
-                   <Label text="%nombreDesordres" GridPane.rowIndex="4" />
+                   <Label fx:id="ui_nombreDesordres_label" text="%nombreDesordres" GridPane.rowIndex="4" />
                    <Spinner fx:id="ui_nombreDesordres" GridPane.columnIndex="1" GridPane.rowIndex="4"  maxHeight="-Infinity" maxWidth="-Infinity"/>
 
-                   <Label text="%urgenceId" GridPane.rowIndex="5" />
+                   <Label fx:id="ui_urgenceId_label" text="%urgenceId" GridPane.rowIndex="5" />
                    <ComboBox fx:id="ui_urgenceId" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                    <Button fx:id="ui_urgenceId_link" GridPane.columnIndex="2" GridPane.rowIndex="5" />
 
