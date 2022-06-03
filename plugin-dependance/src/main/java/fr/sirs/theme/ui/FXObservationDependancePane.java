@@ -59,8 +59,10 @@ public class FXObservationDependancePane extends AbstractFXElementPane<Observati
     @FXML protected TextArea ui_evolution;
     @FXML protected DatePicker ui_date;
     @FXML protected TextArea ui_suite;
+    // HACK_REDMINE_7544 - to be removed if better fix - add fx:id on the label to hide the 'nombre de désordres' for the AH's observation dependance
     @FXML protected Label ui_nombreDesordres_label;
     @FXML protected Spinner ui_nombreDesordres;
+    // HACK_REDMINE_7544 - to be removed if better fix - add fx:id on the label hide the 'Niveau d'urgence' for the AH's observation dependance
     @FXML protected Label  ui_urgenceId_label;
     @FXML protected ComboBox ui_urgenceId;
     @FXML protected Button ui_urgenceId_link;
@@ -196,7 +198,8 @@ public class FXObservationDependancePane extends AbstractFXElementPane<Observati
             if (parentType != null) {
                 try {
                     ui_parent_label.setText(LabelMapper.get(Class.forName(parentType)).mapClassName());
-                    // hack : hide the 'nombre de désordres' and 'Niveau d'urgence' for the AH's observation dependance
+                    // HACK_REDMINE_7544 - to be removed if better fix - hide the 'nombre de désordres' and 'Niveau d'urgence' for the AH's observation dependance
+                    // best would be to create an AbstractObservationDependance and a specific ObservationDependance for the Ahs
                     if(Class.forName(parentType).equals(AmenagementHydraulique.class)){
                         ui_nombreDesordres_label.setVisible(false);
                         ui_nombreDesordres.setVisible(false);
@@ -220,11 +223,11 @@ public class FXObservationDependancePane extends AbstractFXElementPane<Observati
         // * suite
         ui_suite.textProperty().bindBidirectional(newElement.suiteProperty());
         // * nombreDesordres
-        // hack : hide the 'nombre de désordres' and 'Niveau d'urgence' for the AH's observation dependance
+        // HACK_REDMINE_7544 - to be removed if better fix - hide the 'nombre de désordres' and 'Niveau d'urgence' for the AH's observation dependance
         if (ui_nombreDesordres.isVisible()) ui_nombreDesordres.getValueFactory().valueProperty().bindBidirectional(newElement.nombreDesordresProperty());
 
         // * urgenceId
-        // hack : hide the 'nombre de désordres' and 'Niveau d'urgence' for the AH's observation dependance
+        // HACK_REDMINE_7544 - to be removed if better fix - hide the 'nombre de désordres' and 'Niveau d'urgence' for the AH's observation dependance
         if (ui_nombreDesordres.isVisible()) {
             final AbstractSIRSRepository<RefUrgence> urgenceIdRepo = session.getRepositoryForClass(RefUrgence.class);
             SIRS.initCombo(ui_urgenceId, SIRS.observableList(urgenceIdRepo.getAll()), newElement.getUrgenceId() == null? null : urgenceIdRepo.get(newElement.getUrgenceId()));
