@@ -1,45 +1,49 @@
+/**
+ *
+ * This file is part of SIRS-Digues 2.
+ *
+ * Copyright (C) 2016, FRANCE-DIGUES,
+ *
+ * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
+ */
 
 package fr.sirs.theme.ui;
 
-import fr.sirs.theme.ui.pojotable.PojoTableExternalAddable;
-import fr.sirs.Session;
-import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import fr.sirs.core.component.*;
+import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.*;
-import fr.sirs.util.FXFileTextField;
-import fr.sirs.util.FXComponentField;
-import fr.sirs.util.javafx.FloatSpinnerValueFactory;
-import fr.sirs.util.StreamingIterable;
-import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.DatePickerConverter;
-
+import fr.sirs.util.FXFreeTab;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.geometry.*;
-import javafx.event.ActionEvent;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 
-import org.geotoolkit.gui.javafx.util.FXDateField;
-import org.geotoolkit.util.collection.CloseableIterator;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.function.UnaryOperator;
 import java.util.logging.Level;
-import javafx.beans.value.ChangeListener;
 
 /**
  *
  * @author Olivier Nouguier (Geomatys)
  * @author Alexis Manin (Geomatys)
+ * @author Estelle Idee (Geomatys) : HACK_REDMINE_7544 class added and not auto-generated in order to hide attributs for AH's ObservationDependance
  */
 public class FXObservationDependancePane extends AbstractFXElementPane<ObservationDependance> {
 
