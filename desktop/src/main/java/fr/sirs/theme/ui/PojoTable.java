@@ -1101,7 +1101,7 @@ public class PojoTable extends BorderPane implements Printable {
         return getTable().getSelectionModel().selectedItemProperty();
     }
 
-    protected final TableView<Element> getTable() {
+    public final TableView<Element> getTable() {
         return uiTable;
     }
 
@@ -1392,7 +1392,10 @@ public class PojoTable extends BorderPane implements Printable {
 
     /**
      * @return {@link TableView} used for element display.
+     * Deprecated - to be removed but first fix {@link FXSystemeReperagePane} method updateFields (I could not solve it)
+     * Duplicate with method getTable()
      */
+    @Deprecated
     public TableView getUiTable() {
         return uiTable;
     }
