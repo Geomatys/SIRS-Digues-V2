@@ -36,6 +36,7 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.RefTypeTroncon;
+import fr.sirs.core.model.RefTypologieTroncon;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXSystemeReperagePane;
