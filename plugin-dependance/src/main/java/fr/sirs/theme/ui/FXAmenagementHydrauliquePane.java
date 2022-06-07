@@ -15,8 +15,12 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -329,6 +333,8 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
     protected void updateObservationsTable(final Session session, final AmenagementHydraulique newElement) {
         if (observationsTable == null)
             return;
+        // HACK_REDMINE_7544 - to be removed if better fix - hide colomns 'nombre de désordres' and 'niveau d'urgence' for the AH's ObservationDependances
+        observationsTable.getTable().getColumns().removeIf(this::shouldBeRemoved);
 
         if (newElement == null) {
             observationsTable.setTableItems(null);
@@ -336,6 +342,11 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             observationsTable.setParentElement(newElement);
             observationsTable.setTableItems(()-> (ObservableList) newElement.getObservations());
         }
+    }
+
+    // HACK_REDMINE_7544 - to be removed if better fix - hide colomns 'nombre de désordres' and 'niveau d'urgence' for the AH's ObservationDependances
+    private boolean shouldBeRemoved(TableColumn<?,?> c) {
+        return "urgenceId".equals(c.getId()) || "nombreDesordres".equals(c.getId());
     }
 
     protected void updateTraitIdsTable(final Session session, final AmenagementHydraulique newElement) {

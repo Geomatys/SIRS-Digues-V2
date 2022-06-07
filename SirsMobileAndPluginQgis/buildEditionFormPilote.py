@@ -108,7 +108,7 @@ def check_argument():
             print(content)
         sys.exit(0)
     for i in range(len(argv)):
-        if i == 0:
+        if argv[i] == "buildEditionFormPilote.py":
             continue
         elif argv[i] == "--plugin":
             copy2plugin = True
