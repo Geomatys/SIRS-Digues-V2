@@ -81,7 +81,7 @@ public class FXLitPane extends FXLitPaneStub {
         public TronconLitPojoTable(final ObjectProperty<? extends Element> container) {
             super(TronconLit.class, "Tronçon du lit", container);
             // hide the "Typologie de tronçon" colomn as it is specific to TronconDigue only
-            this.getTable().getColumns().removeIf(c -> "typologieTronconId".equals(c.getId()));
+            this.getTable().getColumns().removeIf(c -> "typologieTronconId".equalsIgnoreCase(c.getId()));
             editableProperty().unbind();
             editableProperty().set(false);
         }

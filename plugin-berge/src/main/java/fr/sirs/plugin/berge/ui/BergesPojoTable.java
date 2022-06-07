@@ -48,7 +48,7 @@ public class BergesPojoTable extends PojoTable {
     public BergesPojoTable(final Class clazz, final ObjectProperty<? extends Element> container) {
         super(clazz, "Liste des berges", container);
         // hide the "Typologie de tronçon" colomn as it is specific to TronconDigue only
-        this.getTable().getColumns().removeIf(c -> "typologieTronconId".equals(c.getId()));
+        this.getTable().getColumns().removeIf(c -> "typologieTronconId".equalsIgnoreCase(c.getId()));
 
         if (getFilterUI() instanceof VBox) {
             final VBox vbox = (VBox) getFilterUI();
