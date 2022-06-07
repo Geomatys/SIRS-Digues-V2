@@ -1,20 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import fr.sirs.util.FXFreeTab?>
-<?import fr.sirs.theme.ui.FXValidityPeriodPane?>
 <?import fr.sirs.theme.ui.FXAmenagementHydrauliqueAttachementPane?>
-<?import fr.sirs.*?>
-<?import javafx.scene.effect.*?>
-<?import org.geotoolkit.gui.javafx.util.*?>
-<?import jfxtras.scene.control.*?>
-<?import javafx.scene.web.*?>
-<?import java.net.*?>
-<?import java.lang.*?>
-<?import javafx.geometry.*?>
+<?import fr.sirs.theme.ui.FXValidityPeriodPane?>
+<?import fr.sirs.util.FXFreeTab?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import jfxtras.scene.control.ListView?>
 
 <fx:root prefHeight="768.0" prefWidth="1024.0" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
     <center>
@@ -47,7 +39,7 @@
                                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                 </rowConstraints-->
                                                 <children>
-                                                    <!-- EString -->                 
+                                                    <!-- EString -->
                                                     <Label text="%libelle" GridPane.rowIndex="0" />
                                                     <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="0"  />
                                                     <Label text="%digueId" GridPane.rowIndex="1" />
