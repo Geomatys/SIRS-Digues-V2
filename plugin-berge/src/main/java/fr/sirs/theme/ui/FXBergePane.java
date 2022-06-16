@@ -56,6 +56,7 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
     @FXML protected TextArea ui_commentaire;
     @FXML protected ComboBox ui_typeRiveId;
     @FXML protected Button ui_typeRiveId_link;
+    @FXML ComboBox ui_typologieTronconId;
     @FXML protected ComboBox ui_systemeRepDefautId;
     @FXML protected Button ui_systemeRepDefautId_link;
     @FXML protected Tab ui_borneIds;
@@ -84,6 +85,7 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
         ui_commentaire.disableProperty().bind(disableFieldsProperty());
         ui_typeRiveId.disableProperty().bind(disableFieldsProperty());
         ui_typeRiveId_link.setVisible(false);
+        ui_typologieTronconId.disableProperty().bind(disableFieldsProperty());
         ui_systemeRepDefautId.disableProperty().bind(disableFieldsProperty());
         ui_systemeRepDefautId_link.disableProperty().bind(ui_systemeRepDefautId.getSelectionModel().selectedItemProperty().isNull());
         ui_systemeRepDefautId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
@@ -143,6 +145,9 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
             SIRS.initCombo(ui_typeRiveId, FXCollections.observableList(
                     previewRepository.getByClass(RefRive.class)),
                     newElement.getTypeRiveId() == null ? null : previewRepository.get(newElement.getTypeRiveId()));
+            SIRS.initCombo(ui_typologieTronconId, SIRS.observableList(
+                            previewRepository.getByClass(RefTypologieTroncon.class)).sorted(),
+                    newElement.getTypologieTronconId() == null ? null : previewRepository.get(newElement.getTypologieTronconId()));
             SIRS.initCombo(ui_systemeRepDefautId, FXCollections.observableList(
                     previewRepository.getByClass(SystemeReperage.class)),
                     newElement.getSystemeRepDefautId() == null ? null : previewRepository.get(newElement.getSystemeRepDefautId()));
@@ -170,6 +175,14 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
             element.setTypeRiveId(((Element)cbValue).getId());
         } else if (cbValue == null) {
             element.setTypeRiveId(null);
+        }
+        cbValue = ui_typologieTronconId.getValue();
+        if (cbValue instanceof Preview) {
+            element.setTypologieTronconId(((Preview)cbValue).getElementId());
+        } else if (cbValue instanceof Element) {
+            element.setTypologieTronconId(((Element)cbValue).getId());
+        } else if (cbValue == null) {
+            element.setTypologieTronconId(null);
         }
         cbValue = ui_systemeRepDefautId.getValue();
         if (cbValue instanceof Preview) {
