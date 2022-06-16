@@ -30,6 +30,7 @@ import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.TronconDigue;
+import static fr.sirs.CorePlugin.modifySymbolSize;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -60,8 +61,10 @@ import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.display2d.service.OutputDef;
 import org.geotoolkit.feature.type.FeatureType;
+import org.geotoolkit.map.MapContext;
 import org.geotoolkit.report.CollectionDataSource;
 import org.geotoolkit.report.JasperReportService;
+import org.geotoolkit.style.MutableStyle;
 import org.xml.sax.SAXException;
 
 /**
@@ -167,7 +170,7 @@ public class PrinterUtilities {
 
             final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(metaTemplateStream,
                     avoidReseauFields, observationFields, observationSpecFields, reseauFields, desordreFields, printPhoto, printReseauOuvrage);
-            
+
             templateWriter.setOutput(templateFile);
             templateWriter.write();
 
@@ -219,7 +222,8 @@ public class PrinterUtilities {
         templateFile.deleteOnExit();
 
         final JasperPrint print;
-        try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateDesordre.jrxml")) {
+        Map<String, MutableStyle> styleToChangeBack;
+        try (final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateDesordre.jrxml")) {
             final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(metaTemplateStream, avoidDesordreFields,
                     observationFields, prestationFields, reseauFields, printPhoto, printReseauOuvrage, printVoirie);
             templateWriter.setOutput(templateFile);
@@ -236,6 +240,11 @@ public class PrinterUtilities {
 
             desordres.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
             if (!desordres.isEmpty()) CorePlugin.modifyLayerVisibilityForElement(desordres.get(0), true);
+
+            // TODO REDMINE-6450 increase the size of PointSymbolizers and TextSymbolizers on visible layers
+            if (printLocationInsert) {
+                CorePlugin.modifySymbolSize(2);
+            }
             final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter, printLocationInsert);
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
         }
@@ -247,6 +256,8 @@ public class PrinterUtilities {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
             JasperReportService.generate(print, output);
         }
+
+        if (printLocationInsert) modifySymbolSize(0.5);
 
         return fout;
     }
