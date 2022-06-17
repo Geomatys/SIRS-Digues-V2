@@ -105,7 +105,6 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -118,8 +117,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
-
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
@@ -142,7 +139,6 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display.PortrayalException;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.canvas.J2DCanvas;
-import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
 import org.geotoolkit.display2d.ext.northarrow.GraphicNorthArrowJ2D;
 import org.geotoolkit.display2d.ext.scalebar.GraphicScaleBarJ2D;
@@ -1100,99 +1096,6 @@ public class CorePlugin extends Plugin {
             fts.rules().add(longRule);
         } catch (Exception e) {
             SirsCore.LOGGER.log(Level.WARNING, NAME, e);
-        }
-    }
-
-    /**
-     * Increases the size of PointSymbolizers and TextSymbolizers on visible layers
-     * Method used prior printing Fiches
-     *
-     * @param
-     * @return list of MutableStyle of the modified layer prior modification : to change the layers back to normal after printing
-     */
-    public static void modifySymbolSize(double multiplier) {
-        FXMapPane map = Injector.getSession().getFrame().getMapTab().getMap();
-        final FXMap uiMap = map.getUiMap();
-        final ContextContainer2D cc = (ContextContainer2D) uiMap.getCanvas().getContainer();
-        final MapContext context = cc.getContext();
-        // Map<String, MutableStyle> styleToChangeBack = new HashMap<>();
-        for (MapLayer layer : context.layers()) {
-            if (layer.isVisible()) {
-                MutableStyle currentStyle = layer.getStyle();
-                if (currentStyle != null && currentStyle.featureTypeStyles() != null && !currentStyle.featureTypeStyles().isEmpty()) {
-                    boolean styleModified = false;
-                    Symbolizer sym;
-                    PointSymbolizer tmpPoint;
-                    TextSymbolizer tmpText;
-                    Graphic tmpGraphic;
-                    for (final FeatureTypeStyle ftStyle : currentStyle.featureTypeStyles()) {
-                        for (final Rule r : ftStyle.rules()) {
-                            for (int i = 0; i < r.symbolizers().size(); i++) {
-                                sym = r.symbolizers().get(i);
-
-                                if (sym instanceof PointSymbolizer) {
-                                    styleModified = true;
-                                    tmpPoint = (PointSymbolizer) sym;
-                                    tmpGraphic = tmpPoint.getGraphic();
-                                    tmpGraphic = SF.graphic(tmpGraphic.graphicalSymbols(),
-                                            tmpGraphic.getOpacity(),
-                                            FF.literal(Double.parseDouble(tmpGraphic.getSize().toString()) * multiplier),
-                                            tmpGraphic.getRotation(),
-                                            tmpGraphic.getAnchorPoint(),
-                                            tmpGraphic.getDisplacement());
-
-                                    r.symbolizers().remove(i);
-                                    ((List) r.symbolizers()).add(i, SF.pointSymbolizer(tmpPoint.getName(), tmpPoint.getGeometry(), tmpPoint.getDescription(), tmpPoint.getUnitOfMeasure(), tmpGraphic));
-                                } else if (sym instanceof TextSymbolizer) {
-                                    styleModified = true;
-                                    Font font = ((TextSymbolizer) sym).getFont();
-                                    tmpText = SF.textSymbolizer(((TextSymbolizer) sym).getFill(),
-                                            new DefaultFont(font.getFamily(),
-                                                    font.getStyle(),
-                                                    font.getWeight(),
-                                                    FF.literal(Integer.parseInt(font.getSize().toString()) * multiplier)),
-                                            SF.halo(((TextSymbolizer) sym).getHalo().getFill(),
-                                                    FF.literal(Double.parseDouble(((TextSymbolizer) sym).getHalo().getRadius().toString()) * multiplier)),
-                                            FF.property("libelle"),
-                                            ((TextSymbolizer) sym).getLabelPlacement(), null);
-
-                                    r.symbolizers().remove(i);
-                                    ((List) r.symbolizers()).add(i, tmpText);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        System.out.println("multiplier : " + multiplier);
-        //return styleToChangeBack;
-    }
-
-    /**
-     * Increases the size of PointSymbolizers and TextSymbolizers on visible layers
-     * Method used prior printing Fiches
-     *
-     * @param
-     * @return list of MutableStyle of the modified layer prior modification : to change the layers back to normal after printing
-     */
-    public static void changeBackSymbolSize(Map<String, MutableStyle> styleToChangeBack) {
-        FXMapPane map = Injector.getSession().getFrame().getMapTab().getMap();
-        final FXMap uiMap = map.getUiMap();
-        final ContextContainer2D cc = (ContextContainer2D) uiMap.getCanvas().getContainer();
-        final MapContext context = cc.getContext();
-        List<MapLayer> layers = context.layers().stream().filter(l -> {
-            if (l instanceof FeatureMapLayer) {
-                return styleToChangeBack.containsKey(l.getName() + ".".concat(((FeatureMapLayer) l).getQuery().getTypeName().toString()));
-            }
-            return (styleToChangeBack.containsKey(l.getName()));
-        }).collect(Collectors.toList());
-        if (layers != null && !layers.isEmpty()) {
-            for (MapLayer layer : layers) {
-                if (layer instanceof FeatureMapLayer) {
-                    layer.setStyle(styleToChangeBack.get(layer.getName() + ".".concat(((FeatureMapLayer) layer).getQuery().getTypeName().toString())));
-                } else layer.setStyle(styleToChangeBack.get(layer.getName()));
-            }
         }
     }
 

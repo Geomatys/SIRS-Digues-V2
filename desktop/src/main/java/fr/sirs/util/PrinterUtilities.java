@@ -30,7 +30,6 @@ import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.TronconDigue;
-import static fr.sirs.CorePlugin.modifySymbolSize;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -61,7 +60,7 @@ import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.display2d.service.OutputDef;
 import org.geotoolkit.feature.type.FeatureType;
-import org.geotoolkit.map.MapContext;
+import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.report.CollectionDataSource;
 import org.geotoolkit.report.JasperReportService;
 import org.geotoolkit.style.MutableStyle;
@@ -83,6 +82,12 @@ public class PrinterUtilities {
     private static final String PDF_EXTENSION = ".pdf";
     private static final String LOGO_PATH = "/fr/sirs/images/icon-sirs.png";
     private static final String ORDERED_SEPARATOR = ") ";
+    // how much the symbols should be modified by when printing the locationInsert
+    private static final double multiplier = 3;
+    // to store the styles to be restored prior printing
+    private static Map<MapLayer, MutableStyle> backUpStyles = null;
+    // to store the selectionStyle to be restored after printing
+    private static MutableStyle backupSelectStyle = null;
 
     private static final List<String> FALSE_GETTERS = new ArrayList<>();
     static{
@@ -131,9 +136,23 @@ public class PrinterUtilities {
             }
 
             ouvrages.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            if (!ouvrages.isEmpty()) CorePlugin.modifyLayerVisibilityForElement(ouvrages.get(0), true);
+            boolean wasVisible = CorePlugin.getMapLayerForElement(ouvrages.get(0)).isVisible();
+            if (!ouvrages.isEmpty() && !wasVisible) CorePlugin.modifyLayerVisibilityForElement(ouvrages.get(0), true);
+
+            if (printLocationInsert) {
+                // increase the style and selectionStyle Symbolizers size
+                modifyStylesPriorPrinting(ouvrages.get(0));
+            }
             final JRDataSource source = new OuvrageHydrauliqueAssocieDataSource(ouvrages, previewLabelRepository, stringConverter, printLocationInsert);
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
+
+            // hide the layer if it was hidden before
+            if (!wasVisible) CorePlugin.modifyLayerVisibilityForElement(ouvrages.get(0), false);
+
+            if (printLocationInsert && backUpStyles != null) {
+                // restore the previous styles and selectedStyle
+                restoreStyles(ouvrages.get(0));
+            }
         }
 
         // Generate the report -------------------------------------------------
@@ -184,9 +203,23 @@ public class PrinterUtilities {
             }
 
             reseaux.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            if (!reseaux.isEmpty()) CorePlugin.modifyLayerVisibilityForElement(reseaux.get(0), true);
+            boolean wasVisible = CorePlugin.getMapLayerForElement(reseaux.get(0)).isVisible();
+            if (!reseaux.isEmpty() && !wasVisible) CorePlugin.modifyLayerVisibilityForElement(reseaux.get(0), true);
+
+            if (printLocationInsert) {
+                // increase the style and selectionStyle Symbolizers size
+                modifyStylesPriorPrinting(reseaux.get(0));
+            }
             final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter, printLocationInsert);
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
+
+            // hide the layer if it was hidden before
+            if (!wasVisible) CorePlugin.modifyLayerVisibilityForElement(reseaux.get(0), false);
+            if (printLocationInsert && backUpStyles != null) {
+                // restore the previous styles and selectedStyle
+                restoreStyles(reseaux.get(0));
+            }
+
         }
 
         // Generate the report -------------------------------------------------
@@ -239,14 +272,23 @@ public class PrinterUtilities {
             }
 
             desordres.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            if (!desordres.isEmpty()) CorePlugin.modifyLayerVisibilityForElement(desordres.get(0), true);
+            boolean wasVisible = CorePlugin.getMapLayerForElement(desordres.get(0)).isVisible();
+            if (!desordres.isEmpty()  && !wasVisible) CorePlugin.modifyLayerVisibilityForElement(desordres.get(0), true);
 
-            // TODO REDMINE-6450 increase the size of PointSymbolizers and TextSymbolizers on visible layers
             if (printLocationInsert) {
-                CorePlugin.modifySymbolSize(2);
+                // increase the style and selectionStyle Symbolizers size
+               modifyStylesPriorPrinting(desordres.get(0));
             }
             final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter, printLocationInsert);
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
+
+            if (printLocationInsert && backUpStyles != null) {
+                // restore the previous styles and selectedStyle
+                restoreStyles(desordres.get(0));
+            }
+            // hide the layer if it was hidden before
+            if (!wasVisible) CorePlugin.modifyLayerVisibilityForElement(desordres.get(0), false);
+
         }
 
         // Generate the report -------------------------------------------------
@@ -256,10 +298,23 @@ public class PrinterUtilities {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
             JasperReportService.generate(print, output);
         }
-
-        if (printLocationInsert) modifySymbolSize(0.5);
-
         return fout;
+    }
+
+    private static void modifyStylesPriorPrinting(Element e) {
+        // increase the size of PointSymbolizers, LineSymbolizers and TextSymbolizers for the styles of visible layers
+        backUpStyles = LocationInsertUtilities.modifySymbolSize(multiplier);
+        // increase the size of PointSymbolizers, LineSymbolizers and TextSymbolizers for the selectionStyle of Desordre
+        backupSelectStyle = LocationInsertUtilities.modifySelectionSymbolSize(multiplier, e);
+    }
+
+    private static void restoreStyles(Element e) {
+        // restore layers style
+        LocationInsertUtilities.changeBackLayersSymbolSize(backUpStyles);
+        // restore selectionStyle of the element layer
+        LocationInsertUtilities.changeBackSelectionSymbolSize(e, backupSelectStyle);
+        backUpStyles = null;
+        backupSelectStyle = null;
     }
 
     ////////////////////////////////////////////////////////////////////////////
