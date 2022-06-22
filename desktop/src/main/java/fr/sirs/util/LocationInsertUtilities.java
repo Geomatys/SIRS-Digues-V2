@@ -18,40 +18,45 @@
  */
 package fr.sirs.util;
 
-import com.vividsolutions.jts.geom.Geometry;
 import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
-import fr.sirs.SIRS;
-import fr.sirs.core.model.*;
-import org.geotoolkit.data.bean.BeanFeature;
+import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.AvecBornesTemporelles;
+import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.TronconDigue;
+import org.geotoolkit.data.query.Query;
+import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
-import org.geotoolkit.feature.Feature;
-import org.geotoolkit.filter.identity.DefaultFeatureId;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.geometry.jts.JTSEnvelope2D;
+import org.geotoolkit.feature.type.GeometryDescriptor;
 import org.geotoolkit.map.FeatureMapLayer;
-import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.style.DefaultFont;
 import org.geotoolkit.style.MutableFeatureTypeStyle;
 import org.geotoolkit.style.MutableStyle;
 import org.geotoolkit.style.MutableStyleFactory;
+import org.geotoolkit.util.NamesExt;
+import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.Id;
-import org.opengis.geometry.Envelope;
 import org.opengis.style.*;
+import org.opengis.util.GenericName;
 
 import java.time.LocalDate;
-import java.util.*;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static fr.sirs.core.SirsCore.DATE_DEBUT_FIELD;
+import static fr.sirs.core.SirsCore.DATE_FIN_FIELD;
 
 /**
  * <p>This class provides utilities for two purposes:</p>
  * <ul>
  * <li>increasing the @{@link Symbolizer} size prior printing the Fiches</li>
- * <li>hide the @{@link TronconDigue} archived prior printing the Fiches</li>
+ * <li>hiding the archived @{@link Element} prior printing</li>
  * <li>restoring the @{@link Symbolizer} size after printing the Fiches</li>
- * <li>restore the @{@link TronconDigue} archived prior printing the Fiches</li>
+ * <li>restoring the visibility of the @{@link Element} after printing</li>
  * </ul>
  * @author Estelle Idée (Geomatys)
  */
@@ -66,7 +71,7 @@ public class LocationInsertUtilities {
      * @param e to get the layer that should be modified
      * @return the original style prior modification - to be used to restore the layer back to normal after printing
      */
-    public static MutableStyle modifySelectionSymbolSize(double multiplier, Element e) {
+    protected static MutableStyle modifySelectionSymbolSize(double multiplier, Element e) {
         MapLayer layer = CorePlugin.getMapLayerForElement(e);
         //create new style to replace the old one
         Map<MapLayer, MutableStyle> result = new HashMap<>();
@@ -81,7 +86,7 @@ public class LocationInsertUtilities {
      * @param multiplier how much the symbols size should be modified by
      * @return Map of @{@link MutableStyle} of the modified layers prior modification : to be used to restore the layers back to normal after printing
      */
-    public static Map<MapLayer, MutableStyle> modifySymbolSize(double multiplier) {
+    protected static Map<MapLayer, MutableStyle> modifySymbolSize(double multiplier) {
         final List<MapLayer> layers = Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
         Map<MapLayer, MutableStyle> result = new HashMap<>();
 
@@ -102,7 +107,7 @@ public class LocationInsertUtilities {
      * @param result Map of @{@link MutableStyle} of the modified layers prior modification : to be used to restore the layers back to normal after printing
      * @param selectionStyle to modify the layer style or selectionStyle
      */
-    public static void modifyLayerSymbolSize(MapLayer layer, double multiplier, Map<MapLayer, MutableStyle> result, boolean selectionStyle) {
+    private static void modifyLayerSymbolSize(MapLayer layer, double multiplier, Map<MapLayer, MutableStyle> result, boolean selectionStyle) {
         //create new style to replace the old one
         final MutableFeatureTypeStyle newFts = SF.featureTypeStyle();
 
@@ -162,7 +167,7 @@ public class LocationInsertUtilities {
      * @param multiplier how much to multiply the graphic size by
      * @return the created @{@link PointSymbolizer} with new size
      */
-    public static PointSymbolizer increaseSizePointSymbolizer(PointSymbolizer sym, double multiplier) {
+    private static PointSymbolizer increaseSizePointSymbolizer(PointSymbolizer sym, double multiplier) {
         Graphic tmpGraphic = sym.getGraphic();
         tmpGraphic = SF.graphic(tmpGraphic.graphicalSymbols(),
                 tmpGraphic.getOpacity(),
@@ -180,7 +185,7 @@ public class LocationInsertUtilities {
      * @param multiplier how much to multiply the line width by
      * @return the created @{@link LineSymbolizer} with new width
      */
-    public static LineSymbolizer increaseSizeLineSymbolizer(LineSymbolizer sym, double multiplier) {
+    private static LineSymbolizer increaseSizeLineSymbolizer(LineSymbolizer sym, double multiplier) {
         Stroke tmpStroke = sym.getStroke();
         tmpStroke = SF.stroke(tmpStroke.getColor(),
                 tmpStroke.getOpacity(),
@@ -199,9 +204,9 @@ public class LocationInsertUtilities {
      * @param multiplier how much to multiply the font size by
      * @return the created @{@link TextSymbolizer} with new font size
      */
-    public static TextSymbolizer increaseSizeTextSymbolizer(TextSymbolizer sym, double multiplier) {
+    private static TextSymbolizer increaseSizeTextSymbolizer(TextSymbolizer sym, double multiplier) {
         Font font = sym.getFont();
-        TextSymbolizer tmpText = SF.textSymbolizer(sym.getFill(),
+        return SF.textSymbolizer(sym.getFill(),
                 new DefaultFont(font.getFamily(),
                         font.getStyle(),
                         font.getWeight(),
@@ -210,22 +215,20 @@ public class LocationInsertUtilities {
                         FF.literal(Double.parseDouble(sym.getHalo().getRadius().toString()) * multiplier)),
                 FF.property("libelle"),
                 sym.getLabelPlacement(), null);
-
-        return tmpText;
     }
 
     /**
      * Restore the context layers style
-     *
      * @param backUpStyles map with the layers' styles to be restored
-     * @return
      */
-    public static void changeBackLayersSymbolSize(Map<MapLayer, MutableStyle> backUpStyles) {
-        final List<MapLayer> layers = Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
-        MutableStyle toRestore;
-        for (MapLayer layer : layers) {
-            toRestore = backUpStyles.get(layer);
-            if (toRestore != null) layer.setStyle(toRestore);
+    protected static void changeBackLayersSymbolSize(Map<MapLayer, MutableStyle> backUpStyles) {
+        if (backUpStyles != null && !backUpStyles.isEmpty()) {
+            final List<MapLayer> layers = Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
+            MutableStyle toRestore;
+            for (MapLayer layer : layers) {
+                toRestore = backUpStyles.get(layer);
+                if (toRestore != null) layer.setStyle(toRestore);
+            }
         }
     }
 
@@ -234,9 +237,92 @@ public class LocationInsertUtilities {
      * @param e element for which the layer should be modified
      * @param backUpSelectionStyle the selectionStyle to be restored
      */
-    public static void changeBackSelectionSymbolSize(Element e, MutableStyle backUpSelectionStyle) {
-        MapLayer layer = CorePlugin.getMapLayerForElement(e);
-        layer.setSelectionStyle(backUpSelectionStyle);
+    protected static void changeBackSelectionSymbolSize(Element e, MutableStyle backUpSelectionStyle) {
+        if (backUpSelectionStyle != null) {
+            MapLayer layer = CorePlugin.getMapLayerForElement(e);
+            layer.setSelectionStyle(backUpSelectionStyle);
+        }
+    }
+
+    /**
+     * To hide the archived elements because the extraDimension would also hide the selected archived elements
+     * @param elementsToShow list of selected elements to print
+     * @return the backup queries to restore the queries after printing
+     */
+    protected static Map<FeatureMapLayer, Query> hideArchivedElements(List<? extends Element> elementsToShow) {
+        List<FeatureMapLayer> fml = new ArrayList<>();
+        List<MapLayer> layers = Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
+
+        // to collect all layers containing Elements than can be archived
+        for (MapLayer l : layers) {
+            if (l.isVisible() && l instanceof FeatureMapLayer && !((FeatureMapLayer) l).getCollection().isEmpty()) {
+                if (((FeatureMapLayer) l).getCollection().iterator().next().getUserData().get("bean") instanceof AvecBornesTemporelles)
+                    fml.add((FeatureMapLayer) l);
+            }
+        }
+        final TronconDigueRepository tronconRepository = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
+        // collect the docmuentIds of the troncons the elements are linked to
+        List<String> tronconsIds = new ArrayList<>();
+        if (elementsToShow!= null && !elementsToShow.isEmpty() && (elementsToShow).get(0) instanceof Objet){
+            for (Element e : elementsToShow) {
+                tronconsIds.add(tronconRepository.get(((Objet) e).getLinearId()).getDocumentId());
+            }
+        }
+
+        Map<FeatureMapLayer, Query> oldQueries = new HashMap<>();
+        for (FeatureMapLayer layer : fml) {
+            Query currentQuery = layer.getQuery();
+            oldQueries.put(layer, currentQuery);
+            GenericName typeName = layer.getCollection().getFeatureType().getName();
+            Filter filter = FF.and(
+                    FF.or(
+                            FF.isNull(FF.property(DATE_FIN_FIELD)),
+                            FF.greaterOrEqual(FF.property(DATE_FIN_FIELD), FF.literal(LocalDate.now()))),
+                    FF.or(
+                            FF.isNull(FF.property(DATE_DEBUT_FIELD)),
+                            FF.lessOrEqual(FF.property(DATE_DEBUT_FIELD), FF.literal(LocalDate.now()))))
+                    ;
+            // the archived selected elements should be visible on the location insert
+            if (!tronconsIds.isEmpty() && elementsToShow.get(0).getClass().getSimpleName().equalsIgnoreCase(typeName.toString())) {
+                for (String tId : tronconsIds) {
+                    filter = FF.or(
+                            FF.equals(FF.property("linearId"), FF.literal(tId)),
+                            filter);
+                }
+            }
+            // the tronçons of the selected elements should be visible on the location insert even though they are archived
+            else if (layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME) && !tronconsIds.isEmpty()) {
+                for (String tId : tronconsIds) {
+                    filter = FF.or(
+                            FF.equals(FF.property("documentId"), FF.literal(tId)),
+                            filter);
+                }
+            }
+            QueryBuilder queryBuilder = new QueryBuilder(
+                    NamesExt.create(typeName.scope().toString(), typeName.head().toString()));
+            queryBuilder.setFilter(filter);
+            GeometryDescriptor geomDescriptor = layer.getCollection().getFeatureType().getGeometryDescriptor();
+            if (geomDescriptor != null) {
+                queryBuilder.setProperties(new GenericName[]{geomDescriptor.getName()});
+            }
+            layer.setQuery(queryBuilder.buildQuery());
+        }
+        return oldQueries;
+    }
+
+    /**
+     * Method to restore the initial layers' queries prior hiding archived elements
+     * @param backupQueries the output of the method @hideArchivedElements
+     */
+    protected static void showBackArchivedElements(Map<FeatureMapLayer, Query>  backupQueries){
+        if (backupQueries != null && !backupQueries.isEmpty()) {
+            final List<MapLayer> layers = Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
+            Query toRestore;
+            for (MapLayer layer : layers) {
+                toRestore = backupQueries.get(layer);
+                if (toRestore != null) ((FeatureMapLayer) layer).setQuery(toRestore);
+            }
+        }
     }
 
 }

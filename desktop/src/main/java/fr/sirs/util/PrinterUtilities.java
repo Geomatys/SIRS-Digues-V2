@@ -38,13 +38,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -58,8 +52,10 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.geotoolkit.data.FeatureCollection;
+import org.geotoolkit.data.query.Query;
 import org.geotoolkit.display2d.service.OutputDef;
 import org.geotoolkit.feature.type.FeatureType;
+import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.report.CollectionDataSource;
 import org.geotoolkit.report.JasperReportService;
@@ -85,10 +81,13 @@ public class PrinterUtilities {
     // how much the symbols should be modified by when printing the locationInsert
     private static final double multiplier = 3;
     // to store the styles to be restored prior printing
-    private static Map<MapLayer, MutableStyle> backUpStyles = null;
+    public static Map<MapLayer, MutableStyle> backUpStyles = null;
     // to store the selectionStyle to be restored after printing
-    private static MutableStyle backupSelectStyle = null;
+    public static MutableStyle backupSelectStyle = null;
+    // to store layers' queries before changing its filter to hide the archived elements
+    public static  Map<FeatureMapLayer, Query>  backupQueries = null;
 
+    private static  boolean wasVisible;
     private static final List<String> FALSE_GETTERS = new ArrayList<>();
     static{
         FALSE_GETTERS.add("getClass");
@@ -134,24 +133,16 @@ public class PrinterUtilities {
                     parameters.put(PHOTOS_SUBREPORT, net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream));
                 }
             }
-
             ouvrages.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            boolean wasVisible = CorePlugin.getMapLayerForElement(ouvrages.get(0)).isVisible();
-            if (!ouvrages.isEmpty() && !wasVisible) CorePlugin.modifyLayerVisibilityForElement(ouvrages.get(0), true);
-
             if (printLocationInsert) {
                 // increase the style and selectionStyle Symbolizers size
-                modifyStylesPriorPrinting(ouvrages.get(0));
+                modifyMapPriorPrinting(ouvrages);
             }
             final JRDataSource source = new OuvrageHydrauliqueAssocieDataSource(ouvrages, previewLabelRepository, stringConverter, printLocationInsert);
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
-
-            // hide the layer if it was hidden before
-            if (!wasVisible) CorePlugin.modifyLayerVisibilityForElement(ouvrages.get(0), false);
-
             if (printLocationInsert && backUpStyles != null) {
                 // restore the previous styles and selectedStyle
-                restoreStyles(ouvrages.get(0));
+                restoreMap(ouvrages.get(0));
             }
         }
 
@@ -201,25 +192,17 @@ public class PrinterUtilities {
                     parameters.put(PHOTOS_SUBREPORT, net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream));
                 }
             }
-
             reseaux.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            boolean wasVisible = CorePlugin.getMapLayerForElement(reseaux.get(0)).isVisible();
-            if (!reseaux.isEmpty() && !wasVisible) CorePlugin.modifyLayerVisibilityForElement(reseaux.get(0), true);
-
             if (printLocationInsert) {
                 // increase the style and selectionStyle Symbolizers size
-                modifyStylesPriorPrinting(reseaux.get(0));
+                modifyMapPriorPrinting(reseaux);
             }
             final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter, printLocationInsert);
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
-
-            // hide the layer if it was hidden before
-            if (!wasVisible) CorePlugin.modifyLayerVisibilityForElement(reseaux.get(0), false);
             if (printLocationInsert && backUpStyles != null) {
                 // restore the previous styles and selectedStyle
-                restoreStyles(reseaux.get(0));
+                restoreMap(reseaux.get(0));
             }
-
         }
 
         // Generate the report -------------------------------------------------
@@ -255,7 +238,6 @@ public class PrinterUtilities {
         templateFile.deleteOnExit();
 
         final JasperPrint print;
-        Map<String, MutableStyle> styleToChangeBack;
         try (final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateDesordre.jrxml")) {
             final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(metaTemplateStream, avoidDesordreFields,
                     observationFields, prestationFields, reseauFields, printPhoto, printReseauOuvrage, printVoirie);
@@ -270,25 +252,17 @@ public class PrinterUtilities {
                     parameters.put(PHOTOS_SUBREPORT, JasperCompileManager.compileReport(photoTemplateStream));
                 }
             }
-
             desordres.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            boolean wasVisible = CorePlugin.getMapLayerForElement(desordres.get(0)).isVisible();
-            if (!desordres.isEmpty()  && !wasVisible) CorePlugin.modifyLayerVisibilityForElement(desordres.get(0), true);
-
             if (printLocationInsert) {
                 // increase the style and selectionStyle Symbolizers size
-               modifyStylesPriorPrinting(desordres.get(0));
+                modifyMapPriorPrinting(desordres);
             }
             final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter, printLocationInsert);
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
-
             if (printLocationInsert && backUpStyles != null) {
                 // restore the previous styles and selectedStyle
-                restoreStyles(desordres.get(0));
+                restoreMap(desordres.get(0));
             }
-            // hide the layer if it was hidden before
-            if (!wasVisible) CorePlugin.modifyLayerVisibilityForElement(desordres.get(0), false);
-
         }
 
         // Generate the report -------------------------------------------------
@@ -301,20 +275,30 @@ public class PrinterUtilities {
         return fout;
     }
 
-    private static void modifyStylesPriorPrinting(Element e) {
+    private static void modifyMapPriorPrinting(List<? extends Element> elements) {
+        wasVisible = CorePlugin.getMapLayerForElement(elements.get(0)).isVisible();
+        if (!elements.isEmpty() && !wasVisible) CorePlugin.modifyLayerVisibilityForElement(elements.get(0), true);
         // increase the size of PointSymbolizers, LineSymbolizers and TextSymbolizers for the styles of visible layers
         backUpStyles = LocationInsertUtilities.modifySymbolSize(multiplier);
         // increase the size of PointSymbolizers, LineSymbolizers and TextSymbolizers for the selectionStyle of Desordre
-        backupSelectStyle = LocationInsertUtilities.modifySelectionSymbolSize(multiplier, e);
+        backupSelectStyle = LocationInsertUtilities.modifySelectionSymbolSize(multiplier, elements.get(0));
+        // Hide archived Elements from all visible layers
+        backupQueries = LocationInsertUtilities.hideArchivedElements(elements);
     }
 
-    private static void restoreStyles(Element e) {
+    // public method to be accessed by the FXDisorderPrintPane, FXReseauFermePrintPane and FXOuvrageAssociePrintPane
+    public static void restoreMap(Element e) {
+        // hide the layer back if it was hidden before
+        if (!wasVisible) CorePlugin.modifyLayerVisibilityForElement(e, false);
         // restore layers style
         LocationInsertUtilities.changeBackLayersSymbolSize(backUpStyles);
         // restore selectionStyle of the element layer
         LocationInsertUtilities.changeBackSelectionSymbolSize(e, backupSelectStyle);
+        // Restore hidden archived Elements from all visible layers
+        LocationInsertUtilities.showBackArchivedElements(backupQueries);
         backUpStyles = null;
         backupSelectStyle = null;
+        backupQueries = null;
     }
 
     ////////////////////////////////////////////////////////////////////////////

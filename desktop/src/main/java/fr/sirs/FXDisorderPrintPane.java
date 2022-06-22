@@ -38,6 +38,8 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import fr.sirs.util.PrinterUtilities;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -155,8 +157,11 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
 
     @FXML private void cancel() {
         final Task t = taskProperty.get();
-        if (t != null)
+        if (t != null) {
+            if (PrinterUtilities.backUpStyles != null || PrinterUtilities.backupSelectStyle != null || PrinterUtilities.backupQueries != null)
+                PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
             t.cancel();
+        }
     }
 
     @FXML
@@ -180,6 +185,15 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                     alert.show();
                 });
                 throw error;
+            } catch (InterruptedException e) {
+                // restore the interrupted status
+                Thread.currentThread().interrupt();
+                // abort
+                throw new RuntimeException("interrupted", e);
+            } catch (RuntimeException re) {
+                SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to error", re);
+                PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
+                throw re;
             }
         });
         taskProperty.set(printing);
