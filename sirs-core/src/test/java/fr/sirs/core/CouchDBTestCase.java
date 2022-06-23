@@ -18,31 +18,12 @@
  */
 package fr.sirs.core;
 
-import static fr.sirs.core.SirsCore.NAME;
 import fr.sirs.core.authentication.SIRSAuthenticator;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.util.SystemProxySelector;
-import java.io.File;
-import java.io.IOException;
-import java.net.Authenticator;
-import java.net.ProxySelector;
-import java.util.HashSet;
-import java.util.Iterator;
-
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.prefs.Preferences;
-import java.util.prefs.BackingStoreException;
 import javafx.embed.swing.JFXPanel;
 import org.apache.sis.test.TestCase;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.Path;
-import org.apache.commons.io.FileUtils;
-
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
 import org.junit.AfterClass;
@@ -51,6 +32,16 @@ import org.junit.BeforeClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.Authenticator;
+import java.net.ProxySelector;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 public abstract class CouchDBTestCase extends TestCase {
 
@@ -79,7 +70,7 @@ public abstract class CouchDBTestCase extends TestCase {
      */
     @Autowired
     protected SessionCore session;
-    
+
     @BeforeClass
     public static synchronized void initEnvironment() throws Exception {
         // Set http proxy / authentication managers
@@ -93,7 +84,9 @@ public abstract class CouchDBTestCase extends TestCase {
         // Create / connect to sirs database.
         DB_NAME = "sirs-test".concat(UUID.randomUUID().toString());
         DBS_TO_DELETE.add(DB_NAME);
-        REGISTRY = new DatabaseRegistry();
+        // set a system variable to run tests in CI - option to add to mvn command : -DCOUCHDB_TEST_URL="myVariable"
+        // if not added to the maven command, local couchdb will be created
+        REGISTRY = new DatabaseRegistry(System.getProperty("COUCHDB_TEST_URL"));
         APP_CTX = REGISTRY.connectToSirsDatabase(DB_NAME, true, true, true);
         final SirsDBInfoRepository sirsDBInfoRepository = APP_CTX.getBean(SirsDBInfoRepository.class);
         Optional<SirsDBInfo> init = sirsDBInfoRepository.get();

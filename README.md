@@ -71,3 +71,8 @@ Cela permet d’initialiser un nouveau projet construit comme le modèle choisi.
 
 Une fois toutes les propriétés spécifiées, maven vous demande confirmation. Confirmez, et la création de votre plugin est terminée.
 
+### 5 - Run tests in CI
+
+Ajouter l'option -DCOUCHDB_TEST_URL="myVariable" à la commande maven des tests
+
+Exemple : mvn -DCOUCHDB_TEST_URL="http://127.0.0.1:5984/" test
