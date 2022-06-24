@@ -18,7 +18,6 @@
  */
 package fr.sirs.core;
 
-import static fr.sirs.core.SirsCore.NAME;
 import fr.sirs.core.authentication.SIRSAuthenticator;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
@@ -74,7 +73,7 @@ public abstract class CouchDBTestCase extends TestCase {
      */
     @Autowired
     protected SessionCore session;
-    
+
     @BeforeClass
     public static synchronized void initEnvironment() throws Exception {
         // Set http proxy / authentication managers
@@ -88,7 +87,9 @@ public abstract class CouchDBTestCase extends TestCase {
         // Create / connect to sirs database.
         DB_NAME = "sirs-test".concat(UUID.randomUUID().toString());
         DBS_TO_DELETE.add(DB_NAME);
-        REGISTRY = new DatabaseRegistry();
+        // set a system variable to run tests in CI - option to add to mvn command : -DCOUCHDB_TEST_URL="myVariable"
+        // if not added to the maven command, local couchdb will be created
+        REGISTRY = new DatabaseRegistry(System.getProperty("COUCHDB_TEST_URL"));
         APP_CTX = REGISTRY.connectToSirsDatabase(DB_NAME, true, true, true);
         final SirsDBInfoRepository sirsDBInfoRepository = APP_CTX.getBean(SirsDBInfoRepository.class);
         Optional<SirsDBInfo> init = sirsDBInfoRepository.get();
