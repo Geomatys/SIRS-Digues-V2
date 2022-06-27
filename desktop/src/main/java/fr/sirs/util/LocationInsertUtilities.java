@@ -20,6 +20,7 @@ package fr.sirs.util;
 
 import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Element;
@@ -46,6 +47,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import static fr.sirs.core.SirsCore.DATE_DEBUT_FIELD;
 import static fr.sirs.core.SirsCore.DATE_FIN_FIELD;
@@ -56,7 +58,7 @@ import static fr.sirs.core.SirsCore.DATE_FIN_FIELD;
  * <li>increasing the @{@link Symbolizer} size prior printing the Fiches</li>
  * <li>hiding the archived @{@link Element} prior printing</li>
  * <li>restoring the @{@link Symbolizer} size after printing the Fiches</li>
- * <li>restoring the visibility of the @{@link Element} after printing</li>
+ * <li>restoring the visibility of the archived @{@link Element} after printing</li>
  * </ul>
  * @author Estelle Idée (Geomatys)
  */
@@ -87,7 +89,7 @@ public class LocationInsertUtilities {
      * @return Map of @{@link MutableStyle} of the modified layers prior modification : to be used to restore the layers back to normal after printing
      */
     protected static Map<MapLayer, MutableStyle> modifySymbolSize(double multiplier) {
-        final List<MapLayer> layers = Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
+        final List<MapLayer> layers = getMapLayers();
         Map<MapLayer, MutableStyle> result = new HashMap<>();
 
         for (MapLayer layer : layers) {
@@ -223,7 +225,7 @@ public class LocationInsertUtilities {
      */
     protected static void changeBackLayersSymbolSize(Map<MapLayer, MutableStyle> backUpStyles) {
         if (backUpStyles != null && !backUpStyles.isEmpty()) {
-            final List<MapLayer> layers = Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
+            final List<MapLayer> layers = getMapLayers();
             MutableStyle toRestore;
             for (MapLayer layer : layers) {
                 toRestore = backUpStyles.get(layer);
@@ -251,7 +253,9 @@ public class LocationInsertUtilities {
      */
     protected static Map<FeatureMapLayer, Query> hideArchivedElements(List<? extends Element> elementsToShow) {
         List<FeatureMapLayer> fml = new ArrayList<>();
-        List<MapLayer> layers = Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
+        List<MapLayer> layers = getMapLayers();
+        // to collect backup queries
+        Map<FeatureMapLayer, Query> oldQueries = new HashMap<>();
 
         // to collect all layers containing Elements than can be archived
         for (MapLayer l : layers) {
@@ -260,52 +264,52 @@ public class LocationInsertUtilities {
                     fml.add((FeatureMapLayer) l);
             }
         }
-        final TronconDigueRepository tronconRepository = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
-        // collect the docmuentIds of the troncons the elements are linked to
-        List<String> tronconsIds = new ArrayList<>();
-        if (elementsToShow!= null && !elementsToShow.isEmpty() && (elementsToShow).get(0) instanceof Objet){
-            for (Element e : elementsToShow) {
-                tronconsIds.add(tronconRepository.get(((Objet) e).getLinearId()).getDocumentId());
+        if (!fml.isEmpty()) {
+            final TronconDigueRepository tronconRepository = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
+            // collect the docmuentIds of the troncons the elements are linked to
+            List<String> tronconsIds = new ArrayList<>();
+            if (elementsToShow != null && !elementsToShow.isEmpty() && (elementsToShow).get(0) instanceof Objet) {
+                for (Element e : elementsToShow) {
+                    tronconsIds.add(tronconRepository.get(((Objet) e).getLinearId()).getDocumentId());
+                }
             }
-        }
 
-        Map<FeatureMapLayer, Query> oldQueries = new HashMap<>();
-        for (FeatureMapLayer layer : fml) {
-            Query currentQuery = layer.getQuery();
-            oldQueries.put(layer, currentQuery);
-            GenericName typeName = layer.getCollection().getFeatureType().getName();
-            Filter filter = FF.and(
-                    FF.or(
-                            FF.isNull(FF.property(DATE_FIN_FIELD)),
-                            FF.greaterOrEqual(FF.property(DATE_FIN_FIELD), FF.literal(LocalDate.now()))),
-                    FF.or(
-                            FF.isNull(FF.property(DATE_DEBUT_FIELD)),
-                            FF.lessOrEqual(FF.property(DATE_DEBUT_FIELD), FF.literal(LocalDate.now()))))
-                    ;
-            // the archived selected elements should be visible on the location insert
-            if (!tronconsIds.isEmpty() && elementsToShow.get(0).getClass().getSimpleName().equalsIgnoreCase(typeName.toString())) {
-                for (String tId : tronconsIds) {
-                    filter = FF.or(
-                            FF.equals(FF.property("linearId"), FF.literal(tId)),
-                            filter);
+            for (FeatureMapLayer layer : fml) {
+                Query currentQuery = layer.getQuery();
+                oldQueries.put(layer, currentQuery);
+                GenericName typeName = layer.getCollection().getFeatureType().getName();
+                Filter filter = FF.and(
+                        FF.or(
+                                FF.isNull(FF.property(DATE_FIN_FIELD)),
+                                FF.greaterOrEqual(FF.property(DATE_FIN_FIELD), FF.literal(LocalDate.now()))),
+                        FF.or(
+                                FF.isNull(FF.property(DATE_DEBUT_FIELD)),
+                                FF.lessOrEqual(FF.property(DATE_DEBUT_FIELD), FF.literal(LocalDate.now()))));
+                // the archived selected elements should be visible on the location insert
+                if (!tronconsIds.isEmpty() && elementsToShow.get(0).getClass().getSimpleName().equalsIgnoreCase(typeName.toString())) {
+                    for (String tId : tronconsIds) {
+                        filter = FF.or(
+                                FF.equals(FF.property("linearId"), FF.literal(tId)),
+                                filter);
+                    }
                 }
-            }
-            // the tronçons of the selected elements should be visible on the location insert even though they are archived
-            else if (layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME) && !tronconsIds.isEmpty()) {
-                for (String tId : tronconsIds) {
-                    filter = FF.or(
-                            FF.equals(FF.property("documentId"), FF.literal(tId)),
-                            filter);
+                // the tronçons of the selected elements should be visible on the location insert even though they are archived
+                else if (layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME) && !tronconsIds.isEmpty()) {
+                    for (String tId : tronconsIds) {
+                        filter = FF.or(
+                                FF.equals(FF.property("documentId"), FF.literal(tId)),
+                                filter);
+                    }
                 }
+                QueryBuilder queryBuilder = new QueryBuilder(
+                        NamesExt.create(typeName.scope().toString(), typeName.head().toString()));
+                queryBuilder.setFilter(filter);
+                GeometryDescriptor geomDescriptor = layer.getCollection().getFeatureType().getGeometryDescriptor();
+                if (geomDescriptor != null) {
+                    queryBuilder.setProperties(new GenericName[]{geomDescriptor.getName()});
+                }
+                layer.setQuery(queryBuilder.buildQuery());
             }
-            QueryBuilder queryBuilder = new QueryBuilder(
-                    NamesExt.create(typeName.scope().toString(), typeName.head().toString()));
-            queryBuilder.setFilter(filter);
-            GeometryDescriptor geomDescriptor = layer.getCollection().getFeatureType().getGeometryDescriptor();
-            if (geomDescriptor != null) {
-                queryBuilder.setProperties(new GenericName[]{geomDescriptor.getName()});
-            }
-            layer.setQuery(queryBuilder.buildQuery());
         }
         return oldQueries;
     }
@@ -316,12 +320,49 @@ public class LocationInsertUtilities {
      */
     protected static void showBackArchivedElements(Map<FeatureMapLayer, Query>  backupQueries){
         if (backupQueries != null && !backupQueries.isEmpty()) {
-            final List<MapLayer> layers = Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
+            final List<MapLayer> layers = getMapLayers();
             Query toRestore;
             for (MapLayer layer : layers) {
                 toRestore = backupQueries.get(layer);
                 if (toRestore != null) ((FeatureMapLayer) layer).setQuery(toRestore);
             }
+        }
+    }
+
+    private static List<MapLayer> getMapLayers() {
+        if (Injector.getSession() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "There is no session to retrieved");
+            throw new RuntimeException("There is no session to retrieved");
+        }
+        if (Injector.getSession().getFrame() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "There is no frame to retrieved");
+            throw new RuntimeException("There is no frame to retrieved");
+        }
+        if (Injector.getSession().getFrame().getMapTab() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Could not access the map tab");
+            throw new RuntimeException("Could not access the map tab");
+        }
+        if (Injector.getSession().getFrame().getMapTab().getMap() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Could not access the FXMapPane");
+            throw new RuntimeException("Could not access the FXMapPane");
+        }
+        if (Injector.getSession().getFrame().getMapTab().getMap().getUiMap() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Could not access the FXMap");
+            throw new RuntimeException("Could not access the FXMap");
+        }
+        if (Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Could not access the container");
+            throw new RuntimeException("Could not access the container");
+        }
+        if (Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Could not access the MapContext");
+            throw new RuntimeException("Could not access the MapContext");
+        }
+        if (Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Could not access the context layers");
+            throw new RuntimeException("Could not access the context layers");
+        } else {
+            return Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
         }
     }
 

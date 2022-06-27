@@ -129,6 +129,11 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                     new Growl(Growl.Type.ERROR, "L'impression a échouée.").showAndFade();
                     taskProperty.set(null);
                 }));
+                newVal.setOnRunning(evt -> Platform.runLater(() -> {
+                    if (uiOptionLocationInsert.isSelected()) {
+                       new Growl(Growl.Type.WARNING, "Durant l'extraction des données lors de l'impression des fiches, le style de la carte est temporairement modifié.").showAndFade();
+                    }
+                }));
             }
         });
 
@@ -166,7 +171,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
 
     @FXML
     private void print() {
-        final Task<Boolean> printing = new TaskManager.MockTask<>("Génération de fiches détaillées de désordres", () -> {
+        final Task<Boolean> printing = new TaskManager.MockTask<>("Génération de fiches détaillées", () -> {
             try {
                 final List<Desordre> toPrint;
                 try (final Stream<Desordre> data = getData()) {
@@ -185,20 +190,28 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                     alert.show();
                 });
                 throw error;
-            } catch (InterruptedException e) {
-                // restore the interrupted status
-                Thread.currentThread().interrupt();
-                // abort
-                throw new RuntimeException("interrupted", e);
             } catch (RuntimeException re) {
                 SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to error", re);
-                PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
+                if (PrinterUtilities.backUpStyles != null || PrinterUtilities.backupSelectStyle != null || PrinterUtilities.backupQueries != null)
+                    PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
                 throw re;
             }
         });
-        taskProperty.set(printing);
-
-        TaskManager.INSTANCE.submit(printing);
+        boolean canPrint = true;
+        if (TaskManager.INSTANCE.getSubmittedTasks() != null && !TaskManager.INSTANCE.getSubmittedTasks().isEmpty()) {
+            for (Task t : TaskManager.INSTANCE.getSubmittedTasks()) {
+                if ("Génération de fiches détaillées".equalsIgnoreCase(t.getTitle())) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to other printing on going");
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Une impression de fiche est en cours,\nveuillez réessayer quand elle sera terminée", ButtonType.OK);
+                    alert.showAndWait();
+                    canPrint = false;
+                }
+            }
+        }
+        if (canPrint) {
+            taskProperty.set(printing);
+            TaskManager.INSTANCE.submit(printing);
+        }
     }
 
     private Stream<Desordre> getData() {

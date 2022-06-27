@@ -81,11 +81,11 @@ public class PrinterUtilities {
     // how much the symbols should be modified by when printing the locationInsert
     private static final double multiplier = 3;
     // to store the styles to be restored prior printing
-    public static Map<MapLayer, MutableStyle> backUpStyles = null;
+    public static Map<MapLayer, MutableStyle> backUpStyles;
     // to store the selectionStyle to be restored after printing
-    public static MutableStyle backupSelectStyle = null;
+    public static MutableStyle backupSelectStyle;
     // to store layers' queries before changing its filter to hide the archived elements
-    public static  Map<FeatureMapLayer, Query>  backupQueries = null;
+    public static  Map<FeatureMapLayer, Query>  backupQueries;
 
     private static  boolean wasVisible;
     private static final List<String> FALSE_GETTERS = new ArrayList<>();
@@ -134,16 +134,7 @@ public class PrinterUtilities {
                 }
             }
             ouvrages.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            if (printLocationInsert) {
-                // increase the style and selectionStyle Symbolizers size
-                modifyMapPriorPrinting(ouvrages);
-            }
-            final JRDataSource source = new OuvrageHydrauliqueAssocieDataSource(ouvrages, previewLabelRepository, stringConverter, printLocationInsert);
-            print = JasperFillManager.fillReport(jasperReport, parameters, source);
-            if (printLocationInsert && backUpStyles != null) {
-                // restore the previous styles and selectedStyle
-                restoreMap(ouvrages.get(0));
-            }
+            print = createDataSource(jasperReport, ouvrages, previewLabelRepository, stringConverter, printLocationInsert);
         }
 
         // Generate the report -------------------------------------------------
@@ -193,16 +184,7 @@ public class PrinterUtilities {
                 }
             }
             reseaux.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            if (printLocationInsert) {
-                // increase the style and selectionStyle Symbolizers size
-                modifyMapPriorPrinting(reseaux);
-            }
-            final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter, printLocationInsert);
-            print = JasperFillManager.fillReport(jasperReport, parameters, source);
-            if (printLocationInsert && backUpStyles != null) {
-                // restore the previous styles and selectedStyle
-                restoreMap(reseaux.get(0));
-            }
+            print = createDataSource(jasperReport, reseaux, previewLabelRepository, stringConverter, printLocationInsert);
         }
 
         // Generate the report -------------------------------------------------
@@ -253,16 +235,7 @@ public class PrinterUtilities {
                 }
             }
             desordres.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            if (printLocationInsert) {
-                // increase the style and selectionStyle Symbolizers size
-                modifyMapPriorPrinting(desordres);
-            }
-            final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter, printLocationInsert);
-            print = JasperFillManager.fillReport(jasperReport, parameters, source);
-            if (printLocationInsert && backUpStyles != null) {
-                // restore the previous styles and selectedStyle
-                restoreMap(desordres.get(0));
-            }
+            print = createDataSource(jasperReport, desordres, previewLabelRepository, stringConverter, printLocationInsert);
         }
 
         // Generate the report -------------------------------------------------
@@ -273,6 +246,37 @@ public class PrinterUtilities {
             JasperReportService.generate(print, output);
         }
         return fout;
+    }
+
+    private static JasperPrint createDataSource(JasperReport jasperReport,
+                                                             final List<? extends Element> elementsToPrint,
+                                                             final Previews previewLabelRepository,
+                                                             final SirsStringConverter stringConverter,
+                                                             final boolean printLocationInsert)
+            throws JRException {
+        final JasperPrint print;
+        final Map<String, Object> parameters = new HashMap<>();
+        if (printLocationInsert) {
+            // increase the style and selectionStyle Symbolizers size
+            modifyMapPriorPrinting(elementsToPrint);
+        }
+
+        final JRDataSource source;
+        if (elementsToPrint.get(0) instanceof Desordre)
+            source = new DesordreDataSource((List<Desordre>) elementsToPrint, previewLabelRepository, stringConverter, printLocationInsert);
+        else if (elementsToPrint.get(0) instanceof ReseauHydrauliqueFerme)
+            source = new ReseauHydrauliqueFermeDataSource((List<ReseauHydrauliqueFerme>) elementsToPrint, previewLabelRepository, stringConverter, printLocationInsert);
+        else if (elementsToPrint.get(0) instanceof OuvrageHydrauliqueAssocie)
+            source = new OuvrageHydrauliqueAssocieDataSource((List<OuvrageHydrauliqueAssocie>) elementsToPrint, previewLabelRepository, stringConverter, printLocationInsert);
+        else
+            throw new RuntimeException("Can't print the type of Elements selected : "+elementsToPrint.get(0).getClass().getSimpleName());
+        print = JasperFillManager.fillReport(jasperReport, parameters, source);
+
+        if (printLocationInsert && backUpStyles != null) {
+            // restore the previous styles and selectedStyle
+            restoreMap(elementsToPrint.get(0));
+        }
+        return print;
     }
 
     private static void modifyMapPriorPrinting(List<? extends Element> elements) {
@@ -286,7 +290,7 @@ public class PrinterUtilities {
         backupQueries = LocationInsertUtilities.hideArchivedElements(elements);
     }
 
-    // public method to be accessed by the FXDisorderPrintPane, FXReseauFermePrintPane and FXOuvrageAssociePrintPane
+    // public method to be accessed from FXDisorderPrintPane, FXReseauFermePrintPane, FXOuvrageAssociePrintPane
     public static void restoreMap(Element e) {
         // hide the layer back if it was hidden before
         if (!wasVisible) CorePlugin.modifyLayerVisibilityForElement(e, false);

@@ -18,6 +18,7 @@
  */
 package fr.sirs;
 
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.AvecObservations.LastObservationPredicate;
 import fr.sirs.core.model.RefConduiteFermee;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
@@ -28,9 +29,12 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import fr.sirs.util.PrinterUtilities;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -39,11 +43,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.Tab;
+import javafx.scene.control.*;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.util.collection.CloseableIterator;
 
@@ -53,6 +53,11 @@ import org.geotoolkit.util.collection.CloseableIterator;
  */
 public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
 
+    private static final String MEMORY_ERROR_MSG = String.format(
+            "Impossible d'imprimer les fiches : la mémoire disponible est insuffisante. Vous devez soit :%n"
+                    + " - sélectionner moins de réseaux hydrauliques fermés,%n"
+                    + " - fermer d'autres applications ouvertes sur le système."
+    );
     @FXML private Tab uiConduiteTypeChoice;
 
     @FXML private CheckBox uiOptionPhoto;
@@ -98,6 +103,11 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
                     new Growl(Growl.Type.ERROR, "L'impression a échouée.").showAndFade();
                     taskProperty.set(null);
                 }));
+                newVal.setOnRunning(evt -> Platform.runLater(() -> {
+                    if (uiOptionLocationInsert.isSelected()) {
+                        new Growl(Growl.Type.WARNING, "Durant l'extraction des données lors de l'impression des fiches, le style de la carte est temporairement modifié.").showAndFade();
+                    }
+                }));
             }
         });
 
@@ -126,28 +136,56 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
 
     @FXML private void cancel() {
         final Task t = taskProperty.get();
-        if (t != null)
+        if (t != null){
+            if (PrinterUtilities.backUpStyles != null || PrinterUtilities.backupSelectStyle != null || PrinterUtilities.backupQueries != null)
+                PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
             t.cancel();
+        }
     }
 
     @FXML
     private void print() {
-        final Task<Boolean> printing = new TaskManager.MockTask<>("Génération de fiches détaillées de réseaux hydrauliques fermés", () -> {
+        final Task<Boolean> printing = new TaskManager.MockTask<>("Génération de fiches détaillées", () -> {
+            try {
+                final List<ReseauHydrauliqueFerme> toPrint;
+                try (final Stream<ReseauHydrauliqueFerme> data = getData()) {
+                    toPrint = data.collect(Collectors.toList());
+                }
 
-            final List<ReseauHydrauliqueFerme> toPrint;
-            try (final Stream<ReseauHydrauliqueFerme> data = getData()) {
-                toPrint = data.collect(Collectors.toList());
+                if (!toPrint.isEmpty() && !Thread.currentThread().isInterrupted()) {
+                    Injector.getSession().getPrintManager().printReseaux(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionLocationInsert.isSelected());
+                }
+
+                return !toPrint.isEmpty();
+            } catch (OutOfMemoryError error) {
+                SirsCore.LOGGER.log(Level.WARNING, "Cannot print reseaux hydrauliques fermés due to lack of memory", error);
+                Platform.runLater(() -> {
+                    final Alert alert = new Alert(Alert.AlertType.ERROR, MEMORY_ERROR_MSG, ButtonType.OK);
+                    alert.show();
+                });
+                throw error;
+            } catch (RuntimeException re) {
+                SirsCore.LOGGER.log(Level.WARNING, "Cannot print reseaux hydrauliques fermés due to error", re);
+                if (PrinterUtilities.backUpStyles != null || PrinterUtilities.backupSelectStyle != null || PrinterUtilities.backupQueries != null)
+                    PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
+                throw re;
             }
-
-            if (!toPrint.isEmpty() && !Thread.currentThread().isInterrupted()) {
-                Injector.getSession().getPrintManager().printReseaux(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionLocationInsert.isSelected());
-            }
-
-            return !toPrint.isEmpty();
         });
-        taskProperty.set(printing);
-
-        TaskManager.INSTANCE.submit(printing);
+        boolean canPrint = true;
+        if (TaskManager.INSTANCE.getSubmittedTasks() != null && !TaskManager.INSTANCE.getSubmittedTasks().isEmpty()) {
+            for (Task t : TaskManager.INSTANCE.getSubmittedTasks()) {
+                if ("Génération de fiches détaillées".equalsIgnoreCase(t.getTitle())) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Cannot print réseaux hydrauliques fermés due to other printing on going");
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Une impression de fiche est en cours,\nveuillez réessayer quand elle sera terminée", ButtonType.OK);
+                    alert.showAndWait();
+                    canPrint = false;
+                }
+            }
+        }
+        if (canPrint) {
+            taskProperty.set(printing);
+            TaskManager.INSTANCE.submit(printing);
+        }
     }
 
     private Stream<ReseauHydrauliqueFerme> getData() {
