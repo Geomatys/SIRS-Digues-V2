@@ -73,12 +73,10 @@ public class LocationInsertUtilities {
      * @param e to get the layer that should be modified
      * @return the original style prior modification - to be used to restore the layer back to normal after printing
      */
-    protected static MutableStyle modifySelectionSymbolSize(double multiplier, Element e) {
-        MapLayer layer = CorePlugin.getMapLayerForElement(e);
+    protected static MutableStyle modifySelectionSymbolSize(final double multiplier, final Element e) {
+        final MapLayer layer = CorePlugin.getMapLayerForElement(e);
         //create new style to replace the old one
-        Map<MapLayer, MutableStyle> result = new HashMap<>();
-        modifyLayerSymbolSize(layer, multiplier, result, true);
-        return result.get(layer);
+        return modifyLayerSymbolSize(layer, multiplier, true);
     }
 
     /**
@@ -88,16 +86,16 @@ public class LocationInsertUtilities {
      * @param multiplier how much the symbols size should be modified by
      * @return Map of @{@link MutableStyle} of the modified layers prior modification : to be used to restore the layers back to normal after printing
      */
-    protected static Map<MapLayer, MutableStyle> modifySymbolSize(double multiplier) {
+    protected static Map<MapLayer, MutableStyle> modifySymbolSize(final double multiplier) {
         final List<MapLayer> layers = getMapLayers();
-        Map<MapLayer, MutableStyle> result = new HashMap<>();
+        final Map<MapLayer, MutableStyle> backUpStyles = new HashMap<>();
 
         for (MapLayer layer : layers) {
             if (layer.isVisible()) {
-                modifyLayerSymbolSize(layer, multiplier, result, false);
+                backUpStyles.put(layer, modifyLayerSymbolSize(layer, multiplier, false));
             }
         }
-        return result;
+        return backUpStyles;
     }
 
     /**
@@ -106,21 +104,22 @@ public class LocationInsertUtilities {
      *
      * @param layer that will be modified
      * @param multiplier how much the symbols size should be modified by
-     * @param result Map of @{@link MutableStyle} of the modified layers prior modification : to be used to restore the layers back to normal after printing
      * @param selectionStyle to modify the layer style or selectionStyle
+     * @return the initial layer's @MutableStyle prior being modified - to be used to restore style afterwards
      */
-    private static void modifyLayerSymbolSize(MapLayer layer, double multiplier, Map<MapLayer, MutableStyle> result, boolean selectionStyle) {
+    private static MutableStyle modifyLayerSymbolSize(final MapLayer layer, final double multiplier,
+                                              final boolean selectionStyle) {
         //create new style to replace the old one
         final MutableFeatureTypeStyle newFts = SF.featureTypeStyle();
 
-        MutableStyle currentStyle = selectionStyle ? layer.getSelectionStyle() : layer.getStyle();
+        final MutableStyle currentStyle = selectionStyle ? layer.getSelectionStyle() : layer.getStyle();
+        MutableStyle backupStyle = null;
+        boolean styleModified = false;
         if (currentStyle != null && currentStyle.featureTypeStyles() != null && !currentStyle.featureTypeStyles().isEmpty()) {
-            boolean styleModified;
             Symbolizer sym;
             Symbolizer[] copiedSymbolizers;
+            backupStyle = currentStyle;
             for (final FeatureTypeStyle ftStyle : currentStyle.featureTypeStyles()) {
-                styleModified = false;
-                result.put(layer, currentStyle);
                 if (ftStyle != null && ftStyle.rules() != null && !ftStyle.rules().isEmpty()) {
                     for (int ri = 0; ri < ftStyle.rules().size(); ri++) {
                         final Rule r = ftStyle.rules().get(ri);
@@ -149,10 +148,6 @@ public class LocationInsertUtilities {
                         }
                     }
                 }
-                // if the layer's style has not been modified, it's removed from the returned Map
-                if (!styleModified) {
-                    result.remove(layer);
-                }
             }
         }
         final MutableStyle style = SF.style();
@@ -160,6 +155,12 @@ public class LocationInsertUtilities {
 
         if (selectionStyle) layer.setSelectionStyle(style);
         else layer.setStyle(style);
+
+        // if the layer's style has not been modified, it's removed from the returned Map
+        if (styleModified) {
+            return backupStyle;
+        } else
+            return null;
     }
 
     /**
@@ -169,7 +170,7 @@ public class LocationInsertUtilities {
      * @param multiplier how much to multiply the graphic size by
      * @return the created @{@link PointSymbolizer} with new size
      */
-    private static PointSymbolizer increaseSizePointSymbolizer(PointSymbolizer sym, double multiplier) {
+    private static PointSymbolizer increaseSizePointSymbolizer(final PointSymbolizer sym, final double multiplier) {
         Graphic tmpGraphic = sym.getGraphic();
         tmpGraphic = SF.graphic(tmpGraphic.graphicalSymbols(),
                 tmpGraphic.getOpacity(),
@@ -187,7 +188,7 @@ public class LocationInsertUtilities {
      * @param multiplier how much to multiply the line width by
      * @return the created @{@link LineSymbolizer} with new width
      */
-    private static LineSymbolizer increaseSizeLineSymbolizer(LineSymbolizer sym, double multiplier) {
+    private static LineSymbolizer increaseSizeLineSymbolizer(final LineSymbolizer sym, final double multiplier) {
         Stroke tmpStroke = sym.getStroke();
         tmpStroke = SF.stroke(tmpStroke.getColor(),
                 tmpStroke.getOpacity(),
@@ -206,7 +207,7 @@ public class LocationInsertUtilities {
      * @param multiplier how much to multiply the font size by
      * @return the created @{@link TextSymbolizer} with new font size
      */
-    private static TextSymbolizer increaseSizeTextSymbolizer(TextSymbolizer sym, double multiplier) {
+    private static TextSymbolizer increaseSizeTextSymbolizer(final TextSymbolizer sym, final double multiplier) {
         Font font = sym.getFont();
         return SF.textSymbolizer(sym.getFill(),
                 new DefaultFont(font.getFamily(),
@@ -223,7 +224,7 @@ public class LocationInsertUtilities {
      * Restore the context layers style
      * @param backUpStyles map with the layers' styles to be restored
      */
-    protected static void changeBackLayersSymbolSize(Map<MapLayer, MutableStyle> backUpStyles) {
+    protected static void changeBackLayersSymbolSize(final Map<MapLayer, MutableStyle> backUpStyles) {
         if (backUpStyles != null && !backUpStyles.isEmpty()) {
             final List<MapLayer> layers = getMapLayers();
             MutableStyle toRestore;
@@ -239,9 +240,9 @@ public class LocationInsertUtilities {
      * @param e element for which the layer should be modified
      * @param backUpSelectionStyle the selectionStyle to be restored
      */
-    protected static void changeBackSelectionSymbolSize(Element e, MutableStyle backUpSelectionStyle) {
+    protected static void changeBackSelectionSymbolSize(final Element e, final MutableStyle backUpSelectionStyle) {
         if (backUpSelectionStyle != null) {
-            MapLayer layer = CorePlugin.getMapLayerForElement(e);
+            final MapLayer layer = CorePlugin.getMapLayerForElement(e);
             layer.setSelectionStyle(backUpSelectionStyle);
         }
     }
@@ -251,11 +252,11 @@ public class LocationInsertUtilities {
      * @param elementsToShow list of selected elements to print
      * @return the backup queries to restore the queries after printing
      */
-    protected static Map<FeatureMapLayer, Query> hideArchivedElements(List<? extends Element> elementsToShow) {
-        List<FeatureMapLayer> fml = new ArrayList<>();
-        List<MapLayer> layers = getMapLayers();
+    protected static Map<FeatureMapLayer, Query> hideArchivedElements(final List<Objet> elementsToShow) {
+        final List<FeatureMapLayer> fml = new ArrayList<>();
+        final List<MapLayer> layers = getMapLayers();
         // to collect backup queries
-        Map<FeatureMapLayer, Query> oldQueries = new HashMap<>();
+        final Map<FeatureMapLayer, Query> oldQueries = new HashMap<>();
 
         // to collect all layers containing Elements than can be archived
         for (MapLayer l : layers) {
@@ -267,17 +268,21 @@ public class LocationInsertUtilities {
         if (!fml.isEmpty()) {
             final TronconDigueRepository tronconRepository = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
             // collect the docmuentIds of the troncons the elements are linked to
-            List<String> tronconsIds = new ArrayList<>();
-            if (elementsToShow != null && !elementsToShow.isEmpty() && (elementsToShow).get(0) instanceof Objet) {
-                for (Element e : elementsToShow) {
-                    tronconsIds.add(tronconRepository.get(((Objet) e).getLinearId()).getDocumentId());
+            final List<String> tronconsIds = new ArrayList<>();
+            if (elementsToShow != null && !elementsToShow.isEmpty()) {
+                for (Objet e : elementsToShow) {
+                    if (e.getLinearId() != null) {
+                        if (tronconRepository.get(e.getLinearId()) != null) {
+                            tronconsIds.add(tronconRepository.get(e.getLinearId()).getDocumentId());
+                        }
+                    }
                 }
             }
 
             for (FeatureMapLayer layer : fml) {
-                Query currentQuery = layer.getQuery();
+                final Query currentQuery = layer.getQuery();
                 oldQueries.put(layer, currentQuery);
-                GenericName typeName = layer.getCollection().getFeatureType().getName();
+                final GenericName typeName = layer.getCollection().getFeatureType().getName();
                 Filter filter = FF.and(
                         FF.or(
                                 FF.isNull(FF.property(DATE_FIN_FIELD)),
@@ -301,10 +306,10 @@ public class LocationInsertUtilities {
                                 filter);
                     }
                 }
-                QueryBuilder queryBuilder = new QueryBuilder(
+                final QueryBuilder queryBuilder = new QueryBuilder(
                         NamesExt.create(typeName.scope().toString(), typeName.head().toString()));
                 queryBuilder.setFilter(filter);
-                GeometryDescriptor geomDescriptor = layer.getCollection().getFeatureType().getGeometryDescriptor();
+                final GeometryDescriptor geomDescriptor = layer.getCollection().getFeatureType().getGeometryDescriptor();
                 if (geomDescriptor != null) {
                     queryBuilder.setProperties(new GenericName[]{geomDescriptor.getName()});
                 }
@@ -318,7 +323,7 @@ public class LocationInsertUtilities {
      * Method to restore the initial layers' queries prior hiding archived elements
      * @param backupQueries the output of the method @hideArchivedElements
      */
-    protected static void showBackArchivedElements(Map<FeatureMapLayer, Query>  backupQueries){
+    protected static void showBackArchivedElements(final Map<FeatureMapLayer, Query>  backupQueries){
         if (backupQueries != null && !backupQueries.isEmpty()) {
             final List<MapLayer> layers = getMapLayers();
             Query toRestore;

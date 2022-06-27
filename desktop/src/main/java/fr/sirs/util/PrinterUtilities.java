@@ -287,7 +287,13 @@ public class PrinterUtilities {
         // increase the size of PointSymbolizers, LineSymbolizers and TextSymbolizers for the selectionStyle of Desordre
         backupSelectStyle = LocationInsertUtilities.modifySelectionSymbolSize(multiplier, elements.get(0));
         // Hide archived Elements from all visible layers
-        backupQueries = LocationInsertUtilities.hideArchivedElements(elements);
+        // elementsToShow is the list of the printed elements : Desordre, OuvrageHydrauliqueAssocie or ReseauHydrauliqueFerme - all extends Objet
+        // casted to Objet to get their TronconDigue from the linearId attribut
+        if (!(elements.get(0) instanceof Objet)) {
+            SIRS.LOGGER.log(Level.WARNING, "Trying to print elements that are not Objet");
+            throw new RuntimeException("Trying to print elements that are not Objet");
+        }
+        backupQueries = LocationInsertUtilities.hideArchivedElements((List<Objet>) elements);
     }
 
     // public method to be accessed from FXDisorderPrintPane, FXReseauFermePrintPane, FXOuvrageAssociePrintPane
