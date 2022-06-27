@@ -191,8 +191,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                 throw error;
             } catch (RuntimeException re) {
                 SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to error", re);
-                if (PrinterUtilities.backUpStyles != null || PrinterUtilities.backupSelectStyle != null || PrinterUtilities.backupQueries != null)
-                    PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
+                PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
                 throw re;
             }
         });

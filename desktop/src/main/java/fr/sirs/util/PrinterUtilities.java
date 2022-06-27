@@ -81,11 +81,11 @@ public final class PrinterUtilities {
     // how much the symbols should be modified by when printing the locationInsert
     private static final double MULTIPLIER = 3;
     // to store the styles to be restored prior printing
-    public static Map<MapLayer, MutableStyle> backUpStyles;
+    private static Map<MapLayer, MutableStyle> backUpStyles;
     // to store the selectionStyle to be restored after printing
-    public static MutableStyle backupSelectStyle;
+    private static MutableStyle backupSelectStyle;
     // to store layers' queries before changing its filter to hide the archived elements
-    public static Map<FeatureMapLayer, Query> backupQueries;
+    private static Map<FeatureMapLayer, Query> backupQueries;
 
     private static  boolean wasVisible;
     private static final List<String> FALSE_GETTERS = new ArrayList<>();
