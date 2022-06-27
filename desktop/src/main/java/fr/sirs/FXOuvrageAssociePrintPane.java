@@ -139,8 +139,8 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
     @FXML private void cancel() {
         final Task t = taskProperty.get();
         if (t != null) {
-            if (PrinterUtilities.backUpStyles != null || PrinterUtilities.backupSelectStyle != null || PrinterUtilities.backupQueries != null)
-                PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
+            //restore the map style
+            PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
             t.cancel();
         }
     }
@@ -168,8 +168,8 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
                 throw error;
             } catch (RuntimeException re) {
                 SirsCore.LOGGER.log(Level.WARNING, "Cannot print ouvrages hydrauliques associés due to error", re);
-                if (PrinterUtilities.backUpStyles != null || PrinterUtilities.backupSelectStyle != null || PrinterUtilities.backupQueries != null)
-                    PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
+                //restore the map style
+                PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
                 throw re;
             }
         });

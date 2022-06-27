@@ -84,6 +84,7 @@ import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapPane;
+import fr.sirs.map.FXMapTab;
 import fr.sirs.migration.HtmlRemoval;
 import fr.sirs.migration.RemoveOldDependanceConf;
 import fr.sirs.migration.upgrade.v2and23.UpgradeLink1NtoNN;
@@ -139,6 +140,7 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display.PortrayalException;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.canvas.J2DCanvas;
+import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
 import org.geotoolkit.display2d.ext.northarrow.GraphicNorthArrowJ2D;
 import org.geotoolkit.display2d.ext.scalebar.GraphicScaleBarJ2D;
@@ -1441,7 +1443,7 @@ public class CorePlugin extends Plugin {
     public static void modifyLayerVisibilityForElement(final Element e, final boolean visible) {
         try {
             final MapLayer layerForElement = CorePlugin.getMapLayerForElement(e);
-            final List<MapLayer> layers = Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
+            final List<MapLayer> layers = getMapLayers();
 
             for (MapLayer layer: layers) {
                 if (layer.getName().equals(layerForElement.getName())) {
@@ -1465,5 +1467,49 @@ public class CorePlugin extends Plugin {
             return p.getClass().equals(TronconDigue.class);
         }
         return false;
+    }
+
+    public static List<MapLayer> getMapLayers() {
+        if (Injector.getSession() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "There is no session to retrieved");
+            throw new RuntimeException("There is no session to retrieved");
+        }
+        Session session = Injector.getSession();
+        if (session.getFrame() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "There is no frame to retrieved");
+            throw new RuntimeException("There is no frame to retrieved");
+        }
+        FXMainFrame frame = session.getFrame();
+        if (frame.getMapTab() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Could not access the map tab");
+            throw new RuntimeException("Could not access the map tab");
+        }
+        FXMapTab mapTab = frame.getMapTab();
+        if (mapTab.getMap() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Could not access the FXMapPane");
+            throw new RuntimeException("Could not access the FXMapPane");
+        }
+        FXMapPane map = mapTab.getMap();
+        if (map.getUiMap() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Could not access the FXMap");
+            throw new RuntimeException("Could not access the FXMap");
+        }
+        FXMap uiMap = map.getUiMap();
+        if (uiMap.getContainer() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Could not access the container");
+            throw new RuntimeException("Could not access the container");
+        }
+        ContextContainer2D container = uiMap.getContainer();
+        if (container.getContext() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Could not access the MapContext");
+            throw new RuntimeException("Could not access the MapContext");
+        }
+        MapContext context = container.getContext();
+        if (context.layers() == null) {
+            SIRS.LOGGER.log(Level.WARNING, "Could not access the context layers");
+            throw new RuntimeException("Could not access the context layers");
+        } else {
+            return Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
+        }
     }
 }

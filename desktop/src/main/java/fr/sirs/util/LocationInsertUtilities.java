@@ -18,14 +18,13 @@
  */
 package fr.sirs.util;
 
-import fr.sirs.CorePlugin;
-import fr.sirs.Injector;
-import fr.sirs.SIRS;
+import fr.sirs.*;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
+import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -67,6 +66,14 @@ public class LocationInsertUtilities {
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
 
+    private static final  Filter FILTER_ARCHIVED = FF.and(
+            FF.or(
+                    FF.isNull(FF.property(DATE_FIN_FIELD)),
+                    FF.greaterOrEqual(FF.property(DATE_FIN_FIELD), FF.literal(LocalDate.now()))),
+            FF.or(
+                    FF.isNull(FF.property(DATE_DEBUT_FIELD)),
+                    FF.lessOrEqual(FF.property(DATE_DEBUT_FIELD), FF.literal(LocalDate.now()))));
+
     /**
      *  Modify the SelectionStyle size on a specific layer
      * @param multiplier how much the symbols size should be modified by
@@ -74,6 +81,7 @@ public class LocationInsertUtilities {
      * @return the original style prior modification - to be used to restore the layer back to normal after printing
      */
     protected static MutableStyle modifySelectionSymbolSize(final double multiplier, final Element e) {
+        ArgumentChecks.ensureNonNull("Element", e);
         final MapLayer layer = CorePlugin.getMapLayerForElement(e);
         //create new style to replace the old one
         return modifyLayerSymbolSize(layer, multiplier, true);
@@ -87,7 +95,7 @@ public class LocationInsertUtilities {
      * @return Map of @{@link MutableStyle} of the modified layers prior modification : to be used to restore the layers back to normal after printing
      */
     protected static Map<MapLayer, MutableStyle> modifySymbolSize(final double multiplier) {
-        final List<MapLayer> layers = getMapLayers();
+        final List<MapLayer> layers = CorePlugin.getMapLayers();
         final Map<MapLayer, MutableStyle> backUpStyles = new HashMap<>();
 
         for (MapLayer layer : layers) {
@@ -109,6 +117,8 @@ public class LocationInsertUtilities {
      */
     private static MutableStyle modifyLayerSymbolSize(final MapLayer layer, final double multiplier,
                                               final boolean selectionStyle) {
+        ArgumentChecks.ensureNonNull("layer to modify", layer);
+
         //create new style to replace the old one
         final MutableFeatureTypeStyle newFts = SF.featureTypeStyle();
 
@@ -122,13 +132,13 @@ public class LocationInsertUtilities {
             for (final FeatureTypeStyle ftStyle : currentStyle.featureTypeStyles()) {
                 if (ftStyle != null && ftStyle.rules() != null && !ftStyle.rules().isEmpty()) {
                     for (int ri = 0; ri < ftStyle.rules().size(); ri++) {
-                        final Rule r = ftStyle.rules().get(ri);
-                        if (r.symbolizers() != null && !r.symbolizers().isEmpty()) {
-                            copiedSymbolizers = r.symbolizers().toArray(new Symbolizer[r.symbolizers().size()]);
+                        final List<? extends Symbolizer> rSym = ftStyle.rules().get(ri).symbolizers();
+                        if (rSym != null && !rSym.isEmpty()) {
+                            copiedSymbolizers = rSym.toArray(new Symbolizer[rSym.size()]);
 
-                            if (r.symbolizers() != null && !r.symbolizers().isEmpty()) {
-                                for (int i = 0; i < r.symbolizers().size(); i++) {
-                                    sym = r.symbolizers().get(i);
+                            if (rSym != null && !rSym.isEmpty()) {
+                                for (int i = 0; i < rSym.size(); i++) {
+                                    sym = rSym.get(i);
 
                                     if (sym instanceof PointSymbolizer) {
                                         styleModified = true;
@@ -141,6 +151,8 @@ public class LocationInsertUtilities {
                                     } else if (sym instanceof TextSymbolizer) {
                                         styleModified = true;
                                         copiedSymbolizers[i] = increaseSizeTextSymbolizer((TextSymbolizer) sym, multiplier);
+                                    } else {
+                                        SIRS.LOGGER.log(Level.WARNING, "This type of Symbolizer is not modified : "+sym.getClass().getSimpleName());
                                     }
                                 }
                             }
@@ -171,6 +183,8 @@ public class LocationInsertUtilities {
      * @return the created @{@link PointSymbolizer} with new size
      */
     private static PointSymbolizer increaseSizePointSymbolizer(final PointSymbolizer sym, final double multiplier) {
+        ArgumentChecks.ensureNonNull("PointSymbolizer to modify", sym);
+
         Graphic tmpGraphic = sym.getGraphic();
         tmpGraphic = SF.graphic(tmpGraphic.graphicalSymbols(),
                 tmpGraphic.getOpacity(),
@@ -189,6 +203,7 @@ public class LocationInsertUtilities {
      * @return the created @{@link LineSymbolizer} with new width
      */
     private static LineSymbolizer increaseSizeLineSymbolizer(final LineSymbolizer sym, final double multiplier) {
+        ArgumentChecks.ensureNonNull("LineSymbolizer to modify", sym);
         Stroke tmpStroke = sym.getStroke();
         tmpStroke = SF.stroke(tmpStroke.getColor(),
                 tmpStroke.getOpacity(),
@@ -208,6 +223,7 @@ public class LocationInsertUtilities {
      * @return the created @{@link TextSymbolizer} with new font size
      */
     private static TextSymbolizer increaseSizeTextSymbolizer(final TextSymbolizer sym, final double multiplier) {
+        ArgumentChecks.ensureNonNull("TextSymbolizer to modify", sym);
         Font font = sym.getFont();
         return SF.textSymbolizer(sym.getFill(),
                 new DefaultFont(font.getFamily(),
@@ -225,13 +241,13 @@ public class LocationInsertUtilities {
      * @param backUpStyles map with the layers' styles to be restored
      */
     protected static void changeBackLayersSymbolSize(final Map<MapLayer, MutableStyle> backUpStyles) {
-        if (backUpStyles != null && !backUpStyles.isEmpty()) {
-            final List<MapLayer> layers = getMapLayers();
-            MutableStyle toRestore;
-            for (MapLayer layer : layers) {
-                toRestore = backUpStyles.get(layer);
-                if (toRestore != null) layer.setStyle(toRestore);
-            }
+        if (backUpStyles == null || backUpStyles.isEmpty()) return;
+        final List<MapLayer> layers = CorePlugin.getMapLayers();
+        MutableStyle toRestore;
+        for (MapLayer layer : layers) {
+            toRestore = backUpStyles.get(layer);
+            if (toRestore != null) layer.setStyle(toRestore);
+
         }
     }
 
@@ -254,13 +270,13 @@ public class LocationInsertUtilities {
      */
     protected static Map<FeatureMapLayer, Query> hideArchivedElements(final List<Objet> elementsToShow) {
         final List<FeatureMapLayer> fml = new ArrayList<>();
-        final List<MapLayer> layers = getMapLayers();
+        final List<MapLayer> layers = CorePlugin.getMapLayers();
         // to collect backup queries
         final Map<FeatureMapLayer, Query> oldQueries = new HashMap<>();
 
         // to collect all layers containing Elements than can be archived
         for (MapLayer l : layers) {
-            if (l.isVisible() && l instanceof FeatureMapLayer && !((FeatureMapLayer) l).getCollection().isEmpty()) {
+            if (l instanceof FeatureMapLayer && l.isVisible() && !((FeatureMapLayer) l).getCollection().isEmpty()) {
                 if (((FeatureMapLayer) l).getCollection().iterator().next().getUserData().get("bean") instanceof AvecBornesTemporelles)
                     fml.add((FeatureMapLayer) l);
             }
@@ -278,18 +294,17 @@ public class LocationInsertUtilities {
                     }
                 }
             }
-
+            Query currentQuery;
+            GenericName typeName;
+            Filter filter;
+            QueryBuilder queryBuilder;
+            GeometryDescriptor geomDescriptor;
+            GenericName[] genericNames;
             for (FeatureMapLayer layer : fml) {
-                final Query currentQuery = layer.getQuery();
+                currentQuery = layer.getQuery();
                 oldQueries.put(layer, currentQuery);
-                final GenericName typeName = layer.getCollection().getFeatureType().getName();
-                Filter filter = FF.and(
-                        FF.or(
-                                FF.isNull(FF.property(DATE_FIN_FIELD)),
-                                FF.greaterOrEqual(FF.property(DATE_FIN_FIELD), FF.literal(LocalDate.now()))),
-                        FF.or(
-                                FF.isNull(FF.property(DATE_DEBUT_FIELD)),
-                                FF.lessOrEqual(FF.property(DATE_DEBUT_FIELD), FF.literal(LocalDate.now()))));
+                typeName = layer.getCollection().getFeatureType().getName();
+                filter = FILTER_ARCHIVED;
                 // the archived selected elements should be visible on the location insert
                 if (!tronconsIds.isEmpty() && elementsToShow.get(0).getClass().getSimpleName().equalsIgnoreCase(typeName.toString())) {
                     for (String tId : tronconsIds) {
@@ -306,12 +321,13 @@ public class LocationInsertUtilities {
                                 filter);
                     }
                 }
-                final QueryBuilder queryBuilder = new QueryBuilder(
+                queryBuilder = new QueryBuilder(
                         NamesExt.create(typeName.scope().toString(), typeName.head().toString()));
                 queryBuilder.setFilter(filter);
-                final GeometryDescriptor geomDescriptor = layer.getCollection().getFeatureType().getGeometryDescriptor();
+                geomDescriptor = layer.getCollection().getFeatureType().getGeometryDescriptor();
                 if (geomDescriptor != null) {
-                    queryBuilder.setProperties(new GenericName[]{geomDescriptor.getName()});
+                    genericNames = new GenericName[]{geomDescriptor.getName()};
+                    queryBuilder.setProperties(genericNames);
                 }
                 layer.setQuery(queryBuilder.buildQuery());
             }
@@ -325,7 +341,7 @@ public class LocationInsertUtilities {
      */
     protected static void showBackArchivedElements(final Map<FeatureMapLayer, Query>  backupQueries){
         if (backupQueries != null && !backupQueries.isEmpty()) {
-            final List<MapLayer> layers = getMapLayers();
+            final List<MapLayer> layers = CorePlugin.getMapLayers();
             Query toRestore;
             for (MapLayer layer : layers) {
                 toRestore = backupQueries.get(layer);
@@ -333,42 +349,4 @@ public class LocationInsertUtilities {
             }
         }
     }
-
-    private static List<MapLayer> getMapLayers() {
-        if (Injector.getSession() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "There is no session to retrieved");
-            throw new RuntimeException("There is no session to retrieved");
-        }
-        if (Injector.getSession().getFrame() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "There is no frame to retrieved");
-            throw new RuntimeException("There is no frame to retrieved");
-        }
-        if (Injector.getSession().getFrame().getMapTab() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "Could not access the map tab");
-            throw new RuntimeException("Could not access the map tab");
-        }
-        if (Injector.getSession().getFrame().getMapTab().getMap() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "Could not access the FXMapPane");
-            throw new RuntimeException("Could not access the FXMapPane");
-        }
-        if (Injector.getSession().getFrame().getMapTab().getMap().getUiMap() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "Could not access the FXMap");
-            throw new RuntimeException("Could not access the FXMap");
-        }
-        if (Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "Could not access the container");
-            throw new RuntimeException("Could not access the container");
-        }
-        if (Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "Could not access the MapContext");
-            throw new RuntimeException("Could not access the MapContext");
-        }
-        if (Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "Could not access the context layers");
-            throw new RuntimeException("Could not access the context layers");
-        } else {
-            return Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
-        }
-    }
-
 }

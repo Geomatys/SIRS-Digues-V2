@@ -72,20 +72,20 @@ import org.xml.sax.SAXException;
  * <p>These are tools for printing functionnalities.</p>
  * @author Samuel Andrés (Geomatys)
  */
-public class PrinterUtilities {
+public final class PrinterUtilities {
 
     private static final String JRXML_EXTENSION = ".jrxml";
     private static final String PDF_EXTENSION = ".pdf";
     private static final String LOGO_PATH = "/fr/sirs/images/icon-sirs.png";
     private static final String ORDERED_SEPARATOR = ") ";
     // how much the symbols should be modified by when printing the locationInsert
-    private static final double multiplier = 3;
+    private static final double MULTIPLIER = 3;
     // to store the styles to be restored prior printing
     public static Map<MapLayer, MutableStyle> backUpStyles;
     // to store the selectionStyle to be restored after printing
     public static MutableStyle backupSelectStyle;
     // to store layers' queries before changing its filter to hide the archived elements
-    public static  Map<FeatureMapLayer, Query>  backupQueries;
+    public static Map<FeatureMapLayer, Query> backupQueries;
 
     private static  boolean wasVisible;
     private static final List<String> FALSE_GETTERS = new ArrayList<>();
@@ -134,7 +134,7 @@ public class PrinterUtilities {
                 }
             }
             ouvrages.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            print = createDataSource(jasperReport, ouvrages, previewLabelRepository, stringConverter, printLocationInsert);
+            print = createJasperPrint(jasperReport, ouvrages, previewLabelRepository, stringConverter, printLocationInsert);
         }
 
         // Generate the report -------------------------------------------------
@@ -184,7 +184,7 @@ public class PrinterUtilities {
                 }
             }
             reseaux.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            print = createDataSource(jasperReport, reseaux, previewLabelRepository, stringConverter, printLocationInsert);
+            print = createJasperPrint(jasperReport, reseaux, previewLabelRepository, stringConverter, printLocationInsert);
         }
 
         // Generate the report -------------------------------------------------
@@ -235,7 +235,7 @@ public class PrinterUtilities {
                 }
             }
             desordres.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            print = createDataSource(jasperReport, desordres, previewLabelRepository, stringConverter, printLocationInsert);
+            print = createJasperPrint(jasperReport, desordres, previewLabelRepository, stringConverter, printLocationInsert);
         }
 
         // Generate the report -------------------------------------------------
@@ -248,7 +248,7 @@ public class PrinterUtilities {
         return fout;
     }
 
-    private static JasperPrint createDataSource(JasperReport jasperReport,
+    private static JasperPrint createJasperPrint(JasperReport jasperReport,
                                                              final List<? extends Element> elementsToPrint,
                                                              final Previews previewLabelRepository,
                                                              final SirsStringConverter stringConverter,
@@ -272,7 +272,7 @@ public class PrinterUtilities {
             throw new RuntimeException("Can't print the type of Elements selected : "+elementsToPrint.get(0).getClass().getSimpleName());
         print = JasperFillManager.fillReport(jasperReport, parameters, source);
 
-        if (printLocationInsert && backUpStyles != null) {
+        if (printLocationInsert) {
             // restore the previous styles and selectedStyle
             restoreMap(elementsToPrint.get(0));
         }
@@ -283,9 +283,9 @@ public class PrinterUtilities {
         wasVisible = CorePlugin.getMapLayerForElement(elements.get(0)).isVisible();
         if (!elements.isEmpty() && !wasVisible) CorePlugin.modifyLayerVisibilityForElement(elements.get(0), true);
         // increase the size of PointSymbolizers, LineSymbolizers and TextSymbolizers for the styles of visible layers
-        backUpStyles = LocationInsertUtilities.modifySymbolSize(multiplier);
+        backUpStyles = LocationInsertUtilities.modifySymbolSize(MULTIPLIER);
         // increase the size of PointSymbolizers, LineSymbolizers and TextSymbolizers for the selectionStyle of Desordre
-        backupSelectStyle = LocationInsertUtilities.modifySelectionSymbolSize(multiplier, elements.get(0));
+        backupSelectStyle = LocationInsertUtilities.modifySelectionSymbolSize(MULTIPLIER, elements.get(0));
         // Hide archived Elements from all visible layers
         // elementsToShow is the list of the printed elements : Desordre, OuvrageHydrauliqueAssocie or ReseauHydrauliqueFerme - all extends Objet
         // casted to Objet to get their TronconDigue from the linearId attribut

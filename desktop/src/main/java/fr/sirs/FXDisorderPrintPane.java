@@ -163,8 +163,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
     @FXML private void cancel() {
         final Task t = taskProperty.get();
         if (t != null) {
-            if (PrinterUtilities.backUpStyles != null || PrinterUtilities.backupSelectStyle != null || PrinterUtilities.backupQueries != null)
-                PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
+            PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
             t.cancel();
         }
     }
