@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import static fr.sirs.core.SirsCore.DATE_DEBUT_FIELD;
@@ -63,6 +64,7 @@ import static fr.sirs.core.SirsCore.DATE_FIN_FIELD;
  */
 public class LocationInsertUtilities {
 
+    private final static Logger LOG = Logger.getLogger(LocationInsertUtilities.class.getName());
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
 
@@ -135,25 +137,23 @@ public class LocationInsertUtilities {
                         final List<? extends Symbolizer> rSym = ftStyle.rules().get(ri).symbolizers();
                         if (rSym != null && !rSym.isEmpty()) {
                             copiedSymbolizers = rSym.toArray(new Symbolizer[rSym.size()]);
+                            for (int i = 0; i < rSym.size(); i++) {
+                                sym = rSym.get(i);
 
-                            if (rSym != null && !rSym.isEmpty()) {
-                                for (int i = 0; i < rSym.size(); i++) {
-                                    sym = rSym.get(i);
+                                if (sym instanceof PointSymbolizer) {
+                                    styleModified = true;
+                                    copiedSymbolizers[i] = increaseSizePointSymbolizer((PointSymbolizer) sym, multiplier);
+                                }
+                                if (sym instanceof LineSymbolizer) {
+                                    styleModified = true;
+                                    copiedSymbolizers[i] = increaseSizeLineSymbolizer((LineSymbolizer) sym, multiplier);
 
-                                    if (sym instanceof PointSymbolizer) {
-                                        styleModified = true;
-                                        copiedSymbolizers[i] = increaseSizePointSymbolizer((PointSymbolizer) sym, multiplier);
-                                    }
-                                    if (sym instanceof LineSymbolizer) {
-                                        styleModified = true;
-                                        copiedSymbolizers[i] = increaseSizeLineSymbolizer((LineSymbolizer) sym, multiplier);
-
-                                    } else if (sym instanceof TextSymbolizer) {
-                                        styleModified = true;
-                                        copiedSymbolizers[i] = increaseSizeTextSymbolizer((TextSymbolizer) sym, multiplier);
-                                    } else {
-                                        SIRS.LOGGER.log(Level.WARNING, "This type of Symbolizer is not modified : "+sym.getClass().getSimpleName());
-                                    }
+                                } else if (sym instanceof TextSymbolizer) {
+                                    styleModified = true;
+                                    copiedSymbolizers[i] = increaseSizeTextSymbolizer((TextSymbolizer) sym, multiplier);
+                                } else {
+                                    // we only want the log for debugging purpose
+                                    LOG.log(Level.FINER, "This type of Symbolizer is not modified : " + sym.getClass().getSimpleName());
                                 }
                             }
                             newFts.rules().add(SF.rule(copiedSymbolizers));
