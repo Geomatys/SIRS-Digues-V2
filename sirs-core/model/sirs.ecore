@@ -84,7 +84,6 @@
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
         eType="#//Photo" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typologieTronconId" eType="#//RefTypologieTroncon"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SystemeReperage">
     <eAnnotations source="couchDBDocument">
@@ -1709,10 +1708,5 @@
   <eClassifiers xsi:type="ecore:EClass" name="RefManoeuvre" eSuperTypes="#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefTypologieTroncon" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="couchDBDocument">
-      <details key="document" value="true"/>
-    </eAnnotations>
   </eClassifiers>
 </ecore:EPackage>
