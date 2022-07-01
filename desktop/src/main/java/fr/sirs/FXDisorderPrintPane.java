@@ -163,8 +163,14 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         if (t != null) {
             //restore the map style
             PrinterUtilities.restoreMap(getData().findFirst().orElseThrow(() -> new RuntimeException("No disorder to print")));
-            PrinterUtilities.canPrint.set(true);
-            t.cancel();
+            try {
+                t.cancel();
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.WARNING, "Could not cancel printing Disorders", e);
+                throw e;
+            } finally {
+                PrinterUtilities.canPrint.set(true);
+            }
         }
     }
 
