@@ -128,6 +128,7 @@ import org.apache.sis.measure.Units;
 import org.apache.sis.referencing.CRS;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
+import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.ArraysExt;
 import org.ektorp.CouchDbConnector;
 import org.geotoolkit.cql.CQLException;
@@ -1470,46 +1471,30 @@ public class CorePlugin extends Plugin {
     }
 
     public static List<MapLayer> getMapLayers() {
-        if (Injector.getSession() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "There is no session to retrieved");
-            throw new RuntimeException("There is no session to retrieved");
-        }
         Session session = Injector.getSession();
-        if (session.getFrame() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "There is no frame to retrieved");
-            throw new RuntimeException("There is no frame to retrieved");
-        }
+        ArgumentChecks.ensureNonNull("session", session);
+
         FXMainFrame frame = session.getFrame();
-        if (frame.getMapTab() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "Could not access the map tab");
-            throw new RuntimeException("Could not access the map tab");
-        }
+        ArgumentChecks.ensureNonNull("frame", frame);
+
         FXMapTab mapTab = frame.getMapTab();
-        if (mapTab.getMap() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "Could not access the FXMapPane");
-            throw new RuntimeException("Could not access the FXMapPane");
-        }
+        ArgumentChecks.ensureNonNull("map tab", mapTab);
+
         FXMapPane map = mapTab.getMap();
-        if (map.getUiMap() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "Could not access the FXMap");
-            throw new RuntimeException("Could not access the FXMap");
-        }
+        ArgumentChecks.ensureNonNull("FXMapPane", map);
+
         FXMap uiMap = map.getUiMap();
-        if (uiMap.getContainer() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "Could not access the container");
-            throw new RuntimeException("Could not access the container");
-        }
+        ArgumentChecks.ensureNonNull("FXMap", uiMap);
+
         ContextContainer2D container = uiMap.getContainer();
-        if (container.getContext() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "Could not access the MapContext");
-            throw new RuntimeException("Could not access the MapContext");
-        }
+        ArgumentChecks.ensureNonNull("container", container);
+
         MapContext context = container.getContext();
-        if (context.layers() == null) {
-            SIRS.LOGGER.log(Level.WARNING, "Could not access the context layers");
-            throw new RuntimeException("Could not access the context layers");
-        } else {
-            return Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
-        }
+        ArgumentChecks.ensureNonNull("MapContext", context);
+
+        List<MapLayer> layers = context.layers();
+        ArgumentChecks.ensureNonNull("context layers", layers);
+
+        return layers;
     }
 }

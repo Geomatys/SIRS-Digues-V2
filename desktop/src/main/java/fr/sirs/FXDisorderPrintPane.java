@@ -28,11 +28,8 @@ import fr.sirs.core.model.RefUrgence;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.ClosingDaemon;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
+
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -67,7 +64,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
     private static final String MEMORY_ERROR_MSG = String.format(
             "Impossible d'imprimer les fiches : la mémoire disponible est insuffisante. Vous devez soit :%n"
                     + " - sélectionner moins de désordres,%n"
-                    + " - fermer d'autres applications ouvertes sur le système."
+                    + " - allouer plus de mémoire à l'application."
     );
 
     private static final Comparator<Observation> DATE_COMPARATOR = (o1, o2) -> {
@@ -160,10 +157,13 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         updateCount(null);
     }
 
-    @FXML private void cancel() {
+    @FXML
+    private void cancel() {
         final Task t = taskProperty.get();
         if (t != null) {
-            PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
+            //restore the map style
+            PrinterUtilities.restoreMap(getData().findFirst().orElseThrow(() -> new RuntimeException("No disorder to print")));
+            PrinterUtilities.canPrint.set(true);
             t.cancel();
         }
     }
@@ -171,15 +171,16 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
     @FXML
     private void print() {
         final Task<Boolean> printing = new TaskManager.MockTask<>("Génération de fiches détaillées", () -> {
+            final List<Desordre> toPrint = new ArrayList<>();
             try {
-                final List<Desordre> toPrint;
                 try (final Stream<Desordre> data = getData()) {
-                    toPrint = data.collect(Collectors.toList());
+                    toPrint.addAll(data.collect(Collectors.toList()));
                 }
 
                 if (!toPrint.isEmpty() && !Thread.currentThread().isInterrupted())
                     Injector.getSession().getPrintManager().printDesordres(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected(), uiOptionLocationInsert.isSelected());
 
+                PrinterUtilities.canPrint.set(true);
                 return !toPrint.isEmpty();
 
             } catch (OutOfMemoryError error) {
@@ -188,27 +189,23 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                     final Alert alert = new Alert(Alert.AlertType.ERROR, MEMORY_ERROR_MSG, ButtonType.OK);
                     alert.show();
                 });
+                PrinterUtilities.canPrint.set(true);
                 throw error;
-            } catch (RuntimeException re) {
-                SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to error", re);
-                PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
-                throw re;
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to error", e);
+                if (!toPrint.isEmpty())
+                    PrinterUtilities.restoreMap(toPrint.get(0));
+                PrinterUtilities.canPrint.set(true);
+                throw e;
             }
         });
-        boolean canPrint = true;
-        if (TaskManager.INSTANCE.getSubmittedTasks() != null && !TaskManager.INSTANCE.getSubmittedTasks().isEmpty()) {
-            for (Task t : TaskManager.INSTANCE.getSubmittedTasks()) {
-                if ("Génération de fiches détaillées".equalsIgnoreCase(t.getTitle())) {
-                    SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to other printing on going");
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Une impression de fiche est en cours,\nveuillez réessayer quand elle sera terminée", ButtonType.OK);
-                    alert.showAndWait();
-                    canPrint = false;
-                }
-            }
-        }
-        if (canPrint) {
+        if (PrinterUtilities.canPrint.compareAndSet(true, false)) {
             taskProperty.set(printing);
             TaskManager.INSTANCE.submit(printing);
+        } else {
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to other printing on going");
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Une impression de fiche est en cours,\nveuillez réessayer quand elle sera terminée", ButtonType.OK);
+            alert.showAndWait();
         }
     }
 

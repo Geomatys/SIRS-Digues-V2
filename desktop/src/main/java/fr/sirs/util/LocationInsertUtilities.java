@@ -30,7 +30,9 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.feature.type.GeometryDescriptor;
 import org.geotoolkit.map.FeatureMapLayer;
+import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
+import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.style.DefaultFont;
 import org.geotoolkit.style.MutableFeatureTypeStyle;
 import org.geotoolkit.style.MutableStyle;
@@ -86,7 +88,7 @@ public class LocationInsertUtilities {
         ArgumentChecks.ensureNonNull("Element", e);
         final MapLayer layer = CorePlugin.getMapLayerForElement(e);
         //create new style to replace the old one
-        return modifyLayerSymbolSize(layer, multiplier, true);
+        return modifyLayerSymbolsSizeAndGetBackUpStyle(layer, multiplier, true);
     }
 
     /**
@@ -96,15 +98,12 @@ public class LocationInsertUtilities {
      * @param multiplier how much the symbols size should be modified by
      * @return Map of @{@link MutableStyle} of the modified layers prior modification : to be used to restore the layers back to normal after printing
      */
-    protected static Map<MapLayer, MutableStyle> modifySymbolSize(final double multiplier) {
+    protected static Map<MapLayer, MutableStyle> modifyContextSymbolsSizeAndGetBackUpStyles(final double multiplier) {
         final List<MapLayer> layers = CorePlugin.getMapLayers();
         final Map<MapLayer, MutableStyle> backUpStyles = new HashMap<>();
 
-        for (MapLayer layer : layers) {
-            if (layer.isVisible()) {
-                backUpStyles.put(layer, modifyLayerSymbolSize(layer, multiplier, false));
-            }
-        }
+        layers.stream().filter(MapItem::isVisible).forEach(l ->
+            backUpStyles.put(l, modifyLayerSymbolsSizeAndGetBackUpStyle(l, multiplier, false)));
         return backUpStyles;
     }
 
@@ -117,8 +116,8 @@ public class LocationInsertUtilities {
      * @param selectionStyle to modify the layer style or selectionStyle
      * @return the initial layer's @MutableStyle prior being modified - to be used to restore style afterwards
      */
-    private static MutableStyle modifyLayerSymbolSize(final MapLayer layer, final double multiplier,
-                                              final boolean selectionStyle) {
+    private static MutableStyle modifyLayerSymbolsSizeAndGetBackUpStyle(final MapLayer layer, final double multiplier,
+                                                                        final boolean selectionStyle) {
         ArgumentChecks.ensureNonNull("layer to modify", layer);
 
         //create new style to replace the old one
@@ -142,15 +141,15 @@ public class LocationInsertUtilities {
 
                                 if (sym instanceof PointSymbolizer) {
                                     styleModified = true;
-                                    copiedSymbolizers[i] = increaseSizePointSymbolizer((PointSymbolizer) sym, multiplier);
+                                    copiedSymbolizers[i] = increasePointSymbolizerSize((PointSymbolizer) sym, multiplier);
                                 }
                                 if (sym instanceof LineSymbolizer) {
                                     styleModified = true;
-                                    copiedSymbolizers[i] = increaseSizeLineSymbolizer((LineSymbolizer) sym, multiplier);
+                                    copiedSymbolizers[i] = increaseLineSymbolizerSize((LineSymbolizer) sym, multiplier);
 
                                 } else if (sym instanceof TextSymbolizer) {
                                     styleModified = true;
-                                    copiedSymbolizers[i] = increaseSizeTextSymbolizer((TextSymbolizer) sym, multiplier);
+                                    copiedSymbolizers[i] = increaseTextSymbolizerSize((TextSymbolizer) sym, multiplier);
                                 } else {
                                     // we only want the log for debugging purpose
                                     LOG.log(Level.FINER, "This type of Symbolizer is not modified : " + sym.getClass().getSimpleName());
@@ -182,7 +181,7 @@ public class LocationInsertUtilities {
      * @param multiplier how much to multiply the graphic size by
      * @return the created @{@link PointSymbolizer} with new size
      */
-    private static PointSymbolizer increaseSizePointSymbolizer(final PointSymbolizer sym, final double multiplier) {
+    private static PointSymbolizer increasePointSymbolizerSize(final PointSymbolizer sym, final double multiplier) {
         ArgumentChecks.ensureNonNull("PointSymbolizer to modify", sym);
 
         Graphic tmpGraphic = sym.getGraphic();
@@ -202,7 +201,7 @@ public class LocationInsertUtilities {
      * @param multiplier how much to multiply the line width by
      * @return the created @{@link LineSymbolizer} with new width
      */
-    private static LineSymbolizer increaseSizeLineSymbolizer(final LineSymbolizer sym, final double multiplier) {
+    private static LineSymbolizer increaseLineSymbolizerSize(final LineSymbolizer sym, final double multiplier) {
         ArgumentChecks.ensureNonNull("LineSymbolizer to modify", sym);
         Stroke tmpStroke = sym.getStroke();
         tmpStroke = SF.stroke(tmpStroke.getColor(),
@@ -222,7 +221,7 @@ public class LocationInsertUtilities {
      * @param multiplier how much to multiply the font size by
      * @return the created @{@link TextSymbolizer} with new font size
      */
-    private static TextSymbolizer increaseSizeTextSymbolizer(final TextSymbolizer sym, final double multiplier) {
+    private static TextSymbolizer increaseTextSymbolizerSize(final TextSymbolizer sym, final double multiplier) {
         ArgumentChecks.ensureNonNull("TextSymbolizer to modify", sym);
         Font font = sym.getFont();
         return SF.textSymbolizer(sym.getFill(),
@@ -287,9 +286,10 @@ public class LocationInsertUtilities {
             final List<String> tronconsIds = new ArrayList<>();
             if (elementsToShow != null && !elementsToShow.isEmpty()) {
                 for (Objet e : elementsToShow) {
-                    if (e.getLinearId() != null) {
-                        if (tronconRepository.get(e.getLinearId()) != null) {
-                            tronconsIds.add(tronconRepository.get(e.getLinearId()).getDocumentId());
+                    String linearId = e.getLinearId();
+                    if (linearId != null) {
+                        if (tronconRepository.get(linearId) != null) {
+                            tronconsIds.add(tronconRepository.get(linearId).getDocumentId());
                         }
                     }
                 }
@@ -303,7 +303,8 @@ public class LocationInsertUtilities {
             for (FeatureMapLayer layer : fml) {
                 currentQuery = layer.getQuery();
                 oldQueries.put(layer, currentQuery);
-                typeName = layer.getCollection().getFeatureType().getName();
+                FeatureType ft = layer.getCollection().getFeatureType();
+                typeName = ft.getName();
                 filter = FILTER_ARCHIVED;
                 // the archived selected elements should be visible on the location insert
                 if (!tronconsIds.isEmpty() && elementsToShow.get(0).getClass().getSimpleName().equalsIgnoreCase(typeName.toString())) {
@@ -324,7 +325,7 @@ public class LocationInsertUtilities {
                 queryBuilder = new QueryBuilder(
                         NamesExt.create(typeName.scope().toString(), typeName.head().toString()));
                 queryBuilder.setFilter(filter);
-                geomDescriptor = layer.getCollection().getFeatureType().getGeometryDescriptor();
+                geomDescriptor = ft.getGeometryDescriptor();
                 if (geomDescriptor != null) {
                     genericNames = new GenericName[]{geomDescriptor.getName()};
                     queryBuilder.setProperties(genericNames);

@@ -26,10 +26,8 @@ import fr.sirs.core.model.RefOuvrageHydrauliqueAssocie;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.ClosingDaemon;
-import java.util.List;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
+
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -58,7 +56,7 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
     private static final String MEMORY_ERROR_MSG = String.format(
             "Impossible d'imprimer les fiches : la mémoire disponible est insuffisante. Vous devez soit :%n"
                     + " - sélectionner moins d'ouvrages hydrauliques associés,%n"
-                    + " - fermer d'autres applications ouvertes sur le système."
+                    + " - allouer plus de mémoire à l'application."
     );
     @FXML private Tab uiOuvrageTypeChoice;
 
@@ -140,7 +138,8 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
         final Task t = taskProperty.get();
         if (t != null) {
             //restore the map style
-            PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
+            PrinterUtilities.restoreMap(getData().findFirst().orElseThrow(() -> new RuntimeException("No ouvrage associé to print")));
+            PrinterUtilities.canPrint.set(true);
             t.cancel();
         }
     }
@@ -148,15 +147,16 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
     @FXML
     private void print() {
         final Task<Boolean> printing = new TaskManager.MockTask<>("Génération de fiches détaillées", () -> {
+            final List<OuvrageHydrauliqueAssocie> toPrint = new ArrayList<>();
             try {
-                final List<OuvrageHydrauliqueAssocie> toPrint;
                 try (final Stream<OuvrageHydrauliqueAssocie> data = getData()) {
-                    toPrint = data.collect(Collectors.toList());
+                    toPrint.addAll(data.collect(Collectors.toList()));
                 }
 
                 if (!toPrint.isEmpty() && !Thread.currentThread().isInterrupted())
                     Injector.getSession().getPrintManager().printOuvragesAssocies(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauxFermes.isSelected(), uiOptionLocationInsert.isSelected());
 
+                PrinterUtilities.canPrint.set(true);
                 return !toPrint.isEmpty();
 
             } catch (OutOfMemoryError error) {
@@ -165,28 +165,24 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
                     final Alert alert = new Alert(Alert.AlertType.ERROR, MEMORY_ERROR_MSG, ButtonType.OK);
                     alert.show();
                 });
+                PrinterUtilities.canPrint.set(true);
                 throw error;
             } catch (RuntimeException re) {
                 SirsCore.LOGGER.log(Level.WARNING, "Cannot print ouvrages hydrauliques associés due to error", re);
-                //restore the map style
-                PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
+                if (!toPrint.isEmpty())
+                    //restore the map style
+                    PrinterUtilities.restoreMap(toPrint.get(0));
+                PrinterUtilities.canPrint.set(true);
                 throw re;
             }
         });
-        boolean canPrint = true;
-        if (TaskManager.INSTANCE.getSubmittedTasks() != null && !TaskManager.INSTANCE.getSubmittedTasks().isEmpty()) {
-            for (Task t : TaskManager.INSTANCE.getSubmittedTasks()) {
-                if ("Génération de fiches détaillées".equalsIgnoreCase(t.getTitle())) {
-                    SirsCore.LOGGER.log(Level.WARNING, "Cannot print ouvrages hydrauliques associés due to other printing on going");
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Une impression de fiche est en cours,\nveuillez réessayer quand elle sera terminée", ButtonType.OK);
-                    alert.showAndWait();
-                    canPrint = false;
-                }
-            }
-        }
-        if (canPrint) {
+        if (PrinterUtilities.canPrint.compareAndSet(true, false)) {
             taskProperty.set(printing);
             TaskManager.INSTANCE.submit(printing);
+        } else {
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot print Ouvrages Hydrauliques Associés due to other printing on going");
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Une impression de fiche est en cours,\nveuillez réessayer quand elle sera terminée", ButtonType.OK);
+            alert.showAndWait();
         }
     }
 

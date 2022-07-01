@@ -39,6 +39,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -79,6 +80,7 @@ public final class PrinterUtilities {
     private static final String LOGO_PATH = "/fr/sirs/images/icon-sirs.png";
     private static final String ORDERED_SEPARATOR = ") ";
     // how much the symbols should be modified by when printing the locationInsert
+    public static AtomicBoolean canPrint = new AtomicBoolean(true);
     private static final double MULTIPLIER = 3;
     // to store the styles to be restored prior printing
     private static Map<MapLayer, MutableStyle> backUpStyles;
@@ -86,7 +88,6 @@ public final class PrinterUtilities {
     private static MutableStyle backupSelectStyle;
     // to store layers' queries before changing its filter to hide the archived elements
     private static Map<FeatureMapLayer, Query> backupQueries;
-
     private static  boolean wasVisible;
     private static final List<String> FALSE_GETTERS = new ArrayList<>();
     static{
@@ -248,6 +249,7 @@ public final class PrinterUtilities {
         return fout;
     }
 
+    // TODO make this class generic
     private static JasperPrint createJasperPrint(JasperReport jasperReport,
                                                              final List<? extends Element> elementsToPrint,
                                                              final Previews previewLabelRepository,
@@ -283,7 +285,7 @@ public final class PrinterUtilities {
         wasVisible = CorePlugin.getMapLayerForElement(elements.get(0)).isVisible();
         if (!elements.isEmpty() && !wasVisible) CorePlugin.modifyLayerVisibilityForElement(elements.get(0), true);
         // increase the size of PointSymbolizers, LineSymbolizers and TextSymbolizers for the styles of visible layers
-        backUpStyles = LocationInsertUtilities.modifySymbolSize(MULTIPLIER);
+        backUpStyles = LocationInsertUtilities.modifyContextSymbolsSizeAndGetBackUpStyles(MULTIPLIER);
         // increase the size of PointSymbolizers, LineSymbolizers and TextSymbolizers for the selectionStyle of Desordre
         backupSelectStyle = LocationInsertUtilities.modifySelectionSymbolSize(MULTIPLIER, elements.get(0));
         // Hide archived Elements from all visible layers

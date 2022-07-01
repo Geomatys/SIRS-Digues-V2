@@ -24,10 +24,8 @@ import fr.sirs.core.model.RefConduiteFermee;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.ClosingDaemon;
-import java.util.List;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
+
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -56,7 +54,7 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
     private static final String MEMORY_ERROR_MSG = String.format(
             "Impossible d'imprimer les fiches : la mémoire disponible est insuffisante. Vous devez soit :%n"
                     + " - sélectionner moins de réseaux hydrauliques fermés,%n"
-                    + " - fermer d'autres applications ouvertes sur le système."
+                    + " - allouer plus de mémoire à l'application."
     );
     @FXML private Tab uiConduiteTypeChoice;
 
@@ -138,7 +136,8 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
         final Task t = taskProperty.get();
         if (t != null){
             //restore the map style
-            PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
+            PrinterUtilities.restoreMap(getData().findFirst().orElseThrow(() -> new RuntimeException("No réseau fermé to print")));
+            PrinterUtilities.canPrint.set(true);
             t.cancel();
         }
     }
@@ -146,45 +145,41 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
     @FXML
     private void print() {
         final Task<Boolean> printing = new TaskManager.MockTask<>("Génération de fiches détaillées", () -> {
+            final List<ReseauHydrauliqueFerme> toPrint = new ArrayList<>();
             try {
-                final List<ReseauHydrauliqueFerme> toPrint;
                 try (final Stream<ReseauHydrauliqueFerme> data = getData()) {
-                    toPrint = data.collect(Collectors.toList());
+                    toPrint.addAll(data.collect(Collectors.toList()));
                 }
 
                 if (!toPrint.isEmpty() && !Thread.currentThread().isInterrupted()) {
                     Injector.getSession().getPrintManager().printReseaux(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionLocationInsert.isSelected());
                 }
-
+                PrinterUtilities.canPrint.set(true);
                 return !toPrint.isEmpty();
+
             } catch (OutOfMemoryError error) {
                 SirsCore.LOGGER.log(Level.WARNING, "Cannot print reseaux hydrauliques fermés due to lack of memory", error);
                 Platform.runLater(() -> {
                     final Alert alert = new Alert(Alert.AlertType.ERROR, MEMORY_ERROR_MSG, ButtonType.OK);
                     alert.show();
                 });
+                PrinterUtilities.canPrint.set(true);
                 throw error;
             } catch (RuntimeException re) {
                 SirsCore.LOGGER.log(Level.WARNING, "Cannot print reseaux hydrauliques fermés due to error", re);
                 //restore the map style
-                PrinterUtilities.restoreMap(getData().collect(Collectors.toList()).get(0));
+                PrinterUtilities.restoreMap(toPrint.get(0));
+                PrinterUtilities.canPrint.set(true);
                 throw re;
             }
         });
-        boolean canPrint = true;
-        if (TaskManager.INSTANCE.getSubmittedTasks() != null && !TaskManager.INSTANCE.getSubmittedTasks().isEmpty()) {
-            for (Task t : TaskManager.INSTANCE.getSubmittedTasks()) {
-                if ("Génération de fiches détaillées".equalsIgnoreCase(t.getTitle())) {
-                    SirsCore.LOGGER.log(Level.WARNING, "Cannot print réseaux hydrauliques fermés due to other printing on going");
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Une impression de fiche est en cours,\nveuillez réessayer quand elle sera terminée", ButtonType.OK);
-                    alert.showAndWait();
-                    canPrint = false;
-                }
-            }
-        }
-        if (canPrint) {
+        if (PrinterUtilities.canPrint.compareAndSet(true, false)) {
             taskProperty.set(printing);
             TaskManager.INSTANCE.submit(printing);
+        } else {
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot print Réseaux Hydrauliques Fermés due to other printing on going");
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Une impression de fiche est en cours,\nveuillez réessayer quand elle sera terminée", ButtonType.OK);
+            alert.showAndWait();
         }
     }
 
