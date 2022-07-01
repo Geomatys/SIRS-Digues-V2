@@ -319,6 +319,23 @@
 				</textField>
 			</frame>
 			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="220" width="380" height="12" uuid="835cfbf2-110f-49af-adde-32150a795269"/>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="120" height="12" uuid="98ea26a9-aa57-4726-8a48-7a77fe338938"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Coordonnées éditées]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="176" y="0" width="204" height="12" uuid="3f8f9d4a-d6ef-47ce-a5e2-2d0abe8dbe71"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{editedGeoCoordinate}) ? "Coordonnées géographique" : ((!$F{editedGeoCoordinate}) ? "Coordonnées Linéaires" : "-")]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="232" width="380" height="12" backcolor="#D6E3BC" uuid="eb6e93f0-e640-48be-b20b-2ea7290d6109"/>
 				<staticText>
 					<reportElement positionType="Float" x="11" y="0" width="70" height="12" uuid="df6998e9-1d13-4ad0-badc-cb7a2026a600"/>
@@ -412,7 +429,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="268" width="380" height="12" backcolor="#D6E3BC" uuid="cb205cc8-4443-44de-8e90-4da41022d5f6"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="268" width="380" height="12" uuid="cb205cc8-4443-44de-8e90-4da41022d5f6"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="0696493d-99fc-413a-a5f6-2e67e21ff935"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -474,6 +491,23 @@
 				</textField>
 			</frame>
 			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="292" width="380" height="12" uuid="ca171c63-eadd-44fb-8f83-f1ca1f632c69"/>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="872f4f6c-5193-4eba-a821-02275a29a2eb"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Longueur]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="79" y="0" width="301" height="12" uuid="d762231c-f290-42d4-9232-b98ab6a8336a"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ouvrage_hydraulique_associe_length}+" m"]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="304" width="555" height="12" backcolor="#D6E3BC" uuid="0e5f620d-ae56-4464-a0d2-b9d3ac85412b"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="50" height="12" uuid="a9c8b115-9926-4cb9-bf49-5fd53252f997"/>
@@ -502,40 +536,6 @@
 						<font size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{positionId})]]></textFieldExpression>
-				</textField>
-			</frame>
-			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="220" width="380" height="12" uuid="835cfbf2-110f-49af-adde-32150a795269"/>
-				<staticText>
-					<reportElement positionType="Float" x="10" y="0" width="120" height="12" uuid="98ea26a9-aa57-4726-8a48-7a77fe338938"/>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
-					</textElement>
-					<text><![CDATA[Coordonnées éditées]]></text>
-				</staticText>
-				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="176" y="0" width="204" height="12" uuid="3f8f9d4a-d6ef-47ce-a5e2-2d0abe8dbe71"/>
-					<textElement textAlignment="Justified" verticalAlignment="Middle">
-						<font size="8"/>
-					</textElement>
-					<textFieldExpression><![CDATA[($F{editedGeoCoordinate}) ? "Coordonnées géographique" : ((!$F{editedGeoCoordinate}) ? "Coordonnées Linéaires" : "-")]]></textFieldExpression>
-				</textField>
-			</frame>
-			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="292" width="380" height="12" uuid="ca171c63-eadd-44fb-8f83-f1ca1f632c69"/>
-				<staticText>
-					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="872f4f6c-5193-4eba-a821-02275a29a2eb"/>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
-					</textElement>
-					<text><![CDATA[Longueur]]></text>
-				</staticText>
-				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="79" y="0" width="301" height="12" uuid="d762231c-f290-42d4-9232-b98ab6a8336a"/>
-					<textElement textAlignment="Justified" verticalAlignment="Middle">
-						<font size="8"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{ouvrage_hydraulique_associe_length}+" m"]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
