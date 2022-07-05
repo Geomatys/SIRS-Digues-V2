@@ -84,6 +84,7 @@ import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapPane;
+import fr.sirs.map.FXMapTab;
 import fr.sirs.migration.HtmlRemoval;
 import fr.sirs.migration.RemoveOldDependanceConf;
 import fr.sirs.migration.upgrade.v2and23.UpgradeLink1NtoNN;
@@ -127,6 +128,7 @@ import org.apache.sis.measure.Units;
 import org.apache.sis.referencing.CRS;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
+import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.ArraysExt;
 import org.ektorp.CouchDbConnector;
 import org.geotoolkit.cql.CQLException;
@@ -139,6 +141,7 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display.PortrayalException;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.canvas.J2DCanvas;
+import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
 import org.geotoolkit.display2d.ext.northarrow.GraphicNorthArrowJ2D;
 import org.geotoolkit.display2d.ext.scalebar.GraphicScaleBarJ2D;
@@ -160,12 +163,7 @@ import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.style.MutableFeatureTypeStyle;
-import org.geotoolkit.style.MutableRule;
-import org.geotoolkit.style.MutableStyle;
-import org.geotoolkit.style.MutableStyleFactory;
-import org.geotoolkit.style.RandomStyleBuilder;
-import org.geotoolkit.style.StyleConstants;
+import org.geotoolkit.style.*;
 import static org.geotoolkit.style.StyleConstants.DEFAULT_ANCHOR_POINT;
 import static org.geotoolkit.style.StyleConstants.DEFAULT_DESCRIPTION;
 import static org.geotoolkit.style.StyleConstants.DEFAULT_DISPLACEMENT;
@@ -187,16 +185,7 @@ import org.opengis.filter.expression.Expression;
 import org.opengis.geometry.Envelope;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.TransformException;
-import org.opengis.style.Fill;
-import org.opengis.style.Graphic;
-import org.opengis.style.GraphicStroke;
-import org.opengis.style.GraphicalSymbol;
-import org.opengis.style.LineSymbolizer;
-import org.opengis.style.Mark;
-import org.opengis.style.PointSymbolizer;
-import org.opengis.style.PolygonSymbolizer;
-import org.opengis.style.Stroke;
-import org.opengis.style.TextSymbolizer;
+import org.opengis.style.*;
 import org.opengis.util.FactoryException;
 import org.opengis.util.GenericName;
 
@@ -1455,7 +1444,7 @@ public class CorePlugin extends Plugin {
     public static void modifyLayerVisibilityForElement(final Element e, final boolean visible) {
         try {
             final MapLayer layerForElement = CorePlugin.getMapLayerForElement(e);
-            final List<MapLayer> layers = Injector.getSession().getFrame().getMapTab().getMap().getUiMap().getContainer().getContext().layers();
+            final List<MapLayer> layers = getMapLayers();
 
             for (MapLayer layer: layers) {
                 if (layer.getName().equals(layerForElement.getName())) {
@@ -1479,5 +1468,33 @@ public class CorePlugin extends Plugin {
             return p.getClass().equals(TronconDigue.class);
         }
         return false;
+    }
+
+    public static List<MapLayer> getMapLayers() {
+        Session session = Injector.getSession();
+        ArgumentChecks.ensureNonNull("session", session);
+
+        FXMainFrame frame = session.getFrame();
+        ArgumentChecks.ensureNonNull("frame", frame);
+
+        FXMapTab mapTab = frame.getMapTab();
+        ArgumentChecks.ensureNonNull("map tab", mapTab);
+
+        FXMapPane map = mapTab.getMap();
+        ArgumentChecks.ensureNonNull("FXMapPane", map);
+
+        FXMap uiMap = map.getUiMap();
+        ArgumentChecks.ensureNonNull("FXMap", uiMap);
+
+        ContextContainer2D container = uiMap.getContainer();
+        ArgumentChecks.ensureNonNull("container", container);
+
+        MapContext context = container.getContext();
+        ArgumentChecks.ensureNonNull("MapContext", context);
+
+        List<MapLayer> layers = context.layers();
+        ArgumentChecks.ensureNonNull("context layers", layers);
+
+        return layers;
     }
 }

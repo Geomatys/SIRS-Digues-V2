@@ -28,16 +28,15 @@ import fr.sirs.core.model.RefUrgence;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.ClosingDaemon;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
+
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import fr.sirs.util.PrinterUtilities;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -65,7 +64,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
     private static final String MEMORY_ERROR_MSG = String.format(
             "Impossible d'imprimer les fiches : la mémoire disponible est insuffisante. Vous devez soit :%n"
                     + " - sélectionner moins de désordres,%n"
-                    + " - fermer d'autres applications ouvertes sur le système."
+                    + " - allouer plus de mémoire à l'application."
     );
 
     private static final Comparator<Observation> DATE_COMPARATOR = (o1, o2) -> {
@@ -127,6 +126,11 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                     new Growl(Growl.Type.ERROR, "L'impression a échouée.").showAndFade();
                     taskProperty.set(null);
                 }));
+                newVal.setOnRunning(evt -> Platform.runLater(() -> {
+                    if (uiOptionLocationInsert.isSelected()) {
+                       new Growl(Growl.Type.WARNING, "Durant l'extraction des données lors de l'impression des fiches, le style de la carte est temporairement modifié.").showAndFade();
+                    }
+                }));
             }
         });
 
@@ -153,24 +157,36 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         updateCount(null);
     }
 
-    @FXML private void cancel() {
+    @FXML
+    private void cancel() {
         final Task t = taskProperty.get();
-        if (t != null)
-            t.cancel();
+        if (t != null) {
+            //restore the map style
+            PrinterUtilities.restoreMap(getData().findFirst().orElseThrow(() -> new RuntimeException("No disorder to print")));
+            try {
+                t.cancel();
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.WARNING, "Could not cancel printing Disorders", e);
+                throw e;
+            } finally {
+                PrinterUtilities.canPrint.set(true);
+            }
+        }
     }
 
     @FXML
     private void print() {
-        final Task<Boolean> printing = new TaskManager.MockTask<>("Génération de fiches détaillées de désordres", () -> {
+        final Task<Boolean> printing = new TaskManager.MockTask<>("Génération de fiches détaillées", () -> {
+            final List<Desordre> toPrint = new ArrayList<>();
             try {
-                final List<Desordre> toPrint;
                 try (final Stream<Desordre> data = getData()) {
-                    toPrint = data.collect(Collectors.toList());
+                    toPrint.addAll(data.collect(Collectors.toList()));
                 }
 
                 if (!toPrint.isEmpty() && !Thread.currentThread().isInterrupted())
                     Injector.getSession().getPrintManager().printDesordres(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected(), uiOptionLocationInsert.isSelected());
 
+                PrinterUtilities.canPrint.set(true);
                 return !toPrint.isEmpty();
 
             } catch (OutOfMemoryError error) {
@@ -179,12 +195,24 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                     final Alert alert = new Alert(Alert.AlertType.ERROR, MEMORY_ERROR_MSG, ButtonType.OK);
                     alert.show();
                 });
+                PrinterUtilities.canPrint.set(true);
                 throw error;
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to error", e);
+                if (!toPrint.isEmpty())
+                    PrinterUtilities.restoreMap(toPrint.get(0));
+                PrinterUtilities.canPrint.set(true);
+                throw e;
             }
         });
-        taskProperty.set(printing);
-
-        TaskManager.INSTANCE.submit(printing);
+        if (PrinterUtilities.canPrint.compareAndSet(true, false)) {
+            taskProperty.set(printing);
+            TaskManager.INSTANCE.submit(printing);
+        } else {
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to other printing on going");
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Une impression de fiche est en cours,\nveuillez réessayer quand elle sera terminée", ButtonType.OK);
+            alert.showAndWait();
+        }
     }
 
     private Stream<Desordre> getData() {
