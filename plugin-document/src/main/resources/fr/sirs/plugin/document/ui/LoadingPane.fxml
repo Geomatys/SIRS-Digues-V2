@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.*?>
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -28,9 +25,13 @@
             <Insets top="10.0" />
          </GridPane.margin>
       </ProgressIndicator>
-      <Label fx:id="uiProgressLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="40.0" prefWidth="400.0" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
-      <Button fx:id="uiGenerateFinish" alignment="CENTER" mnemonicParsing="false" text="Terminer" GridPane.rowIndex="2" GridPane.valignment="CENTER">
-         <GridPane.margin>
+       <Label fx:id="uiProgressLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="40.0" prefWidth="400.0"
+              GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS"/>
+       <Label fx:id="uiErrorLabel" alignment="CENTER" contentDisplay="CENTER"
+              GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS"/>
+       <Button fx:id="uiGenerateFinish" alignment="CENTER" mnemonicParsing="false" text="Terminer" GridPane.rowIndex="2"
+               GridPane.valignment="CENTER">
+           <GridPane.margin>
             <Insets bottom="5.0" top="5.0" />
          </GridPane.margin>
       </Button>

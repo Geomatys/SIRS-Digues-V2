@@ -19,6 +19,7 @@
 package fr.sirs.plugin.document.ui;
 
 import fr.sirs.SIRS;
+import fr.sirs.plugin.document.FileAndUnsupportedFiles;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -31,6 +32,8 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import java.util.List;
 
 /**
  * A simple panel whose aim is to display advancement of a given task.
@@ -47,6 +50,9 @@ public class LoadingPane extends GridPane {
 
     @FXML
     public Label uiProgressLabel;
+
+    @FXML
+    public Label uiErrorLabel;
 
     /**
      * Property holding task to listen to.
@@ -70,11 +76,13 @@ public class LoadingPane extends GridPane {
             uiProgress.progressProperty().unbind();
             uiProgressLabel.textProperty().unbind();
             uiGenerateFinish.visibleProperty().unbind();
+            uiErrorLabel.visibleProperty().unbind();
         }
 
         if (newValue == null) {
             uiProgress.setVisible(false);
             uiGenerateFinish.setVisible(false);
+            uiErrorLabel.setVisible(false);
             uiProgressLabel.setText("Aucune tâche en cours");
         } else {
             uiProgress.setVisible(true);
@@ -82,6 +90,21 @@ public class LoadingPane extends GridPane {
             uiProgressLabel.textProperty().bind(newValue.messageProperty());
             uiGenerateFinish.disableProperty().bind(newValue.runningProperty());
             newValue.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, evt -> {
+                final Object taskValue = newValue.getValue();
+                if (taskValue instanceof FileAndUnsupportedFiles) {
+                    FileAndUnsupportedFiles taskResult = (FileAndUnsupportedFiles) taskValue;
+                    final List<String> unsupportedFiles = taskResult.getUnsupportedFiles();
+                    if (unsupportedFiles != null && !unsupportedFiles.isEmpty()) {
+                        StringBuilder errorMsg = new StringBuilder("Information : \nLes fichiers suivants n'ont pas été ajoutés au dossier de synthèse \ncar leurs formats ne sont pas pris en charge:\n");
+                        for (String fileName : unsupportedFiles) {
+                            errorMsg.append("\n" + fileName);
+                        }
+                        errorMsg.append(" \n\nFormats pris en charge : ODF, PDF, Image et text\n");
+                        uiErrorLabel.setText(errorMsg.toString());
+                        uiErrorLabel.setVisible(true);
+                        this.getScene().getWindow().sizeToScene();
+                    }
+                }
                 // If bound task did not update its progress to finish state, we do it ourself.
                 if (uiProgress.getProgress() < 1) {
                     uiProgressLabel.textProperty().unbind();
