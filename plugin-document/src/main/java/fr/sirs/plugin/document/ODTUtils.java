@@ -31,7 +31,6 @@ import static fr.sirs.plugin.document.PropertiesFileUtilities.setProperty;
 import fr.sirs.plugin.document.ui.DocumentsPane;
 import static fr.sirs.plugin.document.ui.DocumentsPane.DYNAMIC;
 import static fr.sirs.plugin.document.ui.DocumentsPane.MODELE;
-import static fr.sirs.util.odt.ODTUtils.generateReport;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -163,11 +162,11 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
      * @param file File to put synthesis into.
      * @return Input file.
      */
-    public static Task<File> writeDoSynth(final FileTreeItem item, final File file) {
-        return TaskManager.INSTANCE.submit(new Task<File>() {
+    public static Task<FileAndUnsupportedFiles> writeDoSynth(final FileTreeItem item, final File file) {
+        return TaskManager.INSTANCE.submit(new Task<FileAndUnsupportedFiles>() {
 
             @Override
-            protected File call() throws Exception {
+            protected FileAndUnsupportedFiles call() throws Exception {
                 updateTitle("Génération d'une synthèse : "+item.getLibelle());
 
                 // Define a string which will deliver task message.
@@ -176,12 +175,14 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
 
                 msgProperty.set("Initialisation du document");
                 final TextDocument doc = TextDocument.newTextDocument();
-                write(doc, (FileTreeItem) item, true, msgProperty);
+                final List<String> unsupportedFiles = write(doc, item, true, msgProperty);
+
+                FileAndUnsupportedFiles fileAndUnsupportedFiles = new FileAndUnsupportedFiles(unsupportedFiles, file);
 
                 msgProperty.set("Sauvegarde du document");
                 doc.save(file);
 
-                return file;
+                return fileAndUnsupportedFiles;
             }
         });
     }
@@ -194,7 +195,7 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
      * @param progressMessage A text property to put progress message into.
      * @throws Exception
      */
-    private static void write(final TextDocument doc, final FileTreeItem item, boolean doSynth, final StringProperty progressMessage) throws Exception {
+    private static List<String> write(final TextDocument doc, final FileTreeItem item, boolean doSynth, final StringProperty progressMessage) throws Exception {
         // title
         final int headingLevel;
         if (item.isSe()) {
@@ -210,16 +211,25 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
 
         List<FileTreeItem> directories = item.listChildrenItem(true, doSynth);
         List<FileTreeItem> files       = item.listChildrenItem(false, doSynth);
+        final List<String> unsupportedFiles = new ArrayList<>();
         if (!files.isEmpty()) {
             if (doSynth) {
                 final String prefix = item.getLibelle() + System.lineSeparator() +"Concatenation des fichiers : ";
                 final int n = files.size();
                 int i = 1;
                 for (FileTreeItem child : files) {
-                    final int I = i++;
-                    Platform.runLater(() -> progressMessage.set(prefix + I + "/" + n));
-                    doc.addParagraph(child.getLibelle()).applyHeading(true, 6);
-                    append(doc, child.getValue());
+                    TextDocument tmpDoc = TextDocument.newTextDocument();
+                    try {
+                        final int I = i++;
+                        Platform.runLater(() -> progressMessage.set(prefix + I + "/" + n));
+                        tmpDoc.addParagraph(child.getLibelle()).applyHeading(true, 6);
+                        append(tmpDoc, child.getValue());
+                    } catch (Exception e) {
+                        unsupportedFiles.add(child.getValue().getName());
+                        continue;
+                    }
+                    //tmpDoc added to doc only if the append() has not failed
+                    doc.insertContentFromDocumentAfter(tmpDoc, doc.addParagraph(""), true);
                 }
             } else {
                 final Table table = Table.newTable(doc, 1 + files.size(), TABLE_HEADERS.length);
@@ -245,5 +255,7 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
             doc.addColumnBreak();
             write(doc, child, doSynth, progressMessage);
         }
+
+        return unsupportedFiles;
     }
 }
