@@ -88,10 +88,10 @@ public class VegetationToolBar extends ToolBar {
     }
 
     /**
-     * Vérifie s'il existe un plan de végétation actif et avertit l'utilisateur au moyen d'une fenêtre informative dans 
+     * Vérifie s'il existe un plan de végétation actif et avertit l'utilisateur au moyen d'une fenêtre informative dans
      * le cas contraire.
-     * 
-     * @return Vrai si la session de vététation indique un plan de gestion actif. Faux dans le cas contraire. 
+     *
+     * @return Vrai si la session de vététation indique un plan de gestion actif. Faux dans le cas contraire.
      */
     private boolean checkPlan(){
         //on vérifie qu'il y a un plan de gestion actif
@@ -109,6 +109,8 @@ public class VegetationToolBar extends ToolBar {
         if(!checkPlan()) return;
         if (editionVegetationStage == null) initEditionVegetationStage();
         editionVegetationStage.show();
+        editionVegetationStage.setWidth((double) 500);
+        editionVegetationStage.setHeight((double) 650);
         editionVegetationStage.requestFocus();
     }
 
