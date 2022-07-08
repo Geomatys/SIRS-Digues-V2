@@ -169,11 +169,6 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
         return mapper.mapClassName();
     }
 
-    @Override
-    protected FXPanMouseListen getMouseInputListener() {
-        return mouseInputListener;
-    }
-
     /**
      * {@inheritDoc }
      */
@@ -229,7 +224,11 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
                         editGeometry.reset();
                         this.updateGeometryType();
                     });
-                    pane.selectedObjetProperty.addListener((ob, ol, ne) -> updateSelectedObjet(ne));
+                    pane.selectedObjetProperty.addListener((ob, ol, ne) -> {
+                        //HACK_REDMINE_7621 : The selected troncon is removed from the selection for more visibility
+                        tronconLayer.setSelectionFilter(null);
+                        updateSelectedObjet(ne);
+                    });
                 }
 
                 editPane.tronconProperty().addListener((ob, ol, ne) -> chooseTypesAndCreate());
@@ -304,6 +303,10 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
         private void updateSelectedObjet(Object selected) {
             if (editedClass.isInstance(selected)) {
                 editedObjet = editedClass.cast(selected);
+                // erase the temporary geometry
+                editGeometry.reset();
+                // remove the temporary geometry from the edition layer
+                geomLayer.getGeometries().clear();
             } else {
                 SIRS.LOGGER.log(Level.WARNING, "L''\u00e9l\u00e9ment s\u00e9lectionn\u00e9 n''est pas une instance de la classe edit\u00e9e : {0}", editedClass);
             }
