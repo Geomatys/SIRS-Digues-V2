@@ -41,14 +41,12 @@ build-windows:
   stage: build
   tags:
     - powershell
-  services:
-    - couchdb:3.1.1
   variables:
-    MAVEN_CLI_OPTS: "--batch-mode" #-Dmaven.repo.local=$CI_PROJECT_DIR\\.m2"
+    MAVEN_CLI_OPTS: "--batch-mode"
   script:
     - cd $env:CI_PROJECT_DIR\
     #- keytool -importcert -file $CERTIFICATE -alias certificate -storepass changeit -noprompt
-    - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -Pall -DfailIfNoTests=false
+    - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -Pall -DskipTests
     - cd launcher
     - mvn jfx:native $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS
   artifacts:
@@ -60,11 +58,9 @@ build-macosx:
   stage: build
   tags:
     - macosx
-  services:
-    - couchdb:3.1.1
   script:
     #- keytool -importcert -file $CERTIFICATE -alias certificate -storepass changeit -noprompt
-    - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -Pall -Dtest=!fr.sirs.DesignationIncrementerTest -DfailIfNoTests=false
+    - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -Pall -DskipTests
     - cd launcher
     - mvn jfx:native $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS
   artifacts:
