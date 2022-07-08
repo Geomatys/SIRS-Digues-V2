@@ -238,7 +238,17 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
      */
     protected void modifyObjetGeometry(final MouseEvent e, final double x, final double y) {
         final Geometry tempEditGeom = editGeometry.geometry.get();
-        if ((tempEditGeom!= null)&&(!Point.class.isAssignableFrom(tempEditGeom.getClass()) && e.getClickCount() >= 2)) {
+        // If the selected object has not been modified yet, we add it into the edition layer of the map
+        if ((tempEditGeom == null)) {
+            if (!Point.class.isAssignableFrom(newGeomType)) {
+                // On récupère la géométrie de l'objet sélectionné pour pouvoir la modifier
+                editGeometry.geometry.set((Geometry) editedObjet.getGeometry().clone());
+                // Ajout de cette géométrie dans la couche d'édition sur la carte.
+                geomLayer.getGeometries().setAll(editGeometry.geometry.get());
+                modeProperty.setValue(EDIT_OBJET);
+                return;
+            }
+        } else if (!Point.class.isAssignableFrom(tempEditGeom.getClass()) && e.getClickCount() >= 2) {
             final Geometry result;
             if (tempEditGeom instanceof Polygon) {
                 result = objetHelper.insertNode((Polygon) editGeometry.geometry.get(), x, y);
@@ -247,7 +257,9 @@ public class SIRSEditMouseListen<G extends AvecSettableGeometrie> extends Abstra
             }
             editGeometry.geometry.set(result);
             geomLayer.getGeometries().setAll(editGeometry.geometry.get());
-        } else if (Point.class.isAssignableFrom(newGeomType)) {
+            return;
+        }
+        if (Point.class.isAssignableFrom(newGeomType)) {
             createNewGeometryForObjet(x, y);
         }
     }
