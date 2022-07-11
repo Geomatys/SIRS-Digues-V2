@@ -11,7 +11,8 @@ stages:
 
 variables:
   MAVEN_USER: 'deployment'
-  MAVEN_CLI_OPTS: "-DskipTests --batch-mode -Dmaven.repo.local=$CI_PROJECT_DIR/.m2"
+#  MAVEN_CLI_OPTS: "-DskipTests --batch-mode -Dmaven.repo.local=$CI_PROJECT_DIR/.m2"
+  MAVEN_CLI_OPTS: "-DskipTests --batch-mode -Dmaven.repo.local=$CI_PROJECT_DIR/test-m2"
   UPLOAD_URL: '$NEXUS_URL/$CI_COMMIT_TAG/'
   NEXUS_CREDENTIALS: '$NEXUS_USER:$NEXUS_PASSWORD'
   SONAR_HOST_URL: 'https://sonar.geomatys.com'
@@ -48,7 +49,7 @@ build-windows:
   script:
     #- keytool -importcert -file $CERTIFICATE -alias certificate -storepass changeit -noprompt
     - mkdir $CI_PROJECT_DIR/test-m2
-    - mvn clean install -s $MAVEN_SETTINGS -DskipTests -Dmaven.repo.local=$CI_PROJECT_DIR/test-m2 -Pall
+    - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -Pall
     - mvn jfx:native $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -DskipTests -f launcher\pom.xml
     - mkdir windows
     - mv launcher windows
