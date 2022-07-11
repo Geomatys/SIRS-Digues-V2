@@ -50,7 +50,7 @@ build-windows:
     #- keytool -importcert -file $CERTIFICATE -alias certificate -storepass changeit -noprompt
 #    - mkdir $CI_PROJECT_DIR/test-m2
     - echo $MAVEN_CLI_OPTS
-    - ls $CI_PROJECT_DIR/.m2
+    - ls $HOME/.m2
     - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -Pall
     - mvn jfx:native $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -DskipTests -f launcher\pom.xml
     - mkdir windows
