@@ -4,7 +4,7 @@
 #
 # A script to release a tag on GIT for the project in which the current project resides.
 #
-# Folder structure should be : 
+# Folder structure should be :
 #
 #	- My_GIT_project/
 #		--> build/
@@ -21,7 +21,7 @@
 
 ############## DEFAULT VALUES TO USE FOR RELEASE VERSION 								 ##############
 ############## WARNING : DO NOT AFFECT THOSE VARIABLES IN ANOTHER PLACE OF THIS SCRIPT ! ##############
-defaultMinor=38
+defaultMinor=37
 defaultMajor=2
 
 
@@ -30,7 +30,7 @@ defaultMajor=2
 releaseMinor=
 releaseMajor=
 
-# RELEASE VERSION : COMPLETE STRING COMPOSED OF MAJOR AND MINOR variables. 
+# RELEASE VERSION : COMPLETE STRING COMPOSED OF MAJOR AND MINOR variables.
 releaseVersion=
 
 # The name of the file in which we put tag name (so an automatic script can checkout tag by doing cat lastTag.tmp|git checkout)
@@ -101,7 +101,7 @@ function createTag {
 	ant -f $renameScriptFile
 
 	echo "Revert version script to its original state."
- 	mv -f $renameScriptFile$backupExtension $renameScriptFile 
+ 	mv -f $renameScriptFile$backupExtension $renameScriptFile
 
 	echo "Commit release versions"
 	git commit -m "Project release $releaseVersion" -a
@@ -125,7 +125,7 @@ function incrementDefaultValues {
 	git commit -m "Prepare release script for next build." -a
 }
 
-########################### MAIN ############################# 
+########################### MAIN #############################
 
 # ARGUMENT CHECK
 while [ "$1" != "" ]; do
@@ -149,12 +149,12 @@ done
 
 
 if [ -z "$releaseMinor" ]
-	then 
+	then
 	releaseMinor=$defaultMinor
 fi
 
 if [ -z "$releaseMajor" ]
-	then 
+	then
 	releaseMajor=$defaultMajor
 fi
 
