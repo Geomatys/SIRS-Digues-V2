@@ -21,7 +21,8 @@ Pour une aide contextuelle concernant le script, utilisez l'argument -h.
 
 Note : le script crée le tag en local, mais ne pousse rien. <br/>
 Note2 : pour créer le tag, le script crée une branche temporaire qu'il efface une fois le tag généré avec succès. En cas d'erreur durant l'éxecution du script, il est possible que vous vous retrouviez avec une branche inutile sur votre dépôt local. <br/>
-Note3 : Si vous devez mettre à jour des plugins, pensez à suivre la section dédiée dans le wiki avant le lancement du script.
+Note3 : Si vous devez mettre à jour des plugins, pensez à suivre la section dédiée dans le wiki avant le lancement du script. <br/>
+Note4 : L'exécution du script de modification de la version dans les pom.xml nécessite l'installation d'Apache Ant.
 
 ### 2 - Compiler un paquet executable
 
