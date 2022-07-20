@@ -135,7 +135,7 @@ public final class PrinterUtilities {
                 }
             }
             ouvrages.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            print = createJasperPrint(jasperReport, ouvrages, previewLabelRepository, stringConverter, printLocationInsert);
+            print = createJasperPrint(jasperReport, ouvrages, previewLabelRepository, stringConverter, printLocationInsert, parameters);
         }
 
         // Generate the report -------------------------------------------------
@@ -185,7 +185,7 @@ public final class PrinterUtilities {
                 }
             }
             reseaux.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            print = createJasperPrint(jasperReport, reseaux, previewLabelRepository, stringConverter, printLocationInsert);
+            print = createJasperPrint(jasperReport, reseaux, previewLabelRepository, stringConverter, printLocationInsert, parameters);
         }
 
         // Generate the report -------------------------------------------------
@@ -236,7 +236,7 @@ public final class PrinterUtilities {
                 }
             }
             desordres.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
-            print = createJasperPrint(jasperReport, desordres, previewLabelRepository, stringConverter, printLocationInsert);
+            print = createJasperPrint(jasperReport, desordres, previewLabelRepository, stringConverter, printLocationInsert, parameters);
         }
 
         // Generate the report -------------------------------------------------
@@ -254,10 +254,10 @@ public final class PrinterUtilities {
                                                              final List<? extends Element> elementsToPrint,
                                                              final Previews previewLabelRepository,
                                                              final SirsStringConverter stringConverter,
-                                                             final boolean printLocationInsert)
+                                                             final boolean printLocationInsert,
+                                                 final Map<String, Object> parameters)
             throws JRException {
         final JasperPrint print;
-        final Map<String, Object> parameters = new HashMap<>();
         if (printLocationInsert) {
             // increase the style and selectionStyle Symbolizers size
             modifyMapPriorPrinting(elementsToPrint);
