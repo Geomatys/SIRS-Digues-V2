@@ -215,6 +215,21 @@
                                                 <Insets bottom="20.0" left="40.0" right="40.0" top="20.0" />
                                             </padding>
                                         </VBox>
+                                        <VBox spacing="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="560.0">
+                                            <children>
+                                                <Label text="%optionSubtitlePrBornes" underline="true">
+                                                    <font>
+                                                        <Font name="System Bold Italic" size="13.0" />
+                                                    </font>
+                                                </Label>
+                                                <CheckBox fx:id="uiDisablePR" mnemonicParsing="false" text="%prOption" />
+                                                <CheckBox fx:id="uiDisableXY" mnemonicParsing="false" text="%xyOption" />
+                                                <CheckBox fx:id="uiDisableBorne" mnemonicParsing="false" text="%borneOption" />
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="40.0" right="40.0" top="20.0" />
+                                            </padding>
+                                        </VBox>
                                     </children>
                                 </AnchorPane>
                             </items>

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -76,11 +76,12 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
             final List<JRColumnParameter> observationFields,
             final List<JRColumnParameter> prestationFields,
             final List<JRColumnParameter> reseauFields,
-            final boolean printPhoto, 
-            final boolean printReseauOuvrage, 
-            final boolean printVoirie) throws ParserConfigurationException, SAXException, IOException {
+            final boolean printPhoto,
+            final boolean printReseauOuvrage,
+            final boolean printVoirie)
+            throws ParserConfigurationException, SAXException, IOException {
         super(Desordre.class, stream, avoidFields, "#47daff");
-        
+
         this.observationFields = observationFields;
         this.prestationFields = prestationFields;
         this.reseauFields = reseauFields;
@@ -128,31 +129,31 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
     /**
      * <p>This method writes the content of the detail element.</p>
      * @param classToMap
-     * @throws Exception 
+     * @throws Exception
      */
     private void writeDetail() {
-        
+
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         currentY = Integer.valueOf(band.getAttribute(ATT_HEIGHT));
-        
+
         /*----------------------------------------------------------------------
         TABLEAU DES OBSERVATIONS
         ----------------------------------------------------------------------*/
         currentY+=24;
         writeSectionTitle("Observations", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
         currentY+=2;
-        writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 
+        writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET,
                 TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
-        
+
         /*----------------------------------------------------------------------
         TABLEAU DES PRESTATIONS
         ----------------------------------------------------------------------*/
         currentY+=24;
         writeSectionTitle("Prestations", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
         currentY+=2;
-        writeTable(Prestation.class, prestationFields, true, PRESTATION_TABLE_DATA_SOURCE, PRESTATION_DATASET, 
+        writeTable(Prestation.class, prestationFields, true, PRESTATION_TABLE_DATA_SOURCE, PRESTATION_DATASET,
                 TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
-        
+
         /*----------------------------------------------------------------------
         SOUS-RAPPORTS DES PHOTOS
         ----------------------------------------------------------------------*/
@@ -160,7 +161,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
             currentY+=24;
             includePhotoSubreport(0);
         }
-        
+
         /*----------------------------------------------------------------------
         TABLEAU DES OUVRAGES ET RÉSEAUX
         ----------------------------------------------------------------------*/
@@ -168,10 +169,10 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
             currentY+=24;
             writeSectionTitle("Réseaux et ouvrages", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
             currentY+=2;
-            writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET, 
+            writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET,
                     TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
         }
-        
+
         /*----------------------------------------------------------------------
         TABLEAU DES VOIRIES
         ----------------------------------------------------------------------*/
@@ -179,15 +180,15 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
             currentY+=24;
             writeSectionTitle("Voiries", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
             currentY+=2;
-            writeTable(ObjetReseau.class, reseauFields, true, VOIRIE_TABLE_DATA_SOURCE, VOIRIE_DATASET, 
+            writeTable(ObjetReseau.class, reseauFields, true, VOIRIE_TABLE_DATA_SOURCE, VOIRIE_DATASET,
                     TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
         }
-        
+
 //        writeDetailPageBreak();
-        
+
         // Sizes the detail element given to the field number.------------------
         band.setAttribute(ATT_HEIGHT, String.valueOf(DETAIL_HEIGHT));
-        
+
         // Builds the DOM tree.-------------------------------------------------
         root.appendChild(detail);
     }

@@ -63,6 +63,9 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
     @FXML private CheckBox uiOptionPhoto;
     @FXML private CheckBox uiOptionReseauxFermes;
     @FXML private CheckBox uiOptionLocationInsert;
+    @FXML private CheckBox uiDisablePR;
+    @FXML private CheckBox uiDisableXY;
+    @FXML private CheckBox uiDisableBorne;
 
     private final TypeChoicePojoTable ouvrageTypesTable = new TypeChoicePojoTable(RefOuvrageHydrauliqueAssocie.class, "Types d'ouvrages associés");
 
@@ -160,7 +163,7 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
                 }
 
                 if (!toPrint.isEmpty() && !Thread.currentThread().isInterrupted())
-                    Injector.getSession().getPrintManager().printOuvragesAssocies(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauxFermes.isSelected(), uiOptionLocationInsert.isSelected());
+                    Injector.getSession().getPrintManager().printOuvragesAssocies(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauxFermes.isSelected(), uiOptionLocationInsert.isSelected(), !uiDisablePR.isSelected(), !uiDisableXY.isSelected(), !uiDisableBorne.isSelected());
 
                 PrinterUtilities.canPrint.set(true);
                 return !toPrint.isEmpty();
