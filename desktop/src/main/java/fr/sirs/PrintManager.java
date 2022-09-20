@@ -257,7 +257,15 @@ public class PrintManager {
      * @param printReseauOuvrage
      * @param printVoirie
      */
-    public final void printDesordres(final List<Desordre> desordres, final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie, final boolean printLocationInsert) throws Exception {
+    public final void printDesordres(final List<Desordre> desordres,
+                                     final boolean printPhoto,
+                                     final boolean printReseauOuvrage,
+                                     final boolean printVoirie,
+                                     final boolean printLocationInsert,
+                                     final boolean printPR,
+                                     final boolean printXY,
+                                     final boolean printBorne)
+            throws Exception {
 
         final List<String> avoidDesordreFields = new ArrayList<>();
         avoidDesordreFields.add(GEOMETRY_FIELD);
@@ -319,7 +327,7 @@ public class PrintManager {
                 reseauFields,
                 Injector.getSession().getPreviews(),
                 new SirsStringConverter(),
-                desordres, printPhoto, printReseauOuvrage, printVoirie, printLocationInsert);
+                desordres, printPhoto, printReseauOuvrage, printVoirie, printLocationInsert, printPR, printXY, printBorne);
         SIRS.openFile(fileToPrint);
     }
 
@@ -330,7 +338,14 @@ public class PrintManager {
      * @param printPhoto
      * @param printReseauOuvrage
      */
-    public final void printReseaux(final List<ReseauHydrauliqueFerme> reseauxFermes, final boolean printPhoto, final boolean printReseauOuvrage, final boolean printLocationInsert) throws Exception {
+    public final void printReseaux(final List<ReseauHydrauliqueFerme> reseauxFermes,
+                                   final boolean printPhoto,
+                                   final boolean printReseauOuvrage,
+                                   final boolean printLocationInsert,
+                                   final boolean printPR,
+                                   final boolean printXY,
+                                   final boolean printBorne)
+            throws Exception {
 
         final List<String> avoidReseauFields = new ArrayList<>();
         avoidReseauFields.add(GEOMETRY_FIELD);
@@ -385,7 +400,7 @@ public class PrintManager {
         reseauFields.add(new JRColumnParameter("date_debut"));
         reseauFields.add(new JRColumnParameter("date_fin"));
         reseauFields.add(new JRColumnParameter("commentaire", 2.f));
-        
+
         final List<JRColumnParameter> desordreFields = new ArrayList<>();
         desordreFields.add(new JRColumnParameter("observationDate", true));
         desordreFields.add(new JRColumnParameter("observationDesignation", .7f));
@@ -401,7 +416,7 @@ public class PrintManager {
                 desordreFields,
                 Injector.getSession().getPreviews(),
                 new SirsStringConverter(),
-                reseauxFermes, printPhoto, printReseauOuvrage, printLocationInsert);
+                reseauxFermes, printPhoto, printReseauOuvrage, printLocationInsert, printPR, printXY, printBorne);
         SIRS.openFile(fileToPrint);
     }
 
@@ -412,7 +427,14 @@ public class PrintManager {
      * @param printPhoto
      * @param printReseauxFermes
      */
-    public final void printOuvragesAssocies(final List<OuvrageHydrauliqueAssocie> ouvrages, final boolean printPhoto, final boolean printReseauxFermes, final boolean printLocationInsert) throws Exception {
+    public final void printOuvragesAssocies(final List<OuvrageHydrauliqueAssocie> ouvrages,
+                                            final boolean printPhoto,
+                                            final boolean printReseauxFermes,
+                                            final boolean printLocationInsert,
+                                            final boolean printPR,
+                                            final boolean printXY,
+                                            final boolean printBorne)
+           throws Exception {
 
         final List<String> avoidReseauFields = new ArrayList<>();
         avoidReseauFields.add(GEOMETRY_FIELD);
@@ -468,7 +490,7 @@ public class PrintManager {
         reseauFields.add(new JRColumnParameter("date_debut"));
         reseauFields.add(new JRColumnParameter("date_fin"));
         reseauFields.add(new JRColumnParameter("commentaire", 2.6f));
-        
+
         final List<JRColumnParameter> desordreFields = new ArrayList<>();
         desordreFields.add(new JRColumnParameter("observationDate", true));
         desordreFields.add(new JRColumnParameter("observationDesignation", .7f));
@@ -484,7 +506,7 @@ public class PrintManager {
                 desordreFields,
                 Injector.getSession().getPreviews(),
                 new SirsStringConverter(),
-                ouvrages, printPhoto, printReseauxFermes, printLocationInsert);
+                ouvrages, printPhoto, printReseauxFermes, printLocationInsert, printPR, printXY, printBorne);
         SIRS.openFile(fileToPrint);
     }
 }

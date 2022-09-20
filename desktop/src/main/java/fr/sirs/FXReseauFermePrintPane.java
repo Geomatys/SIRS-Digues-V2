@@ -61,6 +61,9 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
     @FXML private CheckBox uiOptionPhoto;
     @FXML private CheckBox uiOptionReseauOuvrage;
     @FXML private CheckBox uiOptionLocationInsert;
+    @FXML private CheckBox uiDisablePR;
+    @FXML private CheckBox uiDisableXY;
+    @FXML private CheckBox uiDisableBorne;
 
     private final TypeChoicePojoTable conduiteTypesTable = new TypeChoicePojoTable(RefConduiteFermee.class, "Types de conduites fermées");
 
@@ -158,7 +161,7 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
                 }
 
                 if (!toPrint.isEmpty() && !Thread.currentThread().isInterrupted()) {
-                    Injector.getSession().getPrintManager().printReseaux(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionLocationInsert.isSelected());
+                    Injector.getSession().getPrintManager().printReseaux(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionLocationInsert.isSelected(), !uiDisablePR.isSelected(), !uiDisableXY.isSelected(), !uiDisableBorne.isSelected());
                 }
                 PrinterUtilities.canPrint.set(true);
                 return !toPrint.isEmpty();

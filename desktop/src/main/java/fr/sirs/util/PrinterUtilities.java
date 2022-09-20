@@ -99,19 +99,29 @@ public final class PrinterUtilities {
         FALSE_GETTERS.add("getDocumentId");
     }
 
+    private static final String PRINT_PR = "PRINT_PR";
+    private static final String PRINT_XY = "PRINT_XY";
+    private static final String PRINT_BORNE = "PRINT_BORNE";
+    private static final String PRINT_LOCATION_INSERT = "PRINT_LOCATION_INSERT";
+
     ////////////////////////////////////////////////////////////////////////////
     // FICHES DÉTAILLÉES D'OUVRAGE HYDRAULIQUE ASSOCIE
     ////////////////////////////////////////////////////////////////////////////
 
     public static File printOuvrageAssocie(final List<String> avoidReseauFields,
-            final List<JRColumnParameter> observationFields,
-            final List<JRColumnParameter> observationSpecFields,
-            final List<JRColumnParameter> reseauFields,
-            final List<JRColumnParameter> desordreFields,
-            final Previews previewLabelRepository,
-            final SirsStringConverter stringConverter,
-            final List<OuvrageHydrauliqueAssocie> ouvrages,
-            final boolean printPhoto, final boolean printReseauFerme, final boolean printLocationInsert
+                                           final List<JRColumnParameter> observationFields,
+                                           final List<JRColumnParameter> observationSpecFields,
+                                           final List<JRColumnParameter> reseauFields,
+                                           final List<JRColumnParameter> desordreFields,
+                                           final Previews previewLabelRepository,
+                                           final SirsStringConverter stringConverter,
+                                           final List<OuvrageHydrauliqueAssocie> ouvrages,
+                                           final boolean printPhoto,
+                                           final boolean printReseauFerme,
+                                           final boolean printLocationInsert,
+                                           final boolean printPR,
+                                           final boolean printXY,
+                                           final boolean printBorne
     ) throws IOException, ParserConfigurationException, SAXException, TransformerException, JRException {
 
         // Creates the Jasper Reports specific template from the generic template.
@@ -134,6 +144,7 @@ public final class PrinterUtilities {
                     parameters.put(PHOTOS_SUBREPORT, net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream));
                 }
             }
+            addDefaultParameters(parameters, printPR, printXY, printBorne, printLocationInsert);
             ouvrages.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
             print = createJasperPrint(jasperReport, ouvrages, previewLabelRepository, stringConverter, printLocationInsert, parameters);
         }
@@ -153,14 +164,19 @@ public final class PrinterUtilities {
     ////////////////////////////////////////////////////////////////////////////
 
     public static File printReseauFerme(final List<String> avoidReseauFields,
-            final List<JRColumnParameter> observationFields,
-            final List<JRColumnParameter> observationSpecFields,
-            final List<JRColumnParameter> reseauFields,
-            final List<JRColumnParameter> desordreFields,
-            final Previews previewLabelRepository,
-            final SirsStringConverter stringConverter,
-            final List<ReseauHydrauliqueFerme> reseaux,
-            final boolean printPhoto, final boolean printReseauOuvrage, final boolean printLocationInsert
+                                        final List<JRColumnParameter> observationFields,
+                                        final List<JRColumnParameter> observationSpecFields,
+                                        final List<JRColumnParameter> reseauFields,
+                                        final List<JRColumnParameter> desordreFields,
+                                        final Previews previewLabelRepository,
+                                        final SirsStringConverter stringConverter,
+                                        final List<ReseauHydrauliqueFerme> reseaux,
+                                        final boolean printPhoto,
+                                        final boolean printReseauOuvrage,
+                                        final boolean printLocationInsert,
+                                        final boolean printPR,
+                                        final boolean printXY,
+                                        final boolean printBorne
     ) throws IOException, ParserConfigurationException, SAXException, TransformerException, JRException {
 
         // Creates the Jasper Reports specific template from the generic template.
@@ -184,6 +200,7 @@ public final class PrinterUtilities {
                     parameters.put(PHOTOS_SUBREPORT, net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream));
                 }
             }
+            addDefaultParameters(parameters, printPR, printXY, printBorne, printLocationInsert);
             reseaux.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
             print = createJasperPrint(jasperReport, reseaux, previewLabelRepository, stringConverter, printLocationInsert, parameters);
         }
@@ -212,7 +229,10 @@ public final class PrinterUtilities {
             final boolean printPhoto,
             final boolean printReseauOuvrage,
             final boolean printVoirie,
-            final boolean printLocationInsert
+            final boolean printLocationInsert,
+            final boolean printPR,
+            final boolean printXY,
+            final boolean printBorne
     )
         throws ParserConfigurationException, SAXException, JRException, TransformerException, IOException {
 
@@ -235,6 +255,7 @@ public final class PrinterUtilities {
                     parameters.put(PHOTOS_SUBREPORT, JasperCompileManager.compileReport(photoTemplateStream));
                 }
             }
+            addDefaultParameters(parameters, printPR, printXY, printBorne, printLocationInsert);
             desordres.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
             print = createJasperPrint(jasperReport, desordres, previewLabelRepository, stringConverter, printLocationInsert, parameters);
         }
@@ -311,6 +332,13 @@ public final class PrinterUtilities {
         backUpStyles = null;
         backupSelectStyle = null;
         backupQueries = null;
+    }
+
+    public static void addDefaultParameters(Map<String, Object> parameters, boolean printPR, boolean printXY, boolean printBorne, boolean printLocationInsert){
+        parameters.put(PRINT_PR, printPR);
+        parameters.put(PRINT_XY, printXY);
+        parameters.put(PRINT_BORNE, printBorne);
+        parameters.put(PRINT_LOCATION_INSERT, printLocationInsert);
     }
 
     ////////////////////////////////////////////////////////////////////////////
