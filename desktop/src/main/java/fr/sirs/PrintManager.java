@@ -344,7 +344,8 @@ public class PrintManager {
                                    final boolean printLocationInsert,
                                    final boolean printPR,
                                    final boolean printXY,
-                                   final boolean printBorne)
+                                   final boolean printBorne,
+                                   boolean printObservationsSpec)
             throws Exception {
 
         final List<String> avoidReseauFields = new ArrayList<>();
@@ -416,7 +417,7 @@ public class PrintManager {
                 desordreFields,
                 Injector.getSession().getPreviews(),
                 new SirsStringConverter(),
-                reseauxFermes, printPhoto, printReseauOuvrage, printLocationInsert, printPR, printXY, printBorne);
+                reseauxFermes, printPhoto, printReseauOuvrage, printLocationInsert, printPR, printXY, printBorne, printObservationsSpec);
         SIRS.openFile(fileToPrint);
     }
 
@@ -433,7 +434,8 @@ public class PrintManager {
                                             final boolean printLocationInsert,
                                             final boolean printPR,
                                             final boolean printXY,
-                                            final boolean printBorne)
+                                            final boolean printBorne,
+                                            boolean printObservationsSpec)
            throws Exception {
 
         final List<String> avoidReseauFields = new ArrayList<>();
@@ -506,7 +508,7 @@ public class PrintManager {
                 desordreFields,
                 Injector.getSession().getPreviews(),
                 new SirsStringConverter(),
-                ouvrages, printPhoto, printReseauxFermes, printLocationInsert, printPR, printXY, printBorne);
+                ouvrages, printPhoto, printReseauxFermes, printLocationInsert, printPR, printXY, printBorne, printObservationsSpec);
         SIRS.openFile(fileToPrint);
     }
 }

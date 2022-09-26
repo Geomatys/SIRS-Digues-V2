@@ -121,7 +121,8 @@ public final class PrinterUtilities {
                                            final boolean printLocationInsert,
                                            final boolean printPR,
                                            final boolean printXY,
-                                           final boolean printBorne
+                                           final boolean printBorne,
+                                           final boolean printObservationsSpec
     ) throws IOException, ParserConfigurationException, SAXException, TransformerException, JRException {
 
         // Creates the Jasper Reports specific template from the generic template.
@@ -132,7 +133,7 @@ public final class PrinterUtilities {
         try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateOuvrageAssocie.jrxml")) {
 
             final JRDomWriterOuvrageAssocieSheet templateWriter = new JRDomWriterOuvrageAssocieSheet(metaTemplateStream,
-                    avoidReseauFields, observationFields, observationSpecFields, reseauFields, desordreFields, printPhoto, printReseauFerme);
+                    avoidReseauFields, observationFields, observationSpecFields, reseauFields, desordreFields, printPhoto, printReseauFerme, printObservationsSpec);
             templateWriter.setOutput(templateFile);
             templateWriter.write();
 
@@ -176,7 +177,8 @@ public final class PrinterUtilities {
                                         final boolean printLocationInsert,
                                         final boolean printPR,
                                         final boolean printXY,
-                                        final boolean printBorne
+                                        final boolean printBorne,
+                                        final boolean printObservationsSpec
     ) throws IOException, ParserConfigurationException, SAXException, TransformerException, JRException {
 
         // Creates the Jasper Reports specific template from the generic template.
@@ -187,7 +189,7 @@ public final class PrinterUtilities {
         try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateReseauFerme.jrxml")){
 
             final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(metaTemplateStream,
-                    avoidReseauFields, observationFields, observationSpecFields, reseauFields, desordreFields, printPhoto, printReseauOuvrage);
+                    avoidReseauFields, observationFields, observationSpecFields, reseauFields, desordreFields, printPhoto, printReseauOuvrage, printObservationsSpec);
 
             templateWriter.setOutput(templateFile);
             templateWriter.write();

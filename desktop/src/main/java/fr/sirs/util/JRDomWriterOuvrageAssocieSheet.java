@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -37,19 +37,19 @@ import org.xml.sax.SAXException;
  * @author Samuel Andrés (Geomatys)
  */
 public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpecificSheetWithPhotoReport<OuvrageHydrauliqueAssocie> {
-    
+
     public static final String OBSERVATION_DATASET = "Observation Dataset";
     public static final String OBSERVATION_TABLE_DATA_SOURCE = "OBSERVATION_TABLE_DATA_SOURCE";
 
     public static final String OBSERVATION_SPEC_DATASET = "Observation Specification Dataset";
     public static final String OBSERVATION_SPEC_TABLE_DATA_SOURCE = "OBSERVATION_SPEC_TABLE_DATA_SOURCE";
-    
+
     public static final String RESEAU_FERME_DATASET = "ReseauFerme Dataset";
     public static final String RESEAU_FERME_TABLE_DATA_SOURCE = "RESEAU_FERME_TABLE_DATA_SOURCE";
-    
+
     public static final String DESORDRE_DATASET = "Desordre Dataset";
     public static final String DESORDRE_TABLE_DATA_SOURCE = "DESORDRE_TABLE_DATA_SOURCE";
-    
+
     public static final String PHOTO_DATA_SOURCE = "PHOTO_DATA_SOURCE";
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
 
@@ -68,36 +68,39 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
 
     private final boolean printPhoto;
     private final boolean printReseauFerme;
-    
+    private final boolean printObservationsSpec;
+
     private JRDomWriterOuvrageAssocieSheet(final Class<OuvrageHydrauliqueAssocie> classToMap){
         super(classToMap);
-        
+
         observationFields = null;
         observationSpecFields = null;
         reseauFermeFields = null;
         desordreFields = null;
-        printPhoto = printReseauFerme = true;
+        printPhoto = printReseauFerme = printObservationsSpec =true;
     }
-    
+
     public JRDomWriterOuvrageAssocieSheet(final InputStream stream,
-            final List<String> avoidFields,
-            final List<JRColumnParameter> observationFields,
-            final List<JRColumnParameter> observationSpecFields,
-            final List<JRColumnParameter> reseauFermeFields,
-            final List<JRColumnParameter> desordreFields,
-            final boolean printPhoto, 
-            final boolean printReseauFerme) throws ParserConfigurationException, SAXException, IOException {
+                                          final List<String> avoidFields,
+                                          final List<JRColumnParameter> observationFields,
+                                          final List<JRColumnParameter> observationSpecFields,
+                                          final List<JRColumnParameter> reseauFermeFields,
+                                          final List<JRColumnParameter> desordreFields,
+                                          final boolean printPhoto,
+                                          final boolean printReseauFerme,
+                                          boolean printObservationsSpec)
+            throws ParserConfigurationException, SAXException, IOException {
         super(OuvrageHydrauliqueAssocie.class, stream, avoidFields, "#76923c");
-        
+
         this.observationFields = observationFields;
         this.observationSpecFields = observationSpecFields;
         this.reseauFermeFields = reseauFermeFields;
         this.printPhoto = printPhoto;
         this.printReseauFerme = printReseauFerme;
         this.desordreFields = desordreFields;
+        this.printObservationsSpec = printObservationsSpec;
     }
-        
-        
+
     /**
      * <p>This method modifies the body of the DOM.</p>
      */
@@ -122,28 +125,28 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
         writeField(ObjectDataSource.class, DESORDRE_TABLE_DATA_SOURCE, "Source de données des désordres");
         writeField(Image.class, IMAGE_DATA_SOURCE, "Image de l'élément");
         writeField(String.class, SECURITE_ID_FIELD, "Champ calculé pour le niveau de sécurité de l'ouvrage associé.");
-        
+
         // Modifies the title block.--------------------------------------------
         writeTitle();
-        
+
         // Writes the headers.--------------------------------------------------
         writePageHeader();
         writeColumnHeader();
-        
+
         // Builds the body of the Jasper Reports template.----------------------
-        writeDetail();
+        writeDetail(printObservationsSpec);
 
         // Writes the footers
         writeColumnFooter();
         writePageFooter();
     }
-    
+
     /**
      * <p>This method writes the content of the detail element.</p>
-     * @param classToMap
-     * @throws Exception 
+     * @param printObservationsSpec
+     * @throws Exception
      */
-    private void writeDetail() {
+    private void writeDetail(boolean printObservationsSpec) {
 
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         currentY = Integer.valueOf(band.getAttribute(ATT_HEIGHT));
@@ -160,12 +163,13 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
         /*----------------------------------------------------------------------
         TABLEAU DES SPECIFICATIONS D'OBSERVATIONS
         ----------------------------------------------------------------------*/
-        currentY+=24;
-        writeSectionTitle("Observations (spécification ouvrage/réseau)", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
-        currentY+=2;
-        writeTable(ObservationOuvrageHydrauliqueAssocie.class, observationSpecFields, true, OBSERVATION_SPEC_TABLE_DATA_SOURCE, OBSERVATION_SPEC_DATASET,
-                TABLE_HEIGHT, TABLE_FONT_SIZE, 36, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
-
+        if (printObservationsSpec) {
+            currentY += 24;
+            writeSectionTitle("Observations (spécification ouvrage/réseau)", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
+            currentY += 2;
+            writeTable(ObservationOuvrageHydrauliqueAssocie.class, observationSpecFields, true, OBSERVATION_SPEC_TABLE_DATA_SOURCE, OBSERVATION_SPEC_DATASET,
+                    TABLE_HEIGHT, TABLE_FONT_SIZE, 36, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
+        }
         /*----------------------------------------------------------------------
         SOUS-RAPPORTS DES PHOTOS
         ----------------------------------------------------------------------*/
@@ -173,16 +177,16 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
             currentY+=24;
             includePhotoSubreport(0);
         }
-        
+
         /*----------------------------------------------------------------------
         TABLEAU DES DESORDRES
         ----------------------------------------------------------------------*/
         currentY+=24;
         writeSectionTitle("Desordres", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
         currentY+=2;
-        writeTable(JRDesordreTableRow.class, desordreFields, true, DESORDRE_TABLE_DATA_SOURCE, DESORDRE_DATASET, 
+        writeTable(JRDesordreTableRow.class, desordreFields, true, DESORDRE_TABLE_DATA_SOURCE, DESORDRE_DATASET,
                 TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
-        
+
         /*----------------------------------------------------------------------
         TABLEAU DES OUVRAGES ET RÉSEAUX
         ----------------------------------------------------------------------*/
@@ -193,12 +197,12 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
             writeTable(ReseauHydrauliqueFerme.class, reseauFermeFields, true, RESEAU_FERME_TABLE_DATA_SOURCE, RESEAU_FERME_DATASET,
                     TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
         }
-        
+
 //        writeDetailPageBreak();
-        
+
         // Sizes the detail element given to the field number.------------------
         band.setAttribute(ATT_HEIGHT, String.valueOf(DETAIL_HEIGHT));
-        
+
         // Builds the DOM tree.-------------------------------------------------
         root.appendChild(detail);
     }
