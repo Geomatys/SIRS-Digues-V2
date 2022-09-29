@@ -21,14 +21,16 @@ package fr.sirs.core.component;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.model.DesordreDependance;
+import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
+import org.ektorp.support.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import static fr.sirs.core.component.DesordreDependanceRepository.BY_AMENAGEMENT_HYDRAULIQUE_ID;
-import static fr.sirs.core.component.DesordreDependanceRepository.BY_DEPENDANCE_ID;
+
 import java.util.List;
-import org.ektorp.support.Views;
+
+import static fr.sirs.core.component.DesordreDependanceRepository.*;
 
 /**
  *
@@ -36,12 +38,14 @@ import org.ektorp.support.Views;
  */
 @Views({
     @View(name=BY_AMENAGEMENT_HYDRAULIQUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.DesordreDependance') {emit(doc.amenagementHydrauliqueId, doc._id)}}"),
-    @View(name=BY_DEPENDANCE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.DesordreDependance') {emit(doc.dependanceId, doc._id)}}")
+    @View(name=BY_DEPENDANCE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.DesordreDependance') {emit(doc.dependanceId, doc._id)}}"),
+        @View(name = ALL_OPEN_BY_AH_ID, map = "classpath:DesordreDependance-by-ah-id.js")
 })
 @Component("fr.sirs.core.component.DesordreDependanceRepository")
 public class DesordreDependanceRepository extends AbstractAmenagementHydrauliqueRepository<DesordreDependance> {
 
     public static final String BY_DEPENDANCE_ID = "byDependanceId";
+    public static final String ALL_OPEN_BY_AH_ID = "allOpenByAHId";
 
     @Autowired
     private DesordreDependanceRepository ( CouchDbConnector db) {
@@ -78,5 +82,10 @@ public class DesordreDependanceRepository extends AbstractAmenagementHydraulique
         if (byDependanceId.isEmpty()) return byAmenagementHydrauliqueId;
         byAmenagementHydrauliqueId.addAll(byDependanceId);
         return byAmenagementHydrauliqueId;
+    }
+
+    public List<DesordreDependance> getDesordreOpenByLinearId(final String ahId) {
+        ArgumentChecks.ensureNonNull("DesordreDependance AH", ahId);
+        return this.queryView(ALL_OPEN_BY_AH_ID, ahId);
     }
 }
