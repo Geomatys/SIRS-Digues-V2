@@ -548,7 +548,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
             refFin = refDebut;
         }
 
-        return cut(referenceLinear, refDebut.distanceAlongLinear, refFin.distanceAlongLinear);
+        return cut(referenceLinear, StrictMath.min(refDebut.distanceAlongLinear, refFin.distanceAlongLinear), StrictMath.max(refDebut.distanceAlongLinear, refFin.distanceAlongLinear));
     }
 
     /**

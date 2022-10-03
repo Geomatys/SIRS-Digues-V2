@@ -66,6 +66,18 @@ public class ConvertPositionableCoordinates {
                 return false;
             }
 
+            if (!positionable.getValid()) {
+                // if the positionable has already been through the process, we compare it to what it was before the last process
+                // if the previous process has not changed it, then we stop and return false
+                if (positionable.equals(cache.get(positionable.getId()))) {
+                    return false;
+                }
+                cache.clear();
+                cache.put(positionable.getId(), positionable);
+
+                positionable.setGeometry(null);
+            }
+
             // Si les coordonnées sont déjà présentes, aucune modification n'est apportée.
             if ((withLinearCoord) && (withGeoCoord)) {
 
