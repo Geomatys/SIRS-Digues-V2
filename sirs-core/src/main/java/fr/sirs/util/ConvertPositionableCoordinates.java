@@ -20,11 +20,7 @@ package fr.sirs.util;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.core.InjectorCore;
-import fr.sirs.core.LinearReferencingUtilities;
-import fr.sirs.core.SessionCore;
-import fr.sirs.core.SirsCore;
-import fr.sirs.core.TronconUtils;
+import fr.sirs.core.*;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.BorneDigue;
@@ -36,6 +32,7 @@ import fr.sirs.core.model.TronconDigue;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
+import org.apache.sis.util.collection.Cache;
 import org.geotoolkit.referencing.LinearReferencing;
 
 /**
@@ -50,6 +47,8 @@ public class ConvertPositionableCoordinates {
      * Renvoie un boolean indiquant si des coordonnées ont été mises à jours.
      */
     final public static Predicate<Positionable> COMPUTE_MISSING_COORD = positionable -> ensureCoordinates(positionable);
+
+    protected static final Cache<String, Positionable> cache = new Cache(10, 0, CacheRules.cacheElementsOfType(Positionable.class));
 
     private static boolean ensureCoordinates(final Positionable positionable) {
         try {
@@ -69,13 +68,14 @@ public class ConvertPositionableCoordinates {
             if (!positionable.getValid()) {
                 // if the positionable has already been through the process, we compare it to what it was before the last process
                 // if the previous process has not changed it, then we stop and return false
-                if (positionable.equals(cache.get(positionable.getId()))) {
+                if (positionable.contentBasedEquals(cache.get(positionable.getId()))) {
+                    cache.clear();
                     return false;
                 }
-                cache.clear();
                 cache.put(positionable.getId(), positionable);
-
+                // force the update of the geometry to correct the bug when start point is in aval of end point for data coming from mobile app
                 positionable.setGeometry(null);
+                return true;
             }
 
             // Si les coordonnées sont déjà présentes, aucune modification n'est apportée.

@@ -329,7 +329,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
         final Point positionFin = structure.getPositionFin();
 
         if (positionDebut != null || positionFin != null) {
-            return buildGeometryFromGeo(refLinear, segments, positionDebut, positionFin);
+            return buildGeometryFromGeo(refLinear, segments, positionDebut, positionFin, structure);
         } else {
             return buildGeometryFromBorne(refLinear, segments, structure, repo);
         }
@@ -403,7 +403,35 @@ public final class LinearReferencingUtilities extends LinearReferencing {
             distanceFin = distanceDebut;
         }
 
+        // HACK-REDMINE-4559 : sorts bornes from amont to aval when data are collected from aval to amont on the mobile app
+        if (!structure.getValid() && distanceDebut > distanceFin) {
+            // update the positionable attributes
+            sortBornesAndCoordFromAvalToAmont(structure);
+        }
+
         return cut(refLinear, StrictMath.min(distanceDebut, distanceFin), StrictMath.max(distanceDebut, distanceFin));
+    }
+
+    /**
+     * Method used to sort the bornes and coordinates from Amont to Aval when they were recorded on the field from Aval to Amont
+     * @param structure Positionable we want to sort the bornes
+     */
+    public static void sortBornesAndCoordFromAvalToAmont(Positionable structure) {
+        // store start point info
+        final String tmpOldBorneDebutId = structure.getBorneDebutId();
+        final boolean tmpOldBorneDebutAval = structure.getBorne_debut_aval();
+        final double tmpOldBorneDebutDistance = structure.getBorne_debut_distance();
+        final Point tmpPositionDebut = structure.getPositionDebut();
+        // update start point info with end point info
+        structure.setBorneDebutId(structure.getBorneFinId());
+        structure.setBorne_debut_aval(structure.getBorne_fin_aval());
+        structure.setBorne_debut_distance(structure.getBorne_fin_distance());
+        structure.setPositionDebut(structure.getPositionFin());
+        // update end point from stored point info
+        structure.setBorneFinId(tmpOldBorneDebutId);
+        structure.setBorne_fin_aval(tmpOldBorneDebutAval);
+        structure.setBorne_fin_distance(tmpOldBorneDebutDistance);
+        structure.setPositionFin(tmpPositionDebut);
     }
 
     /**
@@ -522,7 +550,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      */
     public static LineString buildGeometryFromGeo(Geometry tronconGeom, Point positionDebut, Point positionFin) {
         final LineString linear = asLineString(tronconGeom);
-        return buildGeometryFromGeo(linear, buildSegments(linear), positionDebut, positionFin);
+        return buildGeometryFromGeo(linear, buildSegments(linear), positionDebut, positionFin, null);
     }
 
     /**
@@ -535,6 +563,20 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      * @return A line along given linear structure, between start and end point.
      */
     public static LineString buildGeometryFromGeo(final LineString referenceLinear, final SegmentInfo[] segments, Point positionDebut, Point positionFin) {
+        return buildGeometryFromGeo(referenceLinear, segments, positionDebut, positionFin, null);
+    }
+
+    /**
+     *
+     * @param referenceLinear The source geometry to follow when creating the new
+     * one.
+     * @param segments Input reference linear represented as a succession of segments.
+     * @param positionDebut Start point of the geometry to compute.
+     * @param positionFin End point of the geometry to compute.
+     * @param structure the positionable to compute the geometry for
+     * @return A line along given linear structure, between start and end point.
+     */
+    public static LineString buildGeometryFromGeo(final LineString referenceLinear, final SegmentInfo[] segments, Point positionDebut, Point positionFin, Positionable structure) {
         ProjectedPoint refDebut = null, refFin = null;
         if (positionDebut != null) {
             refDebut = projectReference(segments, positionDebut);
@@ -546,6 +588,11 @@ public final class LinearReferencingUtilities extends LinearReferencing {
             refDebut = refFin;
         } else if (refFin == null) {
             refFin = refDebut;
+        }
+
+        // HACK-REDMINE-4559 : sorts bornes from amont to aval when data are collected from aval to amont on the mobile app
+        if (structure != null && !structure.getValid() && refDebut.distanceAlongLinear > refFin.distanceAlongLinear) {
+            sortBornesAndCoordFromAvalToAmont(structure);
         }
 
         return cut(referenceLinear, StrictMath.min(refDebut.distanceAlongLinear, refFin.distanceAlongLinear), StrictMath.max(refDebut.distanceAlongLinear, refFin.distanceAlongLinear));
@@ -566,6 +613,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
     public static LineString cut(final LineString linear, double distanceDebut, double distanceFin) {
         //on s"assure de ne pas sortir du troncon
         final double tronconLength = linear.getLength();
+
         distanceDebut = XMath.clamp(Math.min(distanceDebut, distanceFin), 0, tronconLength);
         distanceFin = XMath.clamp(Math.max(distanceDebut, distanceFin), 0, tronconLength);
 
