@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -24,30 +24,16 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.LinearReferencingUtilities;
-import static fr.sirs.core.LinearReferencingUtilities.asLineString;
 import fr.sirs.core.SirsCore;
-import static fr.sirs.core.SirsCore.SR_ELEMENTAIRE;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
-import static fr.sirs.map.EditModeObjet.CREATE_OBJET;
-import static fr.sirs.map.EditModeObjet.EDIT_OBJET;
-import static fr.sirs.map.EditModeObjet.PICK_TRONCON;
-import fr.sirs.util.LabelComparator;
-import fr.sirs.util.SimpleButtonColumn;
-import fr.sirs.util.SirsStringConverter;
-import fr.sirs.util.ReferenceTableCell;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
+import fr.sirs.util.*;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -66,21 +52,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -96,28 +68,40 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.LinearReferencing;
 import org.geotoolkit.referencing.LinearReferencing.ProjectedPoint;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static fr.sirs.core.LinearReferencingUtilities.asLineString;
+import static fr.sirs.core.SirsCore.SR_ELEMENTAIRE;
 import static org.geotoolkit.referencing.LinearReferencing.buildSegments;
 import static org.geotoolkit.referencing.LinearReferencing.projectReference;
+
 /**
- *
  * @author Johann Sorel (Geomatys)
  * @author Matthieu Bastianelli (Geomatys)
  */
 public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
 
-
-
-    @FXML Button uiAddObjet;
-    @FXML private ChoiceBox<SystemeReperage> uiSrComboBox;
-    @FXML private CheckBox uiDefaultSRCheckBox;
-    @FXML private Button uiAddSr;
-    @FXML private Button uiDeleteSR;
-    @FXML Button uiProject;
-
+    @FXML
+    Button uiAddObjet;
+    @FXML
+    private ChoiceBox<SystemeReperage> uiSrComboBox;
+    @FXML
+    private CheckBox uiDefaultSRCheckBox;
+    @FXML
+    private Button uiAddSr;
+    @FXML
+    private Button uiDeleteSR;
+    @FXML
+    Button uiProject;
 
 //    private final ObjectProperty<ObjetEditMode> mode = new SimpleObjectProperty<>(EditModeObjet.NONE);
 
-    /** A flag to indicate that selected {@link SystemeReperage} must be saved. */
+    /**
+     * A flag to indicate that selected {@link SystemeReperage} must be saved.
+     */
     private final SimpleBooleanProperty saveSR = new SimpleBooleanProperty(false);
 
     /**
@@ -153,7 +137,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
             @Override
             public void onChanged(ListChangeListener.Change<? extends SystemeReperageBorne> c) {
                 final int size = uiObjetTable.getSelectionModel().getSelectedItems().size();
-                uiProject.setDisable(size<1);
+                uiProject.setDisable(size < 1);
             }
         });
 
@@ -201,22 +185,22 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
     }
 
     @Override
-    public void reset(){
-	super.reset();
+    public void reset() {
+        super.reset();
         systemeReperageProperty().set(null);
     }
 
-    public void selectSRB(SystemeReperageBorne srb){
+    public void selectSRB(SystemeReperageBorne srb) {
         final int index = uiObjetTable.getItems().indexOf(srb);
-        if(index>=0){
+        if (index >= 0) {
             uiObjetTable.getSelectionModel().clearAndSelect(index);
-        }else{
+        } else {
             uiObjetTable.getSelectionModel().clearSelection();
         }
     }
 
 
-    public ObjectProperty<SystemeReperage> systemeReperageProperty(){
+    public ObjectProperty<SystemeReperage> systemeReperageProperty() {
         return uiSrComboBox.valueProperty();
     }
 
@@ -303,7 +287,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
     void startAddObjet(ActionEvent evt) {
         final TronconDigue troncon = getTronconFromProperty();
         final SystemeReperage csr = systemeReperageProperty().get();
-        if(csr==null || troncon==null) return;
+        if (csr == null || troncon == null) return;
 
         // Do not show bornes already present in selected SR.
         final Set<String> borneIdsAlreadyInSR = new HashSet<>();
@@ -321,12 +305,53 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
 
         // Récupération des bornes sélectionnées et ajout dans le SR.
         final Object res = dialog.showAndWait().get();
-        if(ButtonType.OK.equals(res)){
+        if (ButtonType.OK.equals(res)) {
             final ObservableList<BorneDigue> selectedItems = bornesView.getSelectionModel().getSelectedItems();
-            for(BorneDigue bd : selectedItems){
+            for (BorneDigue bd : selectedItems) {
                 addBorneToSR(bd);
             }
         }
+    }
+
+    /**
+     * Constuit un composant graphique listant les bornes renommables du SR sélectionné
+     * Début du tronçon and Fin du tronçon cannot be renamed
+     */
+    ListView buildListOfSRRenameableBornes() {
+        final TronconDigue troncon = getTronconFromProperty();
+        if (troncon == null) return null;
+
+        // Collect SR bornesIds.
+        final ObservableList<SystemeReperageBorne> srb = systemeReperageProperty().get().getSystemeReperageBornes();
+        if (srb == null || srb.isEmpty()) return null;
+
+        final List<String> srbIds = srb.stream().map(b -> b.getBorneId()).collect(Collectors.toList());
+
+        // Filter troncon's bornes to get only the ones present in the SR.
+        // Get ids of the start and end bornes.
+        final ObservableList<String> borneIds;
+        borneIds = FXCollections.observableArrayList(troncon.getBorneIds());
+        borneIds.removeIf((borneId) -> !srbIds.contains(borneId));
+
+        // Collect and sort of the bornes.
+        final List<BorneDigue> bornes = session.getRepositoryForClass(BorneDigue.class).get(borneIds);
+        bornes.sort((BorneDigue b1, BorneDigue b2) -> {
+            if (b1.getLibelle() == null) {
+                return 1;
+            }
+            return b1.getLibelle().compareToIgnoreCase(b2.getLibelle());
+        });
+
+        // Remove start and end borne of the troncon.
+        bornes.removeIf(b -> SirsCore.SR_ELEMENTAIRE_START_BORNE.equals(b.getLibelle()) || SirsCore.SR_ELEMENTAIRE_END_BORNE.equals(b.getLibelle()));
+
+        // Construction of the graphic component.
+        final ListView<BorneDigue> bornesView = new ListView<>();
+        bornesView.setItems(FXCollections.observableArrayList(bornes));
+        bornesView.setCellFactory(TextFieldListCell.forListView(new SirsStringConverter()));
+        bornesView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+        return bornesView;
     }
 
     /**
@@ -334,12 +359,12 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
      *
      * @param evt
      */
-    private void reprojectBorneToSection(ActionEvent evt){
+    private void reprojectBorneToSection(ActionEvent evt) {
 
         // Récupération du tronçon et du SR.
         final TronconDigue troncon = getTronconFromProperty();
         final SystemeReperage sr = systemeReperageProperty().get();
-        if(troncon==null || sr==null) return;
+        if (troncon == null || sr == null) return;
 
         final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());
         final LinearReferencingUtilities.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(linear);
@@ -348,7 +373,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
 
         // Parcours des bornes sélectionnées, projection de la géométrie sur la géométrie du tronçon et mise à jour de la borne en base.
         final ObservableList<SystemeReperageBorne> lst = uiObjetTable.getSelectionModel().getSelectedItems();
-        for(final SystemeReperageBorne srb : lst){
+        for (final SystemeReperageBorne srb : lst) {
 
             final BorneDigue borne = repo.get(srb.getBorneId());
             final Point point = borne.getGeometry();
@@ -363,9 +388,9 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
         map.getCanvas().repaint();
     }
 
-    private void createSystemeReperage(ActionEvent evt){
+    private void createSystemeReperage(ActionEvent evt) {
         final TronconDigue troncon = getTronconFromProperty();
-        if(troncon==null) return;
+        if (troncon == null) return;
 
         final TextInputDialog dialog = new TextInputDialog("Nom du SR");
         dialog.getEditor().setPromptText("nom du système de repèrage");
@@ -373,7 +398,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
         dialog.setHeaderText("Nom du nouveau système de repèrage");
 
         final Optional<String> opt = dialog.showAndWait();
-        if(!opt.isPresent() || opt.get().isEmpty()) return;
+        if (!opt.isPresent() || opt.get().isEmpty()) return;
 
 
         final String srName = opt.get();
@@ -395,7 +420,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
      * @param geom
      */
 //    @Override
-    public final void createObjet(final Point geom){
+    public final void createObjet(final Point geom) {
 
         // Formulaire de renseignement du libellé de la borne.
         final TextInputDialog dialog = new TextInputDialog("");
@@ -405,14 +430,14 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
         dialog.setHeaderText("Libellé de la nouvelle borne");
 
         final Optional<String> opt = dialog.showAndWait();
-        if(!opt.isPresent() || opt.get().isEmpty()) return;
+        if (!opt.isPresent() || opt.get().isEmpty()) return;
 
         //creation de la borne
         final String borneLbl = opt.get();
 
         // On vérifie que le libellé renseigné pour la borne ne fait pas partie des libellés utilisés par le SR élémentaire.
-        if(SirsCore.SR_ELEMENTAIRE_START_BORNE.equals(borneLbl) || SirsCore.SR_ELEMENTAIRE_END_BORNE.equals(borneLbl)){
-            final Alert alert = new Alert(Alert.AlertType.ERROR, "Le libellé de borne \""+borneLbl+"\" est réservé au SR élémentaire.", ButtonType.CLOSE);
+        if (SirsCore.SR_ELEMENTAIRE_START_BORNE.equals(borneLbl) || SirsCore.SR_ELEMENTAIRE_END_BORNE.equals(borneLbl)) {
+            final Alert alert = new Alert(Alert.AlertType.ERROR, "Le libellé de borne \"" + borneLbl + "\" est réservé au SR élémentaire.", ButtonType.CLOSE);
             alert.setResizable(true);
             alert.showAndWait();
             return;
@@ -440,8 +465,8 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
         final SystemeReperage sr = systemeReperageProperty().get();
 
         //on vérifie que la borne n'est pas deja dans la liste
-        for(final SystemeReperageBorne srb : sr.getSystemeReperageBornes()){
-            if(borne.getDocumentId().equals(srb.borneIdProperty().get())){
+        for (final SystemeReperageBorne srb : sr.getSystemeReperageBornes()) {
+            if (borne.getDocumentId().equals(srb.borneIdProperty().get())) {
                 //la borne fait deja partie de ce SR
                 return;
             }
@@ -452,13 +477,12 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
         srb.borneIdProperty().set(borne.getDocumentId());
 
         // Si on est dans le SR élémentaire, il faut calculer le PR de la borne de manière automatique (SYM-1429).
-        if(getTronconFromProperty()!=null && SR_ELEMENTAIRE.equals(sr.getLibelle())){
+        if (getTronconFromProperty() != null && SR_ELEMENTAIRE.equals(sr.getLibelle())) {
             final ProjectedPoint proj = projectReference(buildSegments(asLineString(getTronconFromProperty().getGeometry())), borne.getGeometry());
 
             // Pour obtenir le PR calculé dans le SR élémentaire, il faut ajouter le PR de la borne de départ à la distance du point projeté sur le linéaire.
             srb.setValeurPR((float) proj.distanceAlongLinear + TronconUtils.getPRStart(getTronconFromProperty(), sr, session));
-        }
-        else {
+        } else {
             srb.setValeurPR(0.f);
         }
 
@@ -469,7 +493,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
     /**
      * Open a {@link ListView} to allow user to select one or more {@link BorneDigue}
      * to delete.
-     *
+     * <p>
      * Note : Once suppression is confirmed, we're forced to check all {@link SystemeReperage}
      * defined on the currently edited {@link TronconDigue}, and update them if
      * they use chosen bornes.
@@ -530,6 +554,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
      * Detect if any available SR would be emptied if input {@link BorneDigue}s
      * were deleted from database. If it's the case, we ask user to confirm his
      * will to remove them.
+     *
      * @param bornes Bornes to delete.
      * @return True if we can proceed to borne deletion, false if not.
      */
@@ -549,11 +574,11 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
             return true;
         }
 
-        final StringBuilder msg = new StringBuilder("La suppression des bornes séléctionnées va entièrement vider les systèmes de repérage suivants :");
+        final StringBuilder msg = new StringBuilder("La suppression des bornes sélectionnées va entièrement vider les systèmes de repérage suivants :");
         for (final SystemeReperage sr : emptiedSrs) {
             msg.append(System.lineSeparator()).append(uiSrComboBox.getConverter().toString(sr));
         }
-        msg.append(System.lineSeparator()).append("Voulez-vous tout-de-même supprimer ces bornes ?");
+        msg.append(System.lineSeparator()).append("Voulez-vous tout de même supprimer ces bornes ?");
 
         final Alert alert = new Alert(Alert.AlertType.WARNING, msg.toString(), ButtonType.NO, ButtonType.YES);
         alert.setResizable(true);
@@ -566,11 +591,12 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
 
     /**
      * Delete the {@link SystemeReperage} selected in {@link #ui
+     *
      * @param evt
      */
     private void deleteSystemeReperage(ActionEvent evt) {
         final TronconDigue troncon = getTronconFromProperty();
-        if(troncon==null) return;
+        if (troncon == null) return;
 
         SystemeReperage toDelete = uiSrComboBox.getValue();
         if (toDelete == null || toDelete.getId() == null) {
@@ -642,13 +668,63 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
         }
     }
 
+    /**
+     * Method to rename a borne from the @{@link SystemeReperageBorne} creation/edition
+     * @return
+     */
+    @FXML
+    void renameObjets(ActionEvent e) {
+        final ListView<BorneDigue> borneList = buildListOfSRRenameableBornes();
+        if (borneList == null) return;
+
+        final Stage stage = new Stage();
+        stage.setTitle("Sélectionnez la borne à renommer");
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initOwner(this.getScene().getWindow());
+
+        final Separator blankSpace = new Separator();
+        blankSpace.setVisible(false);
+
+        final Button cancelButton = new Button("Annuler");
+        cancelButton.setCancelButton(true);
+        cancelButton.setOnAction(event -> stage.hide());
+        final Button renameButton = new Button("Renommer");
+        renameButton.disableProperty().bind(borneList.getSelectionModel().selectedItemProperty().isNull());
+
+        final HBox buttonBar = new HBox(10, blankSpace, cancelButton, renameButton);
+        buttonBar.setPadding(new Insets(5));
+        buttonBar.setAlignment(Pos.CENTER_RIGHT);
+        final VBox content = new VBox(borneList, buttonBar);
+
+        stage.setScene(new Scene(content));
+
+        renameButton.setOnAction(event -> {
+            final BorneDigue selectedItem = borneList.getSelectionModel().getSelectedItem();
+
+            int index = borneList.getItems().indexOf(selectedItem);
+
+            if (!BorneUtils.openBorneRenamingWindow(selectedItem)) return;
+            // Force to update the new libelle in the list.
+            borneList.getItems().remove(selectedItem);
+            selectedItem.setLibelle(selectedItem.getLibelle());
+            borneList.getItems().add(index, selectedItem);
+
+            // Force to update the Borne libelle in the uiObjetTable.
+            uiSrComboBox.getValue().getSystemeReperageBornes().removeIf(b -> b.getBorneId().equals(selectedItem.getId()));
+            // Ajout de la borne au SR.
+            addBorneToSR(selectedItem);
+        });
+
+        stage.show();
+    }
+
     @Override
     void tronconChanged(ObservableValue observable, TronconDigue oldValue, TronconDigue newValue) {
         if (oldValue != null) {
             save(uiSrComboBox.getValue(), oldValue);
         }
 
-        if(newValue==null) {
+        if (newValue == null) {
             uiSrComboBox.setItems(FXCollections.emptyObservableList());
         } else {
             mode.set(EditModeObjet.NONE);
@@ -667,7 +743,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
 
             // In case default SR change from another panel
             newValue.systemeRepDefautIdProperty().addListener((ObservableValue<? extends String> srObservable, String oldSR, String newSR) -> {
-                uiDefaultSRCheckBox.setSelected(newSR == null? false : newSR.equals(uiSrComboBox.getValue() == null? null : uiSrComboBox.getValue().getId()));
+                uiDefaultSRCheckBox.setSelected(newSR == null ? false : newSR.equals(uiSrComboBox.getValue() == null ? null : uiSrComboBox.getValue().getId()));
             });
 
             // On met à jour le SR élémentaire s'il esxiste.
@@ -687,7 +763,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
     private void updateTonconDefaultSR(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
         TronconDigue td = getTronconFromProperty();
         final SystemeReperage selectedSR = uiSrComboBox.getSelectionModel().getSelectedItem();
-        final String srid = selectedSR == null? null : selectedSR.getId();
+        final String srid = selectedSR == null ? null : selectedSR.getId();
         if (td != null && srid != null) {
             if (Boolean.TRUE.equals(newValue) && !srid.equals(td.getSystemeRepDefautId())) {
                 td.setSystemeRepDefautId(srid);
@@ -764,7 +840,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
     /**
      * Colonne d'affichage et de mise à jour du nom d'une borne.
      */
-    private static class SRBNameColumn extends TableColumn<SystemeReperageBorne,SystemeReperageBorne>{
+    private static class SRBNameColumn extends TableColumn<SystemeReperageBorne, SystemeReperageBorne> {
 
         public SRBNameColumn() {
             super("Nom");
@@ -806,7 +882,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
     /**
      * Colonne d'affichage et de mise à jour du PR d'une borne dans un SR.
      */
-    private class PRColumn extends TableColumn<SystemeReperageBorne, Number>{
+    private class PRColumn extends TableColumn<SystemeReperageBorne, Number> {
 
         public PRColumn() {
             super("PR");
@@ -816,7 +892,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
             setCellValueFactory(new Callback<CellDataFeatures<SystemeReperageBorne, Number>, ObservableValue<Number>>() {
                 @Override
                 public ObservableValue<Number> call(CellDataFeatures<SystemeReperageBorne, Number> param) {
-                    return (ObservableValue)param.getValue().valeurPRProperty();
+                    return (ObservableValue) param.getValue().valeurPRProperty();
                 }
             });
 
@@ -840,13 +916,13 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
 
                     // CAS PARTICULIER :
                     // Dans le SR élémentaire, la valeur du PR équivaut à la distance depuis la borne de début et le calcul est automatique.
-                    if(SR_ELEMENTAIRE.equals(systemeReperageProperty().get().getLibelle())){
+                    if (SR_ELEMENTAIRE.equals(systemeReperageProperty().get().getLibelle())) {
 
                         // Récupération des informations de la borne.
                         final BorneDigue bd = Injector.getSession().getRepositoryForClass(BorneDigue.class).get(srb.getBorneId());
-                        if(bd!=null){
+                        if (bd != null) {
                             // Les bornes de début et de fin sont spécifiques
-                            if(SirsCore.SR_ELEMENTAIRE_START_BORNE.equals(bd.getLibelle())){
+                            if (SirsCore.SR_ELEMENTAIRE_START_BORNE.equals(bd.getLibelle())) {
                                 /*
                                 On autorise la modification du PR de la borne de début car ce dernier sert d'offset pour
                                 les PRs des autres bornes dans le SR élémentaire. Mais on ne déplace jamais la borne de
@@ -869,24 +945,23 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
                                 }
 
 
-                            } else if(SirsCore.SR_ELEMENTAIRE_END_BORNE.equals(bd.getLibelle())){
+                            } else if (SirsCore.SR_ELEMENTAIRE_END_BORNE.equals(bd.getLibelle())) {
                                 /*
                                 On ne déplace jamais la borne de fin lorsque son PR est édité, mais de plus ce dernier
                                 ne dépend pas de l'utilisateur, mais de la longueur du tronçon et du PR de la borne de
                                 début. On restaure donc la valeur calculée et on ignore la valeur modifiée.
                                 */
-                                Platform.runLater(()-> {
+                                Platform.runLater(() -> {
                                     final Alert alert = new Alert(Alert.AlertType.ERROR, "La borne de fin d'un SR élémentaire "
-                                        + "\nest fixé à la fin du tronçon et son PR \nne peut être modifié car dépendant seulement "
-                                        + "\nde la géométrie du tronçon et du PR de \nla borne de début.", ButtonType.CLOSE);
+                                            + "\nest fixé à la fin du tronçon et son PR \nne peut être modifié car dépendant seulement "
+                                            + "\nde la géométrie du tronçon et du PR de \nla borne de début.", ButtonType.CLOSE);
                                     alert.setResizable(true);
                                     alert.showAndWait();
                                     final double offset = TronconUtils.getPRStart(troncon, systemeReperageProperty().get(), session);
-                                    srb.setValeurPR((float)(troncon.getGeometry().getLength()+offset));
+                                    srb.setValeurPR((float) (troncon.getGeometry().getLength() + offset));
                                 });
 
-                            }
-                            else {
+                            } else {
                                 // Dans le cas général des autres bornes du SR élémentaire, on veut maintenir la position
                                 // de la borne sur le tronçon en cohérence avec son PR modifié.
 
@@ -923,8 +998,8 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
                                 du PR des bornes intermédiaires à des valeurs qui ne diffèreront pas des calculs automatiques
                                 ultérieurs.
                                 */
-                                if(srb.getValeurPR()<offset || srb.getValeurPR()>troncon.getGeometry().getLength()+offset){
-                                    Platform.runLater(()-> {
+                                if (srb.getValeurPR() < offset || srb.getValeurPR() > troncon.getGeometry().getLength() + offset) {
+                                    Platform.runLater(() -> {
                                         final Alert alert = new Alert(Alert.AlertType.ERROR, "Le PR d'une borne intermédiaire\n"
                                                 + " dans le SR élémentaire doit obligatoirement\n être supérieur au PR de la borne de début\n"
                                                 + " et inférieur à la longueur du tronçon.");
@@ -932,19 +1007,18 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
                                         alert.showAndWait();
                                         srb.setValeurPR(oldValue);
                                     });
-                                }
-                                else {
+                                } else {
                                     final LinearReferencing.SegmentInfo[] buildSegments = buildSegments(asLineString(troncon.getGeometry()));
                                     final Point computeCoordinate = LinearReferencingUtilities.computeCoordinate(buildSegments,
-                                            GO2Utilities.JTS_FACTORY.createPoint(buildSegments[0].segmentCoords[0]), srb.getValeurPR()-offset, 0.);
-                                        bd.setGeometry(computeCoordinate);
-                                        Injector.getSession().getRepositoryForClass(BorneDigue.class).update(bd);
+                                            GO2Utilities.JTS_FACTORY.createPoint(buildSegments[0].segmentCoords[0]), srb.getValeurPR() - offset, 0.);
+                                    bd.setGeometry(computeCoordinate);
+                                    Injector.getSession().getRepositoryForClass(BorneDigue.class).update(bd);
                                 }
                             }
                         } else {
-                                throw new IllegalStateException("Aucune borne n'a été trouvée pour l'identifiant " + srb.getBorneId());
-                            }
+                            throw new IllegalStateException("Aucune borne n'a été trouvée pour l'identifiant " + srb.getBorneId());
                         }
+                    }
 
                     saveSR.set(true);
                 }
