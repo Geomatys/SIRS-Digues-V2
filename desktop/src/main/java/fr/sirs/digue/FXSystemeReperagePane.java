@@ -19,25 +19,27 @@
 package fr.sirs.digue;
 
 import fr.sirs.Injector;
-import fr.sirs.Session;
 import fr.sirs.SIRS;
-import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.Session;
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.SystemeReperageBorne;
-import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.*;
+import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.theme.ui.pojotable.RenameBorneColumn;
+import fr.sirs.util.BorneUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 
 /**
@@ -111,6 +113,8 @@ public class FXSystemeReperagePane extends BorderPane {
 
     private class BorneTable extends PojoTable {
 
+        private final Button uiEditBorne = new Button(null, new ImageView(SIRS.ICON_EDITION_WHITE));
+
         public BorneTable() {
             super(SystemeReperageBorne.class, "Liste des bornes", (ObjectProperty<Element>) null);
             getColumns().remove((TableColumn) editCol);
@@ -118,6 +122,61 @@ public class FXSystemeReperagePane extends BorderPane {
             uiAdd.setVisible(false);
             uiDelete.setVisible(false);
             uiFicheMode.setVisible(false);
+
+            // HACK-redmine-6551 : rename a borne
+            uiTable.getSelectionModel().select(null);
+            searchEditionToolbar.getChildren().add(2, uiEditBorne);
+//            uiEditBorne.disableProperty().bind(((FXSystemeReperagePane) this.getParentElement()).editableProperty.not());
+            uiEditBorne.setTooltip(new Tooltip("Renommer une borne"));
+            uiEditBorne.setDisable(true);
+            uiEditBorne.setOnAction(renameBorne());
+            uiEditBorne.getStyleClass().add(BUTTON_STYLE);
+
+            uiTable.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<Element>() {
+                @Override
+                public void onChanged(ListChangeListener.Change<? extends Element> c) {
+                    final int size = uiTable.getSelectionModel().getSelectedItems().size();
+                    uiEditBorne.setDisable(size != 1);
+                }
+            });
+
+            RenameBorneColumn renameBorneCol = new RenameBorneColumn(getDefaultValueFactory(), this::renameBorne, getDefaultVisiblePredicate());
+            uiTable.getColumns().add(1,(TableColumn) renameBorneCol);
+        }
+
+        private EventHandler renameBorne() {
+            return new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                   renameBorne(null);
+                }
+            };
+        }
+
+        /**
+         * Method to rename a borne from the @{@link SystemeReperageBorne} pojo table
+         * @param pojo the pojo of the selected line - null if action from button bar
+         * @return the updated @{@link BorneDigue}
+         */
+        private Object renameBorne(Object pojo) {
+
+            final int index;
+            if (pojo != null) {
+                if ((index = uiTable.getItems().indexOf(pojo)) == -1) return pojo;
+                uiTable.getSelectionModel().select(index);
+            }
+
+            Element element = uiTable.getSelectionModel().getSelectedItem();
+            if (element == null)
+                return pojo;
+
+            if (!(element instanceof SystemeReperageBorne))
+                return pojo;
+
+            BorneDigue selectedItem = InjectorCore.getBean(BorneDigueRepository.class).get(((SystemeReperageBorne) element).getBorneId());
+
+            if (!BorneUtils.openBorneRenamingWindow(selectedItem)) return pojo;
+            return selectedItem;
         }
 
         @Override
