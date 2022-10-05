@@ -45,12 +45,17 @@ import org.springframework.stereotype.Component;
 "            libelle: doc.libelle," +
 "            geometry: doc.geometry" +
 "        })}}"),
-    @View(name=GlobalRepository.CONFLICTING_REVISIONS, map="function(doc) {if(doc._conflicts) {emit(doc._id, doc._conflicts)}}")
+    @View(name=GlobalRepository.CONFLICTING_REVISIONS, map="function(doc) {if(doc._conflicts) {emit(doc._id, doc._conflicts)}}"),
+    @View(name=GlobalRepository.WITH_CONFLICT, map="function(doc) {" +
+                "  if(doc._conflicts) {" +
+                "  emit(doc._conflicts, null);" +
+                "  }}")
 })
 public class GlobalRepository extends CouchDbRepositorySupport<Element> {
 
     protected static final String BY_CLASS_AND_LINEAR_VIEW = "byClassAndLinear";
     protected static final String CONFLICTING_REVISIONS = "conflictingRevisions";
+    protected static final String WITH_CONFLICT = "withConflicts";
 
     @Autowired
     private GlobalRepository(CouchDbConnector db) {
