@@ -1,22 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import fr.sirs.theme.ui.*?>
 <?import fr.sirs.util.FXFreeTab?>
-<?import fr.sirs.util.FXFileTextField?>
-<?import fr.sirs.util.FXComponentField?>
-<?import org.geotoolkit.gui.javafx.util.*?>
-<?import jidefx.scene.control.field.*?>
-<?import jfxtras.scene.control.*?>
-<?import javafx.scene.web.*?>
-<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-
-
-
 <fx:root fx:id="uiBorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
   <center>
     <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
@@ -43,6 +30,26 @@
 
 <!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
 
+            <!-- ObservationOuvrageHydrauliqueAssocie -->
+            <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="NEVER"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+                <!--rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                </rowConstraints-->
+                <children>
+                   <Label text="%urgenceId" GridPane.rowIndex="1"/>
+                    <ComboBox fx:id="ui_urgenceId" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <Button fx:id="ui_urgenceId_link" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+
+                </children>
+                <padding>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                </padding>
+            </GridPane>
 
             <!-- AbstractObservation -->
             <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
@@ -55,17 +62,17 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints-->
               <children>
-                   <!-- EDate -->                 
+                   <!-- EDate -->
                    <Label text="%date" GridPane.rowIndex="0" />
                    <DatePicker fx:id="ui_date" GridPane.columnIndex="1" GridPane.rowIndex="0"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <!-- EString -->                 
+                   <!-- EString -->
                    <Label text="%evolution" GridPane.rowIndex="1" />
                    <TextArea fx:id="ui_evolution" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
 
                    <Label text="%suiteApporterId" GridPane.rowIndex="2" />
                    <ComboBox fx:id="ui_suiteApporterId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                    <Button fx:id="ui_suiteApporterId_link" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                   <!-- EString -->                 
+                   <!-- EString -->
                    <Label text="%suite" GridPane.rowIndex="3" />
                    <TextArea fx:id="ui_suite" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
 
@@ -90,7 +97,7 @@
 
 <!-- REFERENCE TABS -->
         <FXFreeTab fx:id="ui_photos" text="%photos"/>
-        
+
         <Tab text="Spécification ouvrage/réseau">
           <ScrollPane>
             <content>
@@ -153,4 +160,3 @@
   </center>
 
 </fx:root>
-

@@ -19,19 +19,10 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.*;
 import fr.sirs.core.model.AvecObservations.LastObservationPredicate;
-import fr.sirs.core.model.RefConduiteFermee;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.ClosingDaemon;
-
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
 import fr.sirs.util.PrinterUtilities;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -45,6 +36,13 @@ import javafx.scene.control.*;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.util.collection.CloseableIterator;
 
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 /**
  *
  * @author Samuel Andrés (Geomatys)
@@ -56,8 +54,9 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
                     + " - sélectionner moins de réseaux hydrauliques fermés,%n"
                     + " - allouer plus de mémoire à l'application."
     );
-    @FXML private Tab uiConduiteTypeChoice;
 
+    @FXML private Tab uiConduiteTypeChoice;
+    @FXML private Tab uiUrgenceTypeChoice;
     @FXML private CheckBox uiOptionPhoto;
     @FXML private CheckBox uiOptionReseauOuvrage;
     @FXML private CheckBox uiOptionLocationInsert;
@@ -67,6 +66,7 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
     @FXML private CheckBox uiOptionObservationsSpec;
 
     private final TypeChoicePojoTable conduiteTypesTable = new TypeChoicePojoTable(RefConduiteFermee.class, "Types de conduites fermées");
+    private final TypeChoicePojoTable urgenceTypesTable = new TypeChoicePojoTable(RefUrgence.class, "Types d'urgences");
 
     private final ObjectProperty<Task<Boolean>> taskProperty = new SimpleObjectProperty<>();
 
@@ -84,6 +84,9 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
         conduiteTypesTable.setTableItems(()-> (ObservableList) SIRS.observableList(Injector.getSession().getRepositoryForClass(RefConduiteFermee.class).getAll()));
         conduiteTypesTable.commentAndPhotoProperty().set(false);
         uiConduiteTypeChoice.setContent(conduiteTypesTable);
+        urgenceTypesTable.setTableItems(()-> (ObservableList) SIRS.observableList(Injector.getSession().getRepositoryForClass(RefUrgence.class).getAll()));
+        urgenceTypesTable.commentAndPhotoProperty().set(false);
+        uiUrgenceTypeChoice.setContent(urgenceTypesTable);
 
         uiPrint.disableProperty().bind(uiCancel.disableProperty().not());
         uiCancel.setDisable(true);
@@ -115,6 +118,7 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
 
         parameterListener = this::updateCount;
         conduiteTypesTable.getSelectedItems().addListener(parameterListener);
+        urgenceTypesTable.getSelectedItems().addListener(parameterListener);
         // TODO : listen PR change on selected items.
         tronconsTable.getSelectedItems().addListener(parameterListener);
         uiOptionArchive.selectedProperty().addListener(parameterListener);
@@ -200,6 +204,9 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
                 .and(new LinearPredicate<>())
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
                 .and(new PRPredicate<>())
+                .and(new AvecObservations.UrgencePredicate(urgenceTypesTable.getSelectedItems().stream()
+                    .map(e -> e.getId())
+                    .collect(Collectors.toSet())))
                 .and(uiPrestationPredicater.getPredicate())
                 .and(new LastObservationPredicate(uiOptionDebutLastObservation.getValue(), uiOptionFinLastObservation.getValue()));
 

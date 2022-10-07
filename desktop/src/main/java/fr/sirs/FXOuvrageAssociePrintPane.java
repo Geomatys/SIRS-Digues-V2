@@ -19,21 +19,11 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.*;
 import fr.sirs.core.model.AvecObservations.LastObservationPredicate;
-import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.RefOuvrageHydrauliqueAssocie;
-import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.ClosingDaemon;
-
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
+import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.util.PrinterUtilities;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -47,6 +37,13 @@ import javafx.scene.control.*;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.util.collection.CloseableIterator;
 
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 /**
  *
  * @author Samuel Andrés (Geomatys)
@@ -58,8 +55,9 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
                     + " - sélectionner moins d'ouvrages hydrauliques associés,%n"
                     + " - allouer plus de mémoire à l'application."
     );
-    @FXML private Tab uiOuvrageTypeChoice;
 
+    @FXML private Tab uiOuvrageTypeChoice;
+    @FXML private Tab uiUrgenceTypeChoice;
     @FXML private CheckBox uiOptionPhoto;
     @FXML private CheckBox uiOptionReseauxFermes;
     @FXML private CheckBox uiOptionLocationInsert;
@@ -69,6 +67,7 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
     @FXML private CheckBox uiOptionObservationsSpec;
 
     private final TypeChoicePojoTable ouvrageTypesTable = new TypeChoicePojoTable(RefOuvrageHydrauliqueAssocie.class, "Types d'ouvrages associés");
+    private final TypeChoicePojoTable urgenceTypesTable = new TypeChoicePojoTable(RefUrgence.class, "Types d'urgences");
 
     private final ObjectProperty<Task<Boolean>> taskProperty = new SimpleObjectProperty<>();
 
@@ -86,6 +85,9 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
         ouvrageTypesTable.setTableItems(()-> (ObservableList) SIRS.observableList(Injector.getSession().getRepositoryForClass(RefOuvrageHydrauliqueAssocie.class).getAll()));
         ouvrageTypesTable.commentAndPhotoProperty().set(false);
         uiOuvrageTypeChoice.setContent(ouvrageTypesTable);
+        urgenceTypesTable.setTableItems(()-> (ObservableList) SIRS.observableList(Injector.getSession().getRepositoryForClass(RefUrgence.class).getAll()));
+        urgenceTypesTable.commentAndPhotoProperty().set(false);
+        uiUrgenceTypeChoice.setContent(urgenceTypesTable);
 
         uiPrint.disableProperty().bind(uiCancel.disableProperty().not());
         uiCancel.setDisable(true);
@@ -117,6 +119,7 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
 
         parameterListener = this::updateCount;
         ouvrageTypesTable.getSelectedItems().addListener(parameterListener);
+        urgenceTypesTable.getSelectedItems().addListener(parameterListener);
         // TODO : listen PR change on selected items.
         tronconsTable.getSelectedItems().addListener(parameterListener);
         uiOptionArchive.selectedProperty().addListener(parameterListener);
@@ -203,6 +206,9 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
                     .and(new LinearPredicate<>())
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
                     .and(new PRPredicate<>())
+                    .and(new AvecObservations.UrgencePredicate(urgenceTypesTable.getSelectedItems().stream()
+                            .map(e -> e.getId())
+                            .collect(Collectors.toSet())))
                     .and(uiPrestationPredicater.getPredicate())
                     .and(new LastObservationPredicate(uiOptionDebutLastObservation.getValue(), uiOptionFinLastObservation.getValue()));
 

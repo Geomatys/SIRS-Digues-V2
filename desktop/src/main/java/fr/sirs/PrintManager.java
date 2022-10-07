@@ -380,6 +380,7 @@ public class PrintManager {
         final List<JRColumnParameter> observationFields = new ArrayList<>();
         observationFields.add(new JRColumnParameter("date", 1.1f, true));
         observationFields.add(new JRColumnParameter("observateurId", .8f));
+        observationFields.add(new JRColumnParameter("urgenceId", .9f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
         observationFields.add(new JRColumnParameter("evolution", 2.f));
         observationFields.add(new JRColumnParameter("suiteApporterId", 1.2f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
         observationFields.add(new JRColumnParameter("suite", 2.f));
@@ -470,6 +471,7 @@ public class PrintManager {
         final List<JRColumnParameter> observationFields = new ArrayList<>();
         observationFields.add(new JRColumnParameter("date", 1.1f, true));
         observationFields.add(new JRColumnParameter("observateurId", .8f));
+        observationFields.add(new JRColumnParameter("urgenceId", .9f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
         observationFields.add(new JRColumnParameter("evolution", 2.f));
         observationFields.add(new JRColumnParameter("suiteApporterId", 1.2f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
         observationFields.add(new JRColumnParameter("suite", 2.f));
