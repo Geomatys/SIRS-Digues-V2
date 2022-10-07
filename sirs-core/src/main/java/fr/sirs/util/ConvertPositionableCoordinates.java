@@ -65,17 +65,16 @@ public class ConvertPositionableCoordinates {
                 return false;
             }
 
-            if (!positionable.getValid()) {
-                // if the positionable has already been through the process, we compare it to what it was before the last process
-                // if the previous process has not changed it, then we stop and return false
-                if (positionable.contentBasedEquals(cache.get(positionable.getId()))) {
-                    cache.clear();
-                    return false;
-                }
+            // HACK-REDMINE-4559
+            // check if the positionable is invalid and if it has already been through the process
+            // if it is its first time, reset the geometry to null to force recalculating geometry
+            // and PRs as there are bugs when start point is in aval of end point
+            if (!positionable.getValid() && cache.get(positionable.getId()) == null) {
+                cache.clear();
                 cache.put(positionable.getId(), positionable);
                 // force the update of the geometry to correct the bug when start point is in aval of end point for data coming from mobile app
                 positionable.setGeometry(null);
-                return true;
+                // pass through the normal process in case linearCoord or GeoCoord are missing
             }
 
             // Si les coordonnées sont déjà présentes, aucune modification n'est apportée.
@@ -94,6 +93,19 @@ public class ConvertPositionableCoordinates {
                             return false; //Les PR sont toujours à 0.f et n'ont pas changés
                         }
                         return true;
+                    }
+                    // HACK-REDMINE-4559
+                    // if the positionable is invalid and has already been through the process, we check if PRs are correct : from amont to aval
+                    if (!positionable.getValid() && cache.get(positionable.getId()) != null) {
+                        // if linear is from aval to amont, the PRs, coord and linear infos are set from amont to aval
+                        // and the positionable must be saved
+                        if (positionable.getPrDebut() > positionable.getPrFin()) {
+                            LinearReferencingUtilities.invertBornesAndCoordFromAvalToAmont(positionable);
+                            positionable.setGeometry(null);
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
                     return false;
                 }

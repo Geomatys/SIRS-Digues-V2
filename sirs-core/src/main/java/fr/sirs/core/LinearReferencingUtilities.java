@@ -402,13 +402,6 @@ public final class LinearReferencingUtilities extends LinearReferencing {
         } else if (borneFin == null) {
             distanceFin = distanceDebut;
         }
-
-        // HACK-REDMINE-4559 : sorts bornes from amont to aval when data are collected from aval to amont on the mobile app
-        if (!structure.getValid() && distanceDebut > distanceFin) {
-            // update the positionable attributes
-            sortBornesAndCoordFromAvalToAmont(structure);
-        }
-
         return cut(refLinear, StrictMath.min(distanceDebut, distanceFin), StrictMath.max(distanceDebut, distanceFin));
     }
 
@@ -416,7 +409,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      * Method used to sort the bornes and coordinates from Amont to Aval when they were recorded on the field from Aval to Amont
      * @param structure Positionable we want to sort the bornes
      */
-    public static void sortBornesAndCoordFromAvalToAmont(Positionable structure) {
+    public static void invertBornesAndCoordFromAvalToAmont(Positionable structure) {
         // store start point info
         final String tmpOldBorneDebutId = structure.getBorneDebutId();
         final boolean tmpOldBorneDebutAval = structure.getBorne_debut_aval();
@@ -588,11 +581,6 @@ public final class LinearReferencingUtilities extends LinearReferencing {
             refDebut = refFin;
         } else if (refFin == null) {
             refFin = refDebut;
-        }
-
-        // HACK-REDMINE-4559 : sorts bornes from amont to aval when data are collected from aval to amont on the mobile app
-        if (structure != null && !structure.getValid() && refDebut.distanceAlongLinear > refFin.distanceAlongLinear) {
-            sortBornesAndCoordFromAvalToAmont(structure);
         }
 
         return cut(referenceLinear, StrictMath.min(refDebut.distanceAlongLinear, refFin.distanceAlongLinear), StrictMath.max(refDebut.distanceAlongLinear, refFin.distanceAlongLinear));

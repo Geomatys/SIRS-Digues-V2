@@ -292,9 +292,6 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     public void update(T entity) {
         ArgumentChecks.ensureNonNull("Document à mettre à jour", entity);
 
-        // store entity into cache as otherwise the condition entity != cache.get(entity.getId()) is always true and we get into an infinity loop
-        cache.put(entity.getId(), entity);
-
         checkIntegrity(entity);
         if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
             ((AvecDateMaj) entity).setDateMaj(LocalDate.now());
