@@ -19,23 +19,11 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.*;
 import fr.sirs.core.model.AvecObservations.LastObservationPredicate;
-import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Observation;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.RefTypeDesordre;
-import fr.sirs.core.model.RefUrgence;
-import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.ClosingDaemon;
-
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
+import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.util.PrinterUtilities;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -45,15 +33,16 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.Tab;
+import javafx.scene.control.*;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.util.collection.CloseableIterator;
+
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  *
@@ -66,16 +55,6 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                     + " - sélectionner moins de désordres,%n"
                     + " - allouer plus de mémoire à l'application."
     );
-
-    private static final Comparator<Observation> DATE_COMPARATOR = (o1, o2) -> {
-        if (o1.getDate() == o2.getDate())
-            return 0;
-        if (o1.getDate() == null)
-            return 1;
-        if (o2.getDate() == null)
-            return -1;
-        return o1.getDate().compareTo(o2.getDate());
-    };
 
     @FXML private Tab uiDisorderTypeChoice;
     @FXML private Tab uiUrgenceTypeChoice;
@@ -225,7 +204,9 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                 .and(new LinearPredicate<>())
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
                 .and(new PRPredicate<>())
-                .and(new UrgencePredicate())
+                .and(new AvecObservations.UrgencePredicate(urgenceTypesTable.getSelectedItems().stream()
+                        .map(e -> e.getId())
+                        .collect(Collectors.toSet())))
                 .and(uiPrestationPredicater.getPredicate())
                 .and(new LastObservationPredicate(uiOptionDebutLastObservation.getValue(), uiOptionFinLastObservation.getValue()));
 
@@ -298,32 +279,5 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
     @Override
     protected InvalidationListener getParameterListener() {
         return parameterListener;
-    }
-
-    /**
-     * Check that the most recent observation defined on given disorder has an
-     * {@link Observation#getUrgenceId() } compatible with user choice.
-     * If user has not chosen any urgence, all disorders are accepted.
-     */
-    private class UrgencePredicate implements Predicate<Desordre> {
-
-        final Set<String> acceptedIds;
-
-        UrgencePredicate() {
-            acceptedIds = urgenceTypesTable.getSelectedItems().stream()
-                    .map(e -> e.getId())
-                    .collect(Collectors.toSet());
-        }
-
-        @Override
-        public boolean test(final Desordre desordre) {
-            if (acceptedIds.isEmpty())
-                return true;
-
-            return desordre.getObservations().stream()
-                    .max(DATE_COMPARATOR)
-                    .map(obs -> obs.getUrgenceId() != null && acceptedIds.contains(obs.getUrgenceId()))
-                    .orElse(false);
-        }
     }
 }
