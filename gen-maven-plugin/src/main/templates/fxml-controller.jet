@@ -771,7 +771,7 @@ else if (helper.isParcelleVegetation()){
                 } else if (ModelHelper.isReferenceType(eRef.getEReferenceType())) {
 %>
             final AbstractSIRSRepository<<%= helper.getClassName(eRef) %>> <%= eRef.getName()%>Repo = session.getRepositoryForClass(<%= helper.getClassName(eRef) %>.class);
-            SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(<%= eRef.getName()%>Repo.getAll()), newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null? null : <%= eRef.getName()%>Repo.get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>()));
+            SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(<%= eRef.getName()%>Repo.getAll()), (newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null || newElement.get<%= Helper.ucFirst(eRef.getName())  %>().trim().isEmpty()) ? null : <%= eRef.getName()%>Repo.get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>()));
 <%
                 } else {
 
