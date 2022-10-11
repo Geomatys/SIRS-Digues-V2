@@ -407,24 +407,32 @@ public final class LinearReferencingUtilities extends LinearReferencing {
 
     /**
      * Method used to sort the bornes and coordinates from Amont to Aval when they were recorded on the field from Aval to Amont
+     * It forces the recalculation of the geometry by setting it to null
      * @param structure Positionable we want to sort the bornes
+     * @return whether the structure has been updated and must be saved
      */
-    public static void invertBornesAndCoordFromAvalToAmont(Positionable structure) {
-        // store start point info
-        final String tmpOldBorneDebutId = structure.getBorneDebutId();
-        final boolean tmpOldBorneDebutAval = structure.getBorne_debut_aval();
-        final double tmpOldBorneDebutDistance = structure.getBorne_debut_distance();
-        final Point tmpPositionDebut = structure.getPositionDebut();
-        // update start point info with end point info
-        structure.setBorneDebutId(structure.getBorneFinId());
-        structure.setBorne_debut_aval(structure.getBorne_fin_aval());
-        structure.setBorne_debut_distance(structure.getBorne_fin_distance());
-        structure.setPositionDebut(structure.getPositionFin());
-        // update end point from stored point info
-        structure.setBorneFinId(tmpOldBorneDebutId);
-        structure.setBorne_fin_aval(tmpOldBorneDebutAval);
-        structure.setBorne_fin_distance(tmpOldBorneDebutDistance);
-        structure.setPositionFin(tmpPositionDebut);
+    public static boolean ensureAvalToAmont(Positionable structure) {
+        if (structure.getPrDebut() > structure.getPrFin()) {
+            // store start point info
+            final String tmpOldBorneDebutId = structure.getBorneDebutId();
+            final boolean tmpOldBorneDebutAval = structure.getBorne_debut_aval();
+            final double tmpOldBorneDebutDistance = structure.getBorne_debut_distance();
+            final Point tmpPositionDebut = structure.getPositionDebut();
+            // update start point info with end point info
+            structure.setBorneDebutId(structure.getBorneFinId());
+            structure.setBorne_debut_aval(structure.getBorne_fin_aval());
+            structure.setBorne_debut_distance(structure.getBorne_fin_distance());
+            structure.setPositionDebut(structure.getPositionFin());
+            // update end point from stored point info
+            structure.setBorneFinId(tmpOldBorneDebutId);
+            structure.setBorne_fin_aval(tmpOldBorneDebutAval);
+            structure.setBorne_fin_distance(tmpOldBorneDebutDistance);
+            structure.setPositionFin(tmpPositionDebut);
+            // force recalculation of geometry and PRs
+            structure.setGeometry(null);
+            return true;
+        }
+        return false;
     }
 
     /**
