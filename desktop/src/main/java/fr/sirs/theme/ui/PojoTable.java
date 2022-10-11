@@ -669,7 +669,7 @@ public class PojoTable extends BorderPane implements Printable {
                     //Copie des éléments sélectionnés vers la cible identifiée.
                     this.elementCopier.copyPojosTo(target, elements);
 
-                    if (elementCopier.getAvecForeignParent()) {
+                    if (elementCopier.getAvecForeignParent() || elementCopier.getRapportEtude()) {
                         //On rafraîchie les éléments du tableau.
                         updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get());
                     }
