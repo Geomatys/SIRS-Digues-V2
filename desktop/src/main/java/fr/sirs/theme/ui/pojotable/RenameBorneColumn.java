@@ -32,6 +32,6 @@ import java.util.function.Predicate;
 public class RenameBorneColumn extends AbstractColumnWithButton {
 
     public RenameBorneColumn(Callback cellValueFactory, Function editFct, Predicate visiblePredicate) {
-        super(cellValueFactory, editFct, visiblePredicate, "Renommer", SIRS.ICON_EDITION,"Renommer l'élément'");
+        super(cellValueFactory, editFct, visiblePredicate, "Renommer", SIRS.ICON_EDITION,"Renommer l'élément");
     }
 }
