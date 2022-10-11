@@ -96,7 +96,7 @@ public class ConvertPositionableCoordinates {
                     }
                     // HACK-REDMINE-4559
                     // if the positionable is invalid and has already been through the process, we check if PRs are correct : from amont to aval
-                    if (!positionable.getValid() && cache.get(positionable.getId()) != null) {
+                    if (cache.get(positionable.getId()) != null) {
                         // if linear is from aval to amont, the PRs, coord and linear infos are set from amont to aval
                         // and the positionable must be saved
                         if (positionable.getPrDebut() > positionable.getPrFin()) {

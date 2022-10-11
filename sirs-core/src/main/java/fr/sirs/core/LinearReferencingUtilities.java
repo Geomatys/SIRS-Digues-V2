@@ -329,7 +329,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
         final Point positionFin = structure.getPositionFin();
 
         if (positionDebut != null || positionFin != null) {
-            return buildGeometryFromGeo(refLinear, segments, positionDebut, positionFin, structure);
+            return buildGeometryFromGeo(refLinear, segments, positionDebut, positionFin);
         } else {
             return buildGeometryFromBorne(refLinear, segments, structure, repo);
         }
@@ -543,7 +543,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      */
     public static LineString buildGeometryFromGeo(Geometry tronconGeom, Point positionDebut, Point positionFin) {
         final LineString linear = asLineString(tronconGeom);
-        return buildGeometryFromGeo(linear, buildSegments(linear), positionDebut, positionFin, null);
+        return buildGeometryFromGeo(linear, buildSegments(linear), positionDebut, positionFin);
     }
 
     /**
@@ -556,20 +556,6 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      * @return A line along given linear structure, between start and end point.
      */
     public static LineString buildGeometryFromGeo(final LineString referenceLinear, final SegmentInfo[] segments, Point positionDebut, Point positionFin) {
-        return buildGeometryFromGeo(referenceLinear, segments, positionDebut, positionFin, null);
-    }
-
-    /**
-     *
-     * @param referenceLinear The source geometry to follow when creating the new
-     * one.
-     * @param segments Input reference linear represented as a succession of segments.
-     * @param positionDebut Start point of the geometry to compute.
-     * @param positionFin End point of the geometry to compute.
-     * @param structure the positionable to compute the geometry for
-     * @return A line along given linear structure, between start and end point.
-     */
-    public static LineString buildGeometryFromGeo(final LineString referenceLinear, final SegmentInfo[] segments, Point positionDebut, Point positionFin, Positionable structure) {
         ProjectedPoint refDebut = null, refFin = null;
         if (positionDebut != null) {
             refDebut = projectReference(segments, positionDebut);
