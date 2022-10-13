@@ -69,6 +69,8 @@ public class FXSirsPreferenceEditor extends ScrollPane implements SaveableConfig
         EDITOR_OVERRIDES.put(SirsPreferences.PROPERTIES.DESIGNATION_AUTO_INCREMENT, new IncrementCheckBox());
         
         EDITOR_OVERRIDES.put(SirsPreferences.PROPERTIES.ABSTRACT_SHOWCASE, new ShowCaseComboBox());
+
+        EDITOR_OVERRIDES.put(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON, new ArchivedTronconCheckBox());
     }
 
     final ObservableMap<SirsPreferences.PROPERTIES, String> editedProperties = FXCollections.observableHashMap();
