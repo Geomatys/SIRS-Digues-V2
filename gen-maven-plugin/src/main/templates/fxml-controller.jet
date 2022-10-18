@@ -16,6 +16,7 @@ import fr.sirs.util.StreamingIterable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.DatePickerConverter;
 
+import fr.sirs.util.property.SirsPreferences;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -34,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import javafx.beans.value.ChangeListener;
@@ -782,8 +784,11 @@ else if (helper.isParcelleVegetation()){
 %>
         {
             final Preview linearPreview = newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null ? null : previewRepository.get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>());
+            // HACK-REDMINE-4408 : hide archived troncons from selection lists
+            final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
             SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(
-                previewRepository.getByClass(linearPreview == null ? <%= helper.getClassName(eRef) %>.class : linearPreview.getJavaClassOr(<%= helper.getClassName(eRef) %>.class))).sorted(), linearPreview);
+                previewRepository.getByClass(linearPreview == null ? <%= helper.getClassName(eRef) %>.class : linearPreview.getJavaClassOr(<%= helper.getClassName(eRef) %>.class))).sorted(),
+                linearPreview, Boolean.valueOf(propertyStr));
         }
 <%
                 }

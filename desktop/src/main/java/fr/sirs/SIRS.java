@@ -26,7 +26,10 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementContainerPane;
 import fr.sirs.theme.ui.columns.TableColumnsPreferences;
@@ -34,23 +37,6 @@ import fr.sirs.util.FXPreferenceEditor;
 import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.Reference;
-import java.awt.Color;
-import java.awt.Desktop;
-import java.io.File;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.function.Predicate;
-import java.util.logging.Level;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
@@ -82,6 +68,22 @@ import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * Constants used for project.
@@ -337,15 +339,57 @@ public final class SIRS extends SirsCore {
      * @param comboBox The combo box to set value on.
      * @param items The items we want into the ComboBox.
      * @param current the element to select by default.
+     * @param withArchived determine whether the combo shall include or not the archived element from the items list
+     */
+    public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final boolean withArchived) {
+        initCombo(comboBox, items, current, new SirsStringConverter(), withArchived);
+    }
+
+    /**
+     * initialize ComboBox items using input list. We also activate completion.
+     * @param comboBox The combo box to set value on.
+     * @param items The items we want into the ComboBox.
+     * @param current the element to select by default.
      * @param converter the StringConverter to use to identify the items.
      */
     public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final StringConverter converter) {
+        initCombo(comboBox, items, current, converter, true);
+    }
+
+    /**
+     * initialize ComboBox items using input list. We also activate completion.
+     * @param comboBox The combo box to set value on.
+     * @param items The items we want into the ComboBox.
+     * @param current the element to select by default.
+     * @param converter the StringConverter to use to identify the items.
+     * @param withArchived determine whether the combo shall include or not the archived element from the items list
+     */
+    public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final StringConverter converter, final boolean withArchived) {
         ArgumentChecks.ensureNonNull("items", items);
         comboBox.setConverter(converter);
-        if (items instanceof SortedList) {
-            comboBox.setItems(items);
+        ObservableList finalItems = null;
+        if (!withArchived && items != null && !items.isEmpty()) {
+            Object item = items.get(0);
+            List<String> classesToFilterArchived = Arrays.asList(TronconDigue.class.getCanonicalName(), "fr.sirs.core.model.TronconLit", "fr.sirs.core.model.Berge");
+            if (classesToFilterArchived.contains(item.getClass().getCanonicalName())
+                    || (item instanceof Preview && classesToFilterArchived.contains(((Preview) item).getElementClass()))) {
+
+                if (item instanceof Preview) {
+                    List<Preview> list = items;
+                    final Predicate<Preview> isNotArchived = tl -> tl.getDateFin() == null || LocalDate.parse(tl.getDateFin()).isAfter(LocalDate.now());
+                    finalItems = SIRS.observableList(list.stream().filter(isNotArchived).collect(Collectors.toList()));
+                } else {
+                    List<? extends AvecBornesTemporelles> list = items;
+                    final Predicate<AvecBornesTemporelles> isNotArchived = tl -> tl.getDate_fin() == null || tl.getDate_fin().isAfter(LocalDate.now());
+                    finalItems = SIRS.observableList(list.stream().filter(isNotArchived).collect(Collectors.toList()));
+                }
+            }
+        }
+        if (finalItems == null) finalItems = items;
+        if (finalItems instanceof SortedList) {
+            comboBox.setItems(finalItems);
         } else {
-            comboBox.setItems(items.sorted((o1, o2) -> converter.toString(o1).compareTo(converter.toString(o2))));
+            comboBox.setItems(finalItems.sorted((o1, o2) -> converter.toString(o1).compareTo(converter.toString(o2))));
         }
         comboBox.setEditable(true);
         comboBox.getSelectionModel().select(current);
