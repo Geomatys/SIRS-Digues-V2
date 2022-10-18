@@ -50,6 +50,9 @@ public class Preview implements AvecLibelle, Comparable {
     @JsonProperty("valid")
     private boolean valid;
 
+    @JsonProperty("dateFin")
+    private String dateFin;
+
     private final SimpleStringProperty designationProperty = new SimpleStringProperty();
 
     private final SimpleStringProperty libelleProperty = new SimpleStringProperty();
@@ -109,6 +112,14 @@ public class Preview implements AvecLibelle, Comparable {
         this.valid = valid;
     }
 
+    public String getDateFin() {
+        return dateFin;
+    }
+
+    public void setDateFin(String dateFin) {
+        this.dateFin = dateFin;
+    }
+
     @JsonProperty("designation")
     public String getDesignation() {
         return designationProperty.get();
@@ -138,7 +149,17 @@ public class Preview implements AvecLibelle, Comparable {
 
     @Override
     public String toString() {
-        return "Preview{" + "docId=" + docId + ", docClass=" + docClass + ", elementId=" + elementId + ", elementClass=" + elementClass + ", author=" + author + ", valid=" + valid + ", designation=" + designationProperty + ", label=" + libelleProperty.get() + '}';
+        return "Preview{" +
+                "docId='" + docId + '\'' +
+                ", docClass='" + docClass + '\'' +
+                ", elementId='" + elementId + '\'' +
+                ", elementClass='" + elementClass + '\'' +
+                ", author='" + author + '\'' +
+                ", valid=" + valid +
+                ", dateFin=" + dateFin +
+                ", designationProperty=" + designationProperty +
+                ", libelleProperty=" + libelleProperty +
+                '}';
     }
 
     @Override
@@ -204,5 +225,4 @@ public class Preview implements AvecLibelle, Comparable {
 
         return -1;
     }
-
 }
