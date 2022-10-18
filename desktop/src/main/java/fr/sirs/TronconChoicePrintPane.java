@@ -21,21 +21,21 @@ package fr.sirs;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
-import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.*;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
+
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+
+import fr.sirs.util.property.SirsPreferences;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -83,7 +83,17 @@ public abstract class TronconChoicePrintPane extends BorderPane {
     public TronconChoicePrintPane(final Class forBundle) {
         SIRS.loadFXML(this, forBundle);
         final Session session = Injector.getSession();
-        tronconsTable.setTableItems(()-> (ObservableList) SIRS.observableList(session.getRepositoryForClass(TronconDigue.class).getAll()));
+
+        final List<TronconDigue> byClass = session.getRepositoryForClass(TronconDigue.class).getAll();
+        // HACK-REDMINE-4408 : hide archived troncons from selection lists
+        final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
+        List<TronconDigue> list = null;
+        if (Boolean.FALSE.equals(Boolean.valueOf(propertyStr))) {
+            final Predicate<TronconDigue> isNotArchived = tl -> tl.getDate_fin() == null || tl.getDate_fin().isAfter(LocalDate.now());
+            list = byClass.stream().filter(isNotArchived).collect(Collectors.toList());
+        }
+        List<TronconDigue> finalList = list == null ? byClass : list;
+        tronconsTable.setTableItems(()-> (ObservableList) SIRS.observableList(finalList));
         tronconsTable.commentAndPhotoProperty().set(false);
         uiTronconChoice.setContent(tronconsTable);
         tronconsTable.getSelectedItems().addListener((ListChangeListener.Change<? extends Element> ch) -> filterPrestations(ch));
