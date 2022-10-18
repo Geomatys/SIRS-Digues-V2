@@ -371,18 +371,14 @@ public final class SIRS extends SirsCore {
         if (!withArchived && items != null && !items.isEmpty()) {
             Object item = items.get(0);
             List<String> classesToFilterArchived = Arrays.asList(TronconDigue.class.getCanonicalName(), "fr.sirs.core.model.TronconLit", "fr.sirs.core.model.Berge");
-            if (classesToFilterArchived.contains(item.getClass().getCanonicalName())
-                    || (item instanceof Preview && classesToFilterArchived.contains(((Preview) item).getElementClass()))) {
-
-                if (item instanceof Preview) {
-                    List<Preview> list = items;
-                    final Predicate<Preview> isNotArchived = tl -> tl.getDateFin() == null || LocalDate.parse(tl.getDateFin()).isAfter(LocalDate.now());
-                    finalItems = SIRS.observableList(list.stream().filter(isNotArchived).collect(Collectors.toList()));
-                } else {
-                    List<? extends AvecBornesTemporelles> list = items;
-                    final Predicate<AvecBornesTemporelles> isNotArchived = tl -> tl.getDate_fin() == null || tl.getDate_fin().isAfter(LocalDate.now());
-                    finalItems = SIRS.observableList(list.stream().filter(isNotArchived).collect(Collectors.toList()));
-                }
+            if (classesToFilterArchived.contains(item.getClass().getCanonicalName())) {
+                List<? extends AvecBornesTemporelles> list = items;
+                final Predicate<AvecBornesTemporelles> isNotArchived = tl -> tl.getDate_fin() == null || tl.getDate_fin().isAfter(LocalDate.now());
+                finalItems = SIRS.observableList(list.stream().filter(isNotArchived).collect(Collectors.toList()));
+            } else if (item instanceof Preview && classesToFilterArchived.contains(((Preview) item).getElementClass())) {
+                List<Preview> list = items;
+                final Predicate<Preview> isNotArchived = tl -> tl.getDateFin() == null || LocalDate.parse(tl.getDateFin()).isAfter(LocalDate.now());
+                finalItems = SIRS.observableList(list.stream().filter(isNotArchived).collect(Collectors.toList()));
             }
         }
         if (finalItems == null) finalItems = items;
