@@ -19,6 +19,7 @@
 package fr.sirs.plugin.lit.ui;
 
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Element;
@@ -28,8 +29,7 @@ import fr.sirs.theme.TronconTheme;
 import fr.sirs.theme.ui.ForeignParentPojoTable;
 import fr.sirs.theme.ui.pojotable.ElementCopier;
 import fr.sirs.util.SimpleFXEditMode;
-import fr.sirs.util.SirsStringConverter;
-import java.util.List;
+import fr.sirs.util.property.SirsPreferences;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -45,6 +45,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+
+import java.util.List;
 
 /**
  *
@@ -73,16 +75,12 @@ public class FXLitThemePane extends BorderPane {
         }
 
         final List<TronconLit> linearPreviews = session.getRepositoryForClass(TronconLit.class).getAll();
-        uiLinearChoice.setItems(FXCollections.observableList(linearPreviews));
-        uiLinearChoice.setConverter(new SirsStringConverter());
-
+        // HACK-REDMINE-4408 : hide archived Berges from selection lists
+        final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
+        SIRS.initCombo(uiLinearChoice, SIRS.observableList(linearPreviews), linearPreviews.isEmpty() ? null : linearPreviews.get(0), Boolean.valueOf(propertyStr));
         uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends TronconLit> observable, TronconLit oldValue, TronconLit newValue) -> {
             linearIdProperty.set(newValue.getId());
         });
-
-        if(!linearPreviews.isEmpty()){
-            uiLinearChoice.getSelectionModel().select(linearPreviews.get(0));
-        }
     }
 
     protected class LitThemePojoTable<T extends AvecForeignParent> extends ForeignParentPojoTable<T>{
