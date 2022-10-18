@@ -368,17 +368,22 @@ public final class SIRS extends SirsCore {
         ArgumentChecks.ensureNonNull("items", items);
         comboBox.setConverter(converter);
         ObservableList finalItems = null;
+        boolean wasFiltered = false;
         if (!withArchived && items != null && !items.isEmpty()) {
             Object item = items.get(0);
-            List<String> classesToFilterArchived = Arrays.asList(TronconDigue.class.getCanonicalName(), "fr.sirs.core.model.TronconLit", "fr.sirs.core.model.Berge");
+            List<String> classesToFilterArchived = Arrays.asList(TronconDigue.class.getCanonicalName(), "fr.sirs.core.model.TronconLit", "fr.sirs.core.model.Berge",
+                    "fr.sirs.core.model.AireStockageDependance", "fr.sirs.core.model.AmenagementHydraulique", "fr.sirs.core.model.AutreDependance",
+                    "fr.sirs.core.model.CheminAccesDependance", "fr.sirs.core.model.OuvrageVoirieDependance");
             if (classesToFilterArchived.contains(item.getClass().getCanonicalName())) {
                 List<? extends AvecBornesTemporelles> list = items;
                 final Predicate<AvecBornesTemporelles> isNotArchived = tl -> tl.getDate_fin() == null || tl.getDate_fin().isAfter(LocalDate.now());
                 finalItems = SIRS.observableList(list.stream().filter(isNotArchived).collect(Collectors.toList()));
+                wasFiltered = true;
             } else if (item instanceof Preview && classesToFilterArchived.contains(((Preview) item).getElementClass())) {
                 List<Preview> list = items;
                 final Predicate<Preview> isNotArchived = tl -> tl.getDateFin() == null || LocalDate.parse(tl.getDateFin()).isAfter(LocalDate.now());
                 finalItems = SIRS.observableList(list.stream().filter(isNotArchived).collect(Collectors.toList()));
+                wasFiltered = true;
             }
         }
         if (finalItems == null) finalItems = items;
@@ -388,7 +393,10 @@ public final class SIRS extends SirsCore {
             comboBox.setItems(finalItems.sorted((o1, o2) -> converter.toString(o1).compareTo(converter.toString(o2))));
         }
         comboBox.setEditable(true);
-        comboBox.getSelectionModel().select(current);
+        if (wasFiltered)
+            comboBox.getSelectionModel().select(finalItems == null ? null : finalItems.get(0));
+        else
+            comboBox.getSelectionModel().select(current);
         ComboBoxCompletion.autocomplete(comboBox);
     }
 
