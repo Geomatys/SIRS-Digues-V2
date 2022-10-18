@@ -20,14 +20,12 @@ package fr.sirs.plugin.dependance.ui;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.model.AbstractDependance;
-import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.DesordreDependance;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.util.SimpleFXEditMode;
-import java.util.List;
-import java.util.logging.Level;
+import fr.sirs.util.property.SirsPreferences;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -37,6 +35,9 @@ import javafx.scene.control.Separator;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+
+import java.util.List;
+import java.util.logging.Level;
 
 /**
  *
@@ -61,11 +62,13 @@ public class FXDesordreThemePane extends FXDependanceThemePane {
         });
 
         final List<Preview> previews = session.getPreviews().getByClass(AbstractDependance.class);
-        if(!previews.contains(ORPHELIN_PREVIEW)){
+       if(!previews.contains(ORPHELIN_PREVIEW)){
             previews.add(ORPHELIN_PREVIEW);
         }
         final ObservableList<Preview> previewsWithEmpty = SIRS.observableList(previews).sorted();
-        SIRS.initCombo(uiDependanceAhChoice, previewsWithEmpty, previewsWithEmpty.get(0));
+       // HACK-REDMINE-4408 : hide archived Dépendances and AHs from selection lists
+        final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
+        SIRS.initCombo(uiDependanceAhChoice, previewsWithEmpty, previewsWithEmpty.get(0), Boolean.valueOf(propertyStr));
     }
 
     @Override

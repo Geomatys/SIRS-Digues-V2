@@ -21,15 +21,14 @@ package fr.sirs.plugin.dependance.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.AbstractAmenagementHydraulique;
+import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SimpleFXEditMode;
-import java.util.List;
-import java.util.logging.Level;
+import fr.sirs.util.property.SirsPreferences;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -43,6 +42,9 @@ import javafx.scene.control.Separator;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+
+import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Thémes regroupant les panneaux des dépendances et de l'aménagement hydraulique
@@ -82,7 +84,9 @@ public class FXDependanceThemePane extends BorderPane {
             rawAhPreviews.add(EMPTY_PREVIEW);
         }
         final ObservableList<Preview> ahPreviews = SIRS.observableList(rawAhPreviews).sorted();
-        SIRS.initCombo(uiAhChoice, ahPreviews, ahPreviews.get(0));
+        // HACK-REDMINE-4408 : hide archived AH from selection lists
+        final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
+        SIRS.initCombo(uiAhChoice, ahPreviews, ahPreviews.get(0), Boolean.valueOf(propertyStr));
     }
 
     protected Parent createContent(AbstractTheme.ThemeManager manager) {
@@ -157,7 +161,7 @@ public class FXDependanceThemePane extends BorderPane {
             }
             if (created != null) {
                 created.setAmenagementHydrauliqueId(getAhIdProperty());
-                
+
                 try {
                     repo.add(created);
                 } catch (NullPointerException e) {

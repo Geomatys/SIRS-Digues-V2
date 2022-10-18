@@ -18,26 +18,28 @@
   */
 package fr.sirs.theme.ui;
 
-import fr.sirs.Session;
-import fr.sirs.SIRS;
-import fr.sirs.Injector;
-import fr.sirs.core.component.*;
-import fr.sirs.core.model.*;
-import fr.sirs.util.FXFreeTab;
-import fr.sirs.util.StreamingIterable;
-import fr.sirs.util.javafx.FloatSpinnerValueFactory;
+ import fr.sirs.Injector;
+ import fr.sirs.SIRS;
+ import fr.sirs.Session;
+ import fr.sirs.core.component.AbstractSIRSRepository;
+ import fr.sirs.core.component.Previews;
+ import fr.sirs.core.model.*;
+ import fr.sirs.util.FXFreeTab;
+ import fr.sirs.util.StreamingIterable;
+ import fr.sirs.util.javafx.FloatSpinnerValueFactory;
+ import fr.sirs.util.property.SirsPreferences;
+ import javafx.beans.value.ObservableValue;
+ import javafx.collections.FXCollections;
+ import javafx.collections.ObservableList;
+ import javafx.collections.transformation.FilteredList;
+ import javafx.event.ActionEvent;
+ import javafx.fxml.FXML;
+ import javafx.scene.control.*;
+ import javafx.scene.image.ImageView;
+ import org.geotoolkit.util.collection.CloseableIterator;
 
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.event.ActionEvent;
-import javafx.scene.image.ImageView;
-import java.util.List;
-import java.util.ArrayList;
-import javafx.collections.transformation.FilteredList;
-import org.geotoolkit.util.collection.CloseableIterator;
+ import java.util.ArrayList;
+ import java.util.List;
 
 /**
  *
@@ -253,7 +255,10 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
             } else if (newElement.getAmenagementHydrauliqueId() != null) {
                 amenagementOrDependancePreview = previewRepository.get(newElement.getAmenagementHydrauliqueId());
             }
-            SIRS.initCombo(ui_abstractDependanceId, FXCollections.observableList(previewRepository.getByClass(AbstractDependance.class)), amenagementOrDependancePreview);
+            // HACK-REDMINE-4408 : hide archived AH from selection lists
+            final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
+            SIRS.initCombo(ui_abstractDependanceId, FXCollections.observableList(session.getPreviews().getByClass(AbstractDependance.class)),
+                    amenagementOrDependancePreview, Boolean.parseBoolean(propertyStr));
         }
 
         updateObservationsTable(session, newElement);

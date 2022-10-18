@@ -1,18 +1,18 @@
 
 package fr.sirs.theme.ui;
 
-import fr.sirs.theme.ui.*;
-import fr.sirs.Session;
-import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import fr.sirs.core.component.*;
+import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.*;
-
+import fr.sirs.util.property.SirsPreferences;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 
 /**
@@ -21,13 +21,13 @@ import javafx.scene.image.ImageView;
  * @author Alexis Manin (Geomatys)
  */
 public class FXTraitAmenagementHydrauliquePane extends AbstractFXElementPane<TraitAmenagementHydraulique> {
-    
+
     protected final Previews previewRepository;
     protected LabelMapper labelMapper;
     private String oldValueAhId;
-    
+
     @FXML private FXValidityPeriodPane uiValidityPeriod;
-    
+
     // Propriétés de TraitAmenagementHydraulique
     @FXML protected TextArea ui_commentaire;
     @FXML protected ComboBox ui_amenagementHydrauliqueId;
@@ -62,12 +62,12 @@ public class FXTraitAmenagementHydrauliquePane extends AbstractFXElementPane<Tra
 
         //uiPosition.dependanceProperty().bind(elementProperty);
     }
-    
+
     public FXTraitAmenagementHydrauliquePane(final TraitAmenagementHydraulique traitAmenagementHydraulique){
         this();
         this.elementProperty().set(traitAmenagementHydraulique);
     }
-    
+
     /**
      * Initialize fields at element setting.
      */
@@ -80,15 +80,15 @@ public class FXTraitAmenagementHydrauliquePane extends AbstractFXElementPane<Tra
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
         }
-        
+
         final Session session = Injector.getBean(Session.class);
-        
+
         if (newElement == null) {
-            
+
             ui_amenagementHydrauliqueId.setItems(null);
         } else {
-            
-            
+
+
             /*
             * Bind control properties to Element ones.
             */
@@ -97,8 +97,11 @@ public class FXTraitAmenagementHydrauliquePane extends AbstractFXElementPane<Tra
             ui_commentaire.textProperty().bindBidirectional(newElement.commentaireProperty());
             final Preview linearPreview = newElement.getAmenagementHydrauliqueId() == null ? null : previewRepository.get(newElement.getAmenagementHydrauliqueId());
             oldValueAhId = newElement.getAmenagementHydrauliqueId();
+            // HACK-REDMINE-4408 : hide archived AH from selection lists
+            final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
             SIRS.initCombo(ui_amenagementHydrauliqueId, SIRS.observableList(
-                    previewRepository.getByClass(linearPreview == null ? AmenagementHydraulique.class : linearPreview.getJavaClassOr(AmenagementHydraulique.class))).sorted(), linearPreview);
+                    previewRepository.getByClass(linearPreview == null ? AmenagementHydraulique.class : linearPreview.getJavaClassOr(AmenagementHydraulique.class))).sorted(),
+                    linearPreview, Boolean.valueOf(propertyStr));
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
         }
@@ -107,7 +110,7 @@ public class FXTraitAmenagementHydrauliquePane extends AbstractFXElementPane<Tra
     public void preSave() {
         final TraitAmenagementHydraulique element = (TraitAmenagementHydraulique) elementProperty().get();
         element.setCommentaire(ui_commentaire.getText());
-        
+
         Object cbValue;
         cbValue = ui_amenagementHydrauliqueId.getValue();
         if (cbValue instanceof Preview) {
