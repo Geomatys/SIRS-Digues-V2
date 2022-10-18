@@ -1,31 +1,31 @@
 
 package fr.sirs.theme.ui;
 
-import fr.sirs.Session;
-import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import fr.sirs.core.component.*;
+import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.Previews;
+import fr.sirs.core.component.TraitAmenagementHydrauliqueRepository;
 import fr.sirs.core.model.*;
-import fr.sirs.util.javafx.FloatSpinnerValueFactory;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsStringConverter;
-
+import fr.sirs.util.javafx.FloatSpinnerValueFactory;
+import fr.sirs.util.property.SirsPreferences;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
 import javafx.util.Callback;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -120,7 +120,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         ui_gestionnaireIds.setClosable(false);
 
         ui_tronconIds.setContent(() -> {
-            tronconIdsTable = new TronconTable(TronconDigue.class, null, elementProperty());
+            tronconIdsTable = new TronconTable( null, elementProperty());
             tronconIdsTable.editableProperty().bind(disableFieldsProperty().not());
             tronconIdsTable.fichableProperty().set(false);
             tronconIdsTable.createNewProperty().set(false);
@@ -229,7 +229,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         }
 
         final Session session = Injector.getBean(Session.class);
-        
+
         if (newElement == null) {
 
             ui_fonctionnementId.setItems(null);
@@ -379,7 +379,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
 //    protected void updateProprietesTable(final Session session, final AmenagementHydraulique newElement) {
 //        if (proprietesTable == null)
 //            return;
-//        
+//
 //        if (newElement == null) {
 //            proprietesTable.setTableItems(null);
 //        } else {
@@ -534,9 +534,9 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         }
     }
 
-    private static final class TronconTable extends ListeningPojoTable {
-        public TronconTable(Class pojoClass, String title, final ObjectProperty<AmenagementHydraulique> container) {
-            super(pojoClass, title, container);
+    private static final class TronconTable extends ListeningPojoTable<TronconDigue> {
+        public TronconTable(String title, final ObjectProperty<? extends Element> container) {
+            super(TronconDigue.class, title, container);
 
             final SirsStringConverter converter = new SirsStringConverter();
             final AbstractSIRSRepository<AmenagementHydraulique> repo = Injector.getSession().getRepositoryForClass(AmenagementHydraulique.class);
@@ -570,6 +570,23 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
                 }
             });
             columns.add(newColumn);
+        }
+
+        @Override
+        public void setTableItems(Supplier<ObservableList<Element>> producer) {
+            // HACK-REDMINE-4408 : hide archived troncons from pojo table
+            final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
+            if (Boolean.FALSE.equals(Boolean.valueOf(propertyStr)) && repo != null && producer != null) {
+                final List<Element> notArchivedElement = new ArrayList<>();
+                producer.get().forEach(p -> {
+                    TronconDigue t = (TronconDigue) p;
+                    if(t.getDate_fin() == null || t.getDate_fin().isAfter(LocalDate.now()))
+                        notArchivedElement.add(p);
+                });
+                super.setTableItems(() -> SIRS.observableList(notArchivedElement));
+                return;
+            }
+            super.setTableItems(producer);
         }
     }
 }
