@@ -20,6 +20,7 @@ package fr.sirs;
 
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.LinearReferencingUtilities;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.*;
 import fr.sirs.theme.ui.PojoTable;
@@ -52,6 +53,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
+import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.gui.javafx.util.TaskManager;
@@ -382,6 +384,24 @@ public abstract class TronconChoicePrintPane extends BorderPane {
                 if (!uiOptionExcludeInvalid.isSelected()) return true;
             }
             return false;
+        }
+    }
+
+    final protected class isNotOnArchivedTroncon<T extends AvecForeignParent> implements Predicate<T> {
+        @Override
+        public boolean test(final T candidate) {
+            String linearId = candidate.getForeignParentId();
+            if (linearId == null) return true;
+            String tronconDateFinStr;
+            try {
+                tronconDateFinStr = Injector.getSession().getPreviews().get(linearId).getDate_fin();
+            } catch (DocumentNotFoundException dnfe) {
+                SirsCore.LOGGER.log(Level.WARNING, "No document found for " + linearId, dnfe);
+                return true;
+            }
+
+            LocalDate dateFin = tronconDateFinStr == null ? null : LocalDate.parse(tronconDateFinStr);
+            return dateFin == null || dateFin.isAfter(LocalDate.now());
         }
     }
 }
