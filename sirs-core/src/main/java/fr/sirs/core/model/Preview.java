@@ -156,7 +156,7 @@ public class Preview implements AvecLibelle, Comparable {
                 ", elementClass='" + elementClass + '\'' +
                 ", author='" + author + '\'' +
                 ", valid=" + valid +
-                ", dateFin=" + date_fin +
+                ", date_fin=" + date_fin +
                 ", designationProperty=" + designationProperty +
                 ", libelleProperty=" + libelleProperty +
                 '}';
