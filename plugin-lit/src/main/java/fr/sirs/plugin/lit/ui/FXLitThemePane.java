@@ -82,8 +82,7 @@ public class FXLitThemePane extends BorderPane {
 
         final List<TronconLit> linearPreviews = session.getRepositoryForClass(TronconLit.class).getAll();
         // HACK-REDMINE-4408 : hide archived Berges from selection lists
-        final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
-        SIRS.initCombo(uiLinearChoice, SIRS.observableList(linearPreviews), null, Boolean.valueOf(propertyStr), false);
+        SIRS.initCombo(uiLinearChoice, SIRS.observableList(linearPreviews), null, SirsPreferences.getHideArchivedProperty(), false);
 
     }
 

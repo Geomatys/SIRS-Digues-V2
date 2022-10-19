@@ -20,7 +20,6 @@ package fr.sirs.ui;
 
 import fr.sirs.SIRS;
 import fr.sirs.util.SaveableConfiguration;
-import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -51,7 +50,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 import org.apache.sis.util.ArgumentChecks;
 
 /**
@@ -67,14 +65,14 @@ public class FXSirsPreferenceEditor extends ScrollPane implements SaveableConfig
     private static final HashMap<SirsPreferences.PROPERTIES, Node> EDITOR_OVERRIDES = new HashMap<>();
     static {
         EDITOR_OVERRIDES.put(SirsPreferences.PROPERTIES.DESIGNATION_AUTO_INCREMENT, new IncrementCheckBox());
-        
+
         EDITOR_OVERRIDES.put(SirsPreferences.PROPERTIES.ABSTRACT_SHOWCASE, new ShowCaseComboBox());
 
-        EDITOR_OVERRIDES.put(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON, new ArchivedTronconCheckBox());
+        EDITOR_OVERRIDES.put(SirsPreferences.PROPERTIES.HIDE_ARCHIVED_PARENT, new ArchivedParentCheckBox());
     }
 
     final ObservableMap<SirsPreferences.PROPERTIES, String> editedProperties = FXCollections.observableHashMap();
-    
+
     public FXSirsPreferenceEditor() {
         final GridPane propertyPane = new GridPane();
         propertyPane.setAlignment(Pos.CENTER);

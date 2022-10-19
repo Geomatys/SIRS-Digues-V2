@@ -20,7 +20,6 @@ package fr.sirs.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.Session;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.property.SirsPreferences;
 import javafx.beans.DefaultProperty;
 import javafx.beans.binding.Bindings;
@@ -35,7 +34,7 @@ import javafx.util.StringConverter;
  * @author Estelle Idée (Geomatys)
  */
 @DefaultProperty("stringValue")
-public class ArchivedTronconCheckBox extends BorderPane {
+public class ArchivedParentCheckBox extends BorderPane {
 
     protected final StringProperty stringValue = new SimpleStringProperty(this, "stringValue");
 
@@ -43,7 +42,7 @@ public class ArchivedTronconCheckBox extends BorderPane {
 
     private final Session session = Injector.getBean(Session.class);
 
-    public ArchivedTronconCheckBox() {
+    public ArchivedParentCheckBox() {
         checkBox = new CheckBox();
         setCenter(checkBox);
 
@@ -59,9 +58,7 @@ public class ArchivedTronconCheckBox extends BorderPane {
             }
         });
 
-        checkBox.selectedProperty().setValue(
-                Boolean.valueOf(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON))
-        );
+        checkBox.selectedProperty().setValue(SirsPreferences.getHideArchivedProperty());
     }
 
     public StringProperty stringValueProperty() {

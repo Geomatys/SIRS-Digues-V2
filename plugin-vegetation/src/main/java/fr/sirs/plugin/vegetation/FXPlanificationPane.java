@@ -64,8 +64,8 @@ public class FXPlanificationPane extends BorderPane {
         // Choix du tronçon.
         final ComboBox<Preview> uiTroncons = new ComboBox<>();
         // HACK-REDMINE-4408 : hide archived Troncons from selection lists
-        final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
-        SIRS.initCombo(uiTroncons, SIRS.observableList(session.getPreviews().getByClass(TronconDigue.class)).sorted(), null, Boolean.valueOf(propertyStr), true);
+        SIRS.initCombo(uiTroncons, SIRS.observableList(session.getPreviews().getByClass(TronconDigue.class)).sorted(),
+                null, SirsPreferences.getHideArchivedProperty(), true);
         final Label lblTroncon = new Label("Tronçon : ");
         lblTroncon.getStyleClass().add("label-header");
 

@@ -56,7 +56,7 @@ public class SirsPreferences extends Properties {
         CHECK_COUCHDB_VERSION("Vérifie la version de CouchDB", "Permet de vérifier ou d'ignorer la version de CouchDB au lancement de l'application.", Boolean.TRUE.toString()),
         DESIGNATION_AUTO_INCREMENT("Auto-incrément des désignations", "Lorsqu'un nouvel élément sera créé, sa désignation sera automatiquement remplie avec une valeur numérique"
                 + " déterminée à partir de l'objet du même type ayant une désignation de forme numérique la plus haute trouvée dans la base de données, + 1.", Boolean.FALSE.toString()),
-        SHOW_ARCHIVED_TRONCON("Afficher les tronçons archivés dans les bandeaux de sélection", "Par défaut les tronçons archivés sont masqués. Lorsque cette option est activée, les tronçons archivés seront disponibles dans les bandeaux.", Boolean.FALSE.toString()),
+        HIDE_ARCHIVED_PARENT("Cacher les tronçons, lits, berges, Dépendances et AHs archivés dans les bandeaux de sélection", "Par défaut les éléments archivés sont masqués. Lorsque cette option est désactivée, les éléments archivés seront disponibles dans les bandeaux.", Boolean.TRUE.toString()),
         ABSTRACT_SHOWCASE("Préférence pour la désignation des objets de l'application","Choix entre abrégé, nom complet ou les 2 pour la désignation des objet dans l'application.",
            ShowCasePossibility.BOTH.name),
         /*
@@ -79,17 +79,17 @@ public class SirsPreferences extends Properties {
 
         public String getDefaultValue(){return defaultValue;}
     }
-    
+
     private Boolean showCase = null;
-    
+
     public Boolean getShowCase(){
-        return showCase;        
+        return showCase;
     }
-    
+
     public Boolean setShowCase(Boolean newShowCase){
-        return showCase = newShowCase;        
+        return showCase = newShowCase;
     }
-    
+
     /**
      * Retourne la valeur de la propriété indiquée en paramètre, ou, en son absence, sa valeur par défaut.
      * @param property propriété
@@ -215,5 +215,9 @@ public class SirsPreferences extends Properties {
      */
     public String getPropertySafe(PROPERTIES key) {
         return getPropertySafe(key.name());
+    }
+
+    public static boolean getHideArchivedProperty() {
+        return Boolean.parseBoolean(INSTANCE.getProperty(SirsPreferences.PROPERTIES.HIDE_ARCHIVED_PARENT));
     }
 }

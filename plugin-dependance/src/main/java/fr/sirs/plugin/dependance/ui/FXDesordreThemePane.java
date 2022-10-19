@@ -67,8 +67,7 @@ public class FXDesordreThemePane extends FXDependanceThemePane {
         }
         final ObservableList<Preview> previewsWithEmpty = SIRS.observableList(previews).sorted();
        // HACK-REDMINE-4408 : hide archived Dépendances and AHs from selection lists
-        final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
-        SIRS.initCombo(uiDependanceAhChoice, previewsWithEmpty, null, Boolean.valueOf(propertyStr), false);
+        SIRS.initCombo(uiDependanceAhChoice, previewsWithEmpty, null, SirsPreferences.getHideArchivedProperty(), false);
     }
 
     @Override

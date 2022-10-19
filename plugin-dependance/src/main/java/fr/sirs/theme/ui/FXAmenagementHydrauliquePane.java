@@ -575,8 +575,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         @Override
         public void setTableItems(Supplier<ObservableList<Element>> producer) {
             // HACK-REDMINE-4408 : hide archived troncons from pojo table
-            final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
-            if (Boolean.FALSE.equals(Boolean.valueOf(propertyStr)) && repo != null && producer != null) {
+            if (SirsPreferences.getHideArchivedProperty() && repo != null && producer != null) {
                 final List<Element> notArchivedElement = new ArrayList<>();
                 producer.get().forEach(p -> {
                     TronconDigue t = (TronconDigue) p;

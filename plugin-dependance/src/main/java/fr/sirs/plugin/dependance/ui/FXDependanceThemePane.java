@@ -85,8 +85,7 @@ public class FXDependanceThemePane extends BorderPane {
         }
         final ObservableList<Preview> ahPreviews = SIRS.observableList(rawAhPreviews).sorted();
         // HACK-REDMINE-4408 : hide archived AH from selection lists
-        final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
-        SIRS.initCombo(uiAhChoice, ahPreviews, null, Boolean.valueOf(propertyStr), false);
+        SIRS.initCombo(uiAhChoice, ahPreviews, null, SirsPreferences.getHideArchivedProperty(), false);
     }
 
     protected Parent createContent(AbstractTheme.ThemeManager manager) {

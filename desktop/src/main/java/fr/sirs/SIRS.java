@@ -339,10 +339,10 @@ public final class SIRS extends SirsCore {
      * @param comboBox The combo box to set value on.
      * @param items The items we want into the ComboBox.
      * @param current the element to select by default.
-     * @param withArchived determine whether the combo shall include or not the archived element from the items list
+     * @param hideArchived determine whether the combo shall include or not the archived element from the items list
      */
-    public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final boolean withArchived, final boolean useCurrent) {
-        initCombo(comboBox, items, current, new SirsStringConverter(), withArchived, useCurrent);
+    public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final boolean hideArchived, final boolean useCurrent) {
+        initCombo(comboBox, items, current, new SirsStringConverter(), hideArchived, useCurrent);
     }
 
     /**
@@ -353,7 +353,7 @@ public final class SIRS extends SirsCore {
      * @param converter the StringConverter to use to identify the items.
      */
     public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final StringConverter converter) {
-        initCombo(comboBox, items, current, converter, true, true);
+        initCombo(comboBox, items, current, converter, false, true);
     }
 
     /**
@@ -362,14 +362,13 @@ public final class SIRS extends SirsCore {
      * @param items The items we want into the ComboBox.
      * @param current the element to select by default.
      * @param converter the StringConverter to use to identify the items.
-     * @param withArchived determine whether the combo shall include or not the archived element from the items list
+     * @param hideArchived determine whether the combo shall include or not the archived element from the items list
      */
-    public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final StringConverter converter, final boolean withArchived, final boolean useCurrent) {
+    public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final StringConverter converter, final boolean hideArchived, final boolean useCurrent) {
         ArgumentChecks.ensureNonNull("items", items);
         comboBox.setConverter(converter);
         ObservableList finalItems = null;
-        boolean wasFiltered = false;
-        if (!withArchived && items != null && !items.isEmpty()) {
+        if (hideArchived && items != null && !items.isEmpty()) {
             Object item = items.get(0);
             List<String> classesToFilterArchived = Arrays.asList(TronconDigue.class.getCanonicalName(), "fr.sirs.core.model.TronconLit", "fr.sirs.core.model.Berge",
                     "fr.sirs.core.model.AireStockageDependance", "fr.sirs.core.model.AmenagementHydraulique", "fr.sirs.core.model.AutreDependance",
@@ -378,12 +377,10 @@ public final class SIRS extends SirsCore {
                 List<? extends AvecBornesTemporelles> list = items;
                 final Predicate<AvecBornesTemporelles> isNotArchived = tl -> tl.getDate_fin() == null || tl.getDate_fin().isAfter(LocalDate.now());
                 finalItems = SIRS.observableList(list.stream().filter(isNotArchived).collect(Collectors.toList()));
-                wasFiltered = true;
             } else if (item instanceof Preview && classesToFilterArchived.contains(((Preview) item).getElementClass())) {
                 List<Preview> list = items;
                 final Predicate<Preview> isNotArchived = tl -> tl.getDate_fin() == null || LocalDate.parse(tl.getDate_fin()).isAfter(LocalDate.now());
                 finalItems = SIRS.observableList(list.stream().filter(isNotArchived).collect(Collectors.toList()));
-                wasFiltered = true;
             }
         }
         if (finalItems == null) finalItems = items;

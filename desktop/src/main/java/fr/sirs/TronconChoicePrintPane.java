@@ -88,9 +88,8 @@ public abstract class TronconChoicePrintPane extends BorderPane {
 
         final List<TronconDigue> byClass = session.getRepositoryForClass(TronconDigue.class).getAll();
         // HACK-REDMINE-4408 : hide archived troncons from selection lists
-        final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
         List<TronconDigue> list = null;
-        if (Boolean.FALSE.equals(Boolean.valueOf(propertyStr))) {
+        if (SirsPreferences.getHideArchivedProperty()) {
             final Predicate<TronconDigue> isNotArchived = tl -> tl.getDate_fin() == null || tl.getDate_fin().isAfter(LocalDate.now());
             list = byClass.stream().filter(isNotArchived).collect(Collectors.toList());
         }

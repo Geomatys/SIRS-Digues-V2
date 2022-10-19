@@ -82,8 +82,7 @@ public class FXBergeThemePane extends BorderPane {
 
         final List<Berge> linearPreviews = session.getRepositoryForClass(Berge.class).getAll();
         // HACK-REDMINE-4408 : hide archived Berges from selection lists
-        final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
-        SIRS.initCombo(uiLinearChoice, SIRS.observableList(linearPreviews), null, Boolean.valueOf(propertyStr), false);
+        SIRS.initCombo(uiLinearChoice, SIRS.observableList(linearPreviews), null, SirsPreferences.getHideArchivedProperty(), false);
 
 
     }

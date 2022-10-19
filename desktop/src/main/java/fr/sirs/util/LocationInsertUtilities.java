@@ -318,8 +318,7 @@ public class LocationInsertUtilities {
                 // the tronçons of the selected elements should be visible on the location insert even though they are archived
                 else if (layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME) && !tronconsIds.isEmpty()) {
                     // HACK-REDMINE-4408 : hide archived Tronçons depending on preference option
-                    final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
-                    if (Boolean.TRUE.equals(Boolean.valueOf(propertyStr))) {
+                    if (!SirsPreferences.getHideArchivedProperty()) {
                         filter = null;
                     }
                 }

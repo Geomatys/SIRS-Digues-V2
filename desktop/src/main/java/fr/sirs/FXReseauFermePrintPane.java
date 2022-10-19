@@ -215,7 +215,7 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
                 .and(new LastObservationPredicate(uiOptionDebutLastObservation.getValue(), uiOptionFinLastObservation.getValue()));
 
         // HACK-REDMINE-4408 : remove elements on archived Troncons
-        if (!Boolean.valueOf(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON))) {
+        if (SirsPreferences.getHideArchivedProperty()) {
             userOptions = userOptions.and(new isNotOnArchivedTroncon());
         }
 

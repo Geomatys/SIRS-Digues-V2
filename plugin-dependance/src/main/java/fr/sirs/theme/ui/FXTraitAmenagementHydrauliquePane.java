@@ -98,10 +98,9 @@ public class FXTraitAmenagementHydrauliquePane extends AbstractFXElementPane<Tra
             final Preview linearPreview = newElement.getAmenagementHydrauliqueId() == null ? null : previewRepository.get(newElement.getAmenagementHydrauliqueId());
             oldValueAhId = newElement.getAmenagementHydrauliqueId();
             // HACK-REDMINE-4408 : hide archived AH from selection lists
-            final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
             SIRS.initCombo(ui_amenagementHydrauliqueId, SIRS.observableList(
                     previewRepository.getByClass(linearPreview == null ? AmenagementHydraulique.class : linearPreview.getJavaClassOr(AmenagementHydraulique.class))).sorted(),
-                    linearPreview, Boolean.valueOf(propertyStr), true);
+                    linearPreview, SirsPreferences.getHideArchivedProperty(), true);
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
         }

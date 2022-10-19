@@ -285,8 +285,7 @@ public class FXOuvrageAssocieAmenagementHydrauliquePane extends AbstractFXElemen
                 linearPreview = sorted.get(0);
             }
             // HACK-REDMINE-4408 : hide archived AH from selection lists
-            final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
-            SIRS.initCombo(ui_amenagementHydrauliqueId, sorted, linearPreview, Boolean.valueOf(propertyStr), true);
+            SIRS.initCombo(ui_amenagementHydrauliqueId, sorted, linearPreview, SirsPreferences.getHideArchivedProperty(), true);
         }
 
         updateAmenagementHydrauliqueAssocieIdsTable(session, newElement);
