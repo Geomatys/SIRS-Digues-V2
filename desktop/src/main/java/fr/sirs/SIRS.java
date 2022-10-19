@@ -381,7 +381,7 @@ public final class SIRS extends SirsCore {
                 wasFiltered = true;
             } else if (item instanceof Preview && classesToFilterArchived.contains(((Preview) item).getElementClass())) {
                 List<Preview> list = items;
-                final Predicate<Preview> isNotArchived = tl -> tl.getDateFin() == null || LocalDate.parse(tl.getDateFin()).isAfter(LocalDate.now());
+                final Predicate<Preview> isNotArchived = tl -> tl.getDate_fin() == null || LocalDate.parse(tl.getDate_fin()).isAfter(LocalDate.now());
                 finalItems = SIRS.observableList(list.stream().filter(isNotArchived).collect(Collectors.toList()));
                 wasFiltered = true;
             }

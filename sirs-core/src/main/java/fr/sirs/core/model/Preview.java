@@ -50,8 +50,8 @@ public class Preview implements AvecLibelle, Comparable {
     @JsonProperty("valid")
     private boolean valid;
 
-    @JsonProperty("dateFin")
-    private String dateFin;
+    @JsonProperty("date_fin")
+    private String date_fin;
 
     private final SimpleStringProperty designationProperty = new SimpleStringProperty();
 
@@ -112,12 +112,12 @@ public class Preview implements AvecLibelle, Comparable {
         this.valid = valid;
     }
 
-    public String getDateFin() {
-        return dateFin;
+    public String getDate_fin() {
+        return date_fin;
     }
 
-    public void setDateFin(String dateFin) {
-        this.dateFin = dateFin;
+    public void setDate_fin(String date_fin) {
+        this.date_fin = date_fin;
     }
 
     @JsonProperty("designation")
@@ -156,7 +156,7 @@ public class Preview implements AvecLibelle, Comparable {
                 ", elementClass='" + elementClass + '\'' +
                 ", author='" + author + '\'' +
                 ", valid=" + valid +
-                ", dateFin=" + dateFin +
+                ", dateFin=" + date_fin +
                 ", designationProperty=" + designationProperty +
                 ", libelleProperty=" + libelleProperty +
                 '}';
