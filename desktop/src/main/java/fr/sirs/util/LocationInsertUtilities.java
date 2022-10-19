@@ -24,6 +24,7 @@ import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.property.SirsPreferences;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
@@ -70,10 +71,10 @@ public class LocationInsertUtilities {
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
 
-    private static final  Filter FILTER_ARCHIVED = FF.and(
+    private static final  Filter FILTER_NOT_ARCHIVED = FF.and(
             FF.or(
                     FF.isNull(FF.property(DATE_FIN_FIELD)),
-                    FF.greaterOrEqual(FF.property(DATE_FIN_FIELD), FF.literal(LocalDate.now()))),
+                    FF.greater(FF.property(DATE_FIN_FIELD), FF.literal(LocalDate.now()))),
             FF.or(
                     FF.isNull(FF.property(DATE_DEBUT_FIELD)),
                     FF.lessOrEqual(FF.property(DATE_DEBUT_FIELD), FF.literal(LocalDate.now()))));
@@ -282,7 +283,7 @@ public class LocationInsertUtilities {
         }
         if (!fml.isEmpty()) {
             final TronconDigueRepository tronconRepository = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
-            // collect the docmuentIds of the troncons the elements are linked to
+            // collect the documentIds of the troncons the elements are linked to
             final List<String> tronconsIds = new ArrayList<>();
             if (elementsToShow != null && !elementsToShow.isEmpty()) {
                 for (Objet e : elementsToShow) {
@@ -296,7 +297,7 @@ public class LocationInsertUtilities {
             }
             Query currentQuery;
             GenericName typeName;
-            Filter filter;
+            Filter filter = null;
             QueryBuilder queryBuilder;
             GeometryDescriptor geomDescriptor;
             GenericName[] genericNames;
@@ -305,7 +306,7 @@ public class LocationInsertUtilities {
                 oldQueries.put(layer, currentQuery);
                 FeatureType ft = layer.getCollection().getFeatureType();
                 typeName = ft.getName();
-                filter = FILTER_ARCHIVED;
+                filter = FILTER_NOT_ARCHIVED;
                 // the archived selected elements should be visible on the location insert
                 if (!tronconsIds.isEmpty() && elementsToShow.get(0).getClass().getSimpleName().equalsIgnoreCase(typeName.toString())) {
                     for (String tId : tronconsIds) {
@@ -316,15 +317,16 @@ public class LocationInsertUtilities {
                 }
                 // the tronçons of the selected elements should be visible on the location insert even though they are archived
                 else if (layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME) && !tronconsIds.isEmpty()) {
-                    for (String tId : tronconsIds) {
-                        filter = FF.or(
-                                FF.equals(FF.property("documentId"), FF.literal(tId)),
-                                filter);
+                    // HACK-REDMINE-4408 : hide archived Tronçons depending on preference option
+                    final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
+                    if (Boolean.TRUE.equals(Boolean.valueOf(propertyStr))) {
+                        filter = null;
                     }
                 }
                 queryBuilder = new QueryBuilder(
                         NamesExt.create(typeName.scope().toString(), typeName.head().toString()));
-                queryBuilder.setFilter(filter);
+                if (filter != null)
+                    queryBuilder.setFilter(filter);
                 geomDescriptor = ft.getGeometryDescriptor();
                 if (geomDescriptor != null) {
                     genericNames = new GenericName[]{geomDescriptor.getName()};
