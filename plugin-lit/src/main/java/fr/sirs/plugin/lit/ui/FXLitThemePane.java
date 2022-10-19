@@ -74,13 +74,17 @@ public class FXLitThemePane extends BorderPane {
             setCenter(pane);
         }
 
+        uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends TronconLit> observable, TronconLit oldValue, TronconLit newValue) -> {
+            if (newValue != null) {
+                linearIdProperty.set(newValue.getId());
+            }
+        });
+
         final List<TronconLit> linearPreviews = session.getRepositoryForClass(TronconLit.class).getAll();
         // HACK-REDMINE-4408 : hide archived Berges from selection lists
         final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
         SIRS.initCombo(uiLinearChoice, SIRS.observableList(linearPreviews), null, Boolean.valueOf(propertyStr), false);
-        uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends TronconLit> observable, TronconLit oldValue, TronconLit newValue) -> {
-            linearIdProperty.set(newValue.getId());
-        });
+
     }
 
     protected class LitThemePojoTable<T extends AvecForeignParent> extends ForeignParentPojoTable<T>{

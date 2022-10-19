@@ -74,13 +74,17 @@ public class FXBergeThemePane extends BorderPane {
             setCenter(pane);
         }
 
+        uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Berge> observable, Berge oldValue, Berge newValue) -> {
+            if (newValue != null) {
+                linearIdProperty.set(newValue.getId());
+            }
+        });
+
         final List<Berge> linearPreviews = session.getRepositoryForClass(Berge.class).getAll();
         // HACK-REDMINE-4408 : hide archived Berges from selection lists
         final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
         SIRS.initCombo(uiLinearChoice, SIRS.observableList(linearPreviews), null, Boolean.valueOf(propertyStr), false);
-        uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Berge> observable, Berge oldValue, Berge newValue) -> {
-            linearIdProperty.set(newValue.getId());
-        });
+
 
     }
 
