@@ -65,7 +65,7 @@ public class FXPlanificationPane extends BorderPane {
         final ComboBox<Preview> uiTroncons = new ComboBox<>();
         // HACK-REDMINE-4408 : hide archived Troncons from selection lists
         final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
-        SIRS.initCombo(uiTroncons, SIRS.observableList(session.getPreviews().getByClass(TronconDigue.class)).sorted(), null, Boolean.valueOf(propertyStr));
+        SIRS.initCombo(uiTroncons, SIRS.observableList(session.getPreviews().getByClass(TronconDigue.class)).sorted(), null, Boolean.valueOf(propertyStr), true);
         final Label lblTroncon = new Label("Tronçon : ");
         lblTroncon.getStyleClass().add("label-header");
 

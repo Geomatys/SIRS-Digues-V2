@@ -341,8 +341,8 @@ public final class SIRS extends SirsCore {
      * @param current the element to select by default.
      * @param withArchived determine whether the combo shall include or not the archived element from the items list
      */
-    public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final boolean withArchived) {
-        initCombo(comboBox, items, current, new SirsStringConverter(), withArchived);
+    public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final boolean withArchived, final boolean useCurrent) {
+        initCombo(comboBox, items, current, new SirsStringConverter(), withArchived, useCurrent);
     }
 
     /**
@@ -353,7 +353,7 @@ public final class SIRS extends SirsCore {
      * @param converter the StringConverter to use to identify the items.
      */
     public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final StringConverter converter) {
-        initCombo(comboBox, items, current, converter, true);
+        initCombo(comboBox, items, current, converter, true, true);
     }
 
     /**
@@ -364,7 +364,7 @@ public final class SIRS extends SirsCore {
      * @param converter the StringConverter to use to identify the items.
      * @param withArchived determine whether the combo shall include or not the archived element from the items list
      */
-    public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final StringConverter converter, final boolean withArchived) {
+    public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current, final StringConverter converter, final boolean withArchived, final boolean useCurrent) {
         ArgumentChecks.ensureNonNull("items", items);
         comboBox.setConverter(converter);
         ObservableList finalItems = null;
@@ -393,10 +393,10 @@ public final class SIRS extends SirsCore {
             comboBox.setItems(finalItems.sorted((o1, o2) -> converter.toString(o1).compareTo(converter.toString(o2))));
         }
         comboBox.setEditable(true);
-        if (wasFiltered)
-            comboBox.getSelectionModel().select(finalItems == null ? null : finalItems.get(0));
-        else
+        if (useCurrent)
             comboBox.getSelectionModel().select(current);
+        else
+            comboBox.getSelectionModel().select(finalItems == null ? null : finalItems.get(0));
         ComboBoxCompletion.autocomplete(comboBox);
     }
 

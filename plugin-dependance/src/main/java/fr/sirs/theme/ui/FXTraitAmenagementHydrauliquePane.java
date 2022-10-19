@@ -101,7 +101,7 @@ public class FXTraitAmenagementHydrauliquePane extends AbstractFXElementPane<Tra
             final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
             SIRS.initCombo(ui_amenagementHydrauliqueId, SIRS.observableList(
                     previewRepository.getByClass(linearPreview == null ? AmenagementHydraulique.class : linearPreview.getJavaClassOr(AmenagementHydraulique.class))).sorted(),
-                    linearPreview, Boolean.valueOf(propertyStr));
+                    linearPreview, Boolean.valueOf(propertyStr), true);
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
         }

@@ -431,7 +431,7 @@ public class FXSeuilLitPane  extends AbstractFXElementPane<SeuilLit> {
         final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
         SIRS.initCombo(ui_linearId, SIRS.observableList(
             previewRepository.getByClass(linearPreview == null ? TronconDigue.class : linearPreview.getJavaClassOr(TronconDigue.class))).sorted(),
-            linearPreview, Boolean.valueOf(propertyStr));
+            linearPreview, Boolean.valueOf(propertyStr), true);
 //        SIRS.initCombo(ui_linearId, SIRS.observableList(
 //            previewRepository.getByClass(TronconDigue.class)).sorted(),
 //            newElement.getLinearId() == null? null : previewRepository.get(newElement.getLinearId()));

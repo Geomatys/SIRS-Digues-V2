@@ -788,7 +788,7 @@ else if (helper.isParcelleVegetation()){
             final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
             SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(
                 previewRepository.getByClass(linearPreview == null ? <%= helper.getClassName(eRef) %>.class : linearPreview.getJavaClassOr(<%= helper.getClassName(eRef) %>.class))).sorted(),
-                linearPreview, Boolean.valueOf(propertyStr));
+                linearPreview, Boolean.valueOf(propertyStr), true);
         }
 <%
                 }

@@ -150,7 +150,7 @@ public class FXPositionDocumentPane extends AbstractFXElementPane<PositionDocume
             // HACK-REDMINE-4408 : hide archived linear from selection lists
             final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
             SIRS.initCombo(ui_linearId, SIRS.observableList(
-                previewRepository.getByClass(linearPreview == null ? TronconDigue.class : linearPreview.getJavaClassOr(TronconDigue.class))).sorted(), linearPreview, Boolean.valueOf(propertyStr));
+                previewRepository.getByClass(linearPreview == null ? TronconDigue.class : linearPreview.getJavaClassOr(TronconDigue.class))).sorted(), linearPreview, Boolean.valueOf(propertyStr), true);
         }
         // Propriétés de AbstractPositionDocumentAssociable
         }

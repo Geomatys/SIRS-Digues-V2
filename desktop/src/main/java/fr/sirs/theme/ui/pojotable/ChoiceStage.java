@@ -46,7 +46,7 @@ public class ChoiceStage extends PojoTableComboBoxChoiceStage<Element, Preview> 
         super(okButtonLabel);
         setTitle(windowTitle);
 
-        SIRS.initCombo(comboBox, items, defaultSelection, Boolean.valueOf(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON)));
+        SIRS.initCombo(comboBox, items, defaultSelection, Boolean.valueOf(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON)), true);
         retrievedElement.bind(new ObjectBinding<Element>() {
 
             {

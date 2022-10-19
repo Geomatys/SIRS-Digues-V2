@@ -106,7 +106,7 @@ public class FXTronconThemePane extends BorderPane {
         final ObservableList<Preview> linearPreviews = SIRS.observableList(byClass).sorted();
         // HACK-REDMINE-4408 : hide archived troncons from selection lists
         final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
-        SIRS.initCombo(uiLinearChoice, linearPreviews, linearPreviews.isEmpty() ? null : linearPreviews.get(0), Boolean.parseBoolean(propertyStr));
+        SIRS.initCombo(uiLinearChoice, linearPreviews, null, Boolean.parseBoolean(propertyStr), false);
 
     }
 

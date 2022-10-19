@@ -258,7 +258,7 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
             // HACK-REDMINE-4408 : hide archived AH from selection lists
             final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.SHOW_ARCHIVED_TRONCON);
             SIRS.initCombo(ui_abstractDependanceId, FXCollections.observableList(session.getPreviews().getByClass(AbstractDependance.class)),
-                    amenagementOrDependancePreview, Boolean.parseBoolean(propertyStr));
+                    amenagementOrDependancePreview, Boolean.parseBoolean(propertyStr), true);
         }
 
         updateObservationsTable(session, newElement);
