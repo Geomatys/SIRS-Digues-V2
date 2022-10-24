@@ -40,13 +40,13 @@ public class DesordreLitRepository extends AbstractDesordreRepository<DesordreLi
     }
 
     /**
-     * get all the desordres for a Troncon that are open (end date null)
-     * @param linearId id of the troncon
-     * @return the list of the open desordres present on the troncon
+     * get all the desordres for a Lit that are not archived (end date null or end date in the future)
+     * @param linearId id of the lit
+     * @return the list of the open desordres present on the lit
      */
     @Override
     public List<DesordreLit> getDesordreOpenByLinearId(final String linearId) {
-        ArgumentChecks.ensureNonNull("Desordre Troncon", linearId);
+        ArgumentChecks.ensureNonNull("Desordre Lit", linearId);
         return this.queryView(ALL_OPEN_BY_LINEAR_ID, linearId);
     }
 }

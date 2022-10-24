@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -19,6 +19,8 @@
 package fr.sirs.core.component;
 
 import fr.sirs.core.model.Element;
+
+import java.util.ArrayList;
 import java.util.List;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
@@ -45,12 +47,20 @@ import org.springframework.stereotype.Component;
 "            libelle: doc.libelle," +
 "            geometry: doc.geometry" +
 "        })}}"),
-    @View(name=GlobalRepository.CONFLICTING_REVISIONS, map="function(doc) {if(doc._conflicts) {emit(doc._id, doc._conflicts)}}")
+    @View(name=GlobalRepository.CONFLICTING_REVISIONS, map="function(doc) {if(doc._conflicts) {emit(doc._id, doc._conflicts)}}"),
+    @View(name=GlobalRepository.BY_CLASS_AND_ID_VIEW, map="function(doc) {if(doc['@class']) {emit([doc['@class'], doc._id], {" +
+            "            id: doc._id," +
+            "            rev: doc._rev," +
+            "            designation: doc.designation," +
+            "            libelle: doc.libelle," +
+            "            geometry: doc.geometry" +
+            "        })}}")
 })
 public class GlobalRepository extends CouchDbRepositorySupport<Element> {
 
     protected static final String BY_CLASS_AND_LINEAR_VIEW = "byClassAndLinear";
     protected static final String CONFLICTING_REVISIONS = "conflictingRevisions";
+    protected static final String BY_CLASS_AND_ID_VIEW = "byClassAndId";
 
     @Autowired
     private GlobalRepository(CouchDbConnector db) {
@@ -64,6 +74,15 @@ public class GlobalRepository extends CouchDbRepositorySupport<Element> {
         return createQuery(BY_CLASS_AND_LINEAR_VIEW)
                 .startKey(startKey)
                 .endKey(endKey)
+                .includeDocs(true);
+    }
+
+    protected <T> ViewQuery createByClassAndIdQuery(Class<T> type, final List<String> ids) {
+        final List<ComplexKey> keys = new ArrayList<>();
+        ids.forEach(id -> keys.add(ComplexKey.of(type.getCanonicalName(), id)));
+
+        return createQuery(BY_CLASS_AND_ID_VIEW)
+                .keys(keys)
                 .includeDocs(true);
     }
 

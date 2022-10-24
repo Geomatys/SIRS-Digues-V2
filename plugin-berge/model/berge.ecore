@@ -130,6 +130,9 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvertureBatardableIds"
         upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvertureBatardable"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DesordreBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//Desordre">
+      <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefNatureSolBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>

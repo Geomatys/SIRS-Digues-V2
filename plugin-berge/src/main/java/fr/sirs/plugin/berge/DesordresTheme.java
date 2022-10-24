@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -18,30 +18,31 @@
  */
 package fr.sirs.plugin.berge;
 
-import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.DesordreBerge;
 import fr.sirs.plugin.berge.ui.AbstractDescriptionPane;
 import fr.sirs.plugin.berge.util.TabContent;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.scene.Parent;
 import javafx.scene.layout.BorderPane;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
- * @author Guilhem Legal (Geomatys)
+ * @author Estelle Idee (Geomatys)
  */
 public class DesordresTheme extends AbstractDescriptionTheme {
-    
+
     public DesordresTheme() {
         super("Désordres", "Désordres");
     }
-    
+
     @Override
     public Parent createPane() {
         List<TabContent> content = new ArrayList<>();
-        content.add(new TabContent("", "Tableau des désordres", Desordre.class));
+        content.add(new TabContent("", "Tableau des désordres (Berge)", DesordreBerge.class));
         final BorderPane borderPane = new AbstractDescriptionPane(content);
         return borderPane;
     }
-    
+
 }

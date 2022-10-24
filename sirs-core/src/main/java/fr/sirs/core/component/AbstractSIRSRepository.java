@@ -23,15 +23,11 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import fr.sirs.core.CacheRules;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
-import fr.sirs.core.model.AvecDateMaj;
-import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Identifiable;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.ReferenceType;
+import fr.sirs.core.model.*;
 import fr.sirs.util.ClosingDaemon;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.util.StreamingIterable;
+
 import java.lang.ref.PhantomReference;
 import java.lang.ref.WeakReference;
 import java.time.LocalDate;
@@ -46,14 +42,7 @@ import java.util.logging.Level;
 import javafx.collections.ObservableList;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
-import org.ektorp.BulkDeleteDocument;
-import org.ektorp.ComplexKey;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.DbAccessException;
-import org.ektorp.DocumentOperationResult;
-import org.ektorp.StreamingViewResult;
-import org.ektorp.ViewQuery;
-import org.ektorp.ViewResult;
+import org.ektorp.*;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.geotoolkit.util.collection.CloseableIterator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,6 +98,8 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
     private StreamingViewIterable allStreaming;
 
+    private StreamingViewIterable byIdsStreaming;
+
     protected AbstractSIRSRepository(Class<T> type, CouchDbConnector db) {
         super(type, db);
         cache = new Cache(20, 0, CacheRules.cacheElementsOfType(type));
@@ -156,6 +147,20 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
             allStreaming = new StreamingViewIterable(globalRepo.createByClassQuery(type));
         }
         return allStreaming;
+    }
+
+    /**
+     *
+     * @return An iterable object which provides an iterator querying all documents
+     * managed by current using a stream, to avoid memory overload.
+     *
+     * Note : provided iterators are closeable.
+     */
+    public synchronized StreamingIterable<T> getByIdsStreaming(List<String> ids) {
+        if (byIdsStreaming == null) {
+            byIdsStreaming = new StreamingViewIterable(globalRepo.createByClassAndIdQuery(type, ids));
+        }
+        return byIdsStreaming;
     }
 
     private void checkIntegrity(T entity){
@@ -215,6 +220,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
         return result;
     }
+
 
     /**
      * Execute bulk for add/update operation on several documents.

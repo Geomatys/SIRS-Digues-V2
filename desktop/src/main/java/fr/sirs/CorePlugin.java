@@ -30,63 +30,13 @@ import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.AbstractPositionDocument;
-import fr.sirs.core.model.AbstractPositionDocumentAssociable;
-import fr.sirs.core.model.ArticleJournal;
-import fr.sirs.core.model.AvecGeometrie;
-import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Crete;
-import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Deversoir;
-import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.DocumentGrandeEchelle;
-import fr.sirs.core.model.EchelleLimnimetrique;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Epi;
-import fr.sirs.core.model.Fondation;
-import fr.sirs.core.model.GardeTroncon;
-import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.LaisseCrue;
-import fr.sirs.core.model.LargeurFrancBord;
-import fr.sirs.core.model.LigneEau;
-import fr.sirs.core.model.Marche;
-import fr.sirs.core.model.MonteeEaux;
-import fr.sirs.core.model.OuvertureBatardable;
-import fr.sirs.core.model.OuvrageFranchissement;
-import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.OuvrageParticulier;
-import fr.sirs.core.model.OuvrageRevanche;
-import fr.sirs.core.model.OuvrageTelecomEnergie;
-import fr.sirs.core.model.OuvrageVoirie;
-import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.PiedDigue;
-import fr.sirs.core.model.PositionDocument;
-import fr.sirs.core.model.PositionProfilTravers;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.Prestation;
-import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.ProfilLong;
-import fr.sirs.core.model.ProfilTravers;
-import fr.sirs.core.model.ProprieteTroncon;
-import fr.sirs.core.model.RapportEtude;
-import fr.sirs.core.model.RefTypeDesordre;
-import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauTelecomEnergie;
-import fr.sirs.core.model.SIRSDocument;
-import fr.sirs.core.model.SommetRisberme;
-import fr.sirs.core.model.StationPompage;
-import fr.sirs.core.model.SystemeEndiguement;
-import fr.sirs.core.model.TalusDigue;
-import fr.sirs.core.model.TalusRisberme;
-import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.model.VoieAcces;
-import fr.sirs.core.model.VoieDigue;
+import fr.sirs.core.model.*;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.migration.HtmlRemoval;
 import fr.sirs.migration.RemoveOldDependanceConf;
+import fr.sirs.migration.UpgradeToDesordreBerge;
 import fr.sirs.migration.upgrade.v2and23.UpgradeLink1NtoNN;
 import fr.sirs.migration.upgrade.v2and23.UpgradePrestationsCoordinates;
 import fr.sirs.migration.upgrade.v2and23.Upgrades1NtoNNSupported;
@@ -117,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -131,6 +82,7 @@ import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.ArraysExt;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.cql.CQLException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
@@ -260,6 +212,28 @@ public class CorePlugin extends Plugin {
             return new StructBeanSupplier(c, () -> getSession().getRepositoryForClass(c).getAllStreaming());
         };
 
+        final Function<Class<? extends Element>, StructBeanSupplier> getDefaultSupplierForClassWithLinearTroncon = (Class<? extends Element> c) ->{
+            List<? extends Element> elements = getSession().getRepositoryForClass(c).getAll();
+
+            final List<String> elementsIdsOnTronconDigue = new ArrayList<>();
+            Element e;
+            for (int i = 0; i < elements.size(); i++) {
+                e = elements.get(i);
+                String linearId = ((AvecForeignParent)e).getForeignParentId();
+                if (linearId == null) continue;
+                Preview linear;
+                try {
+                    linear = Injector.getBean(Session.class).getPreviews().get(linearId);
+                } catch (DocumentNotFoundException ex) {
+                    continue;
+                }
+                if (linear.getElementClass().equals("fr.sirs.core.model.TronconDigue"))
+                    elementsIdsOnTronconDigue.add(e.getId());
+
+            }
+            return new StructBeanSupplier(c, () -> getSession().getRepositoryForClass(c).getByIdsStreaming(elementsIdsOnTronconDigue));
+        };
+
         //troncons
         suppliers.put(TronconDigue.class, new StructBeanSupplier(TronconDigue.class,() -> repository::getAllLightIterator));
 
@@ -298,7 +272,7 @@ public class CorePlugin extends Plugin {
         suppliers.put(EchelleLimnimetrique.class, getDefaultSupplierForClass.apply(EchelleLimnimetrique.class));
 
         // Désordres
-        suppliers.put(Desordre.class, getDefaultSupplierForClass.apply(Desordre.class));
+        suppliers.put(Desordre.class, getDefaultSupplierForClassWithLinearTroncon.apply(Desordre.class));
 
         // Prestations
         suppliers.put(Prestation.class, getDefaultSupplierForClass.apply(Prestation.class));
@@ -1256,6 +1230,11 @@ public class CorePlugin extends Plugin {
         if (fromMajor < 2 || (fromMajor == 2 && fromMinor < 36)) {
             upgradeTasks.add(new RemoveOldDependanceConf(dbConnector));
         }
+
+//        if (fromMajor < 2 || (fromMajor == 2 && fromMinor < 39)) {
+//            upgradeTasks.add(new UpgradeToDesordreBerge(dbConnector));
+//        }
+
         super.findUpgradeTasks(fromMajor, fromMinor, dbConnector, upgradeTasks);
     }
 

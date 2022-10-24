@@ -26,18 +26,7 @@ import fr.sirs.Plugin;
 import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.SirsCoreRuntimeException;
-import fr.sirs.core.model.Berge;
-import fr.sirs.core.model.CreteBerge;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.EpiBerge;
-import fr.sirs.core.model.FondationBerge;
-import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.OuvrageRevancheBerge;
-import fr.sirs.core.model.PiedBerge;
-import fr.sirs.core.model.SommetBerge;
-import fr.sirs.core.model.TalusBerge;
-import fr.sirs.core.model.TalusRisbermeBerge;
-import fr.sirs.core.model.TraitBerge;
+import fr.sirs.core.model.*;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.berge.map.BergeToolBar;
 import java.awt.Color;
@@ -140,16 +129,15 @@ public class PluginBerge extends Plugin {
         suppliers.put(Berge.class, getDefaultSupplierForClass.apply(Berge.class));
         suppliers.put(TraitBerge.class, getDefaultSupplierForClass.apply(TraitBerge.class));
 
-        //
-        suppliers.put(PiedBerge.class, getDefaultSupplierForClass.apply(PiedBerge.class));
         suppliers.put(SommetBerge.class, getDefaultSupplierForClass.apply(SommetBerge.class));
-        suppliers.put(EpiBerge.class, getDefaultSupplierForClass.apply(EpiBerge.class));
-        suppliers.put(FondationBerge.class, getDefaultSupplierForClass.apply(FondationBerge.class));
-        suppliers.put(TalusRisbermeBerge.class, getDefaultSupplierForClass.apply(TalusRisbermeBerge.class));
         suppliers.put(TalusBerge.class, getDefaultSupplierForClass.apply(TalusBerge.class));
+        suppliers.put(PiedBerge.class, getDefaultSupplierForClass.apply(PiedBerge.class));
+        suppliers.put(EpiBerge.class, getDefaultSupplierForClass.apply(EpiBerge.class));
         suppliers.put(OuvrageRevancheBerge.class, getDefaultSupplierForClass.apply(OuvrageRevancheBerge.class));
-        suppliers.put(CreteBerge.class, getDefaultSupplierForClass.apply(CreteBerge.class));
-    }
+//        suppliers.put(FondationBerge.class, getDefaultSupplierForClass.apply(FondationBerge.class));
+//        suppliers.put(TalusRisbermeBerge.class, getDefaultSupplierForClass.apply(TalusRisbermeBerge.class));
+//        suppliers.put(CreteBerge.class, getDefaultSupplierForClass.apply(CreteBerge.class));
+        }
 
 
     @Override
@@ -173,19 +161,64 @@ public class PluginBerge extends Plugin {
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
 
+            final MapItem desordreLayer = MapBuilder.createItem();
+            desordreLayer.setName("Désordres (Berge)");
+            final BeanStore desordreStore = new BeanStore(suppliers.get(DesordreBerge.class));
+            desordreLayer.items().addAll(buildLayers(desordreStore, nameMap, colors, createDefaultSelectionStyle(), false));
+            desordreLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            container.items().add(desordreLayer);
+
             final MapItem structLayer = MapBuilder.createItem();
-            structLayer.setName("Autre (berge)");
+            structLayer.setName("Structure (berge)");
             final BeanStore otherStore = new BeanStore(suppliers.get(PiedBerge.class),
                     suppliers.get(SommetBerge.class),
-                    suppliers.get(EpiBerge.class),
-                    suppliers.get(FondationBerge.class),
-                    suppliers.get(TalusRisbermeBerge.class),
                     suppliers.get(TalusBerge.class),
-                    suppliers.get(OuvrageRevancheBerge.class),
-                    suppliers.get(CreteBerge.class));
+                    suppliers.get(PiedBerge.class),
+                    suppliers.get(EpiBerge.class),
+                    suppliers.get(OuvrageRevancheBerge.class));
+//                    suppliers.get(FondationBerge.class),
+//                    suppliers.get(TalusRisbermeBerge.class),
+//                    suppliers.get(CreteBerge.class))
             structLayer.items().addAll(buildLayers(otherStore, nameMap, colors, createDefaultSelectionStyle(), false));
             structLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             container.items().add(structLayer);
+
+            // Réseaux de voirie
+            final BeanStore rvStore = new BeanStore(
+                    suppliers.get(VoieAcces.class),
+                    suppliers.get(OuvrageFranchissement.class),
+                    suppliers.get(OuvertureBatardable.class),
+                    suppliers.get(VoieDigue.class),
+                    suppliers.get(OuvrageVoirie.class));
+            final MapItem rvLayer = MapBuilder.createItem();
+            rvLayer.setName("Réseaux de voirie");
+            rvLayer.items().addAll( buildLayers(rvStore, nameMap, colors, createDefaultSelectionStyle(),false) );
+            rvLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            container.items().add(rvLayer);
+
+            // Réseaux et ouvrages
+            final BeanStore roStore = new BeanStore(
+                    suppliers.get(StationPompage.class),
+                    suppliers.get(ReseauHydrauliqueFerme.class),
+                    suppliers.get(OuvrageHydrauliqueAssocie.class),
+                    suppliers.get(ReseauTelecomEnergie.class),
+                    suppliers.get(OuvrageTelecomEnergie.class),
+                    suppliers.get(ReseauHydrauliqueCielOuvert.class),
+                    suppliers.get(OuvrageParticulier.class),
+                    suppliers.get(EchelleLimnimetrique.class));
+            final MapItem roLayer = MapBuilder.createItem();
+            roLayer.setName("Réseaux et ouvrages");
+            roLayer.items().addAll( buildLayers(roStore, nameMap, colors, createDefaultSelectionStyle(),false) );
+            roLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            container.items().add(roLayer);
+
+            // Prestations
+            final BeanStore prestaStore = new BeanStore(suppliers.get(Prestation.class));
+            final MapItem prestaLayer = MapBuilder.createItem();
+            prestaLayer.setName("Prestations");
+            prestaLayer.items().addAll( buildLayers(prestaStore, nameMap, colors, createDefaultSelectionStyle(),false) );
+            prestaLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            container.items().add(prestaLayer);
 
             return Collections.singletonList(container);
         } catch (Exception e) {
