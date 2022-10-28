@@ -218,10 +218,12 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             return;
         }
 
-        if (newEditedGeoCoordinate) {
-            uiGeoCoordLabel.setText("Coordonnées saisies");
-        } else {
-            uiGeoCoordLabel.setText("Coordonnées calculées");
+        if (uiGeoCoordLabel!=null) { //Occurred for vegetation
+            if (newEditedGeoCoordinate) {
+                uiGeoCoordLabel.setText("Coordonnées saisies");
+            } else {
+                uiGeoCoordLabel.setText("Coordonnées calculées");
+            }
         }
     }
 

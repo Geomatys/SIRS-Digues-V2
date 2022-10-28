@@ -50,6 +50,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+
+import static fr.sirs.core.SirsCore.LOGGER;
 import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.scene.layout.VBox;
 import org.geotoolkit.data.bean.BeanFeature;
@@ -82,7 +84,6 @@ import org.opengis.util.FactoryException;
  */
 public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> extends AbstractEditionTool{
 
-
     //session and repo
     private final Session session;
     private final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo;
@@ -109,6 +110,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     private final List<Coordinate> coords = new ArrayList<>();
     private final BooleanProperty ended = new SimpleBooleanProperty(false);
 
+    private final Button selectGeomOnMap = new Button("Sélectionner une géométrie sur la carte");
     /** List of layers deactivated on tool install. They will be activated back at uninstallation. */
     private List<MapLayer> toActivateBack;
 
@@ -154,14 +156,42 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         lblGeom.getStyleClass().add("label-text");
         lblGeom.setWrapText(true);
 
+        selectGeomOnMap.disableProperty().set(true);
+        //parcelle.getDocumentId() should never be null as a parcelle must be selected to enable this button
+        selectGeomOnMap.setOnAction(e -> CreateVegetationPolygonTool.selectGeomFromExisting(e, map,new SelectGeomOnMapHandler(vegetation == null ? newVegetation() : vegetation, parcelle)));
+
         final VBox vbox = new VBox(15,
                 lbl1,
                 lblParcelle,
                 lbl2,
-                lblGeom,
+                new VBox(15,new HBox(15,selectGeomOnMap),lblGeom),
                 new HBox(30, end,cancel));
         vbox.setMaxSize(USE_PREF_SIZE,USE_PREF_SIZE);
         wizard.setCenter(vbox);
+    }
+
+    /**
+     * allow the user to define the geometry from an existing one.
+     *
+     * @param actionEvent
+     */
+    private static void selectGeomFromExisting(final ActionEvent actionEvent, final FXMap map, final SelectGeomOnMapHandler geometrySelector) {
+        LOGGER.info("Geometry from existing activated");
+        if( map != null && geometrySelector !=null) {
+            //WARNING Uninstall current component
+            map.setHandler(geometrySelector);
+        }
+    }
+
+    static Geometry getParcelleConstraints(final ParcelleVegetation parcelle) {
+        if (parcelle == null ) return null;
+        final Geometry constraint = parcelle.getGeometry().buffer(1000000, 10, BufferParameters.CAP_FLAT);
+        try {
+            JTS.setCRS(constraint, JTS.findCoordinateReferenceSystem(parcelle.getGeometry()));
+        } catch (FactoryException ex) {
+            Loggers.JAVAFX.log(Level.WARNING, ex.getMessage(), ex);
+        }
+        return constraint;
     }
 
     protected T newVegetation() {
@@ -175,6 +205,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         parcelle = null;
         lblParcelle.setText("Sélectionner une parcelle sur la carte");
         lblGeom.setText("");
+        selectGeomOnMap.disableProperty().set(true);
         if(parcelleLayer!=null) parcelleLayer.setSelectionFilter(null);
 
         editGeometry.reset();
@@ -192,15 +223,11 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         vegetation = newVegetation();
         lblParcelle.setText(cvt.toString(parcelle));
         lblGeom.setText("Cliquer sur la carte pour créer la géométrie, faire un double clic pour terminer la géométrie, faire un clic droit pour supprimer le dernier point.");
+        selectGeomOnMap.disableProperty().set(false);
         parcelleLayer.setSelectionFilter(GO2Utilities.FILTER_FACTORY.id(
                 Collections.singleton(new DefaultFeatureId(parcelle.getDocumentId()))));
 
-        final Geometry constraint = parcelle.getGeometry().buffer(1000000, 10, BufferParameters.CAP_FLAT);
-        try {
-            JTS.setCRS(constraint, JTS.findCoordinateReferenceSystem(parcelle.getGeometry()));
-        } catch (FactoryException ex) {
-            Loggers.JAVAFX.log(Level.WARNING, ex.getMessage(), ex);
-        }
+        final Geometry constraint = getParcelleConstraints(parcelle);
         helper.setConstraint(constraint);
     }
 
@@ -296,7 +323,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
                 } else if (parcelle != null) {
                     if (e.getClickCount() > 1) {
                         //on sauvegarde
-                        if (editGeometry.geometry.get().isEmpty() || !editGeometry.geometry.get().isValid() || !(editGeometry.geometry.get() instanceof Polygon)) {
+                        if (editGeometry.geometry.get()== null || editGeometry.geometry.get().isEmpty() || !editGeometry.geometry.get().isValid() || !(editGeometry.geometry.get() instanceof Polygon)) {
                             //il faut un polygon valid
                             return;
                         }
