@@ -22,6 +22,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.operation.buffer.BufferParameters;
+import com.vividsolutions.jts.operation.distance.DistanceOp;
 import fr.sirs.Injector;
 import static fr.sirs.SIRS.CSS_PATH;
 import fr.sirs.SIRS;
@@ -58,6 +59,7 @@ import javafx.scene.layout.HBox;
 
 import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.scene.layout.VBox;
+import org.apache.sis.util.collection.BackingStoreException;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display.VisitFilter;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -78,6 +80,7 @@ import org.geotoolkit.internal.Loggers;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
 
 /**
@@ -229,7 +232,10 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         setGeometryCRSAndAddToLayer();
         final Geometry geomToSet= editGeometry.geometry.get();
 
-        coords.addAll(Arrays.asList(geomToSet.getCoordinates()));
+        Arrays.stream(geomToSet.getCoordinates())
+                .map(this::reprojectOnParcelle)
+                .forEach(coords::add);
+
 
         final ButtonType result = SIRS.fxRunAndWait(() -> {
             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Souhaitez vous utiliser cete géométrie telle quelle?\n(Sinon, vous pourrez continuer son édition)", ButtonType.YES, ButtonType.NO);
@@ -240,6 +246,26 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
 
         if (ButtonType.YES.equals(result)) {
             concludeGeometry();
+        }
+    }
+
+    private Coordinate reprojectOnParcelle(final Coordinate coordinate) {
+        if (this.helper.getConstraint() != null) {
+            CoordinateReferenceSystem crs2d = this.map.getCanvas().getObjectiveCRS2D();
+
+            try {
+                final Geometry geom = JTS.transform(this.helper.getConstraint(), crs2d);
+                final DistanceOp distOp = new DistanceOp(geom, GO2Utilities.JTS_FACTORY.createPoint(coordinate));
+                final Coordinate nearest = distOp.nearestPoints()[0];
+                if (nearest != coordinate) {
+                    new Growl(Growl.Type.WARNING, "Au moins un point de la géométrie est hors de la parcelle.\nCe(s) point et reprojeté sur la parcelle.").showAndFade();
+                }
+                return nearest;
+            } catch (Exception e) {
+                throw new BackingStoreException(e);
+            }
+        } else {
+            return coordinate;
         }
     }
 
