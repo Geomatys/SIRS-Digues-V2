@@ -23,19 +23,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
-import fr.sirs.core.model.ArbreVegetation;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.HerbaceeVegetation;
-import fr.sirs.core.model.InvasiveVegetation;
-import fr.sirs.core.model.ParcelleVegetation;
-import fr.sirs.core.model.PeuplementVegetation;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.PositionableVegetation;
-import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.RefTypeInvasiveVegetation;
-import fr.sirs.core.model.RefTypePeuplementVegetation;
-import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.*;
 import fr.sirs.theme.ui.FXPositionablePane;
 import fr.sirs.theme.ui.FXPositionableVegetationPane;
 import fr.sirs.util.SirsStringConverter;
@@ -49,7 +37,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -70,6 +57,9 @@ public class FXPositionableForm extends BorderPane {
     @FXML private Label uiTroncon;
     @FXML private TextField uiDesignation;
     @FXML private ComboBox uiType;
+
+    @FXML private Label ui_typeCoteLabel;
+    @FXML protected ComboBox ui_typeCoteId;
 
 
     private final ObjectProperty<Positionable> positionableProperty = new SimpleObjectProperty<>();
@@ -108,6 +98,14 @@ public class FXPositionableForm extends BorderPane {
 
     @FXML
     void save(ActionEvent event) {
+        setFormProperties();
+        final Positionable pos = positionableProperty.get();
+        final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(pos.getClass());
+        repo.update(pos);
+        positionableProperty.set(null);
+    }
+
+    private void setFormProperties() {
         final Positionable pos = positionableProperty.get();
 
         Object cbValue = uiType.getValue();
@@ -119,21 +117,28 @@ public class FXPositionableForm extends BorderPane {
             cbValue = null;
         }
 
-        if(pos instanceof InvasiveVegetation){
-            final InvasiveVegetation iv = (InvasiveVegetation) pos;
-            iv.setTypeVegetationId((String)cbValue);
-        }else if(pos instanceof PeuplementVegetation){
-            final PeuplementVegetation pv = (PeuplementVegetation) pos;
-            pv.setTypeVegetationId((String)cbValue);
-        }
+        if (pos instanceof ZoneVegetation) {
+            final ZoneVegetation zone = (ZoneVegetation) pos;
+            final Object cote = ui_typeCoteId.getValue();
+            if(cote instanceof RefCote) {
+                zone.setTypeCoteId(((RefCote) cote).getId());
+            } else {
+                if (cote != null) throw new IllegalStateException("ui_typeCoteId's value is expected to be a RefCote instance. Current class is : "+cote.getClass());
+            }
 
-        final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(pos.getClass());
-        repo.update(pos);
-        positionableProperty.set(null);
+            if (pos instanceof InvasiveVegetation) {
+                final InvasiveVegetation iv = (InvasiveVegetation) pos;
+                iv.setTypeVegetationId((String) cbValue);
+            } else if (pos instanceof PeuplementVegetation) {
+                final PeuplementVegetation pv = (PeuplementVegetation) pos;
+                pv.setTypeVegetationId((String) cbValue);
+            }
+        }
     }
 
     @FXML
     void gotoForm(ActionEvent event) {
+        setFormProperties();
         final Positionable pos = positionableProperty.get();
         if(pos!=null){
             Injector.getSession().showEditionTab(pos);
@@ -158,9 +163,7 @@ public class FXPositionableForm extends BorderPane {
             AbstractSIRSRepository<TronconDigue> tdrepo = session.getRepositoryForClass(TronconDigue.class);
             TronconDigue td = tdrepo.get(sr.getLinearId());
             uiTroncon.setText(SirsStringConverter.getDesignation(td));
-        }
 
-        if(newValue instanceof PositionableVegetation){
             editor = new FXPositionableVegetationPane();
             ((FXPositionableVegetationPane)editor).setPositionable(newValue);
             ((FXPositionableVegetationPane)editor).disableFieldsProperty().set(false);
@@ -182,15 +185,20 @@ public class FXPositionableForm extends BorderPane {
 
             }else if(newValue instanceof PeuplementVegetation){
                 uiType.setVisible(true);
-                final PeuplementVegetation pv = (PeuplementVegetation) newValue;
+                final PeuplementVegetation peuplement = (PeuplementVegetation) newValue;
                 Previews previewRepository = Injector.getSession().getPreviews();
                 SIRS.initCombo(uiType, FXCollections.observableList(
                     previewRepository.getByClass(RefTypePeuplementVegetation.class)),
-                    pv.getTypeVegetationId() == null? null : previewRepository.get(pv.getTypeVegetationId()));
+                    peuplement.getTypeVegetationId() == null? null : previewRepository.get(peuplement.getTypeVegetationId()));
             }
 
+            if( pv instanceof ZoneVegetation) {
+                final ZoneVegetation zone = (ZoneVegetation) pv;
+                final AbstractSIRSRepository<RefCote> typeCoteIdRepo = session.getRepositoryForClass(RefCote.class);
+                SIRS.initCombo(ui_typeCoteId, SIRS.observableList(typeCoteIdRepo.getAll()), (zone.getTypeCoteId() == null || zone.getTypeCoteId().trim().isEmpty()) ? null : typeCoteIdRepo.get(zone.getTypeCoteId()));
+            }
 
-        }else if(newValue instanceof Positionable){
+        }else if(newValue != null){
             uiType.setVisible(false);
             editor = new FXPositionablePane();
             ((FXPositionablePane)editor).setPositionable(newValue);

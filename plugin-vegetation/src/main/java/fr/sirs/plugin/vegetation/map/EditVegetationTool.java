@@ -90,7 +90,7 @@ public class EditVegetationTool extends AbstractEditionTool{
         public EditionTool create(FXMap map, Object layer) {
             return new EditVegetationTool(map);
         }
-    };
+    }
 
     //session and repo
     private final MouseListen mouseInputListener = new MouseListen();
@@ -117,21 +117,18 @@ public class EditVegetationTool extends AbstractEditionTool{
         //refresh geometry on change
         selection.geometry.addListener((ObservableValue<? extends Geometry> observable, Geometry oldValue, Geometry newValue) ->  refreshDecoration() );
 
-        form.positionableProperty().addListener(new ChangeListener<Positionable>() {
-            @Override
-            public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
-                if(oldValue!=null){
-                    selection.geometry.unbindBidirectional(oldValue.geometryProperty());
-                    selection.geometry.set(null);
-                }
-                if(newValue!=null){
-                    wizard.setCenter(form);
-                    selection.geometry.bindBidirectional(newValue.geometryProperty());
-                }else{
-                    reset();
-                }
-                refreshDecoration();
+        form.positionableProperty().addListener((observable, oldValue, newValue) -> {
+            if(oldValue!=null){
+                selection.geometry.unbindBidirectional(oldValue.geometryProperty());
+                selection.geometry.set(null);
             }
+            if(newValue!=null){
+                wizard.setCenter(form);
+                selection.geometry.bindBidirectional(newValue.geometryProperty());
+            }else{
+                reset();
+            }
+            refreshDecoration();
         });
 
     }
@@ -296,10 +293,13 @@ public class EditVegetationTool extends AbstractEditionTool{
 
             if(pressed == MouseButton.PRIMARY && helper != null){
                 //dragging node
-                form.positionableProperty().get().setGeometryMode(FXPositionableExplicitMode.MODE);
-                selection.moveSelectedNode(helper.toCoord(e.getX(), e.getY()), true);
-                modified = true;
-                return;
+                final Positionable pos = form.positionableProperty().get();
+                if(pos != null) {
+                    pos.setGeometryMode(FXPositionableExplicitMode.MODE);
+                    selection.moveSelectedNode(helper.toCoord(e.getX(), e.getY()), true);
+                    modified = true;
+                    return;
+                }
             }
 
             super.mouseDragged(e);
@@ -307,7 +307,7 @@ public class EditVegetationTool extends AbstractEditionTool{
 
         @Override
         public void keyReleased(KeyEvent e) {
-           if(KeyCode.DELETE == e.getCode() && selection != null){
+           if(KeyCode.DELETE == e.getCode()){
                 //delete node
                 form.positionableProperty().get().setGeometryMode(FXPositionableExplicitMode.MODE);
                 selection.deleteSelectedNode();
