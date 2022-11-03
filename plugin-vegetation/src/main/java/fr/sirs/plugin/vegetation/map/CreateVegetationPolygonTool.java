@@ -22,7 +22,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.operation.buffer.BufferParameters;
-import com.vividsolutions.jts.operation.distance.DistanceOp;
 import fr.sirs.Injector;
 import static fr.sirs.SIRS.CSS_PATH;
 import fr.sirs.SIRS;
@@ -59,7 +58,6 @@ import javafx.scene.layout.HBox;
 
 import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.scene.layout.VBox;
-import org.apache.sis.util.collection.BackingStoreException;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display.VisitFilter;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -142,12 +140,9 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
             }
         });
         Button cancel = new Button("Annuler");
-        cancel.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                reset();
-                map.setHandler(new FXPanHandler(true));
-            }
+        cancel.setOnAction(event -> {
+            reset();
+            map.setHandler(new FXPanHandler(true));
         });
         end.getStyleClass().add("btn-single");
         cancel.getStyleClass().add("btn-single");
@@ -230,12 +225,9 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
 
         this.editGeometry.geometry.set(selectOnMapMouseListener.getSelectedGeometry());
         setGeometryCRSAndAddToLayer();
-        final Geometry geomToSet= editGeometry.geometry.get();
+        final Geometry geomToSet= this.reprojectOnParcelle(editGeometry.geometry.get());
 
-        Arrays.stream(geomToSet.getCoordinates())
-                .map(this::reprojectOnParcelle)
-                .forEach(coords::add);
-
+        coords.addAll(Arrays.asList(geomToSet.getCoordinates()));
 
         final ButtonType result = SIRS.fxRunAndWait(() -> {
             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Souhaitez vous utiliser cete géométrie telle quelle?\n(Sinon, vous pourrez continuer son édition)", ButtonType.YES, ButtonType.NO);
@@ -249,24 +241,25 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         }
     }
 
-    private Coordinate reprojectOnParcelle(final Coordinate coordinate) {
-        if (this.helper.getConstraint() != null) {
-            CoordinateReferenceSystem crs2d = this.map.getCanvas().getObjectiveCRS2D();
+    private Geometry reprojectOnParcelle(final Geometry toReproject) {
 
-            try {
-                final Geometry geom = JTS.transform(this.helper.getConstraint(), crs2d);
-                final DistanceOp distOp = new DistanceOp(geom, GO2Utilities.JTS_FACTORY.createPoint(coordinate));
-                final Coordinate nearest = distOp.nearestPoints()[0];
-                if (nearest != coordinate) {
-                    new Growl(Growl.Type.WARNING, "Au moins un point de la géométrie est hors de la parcelle.\nCe(s) point et reprojeté sur la parcelle.").showAndFade();
-                }
-                return nearest;
-            } catch (Exception e) {
-                throw new BackingStoreException(e);
+        if(this.helper.getConstraint() == null) {
+            final Geometry constraint = getParcelleConstraints(parcelle);
+            if (constraint == null) {
+                SIRS.LOGGER.log(Level.WARNING, "No contraint from parcelle found during vegetation creation.");
+                return toReproject;
             }
-        } else {
-            return coordinate;
+            this.helper.setConstraint(getParcelleConstraints(parcelle));
         }
+        final Geometry reprojected = toReproject.intersection(this.helper.getConstraint());
+
+        if (!reprojected.equals(toReproject)) {
+            new Growl(Growl.Type.WARNING, "Au moins un point de la géométrie est hors de la parcelle.\nCe(s) point et reprojeté sur la parcelle.").showAndFade();
+            editGeometry.geometry.set(reprojected);
+            setGeometryCRSAndAddToLayer();
+            return reprojected;
+        }
+        return toReproject;
     }
 
     static Geometry getParcelleConstraints(final ParcelleVegetation parcelle) {
