@@ -22,18 +22,12 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.*;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.*;
+import org.apache.sis.util.ArgumentChecks;
+import org.geotoolkit.referencing.LinearReferencing;
+
 import java.util.function.Predicate;
 import java.util.logging.Level;
-import org.apache.sis.util.ArgumentChecks;
-import org.apache.sis.util.collection.Cache;
-import org.geotoolkit.referencing.LinearReferencing;
 
 /**
  *
@@ -75,20 +69,14 @@ public class ConvertPositionableCoordinates {
                 } else {
                     if(isZeroPRs(positionable)) {
                         TronconUtils.computePRs(positionable, InjectorCore.getBean(SessionCore.class));
-                        return !isZeroPRs(positionable); //Les PR sont toujours à 0.f et n'ont pas changés
+                        return !isZeroPRs(positionable); //Les PR sont toujours à 0.f et n'ont pas changé
                     }
 
                     // REDMINE-4559
-                        // if linear is from aval to amont, the PRs, coord and linear infos are set from amont to aval,
-                        // the geometry is recomputed
-                        // and the positionable must be saved
-                      boolean res = LinearReferencingUtilities.ensureAvalToAmont(positionable);
-                      if (res) {
-                          positionable.setGeometry(null);
-                          updateGeometryAndPRs(positionable);
-                          return true;
-                      }
-                    return false;
+                    // if linear is from aval to amont, the PRs, coord and linear infos are set from amont to aval,
+                    // the geometry is recomputed
+                    // and the positionable must be saved
+                    return LinearReferencingUtilities.ensureAvalToAmont(positionable);
                 }
             }
 

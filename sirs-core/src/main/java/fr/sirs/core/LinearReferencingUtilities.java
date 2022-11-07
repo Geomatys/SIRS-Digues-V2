@@ -18,27 +18,14 @@
  */
 package fr.sirs.core;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.*;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
+import fr.sirs.util.ConvertPositionableCoordinates;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.primitive.jts.JTSLineIterator;
 import org.geotoolkit.display2d.style.j2d.DoublePathWalker;
@@ -46,8 +33,16 @@ import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.math.XMath;
 import org.geotoolkit.referencing.LinearReferencing;
 
+import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+
 /**
- * Methodes de calculs utilitaire pour le référencement linéaire.
+ * Methodes de calculs utilitaires pour le référencement linéaire.
  *
  * @author Johann Sorel (Geomatys)
  */
@@ -406,10 +401,10 @@ public final class LinearReferencingUtilities extends LinearReferencing {
     }
 
     /**
-     * Method used to sort the bornes and coordinates from Amont to Aval when they were recorded on the field from Aval to Amont
-     * It forces the recalculation of the geometry by setting it to null
-     * @param structure Positionable we want to sort the bornes
-     * @return whether the structure has been updated and must be saved
+     * Method used to sort the bornes and coordinates from Amont to Aval when they were recorded on the field from Aval to Amont.
+     * It forces the recalculation of the geometry by setting it to null.
+     * @param structure Positionable we want to sort the bornes for.
+     * @return whether the structure has been updated and must be saved.
      */
     public static boolean ensureAvalToAmont(Positionable structure) {
         if (structure.getPrDebut() > structure.getPrFin()) {
@@ -430,6 +425,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
             structure.setPositionFin(tmpPositionDebut);
             // force recalculation of geometry and PRs
             structure.setGeometry(null);
+            ConvertPositionableCoordinates.updateGeometryAndPRs(structure);
             return true;
         }
         return false;
