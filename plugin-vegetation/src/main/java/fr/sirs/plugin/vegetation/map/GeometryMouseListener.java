@@ -14,6 +14,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.effect.Light;
@@ -70,6 +71,8 @@ class GeometryMouseListener extends FXPanMouseListen {
 
     private final BooleanProperty selectionDone =new SimpleBooleanProperty(false);
 
+    private EventHandler<? super MouseEvent> mousePressed;
+
     GeometryMouseListener(final AbstractNavigationHandler owner) {
         super(owner);
         choice.setAutoHide(true);
@@ -78,6 +81,8 @@ class GeometryMouseListener extends FXPanMouseListen {
     void uninstallFromMap(final FXMap map) {
         map.removeEventHandler(MouseEvent.MOUSE_CLICKED, this);
         map.removeEventHandler(ScrollEvent.SCROLL, this);
+        map.removeEventHandler(MouseEvent.MOUSE_DRAGGED, mouseDragged);
+        map.removeEventHandler(MouseEvent.MOUSE_PRESSED, mousePressed);
         this.map=null;
         SIRS.LOGGER.log(Level.FINE, "GeometryMouseListener Uninstalled.");
     }
@@ -91,7 +96,7 @@ class GeometryMouseListener extends FXPanMouseListen {
         //Mise en place du carré de sélection
         //====================================
 
-        map.setOnMousePressed(event -> {
+        mousePressed = event -> {
             anchor.setX(event.getX());
             anchor.setY(event.getY());
             selection.setX(event.getX());
@@ -100,20 +105,25 @@ class GeometryMouseListener extends FXPanMouseListen {
             selection.setStroke(Color.BLUE); // border
             selection.getStrokeDashArray().add(10.0);
             root.getChildren().add(selection);
-        });
+        };
 
-        map.setOnMouseDragged(event -> {
-            selection.setWidth(Math.abs(event.getX() - anchor.getX()));
-            selection.setHeight(Math.abs(event.getY() - anchor.getY()));
-            selection.setX(Math.min(anchor.getX(), event.getX()));
-            selection.setY(Math.min(anchor.getY(), event.getY()));
-        });
+        map.setOnMousePressed(mousePressed);
+
+        map.setOnMouseDragged(mouseDragged);
 
         map.setOnMouseReleased(event -> root.getChildren().remove(selection));
         //====================================
         this.map=map;
         SIRS.LOGGER.log(Level.FINE, "GeometryMouseListener installed.");
     }
+
+
+    private final  EventHandler<? super MouseEvent> mouseDragged = event -> {
+        selection.setWidth(Math.abs(event.getX() - anchor.getX()));
+        selection.setHeight(Math.abs(event.getY() - anchor.getY()));
+        selection.setX(Math.min(anchor.getX(), event.getX()));
+        selection.setY(Math.min(anchor.getY(), event.getY()));
+    };
 
     public BooleanProperty selectionDoneProperty() {
         return selectionDone;
@@ -127,28 +137,18 @@ class GeometryMouseListener extends FXPanMouseListen {
         if (selectedGeometry != null) {
             if(selectedGeometry instanceof Polygon) {
                 new Growl(Growl.Type.INFO, "Géométrie sélectionnée à partir de l'élément : " + selectedGeometry+ "\nGéométrie valide; Ouverture de la fiche.").showAndFade();
-//                vegetation.setExplicitGeometry(selectedGeometry);
-//                vegetation.setGeometry(selectedGeometry);
-//                //on sauvegarde
-//                vegetation.setGeometryMode(FXPositionableExplicitMode.MODE);
-//                vegetation.setValid(true);
-//                vegetation.setForeignParentId(parcelleId);
-//                final Session session = Injector.getSession();
-//                final AbstractSIRSRepository vegetationRepo = session.getRepositoryForClass(vegetation.getClass());
-//                vegetationRepo.add(vegetation);
-//                    session.showEditionTab(vegetation); //Demande Jordan
                 selectionDone.set(true);
             } else if(selectedGeometry instanceof MultiPolygon) {
                 final MultiPolygon multipolygon = (MultiPolygon) selectedGeometry;
                 if(multipolygon.getNumGeometries() == 1 ) {
                     selectedGeometry = multipolygon.getGeometryN(0);
-                    new Growl(Growl.Type.INFO, "La géométrie sélectionner est un multipolygone avec 1 polygone. La zone de végétation est créée avec ce polygone :\n"+selectedGeometry).showAndFade();
+                    new Growl(Growl.Type.INFO, "La géométrie sélectionnée est un multipolygone avec 1 polygone. La zone de végétation est créée avec ce polygone :\n"+selectedGeometry).showAndFade();
                     setGeomSaveAndOpen();
                 } else {
-                    new Growl(Growl.Type.ERROR, "La géométrie sélectionner est un multipolygone with more than 1 polygone.").showAndFade();
+                    new Growl(Growl.Type.ERROR, "La géométrie sélectionnée est un multipolygone avec plus d'1 polygone.").showAndFade();
                 }
             } else {
-                new Growl(Growl.Type.ERROR, "La géométrie sélectionner doit être de type polygone.").showAndFade();
+                new Growl(Growl.Type.ERROR, "La géométrie sélectionnée doit être de type polygone.").showAndFade();
                 selectedGeometry = null;
                 selectionDone.set(false);
             }
@@ -160,10 +160,6 @@ class GeometryMouseListener extends FXPanMouseListen {
         super.mouseClicked(me);
         choice.getItems().clear();
         choice.hide();
-
-//            if (MouseButton.SECONDARY.equals(mousebutton)) {
-//
-//            }
 
         // Visitor which will perform action on selected elements.
         final AbstractGraphicVisitor visitor = new AbstractGraphicVisitor() {
@@ -247,7 +243,8 @@ class GeometryMouseListener extends FXPanMouseListen {
 
     private void selectElementGeometry(final Element current) {
         if (!(current instanceof Positionable)) {
-            new Growl(Growl.Type.WARNING, "L'élement sélectionné est null ou n'est pas un Positionable.\nImpossible de sélectionner sa géométrie").showAndFade();
+            new Growl(Growl.Type.WARNING, "L'élément sélectionné est null ou n'est pas un Positionable.\nImpossible de sélectionner sa géométrie").showAndFade();
+            return;
         }
         selectedGeometry = ((Positionable) current).getGeometry();
         setGeomSaveAndOpen();
@@ -255,7 +252,7 @@ class GeometryMouseListener extends FXPanMouseListen {
 
     private void selectFeatureGeometry(final String title, final Feature feature) {
         if (feature == null) {
-            new Growl(Growl.Type.WARNING, "Le feature sélectionner est null").showAndFade();
+            new Growl(Growl.Type.WARNING, "Le feature sélectionné est null").showAndFade();
             return;
         }
 
@@ -311,11 +308,6 @@ class GeometryMouseListener extends FXPanMouseListen {
                     }
 
                 }
-//
-//                    SIRS.LOGGER.log(Level.INFO, "Selected geometry is  : " + selectedGeometry);
-//                    vegetation.setGeometry(selectedGeometry)
-//                    Injector.getSession().showEditionTab(vegetation);
-
             }
             if(selectedGeometry !=null) setGeomSaveAndOpen();
         } catch (Exception e) {
@@ -323,28 +315,6 @@ class GeometryMouseListener extends FXPanMouseListen {
             SIRS.LOGGER.log(Level.WARNING, "Failed to retrieve Geometry from external feature", e);
             throw new BackingStoreException(e);
         }
-
-//            String toString = feature.toString();
-//            // Remove first lines, which displays technical information not useful for end user.
-//            final int secondLineSeparator = toString.indexOf(System.lineSeparator(), toString.indexOf(System.lineSeparator()) + 1);
-//            if (secondLineSeparator > 0) {
-//                toString = toString.substring(secondLineSeparator + 1);
-//            }
-//            final TextArea content = new TextArea(toString);
-//            content.setFont(Font.font("Monospaced"));
-//            content.setEditable(false);
-//            content.setPrefSize(700, 500);
-//
-//            final Dialog d = new Dialog();
-//            d.initModality(Modality.NONE);
-//            d.initOwner(map.getScene().getWindow());
-//            d.setTitle(title);
-//            final DialogPane dialogPane = new DialogPane();
-//            dialogPane.setContent(content);
-//            dialogPane.getButtonTypes().add(ButtonType.CLOSE);
-//            d.setDialogPane(dialogPane);
-//            d.setResizable(true);
-//            d.show();
 
     }
 
