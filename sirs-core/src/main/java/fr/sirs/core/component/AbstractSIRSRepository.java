@@ -162,9 +162,9 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         if(entity instanceof AvecForeignParent){
             if(((AvecForeignParent) entity).getForeignParentId()==null) throw new IllegalArgumentException("L'élément ne peut être enregistré sans élement parent.");
         }
-        if(entity instanceof Positionable) {
-            ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test((Positionable) entity);
-        }
+//        if(entity instanceof Positionable) {
+//            ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test((Positionable) entity);
+//        }
     }
 
     /**
@@ -272,7 +272,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         final List<BulkDeleteDocument> toDelete = new ArrayList<>();
         for(final T toBeDeleted : bulkList){
             toDelete.add(BulkDeleteDocument.of(toBeDeleted));
-            if(cache.containsKey(toBeDeleted.getId())) cache.remove(toBeDeleted.getId());
+            cache.remove(toBeDeleted.getId());
         }
         return db.executeBulk(toDelete);
     }
@@ -281,6 +281,10 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     public void add(T entity) {
         ArgumentChecks.ensureNonNull("Document à ajouter", entity);
         checkIntegrity(entity);
+        //Not sure if needed
+        if(entity instanceof Positionable) {
+            ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test((Positionable) entity);
+        }
         if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
             ((AvecDateMaj)entity).setDateMaj(LocalDate.now());
         }
@@ -291,6 +295,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     @Override
     public void update(T entity) {
         ArgumentChecks.ensureNonNull("Document à mettre à jour", entity);
+
         checkIntegrity(entity);
         if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
             ((AvecDateMaj) entity).setDateMaj(LocalDate.now());
@@ -444,7 +449,6 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * the dormant conflicting revision will immediately revert as the active revision
      * of the document. (origin of the issue 7490)
      *
-     * @param entity
      */
     public void removeConflictingRevisions(final T entity) {
         final List<List<String>> revisions = globalRepo.getConflictingRevisions(entity.getId());
