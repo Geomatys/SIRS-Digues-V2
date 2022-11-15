@@ -340,7 +340,8 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         component.addEventHandler(MouseEvent.ANY, currentMouseInputListener);
         component.addEventHandler(ScrollEvent.ANY, currentMouseInputListener);
 
-        helper = new EditionHelper(map, parcelleLayer);
+        if (this.helper == null) helper = new EditionHelper(map, parcelleLayer); //else reuse it to keep the current constraint.
+
         component.setCursor(Cursor.CROSSHAIR);
         component.addDecoration(geomLayer);
     }
