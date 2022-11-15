@@ -20,23 +20,14 @@ package fr.sirs.util;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.core.InjectorCore;
-import fr.sirs.core.LinearReferencingUtilities;
-import fr.sirs.core.SessionCore;
-import fr.sirs.core.SirsCore;
-import fr.sirs.core.TronconUtils;
+import fr.sirs.core.*;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
-import java.util.function.Predicate;
-import java.util.logging.Level;
+import fr.sirs.core.model.*;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.referencing.LinearReferencing;
+
+import java.util.function.Predicate;
+import java.util.logging.Level;
 
 /**
  *
@@ -49,7 +40,7 @@ public class ConvertPositionableCoordinates {
      * coordonnées manquantes de positionables.
      * Renvoie un boolean indiquant si des coordonnées ont été mises à jours.
      */
-    final public static Predicate<Positionable> COMPUTE_MISSING_COORD = positionable -> ensureCoordinates(positionable);
+    final public static Predicate<Positionable> COMPUTE_MISSING_COORD = ConvertPositionableCoordinates::ensureCoordinates;
 
     private static boolean ensureCoordinates(final Positionable positionable) {
         try {
@@ -78,12 +69,14 @@ public class ConvertPositionableCoordinates {
                 } else {
                     if(isZeroPRs(positionable)) {
                         TronconUtils.computePRs(positionable, InjectorCore.getBean(SessionCore.class));
-                        if (isZeroPRs(positionable)) {
-                            return false; //Les PR sont toujours à 0.f et n'ont pas changés
-                        }
-                        return true;
+                        return !isZeroPRs(positionable); //Les PR sont toujours à 0.f et n'ont pas changé
                     }
-                    return false;
+
+                    // REDMINE-4559
+                    // if linear is from aval to amont, the PRs, coord and linear infos are set from amont to aval,
+                    // the geometry is recomputed
+                    // and the positionable must be saved
+                    return LinearReferencingUtilities.ensureAvalToAmont(positionable);
                 }
             }
 
@@ -102,12 +95,30 @@ public class ConvertPositionableCoordinates {
         return false;
     }
 
+
+    /**
+     * moved from {@link AbstractSIRSRepository}
+     * @param target : positionable to update
+     */
+    public static void updateGeometryAndPRs(final Positionable target) {
+        try {
+            final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(target);
+            if (posInfo.getTroncon() != null) {
+                if (posInfo.getGeometry() != null) {
+                    // Try computing PRs on default SR
+                    TronconUtils.computePRs(posInfo, InjectorCore.getBean(SessionCore.class));
+                }
+            }
+        } catch (Exception e) {
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot update geometry for newly loaded positionable object.", e);
+        }
+    }
+
     /**
      * Tests si les PRs de début et de fin d'un {@link Positionable} NON NULL
      * sont tous 2 égaux à 0.f.
      *
      * @param positionable NON NULL; La nullité ne sera pas testée ici.
-     * @return
      */
     private static boolean isZeroPRs(final Positionable positionable) {
         return (positionable.getPrDebut() == 0.f) && (positionable.getPrFin() == 0.f);
@@ -119,7 +130,6 @@ public class ConvertPositionableCoordinates {
      * the methods affects the own coordinates to the missing ending (resp starting)
      * point.
      *
-     * @param positionable
      * @return true if the input positionable has linear coordinates.
      */
     private static boolean checkLinearCoordAndAffectMissing(Positionable positionable){
@@ -145,8 +155,6 @@ public class ConvertPositionableCoordinates {
      * the methods affects the own coordinates to the missing ending (resp starting)
      * point.
      *
-     * @param positionable
-     * @return
      */
     private static boolean checkGeomCoordAndAffectMissing(Positionable positionable){
         if(((positionable.getPositionDebut() == null)
@@ -167,15 +175,15 @@ public class ConvertPositionableCoordinates {
      * Géographiques) lorsqu'une propriété associée aux coordonnées
      * géographiques (respectivement Linéaires) a été modifiée.
      *
-     * @param PositionableToUpdate l'élément Positionable qui a (déjà!!) été
+     * @param positionableToUpdate l'élément Positionable qui a (déjà!!) été
      * modifié
      * @param modifiedPropretieName le nom de la propriété modifiée : doit
      * correspondre à une (chaîne de caractère) constante de la classe
      * SirsCore.java (validée par le test unitaire
      * SirsCoreTest.test_Nom_Methodes_Positionable_Valides() )
      */
-    public static void computeForModifiedPropertie(Positionable PositionableToUpdate, String modifiedPropretieName) {
-        ArgumentChecks.ensureNonNull("Positionable positionable", PositionableToUpdate);
+    public static void computeForModifiedPropertie(Positionable positionableToUpdate, String modifiedPropretieName) {
+        ArgumentChecks.ensureNonNull("Positionable positionable", positionableToUpdate);
         ArgumentChecks.ensureNonNull("Propertie name modifiedPropertirName", modifiedPropretieName);
 
         //Si le PR a été modifié on ne permet pas le calcul des coordonnées. Pourra évoluer.
@@ -186,14 +194,14 @@ public class ConvertPositionableCoordinates {
         //Si c'est une coordonnées Géo qui a été modifiée on recalcule les coordonnées linéaires :
         if ((modifiedPropretieName.equals(SirsCore.POSITION_DEBUT_FIELD)) || (modifiedPropretieName.equals(SirsCore.POSITION_FIN_FIELD))) {
 
-            computePositionableLinearCoordinate((Positionable) PositionableToUpdate);
+            computePositionableLinearCoordinate(positionableToUpdate);
 
         //Si c'est une coordonnées Linéaire qui a été modifiée on recalcule les coordonnées géo :
         } else if ((modifiedPropretieName.equals(SirsCore.BORNE_DEBUT_AVAL)) || (modifiedPropretieName.equals(SirsCore.BORNE_FIN_AVAL))
                 || (modifiedPropretieName.equals(SirsCore.BORNE_DEBUT_DISTANCE)) || (modifiedPropretieName.equals(SirsCore.BORNE_FIN_DISTANCE))
                 || (modifiedPropretieName.equals(SirsCore.BORNE_DEBUT_ID)) || (modifiedPropretieName.equals(SirsCore.BORNE_FIN_ID))) {
 
-            computePositionableGeometryAndCoord((Positionable) PositionableToUpdate);
+            computePositionableGeometryAndCoord(positionableToUpdate);
 
         }
     }
@@ -206,7 +214,6 @@ public class ConvertPositionableCoordinates {
      * Calcule de la géométrie et des coordonnées d'un positionable à partir de
      * ses coordonnées linéaires.
      *
-     * @param positionableWithLinearCoord
      * @return boolean indiquant si des coordonnées ont été mises à jours
      */
     public static boolean computePositionableGeometryAndCoord(final Positionable positionableWithLinearCoord) {
@@ -391,10 +398,7 @@ public class ConvertPositionableCoordinates {
      * Berge ou autre dans la recherche des éléments parent :
      * getRepositoryForClass(TronconDigue.class) -> getRepositories... + stream
      *
-     * @param element
-     * @return
-     */
-    /**
+     *
      * Search recursively the troncon of the positionable.
      *
      * @param pos Positionable object to find parent linear.
