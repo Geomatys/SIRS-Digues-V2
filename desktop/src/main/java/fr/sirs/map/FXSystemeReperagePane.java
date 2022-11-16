@@ -81,6 +81,7 @@ import static org.geotoolkit.referencing.LinearReferencing.projectReference;
 /**
  * @author Johann Sorel (Geomatys)
  * @author Matthieu Bastianelli (Geomatys)
+ * @author Estelle Idee (Geomatys)
  */
 public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
 
@@ -329,9 +330,9 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
 
         // Filter troncon's bornes to get only the ones present in the SR.
         // Get ids of the start and end bornes.
-        final ObservableList<String> borneIds;
-        borneIds = FXCollections.observableArrayList(troncon.getBorneIds());
-        borneIds.removeIf((borneId) -> !srbIds.contains(borneId));
+        final List<String> borneIds = troncon.getBorneIds().stream()
+                .filter(id -> srbIds.contains(id))
+                .collect(Collectors.toList());
 
         // Collect and sort of the bornes.
         final List<BorneDigue> bornes = session.getRepositoryForClass(BorneDigue.class).get(borneIds);
