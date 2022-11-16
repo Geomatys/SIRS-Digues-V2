@@ -97,6 +97,8 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
     private Button uiDeleteSR;
     @FXML
     Button uiProject;
+    @FXML
+    Button uiRename;
 
 //    private final ObjectProperty<ObjetEditMode> mode = new SimpleObjectProperty<>(EditModeObjet.NONE);
 
@@ -119,6 +121,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
         uiAddSr.setGraphic(new ImageView(SIRS.ICON_ADD_BLACK));
         uiDeleteSR.setGraphic(new ImageView(GeotkFX.ICON_DELETE));
         uiProject.setDisable(true);
+        uiRename.setDisable(true);
 
         //on active le choix du sr si un troncon est sélectionné
         final BooleanBinding srEditBinding = tronconProp.isNull();
@@ -139,6 +142,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
             public void onChanged(ListChangeListener.Change<? extends SystemeReperageBorne> c) {
                 final int size = uiObjetTable.getSelectionModel().getSelectedItems().size();
                 uiProject.setDisable(size < 1);
+                uiRename.setDisable(size != 1);
             }
         });
 
@@ -529,7 +533,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
         stage.setScene(new Scene(content));
 
         deleteButton.setOnAction(event -> {
-            final Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, "Attention, les bornes séléctionnées seront effacées définitivement. Si elles sont utilisées par un système de repérage, cela entrainera le recalcul des positions liées à ce dernier. Continuer ?", ButtonType.NO, ButtonType.YES);
+            final Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, "Attention, les bornes sélectionnées seront effacées définitivement. Si elles sont utilisées par un système de repérage, cela entrainera le recalcul des positions liées à ce dernier. Continuer ?", ButtonType.NO, ButtonType.YES);
             confirmation.setResizable(true);
             final ButtonType userDecision = confirmation.showAndWait().orElse(ButtonType.NO);
             if (ButtonType.YES.equals(userDecision)) {
@@ -591,7 +595,7 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
      */
 
     /**
-     * Delete the {@link SystemeReperage} selected in {@link #ui
+     * Delete the {@link SystemeReperage} selected in @uiObjetTable
      *
      * @param evt
      */
@@ -670,53 +674,28 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
     }
 
     /**
-     * Method to rename a borne from the @{@link SystemeReperageBorne} creation/edition
-     * @return
+     * Method to rename a borne from the @{@link FXSystemeReperagePane}
+     * Invoked by action on Renommer button.
      */
     @FXML
-    void renameObjets(ActionEvent e) {
-        final ListView<BorneDigue> borneList = buildListOfSRRenameableBornes();
-        if (borneList == null) return;
+    void renameObjets() {
 
-        final Stage stage = new Stage();
-        stage.setTitle("Sélectionnez la borne à renommer");
-        stage.initModality(Modality.WINDOW_MODAL);
-        stage.initOwner(this.getScene().getWindow());
+        ObservableList<SystemeReperageBorne> list = uiObjetTable.getSelectionModel().getSelectedItems();
+        if (list.size() != 1) return;
+        SystemeReperageBorne selectedSeBorne = list.get(0);
 
-        final Separator blankSpace = new Separator();
-        blankSpace.setVisible(false);
+        BorneDigueRepository repo = (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class);
+        BorneDigue selectedItem = repo.get(selectedSeBorne.getBorneId());
 
-        final Button cancelButton = new Button("Annuler");
-        cancelButton.setCancelButton(true);
-        cancelButton.setOnAction(event -> stage.hide());
-        final Button renameButton = new Button("Renommer");
-        renameButton.disableProperty().bind(borneList.getSelectionModel().selectedItemProperty().isNull());
+        if (selectedItem == null)
+            throw new NullPointerException("There is no BorneDigue with id : " + selectedSeBorne.getBorneId());
 
-        final HBox buttonBar = new HBox(10, blankSpace, cancelButton, renameButton);
-        buttonBar.setPadding(new Insets(5));
-        buttonBar.setAlignment(Pos.CENTER_RIGHT);
-        final VBox content = new VBox(borneList, buttonBar);
+        if (!BorneUtils.openBorneRenamingWindow(selectedItem)) return;
 
-        stage.setScene(new Scene(content));
-
-        renameButton.setOnAction(event -> {
-            final BorneDigue selectedItem = borneList.getSelectionModel().getSelectedItem();
-
-            int index = borneList.getItems().indexOf(selectedItem);
-
-            if (!BorneUtils.openBorneRenamingWindow(selectedItem)) return;
-            // Force to update the new libelle in the list.
-            borneList.getItems().remove(selectedItem);
-            selectedItem.setLibelle(selectedItem.getLibelle());
-            borneList.getItems().add(index, selectedItem);
-
-            // Force to update the Borne libelle in the uiObjetTable.
-            uiSrComboBox.getValue().getSystemeReperageBornes().removeIf(b -> b.getBorneId().equals(selectedItem.getId()));
-            // Ajout de la borne au SR.
-            addBorneToSR(selectedItem);
-        });
-
-        stage.show();
+        // Force to update the Borne libelle in the uiObjetTable.
+        uiSrComboBox.getValue().getSystemeReperageBornes().removeIf(b -> b.getBorneId().equals(selectedItem.getId()));
+        // Ajout de la borne au SR.
+        addBorneToSR(selectedItem);
     }
 
     @Override

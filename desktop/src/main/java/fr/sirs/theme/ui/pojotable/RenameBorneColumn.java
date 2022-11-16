@@ -25,8 +25,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
+ * Column used in BorneDigue pojo table present in @{@link fr.sirs.digue.FXSystemeReperagePane}
+ * Used to edit a BorneDigue's libelle and designation.
  *
- * @author Samuel Andrés (Geomatys) [extraction de la PojoTable]
  * @author Estelle Idée (Geomatys)
  */
 public class RenameBorneColumn extends AbstractColumnWithButton {

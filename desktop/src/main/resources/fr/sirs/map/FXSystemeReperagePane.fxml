@@ -74,8 +74,8 @@
                   <Button fx:id="uiAddObjet" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Ajouter" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                    <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Saisir de nouvelles bornes" wrapText="true" GridPane.rowIndex="3" />
                    <ToggleButton fx:id="uiCreateObjet" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Saisir" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                   <Label text="Renommer des bornes" GridPane.rowIndex="4" />
-                   <Button mnemonicParsing="false" maxWidth="1.7976931348623157E308" onAction="#renameObjets" text="Renommer" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                   <Label text="Renommer une borne" GridPane.rowIndex="4" />
+                   <Button fx:id="uiRename" mnemonicParsing="false" maxWidth="1.7976931348623157E308" onAction="#renameObjets" text="Renommer" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                   <Label text="Supprimer des bornes" GridPane.rowIndex="5" />
                   <Button mnemonicParsing="false" onAction="#deleteObjets" text="Supprimer" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                    <Label text="Projeter les bornes sélectionnées sur le tronçon" wrapText="true" GridPane.rowIndex="6" />
