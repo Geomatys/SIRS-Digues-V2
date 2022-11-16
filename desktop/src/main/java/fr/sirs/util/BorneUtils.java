@@ -5,13 +5,13 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextInputDialog;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 
-import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This file is part of SIRS-Digues 2.
@@ -31,42 +31,104 @@ import java.util.Optional;
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
+
+/**
+ *
+ * @author Estelle Idée (Geomatys)
+ */
 public class BorneUtils {
 
+    /**
+     * Opens a @{@link Dialog} to update the borne's libelle and designation.
+     * @param selectedItem the borne to be modified : change designation and libelle.
+     * @return whether the borne has been updated.
+     */
     public static boolean openBorneRenamingWindow(BorneDigue selectedItem) {
         if (isStartOrEndBorneLibelle(selectedItem.getLibelle(), "Les bornes de début et de fin d'un tronçon ne peuvent être renommées."))
             return false;
 
-        // Form to fill in the new borne libelle.
-        final TextInputDialog dialog = new TextInputDialog(selectedItem.getLibelle());
-        dialog.getEditor().setPromptText("borne ...");
-        dialog.setTitle("Borne existante : " + selectedItem.getLibelle());
+        AtomicReference<Boolean> wasUpdated = new AtomicReference<>(Boolean.FALSE);
+        String oldLibelle = selectedItem.getLibelle();
+        String oldDesignation = selectedItem.getDesignation();
+        AtomicReference<String> newLibelle = new AtomicReference<>("");
+        AtomicReference<String> newDesignation = new AtomicReference<>(oldDesignation);
+
+        // Form to fill in the new borne libelle and designation.
+        final Dialog dialog = new Dialog<Boolean>();
+        dialog.setResizable(true);
+        dialog.setTitle("Borne existante : " + oldDesignation + " : " + oldLibelle);
         dialog.setGraphic(null);
-        dialog.setHeaderText("Nouveau libellé de la borne");
+        dialog.setHeaderText("Modification des informations");
+
+        final GridPane grid = new GridPane();
+        grid.setHgap(6);
+        grid.setVgap(6 * 2);
+        grid.setPadding(new Insets(6));
+
+        Label designationLabel = new Label("Désignation : ");
+        TextField designationInput = new TextField(oldDesignation);
+        designationLabel.setLabelFor(designationInput);
+        grid.add(designationLabel, 0, 0);
+        grid.add(designationInput, 1, 0);
+
+        Label libelleLabel = new Label("Libellé : ");
+        TextField libelleInput = new TextField(oldLibelle);
+        libelleLabel.setLabelFor(libelleInput);
+        grid.add(libelleLabel, 0, 1);
+        grid.add(libelleInput, 1, 1);
+
+        final DialogPane pane = dialog.getDialogPane();
+
+        pane.setContent(grid);
+        pane.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
 
 
-        final Optional<String> opt = dialog.showAndWait();
-        if (!opt.isPresent() || opt.get().trim().isEmpty()) return false;
+        dialog.setResultConverter((button) -> {
+            if (!ButtonType.OK.equals(button)) {
+                return null;
+            }
+            newLibelle.set(libelleInput.getText());
+            newDesignation.set(designationInput.getText());
+            if (oldLibelle.equals(newLibelle.get()) && oldDesignation.equals(newDesignation.get()))
+                return null;
+            return true;
+        });
 
-        // Edition of the borne.
-        final String borneLbl = opt.get();
+        dialog.showAndWait().ifPresent((result) -> {
+            if (!Boolean.FALSE.equals(result)) {
+                String newLib = newLibelle.get();
+                String newDes = newDesignation.get();
 
-        // We check that the given libelle is not part of the libelles used for the elementary SR.
-        if (isStartOrEndBorneLibelle(borneLbl, "Le libellé de borne \"" + borneLbl + "\" est réservé au SR élémentaire."))
-            return false;
+                // We check that the given libelle is not part of the libelles used for the elementary SR.
+                if (isStartOrEndBorneLibelle(newLib, "Le libellé de borne \"" + newLib + "\" est réservé au SR élémentaire."))
+                    return;
 
-        final TaskManager.MockTask renamer = new TaskManager.MockTask("Changement de libellé d'une borne", () -> {
-            selectedItem.setLibelle(borneLbl);
+                if ((newLib != null && !newLib.trim().isEmpty()) || (newDes != null && !newDes.trim().isEmpty()))
+                    wasUpdated.set(true);
+            }
+        });
+        // if the libelle nor the designation has been updated,
+        // then the selectedItem shall not be updated in the database
+        if (Boolean.FALSE.equals(wasUpdated.get())) return false;
+
+        String newLib = newLibelle.get();
+        String newDes = newDesignation.get();
+
+        final TaskManager.MockTask renamer = new TaskManager.MockTask("Changement de libellé et de désignation d'une borne", () -> {
+            if (!newLib.trim().isEmpty())
+                selectedItem.setLibelle(newLib);
+            if (!newDes.trim().isEmpty())
+                selectedItem.setDesignation(newDes);
             InjectorCore.getBean(BorneDigueRepository.class).update(selectedItem);
         });
 
         renamer.setOnFailed(evt ->
                 Platform.runLater(() ->
-                        GeotkFX.newExceptionDialog("Une erreur est survenue lors du changement de libellé de la borne.", renamer.getException()).show()));
+                        GeotkFX.newExceptionDialog("Une erreur est survenue lors du changement de libellé/désignation de la borne.", renamer.getException()).show()));
 
         TaskManager.INSTANCE.submit(renamer);
 
-        return true;
+        return wasUpdated.get();
     }
 
     public static boolean isStartOrEndBorneLibelle(String libelle, String alertMessage) {
