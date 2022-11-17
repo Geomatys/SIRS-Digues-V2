@@ -220,7 +220,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             return;
         }
 
-        if (uiGeoCoordLabel!=null) { //Occurred for vegetation
+        if (uiGeoCoordLabel != null) { //Occurred for vegetation
             if (newEditedGeoCoordinate) {
                 uiGeoCoordLabel.setText("Coordonnées saisies");
             } else {
@@ -436,7 +436,6 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
      * Update geographic/projected coordinate fields when current CRS change.
      * Note : listener method, should always be launched from FX-thread.
      *
-     * @param observable
      * @param oldValue Previous value into {@link #uiCRSs}
      * @param newValue Current value into {@link #uiCRSs}
      */

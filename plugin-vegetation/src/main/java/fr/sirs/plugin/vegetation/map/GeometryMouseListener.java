@@ -10,6 +10,7 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.ui.Growl;
+import fr.sirs.util.MouseSelectionUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
@@ -21,7 +22,6 @@ import javafx.scene.effect.Light;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import org.apache.sis.util.collection.BackingStoreException;
 import org.geotoolkit.data.bean.BeanFeature;
@@ -69,25 +69,25 @@ class GeometryMouseListener extends FXPanMouseListen {
 
     private FXMap map;
 
-    private final BooleanProperty selectionDone =new SimpleBooleanProperty(false);
-
-    private EventHandler<? super MouseEvent> mousePressed;
+    private final BooleanProperty selectionDone = new SimpleBooleanProperty(false);
 
     GeometryMouseListener(final AbstractNavigationHandler owner) {
         super(owner);
         choice.setAutoHide(true);
     }
 
-    void uninstallFromMap(final FXMap map) {
-        map.removeEventHandler(MouseEvent.MOUSE_CLICKED, this);
-        map.removeEventHandler(ScrollEvent.SCROLL, this);
-        map.removeEventHandler(MouseEvent.MOUSE_DRAGGED, mouseDragged);
-        map.removeEventHandler(MouseEvent.MOUSE_PRESSED, mousePressed);
-        this.map=null;
-        SIRS.LOGGER.log(Level.FINE, "GeometryMouseListener Uninstalled.");
+    void uninstallFromMap(final FXMap fromMap) {
+        fromMap.removeEventHandler(MouseEvent.MOUSE_CLICKED, this);
+        fromMap.removeEventHandler(ScrollEvent.SCROLL, this);
+         //Necessary to remove the eventHandlers
+        fromMap.setOnMouseReleased(null);
+        fromMap.setOnMouseDragged(null);
+        fromMap.setOnMousePressed(null);
+        this.map = null;
+        SIRS.LOGGER.log(Level.INFO, "GeometryMouseListener Uninstalled.");
     }
-    void installOnMap(final FXMap map, final Pane root) {
 
+    void installOnMap(final FXMap map, final Pane root) {
         map.addEventHandler(MouseEvent.MOUSE_CLICKED, this);
         map.addEventHandler(ScrollEvent.SCROLL, this);
         map.setCursor(Cursor.DEFAULT);
@@ -96,34 +96,18 @@ class GeometryMouseListener extends FXPanMouseListen {
         //Mise en place du carré de sélection
         //====================================
 
-        mousePressed = event -> {
-            anchor.setX(event.getX());
-            anchor.setY(event.getY());
-            selection.setX(event.getX());
-            selection.setY(event.getY());
-            selection.setFill(null); // transparent
-            selection.setStroke(Color.BLUE); // border
-            selection.getStrokeDashArray().add(10.0);
-            root.getChildren().add(selection);
-        };
+        final EventHandler<? super MouseEvent> mousePressedSelection = MouseSelectionUtils.mousePressed(selection, anchor, root);
+        final EventHandler<? super MouseEvent> mouseDraggedSelection = MouseSelectionUtils.mouseDragged(selection, anchor);
+        final EventHandler<? super MouseEvent> mouseReleaseSelection = MouseSelectionUtils.mouseRelease(selection, root);
 
-        map.setOnMousePressed(mousePressed);
-
-        map.setOnMouseDragged(mouseDragged);
-
-        map.setOnMouseReleased(event -> root.getChildren().remove(selection));
+        map.setOnMousePressed(mousePressedSelection);
+        map.setOnMouseDragged(mouseDraggedSelection);
+        map.setOnMouseReleased(mouseReleaseSelection);
         //====================================
-        this.map=map;
+        this.map = map;
         SIRS.LOGGER.log(Level.FINE, "GeometryMouseListener installed.");
     }
 
-
-    private final  EventHandler<? super MouseEvent> mouseDragged = event -> {
-        selection.setWidth(Math.abs(event.getX() - anchor.getX()));
-        selection.setHeight(Math.abs(event.getY() - anchor.getY()));
-        selection.setX(Math.min(anchor.getX(), event.getX()));
-        selection.setY(Math.min(anchor.getY(), event.getY()));
-    };
 
     public BooleanProperty selectionDoneProperty() {
         return selectionDone;
@@ -135,14 +119,14 @@ class GeometryMouseListener extends FXPanMouseListen {
 
     private void setGeomSaveAndOpen() {
         if (selectedGeometry != null) {
-            if(selectedGeometry instanceof Polygon) {
-                new Growl(Growl.Type.INFO, "Géométrie sélectionnée à partir de l'élément : " + selectedGeometry+ "\nGéométrie valide; Ouverture de la fiche.").showAndFade();
+            if (selectedGeometry instanceof Polygon) {
+                new Growl(Growl.Type.INFO, "Géométrie sélectionnée à partir de l'élément : " + selectedGeometry + "\nGéométrie valide; Ouverture de la fiche.").showAndFade();
                 selectionDone.set(true);
-            } else if(selectedGeometry instanceof MultiPolygon) {
+            } else if (selectedGeometry instanceof MultiPolygon) {
                 final MultiPolygon multipolygon = (MultiPolygon) selectedGeometry;
-                if(multipolygon.getNumGeometries() == 1 ) {
+                if (multipolygon.getNumGeometries() == 1) {
                     selectedGeometry = multipolygon.getGeometryN(0);
-                    new Growl(Growl.Type.INFO, "La géométrie sélectionnée est un multipolygone avec 1 polygone. La zone de végétation est créée avec ce polygone :\n"+selectedGeometry).showAndFade();
+                    new Growl(Growl.Type.INFO, "La géométrie sélectionnée est un multipolygone avec 1 polygone. La zone de végétation est créée avec ce polygone :\n" + selectedGeometry).showAndFade();
                     setGeomSaveAndOpen();
                 } else {
                     new Growl(Growl.Type.ERROR, "La géométrie sélectionnée est un multipolygone avec plus d'1 polygone.").showAndFade();
@@ -306,12 +290,10 @@ class GeometryMouseListener extends FXPanMouseListen {
                     } else {
                         throw new UnsupportedOperationException("Not able to generate Jts Geometry from this kind of object : " + geom);
                     }
-
                 }
             }
-            if(selectedGeometry !=null) setGeomSaveAndOpen();
+            if (selectedGeometry != null) setGeomSaveAndOpen();
         } catch (Exception e) {
-
             SIRS.LOGGER.log(Level.WARNING, "Failed to retrieve Geometry from external feature", e);
             throw new BackingStoreException(e);
         }

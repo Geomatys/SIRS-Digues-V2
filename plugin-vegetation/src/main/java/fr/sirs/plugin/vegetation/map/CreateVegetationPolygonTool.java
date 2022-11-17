@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -86,7 +86,7 @@ import org.opengis.util.FactoryException;
  * @author Maxime Gavens (Geomatys)
  * @param <T>
  */
-public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> extends AbstractEditionTool{
+public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> extends AbstractEditionTool {
 
     //session and repo
     private final Session session;
@@ -116,13 +116,16 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     private final List<Coordinate> coords = new ArrayList<>();
     private final BooleanProperty ended = new SimpleBooleanProperty(false);
 
-    private static final String SELECT_GEOM_TEXT = "Sélectionner une géométrie sur la carte";
-
+    private static final String TO_SELECT_ON_MAP_TEXT = "Sélectionner une géométrie sur la carte";
     private static final String HOW_TO_CREATE_GEOM_TEXT = "Cliquer sur la carte pour créer la géométrie, faire un double clic pour terminer la géométrie, faire un clic droit pour supprimer le dernier point.";
 
-    private final Button selectGeomOnMapButton = new Button(SELECT_GEOM_TEXT);
+    private static final String TO_DEFAULT_TEXT = "Retour à la sélection sur la carte";
+    private static final String SELECT_ON_MAP_DESCRIPTION = "Sélectionner une géométrie existante sur la carte. Si la sélection ne fonctionne pas, assurez vous que la couche de la géométrie est bien sélectionnable (cadenas ouvert).";
+
+    private final Button selectGeomOnMapButton = new Button(TO_SELECT_ON_MAP_TEXT);
     /** List of layers deactivated on tool install. They will be activated back at uninstallation. */
     private List<MapLayer> toActivateBack;
+
     public CreateVegetationPolygonTool(FXMap map, Spi spi, Class<T> clazz) {
         super(spi);
         vegetationClass = clazz;
@@ -170,9 +173,9 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
                 lbl1,
                 lblParcelle,
                 lbl2,
-                new VBox(15,new HBox(15, selectGeomOnMapButton),lblGeom),
+                new VBox(15, new HBox(15, selectGeomOnMapButton), lblGeom),
                 new HBox(30, end, cancel));
-        vbox.setMaxSize(USE_PREF_SIZE,USE_PREF_SIZE);
+        vbox.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
         wizard.setCenter(vbox);
     }
 
@@ -181,14 +184,14 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
             this.selectOnMapMouseListener = new GeometryMouseListener(this);
         }
 
-        if(this.defaultMouseInputListener == null){ // then the default mouselistener must be use as currentMouseInputListener
+        if (this.defaultMouseInputListener == null) { // then the default mouselistener must be use as currentMouseInputListener
             this.defaultMouseInputListener = (MouseListen) this.currentMouseInputListener;
         }
 
         //Change to select on map Mode
         if (this.currentMouseInputListener == this.defaultMouseInputListener) {
             toSelectOnMapMode();
-        //Roll back on default geom edition to select on map Mode
+            //Roll back on default geom edition to select on map Mode
         } else {
             toDefaultGeometryMode();
         }
@@ -198,20 +201,20 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         uninstallCurrentMouseListener(map);
         selectOnMapMouseListener.installOnMap(map, this.decorationPane);
         this.currentMouseInputListener = selectOnMapMouseListener;
-        selectOnMapMouseListener.selectionDoneProperty().addListener((ch, old,nw) -> {
-            if(nw) {
+        selectOnMapMouseListener.selectionDoneProperty().addListener((ch, old, nw) -> {
+            if (nw) {
                 handleSelectedGeometry();
             }
         });
-        selectGeomOnMapButton.setText("Retour à la sélection sur la carte");
-        lblGeom.setText("Sélectionner une géométrie existante sur la carte");
+        selectGeomOnMapButton.setText(TO_DEFAULT_TEXT);
+        lblGeom.setText(SELECT_ON_MAP_DESCRIPTION);
     }
 
     private void toDefaultGeometryMode() {
         this.currentMouseInputListener = defaultMouseInputListener;
         selectOnMapMouseListener.uninstallFromMap(map);
         installCurrentMouseListener(map);
-        selectGeomOnMapButton.setText(SELECT_GEOM_TEXT);
+        selectGeomOnMapButton.setText(TO_SELECT_ON_MAP_TEXT);
         lblGeom.setText(HOW_TO_CREATE_GEOM_TEXT);
     }
 
@@ -219,7 +222,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     private void handleSelectedGeometry() {
         changeMouseListener();
         acceptSelectedGeom();
-        selectOnMapMouseListener=null;
+        selectOnMapMouseListener = null;
         refreshGeometryFromCoords();
     }
 
@@ -235,7 +238,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
 
         this.editGeometry.geometry.set(selectOnMapMouseListener.getSelectedGeometry());
         setGeometryCRSAndAddToLayer();
-        final Geometry geomToSet= this.reprojectOnParcelle(editGeometry.geometry.get());
+        final Geometry geomToSet = this.reprojectOnParcelle(editGeometry.geometry.get());
 
         coords.addAll(Arrays.asList(geomToSet.getCoordinates()));
 
@@ -256,7 +259,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
 
     private Geometry reprojectOnParcelle(final Geometry toReproject) {
 
-        if(this.helper.getConstraint() == null) {
+        if (this.helper.getConstraint() == null) {
             final Geometry constraint = getParcelleConstraints(parcelle);
             if (constraint == null) {
                 SIRS.LOGGER.log(Level.WARNING, "No contraint from parcelle found during vegetation creation.");
@@ -276,7 +279,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     }
 
     static Geometry getParcelleConstraints(final ParcelleVegetation parcelle) {
-        if (parcelle == null ) return null;
+        if (parcelle == null) return null;
         final Geometry constraint = parcelle.getGeometry().buffer(1000000, 10, BufferParameters.CAP_FLAT);
         try {
             JTS.setCRS(constraint, JTS.findCoordinateReferenceSystem(parcelle.getGeometry()));
@@ -300,7 +303,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         selectGeomOnMapButton.disableProperty().set(true);
         selectOnMapMouseListener = null;
         defaultMouseInputListener = null;
-        if(parcelleLayer!=null) parcelleLayer.setSelectionFilter(null);
+        if (parcelleLayer != null) parcelleLayer.setSelectionFilter(null);
 
         editGeometry.reset();
         coords.clear();
@@ -335,18 +338,19 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         return null;
     }
 
-    private void installCurrentMouseListener(final FXMap component){
+    private void installCurrentMouseListener(final FXMap component) {
 
         component.addEventHandler(MouseEvent.ANY, currentMouseInputListener);
         component.addEventHandler(ScrollEvent.ANY, currentMouseInputListener);
 
-        if (this.helper == null) helper = new EditionHelper(map, parcelleLayer); //else reuse it to keep the current constraint.
+        if (this.helper == null)
+            helper = new EditionHelper(map, parcelleLayer); //else reuse it to keep the current constraint.
 
         component.setCursor(Cursor.CROSSHAIR);
         component.addDecoration(geomLayer);
     }
 
-    private void uninstallCurrentMouseListener(final FXMap component){
+    private void uninstallCurrentMouseListener(final FXMap component) {
 
         component.removeEventHandler(MouseEvent.ANY, currentMouseInputListener);
         component.removeEventHandler(ScrollEvent.ANY, currentMouseInputListener);
@@ -362,14 +366,13 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
 
         // On instancie une nouvelle liste pour les couches à désactiver provisoirement (le temps de l'activation de l'outil)
         toActivateBack = new ArrayList<>();
-        
+
         //on rend les couches troncon et borne selectionnables
         final MapContext context = component.getContainer().getContext();
         for (MapLayer layer : context.layers()) {
             if (layer.getName().equalsIgnoreCase(PluginVegetation.PARCELLE_LAYER_NAME)) {
                 parcelleLayer = (FeatureMapLayer) layer;
-            } 
-            else if (layer.isSelectable()) {
+            } else if (layer.isSelectable()) {
                 toActivateBack.add(layer);
                 layer.setSelectable(false);
             }
@@ -429,7 +432,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
      */
     private void concludeGeometry() {
         //on sauvegarde
-        if (editGeometry.geometry.get()== null || editGeometry.geometry.get().isEmpty() || !editGeometry.geometry.get().isValid() || !(editGeometry.geometry.get() instanceof Polygon)) {
+        if (editGeometry.geometry.get() == null || editGeometry.geometry.get().isEmpty() || !editGeometry.geometry.get().isValid() || !(editGeometry.geometry.get() instanceof Polygon)) {
             //il faut un polygon valide
             new Growl(Growl.Type.WARNING, "Géométrie éditée non valide.\nUn polygone non nul est attendu.").showAndFade();
             return;
@@ -453,7 +456,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
             mousebutton = e.getButton();
             if (MouseButton.PRIMARY.equals(mousebutton)) {
                 if (parcelle == null) {
-                    final Rectangle2D clickArea = new Rectangle2D.Double(e.getX()-2, e.getY()-2, 4, 4);
+                    final Rectangle2D clickArea = new Rectangle2D.Double(e.getX() - 2, e.getY() - 2, 4, 4);
 
                     parcelleLayer.setSelectable(true);
                     //recherche une parcelle sous la souris
@@ -461,7 +464,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
                         @Override
                         public void visit(ProjectedFeature graphic, RenderingContext2D context, SearchAreaJ2D area) {
                             final Object bean = graphic.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
-                            if(bean instanceof ParcelleVegetation){
+                            if (bean instanceof ParcelleVegetation) {
                                 //on recupere l'object complet
                                 parcelle = (ParcelleVegetation) bean;
                                 //on recupere l'object complet
@@ -469,10 +472,12 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
                                 startGeometry();
                             }
                         }
+
                         @Override
                         public boolean isStopRequested() {
-                            return parcelle!=null;
+                            return parcelle != null;
                         }
+
                         @Override
                         public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
                     }, VisitFilter.INTERSECTS);
@@ -484,10 +489,10 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
                         final double y = getMouseY(e);
 
                         if (coords.isEmpty()) {
-                            coords.add(helper.toCoord(x,y));
-                            coords.add(helper.toCoord(x,y));
+                            coords.add(helper.toCoord(x, y));
+                            coords.add(helper.toCoord(x, y));
                         } else {
-                            coords.add(helper.toCoord(x,y));
+                            coords.add(helper.toCoord(x, y));
                         }
                     }
                 }
@@ -500,9 +505,9 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            if(ended.get()) return;
+            if (ended.get()) return;
             final MouseButton button = e.getButton();
-            if(button!=MouseButton.PRIMARY) super.mouseMoved(e);
+            if (button != MouseButton.PRIMARY) super.mouseMoved(e);
             final double x = getMouseX(e);
             final double y = getMouseY(e);
 
