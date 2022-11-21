@@ -100,7 +100,7 @@ public class FXOpenElementEditorAction extends FXMapAction {
 
         private final AbstractMouseHandler mouseListener;
 
-        final Rectangle selection = new Rectangle();
+        final Rectangle selection = MouseSelectionUtils.defaultRectangle();
         final Point anchor = new Point();
 
         public OpenElementEditorHandler(final FXMap map) {

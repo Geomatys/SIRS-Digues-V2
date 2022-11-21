@@ -19,9 +19,6 @@ public final class MouseSelectionUtils {
             anchor.setY(event.getY());
             selection.setX(event.getX());
             selection.setY(event.getY());
-            selection.setFill(null); // transparent
-            selection.setStroke(Color.BLUE); // border
-            selection.getStrokeDashArray().add(10.0);
             root.getChildren().add(selection);
         };
     }
@@ -37,5 +34,13 @@ public final class MouseSelectionUtils {
 
     public static EventHandler<? super MouseEvent> mouseRelease(final Rectangle selection, final Pane root) {
         return event -> root.getChildren().remove(selection);
+    }
+
+    public static Rectangle defaultRectangle() {
+        final Rectangle selection = new Rectangle();
+        selection.setFill(null); // transparent
+        selection.setStroke(Color.BLUE); // border
+        selection.getStrokeDashArray().add(10.0);
+        return selection;
     }
 }

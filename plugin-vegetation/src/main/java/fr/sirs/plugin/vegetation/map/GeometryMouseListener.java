@@ -54,7 +54,7 @@ class GeometryMouseListener extends FXPanMouseListen {
     private static final double POINT_RADIUS = 1.;
 
     //Attributs liés au carré de sélection.
-    final Rectangle selection = new Rectangle();
+    final Rectangle selection = MouseSelectionUtils.defaultRectangle();
     final Light.Point anchor = new Light.Point();
 
 
