@@ -50,6 +50,7 @@ public class Preview implements AvecLibelle, Comparable {
     @JsonProperty("valid")
     private boolean valid;
 
+    // Used to sort non-archived elements.
     @JsonProperty("date_fin")
     private String date_fin;
 

@@ -18,50 +18,19 @@
  */
 package fr.sirs.ui;
 
-import fr.sirs.Injector;
-import fr.sirs.Session;
 import fr.sirs.util.property.SirsPreferences;
 import javafx.beans.DefaultProperty;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.scene.control.CheckBox;
-import javafx.scene.layout.BorderPane;
-import javafx.util.StringConverter;
 
 /**
  *
  * @author Estelle Idée (Geomatys)
  */
 @DefaultProperty("stringValue")
-public class ArchivedParentCheckBox extends BorderPane {
-
-    protected final StringProperty stringValue = new SimpleStringProperty(this, "stringValue");
-
-    final CheckBox checkBox;
-
-    private final Session session = Injector.getBean(Session.class);
+public class ArchivedParentCheckBox extends AbstractCheckBox {
 
     public ArchivedParentCheckBox() {
-        checkBox = new CheckBox();
-        setCenter(checkBox);
-
-        Bindings.bindBidirectional(stringValue, checkBox.selectedProperty(), new StringConverter<Boolean>() {
-            @Override
-            public String toString(Boolean object) {
-                return object == null? null : object.toString();
-            }
-
-            @Override
-            public Boolean fromString(String string) {
-                return string == null? null : Boolean.valueOf(string);
-            }
-        });
+       super();
 
         checkBox.selectedProperty().setValue(SirsPreferences.getHideArchivedProperty());
-    }
-
-    public StringProperty stringValueProperty() {
-        return stringValue;
     }
 }

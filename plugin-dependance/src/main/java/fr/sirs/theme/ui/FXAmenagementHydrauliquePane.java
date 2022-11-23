@@ -535,7 +535,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
     }
 
     private static final class TronconTable extends ListeningPojoTable<TronconDigue> {
-        public TronconTable(String title, final ObjectProperty<? extends Element> container) {
+        public TronconTable(String title, final ObjectProperty<AmenagementHydraulique> container) {
             super(TronconDigue.class, title, container);
 
             final SirsStringConverter converter = new SirsStringConverter();

@@ -71,6 +71,11 @@ public class LocationInsertUtilities {
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
 
+    /**
+     * Filter to remove all the archived elements.
+     * Used when the user has selected the app option (in Préférences)
+     * to hide all the archived parents.
+     */
     private static final  Filter FILTER_NOT_ARCHIVED = FF.and(
             FF.or(
                     FF.isNull(FF.property(DATE_FIN_FIELD)),
@@ -297,7 +302,7 @@ public class LocationInsertUtilities {
             }
             Query currentQuery;
             GenericName typeName;
-            Filter filter = null;
+            Filter filter;
             QueryBuilder queryBuilder;
             GeometryDescriptor geomDescriptor;
             GenericName[] genericNames;

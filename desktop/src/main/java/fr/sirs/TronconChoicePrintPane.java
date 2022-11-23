@@ -93,7 +93,9 @@ public abstract class TronconChoicePrintPane extends BorderPane {
             final Predicate<TronconDigue> isNotArchived = tl -> tl.getDate_fin() == null || tl.getDate_fin().isAfter(LocalDate.now());
             list = byClass.stream().filter(isNotArchived).collect(Collectors.toList());
         }
-        List<TronconDigue> finalList = list == null ? byClass : list;
+        List<TronconDigue> finalList;
+        if (list == null) finalList = byClass;
+        else finalList = list;
         tronconsTable.setTableItems(()-> (ObservableList) SIRS.observableList(finalList));
         tronconsTable.commentAndPhotoProperty().set(false);
         uiTronconChoice.setContent(tronconsTable);
