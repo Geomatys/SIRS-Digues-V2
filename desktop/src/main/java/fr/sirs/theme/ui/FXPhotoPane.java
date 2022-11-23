@@ -58,7 +58,6 @@ public class FXPhotoPane extends FXPhotoPaneStub {
         ui_scroll_pane.setBorder(Border.EMPTY);
 
         ui_hbox_container.setFillHeight(true);
-
         ui_photo.setPreserveRatio(true);
         ui_chemin.textProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
             if (newValue != null) {
@@ -69,16 +68,11 @@ public class FXPhotoPane extends FXPhotoPaneStub {
                 isVerticalPhoto = image.getHeight() > image.getWidth();
                 // Compute height when parent size or padding change.
                 ui_photo.fitHeightProperty().bind(Bindings.createDoubleBinding(() -> {
-                    double height = ui_hbox_container.getHeight();
+                    double height = Math.min(ui_hbox_container.getHeight(), getHeight());
                     final Insets padding = ui_photo_stack.getPadding();
-                    double maxHeight = getHeight();
                     if (padding != null) {
                         height -= padding.getBottom() + padding.getTop();
-                        maxHeight -= padding.getBottom() + padding.getTop();
                     }
-                    // HACK-REDMINE-7842 : limit the image height to the max height
-                    if (isVerticalPhoto)
-                        height = Math.min(height, maxHeight);
                     return Math.max(0, height);
                 }, ui_hbox_container.heightProperty(), ui_photo_stack.paddingProperty()));
 
