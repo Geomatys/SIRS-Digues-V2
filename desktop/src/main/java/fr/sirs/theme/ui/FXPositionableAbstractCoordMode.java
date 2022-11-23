@@ -30,6 +30,8 @@ import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.theme.ui.FXPositionableMode.fxNumberValue;
+
+import fr.sirs.ui.Growl;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.util.FormattedDoubleConverter;
 import fr.sirs.util.SirsStringConverter;
@@ -218,10 +220,12 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             return;
         }
 
-        if (newEditedGeoCoordinate) {
-            uiGeoCoordLabel.setText("Coordonnées saisies");
-        } else {
-            uiGeoCoordLabel.setText("Coordonnées calculées");
+        if (uiGeoCoordLabel != null) { //Occurred for vegetation
+            if (newEditedGeoCoordinate) {
+                uiGeoCoordLabel.setText("Coordonnées saisies");
+            } else {
+                uiGeoCoordLabel.setText("Coordonnées calculées");
+            }
         }
     }
 
@@ -432,7 +436,6 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
      * Update geographic/projected coordinate fields when current CRS change.
      * Note : listener method, should always be launched from FX-thread.
      *
-     * @param observable
      * @param oldValue Previous value into {@link #uiCRSs}
      * @param newValue Current value into {@link #uiCRSs}
      */
@@ -514,7 +517,13 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         final StringConverter<Double> converter = isMeter ? TWO_DIGITS_CONVERTER : SEVEN_DIGITS_CONVERTER;
         getSpinners()
                 .map(Spinner::getValueFactory)
-                .forEach(vf -> vf.setConverter(converter));
+                .forEach(vf -> {
+                    if (vf != null) {
+                        vf.setConverter(converter);
+                    } else {
+                        SIRS.LOGGER.log(Level.WARNING,"Value factory null for spinner");
+                    }
+                });
     }
 
     protected Stream<Spinner> getSpinners() {
