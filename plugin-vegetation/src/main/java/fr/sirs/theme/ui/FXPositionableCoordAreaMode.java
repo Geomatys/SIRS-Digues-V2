@@ -24,6 +24,7 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import fr.sirs.core.LinearReferencingUtilities;
 import static fr.sirs.core.LinearReferencingUtilities.buildSegmentFromDistance;
 import fr.sirs.core.TronconUtils;
@@ -37,6 +38,7 @@ import static fr.sirs.plugin.vegetation.PluginVegetation.toPoint;
 import static fr.sirs.plugin.vegetation.PluginVegetation.toPolygon;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
@@ -108,7 +110,7 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         uiEndNear.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
         uiEndFar.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
 
-        final ChangeListener chgListener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> coordChange();
+        final ChangeListener chgListener = (ObservableValue observable, Object oldValue, Object newValue) -> coordChange();
         uiStartNear.valueProperty().addListener(chgListener);
         uiStartFar.valueProperty().addListener(chgListener);
         uiEndNear.valueProperty().addListener(chgListener);
@@ -146,16 +148,12 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
             }
         });
 
-        positionableProperty().addListener(new ChangeListener<Positionable>() {
-
-            @Override
-            public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
-                if(newValue instanceof ZoneVegetation){
-                    ((ZoneVegetation) newValue).typeCoteIdProperty().addListener(typeCoteChangeListener);
-                }
-                if(oldValue instanceof ZoneVegetation){
-                    ((ZoneVegetation) newValue).typeCoteIdProperty().removeListener(typeCoteChangeListener);
-                }
+        positionableProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue instanceof ZoneVegetation){
+                ((ZoneVegetation) newValue).typeCoteIdProperty().addListener(typeCoteChangeListener);
+            }
+            if(oldValue instanceof ZoneVegetation){
+                ((ZoneVegetation) oldValue).typeCoteIdProperty().removeListener(typeCoteChangeListener);
             }
         });
     }
@@ -182,18 +180,18 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
             final Point startPos = pos.getPositionDebut();
             final Point endPos = pos.getPositionFin();
             if (startPos != null) {
-                uiLongitudeStart.getValueFactory().valueProperty().set(startPos.getX());
-                uiLatitudeStart.getValueFactory().valueProperty().set(startPos.getY());
+                if(uiLongitudeStart.getValueFactory() != null) uiLongitudeStart.getValueFactory().valueProperty().set(startPos.getX());
+                if(uiLatitudeStart.getValueFactory() != null) uiLatitudeStart.getValueFactory().valueProperty().set(startPos.getY());
             }else{
-                uiLongitudeStart.getValueFactory().setValue(null);
-                uiLatitudeStart.getValueFactory().setValue(null);
+                if(uiLongitudeStart.getValueFactory() != null) uiLongitudeStart.getValueFactory().setValue(null);
+                if(uiLatitudeStart.getValueFactory() != null) uiLatitudeStart.getValueFactory().setValue(null);
             }
             if (endPos != null) {
-                uiLongitudeEnd.getValueFactory().valueProperty().set(endPos.getX());
-                uiLatitudeEnd.getValueFactory().valueProperty().set(endPos.getY());
+                if(uiLongitudeEnd.getValueFactory() != null) uiLongitudeEnd.getValueFactory().valueProperty().set(endPos.getX());
+                if(uiLatitudeEnd.getValueFactory() != null) uiLatitudeEnd.getValueFactory().valueProperty().set(endPos.getY());
             }else{
-                uiLongitudeEnd.getValueFactory().setValue(null);
-                uiLatitudeEnd.getValueFactory().setValue(null);
+                if(uiLongitudeEnd.getValueFactory() != null) uiLongitudeEnd.getValueFactory().setValue(null);
+                if(uiLatitudeEnd.getValueFactory() != null) uiLatitudeEnd.getValueFactory().setValue(null);
             }
             uiStartNear.getValueFactory().setValue(pos.getDistanceDebutMin());
             uiStartFar.getValueFactory().setValue(pos.getDistanceDebutMax());
@@ -277,6 +275,7 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
 
         final TronconDigue troncon = ConvertPositionableCoordinates.getTronconFromPositionable(zone);
 
+        if (troncon == null) throw new IllegalStateException("Failed to retrieve tronçon from Positionable : "+zone);
 
         //on calcule le ratio on fonction de la rive et du coté
         double ratio = computeRatio(troncon, zone);
