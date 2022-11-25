@@ -387,7 +387,7 @@ public final class SIRS extends SirsCore {
         if (finalItems instanceof SortedList) {
             comboBox.setItems(finalItems);
         } else {
-            comboBox.setItems(finalItems.sorted((o1, o2) -> converter.toString(o1).compareTo(converter.toString(o2))));
+            comboBox.setItems(finalItems.sorted(Comparator.comparing(converter::toString)));
         }
         comboBox.setEditable(true);
         if (useCurrent)

@@ -88,30 +88,23 @@ public abstract class TronconChoicePrintPane extends BorderPane {
 
         final List<TronconDigue> byClass = session.getRepositoryForClass(TronconDigue.class).getAll();
         // HACK-REDMINE-4408 : hide archived troncons from selection lists
-        List<TronconDigue> list = null;
+        final List<TronconDigue> list;
         if (SirsPreferences.getHideArchivedProperty()) {
             final Predicate<TronconDigue> isNotArchived = tl -> tl.getDate_fin() == null || tl.getDate_fin().isAfter(LocalDate.now());
             list = byClass.stream().filter(isNotArchived).collect(Collectors.toList());
+        } else {
+            list = byClass;
         }
-        List<TronconDigue> finalList;
-        if (list == null) finalList = byClass;
-        else finalList = list;
-        tronconsTable.setTableItems(()-> (ObservableList) SIRS.observableList(finalList));
+        tronconsTable.setTableItems(()-> (ObservableList) SIRS.observableList(list));
         tronconsTable.commentAndPhotoProperty().set(false);
         uiTronconChoice.setContent(tronconsTable);
         tronconsTable.getSelectedItems().addListener((ListChangeListener.Change<? extends Element> ch) -> filterPrestations(ch));
 
-        uiOptionExcludeValid.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if (newValue) uiOptionExcludeInvalid.selectedProperty().setValue(false);
-            }
+        uiOptionExcludeValid.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) uiOptionExcludeInvalid.selectedProperty().setValue(false);
         });
-        uiOptionExcludeInvalid.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if (newValue) uiOptionExcludeValid.selectedProperty().setValue(false);
-            }
+        uiOptionExcludeInvalid.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) uiOptionExcludeValid.selectedProperty().setValue(false);
         });
     }
 
@@ -122,7 +115,7 @@ public abstract class TronconChoicePrintPane extends BorderPane {
     protected class TronconChoicePojoTable extends PojoTable {
 
         public TronconChoicePojoTable() {
-            super(TronconDigue.class, "Tronçons", (ObjectProperty<Element>) null, false); //le dernier input 'false" permet de ne pas appliquer les préférences utilisateur depuis le constructeur parent.
+            super(TronconDigue.class, "Tronçons", null, false); //le dernier input 'false" permet de ne pas appliquer les préférences utilisateur depuis le constructeur parent.
             getColumns().remove(editCol);
             editableProperty.set(false);
             createNewProperty.set(false);
