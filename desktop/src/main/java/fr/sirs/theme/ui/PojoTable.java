@@ -141,7 +141,6 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -867,7 +866,7 @@ public class PojoTable extends BorderPane implements Printable {
         if (ProfilTravers.class.isAssignableFrom(pojoClass)) {
             uiImport.setTooltip(new Tooltip("Importer des paramètres hydrauliques"));
         }
-        
+
         if (BUG_JAVAFX_COLUMN_MOVE) {
             //Place toutes les colonnes non visible en fin de tableau (excepté le bouton de suppression)
             // afin de permettre un déplacement (manuel) de colonne intelligible.
@@ -1088,6 +1087,9 @@ public class PojoTable extends BorderPane implements Printable {
     public StringProperty titleProperty() {
         return titleProperty;
     }
+
+    protected Callback<TableColumn.CellDataFeatures, ObservableValue> getDefaultValueFactory() { return DEFAULT_VALUE_FACTORY;}
+    protected Predicate getDefaultVisiblePredicate() { return DEFAULT_VISIBLE_PREDICATE;}
 
     protected final ObservableList<TableColumn<Element, ?>> getColumns() {
         return uiTable.getColumns();
