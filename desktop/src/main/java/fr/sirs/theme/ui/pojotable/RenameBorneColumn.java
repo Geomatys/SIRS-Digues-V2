@@ -25,13 +25,14 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
+ * Column used in BorneDigue pojo table present in @{@link fr.sirs.digue.FXSystemeReperagePane}
+ * Used to edit a BorneDigue's libelle and designation.
  *
- * @author Samuel Andrés (Geomatys) [extraction de la PojoTable]
  * @author Estelle Idée (Geomatys)
  */
-public class EditColumn extends AbstractColumnWithButton {
+public class RenameBorneColumn extends AbstractColumnWithButton {
 
-    public EditColumn(Callback cellValueFactory, Function editFct, Predicate visiblePredicate) {
-        super(cellValueFactory, editFct, visiblePredicate, "Edition", SIRS.ICON_EDIT_BLACK,"Ouvrir la fiche de l'élément");
+    public RenameBorneColumn(Callback cellValueFactory, Function editFct, Predicate visiblePredicate) {
+        super(cellValueFactory, editFct, visiblePredicate, "Renommer", SIRS.ICON_EDITION,"Renommer l'élément");
     }
 }
