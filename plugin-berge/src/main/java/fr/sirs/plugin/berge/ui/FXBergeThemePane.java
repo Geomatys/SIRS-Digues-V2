@@ -19,6 +19,7 @@
 package fr.sirs.plugin.berge.ui;
 
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Berge;
@@ -28,8 +29,7 @@ import fr.sirs.theme.TronconTheme;
 import fr.sirs.theme.ui.ForeignParentPojoTable;
 import fr.sirs.theme.ui.pojotable.ElementCopier;
 import fr.sirs.util.SimpleFXEditMode;
-import fr.sirs.util.SirsStringConverter;
-import java.util.List;
+import fr.sirs.util.property.SirsPreferences;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -45,6 +45,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+
+import java.util.List;
 
 /**
  *
@@ -72,17 +74,17 @@ public class FXBergeThemePane extends BorderPane {
             setCenter(pane);
         }
 
-        final List<Berge> linearPreviews = session.getRepositoryForClass(Berge.class).getAll();
-        uiLinearChoice.setItems(FXCollections.observableList(linearPreviews));
-        uiLinearChoice.setConverter(new SirsStringConverter());
-
         uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Berge> observable, Berge oldValue, Berge newValue) -> {
-            linearIdProperty.set(newValue.getId());
+            if (newValue != null) {
+                linearIdProperty.set(newValue.getId());
+            }
         });
 
-        if(!linearPreviews.isEmpty()){
-            uiLinearChoice.getSelectionModel().select(linearPreviews.get(0));
-        }
+        final List<Berge> linearPreviews = session.getRepositoryForClass(Berge.class).getAll();
+        // HACK-REDMINE-4408 : hide archived Berges from selection lists
+        SIRS.initCombo(uiLinearChoice, SIRS.observableList(linearPreviews), null, SirsPreferences.getHideArchivedProperty(), false);
+
+
     }
 
     protected class BergeThemePojoTable<T extends AvecForeignParent> extends ForeignParentPojoTable<T>{

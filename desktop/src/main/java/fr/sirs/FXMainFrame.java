@@ -470,6 +470,8 @@ public class FXMainFrame extends BorderPane {
         for(final AbstractSIRSRepository repo : repos){
             repo.clearCache();
         }
+        // HACK-REDMINE-4408 : preview cache must be refreshed too
+        session.getPreviews().clearCache();
     }
 
     /**

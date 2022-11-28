@@ -1,20 +1,20 @@
 
 package fr.sirs.theme.ui;
 
-import fr.sirs.theme.ui.*;
-import fr.sirs.Session;
-import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import fr.sirs.core.component.*;
+import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.*;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.javafx.FloatSpinnerValueFactory;
-
+import fr.sirs.util.property.SirsPreferences;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.event.ActionEvent;
 import javafx.scene.image.ImageView;
 
 import java.util.List;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * @author Maxime Gavens (Geomatys)
  */
 public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane<StructureAmenagementHydraulique> {
-    
+
     protected final Previews previewRepository;
     protected LabelMapper labelMapper;
 
@@ -46,17 +46,17 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
     protected PojoTable observationsTable;
     @FXML protected FXFreeTab ui_photos;
     protected PojoTable photosTable;
-    
+
     // Propriétés de AvecGeometrie
-    
+
     // Propriétés de AvecSettableGeometrie
-    
+
     // Propriétés de AbstractAmenagementHydraulique
     @FXML protected ComboBox ui_amenagementHydrauliqueId;
     @FXML protected Button ui_amenagementHydrauliqueId_link;
-    
+
     @FXML FXPositionDependancePane uiPosition;
-    
+
     /**
      * Constructor. Initialize part of the UI which will not require update when
      * element edited change.
@@ -89,9 +89,9 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
         ui_commentaire.disableProperty().bind(disableFieldsProperty());
         ui_commentaire.setWrapText(true);
-        
+
         uiPosition.dependanceProperty().bind(elementProperty);
-        
+
         ui_observations.setContent(() -> {
             observationsTable = new PojoTable(ObservationDependance.class, null, elementProperty());
             observationsTable.editableProperty().bind(disableFieldsProperty().not());
@@ -99,7 +99,7 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             return observationsTable;
         });
         ui_observations.setClosable(false);
-        
+
         ui_photos.setContent(() -> {
             photosTable = new PojoTable(PhotoDependance.class, null, elementProperty());
             photosTable.editableProperty().bind(disableFieldsProperty().not());
@@ -112,12 +112,12 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
         ui_amenagementHydrauliqueId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
         ui_amenagementHydrauliqueId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_amenagementHydrauliqueId.getSelectionModel().getSelectedItem()));
     }
-    
+
     public FXStructureAmenagementHydrauliquePane(final StructureAmenagementHydraulique structureAmenagementHydraulique){
         this();
         this.elementProperty().set(structureAmenagementHydraulique);
     }
-    
+
     /**
      * Initialize fields at element setting.
      */
@@ -137,11 +137,11 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             // Propriétés de AvecSettableGeometrie
             // Propriétés de AbstractAmenagementHydraulique
         }
-        
+
         final Session session = Injector.getBean(Session.class);
-        
+
         if (newElement == null) {
-            
+
             ui_materiauId.setItems(null);
             ui_sourceId.setItems(null);
             ui_fonctionId.setItems(null);
@@ -149,8 +149,8 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             ui_amenagementHydrauliqueId.setItems(null);
             ui_commentaire.setText(null);
         } else {
-            
-            
+
+
             /*
             * Bind control properties to Element ones.
             */
@@ -181,18 +181,19 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             if (linearPreview == null && sorted.size() >= 1) {
                 linearPreview = sorted.get(0);
             }
-            SIRS.initCombo(ui_amenagementHydrauliqueId, sorted, linearPreview);
+            // HACK-REDMINE-4408 : hide archived AH from selection lists
+            SIRS.initCombo(ui_amenagementHydrauliqueId, sorted, linearPreview, SirsPreferences.getHideArchivedProperty(), true);
         }
 
         updateObservationsTable(session, newElement);
         updatePhotosTable(session, newElement);
     }
-    
-    
+
+
     protected void updateObservationsTable(final Session session, final StructureAmenagementHydraulique newElement) {
         if (observationsTable == null)
             return;
-        
+
         if (newElement == null) {
             observationsTable.setTableItems(null);
         } else {
@@ -200,12 +201,12 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
             observationsTable.setTableItems(()-> (ObservableList) newElement.getObservations());
         }
     }
-    
-    
+
+
     protected void updatePhotosTable(final Session session, final StructureAmenagementHydraulique newElement) {
         if (photosTable == null)
             return;
-        
+
         if (newElement == null) {
             photosTable.setTableItems(null);
         } else {
@@ -217,10 +218,10 @@ public class FXStructureAmenagementHydrauliquePane extends AbstractFXElementPane
     public void preSave() {
         final Session session = Injector.getBean(Session.class);
         final StructureAmenagementHydraulique element = (StructureAmenagementHydraulique) elementProperty().get();
-        
-        
-        
-        
+
+
+
+
         Object cbValue;
         cbValue = ui_materiauId.getValue();
         if (cbValue instanceof Preview) {

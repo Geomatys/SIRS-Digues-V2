@@ -25,6 +25,7 @@ import fr.sirs.ui.Growl;
 import fr.sirs.util.ClosingDaemon;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.util.PrinterUtilities;
+import fr.sirs.util.property.SirsPreferences;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -198,7 +199,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
     }
 
     private Stream<Desordre> getData() {
-        final Predicate userOptions = new TypePredicate()
+        Predicate userOptions = new TypePredicate()
                 .and(new ValidPredicate())
                 .and(new TemporalPredicate())
                 .and(new LinearPredicate<>())
@@ -209,6 +210,11 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                         .collect(Collectors.toSet())))
                 .and(uiPrestationPredicater.getPredicate())
                 .and(new LastObservationPredicate(uiOptionDebutLastObservation.getValue(), uiOptionFinLastObservation.getValue()));
+
+        // HACK-REDMINE-4408 : remove elements on archived Troncons
+        if (SirsPreferences.getHideArchivedProperty()) {
+            userOptions = userOptions.and(new isNotOnArchivedTroncon());
+        }
 
         final CloseableIterator<Desordre> it = Injector.getSession()
                 .getRepositoryForClass(Desordre.class)

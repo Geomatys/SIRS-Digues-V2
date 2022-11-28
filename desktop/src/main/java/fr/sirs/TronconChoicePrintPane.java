@@ -20,22 +20,23 @@ package fr.sirs;
 
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.LinearReferencingUtilities;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
-import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.*;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
+
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+
+import fr.sirs.util.property.SirsPreferences;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -52,6 +53,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
+import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.gui.javafx.util.TaskManager;
@@ -83,22 +85,26 @@ public abstract class TronconChoicePrintPane extends BorderPane {
     public TronconChoicePrintPane(final Class forBundle) {
         SIRS.loadFXML(this, forBundle);
         final Session session = Injector.getSession();
-        tronconsTable.setTableItems(()-> (ObservableList) SIRS.observableList(session.getRepositoryForClass(TronconDigue.class).getAll()));
+
+        final List<TronconDigue> byClass = session.getRepositoryForClass(TronconDigue.class).getAll();
+        // HACK-REDMINE-4408 : hide archived troncons from selection lists
+        final List<TronconDigue> list;
+        if (SirsPreferences.getHideArchivedProperty()) {
+            final Predicate<TronconDigue> isNotArchived = tl -> tl.getDate_fin() == null || tl.getDate_fin().isAfter(LocalDate.now());
+            list = byClass.stream().filter(isNotArchived).collect(Collectors.toList());
+        } else {
+            list = byClass;
+        }
+        tronconsTable.setTableItems(()-> (ObservableList) SIRS.observableList(list));
         tronconsTable.commentAndPhotoProperty().set(false);
         uiTronconChoice.setContent(tronconsTable);
         tronconsTable.getSelectedItems().addListener((ListChangeListener.Change<? extends Element> ch) -> filterPrestations(ch));
 
-        uiOptionExcludeValid.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if (newValue) uiOptionExcludeInvalid.selectedProperty().setValue(false);
-            }
+        uiOptionExcludeValid.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) uiOptionExcludeInvalid.selectedProperty().setValue(false);
         });
-        uiOptionExcludeInvalid.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if (newValue) uiOptionExcludeValid.selectedProperty().setValue(false);
-            }
+        uiOptionExcludeInvalid.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) uiOptionExcludeValid.selectedProperty().setValue(false);
         });
     }
 
@@ -109,7 +115,7 @@ public abstract class TronconChoicePrintPane extends BorderPane {
     protected class TronconChoicePojoTable extends PojoTable {
 
         public TronconChoicePojoTable() {
-            super(TronconDigue.class, "Tronçons", (ObjectProperty<Element>) null, false); //le dernier input 'false" permet de ne pas appliquer les préférences utilisateur depuis le constructeur parent.
+            super(TronconDigue.class, "Tronçons", null, false); //le dernier input 'false" permet de ne pas appliquer les préférences utilisateur depuis le constructeur parent.
             getColumns().remove(editCol);
             editableProperty.set(false);
             createNewProperty.set(false);
@@ -372,6 +378,22 @@ public abstract class TronconChoicePrintPane extends BorderPane {
                 if (!uiOptionExcludeInvalid.isSelected()) return true;
             }
             return false;
+        }
+    }
+
+    final protected class isNotOnArchivedTroncon<T extends AvecForeignParent> implements Predicate<T> {
+        @Override
+        public boolean test(final T candidate) {
+            String linearId = candidate.getForeignParentId();
+            if (linearId == null) return true;
+            LocalDate tronconDateFin;
+            try {
+                tronconDateFin = Injector.getSession().getPreviews().get(linearId).getDate_fin();
+                return tronconDateFin == null || tronconDateFin.isAfter(LocalDate.now());
+            } catch (DocumentNotFoundException dnfe) {
+                SirsCore.LOGGER.log(Level.WARNING, "No document found for " + linearId, dnfe);
+                return true;
+            }
         }
     }
 }

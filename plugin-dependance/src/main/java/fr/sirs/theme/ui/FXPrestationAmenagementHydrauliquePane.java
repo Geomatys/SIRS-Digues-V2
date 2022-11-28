@@ -11,6 +11,7 @@ import fr.sirs.plugin.dependance.ui.PrestationDesordresDependancePojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.StreamingIterable;
 import fr.sirs.util.javafx.FloatSpinnerValueFactory;
+import fr.sirs.util.property.SirsPreferences;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -258,13 +259,14 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
             // Propriétés de AbstractAmenagementHydraulique
             Preview linearPreview = newElement.getAmenagementHydrauliqueId() == null ? null : previewRepository.get(newElement.getAmenagementHydrauliqueId());
             final List<Preview> byClass = previewRepository.getByClass(linearPreview == null ? AmenagementHydraulique.class : linearPreview.getJavaClassOr(AmenagementHydraulique.class));
-            final List<Preview> withoutEmptyPreview = byClass.stream().filter(p -> p.getElementId() != null).collect(Collectors.toList());
+           final List<Preview> withoutEmptyPreview = byClass.stream().filter(p -> p.getElementId() != null).collect(Collectors.toList());
             final ObservableList<Preview> sorted = SIRS.observableList(withoutEmptyPreview).sorted();
 
             if (linearPreview == null && sorted.size() >= 1) {
                 linearPreview = sorted.get(0);
             }
-            SIRS.initCombo(ui_amenagementHydrauliqueId, sorted, linearPreview);
+            // HACK-REDMINE-4408 : hide archived AH from selection lists
+            SIRS.initCombo(ui_amenagementHydrauliqueId, sorted, linearPreview, SirsPreferences.getHideArchivedProperty(), true);
         }
 
         updateDesordreIdsTable(session, newElement);
