@@ -386,16 +386,14 @@ public abstract class TronconChoicePrintPane extends BorderPane {
         public boolean test(final T candidate) {
             String linearId = candidate.getForeignParentId();
             if (linearId == null) return true;
-            String tronconDateFinStr;
+            LocalDate tronconDateFin;
             try {
-                tronconDateFinStr = Injector.getSession().getPreviews().get(linearId).getDate_fin();
+                tronconDateFin = Injector.getSession().getPreviews().get(linearId).getDate_fin();
+                return tronconDateFin == null || tronconDateFin.isAfter(LocalDate.now());
             } catch (DocumentNotFoundException dnfe) {
                 SirsCore.LOGGER.log(Level.WARNING, "No document found for " + linearId, dnfe);
                 return true;
             }
-
-            LocalDate dateFin = tronconDateFinStr == null ? null : LocalDate.parse(tronconDateFinStr);
-            return dateFin == null || dateFin.isAfter(LocalDate.now());
         }
     }
 }

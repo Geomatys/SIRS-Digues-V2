@@ -20,9 +20,17 @@ package fr.sirs.core.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.sirs.core.SirsCore;
+import fr.sirs.util.json.LocalDateDeserializer;
+import fr.sirs.util.json.LocalDateSerializer;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
+import java.time.LocalDate;
 
 /**
  *
@@ -30,7 +38,7 @@ import javafx.beans.property.StringProperty;
  * @author Alexis Manin (Geomatys)
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class Preview implements AvecLibelle, Comparable {
+public class Preview implements AvecFinTemporelle, AvecLibelle, Comparable {
 
     @JsonProperty("docId")
     private String docId;
@@ -49,10 +57,6 @@ public class Preview implements AvecLibelle, Comparable {
 
     @JsonProperty("valid")
     private boolean valid;
-
-    // Used to sort non-archived elements.
-    @JsonProperty("date_fin")
-    private String date_fin;
 
     private final SimpleStringProperty designationProperty = new SimpleStringProperty();
 
@@ -113,12 +117,21 @@ public class Preview implements AvecLibelle, Comparable {
         this.valid = valid;
     }
 
-    public String getDate_fin() {
+    @JsonProperty("date_fin")
+    private final ObjectProperty<LocalDate>  date_fin = new SimpleObjectProperty<>();
+    @Override
+    public ObjectProperty<LocalDate> date_finProperty() {
         return date_fin;
     }
 
-    public void setDate_fin(String date_fin) {
-        this.date_fin = date_fin;
+    @JsonSerialize(using=LocalDateSerializer.class)
+    public LocalDate getDate_fin() {
+        return date_fin.get();
+    }
+
+    @JsonDeserialize(using= LocalDateDeserializer.class)
+    public void setDate_fin(LocalDate date_fin) {
+        this.date_fin.set(date_fin);
     }
 
     @JsonProperty("designation")

@@ -26,10 +26,7 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.AvecBornesTemporelles;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.*;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementContainerPane;
 import fr.sirs.theme.ui.columns.TableColumnsPreferences;
@@ -72,13 +69,13 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.InvalidClassException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.text.NumberFormat;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.*;
 import java.util.function.Predicate;
@@ -370,17 +367,28 @@ public final class SIRS extends SirsCore {
         ObservableList finalItems = null;
         if (hideArchived && items != null && !items.isEmpty()) {
             Object item = items.get(0);
-            List<String> classesToFilterArchived = Arrays.asList(TronconDigue.class.getCanonicalName(), "fr.sirs.core.model.TronconLit", "fr.sirs.core.model.Berge",
-                    "fr.sirs.core.model.AireStockageDependance", "fr.sirs.core.model.AmenagementHydraulique", "fr.sirs.core.model.AutreDependance",
-                    "fr.sirs.core.model.CheminAccesDependance", "fr.sirs.core.model.OuvrageVoirieDependance");
-            if (classesToFilterArchived.contains(item.getClass().getCanonicalName())) {
-                List<? extends AvecBornesTemporelles> list = items;
-                final Predicate<AvecBornesTemporelles> isNotArchived = tl -> tl.getDate_fin() == null || tl.getDate_fin().isAfter(LocalDate.now());
-                finalItems = SIRS.observableList(list.stream().filter(isNotArchived).collect(Collectors.toList()));
-            } else if (item instanceof Preview && classesToFilterArchived.contains(((Preview) item).getElementClass())) {
-                List<Preview> list = items;
-                final Predicate<Preview> isNotArchived = tl -> tl.getDate_fin() == null || LocalDate.parse(tl.getDate_fin()).isAfter(LocalDate.now());
-                finalItems = SIRS.observableList(list.stream().filter(isNotArchived).collect(Collectors.toList()));
+
+            if (item instanceof AvecFinTemporelle) {
+                // List of classes that are not TronconDigue children and are impacted by the "hide archived element" option in the SIRS app.
+                List<String> classesToFilterArchived = Arrays.asList("fr.sirs.core.model.TronconLit",
+                        "fr.sirs.core.model.AireStockageDependance", "fr.sirs.core.model.AmenagementHydraulique", "fr.sirs.core.model.AutreDependance",
+                        "fr.sirs.core.model.CheminAccesDependance", "fr.sirs.core.model.OuvrageVoirieDependance");
+
+                final Class clazz;
+                final String className;
+                if (item instanceof Preview) {
+                    Preview prev = (Preview) item;
+                    clazz = prev.getJavaClassOr(null);
+                    className = ((Preview) item).getElementClass();
+                } else {
+                    clazz = item.getClass();
+                    className = clazz.getCanonicalName();
+                }
+
+                if ((clazz != null) && (TronconDigue.class.isAssignableFrom(clazz)) || (classesToFilterArchived.contains(className))) {
+                    List<? extends AvecFinTemporelle> list = items;
+                    finalItems = SIRS.observableList(list.stream().filter(new AvecFinTemporelle.IsNotArchivedPredicate()).collect(Collectors.toList()));
+                }
             }
         }
         if (finalItems == null) finalItems = items;
