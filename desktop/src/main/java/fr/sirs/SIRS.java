@@ -379,7 +379,7 @@ public final class SIRS extends SirsCore {
                 if (item instanceof Preview) {
                     Preview prev = (Preview) item;
                     clazz = prev.getJavaClassOr(null);
-                    className = ((Preview) item).getElementClass();
+                    className = prev.getElementClass();
                 } else {
                     clazz = item.getClass();
                     className = clazz.getCanonicalName();
