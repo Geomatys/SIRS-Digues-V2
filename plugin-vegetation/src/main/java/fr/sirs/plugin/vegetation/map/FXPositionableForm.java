@@ -39,6 +39,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 
 import static fr.sirs.SIRS.EDITION_PREDICATE;
+import static fr.sirs.plugin.vegetation.map.CreateVegetationPolygonTool.CONTACT_EAU_LABEL;
+import static fr.sirs.plugin.vegetation.map.EditVegetationUtils.*;
 
 /**
  *
@@ -65,7 +67,11 @@ public class FXPositionableForm extends BorderPane {
     @FXML
     private Label ui_typeCoteLabel;
     @FXML
-    protected ComboBox ui_typeCoteId;
+    protected ComboBox<Preview> ui_typeCoteId;
+    @FXML
+    protected Label LabelContactEau = generateHeaderLabel(CONTACT_EAU_LABEL);
+    @FXML
+    protected CheckBox checkContactEau = new CheckBox();
 
 
     private final ObjectProperty<Positionable> positionableProperty = new SimpleObjectProperty<>();
@@ -124,14 +130,7 @@ public class FXPositionableForm extends BorderPane {
         }
 
         if (pos instanceof ZoneVegetation) {
-            final ZoneVegetation zone = (ZoneVegetation) pos;
-            final Object cote = ui_typeCoteId.getValue();
-            if (cote instanceof RefCote) {
-                zone.setTypeCoteId(((RefCote) cote).getId());
-            } else {
-                if (cote != null)
-                    throw new IllegalStateException("ui_typeCoteId's value is expected to be a RefCote instance. Current class is : " + cote.getClass());
-            }
+            setEditedAttributes((ZoneVegetation) pos , ui_typeCoteId, checkContactEau);
 
             if (pos instanceof InvasiveVegetation) {
                 final InvasiveVegetation iv = (InvasiveVegetation) pos;
@@ -201,9 +200,8 @@ public class FXPositionableForm extends BorderPane {
 
             if (pv instanceof ZoneVegetation) {
                 final ZoneVegetation zone = (ZoneVegetation) pv;
-                final AbstractSIRSRepository<RefCote> typeCoteIdRepo = session.getRepositoryForClass(RefCote.class);
-                SIRS.initCombo(ui_typeCoteId, SIRS.observableList(typeCoteIdRepo.getAll()), (zone.getTypeCoteId() == null || zone.getTypeCoteId().trim().isEmpty()) ? null : typeCoteIdRepo.get(zone.getTypeCoteId()));
-            }
+                initChoixCoteComboBox(ui_typeCoteId , zone == null ? null : zone.getTypeCoteId());
+                checkContactEau.setSelected(zone.getContactEau());}
 
         } else if (newValue != null) {
             uiType.setVisible(false);

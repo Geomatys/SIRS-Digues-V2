@@ -157,7 +157,7 @@ public class ODTUtils {
             + " d'une fiche. Vous pouvez compléter ce modèle (Ajout de contenu,"
             + " mise en forme) et déplacer / copier les variables (les textes"
             + " surlignés de gris) où vous voulez dans le document. Elles seront"
-            + " automatiquement remplacés à la génération du rapport.";
+            + " automatiquement remplacées lors de la génération du rapport.";
 
     private static Field USER_FIELD;
     private static Field SIMPLE_FIELD;
@@ -305,7 +305,7 @@ public class ODTUtils {
      * @throws java.lang.ReflectiveOperationException If we fail reading
      * candidate properties.
      */
-    public static void fillTemplate(final TextDocument template, final Feature candidate) throws IntrospectionException, ReflectiveOperationException {
+    public static void fillTemplate(final TextDocument template, final Feature candidate) {
         // We iterate through input properties to extract all mappable attributes.
         final Collection<? extends PropertyType> properties = candidate.getType().getProperties(true);
         VariableField var;
@@ -590,9 +590,8 @@ public class ODTUtils {
     }
 
     /**
-     * Analyze input element tto find contained value.
+     * Analyze input element to find contained value.
      *
-     * @param input
      * @return value hold by given object, or null.
      */
     private static Object getValue(TextUserFieldDeclElement userVariable) {

@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -22,29 +22,26 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import static fr.sirs.SIRS.CSS_PATH;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.ArbreVegetation;
-import fr.sirs.core.model.GeometryType;
-import fr.sirs.core.model.ParcelleVegetation;
-import fr.sirs.core.model.TraitementZoneVegetation;
+import fr.sirs.core.component.Previews;
+import fr.sirs.core.model.*;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import fr.sirs.theme.ui.FXPositionableExplicitMode;
 import fr.sirs.util.ResourceInternationalString;
 import fr.sirs.util.SirsStringConverter;
-import java.awt.geom.Rectangle2D;
-import java.util.Collections;
-import java.util.logging.Level;
+import javafx.collections.FXCollections;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import static javafx.scene.layout.Region.USE_PREF_SIZE;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import org.apache.sis.referencing.CRS;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display.VisitFilter;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -63,26 +60,35 @@ import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
-import org.apache.sis.referencing.CRS;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
+
+import java.awt.geom.Rectangle2D;
+import java.util.Collections;
+import java.util.logging.Level;
+
+import static fr.sirs.SIRS.CSS_PATH;
+import static fr.sirs.core.SirsCore.LOGGER;
+import static fr.sirs.plugin.vegetation.map.EditVegetationUtils.generateHeaderLabel;
+import static javafx.scene.layout.Region.USE_PREF_SIZE;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class CreateArbreTool extends AbstractEditionTool{
+public class CreateArbreTool extends AbstractEditionTool {
 
     public static final Spi SPI = new Spi();
-    public static final class Spi extends AbstractEditionToolSpi{
+
+    public static final class Spi extends AbstractEditionToolSpi {
 
         public Spi() {
             super("CreateParcelle",
-                new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle",
-                        "fr.sirs.plugin.vegetation.map.CreateArbreTool.title",CreateArbreTool.class.getClassLoader()),
-                new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle",
-                        "fr.sirs.plugin.vegetation.map.CreateArbreTool.abstract",CreateArbreTool.class.getClassLoader()),
-                new Image("fr/sirs/plugin/vegetation/arbres.png"));
+                    new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle",
+                            "fr.sirs.plugin.vegetation.map.CreateArbreTool.title", CreateArbreTool.class.getClassLoader()),
+                    new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle",
+                            "fr.sirs.plugin.vegetation.map.CreateArbreTool.abstract", CreateArbreTool.class.getClassLoader()),
+                    new Image("fr/sirs/plugin/vegetation/arbres.png"));
         }
 
         @Override
@@ -94,7 +100,7 @@ public class CreateArbreTool extends AbstractEditionTool{
         public EditionTool create(FXMap map, Object layer) {
             return new CreateArbreTool(map);
         }
-    };
+    }
 
 
     //session and repo
@@ -104,12 +110,16 @@ public class CreateArbreTool extends AbstractEditionTool{
     private final MouseListen mouseInputListener = new MouseListen();
     private final BorderPane wizard = new BorderPane();
 
-    private ArbreVegetation arbre = new ArbreVegetation();
+    private ArbreVegetation arbre = Injector.getSession().getElementCreator().createElement(ArbreVegetation.class);
     private ParcelleVegetation parcelle = null;
     private final Label lblParcelle = new Label();
     private final Label lblPoint = new Label();
 
     private FeatureMapLayer parcelleLayer = null;
+
+    //Add editable fields ticket redmine 7741
+    private final ComboBox<Preview> diametreComboBox = new ComboBox();
+    private final ComboBox<Preview> hauteurComboBox = new ComboBox();
 
     public CreateArbreTool(FXMap map) {
         super(SPI);
@@ -118,10 +128,6 @@ public class CreateArbreTool extends AbstractEditionTool{
         session = Injector.getSession();
         parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
 
-        final Label lbl1 = new Label("Parcelle :");
-        final Label lbl2 = new Label("Géométrie :");
-        lbl1.getStyleClass().add("label-header");
-        lbl2.getStyleClass().add("label-header");
         wizard.getStyleClass().add("blue-light");
         lblParcelle.getStyleClass().add("label-text");
         lblPoint.getStyleClass().add("label-text");
@@ -129,21 +135,42 @@ public class CreateArbreTool extends AbstractEditionTool{
         lblParcelle.setWrapText(true);
 
         final VBox vbox = new VBox(15,
-                lbl1,
-                lblParcelle,
-                lbl2,
-                lblPoint);
-        vbox.setMaxSize(USE_PREF_SIZE,USE_PREF_SIZE);
+                new HBox(15, generateHeaderLabel("Parcelle :"), lblParcelle),
+                new HBox(15, generateHeaderLabel("Géométrie :"), lblPoint),
+                new HBox(15, generateHeaderLabel("Diamètre :"), diametreComboBox),
+                new HBox(15,generateHeaderLabel("Hauteur :"), hauteurComboBox)
+        );
+        vbox.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
         wizard.setCenter(vbox);
+
+        //Add editable fields ticket redmine 7741
+        final Previews previewRepository = Injector.getSession().getPreviews();
+        SIRS.initCombo(diametreComboBox, FXCollections.observableList(previewRepository.getByClass(RefDiametreVegetation.class)), null);
+        SIRS.initCombo(hauteurComboBox,  FXCollections.observableList(previewRepository.getByClass(RefHauteurVegetation.class)), null);
+
+        hauteurComboBox.setOnAction(v-> this.arbre.setHauteurId(getElementIdOrnull()));
+        diametreComboBox.setOnAction(v-> this.arbre.setDiametreId(getElementIdOrnull()));
     }
 
-    private void reset(){
+    private String getElementIdOrnull() {
+        Object preview = hauteurComboBox.getSelectionModel().getSelectedItem();
+        if (preview instanceof Preview) {
+            return ((Preview) preview).getElementId();
+        } else {
+            LOGGER.log(Level.INFO, "Selected preview is null or isn't a Preview; set null to created Tree.");
+            return null;
+        }
+    }
+
+    private void reset() {
+        diametreComboBox.getSelectionModel().select(null);
+        hauteurComboBox.getSelectionModel().select(null);
         arbre = Injector.getSession().getElementCreator().createElement(ArbreVegetation.class);
         arbre.setTraitement(Injector.getSession().getElementCreator().createElement(TraitementZoneVegetation.class));
         parcelle = null;
         lblParcelle.setText("Sélectionner une parcelle sur la carte");
         lblPoint.setText("");
-        if(parcelleLayer!=null) parcelleLayer.setSelectionFilter(null);
+        if (parcelleLayer != null) parcelleLayer.setSelectionFilter(null);
     }
 
     @Override
@@ -164,8 +191,8 @@ public class CreateArbreTool extends AbstractEditionTool{
 
         //on rend les couches troncon et borne selectionnables
         final MapContext context = component.getContainer().getContext();
-        for(MapLayer layer : context.layers()){
-            if(layer.getName().equalsIgnoreCase(PluginVegetation.PARCELLE_LAYER_NAME)){
+        for (MapLayer layer : context.layers()) {
+            if (layer.getName().equalsIgnoreCase(PluginVegetation.PARCELLE_LAYER_NAME)) {
                 parcelleLayer = (FeatureMapLayer) layer;
             }
         }
@@ -192,21 +219,21 @@ public class CreateArbreTool extends AbstractEditionTool{
         @Override
         public void mouseClicked(MouseEvent event) {
             mousebutton = event.getButton();
-            if(mousebutton!=MouseButton.PRIMARY){
+            if (mousebutton != MouseButton.PRIMARY) {
                 super.mouseClicked(event);
                 return;
             }
 
-            final Rectangle2D clickArea = new Rectangle2D.Double(event.getX()-2, event.getY()-2, 4, 4);
+            final Rectangle2D clickArea = new Rectangle2D.Double(event.getX() - 2, event.getY() - 2, 4, 4);
 
-            if(parcelle==null){
+            if (parcelle == null) {
                 parcelleLayer.setSelectable(true);
                 //recherche une parcelle sous la souris
                 map.getCanvas().getGraphicsIn(clickArea, new AbstractGraphicVisitor() {
                     @Override
                     public void visit(ProjectedFeature graphic, RenderingContext2D context, SearchAreaJ2D area) {
                         final Object bean = graphic.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
-                        if(bean instanceof ParcelleVegetation){
+                        if (bean instanceof ParcelleVegetation) {
                             //on recupere l'object complet
                             parcelle = (ParcelleVegetation) bean;
                             //on recupere l'object complet
@@ -217,14 +244,17 @@ public class CreateArbreTool extends AbstractEditionTool{
 
                         }
                     }
+
                     @Override
                     public boolean isStopRequested() {
-                        return parcelle!=null;
+                        return parcelle != null;
                     }
+
                     @Override
-                    public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
+                    public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {
+                    }
                 }, VisitFilter.INTERSECTS);
-            }else if(parcelle!=null){
+            } else if (parcelle != null) {
                 parcelleLayer.setSelectable(false);
 
                 //on crée l'arbre
@@ -234,9 +264,9 @@ public class CreateArbreTool extends AbstractEditionTool{
                 JTS.setCRS(pt, map.getCanvas().getObjectiveCRS2D());
                 try {
                     //on s'assure d'etre dans le crs de la base
-                    pt = JTS.transform(pt, CRS.findOperation(JTS.findCoordinateReferenceSystem(pt),session.getProjection(), null).getMathTransform());
+                    pt = JTS.transform(pt, CRS.findOperation(JTS.findCoordinateReferenceSystem(pt), session.getProjection(), null).getMathTransform());
                 } catch (FactoryException | TransformException ex) {
-                    SIRS.LOGGER.log(Level.WARNING,ex.getMessage(),ex);
+                    SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 }
                 arbre.setExplicitGeometry(pt);
                 arbre.setGeometry(pt);
