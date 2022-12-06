@@ -22,24 +22,24 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
-import fr.sirs.core.model.*;
+import fr.sirs.core.model.InvasiveVegetation;
+import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.RefDensiteVegetation;
+import fr.sirs.core.model.RefTypeInvasiveVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
-
-import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_INVASIVE_VEGETATION_TYPE;
-import static fr.sirs.plugin.vegetation.map.EditVegetationUtils.generateHeaderLabel;
-
 import fr.sirs.theme.ui.FXPositionableExplicitMode;
 import fr.sirs.util.ResourceInternationalString;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.edition.AbstractEditionToolSpi;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
+
+import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_INVASIVE_VEGETATION_TYPE;
+import static fr.sirs.plugin.vegetation.map.EditVegetationUtils.*;
 
 /**
  *
@@ -86,23 +86,35 @@ public class CreateInvasiveTool extends CreateVegetationPolygonTool<InvasiveVege
                         previewRepository.getByClass(RefDensiteVegetation.class)),
                 null);
 
+        final GridPane attributeGrid = new GridPane();
+        attributeGrid.setHgap(2);
+        attributeGrid.setVgap(2);
+
+        attributeGrid.add(generateHeaderLabel(LABEL_TYPE_VEGETATION),0,0);
+        attributeGrid.add(comboTypeVegetation,1,0);
+        attributeGrid.add(generateHeaderLabel(LABEL_DENSITE),0,1);
+        attributeGrid.add(densiteComboBox,1,1);
 
         final VBox center = (VBox) wizard.getCenter();
-        center.getChildren().add(4, new HBox(15, generateHeaderLabel("Type de végétation :"), comboTypeVegetation));
-        center.getChildren().add(5, new HBox(15, generateHeaderLabel( "Densité :"), densiteComboBox));
+        center.getChildren().add(4,attributeGrid);
+    }
 
-        // Override save action to include vegetation type
-        end.setOnAction(event -> {
-            //on sauvegarde
-            vegetation.setGeometryMode(FXPositionableExplicitMode.MODE);
-            vegetation.setValid(true);
-            vegetation.setForeignParentId(parcelle.getDocumentId());
-            vegetation.setTypeVegetationId(comboTypeVegetation.getSelectionModel().getSelectedItem().getElementId());
-            vegetation.setDensiteId(densiteComboBox.getSelectionModel().getSelectedItem().getElementId());
-            final AbstractSIRSRepository vegetationRepo = Injector.getSession().getRepositoryForClass(vegetationClass);
-            vegetationRepo.add(vegetation);
-            startGeometry();
-        });
+
+    @Override
+    void saveAction(final boolean saveInBase) {
+        super.saveAction(false);
+
+        vegetation.setTypeVegetationId(getElementIdOrnull(comboTypeVegetation));
+        vegetation.setDensiteId(getElementIdOrnull(densiteComboBox));
+
+        if (saveInBase) super.saveInBase();
+    }
+
+    @Override
+    void reset() {
+        super.reset();
+        comboTypeVegetation.getSelectionModel().clearSelection();
+        densiteComboBox.getSelectionModel().clearSelection();
     }
 
     @Override

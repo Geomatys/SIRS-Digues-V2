@@ -180,18 +180,18 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
             final Point startPos = pos.getPositionDebut();
             final Point endPos = pos.getPositionFin();
             if (startPos != null) {
-                if(uiLongitudeStart.getValueFactory() != null) uiLongitudeStart.getValueFactory().valueProperty().set(startPos.getX());
-                if(uiLatitudeStart.getValueFactory() != null) uiLatitudeStart.getValueFactory().valueProperty().set(startPos.getY());
+                if(uiLongitudeStart != null && uiLongitudeStart.getValueFactory() != null) uiLongitudeStart.getValueFactory().valueProperty().set(startPos.getX());
+                if(uiLatitudeStart != null && uiLatitudeStart.getValueFactory() != null) uiLatitudeStart.getValueFactory().valueProperty().set(startPos.getY());
             }else{
-                if(uiLongitudeStart.getValueFactory() != null) uiLongitudeStart.getValueFactory().setValue(null);
-                if(uiLatitudeStart.getValueFactory() != null) uiLatitudeStart.getValueFactory().setValue(null);
+                if(uiLongitudeStart != null && uiLongitudeStart.getValueFactory() != null) uiLongitudeStart.getValueFactory().setValue(null);
+                if(uiLatitudeStart != null && uiLatitudeStart.getValueFactory() != null) uiLatitudeStart.getValueFactory().setValue(null);
             }
             if (endPos != null) {
-                if(uiLongitudeEnd.getValueFactory() != null) uiLongitudeEnd.getValueFactory().valueProperty().set(endPos.getX());
-                if(uiLatitudeEnd.getValueFactory() != null) uiLatitudeEnd.getValueFactory().valueProperty().set(endPos.getY());
+                if(uiLongitudeEnd != null && uiLongitudeEnd.getValueFactory() != null) uiLongitudeEnd.getValueFactory().valueProperty().set(endPos.getX());
+                if(uiLatitudeEnd != null && uiLatitudeEnd.getValueFactory() != null) uiLatitudeEnd.getValueFactory().valueProperty().set(endPos.getY());
             }else{
-                if(uiLongitudeEnd.getValueFactory() != null) uiLongitudeEnd.getValueFactory().setValue(null);
-                if(uiLatitudeEnd.getValueFactory() != null) uiLatitudeEnd.getValueFactory().setValue(null);
+                if(uiLongitudeEnd != null && uiLongitudeEnd.getValueFactory() != null) uiLongitudeEnd.getValueFactory().setValue(null);
+                if(uiLatitudeEnd != null && uiLatitudeEnd.getValueFactory() != null) uiLatitudeEnd.getValueFactory().setValue(null);
             }
             uiStartNear.getValueFactory().setValue(pos.getDistanceDebutMin());
             uiStartFar.getValueFactory().setValue(pos.getDistanceDebutMax());

@@ -20,29 +20,24 @@ package fr.sirs.plugin.vegetation.map;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefTypePeuplementVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
-import fr.sirs.theme.ui.FXPositionableExplicitMode;
 import fr.sirs.util.ResourceInternationalString;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.util.converter.NumberStringConverter;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.edition.AbstractEditionToolSpi;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
 
 import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_PEUPLEMENT_VEGETATION_TYPE;
-import static fr.sirs.plugin.vegetation.map.EditVegetationUtils.generateHeaderLabel;
+import static fr.sirs.plugin.vegetation.map.EditVegetationUtils.*;
 
 /**
  *
@@ -55,9 +50,9 @@ public class CreatePeuplementTool extends CreateVegetationPolygonTool<Peuplement
     //Add editable fields ticket redmine 7741
     private final ComboBox<Preview> comboTypeVegetation = new ComboBox<>();
 
-    private final Spinner<Double> densiteSpinner = new Spinner<>();
-    private final Spinner<Double> hauteurSpinner = new Spinner<>();
-    private final Spinner<Double> diametreSpinner = new Spinner<>();
+    private final NumberTextField densiteField = new NumberTextField();
+    private final NumberTextField hauteurField = new NumberTextField();
+    private final NumberTextField diametreField = new NumberTextField();
 
     public static final class Spi extends AbstractEditionToolSpi {
 
@@ -89,45 +84,45 @@ public class CreatePeuplementTool extends CreateVegetationPolygonTool<Peuplement
                         previewRepository.getByClass(RefTypePeuplementVegetation.class)),
                 previewRepository.get(DEFAULT_PEUPLEMENT_VEGETATION_TYPE));
 
+        final GridPane attributeGrid = new GridPane();
+        attributeGrid.setHgap(2);
+        attributeGrid.setVgap(4);
 
-        densiteSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0));
-        hauteurSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0));
-        diametreSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0));
-
-        final GridPane gridPane = new GridPane();
-        gridPane.setHgap(2);
-        gridPane.setVgap(4);
-
-
-        gridPane.add(generateHeaderLabel("Type de végétation :"),0,0);
-        gridPane.add(comboTypeVegetation,1,0);
-        gridPane.add(generateHeaderLabel("Densité : "),0,1);
-        gridPane.add(densiteSpinner,1,1);
-        gridPane.add(generateHeaderLabel("Hauteur : "),0,2);
-        gridPane.add(hauteurSpinner,1,2);
-        gridPane.add(generateHeaderLabel("Diamètre : "),0,3);
-        gridPane.add(diametreSpinner,1,3);
+        attributeGrid.add(generateHeaderLabel(LABEL_TYPE_VEGETATION),0,0);
+        attributeGrid.add(comboTypeVegetation,1,0);
+        attributeGrid.add(generateHeaderLabel(LABEL_DENSITE),0,1);
+        attributeGrid.add(densiteField,1,1);
+        attributeGrid.add(generateHeaderLabel(LABEL_HAUTEUR),0,2);
+        attributeGrid.add(hauteurField,1,2);
+        attributeGrid.add(generateHeaderLabel(LABEL_DIAMETRE),0,3);
+        attributeGrid.add(diametreField,1,3);
 
         final VBox center = (VBox) wizard.getCenter();
-        center.getChildren().add(4,gridPane);
+        center.getChildren().add(4,attributeGrid);
+    }
 
-        // Override save action to include vegetation type
-        end.setOnAction(event -> {
-            //on sauvegarde
-            vegetation.setGeometryMode(FXPositionableExplicitMode.MODE);
-            vegetation.setValid(true);
-            vegetation.setForeignParentId(parcelle.getDocumentId());
-            vegetation.setTypeVegetationId(comboTypeVegetation.getSelectionModel().getSelectedItem().getElementId());
-            final Double densite = densiteSpinner.getValue();
-            final Double hauteur = hauteurSpinner.getValue();
-            final Double diametre = diametreSpinner.getValue();
-            if (densite != null) vegetation.setDensite(densite);
-            if (hauteur != null) vegetation.setHauteur(hauteur);
-            if (diametre != null) vegetation.setDiametre(diametre);
-            final AbstractSIRSRepository vegetationRepo = Injector.getSession().getRepositoryForClass(vegetationClass);
-            vegetationRepo.add(vegetation);
-            startGeometry();
-        });
+    @Override
+    void saveAction(final boolean saveInBase) {
+        super.saveAction(false);
+
+        vegetation.setTypeVegetationId(getElementIdOrnull(comboTypeVegetation));
+        final Double densite = densiteField.getValue();
+        final Double hauteur = hauteurField.getValue();
+        final Double diametre = diametreField.getValue();
+        if (densite != null) vegetation.setDensite(densite);
+        if (hauteur != null) vegetation.setHauteur(hauteur);
+        if (diametre != null) vegetation.setDiametre(diametre);
+
+        if (saveInBase) super.saveInBase();
+    }
+
+    @Override
+    void reset() {
+        super.reset();
+        comboTypeVegetation.getSelectionModel().clearSelection();
+        diametreField.replaceText(0, 1, "0");
+        hauteurField.replaceText(0, 1, "0");
+        densiteField.replaceText(0, 1, "0");
     }
 
     @Override

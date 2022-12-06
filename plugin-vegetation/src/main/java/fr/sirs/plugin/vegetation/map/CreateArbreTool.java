@@ -33,12 +33,15 @@ import fr.sirs.util.SirsStringConverter;
 import javafx.collections.FXCollections;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.apache.sis.referencing.CRS;
@@ -68,8 +71,7 @@ import java.util.Collections;
 import java.util.logging.Level;
 
 import static fr.sirs.SIRS.CSS_PATH;
-import static fr.sirs.core.SirsCore.LOGGER;
-import static fr.sirs.plugin.vegetation.map.EditVegetationUtils.generateHeaderLabel;
+import static fr.sirs.plugin.vegetation.map.EditVegetationUtils.*;
 import static javafx.scene.layout.Region.USE_PREF_SIZE;
 
 /**
@@ -118,8 +120,16 @@ public class CreateArbreTool extends AbstractEditionTool {
     private FeatureMapLayer parcelleLayer = null;
 
     //Add editable fields ticket redmine 7741
-    private final ComboBox<Preview> diametreComboBox = new ComboBox();
-    private final ComboBox<Preview> hauteurComboBox = new ComboBox();
+    private final TextField ui_Designation = new TextField();
+
+    // Propriétés de ArbreVegetation
+    private final ComboBox<Preview> diametreComboBox = new ComboBox<>();
+    private final ComboBox<Preview> hauteurComboBox = new ComboBox<>();
+
+    // Propriétés de ZoneVegetation
+    private final CheckBox ui_contactEau =  new CheckBox();
+    private final ComboBox<Preview> ui_typePositionId = new ComboBox<>();
+    private final ComboBox<Preview> ui_typeCoteId = new ComboBox<>();
 
     public CreateArbreTool(FXMap map) {
         super(SPI);
@@ -134,39 +144,79 @@ public class CreateArbreTool extends AbstractEditionTool {
         lblPoint.setWrapText(true);
         lblParcelle.setWrapText(true);
 
+        ui_Designation.setText(arbre.getDesignation());
+
+        final GridPane attributeGrid = new GridPane();
+        attributeGrid.setHgap(2);
+        attributeGrid.setVgap(6);
+
+
+        attributeGrid.add(generateHeaderLabel(LABEL_DESIGNATION),0,0);
+        attributeGrid.add(ui_Designation,1,0);
+        attributeGrid.add(generateHeaderLabel(LABEL_HAUTEUR),0,1);
+        attributeGrid.add(hauteurComboBox,1,1);
+        attributeGrid.add(generateHeaderLabel(LABEL_DIAMETRE),0,2);
+        attributeGrid.add(diametreComboBox,1,2);
+        attributeGrid.add(generateHeaderLabel(LABEL_CONTACT_EAU),0,3);
+        attributeGrid.add(ui_contactEau,1,3);
+        attributeGrid.add(generateHeaderLabel(LABEL_POSITION_ID),0,4);
+        attributeGrid.add(ui_typePositionId,1,4);
+        attributeGrid.add(generateHeaderLabel(LABEL_COTE_ID),0,5);
+        attributeGrid.add(ui_typeCoteId,1,5);
+        
         final VBox vbox = new VBox(15,
                 new HBox(15, generateHeaderLabel("Parcelle :"), lblParcelle),
                 new HBox(15, generateHeaderLabel("Géométrie :"), lblPoint),
-                new HBox(15, generateHeaderLabel("Diamètre :"), diametreComboBox),
-                new HBox(15,generateHeaderLabel("Hauteur :"), hauteurComboBox)
+                attributeGrid
         );
         vbox.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
         wizard.setCenter(vbox);
 
         //Add editable fields ticket redmine 7741
         final Previews previewRepository = Injector.getSession().getPreviews();
-        SIRS.initCombo(diametreComboBox, FXCollections.observableList(previewRepository.getByClass(RefDiametreVegetation.class)), null);
-        SIRS.initCombo(hauteurComboBox,  FXCollections.observableList(previewRepository.getByClass(RefHauteurVegetation.class)), null);
+        SIRS.initCombo(diametreComboBox, FXCollections.observableList(previewRepository.getByClass(RefDiametreVegetation.class)), arbre == null ? null : arbre.getDiametreId());
+        SIRS.initCombo(hauteurComboBox,  FXCollections.observableList(previewRepository.getByClass(RefHauteurVegetation.class)), arbre == null ? null : arbre.getHauteurId());
+        SIRS.initCombo(ui_typePositionId, FXCollections.observableList(previewRepository.getByClass(RefPosition.class)), arbre == null ? null : arbre.getTypePositionId());
+        SIRS.initCombo(ui_typeCoteId,  FXCollections.observableList(previewRepository.getByClass(RefCote.class)), arbre == null ? null : arbre.getTypeCoteId());
 
-        hauteurComboBox.setOnAction(v-> this.arbre.setHauteurId(getElementIdOrnull()));
-        diametreComboBox.setOnAction(v-> this.arbre.setDiametreId(getElementIdOrnull()));
+//        ui_Designation.setOnAction(v -> this.arbre.setDesignation(getElementIdOrnull(hauteurComboBox)));
+//        hauteurComboBox.setOnAction(v-> this.arbre.setHauteurId(getElementIdOrnull(hauteurComboBox)));
+//        diametreComboBox.setOnAction(v-> this.arbre.setDiametreId(getElementIdOrnull(diametreComboBox)));
+//        ui_typePositionId.setOnAction(v-> this.arbre.setTypePositionId(getElementIdOrnull(ui_typePositionId)));
+//        ui_typeCoteId.setOnAction(v-> this.arbre.setTypeCoteId(getElementIdOrnull(ui_typeCoteId)));
+//        ui_contactEau.setOnAction(v -> this.arbre.setContactEau(ui_contactEau.isSelected()));
     }
 
-    private String getElementIdOrnull() {
-        Object preview = hauteurComboBox.getSelectionModel().getSelectedItem();
-        if (preview instanceof Preview) {
-            return ((Preview) preview).getElementId();
-        } else {
-            LOGGER.log(Level.INFO, "Selected preview is null or isn't a Preview; set null to created Tree.");
-            return null;
-        }
+
+    private void saveAction(final Geometry ptToSet ) {
+
+        arbre.setExplicitGeometry(ptToSet);
+        arbre.setGeometry(ptToSet);
+        arbre.setGeometryType(GeometryType.PONCTUAL);
+        arbre.setGeometryMode(FXPositionableExplicitMode.MODE);
+        arbre.setValid(true);
+        arbre.setForeignParentId(parcelle.getDocumentId());
+
+        this.arbre.setDesignation(ui_Designation.getText());
+        this.arbre.setHauteurId(getElementIdOrnull(hauteurComboBox));
+        this.arbre.setDiametreId(getElementIdOrnull(diametreComboBox));
+        this.arbre.setTypePositionId(getElementIdOrnull(ui_typePositionId));
+        this.arbre.setTypeCoteId(getElementIdOrnull(ui_typeCoteId));
+        this.arbre.setContactEau(ui_contactEau.isSelected());
+
+        final AbstractSIRSRepository<ArbreVegetation> arbreRepo = session.getRepositoryForClass(ArbreVegetation.class);
+        arbreRepo.add(arbre);
     }
 
     private void reset() {
-        diametreComboBox.getSelectionModel().select(null);
-        hauteurComboBox.getSelectionModel().select(null);
+        diametreComboBox.getSelectionModel().clearSelection();
+        hauteurComboBox.getSelectionModel().clearSelection();
+        ui_typePositionId.getSelectionModel().clearSelection();
+        ui_typeCoteId.getSelectionModel().clearSelection();
+        ui_contactEau.setSelected(false);
         arbre = Injector.getSession().getElementCreator().createElement(ArbreVegetation.class);
         arbre.setTraitement(Injector.getSession().getElementCreator().createElement(TraitementZoneVegetation.class));
+        ui_Designation.setText(arbre.getDesignation());
         parcelle = null;
         lblParcelle.setText("Sélectionner une parcelle sur la carte");
         lblPoint.setText("");
@@ -268,16 +318,9 @@ public class CreateArbreTool extends AbstractEditionTool {
                 } catch (FactoryException | TransformException ex) {
                     SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 }
-                arbre.setExplicitGeometry(pt);
-                arbre.setGeometry(pt);
-                arbre.setGeometryType(GeometryType.PONCTUAL);
-                arbre.setGeometryMode(FXPositionableExplicitMode.MODE);
-                arbre.setValid(true);
-                arbre.setForeignParentId(parcelle.getDocumentId());
 
+                saveAction(pt);
 
-                final AbstractSIRSRepository<ArbreVegetation> arbreRepo = session.getRepositoryForClass(ArbreVegetation.class);
-                arbreRepo.add(arbre);
                 final ParcelleVegetation p = parcelle;
                 reset();
                 parcelle = p;

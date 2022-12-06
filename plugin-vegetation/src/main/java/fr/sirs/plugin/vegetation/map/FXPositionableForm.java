@@ -39,7 +39,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 
 import static fr.sirs.SIRS.EDITION_PREDICATE;
-import static fr.sirs.plugin.vegetation.map.CreateVegetationPolygonTool.CONTACT_EAU_LABEL;
 import static fr.sirs.plugin.vegetation.map.EditVegetationUtils.*;
 
 /**
@@ -69,9 +68,9 @@ public class FXPositionableForm extends BorderPane {
     @FXML
     protected ComboBox<Preview> ui_typeCoteId;
     @FXML
-    protected Label LabelContactEau = generateHeaderLabel(CONTACT_EAU_LABEL);
+    protected Label LabelContactEau;
     @FXML
-    protected CheckBox checkContactEau = new CheckBox();
+    protected CheckBox checkContactEau;
 
 
     private final ObjectProperty<Positionable> positionableProperty = new SimpleObjectProperty<>();
@@ -130,13 +129,15 @@ public class FXPositionableForm extends BorderPane {
         }
 
         if (pos instanceof ZoneVegetation) {
-            setEditedAttributes((ZoneVegetation) pos , ui_typeCoteId, checkContactEau);
+            final ZoneVegetation zone = (ZoneVegetation) pos;
+            zone.setContactEau(checkContactEau.isSelected());
+            zone.setTypeCoteId(getElementIdOrnull(ui_typeCoteId));
 
-            if (pos instanceof InvasiveVegetation) {
-                final InvasiveVegetation iv = (InvasiveVegetation) pos;
+            if (zone instanceof InvasiveVegetation) {
+                final InvasiveVegetation iv = (InvasiveVegetation) zone;
                 iv.setTypeVegetationId((String) cbValue);
-            } else if (pos instanceof PeuplementVegetation) {
-                final PeuplementVegetation pv = (PeuplementVegetation) pos;
+            } else if (zone instanceof PeuplementVegetation) {
+                final PeuplementVegetation pv = (PeuplementVegetation) zone;
                 pv.setTypeVegetationId((String) cbValue);
             }
         }
@@ -200,7 +201,7 @@ public class FXPositionableForm extends BorderPane {
 
             if (pv instanceof ZoneVegetation) {
                 final ZoneVegetation zone = (ZoneVegetation) pv;
-                initChoixCoteComboBox(ui_typeCoteId , zone == null ? null : zone.getTypeCoteId());
+                initRefPreviewComboBox(ui_typeCoteId, RefCote.class , zone == null ? null : zone.getTypeCoteId());
                 checkContactEau.setSelected(zone.getContactEau());}
 
         } else if (newValue != null) {
