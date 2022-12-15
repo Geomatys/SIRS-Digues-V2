@@ -150,7 +150,6 @@ public class CreateArbreTool extends AbstractEditionTool {
         attributeGrid.setHgap(2);
         attributeGrid.setVgap(6);
 
-
         attributeGrid.add(generateHeaderLabel(LABEL_DESIGNATION),0,0);
         attributeGrid.add(ui_Designation,1,0);
         attributeGrid.add(generateHeaderLabel(LABEL_HAUTEUR),0,1);
@@ -167,6 +166,7 @@ public class CreateArbreTool extends AbstractEditionTool {
         final VBox vbox = new VBox(15,
                 new HBox(15, generateHeaderLabel("Parcelle :"), lblParcelle),
                 new HBox(15, generateHeaderLabel("Géométrie :"), lblPoint),
+                new HBox(15, generateHeaderLabel("ATTENTION, remplir les champs suivant AVANT de positionner l'arbre sur la carte.")),
                 attributeGrid
         );
         vbox.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
@@ -179,12 +179,6 @@ public class CreateArbreTool extends AbstractEditionTool {
         SIRS.initCombo(ui_typePositionId, FXCollections.observableList(previewRepository.getByClass(RefPosition.class)), arbre == null ? null : arbre.getTypePositionId());
         SIRS.initCombo(ui_typeCoteId,  FXCollections.observableList(previewRepository.getByClass(RefCote.class)), arbre == null ? null : arbre.getTypeCoteId());
 
-//        ui_Designation.setOnAction(v -> this.arbre.setDesignation(getElementIdOrnull(hauteurComboBox)));
-//        hauteurComboBox.setOnAction(v-> this.arbre.setHauteurId(getElementIdOrnull(hauteurComboBox)));
-//        diametreComboBox.setOnAction(v-> this.arbre.setDiametreId(getElementIdOrnull(diametreComboBox)));
-//        ui_typePositionId.setOnAction(v-> this.arbre.setTypePositionId(getElementIdOrnull(ui_typePositionId)));
-//        ui_typeCoteId.setOnAction(v-> this.arbre.setTypeCoteId(getElementIdOrnull(ui_typeCoteId)));
-//        ui_contactEau.setOnAction(v -> this.arbre.setContactEau(ui_contactEau.isSelected()));
     }
 
 

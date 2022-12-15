@@ -54,7 +54,7 @@ final class EditVegetationUtils {
         final Previews previewRepository = Injector.getSession().getPreviews();
         SIRS.initCombo(toInit, FXCollections.observableList(
                         previewRepository.getByClass(clazz)),
-                (defaultId == null || defaultId.trim().isEmpty()) ? null : defaultId);
+                (defaultId == null || defaultId.trim().isEmpty()) ? null : previewRepository.get(defaultId));
     }
 
     /**
