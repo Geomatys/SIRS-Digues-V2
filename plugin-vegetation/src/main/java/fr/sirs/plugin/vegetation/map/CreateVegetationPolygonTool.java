@@ -27,9 +27,7 @@ import static fr.sirs.SIRS.CSS_PATH;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.ParcelleVegetation;
-import fr.sirs.core.model.TraitementZoneVegetation;
-import fr.sirs.core.model.ZoneVegetation;
+import fr.sirs.core.model.*;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import fr.sirs.theme.ui.FXPositionableExplicitMode;
 import fr.sirs.ui.Growl;
@@ -46,16 +44,15 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
+import static fr.sirs.plugin.vegetation.map.EditVegetationUtils.*;
 import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.scene.layout.VBox;
 import org.geotoolkit.data.bean.BeanFeature;
@@ -126,22 +123,27 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     /** List of layers deactivated on tool install. They will be activated back at uninstallation. */
     private List<MapLayer> toActivateBack;
 
+    //Add editable fields ticket redmine 7741
+    private final TextField ui_Designation = new TextField();
+    private final CheckBox checkContactEau = new CheckBox();
+    private final ComboBox<Preview> ui_typeCoteId = new ComboBox();
+    private final ComboBox<Preview> ui_typePositionId = new ComboBox<>();
+
     public CreateVegetationPolygonTool(FXMap map, Spi spi, Class<T> clazz) {
         super(spi);
         vegetationClass = clazz;
         wizard.getStylesheets().add(CSS_PATH);
 
+        if (vegetation != null) ui_Designation.setText(vegetation.getDesignation());
+
+        initRefPreviewComboBox(ui_typeCoteId, RefCote.class, vegetation == null ? null : vegetation.getTypeCoteId());
+        initRefPreviewComboBox(ui_typePositionId, RefPosition.class, vegetation == null ? null : vegetation.getTypePositionId());
+
         end.disableProperty().bind(ended.not());
         end.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                //on sauvegarde
-                vegetation.setGeometryMode(FXPositionableExplicitMode.MODE);
-                vegetation.setValid(true);
-                vegetation.setForeignParentId(parcelle.getDocumentId());
-                final AbstractSIRSRepository vegetationRepo = session.getRepositoryForClass(vegetationClass);
-                vegetationRepo.add(vegetation);
-                startGeometry();
+                saveAction(true);
             }
         });
         Button cancel = new Button("Annuler");
@@ -156,10 +158,8 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         session = Injector.getSession();
         parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
 
-        final Label lbl1 = new Label("Parcelle :");
-        final Label lbl2 = new Label("Géométrie :");
-        lbl1.getStyleClass().add("label-header");
-        lbl2.getStyleClass().add("label-header");
+        final Label lbl1 = generateHeaderLabel("Parcelle :");
+        final Label lbl2 = generateHeaderLabel("Géométrie :");
         wizard.getStyleClass().add("blue-light");
         lblParcelle.getStyleClass().add("label-text");
         lblParcelle.setWrapText(true);
@@ -169,14 +169,43 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         selectGeomOnMapButton.disableProperty().set(true);
         selectGeomOnMapButton.setOnAction(e -> changeMouseListener());
 
+        final GridPane attributeGrid = new GridPane();
+        attributeGrid.setHgap(2);
+        attributeGrid.setVgap(3);
+        attributeGrid.setHgap(15);
+        attributeGrid.add(generateHeaderLabel(LABEL_CONTACT_EAU),0,0);
+        attributeGrid.add(checkContactEau,1,0);
+        attributeGrid.add(generateHeaderLabel(LABEL_POSITION_ID),0,1);
+        attributeGrid.add(ui_typePositionId,1,1);
+        attributeGrid.add(generateHeaderLabel(LABEL_COTE_ID),0,2);
+        attributeGrid.add(ui_typeCoteId,1,2);
+
         final VBox vbox = new VBox(15,
-                lbl1,
-                lblParcelle,
-                lbl2,
-                new VBox(15, new HBox(15, selectGeomOnMapButton), lblGeom),
+                new HBox(15, lbl1, lblParcelle),
+                new HBox(15, generateHeaderLabel(LABEL_DESIGNATION), ui_Designation),
+                 new VBox(15, lbl2, new HBox(15, selectGeomOnMapButton), lblGeom),
+                attributeGrid,
                 new HBox(30, end, cancel));
         vbox.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
         wizard.setCenter(vbox);
+    }
+
+    void saveAction(final boolean saveInBase) {
+        vegetation.setGeometryMode(FXPositionableExplicitMode.MODE);
+        vegetation.setValid(true);
+        vegetation.setForeignParentId(parcelle.getDocumentId());
+        setEditedAttributes(vegetation, checkContactEau, ui_typePositionId, ui_typeCoteId);
+        final String designation = ui_Designation.getText();
+        if (designation != null && !designation.isEmpty()) vegetation.setDesignation(designation);
+        if (saveInBase) {
+            saveInBase();
+        }
+    }
+
+    protected void saveInBase() {
+        final AbstractSIRSRepository vegetationRepo = session.getRepositoryForClass(vegetationClass);
+        vegetationRepo.add(vegetation);
+        startGeometry();
     }
 
     private void changeMouseListener() {
@@ -295,8 +324,12 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         return candidate;
     }
 
-    private void reset() {
+    void reset() {
+        checkContactEau.setSelected(false);
+        ui_typeCoteId.getSelectionModel().clearSelection();
+        ui_typePositionId.getSelectionModel().clearSelection();
         vegetation = newVegetation();
+        ui_Designation.setText(vegetation.getDesignation());
         parcelle = null;
         lblParcelle.setText("Sélectionner une parcelle sur la carte");
         lblGeom.setText("");

@@ -39,6 +39,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 
 import static fr.sirs.SIRS.EDITION_PREDICATE;
+import static fr.sirs.plugin.vegetation.map.EditVegetationUtils.*;
 
 /**
  *
@@ -65,7 +66,11 @@ public class FXPositionableForm extends BorderPane {
     @FXML
     private Label ui_typeCoteLabel;
     @FXML
-    protected ComboBox ui_typeCoteId;
+    protected ComboBox<Preview> ui_typeCoteId;
+    @FXML
+    protected Label LabelContactEau;
+    @FXML
+    protected CheckBox checkContactEau;
 
 
     private final ObjectProperty<Positionable> positionableProperty = new SimpleObjectProperty<>();
@@ -125,19 +130,14 @@ public class FXPositionableForm extends BorderPane {
 
         if (pos instanceof ZoneVegetation) {
             final ZoneVegetation zone = (ZoneVegetation) pos;
-            final Object cote = ui_typeCoteId.getValue();
-            if (cote instanceof RefCote) {
-                zone.setTypeCoteId(((RefCote) cote).getId());
-            } else {
-                if (cote != null)
-                    throw new IllegalStateException("ui_typeCoteId's value is expected to be a RefCote instance. Current class is : " + cote.getClass());
-            }
+            zone.setContactEau(checkContactEau.isSelected());
+            zone.setTypeCoteId(getElementIdOrnull(ui_typeCoteId));
 
-            if (pos instanceof InvasiveVegetation) {
-                final InvasiveVegetation iv = (InvasiveVegetation) pos;
+            if (zone instanceof InvasiveVegetation) {
+                final InvasiveVegetation iv = (InvasiveVegetation) zone;
                 iv.setTypeVegetationId((String) cbValue);
-            } else if (pos instanceof PeuplementVegetation) {
-                final PeuplementVegetation pv = (PeuplementVegetation) pos;
+            } else if (zone instanceof PeuplementVegetation) {
+                final PeuplementVegetation pv = (PeuplementVegetation) zone;
                 pv.setTypeVegetationId((String) cbValue);
             }
         }
@@ -201,9 +201,8 @@ public class FXPositionableForm extends BorderPane {
 
             if (pv instanceof ZoneVegetation) {
                 final ZoneVegetation zone = (ZoneVegetation) pv;
-                final AbstractSIRSRepository<RefCote> typeCoteIdRepo = session.getRepositoryForClass(RefCote.class);
-                SIRS.initCombo(ui_typeCoteId, SIRS.observableList(typeCoteIdRepo.getAll()), (zone.getTypeCoteId() == null || zone.getTypeCoteId().trim().isEmpty()) ? null : typeCoteIdRepo.get(zone.getTypeCoteId()));
-            }
+                initRefPreviewComboBox(ui_typeCoteId, RefCote.class , zone == null ? null : zone.getTypeCoteId());
+                checkContactEau.setSelected(zone.getContactEau());}
 
         } else if (newValue != null) {
             uiType.setVisible(false);

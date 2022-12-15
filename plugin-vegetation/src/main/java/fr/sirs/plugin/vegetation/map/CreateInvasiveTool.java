@@ -24,21 +24,22 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.InvasiveVegetation;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.RefDensiteVegetation;
 import fr.sirs.core.model.RefTypeInvasiveVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
-import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_INVASIVE_VEGETATION_TYPE;
 import fr.sirs.theme.ui.FXPositionableExplicitMode;
 import fr.sirs.util.ResourceInternationalString;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.edition.AbstractEditionToolSpi;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
+
+import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_INVASIVE_VEGETATION_TYPE;
+import static fr.sirs.plugin.vegetation.map.EditVegetationUtils.*;
 
 /**
  *
@@ -48,7 +49,9 @@ public class CreateInvasiveTool extends CreateVegetationPolygonTool<InvasiveVege
 
     public static final Spi SPI = new Spi();
 
-    private final ComboBox<Preview> comboTypeVegetation = new ComboBox();
+    //Add editable fields ticket redmine 7741
+    private final ComboBox<Preview> comboTypeVegetation = new ComboBox<>();
+    private final ComboBox<Preview>  densiteComboBox = new ComboBox<>();
 
     public static final class Spi extends AbstractEditionToolSpi{
 
@@ -70,7 +73,7 @@ public class CreateInvasiveTool extends CreateVegetationPolygonTool<InvasiveVege
         public EditionTool create(FXMap map, Object layer) {
             return new CreateInvasiveTool(map);
         }
-    };
+    }
 
     public CreateInvasiveTool(FXMap map) {
         super(map,SPI, InvasiveVegetation.class);
@@ -79,28 +82,39 @@ public class CreateInvasiveTool extends CreateVegetationPolygonTool<InvasiveVege
         SIRS.initCombo(comboTypeVegetation, FXCollections.observableList(
             previewRepository.getByClass(RefTypeInvasiveVegetation.class)),
             previewRepository.get(DEFAULT_INVASIVE_VEGETATION_TYPE));
+        SIRS.initCombo(densiteComboBox, FXCollections.observableList(
+                        previewRepository.getByClass(RefDensiteVegetation.class)),
+                null);
 
-        final Label label = new Label("Type de végétation :");
-        label.getStyleClass().add("label-header");
+        final GridPane attributeGrid = new GridPane();
+        attributeGrid.setHgap(2);
+        attributeGrid.setVgap(2);
+
+        attributeGrid.add(generateHeaderLabel(LABEL_TYPE_VEGETATION),0,0);
+        attributeGrid.add(comboTypeVegetation,1,0);
+        attributeGrid.add(generateHeaderLabel(LABEL_DENSITE),0,1);
+        attributeGrid.add(densiteComboBox,1,1);
 
         final VBox center = (VBox) wizard.getCenter();
-        center.getChildren().add(4, label);
-        center.getChildren().add(5, comboTypeVegetation);
+        center.getChildren().add(4,attributeGrid);
+    }
 
-        // Override save action to include vegetation type
-        end.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                //on sauvegarde
-                vegetation.setGeometryMode(FXPositionableExplicitMode.MODE);
-                vegetation.setValid(true);
-                vegetation.setForeignParentId(parcelle.getDocumentId());
-                vegetation.setTypeVegetationId(comboTypeVegetation.getSelectionModel().getSelectedItem().getElementId());
-                final AbstractSIRSRepository vegetationRepo = Injector.getSession().getRepositoryForClass(vegetationClass);
-                vegetationRepo.add(vegetation);
-                startGeometry();
-            }
-        });
+
+    @Override
+    void saveAction(final boolean saveInBase) {
+        super.saveAction(false);
+
+        vegetation.setTypeVegetationId(getElementIdOrnull(comboTypeVegetation));
+        vegetation.setDensiteId(getElementIdOrnull(densiteComboBox));
+
+        if (saveInBase) super.saveInBase();
+    }
+
+    @Override
+    void reset() {
+        super.reset();
+        comboTypeVegetation.getSelectionModel().clearSelection();
+        densiteComboBox.getSelectionModel().clearSelection();
     }
 
     @Override
