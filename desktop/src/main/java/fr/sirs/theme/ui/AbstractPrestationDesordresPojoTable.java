@@ -23,9 +23,12 @@ import fr.sirs.core.model.Element;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Region;
 
 /**
  *
@@ -34,6 +37,7 @@ import javafx.scene.image.ImageView;
 public abstract class AbstractPrestationDesordresPojoTable extends ListeningPojoTable {
 
     private final Button uiLink = new Button(null, new ImageView(SIRS.ICON_MAGNET_WHITE));
+
     /**
      * Creation of a @ListeningPojoTable including a button to link the container to the desordres of its parent
      * @param pojoClass
@@ -49,7 +53,7 @@ public abstract class AbstractPrestationDesordresPojoTable extends ListeningPojo
 
         uiLink.getStyleClass().add(BUTTON_STYLE);
         uiLink.disableProperty().bind(editableProperty.not());
-        uiLink.setTooltip(new Tooltip("Ajouter les éléments du parent"));
+        uiLink.setTooltip(new Tooltip("Lier à l'ensemble des désordres ouverts"));
 
         uiLink.setOnAction(linkParentDesordres(container, isOnTronconLit));
 
@@ -69,4 +73,26 @@ public abstract class AbstractPrestationDesordresPojoTable extends ListeningPojo
      * @return @{@link java.beans.EventHandler}
      */
     protected abstract EventHandler linkParentDesordres(final ObjectProperty<? extends Element> container, final boolean isOnTronconLit);
+
+    protected ButtonType showConfirmationAlertAndGetResult(String message) {
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                message,
+                ButtonType.YES, ButtonType.NO);
+        alert.setResizable(true);
+        alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+        return alert.showAndWait().get();
+    }
+
+    protected void showWarningOrInformationAlert(String message, boolean isWarning) {
+        final Alert alert;
+        if (isWarning)
+            alert = new Alert(Alert.AlertType.WARNING,
+                message);
+        else
+            alert = new Alert(Alert.AlertType.INFORMATION,
+                    message);
+        alert.setResizable(true);
+        alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+        alert.showAndWait();
+    }
 }

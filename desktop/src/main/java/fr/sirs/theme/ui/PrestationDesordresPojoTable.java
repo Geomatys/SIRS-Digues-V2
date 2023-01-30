@@ -26,11 +26,10 @@ import fr.sirs.core.model.Prestation;
 import javafx.beans.property.ObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 /**
  *
@@ -49,49 +48,49 @@ public class PrestationDesordresPojoTable extends AbstractPrestationDesordresPoj
     }
 
     protected EventHandler linkParentDesordres(final ObjectProperty<? extends Element> container, final boolean isOnTronconLit){
-        return new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
+        return (EventHandler<ActionEvent>) event -> {
+            if (!createNewProperty.get()) {
+                final Element cont = container.get();
+                final List<Desordre> entities;
+                if (Desordre.class.isAssignableFrom(pojoClass) && cont instanceof Prestation) {
 
-                if (!createNewProperty.get()) {
-                    final Element cont = container.get();
-                    final List<Desordre> entities;
-                    if (Desordre.class.isAssignableFrom(pojoClass) && cont instanceof Prestation) {
+                    if (isOnTronconLit) {
+                        // Collects the repo for DesordreLit specific to TronconLit
+                        Optional<AbstractDesordreRepository> repoOp = session.getRepositoriesForClass(Desordre.class).stream().map(r -> (AbstractDesordreRepository) r).filter(r -> r.getClass().getSimpleName().equals("DesordreLitRepository")).findFirst();
+                        if (!repoOp.isPresent())
+                            throw new IllegalStateException("No repository found to read elements of type : DesordreLit");
 
-                        if (isOnTronconLit) {
-                            // Collects the repo for DesordreLit specific to TronconLit
-                            Optional<AbstractDesordreRepository> repoOp = session.getRepositoriesForClass(Desordre.class).stream().map(r -> (AbstractDesordreRepository) r).filter(r -> r.getClass().getSimpleName().equals("DesordreLitRepository")).findFirst();
-                            if (!repoOp.isPresent())
-                                throw new IllegalStateException("No repository found to read elements of type : DesordreLit");
+                        // Collects all DesordreLit
+                        entities = repoOp.get().getDesordreOpenByLinearId(((Prestation) cont).getLinearId());
 
-                            // Collects all DesordreLit
-                            entities = repoOp.get().getDesordreOpenByLinearId(((Prestation) cont).getLinearId());
-
-                        } else {
-                            // Collects all the Elements from the pojoClass repository
-                            entities = ((DesordreRepository) session.getRepositoryForClass(pojoClass)).getDesordreOpenByLinearId(((Prestation) cont).getLinearId());
-                        }
-
-                        // Removes the Desordres already present in the pojoTable
-                        entities.removeIf(new Predicate<Desordre>() {
-                            @Override
-                            public boolean test(Desordre d) {
-                                return getAllValues().contains(d);
-                            }
-                        });
-
-                        // adds the Desordres to the pojoTable
-                        entities.forEach(e -> getAllValues().add(e));
                     } else {
-                        final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le bouton d'ajout multiple ne devrait pas être présent pour ce type d'élément");
-                        alert.setResizable(true);
-                        alert.showAndWait();
+                        // Collects all the Elements from the pojoClass repository
+                        entities = ((DesordreRepository) session.getRepositoryForClass(pojoClass)).getDesordreOpenByLinearId(((Prestation) cont).getLinearId());
                     }
+
+                    if (entities.isEmpty()) {
+                        showWarningOrInformationAlert("Aucun désordre ouvert disponible sur le parent de la prestation.", false);
+                        return;
+                    }
+
+                    // Removes the Desordres already present in the pojoTable
+                    entities.removeIf(d -> getAllValues().contains(d));
+
+                    if (entities.isEmpty()) {
+                        showWarningOrInformationAlert("Tous les désordres ouverts du parent sont déjà liés à la prestation.", false);
+                        return;
+                    }
+
+                    final ButtonType res = showConfirmationAlertAndGetResult( "Confirmer le rattachement de " + entities.size() + " désordres ouverts à la prestation.");
+                    if (res == ButtonType.NO) return;
+
+                    // adds the Desordres to the pojoTable
+                    entities.forEach(e -> getAllValues().add(e));
                 } else {
-                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le bouton de création ne devrait pas être présent pour ce type d'élément");
-                    alert.setResizable(true);
-                    alert.showAndWait();
+                    showWarningOrInformationAlert("Le bouton d'ajout multiple ne devrait pas être présent pour ce type d'élément", true);
                 }
+            } else {
+                showWarningOrInformationAlert("Le bouton de création ne devrait pas être présent pour ce type d'élément", true);
             }
         };
     }

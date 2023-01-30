@@ -26,10 +26,9 @@ import fr.sirs.theme.ui.AbstractPrestationDesordresPojoTable;
 import javafx.beans.property.ObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  *
@@ -47,37 +46,37 @@ public class PrestationDesordresDependancePojoTable extends AbstractPrestationDe
 
     @Override
     protected EventHandler linkParentDesordres(ObjectProperty<? extends Element> container, boolean isOnTronconLit) {
-        return new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
+        return (EventHandler<ActionEvent>) event -> {
 
-                if (!createNewProperty.get()) {
+            if (!createNewProperty.get()) {
 
-                    final Element cont = container.get();
-                    if (DesordreDependance.class.isAssignableFrom(pojoClass) && cont instanceof PrestationAmenagementHydraulique) {
+                final Element cont = container.get();
+                if (DesordreDependance.class.isAssignableFrom(pojoClass) && cont instanceof PrestationAmenagementHydraulique) {
 
-                        // Collects all the Elements from the pojoClass repository
-                        final List<DesordreDependance> entities = ((DesordreDependanceRepository) session.getRepositoryForClass(pojoClass)).getDesordreOpenByLinearId(((PrestationAmenagementHydraulique) cont).getAmenagementHydrauliqueId());
+                    // Collects all the Elements from the pojoClass repository
+                    final List<DesordreDependance> entities = ((DesordreDependanceRepository) session.getRepositoryForClass(pojoClass)).getDesordreOpenByLinearId(((PrestationAmenagementHydraulique) cont).getAmenagementHydrauliqueId());
 
-                        // Removes the Desordres already present in the pojoTable
-                        entities.removeIf(new Predicate<DesordreDependance>() {
-                            @Override
-                            public boolean test(DesordreDependance d) {
-                                return getAllValues().contains(d);
-                            }
-                        });
-
-                        entities.forEach(e -> getAllValues().add(e));
-                    } else {
-                        final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le bouton d'ajout multiple ne devrait pas être présent pour ce type d'élément");
-                        alert.setResizable(true);
-                        alert.showAndWait();
+                    if (entities.isEmpty()) {
+                        showWarningOrInformationAlert("Aucun désordre dépendance ouvert disponible sur l'AH de la prestation.", false);
+                        return;
                     }
+
+                    // Removes the Desordres already present in the pojoTable
+                    entities.removeIf(d -> getAllValues().contains(d));
+
+                    if (entities.isEmpty()) {
+                        showWarningOrInformationAlert("Tous les désordres dépendances ouverts du parent sont déjà liés à la prestation.", false);
+                        return;
+                    }
+
+                    final ButtonType res = showConfirmationAlertAndGetResult("Confirmer le rattachement de " + entities.size() + " désordres dépendances ouverts à la prestation.");
+                    if (res == ButtonType.NO) return;
+                    entities.forEach(e -> getAllValues().add(e));
                 } else {
-                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le bouton de création ne devrait pas être présent pour ce type d'élément");
-                    alert.setResizable(true);
-                    alert.showAndWait();
+                    showWarningOrInformationAlert("Le bouton d'ajout multiple ne devrait pas être présent pour ce type d'élément", true);
                 }
+            } else {
+                showWarningOrInformationAlert("Le bouton de création ne devrait pas être présent pour ce type d'élément", true);
             }
         };
     }
