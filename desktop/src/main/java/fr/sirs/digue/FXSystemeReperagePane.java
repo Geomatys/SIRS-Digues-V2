@@ -123,6 +123,12 @@ public class FXSystemeReperagePane extends BorderPane {
 
         private final Button uiEditBorne = new Button(null, new ImageView(SIRS.ICON_EDITION_WHITE));
 
+        private int selectedItemsCount = 0;
+
+        // listener to disable/enable the borne renaming buttons.
+        // Can only rename one borne at a time.
+        ListChangeListener<Element> selectionListener =  c -> uiEditBorne.setDisable(selectedItemsCount != 1);
+
         public BorneTable(final ObjectProperty<? extends Element> container) {
             super(SystemeReperageBorne.class, "Liste des bornes", container);
             getColumns().remove((TableColumn) editCol);
@@ -130,33 +136,40 @@ public class FXSystemeReperagePane extends BorderPane {
             uiAdd.setVisible(false);
             uiDelete.setVisible(false);
             uiFicheMode.setVisible(false);
+            deleteColumn.setVisible(false);
 
             // HACK-redmine-6551 : rename a borne
             uiTable.getSelectionModel().select(null);
 
             uiEditBorne.setTooltip(new Tooltip("Renommer une borne"));
-            uiEditBorne.setDisable(true);
             uiEditBorne.setOnAction(event -> renameBorne(uiTable.getSelectionModel().getSelectedItem()));
             uiEditBorne.getStyleClass().add(BUTTON_STYLE);
 
-            uiTable.getSelectionModel().getSelectedItems().addListener((ListChangeListener<Element>) c -> {
-                final int size = uiTable.getSelectionModel().getSelectedItems().size();
-                uiEditBorne.setDisable(size != 1);
+            // Add button to edition bar
+            searchEditionToolbar.getChildren().add(2, uiEditBorne);
+
+            // listener to count the number of selected items. Can only rename one borne at a time.
+            uiTable.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super Element>) c -> {
+                selectedItemsCount = uiTable.getSelectionModel().getSelectedItems().size();
             });
 
             RenameBorneColumn renameBorneCol = new RenameBorneColumn(getDefaultValueFactory(), this::renameBorne, getDefaultVisiblePredicate());
-            uiTable.getColumns().add(1, renameBorneCol);
 
             editableProperty.addListener((
                     ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                if (newValue)
-                    searchEditionToolbar.getChildren().add(2, uiEditBorne);
-                else searchEditionToolbar.getChildren().remove(uiEditBorne);
-                renameBorneCol.setVisible(newValue);
-                deleteColumn.setVisible(false);
+                if (newValue) {
+                    uiTable.getColumns().add(1, renameBorneCol);
+                    uiTable.getSelectionModel().getSelectedItems().addListener(selectionListener);
+                    // Can only rename one borne at a time.
+                    uiEditBorne.setDisable(selectedItemsCount != 1);
+                }
+                else {
+                    uiTable.getColumns().remove(renameBorneCol);
+                    uiTable.getSelectionModel().getSelectedItems().removeListener(selectionListener);
+                    uiEditBorne.setDisable(true);
+                }
             });
         }
-
 
         /**
          * Method to rename a borne from the @{@link SystemeReperageBorne} pojo table
@@ -188,12 +201,8 @@ public class FXSystemeReperagePane extends BorderPane {
             // Force update pojo table
             SystemeReperage sr = srProperty.get();
             sr.getSystemeReperageBornes().remove((SystemeReperageBorne) pojo);
-            TronconDigue troncon = session.getRepositoryForClass(TronconDigue.class).get(sr.getLinearId());
-            BorneUtils.addBorneToSR(selectedItem, troncon, sr, session);
-            SystemeReperageBorne newSrBorne = sr.getSystemeReperageBornes()
-                    .stream().filter(srb -> srb.getBorneId().equals(selectedItem.getId()))
-                    .findFirst().get();
-            newSrBorne.setDesignation(srBorne.getDesignation());
+            SystemeReperageBorne newSrBorne = srBorne.copy();
+            sr.systemeReperageBornes.add(newSrBorne);
             Platform.runLater(() -> {
                 Growl growl = new Growl(Growl.Type.WARNING, "Attention, la désignation de la borne est différente\nde la désignation de la borne dans le système de repérage.");
                 growl.show(Duration.seconds(10));

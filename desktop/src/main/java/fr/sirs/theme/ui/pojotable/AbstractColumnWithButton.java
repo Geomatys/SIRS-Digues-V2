@@ -48,15 +48,11 @@ public abstract class AbstractColumnWithButton<S, T> extends TableColumn<S, T> {
 
         setCellValueFactory(cellValueFactory);
 
-        setCellFactory(new Callback<TableColumn<S, T>, TableCell<S, T>>() {
-
-            @Override
-                    public TableCell call(TableColumn param) {
-                ButtonTableCell button = new ButtonTableCell(
-                        false, new ImageView(iconImage), visiblePredicate, editFct);
-                button.setTooltip(tooltip);
-                return button;
-            }
+        setCellFactory(param -> {
+            ButtonTableCell button = new ButtonTableCell(
+                    false, new ImageView(iconImage), visiblePredicate, editFct);
+            button.setTooltip(tooltip);
+            return button;
         });
     }
 }

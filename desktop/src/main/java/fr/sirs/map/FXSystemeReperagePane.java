@@ -626,12 +626,9 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
         if (!BorneUtils.openDialogAndRenameBorne(selectedItem)) return;
 
         // Force to update the Borne libelle in the uiObjetTable.
-        uiSrComboBox.getValue().getSystemeReperageBornes().removeIf(b -> b.getBorneId().equals(selectedItem.getId()));
-        addBorneToSR(selectedItem);
-        systemeReperageProperty().get().getSystemeReperageBornes()
-                .stream().filter(srb -> srb.getBorneId().equals(selectedItem.getId()))
-                .findFirst().get()
-                .setDesignation(selectedSeBorne.getDesignation());
+        SystemeReperage sr = uiSrComboBox.getValue();
+        sr.getSystemeReperageBornes().removeIf(b -> b.getBorneId().equals(selectedItem.getId()));
+        sr.systemeReperageBornes.add(selectedSeBorne.copy());
         uiObjetTable.getSelectionModel().clearSelection();
         uiObjetTable.getSelectionModel().select(index);
     }
