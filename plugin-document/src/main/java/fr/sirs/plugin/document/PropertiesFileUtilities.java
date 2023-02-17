@@ -20,13 +20,14 @@ package fr.sirs.plugin.document;
 
 import fr.sirs.Injector;
 import fr.sirs.core.SirsDBInfo;
-import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
@@ -39,6 +40,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -59,6 +61,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import org.apache.sis.measure.NumberRange;
+import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.nio.IOUtilities;
 import org.geotoolkit.util.collection.CloseableIterator;
@@ -77,7 +80,6 @@ public class PropertiesFileUtilities {
      *
      * @param f A file, can be a folder corresponding to a SE, DG or TR. Or a simple file.
      * @param property Name of the property.
-     * @return
      */
     public static String getProperty(final File f, final String property) {
         final Properties prop = getSirsProperties(f, true);
@@ -113,7 +115,6 @@ public class PropertiesFileUtilities {
      *
      * @param f A file, can be a folder correspounding to a SE, DG or TR. Or a simple file.
      * @param property Name of the property.
-     * @return
      */
     public static Boolean getBooleanProperty(final File f, final String property) {
         final Properties prop = getSirsProperties(f, true);
@@ -138,7 +139,6 @@ public class PropertiesFileUtilities {
      * Return true if the specified file correspound to a a SE, DG or TR folder.
      *
      * @param f A file.
-     * @return
      */
     public static Boolean getIsModelFolder(final File f) {
         return getIsModelFolder(f, SE) || getIsModelFolder(f, TR) || getIsModelFolder(f, DG);
@@ -148,7 +148,6 @@ public class PropertiesFileUtilities {
      * Return true if the specified file correspound to a a specific specified model (SE, DG or TR).
      * @param f A file.
      * @param model SE, DG or TR.
-     * @return
      */
     public static Boolean getIsModelFolder(final File f, final String model) {
         final Properties prop = getSirsProperties(f, true);
@@ -220,7 +219,6 @@ public class PropertiesFileUtilities {
      * @param parent {@code true} if the file f is not the root directory.
      *
      * @return A sirs.properties file.
-     * @throws IOException
      */
     private static File getSirsPropertiesFile(final File f, final boolean parent) throws IOException {
         final File parentFile;
@@ -244,7 +242,6 @@ public class PropertiesFileUtilities {
      *
      * @param f A file.
      * @param parent {@code true} if the file f is not the root directory.
-     * @return
      */
     private static Properties getSirsProperties(final File f, final boolean parent) {
         final Properties prop = new Properties();
@@ -270,7 +267,6 @@ public class PropertiesFileUtilities {
      * Return a label for a file size (if it is a directory the all the added size of its children).
      *
      * @param f A file.
-     * @return
      */
     public static String getStringSizeFile(final File f) {
         final long size        = getFileSize(f);
@@ -294,8 +290,6 @@ public class PropertiesFileUtilities {
 
     /**
      * Return the size of a file (if it is a directory the all the added size of its children).
-     * @param f
-     * @return
      */
     private static long getFileSize(final File f) {
         if (f.isDirectory()) {
@@ -309,50 +303,44 @@ public class PropertiesFileUtilities {
         }
     }
 
-    public static File getOrCreateSE(final File rootDirectory, SystemeEndiguement sd){
-        final File sdDir = new File(rootDirectory, sd.getId());
-        if (!sdDir.exists()) {
-            sdDir.mkdir();
-        }
-        String name = sd.getLibelle();
-        if (name == null) {
-            name = "null";
-        }
-        setIsModelFolder(sdDir, SE, name);
-        final File docDir = new File(sdDir, DocumentsPane.DOCUMENT_FOLDER);
-        if (!docDir.exists()) {
-            docDir.mkdir();
-        }
-        return sdDir;
+    public static File getOrCreateSE(final File rootDirectory, final SystemeEndiguement sd){
+        ArgumentChecks.ensureNonNull("Systeme d'endiguement sd", sd);
+        return getOrCreateForLibelledElement(rootDirectory, SE, sd);
     }
 
-    public static File getOrCreateDG(final File rootDirectory, Digue digue){
-        final File digueDir = new File(rootDirectory, digue.getId());
-        if (!digueDir.exists()) {
-            digueDir.mkdir();
-        }
-        String name = digue.getLibelle();
-        if (name == null) {
-            name = "null";
-        }
-        setIsModelFolder(digueDir, DG, name);
-        final File docDir = new File(digueDir, DocumentsPane.DOCUMENT_FOLDER);
-        if (!docDir.exists()) {
-            docDir.mkdir();
-        }
-        return digueDir;
+    public static File getOrCreateDG(final File rootDirectory, final Digue digue){
+        ArgumentChecks.ensureNonNull("Digue", digue);
+        return getOrCreateForLibelledElement(rootDirectory, DG, digue);
     }
 
-    public static File getOrCreateTR(final File rootDirectory, TronconDigue tr){
-        final File trDir = new File(rootDirectory, tr.getId());
+    public static File getOrCreateTR(final File rootDirectory, final TronconDigue tronconDigue) {
+        ArgumentChecks.ensureNonNull("TronconDigue", tronconDigue);
+        return getOrCreateForLibelledElement(rootDirectory, TR, tronconDigue);
+    }
+
+    /**
+     * @param model SE, DG or TR.
+     */
+    private static <T extends Element & AvecLibelle> File getOrCreateForLibelledElement(final File rootDirectory, final String model, final T libelledElement) {
+        switch (model) {
+            case SE:
+            case DG:
+            case TR:
+                break;
+            default:
+                throw new IllegalArgumentException(" Input model " + model + " must be one of the following values : " + SE + ", " + DG + ", " + TR);
+        }
+
+        final File trDir = new File(rootDirectory, libelledElement.getId());
         if (!trDir.exists()) {
             trDir.mkdir();
         }
-        String name = tr.getLibelle();
+        String name = libelledElement.getLibelle();
         if (name == null) {
             name = "null";
         }
-        setIsModelFolder(trDir, TR, name);
+
+        setIsModelFolder(trDir, model, name);
         final File docDir = new File(trDir, DocumentsPane.DOCUMENT_FOLDER);
         if (!docDir.exists()) {
             docDir.mkdir();
@@ -419,7 +407,7 @@ public class PropertiesFileUtilities {
             final File doFile    = new File(f, DOCUMENT_FOLDER);
             final File newDoFile = new File(newDir, DOCUMENT_FOLDER);
 
-            Files.copy(doFile.toPath(), newDoFile.toPath());
+            Files.copy(doFile.toPath(), newDoFile.toPath(), StandardCopyOption.REPLACE_EXISTING );
             IOUtilities.deleteRecursively(f.toPath());
 
             // save new properties
@@ -497,8 +485,8 @@ public class PropertiesFileUtilities {
     }
 
     public static String getDatabaseIdentifier() {
-        final SirsDBInfoRepository DBrepo = Injector.getBean(SirsDBInfoRepository.class);
-        final Optional<SirsDBInfo> info = DBrepo.get();
+        final SirsDBInfoRepository dbRepo = Injector.getBean(SirsDBInfoRepository.class);
+        final Optional<SirsDBInfo> info = dbRepo.get();
         if (info.isPresent()) {
             final SirsDBInfo dbInfo = info.get();
             return dbInfo.getUuid() + "|" + dbInfo.getEpsgCode() + "|" + dbInfo.getVersion()  + "|" + dbInfo.getRemoteDatabase();
@@ -575,7 +563,7 @@ public class PropertiesFileUtilities {
         final DigueRepository Drepo = Injector.getBean(DigueRepository.class);
         final TronconDigueRepository TRrepo = Injector.getBean(TronconDigueRepository.class);
 
-        /**
+        /*
          * On recupere tous les elements.
          */
         final List<SystemeEndiguement> ses    = SErepo.getAll();
@@ -626,7 +614,7 @@ public class PropertiesFileUtilities {
             tronMoved.addAll(listModel(seFile, TR));
         }
 
-        /**
+        /*
          * On place toute les digues et troncons non trouvé dans un group a part.
          */
         final Set<File> digueFiles = listModel(unclassifiedDir, DG);
@@ -669,7 +657,7 @@ public class PropertiesFileUtilities {
         // on place les tronçon disparus dans les fichiers deplacé
         tronMoved.addAll(trFiles);
 
-        /**
+        /*
          * On restore les fichier deplacé dans leur nouvel emplacement.
          */
         final Set<File> tronMovedFound = new HashSet<>();
