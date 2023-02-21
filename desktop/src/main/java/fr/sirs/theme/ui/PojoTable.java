@@ -397,10 +397,6 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     /**
-     * @param pojoClass
-     * @param title
-     * @param container
-     * @param repo
      * @param applyPreferences : boolean value use to indicate to not apply
      * preferences in the constructor. It is used in {@link ParamPojoTable}
      * which add columns to uiTable after super constructor's call.
@@ -481,9 +477,7 @@ public class PojoTable extends BorderPane implements Printable {
         cellEditableProperty.bind(editableProperty);
 
         detaillableProperty.addListener(
-                (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                    editCol.setVisible(newValue);
-                });
+                (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> editCol.setVisible(newValue));
 
         uiTable.getColumns().add(deleteColumn);
         uiTable.getColumns().add((TableColumn) editCol);
@@ -1481,9 +1475,7 @@ public class PojoTable extends BorderPane implements Printable {
                 }
             }
             if (allValues.isEmpty()) {
-                Platform.runLater(() -> {
-                    uiSearch.setGraphic(searchNone);
-                });
+                Platform.runLater(() -> uiSearch.setGraphic(searchNone));
             }
 
             // Apply filter on properties
@@ -1512,7 +1504,11 @@ public class PojoTable extends BorderPane implements Printable {
 
                 final Predicate<Element> filterPredicate;
                 if (firstFilter == null) {
-                    filterPredicate = element -> element == null || result.contains(element.getId());
+                    filterPredicate = element -> element == null || result.contains(element.getId())
+                            || uiTable.getColumns().stream()
+                            .filter(col-> col instanceof PropertyColumn)
+                            .map(col -> col.getCellData(element))
+                            .anyMatch(value -> value instanceof String && result.contains(value)); // TODO or displayed value contains str ??
                 } else if (str == null || str.isEmpty()) {
                     filterPredicate = element -> element == null || firstFilter.evaluate(element);
                 } else {
