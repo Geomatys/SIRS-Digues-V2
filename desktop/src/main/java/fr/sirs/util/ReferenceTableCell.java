@@ -240,7 +240,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> implements Cha
                         CACHED_VALUES.put(item, text);
                     }
                     else {
-                        final Preview tmpPreview = getPreview((String) item);
+                        final Preview tmpPreview = getPreview(item);
                         if (tmpPreview != null) {
                             text = tmpPreview.libelleProperty();
                             text.setValue(new SirsStringConverter().toString(tmpPreview));
