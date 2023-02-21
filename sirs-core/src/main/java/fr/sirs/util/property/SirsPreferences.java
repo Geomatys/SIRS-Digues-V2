@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Properties;
+import javafx.beans.property.SimpleObjectProperty;
 
 /**
  * Définit les préférences liées à l'installation locale de l'application.
@@ -85,43 +86,6 @@ public class SirsPreferences extends Properties {
         public String getDefaultValue(){return defaultValue;}
     }
 
-    private Boolean showCase = null;
-
-    public Boolean getShowCase(){
-        return showCase;
-    }
-
-    public Boolean setShowCase(Boolean newShowCase){
-        return showCase = newShowCase;
-    }
-
-    /**
-     * Retourne la valeur de la propriété indiquée en paramètre, ou, en son absence, sa valeur par défaut.
-     * @param property propriété
-     * @return valeur de la propriété si elle existe ou valeur par défaut dans le cas contraire.
-     */
-    public String getPropertySafeOrDefault(SirsPreferences.PROPERTIES property){
-        if(SirsPreferences.INSTANCE.getPropertySafe(property)!=null){
-            return SirsPreferences.INSTANCE.getPropertySafe(property);
-        }
-        else {
-            return property.getDefaultValue();
-        }
-    }
-
-    /**
-     * Charge les préférences depuis le système.
-     * @throws IOException Si on échoue à lire ou créer le fichier contenant les propriétés.
-     */
-    private SirsPreferences() throws IOException {
-        super();
-
-        if (!Files.isRegularFile(PREFERENCES_PATH)) {
-            Files.createFile(PREFERENCES_PATH);
-        }
-        reload();
-    }
-
     /**
      * L'instance unique à utiliser pour travailler avec les propriétés.
      */
@@ -134,18 +98,65 @@ public class SirsPreferences extends Properties {
         }
     }
 
+    private ShowCasePossibility showCase;
+    private final SimpleObjectProperty<ShowCasePossibility> showCaseProp;
+
+    /**
+     * Charge les préférences depuis le système.
+     * @throws IOException Si on échoue à lire ou créer le fichier contenant les propriétés.
+     */
+    private SirsPreferences() throws IOException {
+        super();
+
+        if (!Files.isRegularFile(PREFERENCES_PATH)) {
+            Files.createFile(PREFERENCES_PATH);
+        }
+        showCaseProp = new SimpleObjectProperty();
+        reload();
+    }
+
+    public SimpleObjectProperty<ShowCasePossibility> showCasePropProperty() {
+        return showCaseProp;
+    }
+
+    public ShowCasePossibility getShowCase(){
+        return showCase;
+    }
+
+    public void setShowCase(final ShowCasePossibility newShowCase){
+        showCase = newShowCase;
+        showCaseProp.setValue(showCase);
+    }
+
+    /**
+     * Retourne la valeur de la propriété indiquée en paramètre, ou, en son absence, sa valeur par défaut.
+     * @param property propriété
+     * @return valeur de la propriété si elle existe ou valeur par défaut dans le cas contraire.
+     */
+    public String getPropertySafeOrDefault(SirsPreferences.PROPERTIES property){
+        if(SirsPreferences.INSTANCE.getPropertySafe(property)!=null){
+            return SirsPreferences.INSTANCE.getPropertySafe(property);
+        } else {
+            return property.getDefaultValue();
+        }
+    }
+
     /**
      * Recharge les propriétés depuis le disque.
      * @throws IOException Si on échoue à lire le fichier contenant les propriétés.
      */
-    public void reload() throws IOException {
+    private void reload() throws IOException {
         try (final InputStream stream = Files.newInputStream(PREFERENCES_PATH, StandardOpenOption.READ)) {
             this.load(stream);
         }
 
         for (final PROPERTIES prop : PROPERTIES.values()) {
             try {
-                getProperty(prop);
+                if(prop == PROPERTIES.ABSTRACT_SHOWCASE) {
+                    setShowCase(ShowCasePossibility.getFromName(getProperty(prop)));
+                } else {
+                    getProperty(prop);
+                }
             } catch (IllegalStateException e) {
                 if (prop.getDefaultValue() != null) {
                     setProperty(prop.name(), prop.getDefaultValue());

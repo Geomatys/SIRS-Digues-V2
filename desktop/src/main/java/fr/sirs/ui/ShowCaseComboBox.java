@@ -68,18 +68,12 @@ public class ShowCaseComboBox extends BorderPane {
         //Ecouteur sur la valeur sélectionnée.
         comboBox.valueProperty().addListener(change ->{
             try{
-                SirsPreferences.INSTANCE.setShowCase(((ShowCasePossibility) ((SimpleObjectProperty) change).get()).booleanValue);
+                SirsPreferences.INSTANCE.setShowCase(((ShowCasePossibility) ((SimpleObjectProperty) change).get()));
             }catch(ClassCastException | NullPointerException ex){
-                SirsPreferences.INSTANCE.setShowCase(null);
+                SirsPreferences.INSTANCE.setShowCase(ShowCasePossibility.BOTH);
             }
         });
         
-    }
-    
-    
-
-    public StringProperty stringValueProperty() {
-        return stringValue;
     }
 
 }

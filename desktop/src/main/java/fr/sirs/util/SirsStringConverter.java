@@ -71,13 +71,15 @@ public class SirsStringConverter extends StringConverter {
      */
     @Override
     public String toString(Object item) {
-        
-        if ( SirsPreferences.INSTANCE.getShowCase() == null) { //"Abstract : Designation" attendu 
-            return toString(item, true, true);
-        } else if ( SirsPreferences.INSTANCE.getShowCase()) { //"Abstract" (only)
-            return toString(item, true, false);
-        }else{ //"Designation"/Nom complet seulement
-            return toString(item, false, true);
+        switch (SirsPreferences.INSTANCE.getShowCase()) {
+            case BOTH: //"Abstract : Designation" attendu
+                return toString(item, true, true);
+            case ABSTRACT:  //"Abstract" (only)
+                return toString(item, true, false);
+            case FULL_NAME://"Designation"/Nom complet seulement
+                return toString(item, false, true);
+            default :
+                throw new IllegalStateException("Unexpected value for SHowCase preference : "+ SirsPreferences.INSTANCE.getShowCase());
         }
     }
     
@@ -174,7 +176,6 @@ public class SirsStringConverter extends StringConverter {
      *
      * @param text StringBuilder to convert.
      * @param item Object to associate with the returned String.
-     * @return 
      */
     private String convertAndRegister (StringBuilder text, Object item){
         final String result = text.toString();
@@ -276,7 +277,6 @@ public class SirsStringConverter extends StringConverter {
 
     /**
      *
-     * @param className
      * @return the labelMapper for the given class name, or null if there is no
      * class for the given name.
      */

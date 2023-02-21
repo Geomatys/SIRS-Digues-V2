@@ -33,6 +33,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
+import fr.sirs.util.property.SirsPreferences;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -84,8 +85,21 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> implements Cha
     private static final Map<String, StringProperty> CACHED_VALUES = new WeakHashMap<>();
     private static final LibelleUpdater LIBELLE_UPDATER = new LibelleUpdater();
 
+    /**
+     * Listener to update displayed txt according to selected {@link SirsPreferences#getShowCase()}
+     */
+    private final ChangeListener updateTextListener =  (c,o,n) -> {
+        editor = new ComboBox();
+        this.cancelEdit(); //Cancel also update item and ensure update even if currently editing
+    }; //Todo try to move it at table or column level rather than at cell level to reduce the number of listeners
+
+    private static final ChangeListener CLEAR_CACHE_LISTENER = (c, o, n) -> { if (!CACHED_VALUES.isEmpty()) CACHED_VALUES.clear();};
+    static {
+        SirsPreferences.INSTANCE.showCasePropProperty().addListener(CLEAR_CACHE_LISTENER);
+    }
+
     private final Class refClass;
-    private final ComboBox editor = new ComboBox();
+    private ComboBox editor = new ComboBox();
 
     public ReferenceTableCell(final Class referenceClass) {
         ArgumentChecks.ensureNonNull("Reference class", referenceClass);
@@ -105,6 +119,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> implements Cha
         } catch (NoSuchBeanDefinitionException e) {
             SIRS.LOGGER.log(Level.FINE, "Cannot register a listener on CouchDB doc change, because the emitter is not present in spring context.", e);
         }
+        SirsPreferences.INSTANCE.showCasePropProperty().addListener(updateTextListener);
     }
 
     @Override
@@ -139,23 +154,23 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> implements Cha
         } else {
             items = SIRS.observableList(previews.getByClass(refClass)).sorted();
         }
-
-        // Analyze current item to determine default selection
-        final String elementId = getItem();
-        Object selected = null;
-        if (elementId != null && !elementId.isEmpty()) {
-            try {
-                if (SystemeReperageBorne.class.isAssignableFrom(refClass) || BorneDigue.class.isAssignableFrom(refClass)) {
-                    selected = Injector.getSession().getElement(elementId).orElse(null);
-                } else {
-                    selected = previews.get(elementId);
-                }
-            } catch (DocumentNotFoundException e) {
-                SirsCore.LOGGER.fine("No document found for id " + elementId);
-            }
-        }
-
         if (items != null && !items.isEmpty()) {
+
+            // Analyze current item to determine default selection
+            final String elementId = getItem();
+            Object selected = null;
+            if (elementId != null && !elementId.isEmpty()) {
+                try {
+                    if (SystemeReperageBorne.class.isAssignableFrom(refClass) || BorneDigue.class.isAssignableFrom(refClass)) {
+                        selected = Injector.getSession().getElement(elementId).orElse(null);
+                    } else {
+                        selected = previews.get(elementId);
+                    }
+                } catch (DocumentNotFoundException e) {
+                    SirsCore.LOGGER.fine("No document found for id " + elementId);
+                }
+            }
+
             SIRS.initCombo(editor, items, selected);
             super.startEdit();
             textProperty().unbind();
@@ -228,6 +243,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> implements Cha
                         final Preview tmpPreview = getPreview((String) item);
                         if (tmpPreview != null) {
                             text = tmpPreview.libelleProperty();
+                            text.setValue(new SirsStringConverter().toString(tmpPreview));
                             if (text.get() == null) {
                                 // Si l'objet pointé n'a pas de libellé, une valeur par défaut est nécessaire
                                 // afin de montrer qu'une liaison existe réellement.
