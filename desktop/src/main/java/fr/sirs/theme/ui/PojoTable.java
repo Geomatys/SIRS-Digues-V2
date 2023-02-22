@@ -163,6 +163,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import org.apache.sis.feature.AbstractIdentifiedType;
 import org.apache.sis.feature.DefaultAssociationRole;
 import org.apache.sis.feature.DefaultAttributeType;
@@ -1494,7 +1495,9 @@ public class PojoTable extends BorderPane implements Printable {
                 filteredValues = allValues.filtered((Element t) -> true);
             } else {
                 final Set<String> result = new HashSet<>();
-                SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.simpleQueryStringQuery("*" + searched + "*").analyzeWildcard(true).lenient(true));
+                // Remove wildcard analyze as it returned too much result without obvious link with the searched text.
+                // Handle case in getSearchTextInCellsPredicate method
+                SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.simpleQueryStringQuery("*" + searched + "*").analyzeWildcard(false).lenient(true));
                 Iterator<SearchHit> iterator = search.getHits().iterator();
                 while (iterator.hasNext() && !currentThread.isInterrupted()) {
                     result.add(iterator.next().getId());
@@ -1506,8 +1509,9 @@ public class PojoTable extends BorderPane implements Printable {
 
                 final Predicate<Element> filterPredicate;
                 if (firstFilter == null) {
+                    final SirsStringConverter converter = new SirsStringConverter();
                     filterPredicate = element -> element == null || result.contains(element.getId())
-                            || getSearchTextInCellsPredicate(searched).test(element);
+                            || getSearchTextInCellsPredicate(searched, converter).test(element);
                 } else if (searched == null || searched.isEmpty()) {
                     filterPredicate = element -> element == null || firstFilter.evaluate(element);
                 } else {
@@ -1558,18 +1562,25 @@ public class PojoTable extends BorderPane implements Printable {
 
     /**
      * @param searched : searched text
+     * @param converter : converter to convert {@link PropertyColumn#getCellData(Object)} )} in String;
      * @return a {@link Predicate<Element>} testing if the cells of {@link #getUiTable()} associated with the tested element
      *        refer to the searched text.
      */
-    private Predicate<Element> getSearchTextInCellsPredicate(final String searched) {
-        return element -> {
-
-            return uiTable.getColumns().stream()//Search in tableview's cells
-                    .filter(col -> col instanceof PropertyColumn)
-                    .map(col -> col.getCellData(element))
-                    .anyMatch(value -> value instanceof String && toDisplayedText((String) value).contains(searched)); // TODO or displayed value contains str ??
-
-        };
+    private Predicate<Element> getSearchTextInCellsPredicate(final String searched, final StringConverter converter) {
+        return element -> uiTable.getColumns().stream()//Search in tableview's cells
+                .filter(col -> col instanceof PropertyColumn)
+                .map(col -> {
+                    final Object cellData = col.getCellData(element);
+                    if (cellData == null) {
+                    } else if (((PropertyColumn) col).getReference() == null) {
+                        return converter.toString(cellData);
+                    } else if (cellData instanceof String) {
+                        return toDisplayedText((String) cellData);
+                    }
+                    return null;
+                })
+                .filter(s -> s != null && !s.isEmpty())
+                .anyMatch(str -> str.toLowerCase().contains(searched.toLowerCase()));
     }
 
     private String toDisplayedText(final String value) {
