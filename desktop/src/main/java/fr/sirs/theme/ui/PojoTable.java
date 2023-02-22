@@ -36,6 +36,8 @@ import static fr.sirs.SIRS.VALID_FIELD;
 import static fr.sirs.SIRS.ID_FIELD;
 import static fr.sirs.SIRS.REVISION_FIELD;
 import static fr.sirs.SIRS.NEW_FIELD;
+import static fr.sirs.core.SirsCore.LOGGER;
+
 import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.Repository;
@@ -1487,12 +1489,12 @@ public class PojoTable extends BorderPane implements Printable {
             }
 
             // Apply "Plain text" filter
-            final String str = currentSearch.get();
-            if ((str == null || str.isEmpty()) && firstFilter == null) {
+            final String searched = currentSearch.get();
+            if ((searched == null || searched.isEmpty()) && firstFilter == null) {
                 filteredValues = allValues.filtered((Element t) -> true);
             } else {
                 final Set<String> result = new HashSet<>();
-                SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.simpleQueryStringQuery("*" + str + "*").analyzeWildcard(true).lenient(true));
+                SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.simpleQueryStringQuery("*" + searched + "*").analyzeWildcard(true).lenient(true));
                 Iterator<SearchHit> iterator = search.getHits().iterator();
                 while (iterator.hasNext() && !currentThread.isInterrupted()) {
                     result.add(iterator.next().getId());
@@ -1505,11 +1507,8 @@ public class PojoTable extends BorderPane implements Printable {
                 final Predicate<Element> filterPredicate;
                 if (firstFilter == null) {
                     filterPredicate = element -> element == null || result.contains(element.getId())
-                            || uiTable.getColumns().stream()
-                            .filter(col-> col instanceof PropertyColumn)
-                            .map(col -> col.getCellData(element))
-                            .anyMatch(value -> value instanceof String && result.contains(value)); // TODO or displayed value contains str ??
-                } else if (str == null || str.isEmpty()) {
+                            || getSearchTextInCellsPredicate(searched).test(element);
+                } else if (searched == null || searched.isEmpty()) {
                     filterPredicate = element -> element == null || firstFilter.evaluate(element);
                 } else {
                     filterPredicate = element -> element == null || result.contains(element.getId()) && firstFilter.evaluate(element);
@@ -1548,9 +1547,7 @@ public class PojoTable extends BorderPane implements Printable {
                 if (ex != null) {
                     SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 }
-                Platform.runLater(() -> {
-                    uiSearch.setGraphic(searchNone);
-                });
+                Platform.runLater(() -> uiSearch.setGraphic(searchNone));
             } else if (Worker.State.RUNNING.equals(newValue)) {
                 Platform.runLater(() -> uiSearch.setGraphic(searchRunning));
             }
@@ -1558,6 +1555,36 @@ public class PojoTable extends BorderPane implements Printable {
 
         tableUpdaterProperty.set(TaskManager.INSTANCE.submit("Recherche...", updater));
     }
+
+    /**
+     * @param searched : searched text
+     * @return a {@link Predicate<Element>} testing if the cells of {@link #getUiTable()} associated with the tested element
+     *        refer to the searched text.
+     */
+    private Predicate<Element> getSearchTextInCellsPredicate(final String searched) {
+        return element -> {
+
+            return uiTable.getColumns().stream()//Search in tableview's cells
+                    .filter(col -> col instanceof PropertyColumn)
+                    .map(col -> col.getCellData(element))
+                    .anyMatch(value -> value instanceof String && toDisplayedText((String) value).contains(searched)); // TODO or displayed value contains str ??
+
+        };
+    }
+
+    private String toDisplayedText(final String value) {
+        if(value == null || value.isEmpty()) return "";
+        try {
+            final Preview tmpPreview = Injector.getSession().getPreviews().get(value);
+            if (tmpPreview != null) {
+                return new SirsStringConverter().toString(tmpPreview);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.INFO, "Failed to convert input value to cell text; return input value;", e);
+        }
+        return value;
+    }
+
 
     /**
      * Delete the elements given in parameter. They are suppressed from the
@@ -1594,10 +1621,7 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     /**
-     * Try to find and display a form to edit input object.
-     *
-     * @param pojo The object we want to edit.
-     * @return
+     * Same as {@link PojoTable#editPojo(Object, Predicate)} with {@link SIRS#CONSULTATION_PREDICATE}.
      */
     protected Object editPojo(Object pojo) {
         return editPojo(pojo, SIRS.CONSULTATION_PREDICATE);
@@ -1605,9 +1629,9 @@ public class PojoTable extends BorderPane implements Printable {
 
     /**
      *
-     * @param pojo
-     * @param editionPredicate
-     * @return
+     * Try to find and display a form to edit input object.
+     *
+     * @param pojo The object we want to edit.
      */
     protected Object editPojo(Object pojo, Predicate<Element> editionPredicate) {
         final int index;
