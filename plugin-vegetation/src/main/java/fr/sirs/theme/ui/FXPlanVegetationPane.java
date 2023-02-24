@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Level;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -206,11 +207,11 @@ public class FXPlanVegetationPane extends BorderPane {
                     final String typeVegetation;
                     if(type==PeuplementVegetation.class){
                         typeVegetation = ((PeuplementVegetation) zone).getTypeVegetationId();
-                    }
-                    else if(type==InvasiveVegetation.class){
+                    } else if(type==InvasiveVegetation.class){
                         typeVegetation = ((InvasiveVegetation) zone).getTypeVegetationId();
+                    }  else {
+                        typeVegetation = null; //HerbaceeVegetation and ArbreVegetation have no type!
                     }
-                    else typeVegetation = null;
 
                     // Il faut ensuite examiner les traitements ponctuel et non ponctuel de la zone
                     final TraitementZoneVegetation traitement = zone.getTraitement();

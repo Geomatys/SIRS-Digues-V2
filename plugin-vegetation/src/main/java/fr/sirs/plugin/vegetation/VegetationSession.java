@@ -58,10 +58,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
@@ -211,7 +213,7 @@ public final class VegetationSession {
         return peuplementRepo;
     }
 
-    public List<HerbaceeVegetation> getHerbaceeByPlan(String planId){
+    public List<HerbaceeVegetation> getHerbaceeByPlan(String planId) {
         //herbaceeRepo.getByParcelleId(planId);
         return null;
     }
@@ -229,18 +231,15 @@ public final class VegetationSession {
      * Le cout d'exploitation d'une liste de parcelles pour une année est donné
      * par la somme des couts des traitements de la parcelle dont la date
      * correspond à l'année indiquée.
-     * @param year
-     * @param parcelles
-     * @return
      */
-    public static double exploitationCost(final int year, final List<ParcelleVegetation> parcelles){
+    public static double exploitationCost(final int year, final List<ParcelleVegetation> parcelles) {
 
         double cost = 0.;
 
-        for(final ParcelleVegetation parcelle : parcelles){
-            for(final TraitementParcelleVegetation traitement : parcelle.getTraitements()){
-                if(traitement.getDate()!=null && traitement.getDate().getYear()==year){
-                    cost+=traitement.getCout();
+        for (final ParcelleVegetation parcelle : parcelles) {
+            for (final TraitementParcelleVegetation traitement : parcelle.getTraitements()) {
+                if (traitement.getDate() != null && traitement.getDate().getYear() == year) {
+                    cost += traitement.getCout();
                 }
             }
         }
@@ -249,26 +248,26 @@ public final class VegetationSession {
 
     /**
      * Calcul du coût planifié d'un plan pour une année.
-     *
+     * <p>
      * Pour une année de planification, le coût est calculé en faisant la somme
      * de tous les coûts de traitements sur toutes les zones de la parcelle, dès
      * que cette dernière est planifiée "traitée" pour cette année.
-     *
+     * <p>
      * Calcul du coût d'une zone :
      * ==========================
      * Le coût surfacique de traitement, entré dans les paramètres du plan, est
-     * multiplié par la survace de la zone (s'il s'agit d'une surface), ou bien
+     * multiplié par la surface de la zone (s'il s'agit d'une surface), ou bien
      * ajouté tel quel s'il s'agit d'un arbre.
-     *
+     * <p>
      * Pour une zone de végétation, le traitement n'est pris en compte que s'il
      * n'a pas été spécifié comme "hors-gestion".
-     *
+     * <p>
      * Prise en compte des traitements ponctuels et non-ponctuels :
      * ============================================================
      * Enfin, une zone de végétation est associée à deux traitements :
      * un ponctuel et un non ponctuel.
-     *
-     * Les traitements ponctuels sont pris en compte pour toutes les années
+     * <p>
+     * Les traitements non ponctuels sont pris en compte pour toutes les années
      * planifiées alors que le traitement ponctuel n'est pris en compte que la
      * première année du plan, pourvu que la parcelle soit planifiée cette
      * année-là.
@@ -278,7 +277,7 @@ public final class VegetationSession {
      * @param parcelles
      * @return
      */
-    public static double estimatedPlanificationCost(final PlanVegetation plan, final int yearIndex, final List<ParcelleVegetation> parcelles){
+    public static double estimatedPlanificationCost(final PlanVegetation plan, final int yearIndex, final List<ParcelleVegetation> parcelles) {
         /*
         En mode planification le coût suppose que l'on fasse la somme de
         tous les côuts de traitements des zones de la parcelle, dès que
@@ -287,19 +286,22 @@ public final class VegetationSession {
         Les coûts planifiés se trouvent dans le plan.
         */
         double cout = 0.0;
-        final ObservableList<ParamCoutTraitementVegetation> params = plan.getParamCout();
+        final ObservableList<ParamCoutTraitementVegetation> costParams = plan.getParamCout();
+        final ObservableList<ParamFrequenceTraitementVegetation> freqParams = plan.getParamFrequence();
 
         // Map d'indexation des paramètres qui ont un traitement et un sous-traitement.
-        final Map<Entry<String, String>, ParamCoutTraitementVegetation> indexedParams1 = new HashMap<>();
+        final Map<Entry<String, String>, ParamCoutTraitementVegetation> paramsWithSubTreatment = new HashMap<>();
 
         // Map d'indexation des paramètres qui ont un traitement mais pas de sous-traitement.
-        final Map<String, ParamCoutTraitementVegetation> indexedParams2 = new HashMap<>();
+        final Map<String, ParamCoutTraitementVegetation> paramsWithoutSubTreatment = new HashMap<>();
 
         // Indexation des paramètres.
-        for(final ParamCoutTraitementVegetation param : params){
-            if(param.getTypeTraitementId()!=null){
-                if(param.getSousTypeTraitementId()!=null){
-                    indexedParams1.put(new HashMap.SimpleEntry<>(param.getTypeTraitementId(), param.getSousTypeTraitementId()), param);
+        for (final ParamCoutTraitementVegetation param : costParams) {
+            if (param.getTypeTraitementId() != null) {
+                if (param.getSousTypeTraitementId() != null) {
+                    paramsWithSubTreatment.put(new HashMap.SimpleEntry<>(param.getTypeTraitementId(), param.getSousTypeTraitementId()), param);
+                } else {
+                    paramsWithoutSubTreatment.put(param.getTypeTraitementId(), param);
                 }
                 else{
                     indexedParams2.put(param.getTypeTraitementId(), param);
@@ -312,7 +314,7 @@ public final class VegetationSession {
         */
 
         //On parcourt toutes les parcelles du tableau
-        for (final ParcelleVegetation parcelle : parcelles){
+        for (final ParcelleVegetation parcelle : parcelles) {
 
             // La parcelle est-elle planifiée cette année ?
             final PlanifState planifState = getParcellePlanifState(parcelle, yearIndex);
@@ -320,13 +322,13 @@ public final class VegetationSession {
             // On parcourt toutes les zones de végétation de la parcelle
             final ObservableList<? extends ZoneVegetation> allZoneVegetationByParcelleId = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), Injector.getSession());
 
-            for(final ZoneVegetation zone : allZoneVegetationByParcelleId){
+            for (final ZoneVegetation zone : allZoneVegetationByParcelleId) {
 
                 /*
                 Les invasives entrent dans le calcul tous les ans, et les autres
                 zones uniquement les années planifiées.
                 */
-                if(!(zone instanceof InvasiveVegetation) && planifState==NON_PLANIFIE) continue;
+                if (!(zone instanceof InvasiveVegetation) && planifState == NON_PLANIFIE) continue;
 
                 // On vérifie que la zone a bien un traitement planifié et que celui-ci entre dans le plan de gestion
                 if(zone.getTraitement()!=null && !zone.getTraitement().getHorsGestion()){
@@ -334,22 +336,30 @@ public final class VegetationSession {
                     // On récupère le traitement ponctuel et non ponctuel de la zone
                     final TraitementZoneVegetation traitement = zone.getTraitement();
 
+                    List<ParamFrequenceTraitementVegetation> traitementAuto;
+
+                    if (traitement.getTypeTraitementId() == null || traitement.getTypeTraitementPonctuelId() == null) {
+                        //todo split between ponctual / not ponctual
+                        traitementAuto = autoTraitementId(freqParams, zone);
+                    } else {
+                        traitementAuto = Collections.EMPTY_LIST;
+                    }
+
                     /*
                     On commence par s'occuper du traitement ponctuel
                     !!! (UNIQUEMENT SI ON EST LA PREMIÈRE ANNÉE DE TRAITEMENT DE LA PARCELLE DANS LE PLAN) !!!
                     */
-                    if(planifState==PLANIFIE_PREMIERE_FOIS){
+                    if (planifState == PLANIFIE_PREMIERE_FOIS) {
                         final String traitementPonctuelId = traitement.getTypeTraitementPonctuelId();
                         final String sousTraitementPonctuelId = traitement.getSousTypeTraitementPonctuelId();
 
                         // On récupère et on ajoute le cout sur la zone de la combinaison traitement/sous-traitement
-                        if(traitementPonctuelId!=null){
+                        if (traitementPonctuelId != null) {
                             final ParamCoutTraitementVegetation p;
-                            if(sousTraitementPonctuelId!=null){
-                                p=indexedParams1.get(new HashMap.SimpleEntry<>(traitementPonctuelId, sousTraitementPonctuelId));
-                            }
-                            else{
-                                p=indexedParams2.get(traitementPonctuelId);
+                            if (sousTraitementPonctuelId != null) {
+                                p = paramsWithSubTreatment.get(new HashMap.SimpleEntry<>(traitementPonctuelId, sousTraitementPonctuelId));
+                            } else {
+                                p = paramsWithoutSubTreatment.get(traitementPonctuelId);
                             }
 
                             if(p!=null) cout+=computePlanifiedCost(zone, p);
@@ -364,22 +374,47 @@ public final class VegetationSession {
                     final String sousTraitementId = traitement.getSousTypeTraitementId();
 
                     // On récupère et on ajoute le cout sur la zone de la combinaison traitement/sous-traitement
-                    if(traitementId!=null){
+                    if (traitementId != null) {
                         final ParamCoutTraitementVegetation p;
-                        if(sousTraitementId!=null){
-                            p=indexedParams1.get(new HashMap.SimpleEntry<>(traitementId, sousTraitementId));
-                        }
-                        else{
-                            p=indexedParams2.get(traitementId);
+                        if (sousTraitementId != null) {
+                            p = paramsWithSubTreatment.get(new HashMap.SimpleEntry<>(traitementId, sousTraitementId));
+                        } else {
+                            p = paramsWithoutSubTreatment.get(traitementId);
                         }
 
-                        if(p!=null) cout+=computePlanifiedCost(zone, p);
+                        if (p != null) cout += computePlanifiedCost(zone, p);
+                    } else {
+                        //Try using  auto traitement
+                        for (ParamFrequenceTraitementVegetation freqParam : traitementAuto) {
+                            final String sousTypeTraitementId = freqParam.getSousTypeTraitementId();
+                            final ParamCoutTraitementVegetation p;
+                            if (sousTypeTraitementId == null) {
+                                p = paramsWithoutSubTreatment.get(freqParam.getTypeTraitementId());
+                            } else {
+                                p = paramsWithSubTreatment.get(new HashMap.SimpleEntry<>(freqParam.getTypeTraitementId(), sousTypeTraitementId));
+                            }
+                            if (p != null) cout += computePlanifiedCost(zone, p);
+                        }
                     }
                 }
             }
         }
 
         return cout;
+    }
+
+    /**
+     * @return ParamFrequenceTraitementVegetation matching the input {@link ZoneVegetation}
+     *todo (return a Map?)
+     */
+    private static List<ParamFrequenceTraitementVegetation> autoTraitementId(final List<ParamFrequenceTraitementVegetation> frequenceParams, final ZoneVegetation zone) {
+        final String refType = zone.getVegetationType(); //
+        final Class claz = zone.getClass();
+        return frequenceParams.stream()
+                .filter(freqParam -> {
+                    final Class paramType = freqParam.getType();
+                    return ((paramType !=null) && paramType.isAssignableFrom(claz) && Objects.equals(refType, freqParam.getTypeVegetationId()));
+                }).collect(Collectors.toList()); //TODO check if other?
     }
 
     /**

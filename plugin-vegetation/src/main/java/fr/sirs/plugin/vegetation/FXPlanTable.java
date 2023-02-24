@@ -88,7 +88,7 @@ import org.elasticsearch.common.base.Objects;
  */
 public class FXPlanTable extends BorderPane{
 
-    public enum Mode{PLANIFICATION, EXPLOITATION};
+    public enum Mode{PLANIFICATION, EXPLOITATION}
 
     private static final String AUTO_STYLE = "-fx-border-color: lightgray; -fx-border-insets: 0; -fx-border-width: 0 0 0 3; -fx-label-padding: 0;";
     public static final String CHECKBOX_NO_LABEL_PADDING = "-fx-label-padding: 0;";
@@ -481,7 +481,6 @@ public class FXPlanTable extends BorderPane{
 
         /**
          * return the value of the planification if exists. If there is no planification at the cell index, then returns false.
-         * @return
          */
         private boolean getVal(){
             if(index<parcelle.getPlanifications().size()){
@@ -580,6 +579,9 @@ public class FXPlanTable extends BorderPane{
             update();
         }
 
+        /**
+         * update cell cost
+         */
         private void update(){
 
             final double cout;

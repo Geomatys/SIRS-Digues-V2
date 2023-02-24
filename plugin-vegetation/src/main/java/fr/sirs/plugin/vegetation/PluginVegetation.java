@@ -59,7 +59,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -67,12 +67,12 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import org.apache.sis.measure.Units;
+import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.QueryBuilder;
@@ -848,18 +848,17 @@ public class PluginVegetation extends Plugin {
     /**
      * Parametrization of the traitement of a vegetation zone.
      *
-     * @param <T>
-     * @param zoneType
-     * @param peuplement
-     * @param typeVegetationId
+     * @param typeVegetationId id of the vegetation type or null if Class doesn't contain type attribute
      */
-    public static <T extends ZoneVegetation> void paramTraitement(final Class<T> zoneType, final T peuplement, final String typeVegetationId){
+    public static <T extends ZoneVegetation> void paramTraitement(final Class<T> zoneType, final T zone, String typeVegetationId){
+        ArgumentChecks.ensureNonNull("Zone class", zoneType);
+        ArgumentChecks.ensureNonNull("Zone", zone);
         final Session session = Injector.getSession();
 
         // 1- Récupération de la parcelle :
         final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
         if(parcelleRepo!=null){
-            final ParcelleVegetation parcelle = parcelleRepo.get(peuplement.getParcelleId());
+            final ParcelleVegetation parcelle = parcelleRepo.get(zone.getParcelleId());
             if(parcelle!=null && parcelle.getPlanId()!=null){
 
                 // 2- Récupération du plan
@@ -875,16 +874,16 @@ public class PluginVegetation extends Plugin {
                         boolean ponctuelSet=false, nonPonctuelSet=false;
                         for (final ParamFrequenceTraitementVegetation param : params) {
                             // On ne s'intéresse qu'aux paramètres relatifs au type de zone concerné.
-                            if (param.getFrequenceId() != null && param.getType().equals(zoneType) && typeVegetationId.equals(param.getTypeVegetationId())) {
+                            if (param.getFrequenceId() != null && param.getType().equals(zoneType) && Objects.equals(typeVegetationId , param.getTypeVegetationId())) {
                                 final RefFrequenceTraitementVegetation frequence = frequenceRepo.get(param.getFrequenceId());
                                 if (!ponctuelSet && frequence.getFrequence() <= 0) {
-                                    peuplement.getTraitement().setTypeTraitementPonctuelId(param.getTypeTraitementId());
-                                    peuplement.getTraitement().setSousTypeTraitementPonctuelId(param.getSousTypeTraitementId());
+                                    zone.getTraitement().setTypeTraitementPonctuelId(param.getTypeTraitementId());
+                                    zone.getTraitement().setSousTypeTraitementPonctuelId(param.getSousTypeTraitementId());
                                     ponctuelSet = true;
                                 } else if (!nonPonctuelSet) {
-                                    peuplement.getTraitement().setTypeTraitementId(param.getTypeTraitementId());
-                                    peuplement.getTraitement().setSousTypeTraitementId(param.getSousTypeTraitementId());
-                                    peuplement.getTraitement().setFrequenceId(param.getFrequenceId());
+                                    zone.getTraitement().setTypeTraitementId(param.getTypeTraitementId());
+                                    zone.getTraitement().setSousTypeTraitementId(param.getSousTypeTraitementId());
+                                    zone.getTraitement().setFrequenceId(param.getFrequenceId());
                                     nonPonctuelSet = true;
                                 }
                             }
