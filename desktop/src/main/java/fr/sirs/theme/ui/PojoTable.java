@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -36,6 +36,8 @@ import static fr.sirs.SIRS.VALID_FIELD;
 import static fr.sirs.SIRS.ID_FIELD;
 import static fr.sirs.SIRS.REVISION_FIELD;
 import static fr.sirs.SIRS.NEW_FIELD;
+import static fr.sirs.core.SirsCore.LOGGER;
+
 import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.Repository;
@@ -161,6 +163,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import org.apache.sis.feature.AbstractIdentifiedType;
 import org.apache.sis.feature.DefaultAssociationRole;
 import org.apache.sis.feature.DefaultAttributeType;
@@ -202,9 +205,9 @@ public class PojoTable extends BorderPane implements Printable {
     private static final Image ICON_SHOWONMAP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR), null);
 
     public static final String[] COLUMNS_TO_IGNORE = new String[]{
-        AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD,
-        LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD, DATE_MAJ_FIELD,
-        COMMENTAIRE_FIELD, GEOMETRY_MODE_FIELD, REVISION_FIELD, ID_FIELD, NEW_FIELD
+            AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD,
+            LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD, DATE_MAJ_FIELD,
+            COMMENTAIRE_FIELD, GEOMETRY_MODE_FIELD, REVISION_FIELD, ID_FIELD, NEW_FIELD
     };
 
     /**
@@ -397,10 +400,6 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     /**
-     * @param pojoClass
-     * @param title
-     * @param container
-     * @param repo
      * @param applyPreferences : boolean value use to indicate to not apply
      * preferences in the constructor. It is used in {@link ParamPojoTable}
      * which add columns to uiTable after super constructor's call.
@@ -481,9 +480,7 @@ public class PojoTable extends BorderPane implements Printable {
         cellEditableProperty.bind(editableProperty);
 
         detaillableProperty.addListener(
-                (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                    editCol.setVisible(newValue);
-                });
+                (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> editCol.setVisible(newValue));
 
         uiTable.getColumns().add(deleteColumn);
         uiTable.getColumns().add((TableColumn) editCol);
@@ -701,7 +698,7 @@ public class PojoTable extends BorderPane implements Printable {
                 final Optional<ButtonType> res = alert.showAndWait();
                 if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                     deletePojos(elements);
-                    if (uiFicheMode.isSelected())  {
+                    if (uiFicheMode.isSelected()) {
                         updateFiche();
                     }
                 }
@@ -890,7 +887,7 @@ public class PojoTable extends BorderPane implements Printable {
         //Application des préférence utilisateur (position, visibilité et largeur
         // de colonne. Le booléan applyPreferences permet de ne pas appliqué ces
         // préférence depuis ce contructeur.
-        if (applyPreferences){
+        if (applyPreferences) {
             applyPreferences();
             listenPreferences();
         }
@@ -904,6 +901,7 @@ public class PojoTable extends BorderPane implements Printable {
     //==========================================================================
 
     //==========================================================================
+
     /**
      * Méthode permettant de lancer une sauvegarde de préférences utilisateur
      * lorsqu'un changement de la tableView {@code  uiTable} a été détécté.
@@ -962,7 +960,7 @@ public class PojoTable extends BorderPane implements Printable {
      * TODO : should call 3 methods : one by listener.
      *
      */
-    final protected void listenPreferences(){
+    final protected void listenPreferences() {
         //Ajout Listener pour identifier et sauvegarder les modifications de colonnes par l'utilisateur :
         //Identification des changements d'épaisseur.
         uiTable.getColumns().forEach(col -> col.widthProperty().addListener((ov, t, t1) -> {
@@ -1481,9 +1479,7 @@ public class PojoTable extends BorderPane implements Printable {
                 }
             }
             if (allValues.isEmpty()) {
-                Platform.runLater(() -> {
-                    uiSearch.setGraphic(searchNone);
-                });
+                Platform.runLater(() -> uiSearch.setGraphic(searchNone));
             }
 
             // Apply filter on properties
@@ -1495,12 +1491,14 @@ public class PojoTable extends BorderPane implements Printable {
             }
 
             // Apply "Plain text" filter
-            final String str = currentSearch.get();
-            if ((str == null || str.isEmpty()) && firstFilter == null) {
+            final String searched = currentSearch.get();
+            if ((searched == null || searched.isEmpty()) && firstFilter == null) {
                 filteredValues = allValues.filtered((Element t) -> true);
             } else {
                 final Set<String> result = new HashSet<>();
-                SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.simpleQueryStringQuery("*" + str + "*").analyzeWildcard(true).lenient(true));
+                // Remove wildcard analyze as it returned too much result without obvious link with the searched text.
+                // Handle case in getSearchTextInCellsPredicate method
+                SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.simpleQueryStringQuery("*" + searched + "*").analyzeWildcard(false).lenient(true));
                 Iterator<SearchHit> iterator = search.getHits().iterator();
                 while (iterator.hasNext() && !currentThread.isInterrupted()) {
                     result.add(iterator.next().getId());
@@ -1512,8 +1510,10 @@ public class PojoTable extends BorderPane implements Printable {
 
                 final Predicate<Element> filterPredicate;
                 if (firstFilter == null) {
-                    filterPredicate = element -> element == null || result.contains(element.getId());
-                } else if (str == null || str.isEmpty()) {
+                    final SirsStringConverter converter = new SirsStringConverter();
+                    filterPredicate = element -> element == null || result.contains(element.getId())
+                            || getSearchTextInCellsPredicate(searched, converter).test(element);
+                } else if (searched == null || searched.isEmpty()) {
                     filterPredicate = element -> element == null || firstFilter.evaluate(element);
                 } else {
                     filterPredicate = element -> element == null || result.contains(element.getId()) && firstFilter.evaluate(element);
@@ -1552,9 +1552,7 @@ public class PojoTable extends BorderPane implements Printable {
                 if (ex != null) {
                     SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 }
-                Platform.runLater(() -> {
-                    uiSearch.setGraphic(searchNone);
-                });
+                Platform.runLater(() -> uiSearch.setGraphic(searchNone));
             } else if (Worker.State.RUNNING.equals(newValue)) {
                 Platform.runLater(() -> uiSearch.setGraphic(searchRunning));
             }
@@ -1562,6 +1560,45 @@ public class PojoTable extends BorderPane implements Printable {
 
         tableUpdaterProperty.set(TaskManager.INSTANCE.submit("Recherche...", updater));
     }
+
+    /**
+     * @param searched : searched text
+     * @param converter : converter to convert {@link PropertyColumn#getCellData(Object)} )} in String;
+     * @return a {@link Predicate<Element>} testing if the cells of {@link #getUiTable()} associated with the tested element
+     *        refer to the searched text.
+     */
+    private Predicate<Element> getSearchTextInCellsPredicate(final String searched, final StringConverter converter) {
+        return element -> uiTable.getColumns().stream()//Search in tableview's cells
+                .filter(col -> col instanceof PropertyColumn)
+                .map(col -> {
+                    final Object cellData = col.getCellData(element);
+                    if (cellData != null) {
+                        if (((PropertyColumn) col).getReference() == null) {
+                            final String res = converter.toString(cellData);
+                            return ((res == null) || res.isEmpty()) ? cellData.toString() : res; //try to handle not Sirs Object like LocalDate  todo include it in SirsStringConverter?
+                        } else if (cellData instanceof String) {
+                            return toDisplayedText((String) cellData);
+                        }
+                    }
+                    return null;
+                })
+                .filter(s -> s != null && !s.isEmpty())
+                .anyMatch(str -> str.toLowerCase().contains(searched.toLowerCase()));
+    }
+
+    private String toDisplayedText(final String value) {
+        if (value == null || value.isEmpty()) return "";
+        try {
+            final Preview tmpPreview = Injector.getSession().getPreviews().get(value);
+            if (tmpPreview != null) {
+                return new SirsStringConverter().toString(tmpPreview);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.INFO, "Failed to convert input value to cell text; return input value;", e);
+        }
+        return value;
+    }
+
 
     /**
      * Delete the elements given in parameter. They are suppressed from the
@@ -1598,10 +1635,7 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     /**
-     * Try to find and display a form to edit input object.
-     *
-     * @param pojo The object we want to edit.
-     * @return
+     * Same as {@link PojoTable#editPojo(Object, Predicate)} with {@link SIRS#CONSULTATION_PREDICATE}.
      */
     protected Object editPojo(Object pojo) {
         return editPojo(pojo, SIRS.CONSULTATION_PREDICATE);
@@ -1609,9 +1643,9 @@ public class PojoTable extends BorderPane implements Printable {
 
     /**
      *
-     * @param pojo
-     * @param editionPredicate
-     * @return
+     * Try to find and display a form to edit input object.
+     *
+     * @param pojo The object we want to edit.
      */
     protected Object editPojo(Object pojo, Predicate<Element> editionPredicate) {
         final int index;
