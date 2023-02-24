@@ -98,7 +98,6 @@ public class SirsPreferences extends Properties {
         }
     }
 
-    private ShowCasePossibility showCase;
     private final SimpleObjectProperty<ShowCasePossibility> showCaseProp;
 
     /**
@@ -119,12 +118,11 @@ public class SirsPreferences extends Properties {
         return showCaseProp;
     }
 
-    public ShowCasePossibility getShowCase(){
-        return showCase;
+    public ShowCasePossibility getShowCase() {
+        return showCaseProp.get();
     }
 
-    public void setShowCase(final ShowCasePossibility newShowCase){
-        showCase = newShowCase;
+    public void setShowCase(final ShowCasePossibility showCase) {
         showCaseProp.setValue(showCase);
     }
 
