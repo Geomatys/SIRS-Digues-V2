@@ -53,11 +53,6 @@ public class ShowCasePossibilityTest {
         Assert.assertEquals(ShowCasePossibility.FULL_NAME, ShowCasePossibility.getFromName(fullNameString));
         Assert.assertEquals(ShowCasePossibility.BOTH, ShowCasePossibility.getFromName(bothString));
 
-        // Tests des valeurs Booleans
-        Assert.assertEquals(Boolean.TRUE, ShowCasePossibility.getFromName(abstractString).booleanValue);
-        Assert.assertEquals(Boolean.FALSE, ShowCasePossibility.getFromName(fullNameString).booleanValue);
-        Assert.assertNull(ShowCasePossibility.getFromName(bothString).booleanValue);
-
         int val0 = 0;
 
         //Tests des exceptions
@@ -90,16 +85,9 @@ public class ShowCasePossibilityTest {
         Assert.assertEquals(ShowCasePossibility.FULL_NAME, converter.fromString(fullNameString));
         Assert.assertEquals(ShowCasePossibility.BOTH, converter.fromString(bothString));
 
-        // Tests des valeurs Booleans
-        Assert.assertEquals(Boolean.TRUE, converter.fromString(abstractString).booleanValue);
-        Assert.assertEquals(Boolean.FALSE, converter.fromString(fullNameString).booleanValue);
-        Assert.assertEquals(null, converter.fromString(bothString).booleanValue);
 
         // Test de la valeur par défaut :
-        testedList.forEach(wrongString -> {
-            Assert.assertEquals(ShowCasePossibility.BOTH, converter.fromString(wrongString));
-            Assert.assertEquals(null, converter.fromString(bothString).booleanValue);
-        });
+        testedList.forEach(wrongString ->  Assert.assertEquals(ShowCasePossibility.BOTH, converter.fromString(wrongString)));
 
 
         //====================

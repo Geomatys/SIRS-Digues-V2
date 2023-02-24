@@ -53,7 +53,7 @@ public class ConvertPositionableCoordinates {
 
             //Si aucun type de coordonnées n'est présent on renvoie une exception
             if ((!withLinearCoord) && (!withGeoCoord)) {
-                SirsCore.LOGGER.log(Level.WARNING, "Missing coordinates computation failed : the positionable input must provide at least one kind of coordinates 'Linear or geo' but both of them are empty.");
+                SirsCore.LOGGER.log(Level.FINE, "Missing coordinates computation failed : the positionable input must provide at least one kind of coordinates 'Linear or geo' but both of them are empty.");
                 return false;
             }
 
