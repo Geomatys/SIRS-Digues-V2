@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -205,9 +205,9 @@ public class PojoTable extends BorderPane implements Printable {
     private static final Image ICON_SHOWONMAP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR), null);
 
     public static final String[] COLUMNS_TO_IGNORE = new String[]{
-        AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD,
-        LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD, DATE_MAJ_FIELD,
-        COMMENTAIRE_FIELD, GEOMETRY_MODE_FIELD, REVISION_FIELD, ID_FIELD, NEW_FIELD
+            AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD,
+            LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD, DATE_MAJ_FIELD,
+            COMMENTAIRE_FIELD, GEOMETRY_MODE_FIELD, REVISION_FIELD, ID_FIELD, NEW_FIELD
     };
 
     /**
@@ -698,7 +698,7 @@ public class PojoTable extends BorderPane implements Printable {
                 final Optional<ButtonType> res = alert.showAndWait();
                 if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                     deletePojos(elements);
-                    if (uiFicheMode.isSelected())  {
+                    if (uiFicheMode.isSelected()) {
                         updateFiche();
                     }
                 }
@@ -887,7 +887,7 @@ public class PojoTable extends BorderPane implements Printable {
         //Application des préférence utilisateur (position, visibilité et largeur
         // de colonne. Le booléan applyPreferences permet de ne pas appliqué ces
         // préférence depuis ce contructeur.
-        if (applyPreferences){
+        if (applyPreferences) {
             applyPreferences();
             listenPreferences();
         }
@@ -901,6 +901,7 @@ public class PojoTable extends BorderPane implements Printable {
     //==========================================================================
 
     //==========================================================================
+
     /**
      * Méthode permettant de lancer une sauvegarde de préférences utilisateur
      * lorsqu'un changement de la tableView {@code  uiTable} a été détécté.
@@ -959,7 +960,7 @@ public class PojoTable extends BorderPane implements Printable {
      * TODO : should call 3 methods : one by listener.
      *
      */
-    final protected void listenPreferences(){
+    final protected void listenPreferences() {
         //Ajout Listener pour identifier et sauvegarder les modifications de colonnes par l'utilisateur :
         //Identification des changements d'épaisseur.
         uiTable.getColumns().forEach(col -> col.widthProperty().addListener((ov, t, t1) -> {
@@ -1571,11 +1572,13 @@ public class PojoTable extends BorderPane implements Printable {
                 .filter(col -> col instanceof PropertyColumn)
                 .map(col -> {
                     final Object cellData = col.getCellData(element);
-                    if (cellData == null) {
-                    } else if (((PropertyColumn) col).getReference() == null) {
-                        return converter.toString(cellData);
-                    } else if (cellData instanceof String) {
-                        return toDisplayedText((String) cellData);
+                    if (cellData != null) {
+                        if (((PropertyColumn) col).getReference() == null) {
+                            final String res = converter.toString(cellData);
+                            return ((res == null) || res.isEmpty()) ? cellData.toString() : res; //try to handle not Sirs Object like LocalDate  todo include it in SirsStringConverter?
+                        } else if (cellData instanceof String) {
+                            return toDisplayedText((String) cellData);
+                        }
                     }
                     return null;
                 })
@@ -1584,7 +1587,7 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     private String toDisplayedText(final String value) {
-        if(value == null || value.isEmpty()) return "";
+        if (value == null || value.isEmpty()) return "";
         try {
             final Preview tmpPreview = Injector.getSession().getPreviews().get(value);
             if (tmpPreview != null) {
