@@ -212,12 +212,13 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
             } else if ((oldEditedGeoCoordinate!=null) && (oldEditedGeoCoordinate.equals(newEditedGeoCoordinate))) {
                 return;
             }
-
+        if (uiLinearCoordLabel != null) { //Occurred for vegetation
             if (newEditedGeoCoordinate) {
                 uiLinearCoordLabel.setText("Coordonnées calculées");
             } else {
                 uiLinearCoordLabel.setText("Coordonnées saisies");
             }
+        }
     }
 
     @Override
