@@ -139,16 +139,12 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
             }
         });
 
-        positionableProperty().addListener(new ChangeListener<Positionable>() {
-
-            @Override
-            public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
-                if(newValue instanceof ZoneVegetation){
-                    ((ZoneVegetation) newValue).typeCoteIdProperty().addListener(typeCoteChangeListener);
-                }
-                if(oldValue instanceof ZoneVegetation){
-                    ((ZoneVegetation) newValue).typeCoteIdProperty().removeListener(typeCoteChangeListener);
-                }
+        positionableProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue instanceof ZoneVegetation){
+                ((ZoneVegetation) newValue).typeCoteIdProperty().addListener(typeCoteChangeListener);
+            }
+            if(oldValue instanceof ZoneVegetation){
+                ((ZoneVegetation) newValue).typeCoteIdProperty().removeListener(typeCoteChangeListener);
             }
         });
     }
@@ -184,7 +180,7 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         */
         final Map<String, BorneDigue> borneMap = initSRBorneLists(t, defaultSR, false);
 
-        if(MODE.equals(mode)){
+        if (MODE.equals(mode)) {
             //on assigne les valeurs sans changement
             uiAmontStart.setSelected(pos.getBorne_debut_aval());
             uiAvalStart.setSelected(!pos.getBorne_debut_aval());
@@ -201,7 +197,7 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
             uiBorneStart.valueProperty().set(borneMap.get(pos.borneDebutIdProperty().get()));
             uiBorneEnd.valueProperty().set(borneMap.get(pos.borneFinIdProperty().get()));
 
-        }else if(pos.getGeometry()!=null){
+        } else if (pos.getGeometry() != null) {
             //on calcule les valeurs en fonction des points de debut et fin
             final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
             final TronconUtils.PosSR rp = ps.getForSR(defaultSR);
@@ -220,7 +216,7 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
             uiStartFar.getValueFactory().setValue(pos.getDistanceDebutMax());
             uiEndNear.getValueFactory().setValue(pos.getDistanceFinMin());
             uiEndFar.getValueFactory().setValue(pos.getDistanceFinMax());
-        }else{
+        } else {
             uiAvalStart.setSelected(true);
             uiAmontStart.setSelected(false);
             uiDistanceStart.getValueFactory().setValue(0.0);
@@ -246,13 +242,11 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
 
     @Override
     public void buildGeometry(){
-
-
         //sauvegarde des propriétés
         final ZoneVegetation positionable = (ZoneVegetation) positionableProperty().get();
 
         // On ne met la géométrie à jour depuis ce panneau que si on est dans son mode.
-        if(!MODE.equals(positionable.getGeometryMode())) return;
+        if (!MODE.equals(positionable.getGeometryMode())) return;
 
         final SystemeReperage sr = uiSRs.getValue();
         final BorneDigue startBorne = uiBorneStart.getValue();
@@ -279,7 +273,7 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         Geometry geometry;
         final LineString linear;
 
-        if(GeometryType.PONCTUAL.equals(positionable.getGeometryType())){
+        if (GeometryType.PONCTUAL.equals(positionable.getGeometryType())) {
             /*
             Pour un point, il faut récupérer à partir de la géométrie du tronçon
             le segment sur lequel se trouve le point, car pour mesurer la
@@ -292,42 +286,41 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
                     positionable.getBorne_debut_distance(),
                     Injector.getSession().getRepositoryForClass(BorneDigue.class));
             linear = pointAndSegment.getKey();
-            if(ratio==0.) ratio=1.;// On ne met pas un arbre des deux côtés.
+            if (ratio == 0.) ratio = 1.;// On ne met pas un arbre des deux côtés.
             geometry = toPoint(linear,
-                positionable.getDistanceDebutMin() * ratio,
-                pointAndSegment.getValue());
-        }
-        else {
+                    positionable.getDistanceDebutMin() * ratio,
+                    pointAndSegment.getValue());
+        } else {
             /*
             Si on n'a pas à faire à un ponctuel, on peut utiliser la géométrie
             de la structure plutôt que celle du tronçon.
             */
             linear = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), positionable, Injector.getSession().getRepositoryForClass(BorneDigue.class));
-            if(ratio==0){
+            if (ratio == 0) {
                 //des 2 cotés
                 ratio = 1;
                 final Polygon left = toPolygon(linear,
-                    positionable.getDistanceDebutMin() * ratio,
-                    positionable.getDistanceDebutMax() * ratio,
-                    positionable.getDistanceFinMin() * ratio,
-                    positionable.getDistanceFinMax() * ratio);
+                        positionable.getDistanceDebutMin() * ratio,
+                        positionable.getDistanceDebutMax() * ratio,
+                        positionable.getDistanceFinMin() * ratio,
+                        positionable.getDistanceFinMax() * ratio);
                 ratio = -1;
                 final Polygon right = toPolygon(linear,
-                    positionable.getDistanceDebutMin() * ratio,
-                    positionable.getDistanceDebutMax() * ratio,
-                    positionable.getDistanceFinMin() * ratio,
-                    positionable.getDistanceFinMax() * ratio);
-                geometry = GO2Utilities.JTS_FACTORY.createMultiPolygon(new Polygon[]{left,right});
+                        positionable.getDistanceDebutMin() * ratio,
+                        positionable.getDistanceDebutMax() * ratio,
+                        positionable.getDistanceFinMin() * ratio,
+                        positionable.getDistanceFinMax() * ratio);
+                geometry = GO2Utilities.JTS_FACTORY.createMultiPolygon(new Polygon[]{left, right});
                 geometry.setSRID(linear.getSRID());
                 geometry.setUserData(linear.getUserData());
 
-            }else{
+            } else {
                 //1 coté
                 geometry = toPolygon(linear,
-                    positionable.getDistanceDebutMin() * ratio,
-                    positionable.getDistanceDebutMax() * ratio,
-                    positionable.getDistanceFinMin() * ratio,
-                    positionable.getDistanceFinMax() * ratio);
+                        positionable.getDistanceDebutMin() * ratio,
+                        positionable.getDistanceDebutMax() * ratio,
+                        positionable.getDistanceFinMin() * ratio,
+                        positionable.getDistanceFinMax() * ratio);
             }
         }
 

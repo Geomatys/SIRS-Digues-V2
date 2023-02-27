@@ -91,16 +91,16 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
     @FXML
     protected Spinner<Double> uiDistanceEnd;
 
-    //Indicatif de la coordonnée saisie/calculée.    
+    //Indicatif de la coordonnée saisie/calculée.
     @FXML
     protected Label uiLinearCoordLabel;
-    
+
     private boolean reseting = false;
 
     public void setReseting(boolean reseting) {
         this.reseting = reseting;
     }
-    
+
     public FXPositionableAbstractLinearMode() {
         SIRS.loadFXML(this, Positionable.class);
 
@@ -151,37 +151,31 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         valueFactory.setConverter(conv);
         uiDistanceEnd.setValueFactory(valueFactory);
 
-        final ChangeListener<Geometry> geomListener = new ChangeListener<Geometry>() {
-            @Override
-            public void changed(ObservableValue<? extends Geometry> observable, Geometry oldValue, Geometry newValue) {
-                if (reseting) {
-                    return;
-                }
-                if (newValue == null) {
-                    throw new IllegalArgumentException("New geometry is null");
-                }
-                updateFields();
+        final ChangeListener<Geometry> geomListener = (observable, oldValue, newValue) -> {
+            if (reseting) {
+                return;
             }
+            if (newValue == null) {
+                throw new IllegalArgumentException("New geometry is null");
+            }
+            updateFields();
         };
 
         //Listener permettant d'indiquer si les coordonnées sont calculées ou éditées
         final ChangeListener<Boolean> updateEditedGeoCoordinatesDisplay = (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             setCoordinatesLabel(oldValue, newValue);
         };
-        
-        posProperty.addListener(new ChangeListener<Positionable>() {
-            @Override
-            public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
-                if (oldValue != null) {
-                    oldValue.geometryProperty().removeListener(geomListener);
-                    oldValue.editedGeoCoordinateProperty().removeListener(updateEditedGeoCoordinatesDisplay);
-                }
-                if (newValue != null) {
-                    newValue.geometryProperty().addListener(geomListener);
-                    newValue.editedGeoCoordinateProperty().addListener(updateEditedGeoCoordinatesDisplay);
-                    setCoordinatesLabel(null, posProperty.get().getEditedGeoCoordinate());
-                    updateFields();
-                }
+
+        posProperty.addListener((observable, oldValue, newValue) -> {
+            if (oldValue != null) {
+                oldValue.geometryProperty().removeListener(geomListener);
+                oldValue.editedGeoCoordinateProperty().removeListener(updateEditedGeoCoordinatesDisplay);
+            }
+            if (newValue != null) {
+                newValue.geometryProperty().addListener(geomListener);
+                newValue.editedGeoCoordinateProperty().addListener(updateEditedGeoCoordinatesDisplay);
+                setCoordinatesLabel(null, posProperty.get().getEditedGeoCoordinate());
+                updateFields();
             }
         });
 
@@ -196,13 +190,13 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         uiDistanceStart.valueProperty().addListener(chgListener);
         uiDistanceEnd.valueProperty().addListener(chgListener);
     }
-    
+
     /**
      * Méthode permettant de mettre à jour le label (FXML) indiquant si les
      * coordonnées du mode ont été calculées ou éditées.
      *
      * @param oldEditedGeoCoordinate ancienne valeur de la propriété
-     * editedGeoCoordinate du positionable courant. Null si ont l'ignore.
+     * editedGeoCoordinate du positionable courant. Null si on l'ignore.
      * @param newEditedGeoCoordinate nouvelle valeur.
      */
     final protected void setCoordinatesLabel(Boolean oldEditedGeoCoordinate, Boolean newEditedGeoCoordinate){
@@ -392,14 +386,14 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
     }
 
     protected void coordChange(final boolean isBorne) {
-        if (reseting) {return;}
+        if (reseting) return;
         reseting = true;
         try {
             buildGeometry();
             posProperty.get().setEditedGeoCoordinate(Boolean.FALSE);
-        }catch(Exception e){
+        } catch (Exception e) {
             SIRS.LOGGER.log(Level.WARNING, "Echec de la construction de la géométrie lors du changement de coordonnées.", e);
-        }finally {
+        } finally {
             // Disjonction nécéssaire pour éviter l'écrasement de la liste
             // calculée par l'autocomplétion des champs borneDebut et borneFin.
             if (isBorne) {

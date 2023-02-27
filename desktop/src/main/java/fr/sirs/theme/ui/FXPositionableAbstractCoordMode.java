@@ -31,7 +31,6 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.theme.ui.FXPositionableMode.fxNumberValue;
 
-import fr.sirs.ui.Growl;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.util.FormattedDoubleConverter;
 import fr.sirs.util.SirsStringConverter;
@@ -110,7 +109,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
     @FXML
     protected Label uiGeoCoordLabel;
 
-    private Button uiImport;
+    private final Button uiImport;
 
     private boolean reseting = false;
 
@@ -157,41 +156,34 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         uiCRSs.disableProperty().bind(disableProperty);
         uiCRSs.setConverter(new SirsStringConverter());
 
-        final ChangeListener<Geometry> geomListener = new ChangeListener<Geometry>() {
-            @Override
-            public void changed(ObservableValue<? extends Geometry> observable, Geometry oldValue, Geometry newValue) {
-                if (reseting) {
-                    return;
-                }
-                updateFields();
+        final ChangeListener<Geometry> geomListener = (observable, oldValue, newValue) -> {
+            if (reseting) {
+                return;
             }
+            updateFields();
         };
 
         // Listener pour les changements sur les points de début et de fin, dans le cadre de l'import de bornes par exemple.
         final ChangeListener<Point> pointListener = (obs, oldVal, newVal) -> updateFields();
 
         //Listener permettant d'indiquer si les coordonnées sont calculées ou éditées
-        final ChangeListener<Boolean> updateEditedGeoCoordinatesDisplay = (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            setCoordinatesLabel(oldValue, newValue);
-        };
+        final ChangeListener<Boolean> updateEditedGeoCoordinatesDisplay = (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) ->
+                setCoordinatesLabel(oldValue, newValue);
 
-        posProperty.addListener(new ChangeListener<Positionable>() {
-            @Override
-            public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
-                if (oldValue != null) {
-                    oldValue.geometryProperty().removeListener(geomListener);
-                    oldValue.positionDebutProperty().removeListener(pointListener);
-                    oldValue.positionFinProperty().removeListener(pointListener);
-                    oldValue.editedGeoCoordinateProperty().removeListener(updateEditedGeoCoordinatesDisplay);
-                }
-                if (newValue != null) {
-                    newValue.geometryProperty().addListener(geomListener);
-                    newValue.positionDebutProperty().addListener(pointListener);
-                    newValue.positionFinProperty().addListener(pointListener);
-                    newValue.editedGeoCoordinateProperty().addListener(updateEditedGeoCoordinatesDisplay);
-                    setCoordinatesLabel(null, newValue.getEditedGeoCoordinate());
-                    updateFields();
-                }
+        posProperty.addListener((observable, oldValue, newValue) -> {
+            if (oldValue != null) {
+                oldValue.geometryProperty().removeListener(geomListener);
+                oldValue.positionDebutProperty().removeListener(pointListener);
+                oldValue.positionFinProperty().removeListener(pointListener);
+                oldValue.editedGeoCoordinateProperty().removeListener(updateEditedGeoCoordinatesDisplay);
+            }
+            if (newValue != null) {
+                newValue.geometryProperty().addListener(geomListener);
+                newValue.positionDebutProperty().addListener(pointListener);
+                newValue.positionFinProperty().addListener(pointListener);
+                newValue.editedGeoCoordinateProperty().addListener(updateEditedGeoCoordinatesDisplay);
+                setCoordinatesLabel(null, newValue.getEditedGeoCoordinate());
+                updateFields();
             }
         });
 
@@ -231,7 +223,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
 
     @Override
     public String getTitle() {
-        return "Coordonnée";
+        return "Coordonnées";
     }
 
     public List<Node> getExtraButton() {
@@ -261,7 +253,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         pane.setContent(importCoord);
         dialog.setDialogPane(pane);
         dialog.setResizable(true);
-        dialog.setTitle("Import de coordonnée");
+        dialog.setTitle("Import de coordonnées");
         dialog.setOnCloseRequest(event1 -> dialog.hide());
         dialog.show();
     }
@@ -307,8 +299,8 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
                 }
 
             } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
-                GeotkFX.newExceptionDialog("La conversion des positions a échouée.", ex).show();
-                throw new RuntimeException("La conversion des positions a échouée.", ex);
+                GeotkFX.newExceptionDialog("La conversion des positions a échoué.", ex).show();
+                throw new RuntimeException("La conversion des positions a échoué.", ex);
             }
         }
 
@@ -380,8 +372,8 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
                 endPoint = (Point) JTS.transform(endPoint, trs);
 
             } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
-                GeotkFX.newExceptionDialog("La conversion des positions a échouée.", ex).show();
-                throw new RuntimeException("La conversion des positions a échouée.", ex);
+                GeotkFX.newExceptionDialog("La conversion des positions a échoué.", ex).show();
+                throw new RuntimeException("La conversion des positions a échoué.", ex);
             }
         }
 
@@ -494,8 +486,8 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
                     });
                 }
             } catch (Exception ex) {
-                GeotkFX.newExceptionDialog("La conversion des positions a échouée.", ex).show();
-                throw new RuntimeException("La conversion des positions a échouée.", ex);
+                GeotkFX.newExceptionDialog("La conversion des positions a échoué.", ex).show();
+                throw new RuntimeException("La conversion des positions a échoué.", ex);
             }
         }
 

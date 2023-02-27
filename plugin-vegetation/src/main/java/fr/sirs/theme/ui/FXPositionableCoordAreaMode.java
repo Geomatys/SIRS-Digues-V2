@@ -24,7 +24,6 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
-import fr.sirs.SIRS;
 import fr.sirs.core.LinearReferencingUtilities;
 import static fr.sirs.core.LinearReferencingUtilities.buildSegmentFromDistance;
 import fr.sirs.core.TronconUtils;
@@ -38,7 +37,6 @@ import static fr.sirs.plugin.vegetation.PluginVegetation.toPoint;
 import static fr.sirs.plugin.vegetation.PluginVegetation.toPolygon;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.stream.Stream;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
@@ -141,18 +139,17 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
             {bind(pctProp);}
             @Override
             protected String computeValue() {
-                if(pctProp.get()){
+                if (pctProp.get()){
                     return originalLblStartNear;
-                }
-                else return "Point unique";
+                } else return "Point unique";
             }
         });
 
         positionableProperty().addListener((observable, oldValue, newValue) -> {
-            if(newValue instanceof ZoneVegetation){
+            if (newValue instanceof ZoneVegetation) {
                 ((ZoneVegetation) newValue).typeCoteIdProperty().addListener(typeCoteChangeListener);
             }
-            if(oldValue instanceof ZoneVegetation){
+            if (oldValue instanceof ZoneVegetation) {
                 ((ZoneVegetation) oldValue).typeCoteIdProperty().removeListener(typeCoteChangeListener);
             }
         });
@@ -174,31 +171,39 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         final String mode = pos.getGeometryMode();
 
 
-        if(MODE.equals(mode)){
+        if (MODE.equals(mode)) {
             //on assigne les valeurs sans changement
             //on peut réutiliser les points enregistré dans la position
             final Point startPos = pos.getPositionDebut();
             final Point endPos = pos.getPositionFin();
             if (startPos != null) {
-                if(uiLongitudeStart != null && uiLongitudeStart.getValueFactory() != null) uiLongitudeStart.getValueFactory().valueProperty().set(startPos.getX());
-                if(uiLatitudeStart != null && uiLatitudeStart.getValueFactory() != null) uiLatitudeStart.getValueFactory().valueProperty().set(startPos.getY());
-            }else{
-                if(uiLongitudeStart != null && uiLongitudeStart.getValueFactory() != null) uiLongitudeStart.getValueFactory().setValue(null);
-                if(uiLatitudeStart != null && uiLatitudeStart.getValueFactory() != null) uiLatitudeStart.getValueFactory().setValue(null);
+                if (uiLongitudeStart != null && uiLongitudeStart.getValueFactory() != null)
+                    uiLongitudeStart.getValueFactory().valueProperty().set(startPos.getX());
+                if (uiLatitudeStart != null && uiLatitudeStart.getValueFactory() != null)
+                    uiLatitudeStart.getValueFactory().valueProperty().set(startPos.getY());
+            } else {
+                if (uiLongitudeStart != null && uiLongitudeStart.getValueFactory() != null)
+                    uiLongitudeStart.getValueFactory().setValue(null);
+                if (uiLatitudeStart != null && uiLatitudeStart.getValueFactory() != null)
+                    uiLatitudeStart.getValueFactory().setValue(null);
             }
             if (endPos != null) {
-                if(uiLongitudeEnd != null && uiLongitudeEnd.getValueFactory() != null) uiLongitudeEnd.getValueFactory().valueProperty().set(endPos.getX());
-                if(uiLatitudeEnd != null && uiLatitudeEnd.getValueFactory() != null) uiLatitudeEnd.getValueFactory().valueProperty().set(endPos.getY());
-            }else{
-                if(uiLongitudeEnd != null && uiLongitudeEnd.getValueFactory() != null) uiLongitudeEnd.getValueFactory().setValue(null);
-                if(uiLatitudeEnd != null && uiLatitudeEnd.getValueFactory() != null) uiLatitudeEnd.getValueFactory().setValue(null);
+                if (uiLongitudeEnd != null && uiLongitudeEnd.getValueFactory() != null)
+                    uiLongitudeEnd.getValueFactory().valueProperty().set(endPos.getX());
+                if (uiLatitudeEnd != null && uiLatitudeEnd.getValueFactory() != null)
+                    uiLatitudeEnd.getValueFactory().valueProperty().set(endPos.getY());
+            } else {
+                if (uiLongitudeEnd != null && uiLongitudeEnd.getValueFactory() != null)
+                    uiLongitudeEnd.getValueFactory().setValue(null);
+                if (uiLatitudeEnd != null && uiLatitudeEnd.getValueFactory() != null)
+                    uiLatitudeEnd.getValueFactory().setValue(null);
             }
             uiStartNear.getValueFactory().setValue(pos.getDistanceDebutMin());
             uiStartFar.getValueFactory().setValue(pos.getDistanceDebutMax());
             uiEndNear.getValueFactory().setValue(pos.getDistanceFinMin());
             uiEndFar.getValueFactory().setValue(pos.getDistanceFinMax());
 
-        }else if(pos.getGeometry()!=null){
+        } else if (pos.getGeometry() != null) {
             //on calcule les valeurs en fonction des points de debut et fin
 
             //on refait les points a partir de la géométrie
@@ -207,16 +212,16 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
             final Point geoPointStart = ps.getGeoPointStart();
             final Point geoPointEnd = ps.getGeoPointEnd();
 
-            uiLongitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getX());
-            uiLatitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getY());
-            uiLongitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getX());
-            uiLatitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getY());
+            uiLongitudeStart.getValueFactory().setValue(geoPointStart == null ? null : geoPointStart.getX());
+            uiLatitudeStart.getValueFactory().setValue(geoPointStart == null ? null : geoPointStart.getY());
+            uiLongitudeEnd.getValueFactory().setValue(geoPointEnd == null ? null : geoPointEnd.getX());
+            uiLatitudeEnd.getValueFactory().setValue(geoPointEnd == null ? null : geoPointEnd.getY());
 
             uiStartNear.getValueFactory().setValue(pos.getDistanceDebutMin());
             uiStartFar.getValueFactory().setValue(pos.getDistanceDebutMax());
             uiEndNear.getValueFactory().setValue(pos.getDistanceFinMin());
             uiEndFar.getValueFactory().setValue(pos.getDistanceFinMax());
-        }else{
+        } else {
             //pas de geometrie
             uiLongitudeStart.getValueFactory().setValue(null);
             uiLatitudeStart.getValueFactory().setValue(null);
@@ -243,7 +248,7 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         final ZoneVegetation zone = (ZoneVegetation) positionableProperty().get();
 
         // On ne met la géométrie à jour depuis ce panneau que si on est dans son mode.
-        if(!getID().equals(zone.getGeometryMode())) return;
+        if (!getID().equals(zone.getGeometryMode())) return;
 
         zone.setDistanceDebutMin(uiStartNear.getValue());
         zone.setDistanceDebutMax(uiStartFar.getValue());
@@ -253,29 +258,29 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
 
         // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
         final CoordinateReferenceSystem crs = uiCRSs.getSelectionModel().getSelectedItem();
-        if(crs==null) return;
+        if (crs == null) return;
 
         Point startPoint = null;
         Point endPoint = null;
-        if(uiLongitudeStart.getValue()!=null && uiLatitudeStart.getValue()!=null){
+        if (uiLongitudeStart.getValue() != null && uiLatitudeStart.getValue() != null) {
             startPoint = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
                     uiLongitudeStart.getValue(), uiLatitudeStart.getValue()));
             JTS.setCRS(startPoint, crs);
         }
 
-        if(uiLongitudeEnd.getValue()!=null && uiLatitudeEnd.getValue()!=null){
+        if (uiLongitudeEnd.getValue() != null && uiLatitudeEnd.getValue() != null) {
             endPoint = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
                     uiLongitudeEnd.getValue(), uiLatitudeEnd.getValue()));
             JTS.setCRS(endPoint, crs);
         }
 
-        if(startPoint==null && endPoint==null) return;
-        if(startPoint==null) startPoint = endPoint;
-        if(endPoint==null) endPoint = startPoint;
+        if (startPoint == null && endPoint == null) return;
+        if (startPoint == null) startPoint = endPoint;
+        if (endPoint == null) endPoint = startPoint;
 
         final TronconDigue troncon = ConvertPositionableCoordinates.getTronconFromPositionable(zone);
 
-        if (troncon == null) throw new IllegalStateException("Failed to retrieve tronçon from Positionable : "+zone);
+        if (troncon == null) throw new IllegalStateException("Failed to retrieve tronçon from Positionable : " + zone);
 
         //on calcule le ratio on fonction de la rive et du coté
         double ratio = computeRatio(troncon, zone);
@@ -284,7 +289,7 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         Geometry geometry;
         final LineString linear;
 
-        if(GeometryType.PONCTUAL.equals(zone.getGeometryType())){
+        if (GeometryType.PONCTUAL.equals(zone.getGeometryType())) {
 
             final LineString tronconLineString = asLineString(troncon.getGeometry());
             final SegmentInfo[] segments = buildSegments(tronconLineString);
@@ -301,53 +306,52 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
             final Map.Entry<LineString, Double> pointAndSegment = buildSegmentFromDistance(
                     segments, projected.distanceAlongLinear);
             linear = pointAndSegment.getKey();
-            if(ratio==0.) ratio=1.;// On ne met pas un arbre des deux côtés.
+            if (ratio == 0.) ratio = 1.;// On ne met pas un arbre des deux côtés.
             geometry = toPoint(linear,
-                zone.getDistanceDebutMin() * ratio,
-                pointAndSegment.getValue());
-        }
-        else {
+                    zone.getDistanceDebutMin() * ratio,
+                    pointAndSegment.getValue());
+        } else {
             /*
             Si on n'a pas à faire à un ponctuel, on peut utiliser la géométrie
             de la structure plutôt que celle du tronçon.
             */
             linear = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
-            if(ratio==0){
+            if (ratio == 0) {
                 //des 2 cotés
                 ratio = 1;
                 final Polygon left = toPolygon(linear,
-                    zone.getDistanceDebutMin() * ratio,
-                    zone.getDistanceDebutMax() * ratio,
-                    zone.getDistanceFinMin() * ratio,
-                    zone.getDistanceFinMax() * ratio);
+                        zone.getDistanceDebutMin() * ratio,
+                        zone.getDistanceDebutMax() * ratio,
+                        zone.getDistanceFinMin() * ratio,
+                        zone.getDistanceFinMax() * ratio);
                 ratio = -1;
                 final Polygon right = toPolygon(linear,
-                    zone.getDistanceDebutMin() * ratio,
-                    zone.getDistanceDebutMax() * ratio,
-                    zone.getDistanceFinMin() * ratio,
-                    zone.getDistanceFinMax() * ratio);
-                geometry = GO2Utilities.JTS_FACTORY.createMultiPolygon(new Polygon[]{left,right});
+                        zone.getDistanceDebutMin() * ratio,
+                        zone.getDistanceDebutMax() * ratio,
+                        zone.getDistanceFinMin() * ratio,
+                        zone.getDistanceFinMax() * ratio);
+                geometry = GO2Utilities.JTS_FACTORY.createMultiPolygon(new Polygon[]{left, right});
                 geometry.setSRID(linear.getSRID());
                 geometry.setUserData(linear.getUserData());
 
-            }else{
+            } else {
                 //1 coté
                 geometry = toPolygon(linear,
-                    zone.getDistanceDebutMin() * ratio,
-                    zone.getDistanceDebutMax() * ratio,
-                    zone.getDistanceFinMin() * ratio,
-                    zone.getDistanceFinMax() * ratio);
+                        zone.getDistanceDebutMin() * ratio,
+                        zone.getDistanceDebutMax() * ratio,
+                        zone.getDistanceFinMin() * ratio,
+                        zone.getDistanceFinMax() * ratio);
             }
         }
 
         //on sauvegarde les points dans le crs de la base
         zone.setGeometry(geometry);
-        if(!Utilities.equalsIgnoreMetadata(crs, Injector.getSession().getProjection())){
-            try{
+        if (!Utilities.equalsIgnoreMetadata(crs, Injector.getSession().getProjection())) {
+            try {
                 final MathTransform trs = CRS.findOperation(crs, Injector.getSession().getProjection(), null).getMathTransform();
                 startPoint = (Point) JTS.transform(startPoint, trs);
                 endPoint = (Point) JTS.transform(endPoint, trs);
-            }catch(FactoryException | MismatchedDimensionException | TransformException ex){
+            } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
                 GeotkFX.newExceptionDialog("La conversion des positions a échouée.", ex).show();
                 throw new RuntimeException("La conversion des positions a échouée.", ex);
             }

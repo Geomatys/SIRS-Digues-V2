@@ -36,7 +36,6 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.ConvertPositionableCoordinates;
-import fr.sirs.util.SIRSAreaComputer;
 import static fr.sirs.util.SIRSAreaComputer.getGeometryInfo;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -183,35 +182,32 @@ public class FXPositionablePane extends BorderPane {
             }
         };
 
-        posProperty.addListener(new ChangeListener<Positionable>() {
-            @Override
-            public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
-                if (oldValue != null) {
-                    oldValue.geometryProperty().removeListener(geomListener);
-                    oldValue.positionDebutProperty().removeListener(geomListener);
-                    oldValue.positionFinProperty().addListener(geomListener);
-                }
-                if (newValue != null) {
-                    newValue.geometryProperty().addListener(geomListener);
-                    newValue.positionDebutProperty().addListener(geomListener);
-                    newValue.positionFinProperty().addListener(geomListener);
-                    ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test(newValue);
-
-                    //on active le mode dont le type correspond
-                    final String modeName = Preferences.userNodeForPackage(FXPositionableMode.class).get("default", null);
-                    Toggle active = group.getToggles().get(0);
-                    for (Toggle t : group.getToggles()) {
-                        final FXPositionableMode mode = (FXPositionableMode) t.getUserData();
-                        if (mode != null && mode.getID().equalsIgnoreCase(modeName)) {
-                            active = t;
-                            break;
-                        }
-                    }
-                    group.selectToggle(active);
-                    newValue.setGeometryMode(((FXPositionableMode) active.getUserData()).getID());
-                }
-                updateSRAndPRInfo();
+        posProperty.addListener((observable, oldValue, newValue) -> {
+            if (oldValue != null) {
+                oldValue.geometryProperty().removeListener(geomListener);
+                oldValue.positionDebutProperty().removeListener(geomListener);
+                oldValue.positionFinProperty().addListener(geomListener);
             }
+            if (newValue != null) {
+                newValue.geometryProperty().addListener(geomListener);
+                newValue.positionDebutProperty().addListener(geomListener);
+                newValue.positionFinProperty().addListener(geomListener);
+                ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test(newValue);
+
+                //on active le mode dont le type correspond
+                final String modeName = Preferences.userNodeForPackage(FXPositionableMode.class).get("default", null);
+                Toggle active = group.getToggles().get(0);
+                for (Toggle t : group.getToggles()) {
+                    final FXPositionableMode mode = (FXPositionableMode) t.getUserData();
+                    if (mode != null && mode.getID().equalsIgnoreCase(modeName)) {
+                        active = t;
+                        break;
+                    }
+                }
+                group.selectToggle(active);
+                newValue.setGeometryMode(((FXPositionableMode) active.getUserData()).getID());
+            }
+            updateSRAndPRInfo();
         });
 
     }
@@ -364,32 +360,32 @@ public class FXPositionablePane extends BorderPane {
             final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(pos, troncon, segments);
 
             final Geometry geometry = posInfo.getGeometry();
-            if(geometry == null){
+            if (geometry == null) {
                 SIRS.LOGGER.log(Level.WARNING, "Impossible de calculer la g\u00e9om\u00e9trie du positionable sur le sr : \n{0}", sr.toString());
                 uiSR.setText(sr.getLibelle());
                 uiPRDebut.setText("");
                 uiPRFin.setText("");
             } else {
-            final Point startPoint, endPoint;
-            if (geometry instanceof LineString) {
-                LineString ls = (LineString) geometry;
-                startPoint = ls.getStartPoint();
-                endPoint = ls.getEndPoint();
-            } else {
-                startPoint = posInfo.getGeoPointStart();
-                endPoint = posInfo.getGeoPointEnd();
-            }
+                final Point startPoint, endPoint;
+                if (geometry instanceof LineString) {
+                    LineString ls = (LineString) geometry;
+                    startPoint = ls.getStartPoint();
+                    endPoint = ls.getEndPoint();
+                } else {
+                    startPoint = posInfo.getGeoPointStart();
+                    endPoint = posInfo.getGeoPointEnd();
+                }
 
-            final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-            final float startPr = TronconUtils.computePR(segments, sr, startPoint, borneRepo);
-            final float endPr = TronconUtils.computePR(segments, sr, endPoint, borneRepo);
+                final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
+                final float startPr = TronconUtils.computePR(segments, sr, startPoint, borneRepo);
+                final float endPr = TronconUtils.computePR(segments, sr, endPoint, borneRepo);
 
-            uiSR.setText(sr.getLibelle());
-            uiPRDebut.setText(PR_FORMAT.format(startPr));
-            uiPRFin.setText(PR_FORMAT.format(endPr));
-            //on sauvegarde les PR dans le positionable.
-            pos.setPrDebut(startPr);
-            pos.setPrFin(endPr);
+                uiSR.setText(sr.getLibelle());
+                uiPRDebut.setText(PR_FORMAT.format(startPr));
+                uiPRFin.setText(PR_FORMAT.format(endPr));
+                //on sauvegarde les PR dans le positionable.
+                pos.setPrDebut(startPr);
+                pos.setPrFin(endPr);
             }
 
         } else {
