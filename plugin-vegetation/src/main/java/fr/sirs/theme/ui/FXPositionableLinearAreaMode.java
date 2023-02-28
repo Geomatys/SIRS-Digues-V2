@@ -97,7 +97,7 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         uiEndNear.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
         uiEndFar.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
 
-        final ChangeListener chgListener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> coordChange(false);
+        final ChangeListener chgListener = (ObservableValue observable, Object oldValue, Object newValue) -> coordChange(false);
         uiStartNear.valueProperty().addListener(chgListener);
         uiStartFar.valueProperty().addListener(chgListener);
         uiEndNear.valueProperty().addListener(chgListener);

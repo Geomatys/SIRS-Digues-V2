@@ -46,12 +46,8 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
 
     public ZoneVegetationPojoTable(String title, final ObjectProperty<? extends Element> container) {
         super(ZoneVegetation.class, title, container);
-        setDeletor(new Consumer<Element>() {
-
-            @Override
-            public void accept(Element pojo) {
-                if(pojo instanceof ZoneVegetation) ((AbstractSIRSRepository) Injector.getSession().getRepositoryForClass(pojo.getClass())).remove(pojo);
-            }
+        setDeletor((Consumer<Element>) pojo -> {
+            if(pojo instanceof ZoneVegetation) ((AbstractSIRSRepository) Injector.getSession().getRepositoryForClass(pojo.getClass())).remove(pojo);
         });
     }
 
@@ -70,7 +66,7 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
         stage.showAndWait();
 
         final Class<? extends ZoneVegetation> retrievedClass = stage.getRetrievedElement().get();
-        if(retrievedClass!=null){
+        if (retrievedClass != null) {
             //Création de la zone
             final AbstractSIRSRepository zoneVegetationRepo = Injector.getSession().getRepositoryForClass(retrievedClass);
             zone = (ZoneVegetation) zoneVegetationRepo.create();
@@ -83,29 +79,26 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
 
             // S'il s'agit d'une zone d'invasive ou de peuplement, il faut affecter le type par défaut et effectuer le paramétrage éventuel
 
-            if(retrievedClass==PeuplementVegetation.class){
+            if (retrievedClass == PeuplementVegetation.class) {
                 ((PeuplementVegetation) zone).setTypeVegetationId(DEFAULT_PEUPLEMENT_VEGETATION_TYPE);
                 paramTraitement(PeuplementVegetation.class, (PeuplementVegetation) zone, DEFAULT_PEUPLEMENT_VEGETATION_TYPE);
-            }
-            else if(retrievedClass==InvasiveVegetation.class){
+            } else if (retrievedClass == InvasiveVegetation.class) {
                 ((InvasiveVegetation) zone).setTypeVegetationId(DEFAULT_INVASIVE_VEGETATION_TYPE);
                 paramTraitement(InvasiveVegetation.class, (InvasiveVegetation) zone, DEFAULT_INVASIVE_VEGETATION_TYPE);
-            }
-            else if(retrievedClass==ArbreVegetation.class){
+            } else if (retrievedClass == ArbreVegetation.class) {
                 zone.setGeometryType(GeometryType.PONCTUAL);
             }
 
-        }
-        else {
+        } else {
             zone = null;
         }
         return zone;
     }
 
     @Override
-    protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event){
+    protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
         final Element obj = event.getRowValue();
-        if(obj != null){
+        if (obj != null) {
             ((AbstractSIRSRepository) Injector.getSession().getRepositoryForClass(obj.getClass())).update(obj);
         }
     }
