@@ -34,17 +34,22 @@ import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
-import static fr.sirs.plugin.vegetation.PluginVegetation.zoneVegetationClasses;
 import fr.sirs.plugin.vegetation.VegetationSession;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
 import java.time.LocalDate;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -59,6 +64,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import org.geotoolkit.gui.javafx.util.FXListTableCell;
+
+import static fr.sirs.plugin.vegetation.PluginVegetation.zoneVegetationClasses;
 
 
 /**
@@ -140,6 +147,9 @@ public class FXPlanVegetationPane extends BorderPane {
         uiSave.setOnAction((ActionEvent event) -> {
 
             try{
+
+                updateParcelleTraitements();
+
                 // On sauvegarde la plan.
                 planRepo.update(FXPlanVegetationPane.this.plan);
 
@@ -306,6 +316,15 @@ public class FXPlanVegetationPane extends BorderPane {
         // Mise en page
         uiVBox.getChildren().addAll(uiCoutTable, uiFrequenceTable);
     }
+
+
+    private void updateParcelleTraitements() {
+        final List<ParcelleVegetation> planifParcelle = parcelleRepo.getByPlanId(plan.getDocumentId());
+        if (planifParcelle != null) {
+            planifParcelle.forEach(p -> VegetationSession.ensureAppliedToPlotOfVegetation(p, this.plan));
+        }
+    }
+
 
     private static ParamFrequenceTraitementVegetation toParamFrequence(final Class type, final String typeVegetationId, final String traitementId, final String sousTraitementId){
         final ParamFrequenceTraitementVegetation param = Injector.getSession().getElementCreator().createElement(ParamFrequenceTraitementVegetation.class);

@@ -38,7 +38,6 @@ import fr.sirs.core.model.ParamFrequenceTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.PlanVegetation;
-import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefFrequenceTraitementVegetation;
 import fr.sirs.core.model.RefSousTraitementVegetation;
 import fr.sirs.core.model.RefTypeInvasiveVegetation;
@@ -565,6 +564,8 @@ public class PluginVegetation extends Plugin {
      * 4) plan duration is strictly negative.
      */
     public static void resetAutoPlanif(final ParcelleVegetation parcelle, final int initialIndex){
+        ArgumentChecks.ensureNonNull("Parcelle", parcelle);
+
         final String planId = parcelle.getPlanId();
 
         if(planId==null) throw new IllegalStateException("planId must not be null");

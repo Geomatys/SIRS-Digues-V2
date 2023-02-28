@@ -31,14 +31,8 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ZoneVegetation;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.EXPLOITATION;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.PLANIFICATION;
-import static fr.sirs.plugin.vegetation.VegetationSession.NON_PLANIFIE_FUTUR;
-import static fr.sirs.plugin.vegetation.VegetationSession.NON_PLANIFIE_NON_TRAITE;
-import static fr.sirs.plugin.vegetation.VegetationSession.PLANIFIE_FUTUR;
-import static fr.sirs.plugin.vegetation.VegetationSession.PLANIFIE_NON_TRAITE;
-import static fr.sirs.plugin.vegetation.VegetationSession.estimatedPlanificationCost;
-import static fr.sirs.plugin.vegetation.VegetationSession.exploitationCost;
-import static fr.sirs.plugin.vegetation.VegetationSession.getParcelleEtat;
-import static fr.sirs.plugin.vegetation.VegetationSession.setCheckBoxColor;
+import static fr.sirs.plugin.vegetation.VegetationSession.*;
+
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -53,6 +47,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.WeakListChangeListener;
+import javafx.concurrent.Task;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -76,6 +71,7 @@ import javafx.scene.layout.RowConstraints;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.elasticsearch.common.base.Objects;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
  * Tableau de représentation des parcelles utilisé dans les interfaces de planification et d'exploitation. Ce tableau 
@@ -239,6 +235,10 @@ public class FXPlanTable extends BorderPane{
                 continue;
             }
 
+            // Ensure current plan is applied to all vegetation of the parcelle
+             ensureAppliedToPlotOfVegetation(parcelle, plan);
+
+
             // On ajoute la parcelle aux parcelles contenues dans le tableau (on en aura besoin pour les calculs des coûts).
             tableParcelles.add(parcelle);
 
@@ -297,6 +297,7 @@ public class FXPlanTable extends BorderPane{
         }
 
     }
+
 
     private void updateColumnWidth(){
         gridCenter.getColumnConstraints().clear();
@@ -465,8 +466,7 @@ public class FXPlanTable extends BorderPane{
                         }
 
                         this.estGroup.update();
-                    }
-                    else{
+                    } else {
                         setVal(newValue);
                     }
                 };
@@ -584,20 +584,35 @@ public class FXPlanTable extends BorderPane{
          */
         private void update(){
 
-            final double cout;
-            if(mode==PLANIFICATION){
-                cout = estimatedPlanificationCost(plan, index, tableParcelles);
-            }
-            else {
-                if(plan!=null){
-                    cout = exploitationCost(plan.getAnneeDebut()+index, tableParcelles);
+            final Task<String> updating = new Task<String>() {
+
+                @Override
+                protected String call() {
+                    final double cout;
+                    if(mode==PLANIFICATION){
+                        cout = estimatedPlanificationCost(plan, index, tableParcelles);
+                    } else {
+                        if(plan!=null){
+                            cout = exploitationCost(plan.getAnneeDebut()+index, tableParcelles);
+                        }
+                        else {
+                            throw new IllegalStateException("Plan must not be null");
+                        }
+                    }
+                    final NumberFormat numberFormat = new DecimalFormat("0.00");
+                    return numberFormat.format(cout);
                 }
-                else {
-                    throw new IllegalStateException("Plan must not be null");
+            };
+            updating.setOnSucceeded(e -> {
+                final Object res = e.getSource().getValue();
+                if (res instanceof String) {
+                    label.setText((String) res);
                 }
-            }
-            final NumberFormat numberFormat = new DecimalFormat("0.00");
-            label.setText(numberFormat.format(cout));
+            });
+            updating.setOnRunning(e-> label.setText("computing..."));
+            updating.setOnFailed(e-> label.setText("Failed"));
+
+            TaskManager.INSTANCE.submit(updating);
         }
 
     }

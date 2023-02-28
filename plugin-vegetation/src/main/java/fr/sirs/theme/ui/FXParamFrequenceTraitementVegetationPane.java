@@ -18,7 +18,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import javafx.beans.value.ChangeListener;
 
@@ -209,7 +208,7 @@ public class FXParamFrequenceTraitementVegetationPane extends AbstractFXElementP
     @Override
     public void preSave() {
         final Session session = Injector.getBean(Session.class);
-        final ParamFrequenceTraitementVegetation element = (ParamFrequenceTraitementVegetation) elementProperty().get();
+        final ParamFrequenceTraitementVegetation paramFrequence = (ParamFrequenceTraitementVegetation) elementProperty().get();
 
         final Object selectedParent = ui_parent_choice.getSelectionModel().selectedItemProperty().get();
         if (selectedParent == null) {
@@ -228,9 +227,9 @@ public class FXParamFrequenceTraitementVegetationPane extends AbstractFXElementP
 
         // If parent has changed, we have to dereference our object from the old one, and
         if (originalParent == null || !originalParent.getId().equals(newParent.getId())) {
-            newParent.addChild(element);
+            newParent.addChild(paramFrequence);
             if (originalParent != null) {
-                originalParent.removeChild(element);
+                originalParent.removeChild(paramFrequence);
             }
             originalParent = newParent;
         }
@@ -238,38 +237,38 @@ public class FXParamFrequenceTraitementVegetationPane extends AbstractFXElementP
         Object cbValue;
         cbValue = ui_typeVegetationId.getValue();
         if (cbValue instanceof Preview) {
-            element.setTypeVegetationId(((Preview)cbValue).getElementId());
+            paramFrequence.setTypeVegetationId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            element.setTypeVegetationId(((Element)cbValue).getId());
+            paramFrequence.setTypeVegetationId(((Element)cbValue).getId());
         } else if (cbValue == null) {
-            element.setTypeVegetationId(null);
+            paramFrequence.setTypeVegetationId(null);
         }
         cbValue = ui_typeTraitementId.getValue();
         if (cbValue instanceof Preview) {
-            element.setTypeTraitementId(((Preview)cbValue).getElementId());
+            paramFrequence.setTypeTraitementId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            element.setTypeTraitementId(((Element)cbValue).getId());
+            paramFrequence.setTypeTraitementId(((Element)cbValue).getId());
         } else if (cbValue == null) {
-            element.setTypeTraitementId(null);
+            paramFrequence.setTypeTraitementId(null);
         }
         cbValue = ui_sousTypeTraitementId.getValue();
         if (cbValue instanceof Preview) {
-            element.setSousTypeTraitementId(((Preview)cbValue).getElementId());
+            paramFrequence.setSousTypeTraitementId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            element.setSousTypeTraitementId(((Element)cbValue).getId());
+            paramFrequence.setSousTypeTraitementId(((Element)cbValue).getId());
         } else if (cbValue == null) {
-            element.setSousTypeTraitementId(null);
+            paramFrequence.setSousTypeTraitementId(null);
         }
         cbValue = ui_frequenceId.getValue();
         if (cbValue instanceof Preview) {
-            element.setFrequenceId(((Preview)cbValue).getElementId());
+            paramFrequence.setFrequenceId(((Preview)cbValue).getElementId());
         } else if (cbValue instanceof Element) {
-            element.setFrequenceId(((Element)cbValue).getId());
+            paramFrequence.setFrequenceId(((Element)cbValue).getId());
         } else if (cbValue == null) {
-            element.setFrequenceId(null);
+            paramFrequence.setFrequenceId(null);
         }
 
-        element.setType(ui_type.getSelectionModel().getSelectedItem());
+        paramFrequence.setType(ui_type.getSelectionModel().getSelectedItem());
     }
 
     private void initTypeVegetation(final Class zoneClass){

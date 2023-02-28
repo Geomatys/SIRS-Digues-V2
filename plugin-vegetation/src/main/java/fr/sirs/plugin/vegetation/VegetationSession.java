@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -32,21 +32,14 @@ import fr.sirs.core.component.ParcelleVegetationRepository;
 import fr.sirs.core.component.PeuplementVegetationRepository;
 import fr.sirs.core.component.PlanVegetationRepository;
 import fr.sirs.core.component.SirsDBInfoRepository;
-import fr.sirs.core.model.ArbreVegetation;
-import fr.sirs.core.model.HerbaceeVegetation;
-import fr.sirs.core.model.InvasiveVegetation;
-import fr.sirs.core.model.ParamCoutTraitementVegetation;
-import fr.sirs.core.model.ParcelleVegetation;
-import fr.sirs.core.model.PeuplementVegetation;
-import fr.sirs.core.model.PlanVegetation;
-import fr.sirs.core.model.RefTraitementVegetation;
-import fr.sirs.core.model.TraitementParcelleVegetation;
-import fr.sirs.core.model.TraitementZoneVegetation;
-import fr.sirs.core.model.ZoneVegetation;
+import fr.sirs.core.model.*;
 import fr.sirs.plugin.vegetation.map.PlanifState;
+
+import static fr.sirs.plugin.vegetation.PluginVegetation.updateParcelleAutoPlanif;
 import static fr.sirs.plugin.vegetation.map.PlanifState.NON_PLANIFIE;
 import static fr.sirs.plugin.vegetation.map.PlanifState.PLANIFIE;
 import static fr.sirs.plugin.vegetation.map.PlanifState.PLANIFIE_PREMIERE_FOIS;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.net.URISyntaxException;
@@ -60,6 +53,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -76,6 +70,7 @@ import javafx.scene.paint.Color;
 import javax.swing.ImageIcon;
 import org.apache.sis.measure.Units;
 import org.apache.sis.storage.DataStoreException;
+import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureWriter;
@@ -96,10 +91,12 @@ import org.geotoolkit.style.MutableRule;
 import org.geotoolkit.style.MutableStyle;
 import org.geotoolkit.style.MutableStyleFactory;
 import org.geotoolkit.style.RandomStyleBuilder;
+
 import static org.geotoolkit.style.StyleConstants.DEFAULT_ANCHOR_POINT;
 import static org.geotoolkit.style.StyleConstants.DEFAULT_DISPLACEMENT;
 import static org.geotoolkit.style.StyleConstants.DEFAULT_GRAPHIC_ROTATION;
 import static org.geotoolkit.style.StyleConstants.LITERAL_ONE_FLOAT;
+
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
 import org.opengis.style.ExternalGraphic;
@@ -287,7 +284,6 @@ public final class VegetationSession {
         */
         double cout = 0.0;
         final ObservableList<ParamCoutTraitementVegetation> costParams = plan.getParamCout();
-        final ObservableList<ParamFrequenceTraitementVegetation> freqParams = plan.getParamFrequence();
 
         // Map d'indexation des paramètres qui ont un traitement et un sous-traitement.
         final Map<Entry<String, String>, ParamCoutTraitementVegetation> paramsWithSubTreatment = new HashMap<>();
@@ -302,9 +298,6 @@ public final class VegetationSession {
                     paramsWithSubTreatment.put(new HashMap.SimpleEntry<>(param.getTypeTraitementId(), param.getSousTypeTraitementId()), param);
                 } else {
                     paramsWithoutSubTreatment.put(param.getTypeTraitementId(), param);
-                }
-                else{
-                    indexedParams2.put(param.getTypeTraitementId(), param);
                 }
             }
         }
@@ -330,27 +323,22 @@ public final class VegetationSession {
                 */
                 if (!(zone instanceof InvasiveVegetation) && planifState == NON_PLANIFIE) continue;
 
+                // On récupère le traitement ponctuel et non ponctuel de la zone
+                final TraitementZoneVegetation traitement = zone.getTraitement();
+
                 // On vérifie que la zone a bien un traitement planifié et que celui-ci entre dans le plan de gestion
-                if(zone.getTraitement()!=null && !zone.getTraitement().getHorsGestion()){
+                if (traitement != null && !traitement.getHorsGestion()) {
 
-                    // On récupère le traitement ponctuel et non ponctuel de la zone
-                    final TraitementZoneVegetation traitement = zone.getTraitement();
 
-                    List<ParamFrequenceTraitementVegetation> traitementAuto;
 
-                    if (traitement.getTypeTraitementId() == null || traitement.getTypeTraitementPonctuelId() == null) {
-                        //todo split between ponctual / not ponctual
-                        traitementAuto = autoTraitementId(freqParams, zone);
-                    } else {
-                        traitementAuto = Collections.EMPTY_LIST;
-                    }
+                    final String traitementId = traitement.getTypeTraitementId();
+                    final String traitementPonctuelId = traitement.getTypeTraitementPonctuelId();
 
                     /*
                     On commence par s'occuper du traitement ponctuel
                     !!! (UNIQUEMENT SI ON EST LA PREMIÈRE ANNÉE DE TRAITEMENT DE LA PARCELLE DANS LE PLAN) !!!
                     */
                     if (planifState == PLANIFIE_PREMIERE_FOIS) {
-                        final String traitementPonctuelId = traitement.getTypeTraitementPonctuelId();
                         final String sousTraitementPonctuelId = traitement.getSousTypeTraitementPonctuelId();
 
                         // On récupère et on ajoute le cout sur la zone de la combinaison traitement/sous-traitement
@@ -362,7 +350,7 @@ public final class VegetationSession {
                                 p = paramsWithoutSubTreatment.get(traitementPonctuelId);
                             }
 
-                            if(p!=null) cout+=computePlanifiedCost(zone, p);
+                            if (p != null) cout += computePlanifiedCost(zone, p);
                         }
                     }
 
@@ -370,7 +358,6 @@ public final class VegetationSession {
                     /*
                     Puis on s'occupe du traitement non ponctuel
                     */
-                    final String traitementId = traitement.getTypeTraitementId();
                     final String sousTraitementId = traitement.getSousTypeTraitementId();
 
                     // On récupère et on ajoute le cout sur la zone de la combinaison traitement/sous-traitement
@@ -383,24 +370,92 @@ public final class VegetationSession {
                         }
 
                         if (p != null) cout += computePlanifiedCost(zone, p);
-                    } else {
-                        //Try using  auto traitement
-                        for (ParamFrequenceTraitementVegetation freqParam : traitementAuto) {
-                            final String sousTypeTraitementId = freqParam.getSousTypeTraitementId();
-                            final ParamCoutTraitementVegetation p;
-                            if (sousTypeTraitementId == null) {
-                                p = paramsWithoutSubTreatment.get(freqParam.getTypeTraitementId());
-                            } else {
-                                p = paramsWithSubTreatment.get(new HashMap.SimpleEntry<>(freqParam.getTypeTraitementId(), sousTypeTraitementId));
-                            }
-                            if (p != null) cout += computePlanifiedCost(zone, p);
-                        }
                     }
                 }
             }
         }
 
         return cout;
+    }
+
+
+    /**
+     * Ensure current plan is applied to all vegetation of the parcel.
+     */
+    public static void ensureAppliedToPlotOfVegetation(final ParcelleVegetation plot, final PlanVegetation plan) {
+        ArgumentChecks.ensureNonNull("Parcelle", plot);
+        ArgumentChecks.ensureNonNull("Plan", plan);
+
+        // On parcourt toutes les zones de végétation de la parcelle
+        final ObservableList<? extends ZoneVegetation> allZoneVegetationByParcelleId = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(plot.getId(), Injector.getSession());
+        if (allZoneVegetationByParcelleId != null && !allZoneVegetationByParcelleId.isEmpty()) {
+
+            final ObservableList<ParamFrequenceTraitementVegetation> freqParams = plan.getParamFrequence();
+
+            final AbstractSIRSRepository<RefFrequenceTraitementVegetation> frequenceRepo = Injector.getSession().getRepositoryForClass(RefFrequenceTraitementVegetation.class);
+
+            /*
+            get repositories for zones of vegetation
+             */
+            Map<Class, AbstractSIRSRepository> candidateRepos = Injector.getSession().getRepositoriesForClass(ZoneVegetation.class).stream().collect(Collectors.toMap(
+                    r -> r.getModelClass(), Function.identity()));
+
+            for (final ZoneVegetation zone : allZoneVegetationByParcelleId) {
+
+                final TraitementZoneVegetation traitement = zone.getTraitement();
+
+                if (traitement == null)
+                    throw new IllegalStateException("An vegetation zone doesn't have treatment"); //todo : create a new one
+
+                if (traitement.getHorsGestion()) continue;
+
+                final String traitementId = traitement.getTypeTraitementId();
+                final String traitementPonctuelId = traitement.getTypeTraitementPonctuelId();
+
+                if (traitementId == null || traitementPonctuelId == null) {
+                    //todo split between ponctual / not ponctual
+                    final List<ParamFrequenceTraitementVegetation> traitementAutos = autoTraitementId(freqParams, zone);
+
+                    if (traitementAutos.isEmpty()) continue;
+                    final int size = traitementAutos.size();
+
+                    if (size > 2) {
+                        throw new IllegalStateException("Further 'traitements' (" + size + ") could be affected to the current zone of vegetation : " + zone); //todo : what to do
+//                        traitement.setValid(false); //Todo ?
+                    } else if (size == 2) {
+                        throw new UnsupportedOperationException("distinguish punctual and non punctual");
+                    }
+                    final ParamFrequenceTraitementVegetation auto = traitementAutos.get(0);
+
+                    final RefFrequenceTraitementVegetation freq = frequenceRepo.get(auto.getFrequenceId());
+
+                    boolean changed = false;
+                    if (freq != null) {
+                        if ("ponctuel".equalsIgnoreCase(freq.getLibelle())) {
+                            traitement.setTypeTraitementPonctuelId(auto.getTypeTraitementId());
+                            traitement.setSousTypeTraitementPonctuelId(auto.getSousTypeTraitementId());
+                        } else {
+                            traitement.setTypeTraitementId(auto.getTypeTraitementId());
+                            traitement.setSousTypeTraitementId(auto.getSousTypeTraitementId());
+                            traitement.setFrequenceId(auto.getFrequenceId());
+                        }
+                        changed = true;
+                    }
+                    if (changed) {
+                        AbstractSIRSRepository currentRepo = candidateRepos.get(zone.getClass());
+                        if (currentRepo != null) {
+                            updateParcelleAutoPlanif(zone);
+                            currentRepo.update(zone);
+
+                        }
+
+                    }
+
+                }
+
+            }
+        }
+
     }
 
     /**
@@ -413,8 +468,8 @@ public final class VegetationSession {
         return frequenceParams.stream()
                 .filter(freqParam -> {
                     final Class paramType = freqParam.getType();
-                    return ((paramType !=null) && paramType.isAssignableFrom(claz) && Objects.equals(refType, freqParam.getTypeVegetationId()));
-                }).collect(Collectors.toList()); //TODO check if other?
+                    return ((paramType != null) && paramType.isAssignableFrom(claz) && Objects.equals(refType, freqParam.getTypeVegetationId()));
+                }).collect(Collectors.toList());
     }
 
     /**
@@ -428,18 +483,17 @@ public final class VegetationSession {
      * @param param
      * @return
      */
-    private static double computePlanifiedCost(final ZoneVegetation zone, final ParamCoutTraitementVegetation param){
-        if(zone.getGeometry()!=null){
+    private static double computePlanifiedCost(final ZoneVegetation zone, final ParamCoutTraitementVegetation param) {
+        if (zone.getGeometry() != null) {
             // Dans le cas des arbres, le coût est unitaire
-            if(zone instanceof ArbreVegetation){
+            if (zone instanceof ArbreVegetation) {
                 return param.getCout();
             }
             // Dans le cas des autres zones, le coût est surfacique
-            else{
+            else {
                 return zone.getGeometry().getArea() * param.getCout();
             }
-        }
-        else return 0.0;
+        } else return 0.0;
     }
 
     /**
@@ -452,10 +506,10 @@ public final class VegetationSession {
      * @param year
      * @return
      */
-    public static boolean isParcelleTraitee(ParcelleVegetation parcelle, int year){
+    public static boolean isParcelleTraitee(ParcelleVegetation parcelle, int year) {
         boolean done = false;
-        for(TraitementParcelleVegetation traitement : parcelle.getTraitements()){
-            if(traitement.getDate()!=null && traitement.getDate().getYear() == year){
+        for (TraitementParcelleVegetation traitement : parcelle.getTraitements()) {
+            if (traitement.getDate() != null && traitement.getDate().getYear() == year) {
                 done = true;
                 break;
             }
@@ -471,7 +525,7 @@ public final class VegetationSession {
      * @param year
      * @return
      */
-    public static PlanifState getParcellePlanifState(final PlanVegetation plan, final ParcelleVegetation parcelle, final int year){
+    public static PlanifState getParcellePlanifState(final PlanVegetation plan, final ParcelleVegetation parcelle, final int year) {
         return getParcellePlanifState(parcelle, year - plan.getAnneeDebut());
     }
 
@@ -482,20 +536,20 @@ public final class VegetationSession {
      * @param index
      * @return
      */
-    public static PlanifState getParcellePlanifState(final ParcelleVegetation parcelle, final int index){
+    public static PlanifState getParcellePlanifState(final ParcelleVegetation parcelle, final int index) {
         final List<Boolean> planifications = parcelle.getPlanifications();
 
-        if(planifications==null || planifications.size()<=index) return NON_PLANIFIE;
+        if (planifications == null || planifications.size() <= index) return NON_PLANIFIE;
 
-        if(!planifications.get(index)) return NON_PLANIFIE;
+        if (!planifications.get(index)) return NON_PLANIFIE;
 
         /* À ce stade, on est sûr que la parcelle est planifiée pour l'année que
         l'on examine. Mais est-ce la première fois ? Pour cela il faut aller
         voir si la parcelle avait également été planifiée une année antérieure
         du plan.
         */
-        for(int i=0; i<index; i++){
-            if(planifications.get(i)) return PLANIFIE;
+        for (int i = 0; i < index; i++) {
+            if (planifications.get(i)) return PLANIFIE;
         }
         return PLANIFIE_PREMIERE_FOIS;
     }
@@ -509,38 +563,38 @@ public final class VegetationSession {
      * @param year
      * @return
      */
-    public static String getParcelleEtat(final ParcelleVegetation parcelle, final boolean planifie, final int year){
+    public static String getParcelleEtat(final ParcelleVegetation parcelle, final boolean planifie, final int year) {
         final int thisYear = LocalDate.now().getYear();
 
         final boolean done = isParcelleTraitee(parcelle, year);
 
-        if(year>thisYear){
+        if (year > thisYear) {
             //pas de couleur pour les années futures
             return planifie ? PLANIFIE_FUTUR : NON_PLANIFIE_FUTUR;
         }
 
-        if(done){
-            if(planifie){
+        if (done) {
+            if (planifie) {
                 return PLANIFIE_TRAITE;
-            } else{
+            } else {
                 return NON_PLANIFIE_TRAITE;
             }
-        }else{
-            if(planifie){
+        } else {
+            if (planifie) {
                 // Les parcelles planifiées non traitées de l'année en cours sont considérées comme planifiées dans le futur.
-                if(year==thisYear) return PLANIFIE_FUTUR;
+                if (year == thisYear) return PLANIFIE_FUTUR;
                 else return PLANIFIE_NON_TRAITE;
-            } else{
+            } else {
                 return NON_PLANIFIE_NON_TRAITE;
             }
         }
     }
 
-    public static void setCheckBoxColor(final CheckBox cb, final String state){
+    public static void setCheckBoxColor(final CheckBox cb, final String state) {
         final Color color = getParcelleEtatColor(state);
-        if(color==null){
+        if (color == null) {
             cb.setBackground(Background.EMPTY);
-        }else{
+        } else {
             cb.setBackground(new Background(new BackgroundFill(color, new CornerRadii(30), new Insets(5))));
         }
     }
@@ -555,7 +609,7 @@ public final class VegetationSession {
      * @param state
      * @return
      */
-    public static Color getParcelleEtatColor(final String state){
+    public static Color getParcelleEtatColor(final String state) {
         if (state==null) return null;
         switch(state){
             case PLANIFIE_TRAITE : return Color.GREEN;
@@ -576,7 +630,7 @@ public final class VegetationSession {
      * @param parcelles liste des parcelles voulue ou nulle pour toute
      * @return
      */
-    public static MapLayer parcelleTrmtState(final PlanVegetation plan, final int year, Collection<ParcelleVegetation> parcelles){
+    public static MapLayer parcelleTrmtState(final PlanVegetation plan, final int year, Collection<ParcelleVegetation> parcelles) {
         //etat des parcelles : traité, non traité
         final ParcelleVegetationRepository parcelleRepo = VegetationSession.INSTANCE.getParcelleRepo();
 
@@ -596,9 +650,9 @@ public final class VegetationSession {
             throw new RuntimeException(ex);
         }
 
-        if(parcelles==null) parcelles = parcelleRepo.getByPlanId(plan.getId());
+        if (parcelles == null) parcelles = parcelleRepo.getByPlanId(plan.getId());
 
-        for(ParcelleVegetation pv : parcelles){
+        for (ParcelleVegetation pv : parcelles) {
             final Feature feature = writer.next();
             feature.setPropertyValue("id", pv.getId());
             feature.setPropertyValue("geometry", pv.getGeometry());
@@ -611,7 +665,7 @@ public final class VegetationSession {
 
         final FeatureCollection col = store.createSession(true).getFeatureCollection(QueryBuilder.all(ft.getName()));
         final MapLayer layer = MapBuilder.createFeatureLayer(col);
-        layer.setName("Traitement réel "+year);
+        layer.setName("Traitement réel " + year);
         layer.setStyle(createTraitementReelStyle());
 
         return layer;
@@ -629,7 +683,7 @@ public final class VegetationSession {
      * @param parcelles liste des parcelles voulue ou nulle pour toute
      * @return
      */
-    public static MapLayer parcellePanifState(final PlanVegetation plan, final int year, Collection<ParcelleVegetation> parcelles){
+    public static MapLayer parcellePanifState(final PlanVegetation plan, final int year, Collection<ParcelleVegetation> parcelles) {
         //etat des parcelles : planifié, traité, non planifié etc...
 
         final ParcelleVegetationRepository parcelleRepo = VegetationSession.INSTANCE.getParcelleRepo();
@@ -650,13 +704,13 @@ public final class VegetationSession {
             throw new RuntimeException(ex);
         }
 
-        if(parcelles==null) parcelles = parcelleRepo.getByPlanId(plan.getId());
+        if (parcelles == null) parcelles = parcelleRepo.getByPlanId(plan.getId());
 
-        for(ParcelleVegetation pv : parcelles){
+        for (ParcelleVegetation pv : parcelles) {
             final List<Boolean> planifications = pv.getPlanifications();
             int index = year - plan.getAnneeDebut();
             boolean planified = false;
-            if(planifications!=null && planifications.size()>index) planified = planifications.get(index);
+            if (planifications != null && planifications.size() > index) planified = planifications.get(index);
 
             final Feature feature = writer.next();
             feature.setPropertyValue("id", pv.getId());
@@ -670,13 +724,13 @@ public final class VegetationSession {
 
         final FeatureCollection col = store.createSession(true).getFeatureCollection(QueryBuilder.all(ft.getName()));
         final MapLayer layer = MapBuilder.createFeatureLayer(col);
-        layer.setName("Etat parcelle "+year);
+        layer.setName("Etat parcelle " + year);
         layer.setStyle(createParcelleStateStyle());
 
         return layer;
     }
 
-    public static MapLayer vegetationPlanifState(PlanVegetation plan, int year){
+    public static MapLayer vegetationPlanifState(PlanVegetation plan, int year) {
         //etat des vegetations par type de traitement a faire
 
         final ParcelleVegetationRepository parcelleRepo = VegetationSession.INSTANCE.getParcelleRepo();
@@ -699,13 +753,13 @@ public final class VegetationSession {
 
         //on liste tous les traitements
         final AbstractSIRSRepository<RefTraitementVegetation> trmtRepo = Injector.getSession().getRepositoryForClass(RefTraitementVegetation.class);
-        final Map<String,String> trmts = new HashMap<>();
-        for(RefTraitementVegetation trmt : trmtRepo.getAll()){
+        final Map<String, String> trmts = new HashMap<>();
+        for (RefTraitementVegetation trmt : trmtRepo.getAll()) {
             trmts.put(trmt.getDocumentId(), trmt.getLibelle());
         }
         trmts.put(null, "-");
 
-        for(ParcelleVegetation pv : parcelleRepo.getByPlanId(plan.getId())){
+        for (ParcelleVegetation pv : parcelleRepo.getByPlanId(plan.getId())) {
 
             //on regarde si c'est la premiere année
             final PlanifState planifState = VegetationSession.getParcellePlanifState(plan, pv, year);
@@ -716,18 +770,18 @@ public final class VegetationSession {
             vegetations.addAll(VegetationSession.INSTANCE.getPeuplementRepo().getByParcelleId(pv.getDocumentId()));
             vegetations.addAll(VegetationSession.INSTANCE.getArbreRepo().getByParcelleId(pv.getDocumentId()));
 
-            for(ZoneVegetation zone : vegetations){
+            for (ZoneVegetation zone : vegetations) {
                 String etat = null;
 
-                if(zone.getTraitement()!=null){
-                    if(planifState==PLANIFIE_PREMIERE_FOIS){
+                if (zone.getTraitement() != null) {
+                    if (planifState == PLANIFIE_PREMIERE_FOIS) {
                         //premiere année
                         String tid = zone.getTraitement().getTypeTraitementPonctuelId();
-                        if(tid==null || tid.isEmpty()){
+                        if (tid == null || tid.isEmpty()) {
                             tid = zone.getTraitement().getTypeTraitementId();
                         }
                         etat = trmts.get(tid);
-                    }else if(planifState==PLANIFIE_PREMIERE_FOIS){
+                    } else if (planifState == PLANIFIE_PREMIERE_FOIS) {
                         final String tid = zone.getTraitement().getTypeTraitementId();
                         etat = trmts.get(tid);
                     }
@@ -746,7 +800,7 @@ public final class VegetationSession {
 
         final FeatureCollection col = store.createSession(true).getFeatureCollection(QueryBuilder.all(ft.getName()));
         final MapLayer layer = MapBuilder.createFeatureLayer(col);
-        layer.setName("Traitement planifié "+year);
+        layer.setName("Traitement planifié " + year);
         layer.setStyle(createTraitementPlanifiéStyle(trmts.values()));
 
         return layer;
@@ -759,13 +813,13 @@ public final class VegetationSession {
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
         style.featureTypeStyles().add(fts);
 
-        final MutableRule traiteRule = createParcelleRule(Boolean.TRUE,      new java.awt.Color(0.0f, 0.7f, 0.0f, 0.6f));
+        final MutableRule traiteRule = createParcelleRule(Boolean.TRUE, new java.awt.Color(0.0f, 0.7f, 0.0f, 0.6f));
         traiteRule.setName("Traité");
-        traiteRule.setDescription(SF.description(traiteRule.getName(),traiteRule.getName()));
+        traiteRule.setDescription(SF.description(traiteRule.getName(), traiteRule.getName()));
 
-        final MutableRule nonTraiteRule = createParcelleRule(Boolean.FALSE,      new java.awt.Color(0.7f, 0.0f, 0.0f, 0.6f));
+        final MutableRule nonTraiteRule = createParcelleRule(Boolean.FALSE, new java.awt.Color(0.7f, 0.0f, 0.0f, 0.6f));
         nonTraiteRule.setName("Non traité");
-        nonTraiteRule.setDescription(SF.description(nonTraiteRule.getName(),nonTraiteRule.getName()));
+        nonTraiteRule.setDescription(SF.description(nonTraiteRule.getName(), nonTraiteRule.getName()));
 
         fts.rules().add(traiteRule);
         fts.rules().add(nonTraiteRule);
@@ -773,7 +827,7 @@ public final class VegetationSession {
         return style;
     }
 
-    private static MutableStyle createTraitementPlanifiéStyle(Collection<String> types){
+    private static MutableStyle createTraitementPlanifiéStyle(Collection<String> types) {
 
         final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
         final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
@@ -782,12 +836,12 @@ public final class VegetationSession {
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
         style.featureTypeStyles().add(fts);
 
-        for(String str : types){
+        for (String str : types) {
 
             final java.awt.Color color;
-            if(str.equals("-")){
+            if (str.equals("-")) {
                 color = java.awt.Color.LIGHT_GRAY;
-            }else{
+            } else {
                 color = RandomStyleBuilder.randomColor();
             }
 
@@ -798,9 +852,9 @@ public final class VegetationSession {
             rulePoint.setDescription(SF.description(str, str));
             rulePoint.setFilter(
                     FF.and(
-                        FF.equals(FF.function("geometryType", FF.property("geometry")),FF.literal("Point")),
-                        FF.equals(FF.property("etat"), FF.literal(str)))
-                    );
+                            FF.equals(FF.function("geometryType", FF.property("geometry")), FF.literal("Point")),
+                            FF.equals(FF.property("etat"), FF.literal(str)))
+            );
 
             final Stroke stroke = SF.stroke(java.awt.Color.BLACK, 1);
             final Fill fill = SF.fill(color);
@@ -808,7 +862,7 @@ public final class VegetationSession {
             try {
                 extMark = SF.externalMark(
                         SF.onlineResource(IconBuilder.FONTAWESOME.toURI()),
-                        "ttf",FontAwesomeIcons.ICON_TREE.codePointAt(0));
+                        "ttf", FontAwesomeIcons.ICON_TREE.codePointAt(0));
             } catch (URISyntaxException ex) {
                 //n'arrivera pas
                 throw new RuntimeException(ex);
@@ -831,9 +885,9 @@ public final class VegetationSession {
             rulePoly.setDescription(SF.description(str, str));
             rulePoly.setFilter(
                     FF.and(
-                        FF.equals(FF.function("geometryType", FF.property("geometry")),FF.literal("Polygon")),
-                        FF.equals(FF.property("etat"), FF.literal(str)))
-                    );
+                            FF.equals(FF.function("geometryType", FF.property("geometry")), FF.literal("Polygon")),
+                            FF.equals(FF.property("etat"), FF.literal(str)))
+            );
             final Stroke strokePoly = SF.stroke(java.awt.Color.BLACK, 1);
             final Fill fillPoly = SF.fill(color);
             rulePoly.symbolizers().add(SF.polygonSymbolizer(strokePoly, fillPoly, null));
@@ -852,17 +906,17 @@ public final class VegetationSession {
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
         style.featureTypeStyles().add(fts);
 
-        fts.rules().add(createParcelleRule(VegetationSession.PLANIFIE_TRAITE,      new java.awt.Color(0.0f, 0.7f, 0.0f, 0.6f)));
-        fts.rules().add(createParcelleRule(VegetationSession.PLANIFIE_NON_TRAITE,   new java.awt.Color(0.7f, 0.0f, 0.0f, 0.6f)));
-        fts.rules().add(createParcelleRule(VegetationSession.PLANIFIE_FUTUR,       new java.awt.Color(0.0f, 0.0f, 0.7f, 0.6f)));
-        fts.rules().add(createParcelleRule(VegetationSession.NON_PLANIFIE_TRAITE,   new java.awt.Color(0.6f, 0.4f, 0.0f, 0.6f)));
-        fts.rules().add(createParcelleRule(VegetationSession.NON_PLANIFIE_NON_TRAITE,new java.awt.Color(0.7f, 0.7f, 0.7f, 0.6f)));
-        fts.rules().add(createParcelleRule(VegetationSession.NON_PLANIFIE_FUTUR,    new java.awt.Color(0.7f, 0.7f, 0.7f, 0.6f)));
+        fts.rules().add(createParcelleRule(VegetationSession.PLANIFIE_TRAITE, new java.awt.Color(0.0f, 0.7f, 0.0f, 0.6f)));
+        fts.rules().add(createParcelleRule(VegetationSession.PLANIFIE_NON_TRAITE, new java.awt.Color(0.7f, 0.0f, 0.0f, 0.6f)));
+        fts.rules().add(createParcelleRule(VegetationSession.PLANIFIE_FUTUR, new java.awt.Color(0.0f, 0.0f, 0.7f, 0.6f)));
+        fts.rules().add(createParcelleRule(VegetationSession.NON_PLANIFIE_TRAITE, new java.awt.Color(0.6f, 0.4f, 0.0f, 0.6f)));
+        fts.rules().add(createParcelleRule(VegetationSession.NON_PLANIFIE_NON_TRAITE, new java.awt.Color(0.7f, 0.7f, 0.7f, 0.6f)));
+        fts.rules().add(createParcelleRule(VegetationSession.NON_PLANIFIE_FUTUR, new java.awt.Color(0.7f, 0.7f, 0.7f, 0.6f)));
 
         return style;
     }
 
-    private static MutableRule createParcelleRule(Object state, java.awt.Color color){
+    private static MutableRule createParcelleRule(Object state, java.awt.Color color) {
         final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
         final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
         final MutableRule rule = SF.rule();
@@ -878,10 +932,10 @@ public final class VegetationSession {
         g.fillRect(0, 0, 2, 100);
         g.dispose();
 
-        final ExternalGraphic external = SF.externalGraphic(new ImageIcon(img),Collections.EMPTY_LIST);
+        final ExternalGraphic external = SF.externalGraphic(new ImageIcon(img), Collections.EMPTY_LIST);
 
-        final Expression rotationStart = FF.subtract(FF.literal(0),FF.function("toDegrees", FF.function("startAngle", FF.property("geometry"))));
-        final Expression rotationEnd = FF.subtract(FF.literal(0),FF.function("toDegrees", FF.function("endAngle", FF.property("geometry"))));
+        final Expression rotationStart = FF.subtract(FF.literal(0), FF.function("toDegrees", FF.function("startAngle", FF.property("geometry"))));
+        final Expression rotationEnd = FF.subtract(FF.literal(0), FF.function("toDegrees", FF.function("endAngle", FF.property("geometry"))));
 
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(200);
         final List<GraphicalSymbol> symbols = new ArrayList<>();
