@@ -90,7 +90,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
     private static final StringConverter<Double> SEVEN_DIGITS_CONVERTER = new FormattedDoubleConverter(new DecimalFormat("#.#######"));
     private static final StringConverter<Double> TWO_DIGITS_CONVERTER = new FormattedDoubleConverter(new DecimalFormat("#.##"));
 
-    private final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
+    final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
 
     private final ObjectProperty<Positionable> posProperty = new SimpleObjectProperty<>();
     protected final BooleanProperty disableProperty = new SimpleBooleanProperty(true);
@@ -266,7 +266,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         final String mode = pos.getGeometryMode();
         Point startPoint, endPoint;
         if (mode == null || getID().equals(mode)) {
-            //on peut réutiliser les points enregistré dans la position
+            //on peut réutiliser les points enregistrés dans la position
             startPoint = pos.getPositionDebut();
             endPoint = pos.getPositionFin();
         } else {
@@ -304,24 +304,27 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             }
         }
 
-        if (startPoint != null) {
-            uiLongitudeStart.getValueFactory().setValue(startPoint.getX());
-             uiLatitudeStart.getValueFactory().setValue(startPoint.getY());
-        } else {
-            uiLongitudeStart.getValueFactory().setValue(null);
-             uiLatitudeStart.getValueFactory().setValue(null);
-
-        }
-
-        if (endPoint != null) {
-            uiLongitudeEnd.getValueFactory().setValue(endPoint.getX());
-             uiLatitudeEnd.getValueFactory().setValue(endPoint.getY());
-        } else {
-            uiLongitudeEnd.getValueFactory().setValue(null);
-             uiLatitudeEnd.getValueFactory().setValue(null);
-        }
-
+        updateLatLonStartEndFromStartAndEnd(startPoint, endPoint);
         reseting = false;
+    }
+
+    void updateLatLonStartEndFromStartAndEnd(final Point startPoint, final Point endPoint) {
+        updateLatLonSpinnerWithPoint(startPoint, uiLongitudeStart, uiLatitudeStart);
+        updateLatLonSpinnerWithPoint(endPoint, uiLongitudeEnd, uiLatitudeEnd);
+    }
+
+    private void updateLatLonSpinnerWithPoint(final Point point, final Spinner<Double> lonSpinner, final Spinner<Double> latSpinner) {
+        if (point != null) {
+            if (lonSpinner != null && lonSpinner.getValueFactory() != null)
+                lonSpinner.getValueFactory().valueProperty().set(point.getX());
+            if (latSpinner != null && latSpinner.getValueFactory() != null)
+                latSpinner.getValueFactory().valueProperty().set(point.getY());
+        } else {
+            if (lonSpinner != null && lonSpinner.getValueFactory() != null)
+                lonSpinner.getValueFactory().setValue(null);
+            if (latSpinner != null && latSpinner.getValueFactory() != null)
+                latSpinner.getValueFactory().setValue(null);
+        }
     }
 
     @Override
@@ -330,15 +333,11 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         final Positionable positionable = posProperty.get();
 
         // On ne met la géométrie à jour depuis ce panneau que si on est dans son mode.
-        if (!getID().equals(positionable.getGeometryMode())) {
-            return;
-        }
+        if (!getID().equals(positionable.getGeometryMode())) return;
 
         // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
         final CoordinateReferenceSystem crs = uiCRSs.getValue();
-        if (crs == null) {
-            return;
-        }
+        if (crs == null) return;
 
         Point startPoint = null;
         Point endPoint = null;
@@ -354,15 +353,9 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             JTS.setCRS(endPoint, crs);
         }
 
-        if (startPoint == null && endPoint == null) {
-            return;
-        }
-        if (startPoint == null) {
-            startPoint = endPoint;
-        }
-        if (endPoint == null) {
-            endPoint = startPoint;
-        }
+        if (startPoint == null && endPoint == null) return;
+        if (startPoint == null) startPoint = endPoint;
+        if (endPoint == null) endPoint = startPoint;
 
         //on sauvegarde les points dans le crs de la base
         if (!Utilities.equalsIgnoreMetadata(crs, baseCrs)) {

@@ -215,27 +215,37 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
             throw new RuntimeException("Impossible de recalculer des coordonnées de position uniquement à partir des PR");
         }
 
-        //Si c'est une coordonnées Géo qui a été modifiée on recalcule les coordonnées linéaires :
-        if ((modifiedPropretieName.equals(SirsCore.POSITION_DEBUT_FIELD)) || (modifiedPropretieName.equals(SirsCore.POSITION_FIN_FIELD))) {
+        switch (modifiedPropretieName) {
+            //Si c'est une coordonnées Géo qui a été modifiée on recalcule les coordonnées linéaires :
+            case SirsCore.POSITION_DEBUT_FIELD:
+            case SirsCore.POSITION_FIN_FIELD:
 
-            buildGeometryCoord((ZoneVegetation) positionableToUpdate);
+                buildGeometryCoord((ZoneVegetation) positionableToUpdate);
+                break;
 
             //Si c'est une coordonnées Linéaire qui a été modifiée on recalcule les coordonnées géo :
-        } else if ((modifiedPropretieName.equals(SirsCore.BORNE_DEBUT_AVAL)) || (modifiedPropretieName.equals(SirsCore.BORNE_FIN_AVAL))
-                || (modifiedPropretieName.equals(SirsCore.BORNE_DEBUT_DISTANCE)) || (modifiedPropretieName.equals(SirsCore.BORNE_FIN_DISTANCE))
-                || (modifiedPropretieName.equals(SirsCore.BORNE_DEBUT_ID)) || (modifiedPropretieName.equals(SirsCore.BORNE_FIN_ID))) {
+            case SirsCore.BORNE_DEBUT_AVAL:
+            case SirsCore.BORNE_FIN_AVAL:
+            case SirsCore.BORNE_DEBUT_DISTANCE:
+            case SirsCore.BORNE_FIN_DISTANCE:
+            case SirsCore.BORNE_DEBUT_ID:
+            case SirsCore.BORNE_FIN_ID:
 
-            buildLinearGeometry((ZoneVegetation) positionableToUpdate);
+                buildLinearGeometry((ZoneVegetation) positionableToUpdate);
+                break;
 
             //Si c'est une distance au tronçon qui a été modifiée on recalcule les coordonnées géo ou linéaire en fonction du paramètre editedGeoCoordinateProperty:
-        } else if ((modifiedPropretieName.equals(SirsCore.DISTANCE_DEBUT_MIN)) || (modifiedPropretieName.equals(SirsCore.DISTANCE_DEBUT_MAX))
-                || (modifiedPropretieName.equals(SirsCore.DISTANCE_FIN_MIN)) || (modifiedPropretieName.equals(SirsCore.DISTANCE_FIN_MAX))) {
+            case SirsCore.DISTANCE_DEBUT_MIN:
+            case SirsCore.DISTANCE_DEBUT_MAX:
+            case SirsCore.DISTANCE_FIN_MIN:
+            case SirsCore.DISTANCE_FIN_MAX:
 
-            if (positionableToUpdate.getEditedGeoCoordinate())
-                buildGeometryCoord((ZoneVegetation) positionableToUpdate);
-            else
-                buildLinearGeometry((ZoneVegetation) positionableToUpdate);
+                if (positionableToUpdate.getEditedGeoCoordinate())
+                    buildGeometryCoord((ZoneVegetation) positionableToUpdate);
+                else
+                    buildLinearGeometry((ZoneVegetation) positionableToUpdate);
 
+                break;
         }
     }
 

@@ -20,7 +20,6 @@ package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.Injector;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.GeometryType;
 import fr.sirs.core.model.Positionable;
@@ -164,33 +163,8 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
             //on peut réutiliser les points enregistré dans la position
             final Point startPos = pos.getPositionDebut();
             final Point endPos = pos.getPositionFin();
-            if (startPos != null) {
-                if (uiLongitudeStart != null && uiLongitudeStart.getValueFactory() != null)
-                    uiLongitudeStart.getValueFactory().valueProperty().set(startPos.getX());
-                if (uiLatitudeStart != null && uiLatitudeStart.getValueFactory() != null)
-                    uiLatitudeStart.getValueFactory().valueProperty().set(startPos.getY());
-            } else {
-                if (uiLongitudeStart != null && uiLongitudeStart.getValueFactory() != null)
-                    uiLongitudeStart.getValueFactory().setValue(null);
-                if (uiLatitudeStart != null && uiLatitudeStart.getValueFactory() != null)
-                    uiLatitudeStart.getValueFactory().setValue(null);
-            }
-            if (endPos != null) {
-                if (uiLongitudeEnd != null && uiLongitudeEnd.getValueFactory() != null)
-                    uiLongitudeEnd.getValueFactory().valueProperty().set(endPos.getX());
-                if (uiLatitudeEnd != null && uiLatitudeEnd.getValueFactory() != null)
-                    uiLatitudeEnd.getValueFactory().valueProperty().set(endPos.getY());
-            } else {
-                if (uiLongitudeEnd != null && uiLongitudeEnd.getValueFactory() != null)
-                    uiLongitudeEnd.getValueFactory().setValue(null);
-                if (uiLatitudeEnd != null && uiLatitudeEnd.getValueFactory() != null)
-                    uiLatitudeEnd.getValueFactory().setValue(null);
-            }
-            uiStartNear.getValueFactory().setValue(pos.getDistanceDebutMin());
-            uiStartFar.getValueFactory().setValue(pos.getDistanceDebutMax());
-            uiEndNear.getValueFactory().setValue(pos.getDistanceFinMin());
-            uiEndFar.getValueFactory().setValue(pos.getDistanceFinMax());
-
+            updateLatLonStartEndFromStartAndEnd(startPos, endPos);
+            updateDistanceSpinners(pos);
         } else if (pos.getGeometry() != null) {
             //on calcule les valeurs en fonction des points de debut et fin
 
@@ -199,27 +173,16 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
             final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
             final Point geoPointStart = ps.getGeoPointStart();
             final Point geoPointEnd = ps.getGeoPointEnd();
-
-            uiLongitudeStart.getValueFactory().setValue(geoPointStart == null ? null : geoPointStart.getX());
-            uiLatitudeStart.getValueFactory().setValue(geoPointStart == null ? null : geoPointStart.getY());
-            uiLongitudeEnd.getValueFactory().setValue(geoPointEnd == null ? null : geoPointEnd.getX());
-            uiLatitudeEnd.getValueFactory().setValue(geoPointEnd == null ? null : geoPointEnd.getY());
-
-            uiStartNear.getValueFactory().setValue(pos.getDistanceDebutMin());
-            uiStartFar.getValueFactory().setValue(pos.getDistanceDebutMax());
-            uiEndNear.getValueFactory().setValue(pos.getDistanceFinMin());
-            uiEndFar.getValueFactory().setValue(pos.getDistanceFinMax());
+            updateLatLonStartEndFromStartAndEnd(geoPointStart, geoPointEnd);
+            updateDistanceSpinners(pos);
         } else {
             //pas de geometrie
-            uiLongitudeStart.getValueFactory().setValue(null);
-            uiLatitudeStart.getValueFactory().setValue(null);
-            uiLongitudeEnd.getValueFactory().setValue(null);
-            uiLatitudeEnd.getValueFactory().setValue(null);
+            updateLatLonStartEndFromStartAndEnd(null, null);
 
-            uiStartNear.getValueFactory().setValue(0.0);
-            uiStartFar.getValueFactory().setValue(0.0);
-            uiEndNear.getValueFactory().setValue(0.0);
-            uiEndFar.getValueFactory().setValue(0.0);
+            updateSpinnerWithValue(uiStartNear, 0.0);
+            updateSpinnerWithValue(uiStartFar, 0.0);
+            updateSpinnerWithValue(uiEndNear, 0.0);
+            updateSpinnerWithValue(uiEndFar, 0.0);
         }
 
         //on cache certains champs si c'est un ponctuel
@@ -229,23 +192,39 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         setReseting(false);
     }
 
+    private void updateSpinnerWithValue(Spinner<Double> spinner, Double value) {
+        if (value != null) {
+            if (spinner != null && spinner.getValueFactory() != null)
+                spinner.getValueFactory().valueProperty().set(value);
+        } else {
+            if (spinner != null && spinner.getValueFactory() != null)
+                spinner.getValueFactory().setValue(null);
+        }
+    }
+
+    private void updateDistanceSpinners(PositionableVegetation pos) {
+        updateSpinnerWithValue(uiStartNear, pos.getDistanceDebutMin());
+        updateSpinnerWithValue(uiStartFar, pos.getDistanceDebutMax());
+        updateSpinnerWithValue(uiEndNear, pos.getDistanceFinMin());
+        updateSpinnerWithValue(uiEndFar, pos.getDistanceFinMax());
+    }
+
 
     @Override
     public void buildGeometry(){
 
         final ZoneVegetation zone = (ZoneVegetation) positionableProperty().get();
 
-        // On ne met la géométrie à jour depuis ce panneau que si on est dans son mode.
-        if (!getID().equals(zone.getGeometryMode())) return;
-
         zone.setDistanceDebutMin(uiStartNear.getValue());
         zone.setDistanceDebutMax(uiStartFar.getValue());
         zone.setDistanceFinMin(uiEndNear.getValue());
         zone.setDistanceFinMax(uiEndFar.getValue());
 
+        // On ne met la géométrie à jour depuis ce panneau que si on est dans son mode.
+        if (!getID().equals(zone.getGeometryMode())) return;
 
         // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
-        final CoordinateReferenceSystem crs = uiCRSs.getSelectionModel().getSelectedItem();
+        final CoordinateReferenceSystem crs = uiCRSs.getValue();
         if (crs == null) return;
 
         Point startPoint = null;
@@ -267,9 +246,9 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         if (endPoint == null) endPoint = startPoint;
 
         //on sauvegarde les points dans le crs de la base
-        if (!Utilities.equalsIgnoreMetadata(crs, Injector.getSession().getProjection())) {
+        if (!Utilities.equalsIgnoreMetadata(crs, baseCrs)) {
             try {
-                final MathTransform trs = CRS.findOperation(crs, Injector.getSession().getProjection(), null).getMathTransform();
+                final MathTransform trs = CRS.findOperation(crs, baseCrs, null).getMathTransform();
                 startPoint = (Point) JTS.transform(startPoint, trs);
                 endPoint = (Point) JTS.transform(endPoint, trs);
             } catch (FactoryException | MismatchedDimensionException | TransformException ex) {

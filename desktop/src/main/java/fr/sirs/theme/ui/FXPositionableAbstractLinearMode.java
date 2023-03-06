@@ -265,7 +265,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
      * listeners des champs borneDebut et borneFin.
      * @param isBorne
      */
-    private void updateFields(final boolean isBorne) {
+    void updateFields(final boolean isBorne) {
         reseting = true;
         try {
             final Positionable pos = posProperty.get();
@@ -304,15 +304,13 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
                 uiBorneStart.valueProperty().set(borneMap.get(pos.borneDebutIdProperty().get()));
                 uiBorneEnd.valueProperty().set(borneMap.get(pos.borneFinIdProperty().get()));
 
+            } else if (pos.getGeometry() != null) {
+                //on calcule les valeurs en fonction des points de debut et fin
+                final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
+                updateFromPosSRInfo(defaultSR, ps);
             } else {
-                try {
-                    //on calcule les valeurs en fonction des points de debut et fin
-                    final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
-                    updateFromPosSRInfo(defaultSR, ps);
-                } catch (Exception e) {
-                    //pas de geometrie
-                    updateWithDefaultValues();
-                }
+                //pas de geometrie
+                updateWithDefaultValues();
             }
 
         } finally {
@@ -366,6 +364,13 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
             return;
         }
 
+        setValuesFromUi(positionable);
+
+        //on recalcule la geométrie et les coordonnées Géo du positionable.
+        ConvertPositionableCoordinates.computePositionableGeometryAndCoord(positionable);
+    }
+
+    void setValuesFromUi(Positionable positionable) {
         final SystemeReperage sr = uiSRs.getValue();
         final BorneDigue startBorne = uiBorneStart.getValue();
         final BorneDigue endBorne = uiBorneEnd.getValue();
@@ -376,9 +381,6 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         positionable.setBorne_fin_aval(uiAmontEnd.isSelected());
         positionable.setBorne_debut_distance(uiDistanceStart.getValue());
         positionable.setBorne_fin_distance(uiDistanceEnd.getValue());
-
-        //on recalcule la geométrie et les coordonnées Géo du positionable.
-        ConvertPositionableCoordinates.computePositionableGeometryAndCoord(positionable);
     }
 
     protected void coordChange(final boolean isBorne) {
