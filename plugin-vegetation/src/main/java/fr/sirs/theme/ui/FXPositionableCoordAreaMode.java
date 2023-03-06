@@ -1,42 +1,33 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
 package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
-import fr.sirs.core.LinearReferencingUtilities;
-import static fr.sirs.core.LinearReferencingUtilities.buildSegmentFromDistance;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.GeometryType;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PositionableVegetation;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.ZoneVegetation;
-import static fr.sirs.plugin.vegetation.PluginVegetation.computeRatio;
-import static fr.sirs.plugin.vegetation.PluginVegetation.toPoint;
-import static fr.sirs.plugin.vegetation.PluginVegetation.toPolygon;
 import fr.sirs.util.ConvertPositionableCoordinates;
-import java.util.Map;
 import java.util.stream.Stream;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
@@ -51,11 +42,8 @@ import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.internal.GeotkFX;
 import org.apache.sis.referencing.CRS;
-import org.geotoolkit.referencing.LinearReferencing.ProjectedPoint;
-import org.geotoolkit.referencing.LinearReferencing.SegmentInfo;
-import static org.geotoolkit.referencing.LinearReferencing.asLineString;
-import static org.geotoolkit.referencing.LinearReferencing.buildSegments;
-import static org.geotoolkit.referencing.LinearReferencing.projectReference;
+
+import static fr.sirs.plugin.vegetation.PluginVegetation.*;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -70,7 +58,7 @@ import org.apache.sis.util.Utilities;
  */
 public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode {
 
-    private static final String MODE = "COORD_AREA";
+    public static final String MODE = "COORD_AREA";
 
     //area
     @FXML private Spinner<Double> uiStartNear;
@@ -278,74 +266,7 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         if (startPoint == null) startPoint = endPoint;
         if (endPoint == null) endPoint = startPoint;
 
-        final TronconDigue troncon = ConvertPositionableCoordinates.getTronconFromPositionable(zone);
-
-        if (troncon == null) throw new IllegalStateException("Failed to retrieve tronçon from Positionable : " + zone);
-
-        //on calcule le ratio on fonction de la rive et du coté
-        double ratio = computeRatio(troncon, zone);
-
-        //on extrude avec la distance
-        Geometry geometry;
-        final LineString linear;
-
-        if (GeometryType.PONCTUAL.equals(zone.getGeometryType())) {
-
-            final LineString tronconLineString = asLineString(troncon.getGeometry());
-            final SegmentInfo[] segments = buildSegments(tronconLineString);
-
-            // Projection du point géographique sur le troncon pour obtenir une distance depuis le début du tronçon jusqu'au point projeté.
-            final ProjectedPoint projected = projectReference(segments, startPoint);
-
-            /*
-            Pour un point, il faut récupérer à partir de la géométrie du tronçon
-            le segment sur lequel se trouve le point, car pour mesurer la
-            direction du décalage perpendiculaire au tronçon, un point seul ne
-            suffit pas.
-            */
-            final Map.Entry<LineString, Double> pointAndSegment = buildSegmentFromDistance(
-                    segments, projected.distanceAlongLinear);
-            linear = pointAndSegment.getKey();
-            if (ratio == 0.) ratio = 1.;// On ne met pas un arbre des deux côtés.
-            geometry = toPoint(linear,
-                    zone.getDistanceDebutMin() * ratio,
-                    pointAndSegment.getValue());
-        } else {
-            /*
-            Si on n'a pas à faire à un ponctuel, on peut utiliser la géométrie
-            de la structure plutôt que celle du tronçon.
-            */
-            linear = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
-            if (ratio == 0) {
-                //des 2 cotés
-                ratio = 1;
-                final Polygon left = toPolygon(linear,
-                        zone.getDistanceDebutMin() * ratio,
-                        zone.getDistanceDebutMax() * ratio,
-                        zone.getDistanceFinMin() * ratio,
-                        zone.getDistanceFinMax() * ratio);
-                ratio = -1;
-                final Polygon right = toPolygon(linear,
-                        zone.getDistanceDebutMin() * ratio,
-                        zone.getDistanceDebutMax() * ratio,
-                        zone.getDistanceFinMin() * ratio,
-                        zone.getDistanceFinMax() * ratio);
-                geometry = GO2Utilities.JTS_FACTORY.createMultiPolygon(new Polygon[]{left, right});
-                geometry.setSRID(linear.getSRID());
-                geometry.setUserData(linear.getUserData());
-
-            } else {
-                //1 coté
-                geometry = toPolygon(linear,
-                        zone.getDistanceDebutMin() * ratio,
-                        zone.getDistanceDebutMax() * ratio,
-                        zone.getDistanceFinMin() * ratio,
-                        zone.getDistanceFinMax() * ratio);
-            }
-        }
-
         //on sauvegarde les points dans le crs de la base
-        zone.setGeometry(geometry);
         if (!Utilities.equalsIgnoreMetadata(crs, Injector.getSession().getProjection())) {
             try {
                 final MathTransform trs = CRS.findOperation(crs, Injector.getSession().getProjection(), null).getMathTransform();
@@ -356,11 +277,9 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
                 throw new RuntimeException("La conversion des positions a échouée.", ex);
             }
         }
-        zone.setPositionDebut(startPoint);
-        zone.setPositionFin(endPoint);
-        zone.geometryModeProperty().set(getID());
-        zone.geometryProperty().set(geometry);
-    }
+
+        buildCoordGeometry(zone, startPoint, endPoint, MODE);
+  }
 
     @Override
     protected Stream<Spinner> getSpinners() {

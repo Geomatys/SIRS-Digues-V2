@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -165,16 +165,30 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         final ChangeListener<Boolean> updateEditedGeoCoordinatesDisplay = (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             setCoordinatesLabel(oldValue, newValue);
         };
+        // Listener pour les changements sur les paramètres de début et de fin, dans le cadre de l'import de bornes par exemple ou de changement dans la pojoTable.
+        final ChangeListener pointListener = (obs, oldVal, newVal) -> updateFields();
 
         posProperty.addListener((observable, oldValue, newValue) -> {
             if (oldValue != null) {
                 oldValue.geometryProperty().removeListener(geomListener);
                 oldValue.editedGeoCoordinateProperty().removeListener(updateEditedGeoCoordinatesDisplay);
+                oldValue.borneFinIdProperty().removeListener(pointListener);
+                oldValue.borneDebutIdProperty().removeListener(pointListener);
+                oldValue.borne_debut_avalProperty().removeListener(pointListener);
+                oldValue.borne_debut_distanceProperty().removeListener(pointListener);
+                oldValue.borne_fin_avalProperty().removeListener(pointListener);
+                oldValue.borne_fin_distanceProperty().removeListener(pointListener);
             }
             if (newValue != null) {
                 newValue.geometryProperty().addListener(geomListener);
                 newValue.editedGeoCoordinateProperty().addListener(updateEditedGeoCoordinatesDisplay);
                 setCoordinatesLabel(null, posProperty.get().getEditedGeoCoordinate());
+                newValue.borneFinIdProperty().addListener(pointListener);
+                newValue.borneDebutIdProperty().addListener(pointListener);
+                newValue.borne_debut_avalProperty().addListener(pointListener);
+                newValue.borne_debut_distanceProperty().addListener(pointListener);
+                newValue.borne_fin_avalProperty().addListener(pointListener);
+                newValue.borne_fin_distanceProperty().addListener(pointListener);
                 updateFields();
             }
         });
@@ -294,28 +308,10 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
                 try {
                     //on calcule les valeurs en fonction des points de debut et fin
                     final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
-                    final TronconUtils.PosSR rp = ps.getForSR(defaultSR);
-
-                    uiAvalStart.setSelected(!rp.startAval);
-                    uiAmontStart.setSelected(rp.startAval);
-                    uiDistanceStart.getValueFactory().setValue(rp.distanceStartBorne);
-                    uiBorneStart.getSelectionModel().select(rp.borneDigueStart);
-
-                    uiAvalEnd.setSelected(!rp.endAval);
-                    uiAmontEnd.setSelected(rp.endAval);
-                    uiDistanceEnd.getValueFactory().setValue(rp.distanceEndBorne);
-                    uiBorneEnd.getSelectionModel().select(rp.borneDigueEnd);
+                    updateFromPosSRInfo(defaultSR, ps);
                 } catch (Exception e) {
                     //pas de geometrie
-                    uiAvalStart.setSelected(true);
-                    uiAmontStart.setSelected(false);
-                    uiDistanceStart.getValueFactory().setValue(0.0);
-                    uiBorneStart.getSelectionModel().clearSelection();
-
-                    uiAvalEnd.setSelected(true);
-                    uiAmontEnd.setSelected(false);
-                    uiDistanceEnd.getValueFactory().setValue(0.0);
-                    uiBorneEnd.getSelectionModel().clearSelection();
+                    updateWithDefaultValues();
                 }
             }
 
@@ -431,34 +427,42 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
             try {
                 //on calcule les valeurs en fonction des points de debut et fin
                 final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(positionableProperty().get());
-                final TronconUtils.PosSR rp = ps.getForSR(newSR);
-
-                uiAvalStart.setSelected(!rp.startAval);
-                uiAmontStart.setSelected(rp.startAval);
-                uiDistanceStart.getValueFactory().setValue(rp.distanceStartBorne);
-                uiBorneStart.getSelectionModel().select(rp.borneDigueStart);
-
-                uiAvalEnd.setSelected(!rp.endAval);
-                uiAmontEnd.setSelected(rp.endAval);
-                uiDistanceEnd.getValueFactory().setValue(rp.distanceEndBorne);
-                uiBorneEnd.getSelectionModel().select(rp.borneDigueEnd);
+                updateFromPosSRInfo(newSR, ps);
             } catch (Exception e) {
                 //pas de geometrie
-                uiAvalStart.setSelected(true);
-                uiAmontStart.setSelected(false);
-                uiDistanceStart.getValueFactory().setValue(0.0);
-                uiBorneStart.getSelectionModel().clearSelection();
-
-                uiAvalEnd.setSelected(true);
-                uiAmontEnd.setSelected(false);
-                uiDistanceEnd.getValueFactory().setValue(0.0);
-                uiBorneEnd.getSelectionModel().clearSelection();
+                updateWithDefaultValues();
             }
 
             buildGeometry();
         } finally {
             reseting = false;
         }
+    }
+
+    private void updateWithDefaultValues() {
+        uiAvalStart.setSelected(true);
+        uiAmontStart.setSelected(false);
+        uiDistanceStart.getValueFactory().setValue(0.0);
+        uiBorneStart.getSelectionModel().clearSelection();
+
+        uiAvalEnd.setSelected(true);
+        uiAmontEnd.setSelected(false);
+        uiDistanceEnd.getValueFactory().setValue(0.0);
+        uiBorneEnd.getSelectionModel().clearSelection();
+    }
+
+    void updateFromPosSRInfo(SystemeReperage newSR, TronconUtils.PosInfo ps) {
+        final TronconUtils.PosSR rp = ps.getForSR(newSR);
+
+        uiAvalStart.setSelected(!rp.startAval);
+        uiAmontStart.setSelected(rp.startAval);
+        uiDistanceStart.getValueFactory().setValue(rp.distanceStartBorne);
+        uiBorneStart.getSelectionModel().select(rp.borneDigueStart);
+
+        uiAvalEnd.setSelected(!rp.endAval);
+        uiAmontEnd.setSelected(rp.endAval);
+        uiDistanceEnd.getValueFactory().setValue(rp.distanceEndBorne);
+        uiBorneEnd.getSelectionModel().select(rp.borneDigueEnd);
     }
 
     /**

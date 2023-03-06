@@ -1,29 +1,24 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
 package fr.sirs.theme.ui;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
-import fr.sirs.core.LinearReferencingUtilities;
-import static fr.sirs.core.LinearReferencingUtilities.buildSegmentFromBorne;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.BorneDigue;
@@ -33,13 +28,10 @@ import fr.sirs.core.model.PositionableVegetation;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.ZoneVegetation;
-import static fr.sirs.plugin.vegetation.PluginVegetation.computeRatio;
-import static fr.sirs.plugin.vegetation.PluginVegetation.toPoint;
-import static fr.sirs.plugin.vegetation.PluginVegetation.toPolygon;
+import fr.sirs.plugin.vegetation.PluginVegetation;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -49,8 +41,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import org.geotoolkit.display2d.GO2Utilities;
-import static org.geotoolkit.referencing.LinearReferencing.asLineString;
 
 /**
  * Edition des bornes d'un {@link Positionable}.
@@ -140,11 +130,11 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         });
 
         positionableProperty().addListener((observable, oldValue, newValue) -> {
-            if(newValue instanceof ZoneVegetation){
-                ((ZoneVegetation) newValue).typeCoteIdProperty().addListener(typeCoteChangeListener);
-            }
-            if(oldValue instanceof ZoneVegetation){
+            if (oldValue instanceof ZoneVegetation) {
                 ((ZoneVegetation) newValue).typeCoteIdProperty().removeListener(typeCoteChangeListener);
+            }
+            if (newValue instanceof ZoneVegetation) {
+                ((ZoneVegetation) newValue).typeCoteIdProperty().addListener(typeCoteChangeListener);
             }
         });
     }
@@ -163,7 +153,6 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
 
         final TronconDigue t = ConvertPositionableCoordinates.getTronconFromPositionable(pos);
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
-        final List<SystemeReperage> srs = srRepo.getByLinear(t);
         final SystemeReperage defaultSR;
         if (pos.getSystemeRepId() != null) {
             defaultSR = srRepo.get(pos.getSystemeRepId());
@@ -200,17 +189,8 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         } else if (pos.getGeometry() != null) {
             //on calcule les valeurs en fonction des points de debut et fin
             final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
-            final TronconUtils.PosSR rp = ps.getForSR(defaultSR);
 
-            uiAvalStart.setSelected(!rp.startAval);
-            uiAmontStart.setSelected(rp.startAval);
-            uiDistanceStart.getValueFactory().setValue(rp.distanceStartBorne);
-            uiBorneStart.getSelectionModel().select(rp.borneDigueStart);
-
-            uiAvalEnd.setSelected(!rp.endAval);
-            uiAmontEnd.setSelected(rp.endAval);
-            uiDistanceEnd.getValueFactory().setValue(rp.distanceEndBorne);
-            uiBorneEnd.getSelectionModel().select(rp.borneDigueEnd);
+            updateFromPosSRInfo(defaultSR, ps);
 
             uiStartNear.getValueFactory().setValue(pos.getDistanceDebutMin());
             uiStartFar.getValueFactory().setValue(pos.getDistanceDebutMax());
@@ -251,9 +231,9 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         final SystemeReperage sr = uiSRs.getValue();
         final BorneDigue startBorne = uiBorneStart.getValue();
         final BorneDigue endBorne = uiBorneEnd.getValue();
-        positionable.setSystemeRepId(sr==null ? null : sr.getDocumentId());
-        positionable.setBorneDebutId(startBorne==null ? null : startBorne.getDocumentId());
-        positionable.setBorneFinId(endBorne==null ? null : endBorne.getDocumentId());
+        positionable.setSystemeRepId(sr == null ? null : sr.getDocumentId());
+        positionable.setBorneDebutId(startBorne == null ? null : startBorne.getDocumentId());
+        positionable.setBorneFinId(endBorne == null ? null : endBorne.getDocumentId());
         positionable.setBorne_debut_aval(uiAmontStart.isSelected());
         positionable.setBorne_fin_aval(uiAmontEnd.isSelected());
         positionable.setBorne_debut_distance(uiDistanceStart.getValue());
@@ -263,73 +243,7 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         positionable.setDistanceFinMin(uiEndNear.getValue());
         positionable.setDistanceFinMax(uiEndFar.getValue());
 
-        //on recalculate la geometrie linear
-        final TronconDigue troncon = ConvertPositionableCoordinates.getTronconFromPositionable(positionable);
-
-        //on calcule le ratio on fonction de la rive et du coté
-        double ratio = computeRatio(troncon, positionable);
-
-        //on extrude avec la distance
-        Geometry geometry;
-        final LineString linear;
-
-        if (GeometryType.PONCTUAL.equals(positionable.getGeometryType())) {
-            /*
-            Pour un point, il faut récupérer à partir de la géométrie du tronçon
-            le segment sur lequel se trouve le point, car pour mesurer la
-            direction du décalage perpendiculaire au tronçon, un point seul ne
-            suffit pas.
-            */
-            final Entry<LineString, Double> pointAndSegment = buildSegmentFromBorne(asLineString(troncon.getGeometry()),
-                    positionable.getBorneDebutId(),
-                    positionable.getBorne_debut_aval(),
-                    positionable.getBorne_debut_distance(),
-                    Injector.getSession().getRepositoryForClass(BorneDigue.class));
-            linear = pointAndSegment.getKey();
-            if (ratio == 0.) ratio = 1.;// On ne met pas un arbre des deux côtés.
-            geometry = toPoint(linear,
-                    positionable.getDistanceDebutMin() * ratio,
-                    pointAndSegment.getValue());
-        } else {
-            /*
-            Si on n'a pas à faire à un ponctuel, on peut utiliser la géométrie
-            de la structure plutôt que celle du tronçon.
-            */
-            linear = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), positionable, Injector.getSession().getRepositoryForClass(BorneDigue.class));
-            if (ratio == 0) {
-                //des 2 cotés
-                ratio = 1;
-                final Polygon left = toPolygon(linear,
-                        positionable.getDistanceDebutMin() * ratio,
-                        positionable.getDistanceDebutMax() * ratio,
-                        positionable.getDistanceFinMin() * ratio,
-                        positionable.getDistanceFinMax() * ratio);
-                ratio = -1;
-                final Polygon right = toPolygon(linear,
-                        positionable.getDistanceDebutMin() * ratio,
-                        positionable.getDistanceDebutMax() * ratio,
-                        positionable.getDistanceFinMin() * ratio,
-                        positionable.getDistanceFinMax() * ratio);
-                geometry = GO2Utilities.JTS_FACTORY.createMultiPolygon(new Polygon[]{left, right});
-                geometry.setSRID(linear.getSRID());
-                geometry.setUserData(linear.getUserData());
-
-            } else {
-                //1 coté
-                geometry = toPolygon(linear,
-                        positionable.getDistanceDebutMin() * ratio,
-                        positionable.getDistanceDebutMax() * ratio,
-                        positionable.getDistanceFinMin() * ratio,
-                        positionable.getDistanceFinMax() * ratio);
-            }
-        }
-
-
-        //sauvegarde de la geometrie
-        positionable.geometryModeProperty().set(MODE);
-        positionable.geometryProperty().set(geometry);
-        positionable.setPositionDebut(TronconUtils.getPointFromGeometry(positionable.getGeometry(), getSourceLinear(sr), Injector.getSession().getProjection(), false));
-        positionable.setPositionFin(TronconUtils.getPointFromGeometry(positionable.getGeometry(), getSourceLinear(sr), Injector.getSession().getProjection(), true));
+        PluginVegetation.buildLinearGeometry(positionable, sr, MODE);
     }
 
 }

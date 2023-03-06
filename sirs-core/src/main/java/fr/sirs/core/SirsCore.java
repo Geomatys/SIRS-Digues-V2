@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -142,7 +142,7 @@ public class SirsCore {
     public static final String COMPONENT_PACKAGE="fr.sirs.core.component";
 
     public static final String SPRING_CONTEXT = "classpath:/fr/sirs/spring/application-context.xml";
-    
+
     public static final Path CONFIGURATION_PATH;
     static {
         CONFIGURATION_PATH = SirsCore.initConfigurationFolderPath();
@@ -197,6 +197,11 @@ public class SirsCore {
 
     public static final String BORNE_DEBUT_ID = "borneDebutId";  //Doit correspondre au nom de la Propriété de la classe Positionable
     public static final String BORNE_FIN_ID = "borneFinId";  //Doit correspondre au nom de la Propriété de la classe Positionable
+
+    public static final String DISTANCE_DEBUT_MIN = "distanceDebutMin"; // PositionableVegetation property
+    public static final String DISTANCE_DEBUT_MAX = "distanceDebutMax"; // PositionableVegetation property
+    public static final String DISTANCE_FIN_MIN = "distanceFinMin"; // PositionableVegetation property
+    public static final String DISTANCE_FIN_MAX = "distanceFinMax"; // PositionableVegetation property
 
     public static final String COMMENTAIRE_FIELD = "commentaire";
     public static final String GEOMETRY_FIELD = "geometry";

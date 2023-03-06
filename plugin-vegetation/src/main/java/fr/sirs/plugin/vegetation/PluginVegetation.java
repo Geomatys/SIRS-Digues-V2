@@ -1,51 +1,36 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
 package fr.sirs.plugin.vegetation;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.*;
 import fr.sirs.Injector;
 import fr.sirs.Plugin;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
+import fr.sirs.core.LinearReferencingUtilities;
+import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.AbstractZoneVegetationRepository;
+import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.ParcelleVegetationRepository;
-import fr.sirs.core.model.ArbreVegetation;
-import fr.sirs.core.model.HerbaceeVegetation;
-import fr.sirs.core.model.InvasiveVegetation;
-import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.ParamFrequenceTraitementVegetation;
-import fr.sirs.core.model.ParcelleVegetation;
-import fr.sirs.core.model.PeuplementVegetation;
-import fr.sirs.core.model.PlanVegetation;
-import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.RefFrequenceTraitementVegetation;
-import fr.sirs.core.model.RefSousTraitementVegetation;
-import fr.sirs.core.model.RefTypeInvasiveVegetation;
-import fr.sirs.core.model.RefTypePeuplementVegetation;
-import fr.sirs.core.model.TraitementParcelleVegetation;
-import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.model.ZoneVegetation;
+import fr.sirs.core.model.*;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.vegetation.map.CreateParcelleTool;
 import java.awt.Color;
@@ -56,23 +41,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+
+import fr.sirs.theme.ui.FXPositionableCoordAreaMode;
+import fr.sirs.theme.ui.FXPositionableLinearAreaMode;
+import fr.sirs.util.ConvertPositionableCoordinates;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import org.apache.sis.measure.Units;
+import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.QueryBuilder;
@@ -85,11 +70,16 @@ import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
+import org.geotoolkit.referencing.LinearReferencing;
 import org.geotoolkit.style.MutableFeatureTypeStyle;
 import org.geotoolkit.style.MutableRule;
 import org.geotoolkit.style.MutableStyle;
 import org.geotoolkit.style.MutableStyleFactory;
 import org.geotoolkit.style.RandomStyleBuilder;
+
+import static fr.sirs.core.LinearReferencingUtilities.buildSegmentFromBorne;
+import static fr.sirs.core.LinearReferencingUtilities.buildSegmentFromDistance;
+import static org.geotoolkit.referencing.LinearReferencing.*;
 import static org.geotoolkit.style.StyleConstants.DEFAULT_ANCHOR_POINT;
 import static org.geotoolkit.style.StyleConstants.DEFAULT_DISPLACEMENT;
 import static org.geotoolkit.style.StyleConstants.DEFAULT_GRAPHIC_ROTATION;
@@ -97,6 +87,7 @@ import static org.geotoolkit.style.StyleConstants.LITERAL_ONE_FLOAT;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.style.ExternalGraphic;
 import org.opengis.style.ExternalMark;
 import org.opengis.style.Fill;
@@ -1101,5 +1092,157 @@ public class PluginVegetation extends Plugin {
             image = new Image(in);
         }
         return Optional.of(image);
+    }
+
+    public static Geometry getNonPontualGeometry(final ZoneVegetation zone,
+                                                 final TronconDigue troncon,
+                                                 double ratio,
+                                                 final String mode,
+                                                 final BorneDigueRepository borneRepo,
+                                                 final Point startPoint,
+                                                 final Point endPoint) {
+        final LineString linear;
+        Geometry geometry;
+        if (FXPositionableCoordAreaMode.MODE.equals(mode)) {
+            ArgumentChecks.ensureNonNull("startPoint", startPoint);
+            ArgumentChecks.ensureNonNull("endPoint", endPoint);
+            linear = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
+        } else if (FXPositionableLinearAreaMode.MODE.equals(mode)){
+            ArgumentChecks.ensureNonNull("borneRepo", borneRepo);
+            linear = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), zone, borneRepo);
+        } else {
+            throw new IllegalStateException("Mode not recognised " + mode);
+        }
+
+        if (ratio == 0) {
+            //des 2 cotés
+            ratio = 1;
+            final Polygon left = toPolygon(linear,
+                    zone.getDistanceDebutMin() * ratio,
+                    zone.getDistanceDebutMax() * ratio,
+                    zone.getDistanceFinMin() * ratio,
+                    zone.getDistanceFinMax() * ratio);
+            ratio = -1;
+            final Polygon right = toPolygon(linear,
+                    zone.getDistanceDebutMin() * ratio,
+                    zone.getDistanceDebutMax() * ratio,
+                    zone.getDistanceFinMin() * ratio,
+                    zone.getDistanceFinMax() * ratio);
+            geometry = GO2Utilities.JTS_FACTORY.createMultiPolygon(new Polygon[]{left, right});
+            geometry.setSRID(linear.getSRID());
+            geometry.setUserData(linear.getUserData());
+
+        } else {
+            //1 coté
+            geometry = toPolygon(linear,
+                    zone.getDistanceDebutMin() * ratio,
+                    zone.getDistanceDebutMax() * ratio,
+                    zone.getDistanceFinMin() * ratio,
+                    zone.getDistanceFinMax() * ratio);
+        }
+
+        return geometry;
+    }
+
+    public static void buildLinearGeometry(final ZoneVegetation zone, final SystemeReperage sr, final String mode) {
+        final BorneDigueRepository borneRepo = (BorneDigueRepository) Injector.getSession().getRepositoryForClass(BorneDigue.class);
+
+        //on recalculate la geometrie linear
+        final TronconDigue troncon = ConvertPositionableCoordinates.getTronconFromPositionable(zone);
+
+        //on calcule le ratio on fonction de la rive et du coté
+        double ratio = computeRatio(troncon, zone);
+
+        //on extrude avec la distance
+        Geometry geometry;
+        final LineString linear;
+
+        if (GeometryType.PONCTUAL.equals(zone.getGeometryType())) {
+            /*
+            Pour un point, il faut récupérer à partir de la géométrie du tronçon
+            le segment sur lequel se trouve le point, car pour mesurer la
+            direction du décalage perpendiculaire au tronçon, un point seul ne
+            suffit pas.
+            */
+            final Map.Entry<LineString, Double> pointAndSegment = buildSegmentFromBorne(asLineString(troncon.getGeometry()),
+                    zone.getBorneDebutId(),
+                    zone.getBorne_debut_aval(),
+                    zone.getBorne_debut_distance(),
+                    borneRepo);
+            linear = pointAndSegment.getKey();
+            if (ratio == 0.) ratio = 1.;// On ne met pas un arbre des deux côtés.
+            geometry = toPoint(linear,
+                    zone.getDistanceDebutMin() * ratio,
+                    pointAndSegment.getValue());
+        } else {
+            /*
+            Si on n'a pas à faire à un ponctuel, on peut utiliser la géométrie
+            de la structure plutôt que celle du tronçon.
+            */
+            geometry = getNonPontualGeometry(zone, troncon, ratio, mode, borneRepo, null, null);
+        }
+
+
+        //sauvegarde de la geometrie
+        zone.setGeometryMode(mode);
+        zone.setGeometry(geometry);
+
+        // Hack for the case when geometry is a multipolygon as TronconUtils.getPointFromGeometry() does not support it.
+        // This situation happens when TypePosition is "Berge" and TypeCote is "Deux côtés de la digue".
+        Geometry geometryToProject = geometry.getGeometryN(0);
+
+        final LinearReferencing.SegmentInfo[] sourceLinear = ConvertPositionableCoordinates.getSourceLinear(sr, zone);
+        final CoordinateReferenceSystem crs = Injector.getSession().getProjection();
+
+        zone.setPositionDebut(TronconUtils.getPointFromGeometry(geometryToProject, sourceLinear, crs, false));
+        zone.setPositionFin(TronconUtils.getPointFromGeometry(geometryToProject, sourceLinear, crs, true));
+
+    }
+
+    public static void buildCoordGeometry(final ZoneVegetation zone, final Point startPoint, final Point endPoint, final String mode) {
+        final TronconDigue troncon = ConvertPositionableCoordinates.getTronconFromPositionable(zone);
+
+        if (troncon == null) throw new IllegalStateException("Failed to retrieve tronçon from Positionable : " + zone);
+
+        //on calcule le ratio on fonction de la rive et du coté
+        double ratio = computeRatio(troncon, zone);
+
+        //on extrude avec la distance
+        Geometry geometry;
+        final LineString linear;
+
+        if (GeometryType.PONCTUAL.equals(zone.getGeometryType())) {
+
+            final LineString tronconLineString = asLineString(troncon.getGeometry());
+            final LinearReferencing.SegmentInfo[] segments = buildSegments(tronconLineString);
+
+            // Projection du point géographique sur le troncon pour obtenir une distance depuis le début du tronçon jusqu'au point projeté.
+            final LinearReferencing.ProjectedPoint projected = projectReference(segments, startPoint);
+
+            /*
+            Pour un point, il faut récupérer à partir de la géométrie du tronçon
+            le segment sur lequel se trouve le point, car pour mesurer la
+            direction du décalage perpendiculaire au tronçon, un point seul ne
+            suffit pas.
+            */
+            final Map.Entry<LineString, Double> pointAndSegment = buildSegmentFromDistance(
+                    segments, projected.distanceAlongLinear);
+            linear = pointAndSegment.getKey();
+            if (ratio == 0.) ratio = 1.;// On ne met pas un arbre des deux côtés.
+            geometry = toPoint(linear,
+                    zone.getDistanceDebutMin() * ratio,
+                    pointAndSegment.getValue());
+        } else {
+            /*
+            Si on n'a pas à faire à un ponctuel, on peut utiliser la géométrie
+            de la structure plutôt que celle du tronçon.
+            */
+            geometry = getNonPontualGeometry(zone, troncon, ratio, mode, null, startPoint, endPoint);
+        }
+
+        zone.setGeometryMode(mode);
+        zone.setGeometry(geometry);
+        zone.setEditedGeoCoordinate(true);
+        ConvertPositionableCoordinates.computePositionableLinearCoordinate(zone, false);
     }
 }
