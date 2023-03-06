@@ -1154,8 +1154,7 @@ public class PluginVegetation extends Plugin {
         double ratio = computeRatio(troncon, zone);
 
         //on extrude avec la distance
-        Geometry geometry;
-        final LineString linear;
+        final Geometry geometry;
 
         if (GeometryType.PONCTUAL.equals(zone.getGeometryType())) {
             /*
@@ -1169,7 +1168,7 @@ public class PluginVegetation extends Plugin {
                     zone.getBorne_debut_aval(),
                     zone.getBorne_debut_distance(),
                     borneRepo);
-            linear = pointAndSegment.getKey();
+            final LineString linear = pointAndSegment.getKey();
             if (ratio == 0.) ratio = 1.;// On ne met pas un arbre des deux côtés.
             geometry = toPoint(linear,
                     zone.getDistanceDebutMin() * ratio,
@@ -1189,7 +1188,7 @@ public class PluginVegetation extends Plugin {
 
         // Hack for the case when geometry is a multipolygon as TronconUtils.getPointFromGeometry() does not support it.
         // This situation happens when TypePosition is "Berge" and TypeCote is "Deux côtés de la digue".
-        Geometry geometryToProject = geometry.getGeometryN(0);
+        final Geometry geometryToProject = geometry.getGeometryN(0);
 
         final LinearReferencing.SegmentInfo[] sourceLinear = ConvertPositionableCoordinates.getSourceLinear(sr, zone);
         final CoordinateReferenceSystem crs = Injector.getSession().getProjection();
@@ -1208,8 +1207,7 @@ public class PluginVegetation extends Plugin {
         double ratio = computeRatio(troncon, zone);
 
         //on extrude avec la distance
-        Geometry geometry;
-        final LineString linear;
+        final Geometry geometry;
 
         if (GeometryType.PONCTUAL.equals(zone.getGeometryType())) {
 
@@ -1227,7 +1225,7 @@ public class PluginVegetation extends Plugin {
             */
             final Map.Entry<LineString, Double> pointAndSegment = buildSegmentFromDistance(
                     segments, projected.distanceAlongLinear);
-            linear = pointAndSegment.getKey();
+            final LineString linear = pointAndSegment.getKey();
             if (ratio == 0.) ratio = 1.;// On ne met pas un arbre des deux côtés.
             geometry = toPoint(linear,
                     zone.getDistanceDebutMin() * ratio,

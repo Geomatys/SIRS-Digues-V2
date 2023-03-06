@@ -206,7 +206,7 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
      * SirsCore.java (validée par le test unitaire
      * SirsCoreTest.test_Nom_Methodes_Positionable_Valides() )
      */
-    public static void computeForModifiedPropertie(Positionable positionableToUpdate, String modifiedPropretieName) {
+    public static void computeForModifiedPropertie(final Positionable positionableToUpdate, final String modifiedPropretieName) {
         ArgumentChecks.ensureNonNull("Positionable positionable", positionableToUpdate);
         ArgumentChecks.ensureNonNull("Propertie name modifiedPropertirName", modifiedPropretieName);
 
@@ -249,7 +249,7 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
         }
     }
 
-    public static void buildLinearGeometry(ZoneVegetation zone) {
+    public static void buildLinearGeometry(final ZoneVegetation zone) {
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
         final SystemeReperage sr = srRepo.get(zone.getSystemeRepId());
 
@@ -257,7 +257,7 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
         zone.editedGeoCoordinateProperty().set(false);
     }
 
-    public static void buildGeometryCoord(ZoneVegetation zone) {
+    public static void buildGeometryCoord(final ZoneVegetation zone) {
         Point startPoint = zone.getPositionDebut();
         Point endPoint = zone.getPositionFin();
 

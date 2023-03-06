@@ -192,7 +192,7 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         setReseting(false);
     }
 
-    private void updateSpinnerWithValue(Spinner<Double> spinner, Double value) {
+    private void updateSpinnerWithValue(final Spinner<Double> spinner, final Double value) {
         if (value != null) {
             if (spinner != null && spinner.getValueFactory() != null)
                 spinner.getValueFactory().valueProperty().set(value);
@@ -202,7 +202,7 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         }
     }
 
-    private void updateDistanceSpinners(PositionableVegetation pos) {
+    private void updateDistanceSpinners(final PositionableVegetation pos) {
         updateSpinnerWithValue(uiStartNear, pos.getDistanceDebutMin());
         updateSpinnerWithValue(uiStartFar, pos.getDistanceDebutMax());
         updateSpinnerWithValue(uiEndNear, pos.getDistanceFinMin());

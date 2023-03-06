@@ -370,7 +370,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         ConvertPositionableCoordinates.computePositionableGeometryAndCoord(positionable);
     }
 
-    void setValuesFromUi(Positionable positionable) {
+    void setValuesFromUi(final Positionable positionable) {
         final SystemeReperage sr = uiSRs.getValue();
         final BorneDigue startBorne = uiBorneStart.getValue();
         final BorneDigue endBorne = uiBorneEnd.getValue();
