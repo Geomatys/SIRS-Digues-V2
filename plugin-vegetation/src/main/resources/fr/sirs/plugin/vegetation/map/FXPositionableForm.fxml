@@ -6,38 +6,94 @@
 
 <fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <top>
-      <GridPane hgap="10.0" vgap="3.0" BorderPane.alignment="CENTER">
-        <columnConstraints>
-          <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
-          <ColumnConstraints hgrow="ALWAYS" minWidth="5.0" prefWidth="5.0" />
-            <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
-            <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
-        </columnConstraints>
-        <rowConstraints>
-            <RowConstraints maxHeight="-Infinity" minHeight="40.0" valignment="TOP" vgrow="NEVER" />
-            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
-            <RowConstraints maxHeight="-Infinity" minHeight="24.0" vgrow="NEVER" />
-            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
-            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
-        </rowConstraints>
-         <children>
-            <Button fx:id="uiDelete" mnemonicParsing="false" onAction="#delete" styleClass="btn-single" text="Supprimer" />
-            <Button fx:id="uiGoto" mnemonicParsing="false" onAction="#gotoForm" styleClass="btn-single" text="Fiche complète" GridPane.columnIndex="2" />
-            <Button fx:id="uiSave" mnemonicParsing="false" onAction="#save" styleClass="btn-single" text="Sauvegarder" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="3" />
-            <Label styleClass="label-text" text="Tronçon" GridPane.rowIndex="2" />
-            <Label styleClass="label-text" text="Désignation" GridPane.rowIndex="1" />
-            <Label fx:id="uiTroncon" minWidth="100.0" styleClass="label-text" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
-            <TextField fx:id="uiDesignation" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
-            <Label fx:id="uiTypeLabel" styleClass="label-text" text="Type de végétation" GridPane.rowIndex="3" />
-            <ComboBox fx:id="uiType" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
-             <Label fx:id="ui_typeCoteLabel" styleClass="label-text" text="Choix côté" GridPane.rowIndex="4" />
-             <ComboBox fx:id="ui_typeCoteId" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4" />
-             <Label fx:id="LabelContactEau" styleClass="label-text" text="Contact Eau " GridPane.rowIndex="5" />
-             <CheckBox fx:id="checkContactEau" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="5" />
-         </children>
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
-      </GridPane>
+       <VBox spacing="20.0" VBox.vgrow="ALWAYS">
+           <children>
+              <GridPane hgap="10.0" vgap="3.0" BorderPane.alignment="CENTER">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="120" />
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="5.0" prefWidth="5.0" />
+                    <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+                    <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints maxHeight="-Infinity" minHeight="40.0" valignment="TOP" vgrow="NEVER" />
+                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+                    <RowConstraints maxHeight="-Infinity" minHeight="24.0" vgrow="NEVER" />
+                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+                </rowConstraints>
+                 <children>
+                     <Button fx:id="uiDelete" mnemonicParsing="false" onAction="#delete" styleClass="btn-single" text="Supprimer" />
+                     <Button fx:id="uiGoto" mnemonicParsing="false" onAction="#gotoForm" styleClass="btn-single" text="Fiche complète" GridPane.columnIndex="2" />
+                     <Button fx:id="uiSave" mnemonicParsing="false" onAction="#save" styleClass="btn-single" text="Sauvegarder" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="3" />
+                     <Label styleClass="label-text" text="Désignation" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                     <TextField fx:id="uiDesignation" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+                     <Label styleClass="label-text" text="Tronçon" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                     <Label fx:id="uiTroncon" minWidth="100.0" styleClass="label-text" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
+                     <Label fx:id="uiTypeLabel" styleClass="label-text" text="Type de végétation" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                     <ComboBox fx:id="uiType" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
+                 </children>
+                 <padding>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                 </padding>
+              </GridPane>
+               <GridPane fx:id="grid_pane_dens_haut_diam" hgap="10.0" vgap="3.0" BorderPane.alignment="CENTER">
+               <columnConstraints>
+                   <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="120" />
+                   <ColumnConstraints hgrow="ALWAYS" minWidth="5.0" prefWidth="5.0" />
+                   <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+                   <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+               </columnConstraints>
+               <rowConstraints>
+                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+               </rowConstraints>
+               <children>
+                   <Label fx:id="ui_densiteLabel" text="Densité (nb tiges/ha)" styleClass="label-text" GridPane.rowIndex="0" />
+                   <Spinner fx:id="ui_densite" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="0"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <Label fx:id="ui_densiteIdLabel" text="Densité" styleClass="label-text" GridPane.rowIndex="1" />
+                   <ComboBox fx:id="ui_densiteId" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+                   <Label fx:id="ui_hauteurLabel" text="Hauteur (m)" styleClass="label-text" GridPane.rowIndex="2" />
+                   <Spinner fx:id="ui_hauteur" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <Label fx:id="ui_hauteurIdLabel" text="Hauteur" styleClass="label-text" GridPane.rowIndex="3" />
+                   <ComboBox fx:id="ui_hauteurId" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
+                   <Label fx:id="ui_diametreLabel" text="Diametre (cm)" styleClass="label-text" GridPane.rowIndex="4" />
+                   <Spinner fx:id="ui_diametre" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <Label fx:id="ui_diametreIdLabel" text="Diametre" styleClass="label-text" GridPane.rowIndex="5" />
+                   <ComboBox fx:id="ui_diametreId" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="5" />
+               </children>
+                   <padding>
+                       <Insets bottom="10.0" left="10.0" right="10.0" top="0" />
+                   </padding>
+               </GridPane>
+               <GridPane hgap="10.0" vgap="3.0" BorderPane.alignment="CENTER">
+                   <columnConstraints>
+                       <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="120" />
+                       <ColumnConstraints hgrow="ALWAYS" minWidth="5.0" prefWidth="5.0" />
+                       <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+                       <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+                   </columnConstraints>
+                   <rowConstraints>
+                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+                   </rowConstraints>
+                   <children>
+                       <Label fx:id="LabelContactEau" styleClass="label-text" text="Contact Eau " GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                       <CheckBox fx:id="checkContactEau" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="0" />
+                       <Label fx:id="ui_positionLabel" text="Position" styleClass="label-text" GridPane.rowIndex="1" />
+                       <ComboBox fx:id="ui_positionId" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+                       <Label fx:id="ui_typeCoteLabel" styleClass="label-text" text="Choix côté" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                       <ComboBox fx:id="ui_typeCoteId" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
+                   </children>
+                   <padding>
+                       <Insets bottom="10.0" left="10.0" right="10.0" top="0" />
+                   </padding>
+               </GridPane>
+           </children>
+       </VBox>
    </top>
 </fx:root>
