@@ -188,6 +188,8 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         if (!MODE.equals(positionable.getGeometryMode())) return;
 
         setValuesFromUi(positionable);
+        if (positionable.getBorneDebutId() == null || positionable.getBorneFinId() == null) return;
+
         positionable.setDistanceDebutMin(uiStartNear.getValue());
         positionable.setDistanceDebutMax(uiStartFar.getValue());
         positionable.setDistanceFinMin(uiEndNear.getValue());

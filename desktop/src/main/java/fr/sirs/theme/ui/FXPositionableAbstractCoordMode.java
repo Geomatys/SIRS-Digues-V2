@@ -90,7 +90,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
     private static final StringConverter<Double> SEVEN_DIGITS_CONVERTER = new FormattedDoubleConverter(new DecimalFormat("#.#######"));
     private static final StringConverter<Double> TWO_DIGITS_CONVERTER = new FormattedDoubleConverter(new DecimalFormat("#.##"));
 
-    final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
+    private final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
 
     private final ObjectProperty<Positionable> posProperty = new SimpleObjectProperty<>();
     protected final BooleanProperty disableProperty = new SimpleBooleanProperty(true);
@@ -304,15 +304,26 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             }
         }
 
-        updateLatLonStartEndFromStartAndEnd(startPoint, endPoint);
+        updateLatLongFor(startPoint, endPoint);
         reseting = false;
     }
 
-    void updateLatLonStartEndFromStartAndEnd(final Point startPoint, final Point endPoint) {
+    /**
+     * Update the spinners' Longitude and Latitude values for start and end points.
+     * @param startPoint the start point coordinates
+     * @param endPoint the end point coordinates
+     */
+    public void updateLatLongFor(final Point startPoint, final Point endPoint) {
         updateLatLonSpinnerWithPoint(startPoint, uiLongitudeStart, uiLatitudeStart);
         updateLatLonSpinnerWithPoint(endPoint, uiLongitudeEnd, uiLatitudeEnd);
     }
 
+    /**
+     * Update the spinners' Longitude and Latitude values with point's coordinates.
+     * @param point point with coordinates to update the spinners
+     * @param lonSpinner spinner for longitude
+     * @param latSpinner spinner for latitude
+     */
     private void updateLatLonSpinnerWithPoint(final Point point, final Spinner<Double> lonSpinner, final Spinner<Double> latSpinner) {
         if (point != null) {
             if (lonSpinner != null && lonSpinner.getValueFactory() != null)
@@ -321,9 +332,9 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
                 latSpinner.getValueFactory().valueProperty().set(point.getY());
         } else {
             if (lonSpinner != null && lonSpinner.getValueFactory() != null)
-                lonSpinner.getValueFactory().setValue(null);
+                lonSpinner.getValueFactory().setValue(0.0);
             if (latSpinner != null && latSpinner.getValueFactory() != null)
-                latSpinner.getValueFactory().setValue(null);
+                latSpinner.getValueFactory().setValue(0.0);
         }
     }
 

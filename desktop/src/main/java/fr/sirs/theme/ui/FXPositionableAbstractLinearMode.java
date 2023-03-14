@@ -214,12 +214,12 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
      * @param newEditedGeoCoordinate nouvelle valeur.
      */
     final protected void setCoordinatesLabel(Boolean oldEditedGeoCoordinate, Boolean newEditedGeoCoordinate){
-       if (newEditedGeoCoordinate == null) {
-                uiLinearCoordLabel.setText("Le mode d'obtention du type de coordonnées n'est pas renseigné.");
-                return;
-            } else if ((oldEditedGeoCoordinate!=null) && (oldEditedGeoCoordinate.equals(newEditedGeoCoordinate))) {
-                return;
-            }
+        if (newEditedGeoCoordinate == null) {
+            uiLinearCoordLabel.setText("Le mode d'obtention du type de coordonnées n'est pas renseigné.");
+            return;
+        } else if ((oldEditedGeoCoordinate != null) && (oldEditedGeoCoordinate.equals(newEditedGeoCoordinate))) {
+            return;
+        }
         if (uiLinearCoordLabel != null) { //Occurred for vegetation
             if (newEditedGeoCoordinate) {
                 uiLinearCoordLabel.setText("Coordonnées calculées");
@@ -265,7 +265,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
      * listeners des champs borneDebut et borneFin.
      * @param isBorne
      */
-    void updateFields(final boolean isBorne) {
+    private void updateFields(final boolean isBorne) {
         reseting = true;
         try {
             final Positionable pos = posProperty.get();
@@ -304,13 +304,15 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
                 uiBorneStart.valueProperty().set(borneMap.get(pos.borneDebutIdProperty().get()));
                 uiBorneEnd.valueProperty().set(borneMap.get(pos.borneFinIdProperty().get()));
 
-            } else if (pos.getGeometry() != null) {
-                //on calcule les valeurs en fonction des points de debut et fin
-                final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
-                updateFromPosSRInfo(defaultSR, ps);
             } else {
-                //pas de geometrie
-                updateWithDefaultValues();
+                try {
+                    //on calcule les valeurs en fonction des points de debut et fin
+                    final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
+                    updateFromPosSRInfo(defaultSR, ps);
+                } catch (Exception e) {
+                    //pas de geometrie
+                    updateWithDefaultValues();
+                }
             }
 
         } finally {
@@ -370,7 +372,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         ConvertPositionableCoordinates.computePositionableGeometryAndCoord(positionable);
     }
 
-    void setValuesFromUi(final Positionable positionable) {
+    public void setValuesFromUi(final Positionable positionable) {
         final SystemeReperage sr = uiSRs.getValue();
         final BorneDigue startBorne = uiBorneStart.getValue();
         final BorneDigue endBorne = uiBorneEnd.getValue();

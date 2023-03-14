@@ -20,6 +20,7 @@ package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.Injector;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.GeometryType;
 import fr.sirs.core.model.Positionable;
@@ -163,7 +164,7 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
             //on peut réutiliser les points enregistré dans la position
             final Point startPos = pos.getPositionDebut();
             final Point endPos = pos.getPositionFin();
-            updateLatLonStartEndFromStartAndEnd(startPos, endPos);
+            updateLatLongFor(startPos, endPos);
             updateDistanceSpinners(pos);
         } else if (pos.getGeometry() != null) {
             //on calcule les valeurs en fonction des points de debut et fin
@@ -173,11 +174,11 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
             final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
             final Point geoPointStart = ps.getGeoPointStart();
             final Point geoPointEnd = ps.getGeoPointEnd();
-            updateLatLonStartEndFromStartAndEnd(geoPointStart, geoPointEnd);
+            updateLatLongFor(geoPointStart, geoPointEnd);
             updateDistanceSpinners(pos);
         } else {
             //pas de geometrie
-            updateLatLonStartEndFromStartAndEnd(null, null);
+            updateLatLongFor(null, null);
 
             updateSpinnerWithValue(uiStartNear, 0.0);
             updateSpinnerWithValue(uiStartFar, 0.0);
@@ -227,17 +228,22 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         final CoordinateReferenceSystem crs = uiCRSs.getValue();
         if (crs == null) return;
 
+        final Double longStart = uiLongitudeStart.getValue();
+        final Double latStart = uiLatitudeStart.getValue();
+        final Double longEnd = uiLongitudeEnd.getValue();
+        final Double latEnd = uiLatitudeEnd.getValue();
+
         Point startPoint = null;
         Point endPoint = null;
-        if (uiLongitudeStart.getValue() != null && uiLatitudeStart.getValue() != null) {
+        if (longStart != null && latStart != null) {
             startPoint = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-                    uiLongitudeStart.getValue(), uiLatitudeStart.getValue()));
+                    longStart, latStart));
             JTS.setCRS(startPoint, crs);
         }
 
-        if (uiLongitudeEnd.getValue() != null && uiLatitudeEnd.getValue() != null) {
+        if (longEnd != null && latEnd != null) {
             endPoint = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-                    uiLongitudeEnd.getValue(), uiLatitudeEnd.getValue()));
+                    longEnd, latEnd));
             JTS.setCRS(endPoint, crs);
         }
 
@@ -246,6 +252,7 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         if (endPoint == null) endPoint = startPoint;
 
         //on sauvegarde les points dans le crs de la base
+        final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
         if (!Utilities.equalsIgnoreMetadata(crs, baseCrs)) {
             try {
                 final MathTransform trs = CRS.findOperation(crs, baseCrs, null).getMathTransform();

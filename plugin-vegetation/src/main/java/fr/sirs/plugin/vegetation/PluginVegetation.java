@@ -1238,6 +1238,8 @@ public class PluginVegetation extends Plugin {
             geometry = getNonPontualGeometry(zone, troncon, ratio, mode, null, startPoint, endPoint);
         }
 
+        zone.setPositionDebut(startPoint);
+        zone.setPositionFin(endPoint);
         zone.setGeometryMode(mode);
         zone.setGeometry(geometry);
         zone.setEditedGeoCoordinate(true);
