@@ -133,12 +133,22 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
             }
         });
 
+        final ChangeListener posListener = (ObservableValue observable, Object oldValue, Object newValue) -> updateFields();
+
         positionableProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue instanceof ZoneVegetation) {
-                ((ZoneVegetation) newValue).typeCoteIdProperty().addListener(typeCoteChangeListener);
-            }
             if (oldValue instanceof ZoneVegetation) {
                 ((ZoneVegetation) oldValue).typeCoteIdProperty().removeListener(typeCoteChangeListener);
+                ((ZoneVegetation) oldValue).distanceDebutMinProperty().removeListener(posListener);
+                ((ZoneVegetation) oldValue).distanceDebutMaxProperty().removeListener(posListener);
+                ((ZoneVegetation) oldValue).distanceFinMinProperty().removeListener(posListener);
+                ((ZoneVegetation) oldValue).distanceFinMaxProperty().removeListener(posListener);
+            }
+            if (newValue instanceof ZoneVegetation) {
+                ((ZoneVegetation) newValue).typeCoteIdProperty().addListener(typeCoteChangeListener);
+                ((ZoneVegetation) newValue).distanceDebutMinProperty().addListener(posListener);
+                ((ZoneVegetation) newValue).distanceDebutMaxProperty().addListener(posListener);
+                ((ZoneVegetation) newValue).distanceFinMinProperty().addListener(posListener);
+                ((ZoneVegetation) newValue).distanceFinMaxProperty().addListener(posListener);
             }
         });
     }
@@ -158,33 +168,26 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         final PositionableVegetation pos = (PositionableVegetation) positionableProperty().get();
         final String mode = pos.getGeometryMode();
 
-
+        Point startPos  = null;
+        Point endPos    = null;
         if (MODE.equals(mode)) {
             //on assigne les valeurs sans changement
             //on peut réutiliser les points enregistré dans la position
-            final Point startPos = pos.getPositionDebut();
-            final Point endPos = pos.getPositionFin();
-            updateLatLongFor(startPos, endPos);
-            updateDistanceSpinners(pos);
-        } else if (pos.getGeometry() != null) {
+            startPos    = pos.getPositionDebut();
+            endPos      = pos.getPositionFin();
+        } else if (pos.getGeometry() != null && pos.getBorneDebutId() != null) {
             //on calcule les valeurs en fonction des points de debut et fin
 
             //on refait les points a partir de la géométrie
-            final TronconDigue t = ConvertPositionableCoordinates.getTronconFromPositionable(pos);
-            final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
-            final Point geoPointStart = ps.getGeoPointStart();
-            final Point geoPointEnd = ps.getGeoPointEnd();
-            updateLatLongFor(geoPointStart, geoPointEnd);
-            updateDistanceSpinners(pos);
+            final TronconDigue t            = ConvertPositionableCoordinates.getTronconFromPositionable(pos);
+            final TronconUtils.PosInfo ps   = new TronconUtils.PosInfo(pos, t);
+            startPos    = ps.getGeoPointStart();
+            endPos      = ps.getGeoPointEnd();
         } else {
             //pas de geometrie
-            updateLatLongFor(null, null);
-
-            updateSpinnerWithValue(uiStartNear, 0.0);
-            updateSpinnerWithValue(uiStartFar, 0.0);
-            updateSpinnerWithValue(uiEndNear, 0.0);
-            updateSpinnerWithValue(uiEndFar, 0.0);
         }
+        updateLatLongFor(startPos, endPos);
+        updateDistanceSpinners(pos);
 
         //on cache certains champs si c'est un ponctuel
         pctProp.unbind();
@@ -193,21 +196,16 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         setReseting(false);
     }
 
-    private void updateSpinnerWithValue(final Spinner<Double> spinner, final Double value) {
-        if (value != null) {
-            if (spinner != null && spinner.getValueFactory() != null)
-                spinner.getValueFactory().valueProperty().set(value);
-        } else {
-            if (spinner != null && spinner.getValueFactory() != null)
-                spinner.getValueFactory().setValue(null);
-        }
+    private void updateSpinnerWithValue(final Spinner<Double> spinner, final Double value, final Double defaultValue) {
+        if (spinner != null && spinner.getValueFactory() != null)
+            spinner.getValueFactory().setValue(value == null ? defaultValue : value);
     }
 
     private void updateDistanceSpinners(final PositionableVegetation pos) {
-        updateSpinnerWithValue(uiStartNear, pos.getDistanceDebutMin());
-        updateSpinnerWithValue(uiStartFar, pos.getDistanceDebutMax());
-        updateSpinnerWithValue(uiEndNear, pos.getDistanceFinMin());
-        updateSpinnerWithValue(uiEndFar, pos.getDistanceFinMax());
+        updateSpinnerWithValue(uiStartNear, pos.getDistanceDebutMin(), 0.0);
+        updateSpinnerWithValue(uiStartFar, pos.getDistanceDebutMax(), 0.0);
+        updateSpinnerWithValue(uiEndNear, pos.getDistanceFinMin(), 0.0);
+        updateSpinnerWithValue(uiEndFar, pos.getDistanceFinMax(), 0.0);
     }
 
 
@@ -264,7 +262,7 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
             }
         }
 
-        buildCoordGeometry(zone, startPoint, endPoint, MODE);
+        buildCoordGeometry(zone, startPoint, endPoint, Mode.COORD_AREA);
   }
 
     @Override

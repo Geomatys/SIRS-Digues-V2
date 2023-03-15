@@ -45,8 +45,6 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import fr.sirs.theme.ui.FXPositionableCoordAreaMode;
-import fr.sirs.theme.ui.FXPositionableLinearAreaMode;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -121,6 +119,20 @@ public class PluginVegetation extends Plugin {
 
     private static ObservableList<Class<? extends ZoneVegetation>> ZONE_TYPES;
 
+    public enum Mode {
+        COORD_AREA("COORD_AREA"),
+        LINEAR_AREA("LINEAR_AREA");
+        private String value;
+
+        Mode(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
     public PluginVegetation() {
         name = NAME;
         loadingMessage.set("module végétation");
@@ -130,7 +142,7 @@ public class PluginVegetation extends Plugin {
     }
 
     @Override
-    public void load() throws Exception {
+    public void load() {
         getConfiguration();
 
         //on force le chargement
@@ -1094,24 +1106,41 @@ public class PluginVegetation extends Plugin {
         return Optional.of(image);
     }
 
-    public static Geometry getNonPontualGeometry(final ZoneVegetation zone,
-                                                 final TronconDigue troncon,
-                                                 double ratio,
-                                                 final String mode,
-                                                 final BorneDigueRepository borneRepo,
-                                                 final Point startPoint,
-                                                 final Point endPoint) {
+    /**
+     * Method to compute the geometry of a zone de végétation when GeometryType is different from GeometryType.PONCTUAL.
+     * @param zone the Zone de Végétation to compute the geometry for.
+     * @param troncon the Troncon where the zone de végétation is.
+     * @param ratio the ratio of the zone de végétation.
+     * @param mode the mode in which to compute the geometry: COORD_AREA or LINEAR_AREA.
+     * @param borneRepo the repository of BorneDigue.
+     *                  Must be non null when mode is FXPositionableLinearAreaMode.Mode.
+     * @param startPoint the start point.
+     *                  Must be non null when mode is FXPositionableCoordAreaMode.Mode.
+     * @param endPoint the end point.
+     *      *           Must be non null when mode is FXPositionableCoordAreaMode.Mode.
+     * @return the geometry.
+     */
+    public static Geometry getNonPonctualGeometry(final ZoneVegetation zone,
+                                                  final TronconDigue troncon,
+                                                  double ratio,
+                                                  final Mode mode,
+                                                  final BorneDigueRepository borneRepo,
+                                                  final Point startPoint,
+                                                  final Point endPoint) {
         final LineString linear;
         Geometry geometry;
-        if (FXPositionableCoordAreaMode.MODE.equals(mode)) {
-            ArgumentChecks.ensureNonNull("startPoint", startPoint);
-            ArgumentChecks.ensureNonNull("endPoint", endPoint);
-            linear = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
-        } else if (FXPositionableLinearAreaMode.MODE.equals(mode)){
-            ArgumentChecks.ensureNonNull("borneRepo", borneRepo);
-            linear = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), zone, borneRepo);
-        } else {
-            throw new IllegalStateException("Mode not recognised " + mode);
+        switch (mode) {
+            case COORD_AREA:
+                ArgumentChecks.ensureNonNull("startPoint", startPoint);
+                ArgumentChecks.ensureNonNull("endPoint", endPoint);
+                linear = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
+                break;
+            case LINEAR_AREA:
+                ArgumentChecks.ensureNonNull("borneRepo", borneRepo);
+                linear = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), zone, borneRepo);
+                break;
+            default:
+                throw new IllegalStateException("Mode not recognised " + mode);
         }
 
         if (ratio == 0) {
@@ -1144,7 +1173,7 @@ public class PluginVegetation extends Plugin {
         return geometry;
     }
 
-    public static void buildLinearGeometry(final ZoneVegetation zone, final SystemeReperage sr, final String mode) {
+    public static void buildLinearGeometry(final ZoneVegetation zone, final SystemeReperage sr, final Mode mode) {
         final BorneDigueRepository borneRepo = (BorneDigueRepository) Injector.getSession().getRepositoryForClass(BorneDigue.class);
 
         //on recalculate la geometrie linear
@@ -1163,6 +1192,8 @@ public class PluginVegetation extends Plugin {
             direction du décalage perpendiculaire au tronçon, un point seul ne
             suffit pas.
             */
+            String borneId = zone.getBorneDebutId();
+            if (borneId == null) return;
             final Map.Entry<LineString, Double> pointAndSegment = buildSegmentFromBorne(asLineString(troncon.getGeometry()),
                     zone.getBorneDebutId(),
                     zone.getBorne_debut_aval(),
@@ -1174,16 +1205,19 @@ public class PluginVegetation extends Plugin {
                     zone.getDistanceDebutMin() * ratio,
                     pointAndSegment.getValue());
         } else {
+
+            // if the borne debut or the borne fin is null, then do not compute geometry since it is not a ponctual..
+            if (zone.getBorneDebutId() == null || zone.getBorneFinId() == null) return;
             /*
-            Si on n'a pas à faire à un ponctuel, on peut utiliser la géométrie
+            Si on n'a pas affaire à un ponctuel, on peut utiliser la géométrie
             de la structure plutôt que celle du tronçon.
             */
-            geometry = getNonPontualGeometry(zone, troncon, ratio, mode, borneRepo, null, null);
+            geometry = getNonPonctualGeometry(zone, troncon, ratio, mode, borneRepo, null, null);
         }
 
 
         //sauvegarde de la geometrie
-        zone.setGeometryMode(mode);
+        zone.setGeometryMode(mode.value);
         zone.setGeometry(geometry);
 
         // Hack for the case when geometry is a multipolygon as TronconUtils.getPointFromGeometry() does not support it.
@@ -1198,7 +1232,7 @@ public class PluginVegetation extends Plugin {
 
     }
 
-    public static void buildCoordGeometry(final ZoneVegetation zone, final Point startPoint, final Point endPoint, final String mode) {
+    public static void buildCoordGeometry(final ZoneVegetation zone, final Point startPoint, final Point endPoint, final Mode mode) {
         final TronconDigue troncon = ConvertPositionableCoordinates.getTronconFromPositionable(zone);
 
         if (troncon == null) throw new IllegalStateException("Failed to retrieve tronçon from Positionable : " + zone);
@@ -1235,12 +1269,12 @@ public class PluginVegetation extends Plugin {
             Si on n'a pas à faire à un ponctuel, on peut utiliser la géométrie
             de la structure plutôt que celle du tronçon.
             */
-            geometry = getNonPontualGeometry(zone, troncon, ratio, mode, null, startPoint, endPoint);
+            geometry = getNonPonctualGeometry(zone, troncon, ratio, mode, null, startPoint, endPoint);
         }
 
         zone.setPositionDebut(startPoint);
         zone.setPositionFin(endPoint);
-        zone.setGeometryMode(mode);
+        zone.setGeometryMode(mode.value);
         zone.setGeometry(geometry);
         zone.setEditedGeoCoordinate(true);
         ConvertPositionableCoordinates.computePositionableLinearCoordinate(zone, false);

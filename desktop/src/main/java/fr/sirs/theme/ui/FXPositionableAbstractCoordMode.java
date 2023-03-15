@@ -330,12 +330,9 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
                 lonSpinner.getValueFactory().valueProperty().set(point.getX());
             if (latSpinner != null && latSpinner.getValueFactory() != null)
                 latSpinner.getValueFactory().valueProperty().set(point.getY());
-        } else {
-            if (lonSpinner != null && lonSpinner.getValueFactory() != null)
-                lonSpinner.getValueFactory().setValue(0.0);
-            if (latSpinner != null && latSpinner.getValueFactory() != null)
-                latSpinner.getValueFactory().setValue(0.0);
         }
+        // if the user erase the value, the old value is set back.
+        else SIRS.LOGGER.log(Level.WARNING,"test Value null for spinner " );
     }
 
     @Override
@@ -364,8 +361,10 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             JTS.setCRS(endPoint, crs);
         }
 
-        if (startPoint == null && endPoint == null) return;
-        if (startPoint == null) startPoint = endPoint;
+        if (startPoint == null) {
+            if (endPoint == null) return;
+            startPoint = endPoint;
+        }
         if (endPoint == null) endPoint = startPoint;
 
         //on sauvegarde les points dans le crs de la base

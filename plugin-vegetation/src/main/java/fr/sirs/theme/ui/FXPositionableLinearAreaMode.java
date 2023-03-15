@@ -129,12 +129,22 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
             }
         });
 
+        final ChangeListener posListener = (ObservableValue observable, Object oldValue, Object newValue) -> updateFields();
+
         positionableProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue instanceof ZoneVegetation) {
-                ((ZoneVegetation) newValue).typeCoteIdProperty().removeListener(typeCoteChangeListener);
+                ((ZoneVegetation) oldValue).typeCoteIdProperty().removeListener(typeCoteChangeListener);
+                ((ZoneVegetation) oldValue).distanceDebutMinProperty().removeListener(posListener);
+                ((ZoneVegetation) oldValue).distanceDebutMaxProperty().removeListener(posListener);
+                ((ZoneVegetation) oldValue).distanceFinMinProperty().removeListener(posListener);
+                ((ZoneVegetation) oldValue).distanceFinMaxProperty().removeListener(posListener);
             }
             if (newValue instanceof ZoneVegetation) {
                 ((ZoneVegetation) newValue).typeCoteIdProperty().addListener(typeCoteChangeListener);
+                ((ZoneVegetation) newValue).distanceDebutMinProperty().addListener(posListener);
+                ((ZoneVegetation) newValue).distanceDebutMaxProperty().addListener(posListener);
+                ((ZoneVegetation) newValue).distanceFinMinProperty().addListener(posListener);
+                ((ZoneVegetation) newValue).distanceFinMaxProperty().addListener(posListener);
             }
         });
     }
@@ -150,33 +160,26 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         setReseting(true);
 
         final PositionableVegetation pos = (PositionableVegetation) positionableProperty().get();
-        final String mode = pos.getGeometryMode();
 
-        if (mode == null || MODE.equals(mode)) {
-            //on assigne les valeurs sans changement
-            uiStartNear.getValueFactory().setValue(pos.getDistanceDebutMin());
-            uiStartFar.getValueFactory().setValue(pos.getDistanceDebutMax());
-            uiEndNear.getValueFactory().setValue(pos.getDistanceFinMin());
-            uiEndFar.getValueFactory().setValue(pos.getDistanceFinMax());
-        } else if (pos.getGeometry() != null) {
-            //on calcule les valeurs en fonction des points de debut et fin
-
-            uiStartNear.getValueFactory().setValue(pos.getDistanceDebutMin());
-            uiStartFar.getValueFactory().setValue(pos.getDistanceDebutMax());
-            uiEndNear.getValueFactory().setValue(pos.getDistanceFinMin());
-            uiEndFar.getValueFactory().setValue(pos.getDistanceFinMax());
-        } else {
-            uiStartNear.getValueFactory().setValue(0.0);
-            uiStartFar.getValueFactory().setValue(0.0);
-            uiEndNear.getValueFactory().setValue(0.0);
-            uiEndFar.getValueFactory().setValue(0.0);
-        }
+        updateDistanceSpinners(pos);
 
         //on cache certains champs si c'est un ponctuel
         pctProp.unbind();
         pctProp.bind(pos.geometryTypeProperty().isNotEqualTo(GeometryType.PONCTUAL));
 
         setReseting(false);
+    }
+
+    private void updateSpinnerWithValue(final Spinner<Double> spinner, final Double value, final Double defaultValue) {
+        if (spinner != null && spinner.getValueFactory() != null)
+            spinner.getValueFactory().setValue(value == null ? defaultValue : value);
+    }
+
+    private void updateDistanceSpinners(final PositionableVegetation pos) {
+        updateSpinnerWithValue(uiStartNear, pos.getDistanceDebutMin(), 0.0);
+        updateSpinnerWithValue(uiStartFar, pos.getDistanceDebutMax(), 0.0);
+        updateSpinnerWithValue(uiEndNear, pos.getDistanceFinMin(), 0.0);
+        updateSpinnerWithValue(uiEndFar, pos.getDistanceFinMax(), 0.0);
     }
 
     @Override
@@ -190,12 +193,17 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         setValuesFromUi(positionable);
         if (positionable.getBorneDebutId() == null || positionable.getBorneFinId() == null) return;
 
-        positionable.setDistanceDebutMin(uiStartNear.getValue());
-        positionable.setDistanceDebutMax(uiStartFar.getValue());
-        positionable.setDistanceFinMin(uiEndNear.getValue());
-        positionable.setDistanceFinMax(uiEndFar.getValue());
+        PluginVegetation.buildLinearGeometry(positionable, uiSRs.getValue(), PluginVegetation.Mode.LINEAR_AREA);
+    }
 
-        PluginVegetation.buildLinearGeometry(positionable, uiSRs.getValue(), MODE);
+    @Override
+    public void setValuesFromUi(final Positionable positionable) {
+        super.setValuesFromUi(positionable);
+        PositionableVegetation pos = (PositionableVegetation) positionable;
+        pos.setDistanceDebutMin(uiStartNear.getValue());
+        pos.setDistanceDebutMax(uiStartFar.getValue());
+        pos.setDistanceFinMin(uiEndNear.getValue());
+        pos.setDistanceFinMax(uiEndFar.getValue());
     }
 
 }

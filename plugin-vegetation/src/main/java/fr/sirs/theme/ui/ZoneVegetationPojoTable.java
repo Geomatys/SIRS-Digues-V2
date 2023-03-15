@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
+import fr.sirs.util.ConvertPositionableCoordinates;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WritableValue;
@@ -250,10 +251,23 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
     }
 
     public static void buildLinearGeometry(final ZoneVegetation zone) {
-        final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
-        final SystemeReperage sr = srRepo.get(zone.getSystemeRepId());
+        String srId = zone.getSystemeRepId();
 
-        PluginVegetation.buildLinearGeometry(zone, sr, FXPositionableLinearAreaMode.MODE);
+        // init SR - can be null when new zone de Végétation created but set from PojoTable.
+        if (srId == null) {
+            final TronconDigue t = ConvertPositionableCoordinates.getTronconFromPositionable(zone);
+            zone.setSystemeRepId(t.getSystemeRepDefautId());
+            srId = zone.getSystemeRepId();
+            if (srId == null) {
+                throw new IllegalStateException("Neither the zoneVegetation nor its troncon have a SystemeReperage.");
+            }
+
+        }
+
+        final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
+        final SystemeReperage sr = srRepo.get(srId);
+
+        PluginVegetation.buildLinearGeometry(zone, sr, Mode.LINEAR_AREA);
         zone.editedGeoCoordinateProperty().set(false);
     }
 
@@ -265,7 +279,7 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
         if (startPoint == null) startPoint = endPoint;
         if (endPoint == null) endPoint = startPoint;
 
-        buildCoordGeometry(zone, startPoint, endPoint, FXPositionableCoordAreaMode.MODE);
+        buildCoordGeometry(zone, startPoint, endPoint, Mode.COORD_AREA);
     }
 
 }

@@ -304,15 +304,12 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
                 uiBorneStart.valueProperty().set(borneMap.get(pos.borneDebutIdProperty().get()));
                 uiBorneEnd.valueProperty().set(borneMap.get(pos.borneFinIdProperty().get()));
 
-            } else {
-                try {
+            } else if (pos.getGeometry() != null && pos.getBorneDebutId() != null) {
                     //on calcule les valeurs en fonction des points de debut et fin
                     final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
                     updateFromPosSRInfo(defaultSR, ps);
-                } catch (Exception e) {
-                    //pas de geometrie
-                    updateWithDefaultValues();
-                }
+            } else {
+                updateWithDefaultValues();
             }
 
         } finally {

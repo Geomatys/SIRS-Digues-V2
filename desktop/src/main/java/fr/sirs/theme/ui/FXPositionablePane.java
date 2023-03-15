@@ -186,7 +186,7 @@ public class FXPositionablePane extends BorderPane {
             if (oldValue != null) {
                 oldValue.geometryProperty().removeListener(geomListener);
                 oldValue.positionDebutProperty().removeListener(geomListener);
-                oldValue.positionFinProperty().addListener(geomListener);
+                oldValue.positionFinProperty().removeListener(geomListener);
             }
             if (newValue != null) {
                 newValue.geometryProperty().addListener(geomListener);
