@@ -101,6 +101,7 @@ public class FXPositionableForm extends BorderPane {
     protected Label LabelContactEau;
     @FXML
     protected CheckBox checkContactEau;
+    @FXML protected TextArea ui_commentaire;
 
 
     private final ObjectProperty<Positionable> positionableProperty = new SimpleObjectProperty<>();
@@ -115,6 +116,7 @@ public class FXPositionableForm extends BorderPane {
         ui_hauteurIdLabel.setLabelFor(ui_hauteurId);
         ui_densiteLabel.setLabelFor(ui_densite);
         ui_densiteIdLabel.setLabelFor(ui_densiteId);
+        ui_commentaire.setWrapText(true);
 
         positionableProperty.addListener(this::changed);
 
@@ -227,6 +229,7 @@ public class FXPositionableForm extends BorderPane {
             zone.setContactEau(checkContactEau.isSelected());
             zone.setTypeCoteId(getElementIdOrnull(ui_typeCoteId));
             zone.setTypePositionId((getElementIdOrnull(ui_positionId)));
+            zone.setCommentaire((ui_commentaire.getText()));
 
             if (zone instanceof InvasiveVegetation) {
                 final InvasiveVegetation iv = (InvasiveVegetation) zone;
@@ -263,6 +266,8 @@ public class FXPositionableForm extends BorderPane {
 
         if (oldValue != null) {
             uiDesignation.textProperty().unbindBidirectional(oldValue.designationProperty());
+            if (oldValue instanceof ZoneVegetation)
+                ui_commentaire.textProperty().unbindBidirectional(((ZoneVegetation) oldValue).commentaireProperty());
             if (oldValue instanceof PeuplementVegetation) {
                 final PeuplementVegetation peuplement = (PeuplementVegetation) oldValue;
                 initRefPreviewComboBox(uiType, RefTypePeuplementVegetation.class , peuplement.getTypeVegetationId());
@@ -283,6 +288,8 @@ public class FXPositionableForm extends BorderPane {
         ui_densiteId.disableProperty().set(isNewValueNull);
         ui_hauteurId.disableProperty().set(isNewValueNull);
         ui_diametreId.disableProperty().set(isNewValueNull);
+        ui_commentaire.disableProperty().set(isNewValueNull);
+
 
         if (newValue instanceof PositionableVegetation) {
             PositionableVegetation pv = (PositionableVegetation) newValue;
@@ -298,6 +305,9 @@ public class FXPositionableForm extends BorderPane {
             editor = new FXPositionableVegetationPane();
             ((FXPositionableVegetationPane) editor).setPositionable(newValue);
             ((FXPositionableVegetationPane) editor).disableFieldsProperty().set(false);
+
+            if (newValue instanceof ZoneVegetation)
+                ui_commentaire.textProperty().bindBidirectional(((ZoneVegetation) newValue).commentaireProperty());
 
             uiType.setVisible(false);
             ui_densiteId.setVisible(false);
