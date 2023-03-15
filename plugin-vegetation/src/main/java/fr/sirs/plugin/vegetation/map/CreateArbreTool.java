@@ -33,10 +33,7 @@ import fr.sirs.util.SirsStringConverter;
 import javafx.collections.FXCollections;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -130,6 +127,7 @@ public class CreateArbreTool extends AbstractEditionTool {
     private final CheckBox ui_contactEau =  new CheckBox();
     private final ComboBox<Preview> ui_typePositionId = new ComboBox<>();
     private final ComboBox<Preview> ui_typeCoteId = new ComboBox<>();
+    private final TextArea ui_commentaire = new TextArea();
 
     public CreateArbreTool(FXMap map) {
         super(SPI);
@@ -145,6 +143,7 @@ public class CreateArbreTool extends AbstractEditionTool {
         lblParcelle.setWrapText(true);
 
         ui_Designation.setText(arbre.getDesignation());
+        ui_commentaire.setText(arbre.getCommentaire());
 
         final GridPane attributeGrid = new GridPane();
         attributeGrid.setHgap(2);
@@ -167,7 +166,8 @@ public class CreateArbreTool extends AbstractEditionTool {
                 new HBox(15, generateHeaderLabel("Parcelle :"), lblParcelle),
                 new HBox(15, generateHeaderLabel("Géométrie :"), lblPoint),
                 new HBox(15, generateHeaderLabel("ATTENTION, remplir les champs suivant AVANT de positionner l'arbre sur la carte.")),
-                attributeGrid
+                attributeGrid,
+                new HBox(15, generateHeaderLabel("Commentaire :"), ui_commentaire)
         );
         vbox.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
         wizard.setCenter(vbox);
@@ -200,6 +200,8 @@ public class CreateArbreTool extends AbstractEditionTool {
         this.arbre.setTypeCoteId(getElementIdOrnull(ui_typeCoteId));
         this.arbre.setContactEau(ui_contactEau.isSelected());
 
+        arbre.setCommentaire(ui_commentaire.getText());
+
         final AbstractSIRSRepository<ArbreVegetation> arbreRepo = session.getRepositoryForClass(ArbreVegetation.class);
         arbreRepo.add(arbre);
     }
@@ -216,6 +218,7 @@ public class CreateArbreTool extends AbstractEditionTool {
         parcelle = null;
         lblParcelle.setText("Sélectionner une parcelle sur la carte");
         lblPoint.setText("");
+        ui_commentaire.setText(null);
         if (parcelleLayer != null) parcelleLayer.setSelectionFilter(null);
     }
 
