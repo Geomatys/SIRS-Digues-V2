@@ -128,13 +128,17 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     private final CheckBox checkContactEau = new CheckBox();
     private final ComboBox<Preview> ui_typeCoteId = new ComboBox();
     private final ComboBox<Preview> ui_typePositionId = new ComboBox<>();
+    private final TextArea ui_commentaire = new TextArea();
 
     public CreateVegetationPolygonTool(FXMap map, Spi spi, Class<T> clazz) {
         super(spi);
         vegetationClass = clazz;
         wizard.getStylesheets().add(CSS_PATH);
 
-        if (vegetation != null) ui_Designation.setText(vegetation.getDesignation());
+        if (vegetation != null) {
+            ui_Designation.setText(vegetation.getDesignation());
+            ui_commentaire.setText(vegetation.getCommentaire());
+        }
 
         initRefPreviewComboBox(ui_typeCoteId, RefCote.class, vegetation == null ? null : vegetation.getTypeCoteId());
         initRefPreviewComboBox(ui_typePositionId, RefPosition.class, vegetation == null ? null : vegetation.getTypePositionId());
@@ -185,6 +189,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
                 new HBox(15, generateHeaderLabel(LABEL_DESIGNATION), ui_Designation),
                  new VBox(15, lbl2, new HBox(15, selectGeomOnMapButton), lblGeom),
                 attributeGrid,
+                new HBox(15, generateHeaderLabel("Commentaire :"), ui_commentaire),
                 new HBox(30, end, cancel));
         vbox.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
         wizard.setCenter(vbox);
@@ -198,6 +203,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         vegetation.setValid(true);
         vegetation.setForeignParentId(parcelle.getDocumentId());
         setEditedAttributes(vegetation, checkContactEau, ui_typePositionId, ui_typeCoteId);
+        vegetation.setCommentaire(ui_commentaire.getText());
         final String designation = ui_Designation.getText();
         if (designation != null && !designation.isEmpty()) vegetation.setDesignation(designation);
         if (saveInBase) {
@@ -335,6 +341,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         ui_Designation.setText(vegetation.getDesignation());
         parcelle = null;
         lblParcelle.setText("Sélectionner une parcelle sur la carte");
+        ui_commentaire.setText(null);
         lblGeom.setText("");
         selectGeomOnMapButton.disableProperty().set(true);
         selectOnMapMouseListener = null;
