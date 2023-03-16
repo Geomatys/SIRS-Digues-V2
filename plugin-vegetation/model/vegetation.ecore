@@ -5,10 +5,14 @@
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="hauteurId" eType="#//RefHauteurVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="diametreId" eType="#//RefDiametreVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="etatSanitaireId" eType="#//RefEtatSanitaireVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeArbreId" eType="#//RefTypeArbreVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="especeId" eType="#//RefEspeceArbreVegetation"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PeuplementVegetation" eSuperTypes="#//ZoneVegetation">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeVegetationId" eType="#//RefTypePeuplementVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="etatSanitaireId" eType="#//RefEtatSanitaireVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="densite" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="diametre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
@@ -97,6 +101,15 @@
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypePeuplementVegetation" eSuperTypes="#//TypeZoneVegetation">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefEtatSanitaireVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeArbreVegetation" eSuperTypes="#//TypeZoneVegetation">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefEspeceArbreVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ParamCoutTraitementVegetation">

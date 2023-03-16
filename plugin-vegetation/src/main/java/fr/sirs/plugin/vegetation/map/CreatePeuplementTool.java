@@ -23,6 +23,7 @@ import fr.sirs.SIRS;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.RefEtatSanitaireVegetation;
 import fr.sirs.core.model.RefTypePeuplementVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import fr.sirs.util.ResourceInternationalString;
@@ -31,7 +32,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javafx.util.converter.NumberStringConverter;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.edition.AbstractEditionToolSpi;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
@@ -53,6 +53,7 @@ public class CreatePeuplementTool extends CreateVegetationPolygonTool<Peuplement
     private final NumberTextField densiteField = new NumberTextField();
     private final NumberTextField hauteurField = new NumberTextField();
     private final NumberTextField diametreField = new NumberTextField();
+    private final ComboBox<Preview> ui_etatSanitaireId = new ComboBox<>();
 
     public static final class Spi extends AbstractEditionToolSpi {
 
@@ -83,6 +84,9 @@ public class CreatePeuplementTool extends CreateVegetationPolygonTool<Peuplement
         SIRS.initCombo(comboTypeVegetation, FXCollections.observableList(
                         previewRepository.getByClass(RefTypePeuplementVegetation.class)),
                 previewRepository.get(DEFAULT_PEUPLEMENT_VEGETATION_TYPE));
+        SIRS.initCombo(ui_etatSanitaireId, FXCollections.observableList(
+                        previewRepository.getByClass(RefEtatSanitaireVegetation.class)),
+                vegetation == null ? null : vegetation.getEtatSanitaireId());
 
         final GridPane attributeGrid = new GridPane();
         attributeGrid.setHgap(2);
@@ -96,6 +100,8 @@ public class CreatePeuplementTool extends CreateVegetationPolygonTool<Peuplement
         attributeGrid.add(hauteurField,1,2);
         attributeGrid.add(generateHeaderLabel(LABEL_DIAMETRE),0,3);
         attributeGrid.add(diametreField,1,3);
+        attributeGrid.add(generateHeaderLabel(LABEL_ETAT_SANITAIRE_ID),0,4);
+        attributeGrid.add(ui_etatSanitaireId,1,4);
 
         final VBox center = (VBox) wizard.getCenter();
         center.getChildren().add(4,attributeGrid);
@@ -113,6 +119,8 @@ public class CreatePeuplementTool extends CreateVegetationPolygonTool<Peuplement
         if (hauteur != null) vegetation.setHauteur(hauteur);
         if (diametre != null) vegetation.setDiametre(diametre);
 
+        vegetation.setEtatSanitaireId(getElementIdOrnull(ui_etatSanitaireId));
+
         if (saveInBase) super.saveInBase();
     }
 
@@ -123,6 +131,7 @@ public class CreatePeuplementTool extends CreateVegetationPolygonTool<Peuplement
         diametreField.replaceText(0, 1, "0");
         hauteurField.replaceText(0, 1, "0");
         densiteField.replaceText(0, 1, "0");
+        ui_etatSanitaireId.getSelectionModel().clearSelection();
     }
 
     @Override

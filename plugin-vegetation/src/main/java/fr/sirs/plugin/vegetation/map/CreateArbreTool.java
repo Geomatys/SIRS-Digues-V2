@@ -127,6 +127,9 @@ public class CreateArbreTool extends AbstractEditionTool {
     private final CheckBox ui_contactEau =  new CheckBox();
     private final ComboBox<Preview> ui_typePositionId = new ComboBox<>();
     private final ComboBox<Preview> ui_typeCoteId = new ComboBox<>();
+    private final ComboBox<Preview> ui_etatSanitaireId = new ComboBox<>();
+    private final ComboBox<Preview> ui_typeArbreId = new ComboBox<>();
+    private final ComboBox<Preview> ui_especeId = new ComboBox<>();
     private final TextArea ui_commentaire = new TextArea();
 
     public CreateArbreTool(FXMap map) {
@@ -149,25 +152,35 @@ public class CreateArbreTool extends AbstractEditionTool {
         attributeGrid.setHgap(2);
         attributeGrid.setVgap(6);
 
-        attributeGrid.add(generateHeaderLabel(LABEL_DESIGNATION),0,0);
-        attributeGrid.add(ui_Designation,1,0);
-        attributeGrid.add(generateHeaderLabel(LABEL_HAUTEUR),0,1);
-        attributeGrid.add(hauteurComboBox,1,1);
-        attributeGrid.add(generateHeaderLabel(LABEL_DIAMETRE),0,2);
-        attributeGrid.add(diametreComboBox,1,2);
-        attributeGrid.add(generateHeaderLabel(LABEL_CONTACT_EAU),0,3);
-        attributeGrid.add(ui_contactEau,1,3);
-        attributeGrid.add(generateHeaderLabel(LABEL_POSITION_ID),0,4);
-        attributeGrid.add(ui_typePositionId,1,4);
-        attributeGrid.add(generateHeaderLabel(LABEL_COTE_ID),0,5);
-        attributeGrid.add(ui_typeCoteId,1,5);
+        attributeGrid.add(generateHeaderLabel(LABEL_CONTACT_EAU),0,0);
+        attributeGrid.add(ui_contactEau,1,0);
+        attributeGrid.add(generateHeaderLabel(LABEL_POSITION_ID),0,1);
+        attributeGrid.add(ui_typePositionId,1,1);
+        attributeGrid.add(generateHeaderLabel(LABEL_COTE_ID),0,2);
+        attributeGrid.add(ui_typeCoteId,1,2);
+
+        final GridPane attributeGrid2 = new GridPane();
+        attributeGrid2.setHgap(2);
+        attributeGrid2.setVgap(6);
+        attributeGrid2.add(generateHeaderLabel(LABEL_HAUTEUR),0,0);
+        attributeGrid2.add(hauteurComboBox,1,0);
+        attributeGrid2.add(generateHeaderLabel(LABEL_DIAMETRE),0,1);
+        attributeGrid2.add(diametreComboBox,1,1);
+        attributeGrid2.add(generateHeaderLabel(LABEL_ETAT_SANITAIRE_ID),0,2);
+        attributeGrid2.add(ui_etatSanitaireId,1,2);
+        attributeGrid2.add(generateHeaderLabel(LABEL_TYPE_VEGETATION),0,3);
+        attributeGrid2.add(ui_typeArbreId,1,3);
+        attributeGrid2.add(generateHeaderLabel(LABEL_ESPECE_ID),0,4);
+        attributeGrid2.add(ui_especeId,1,4);
 
         final VBox vbox = new VBox(15,
                 new HBox(15, generateHeaderLabel("Parcelle :"), lblParcelle),
                 new HBox(15, generateHeaderLabel("Géométrie :"), lblPoint),
                 new HBox(15, generateHeaderLabel("ATTENTION, remplir les champs suivant AVANT de positionner l'arbre sur la carte.")),
+                new HBox(15, generateHeaderLabel(LABEL_DESIGNATION), ui_Designation),
                 attributeGrid,
-                new HBox(15, generateHeaderLabel("Commentaire :"), ui_commentaire)
+                attributeGrid2,
+                new HBox(15, generateHeaderLabel(LABEL_COMMENTAIRE), ui_commentaire)
         );
         vbox.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
         wizard.setCenter(vbox);
@@ -178,6 +191,9 @@ public class CreateArbreTool extends AbstractEditionTool {
         SIRS.initCombo(hauteurComboBox,  FXCollections.observableList(previewRepository.getByClass(RefHauteurVegetation.class)), arbre == null ? null : arbre.getHauteurId());
         SIRS.initCombo(ui_typePositionId, FXCollections.observableList(previewRepository.getByClass(RefPosition.class)), arbre == null ? null : arbre.getTypePositionId());
         SIRS.initCombo(ui_typeCoteId,  FXCollections.observableList(previewRepository.getByClass(RefCote.class)), arbre == null ? null : arbre.getTypeCoteId());
+        SIRS.initCombo(ui_etatSanitaireId,  FXCollections.observableList(previewRepository.getByClass(RefEtatSanitaireVegetation.class)), arbre == null ? null : arbre.getEtatSanitaireId());
+        SIRS.initCombo(ui_typeArbreId,  FXCollections.observableList(previewRepository.getByClass(RefTypeArbreVegetation.class)), arbre == null ? null : arbre.getTypeArbreId());
+        SIRS.initCombo(ui_especeId,  FXCollections.observableList(previewRepository.getByClass(RefEspeceArbreVegetation.class)), arbre == null ? null : arbre.getEspeceId());
 
     }
 
@@ -193,12 +209,15 @@ public class CreateArbreTool extends AbstractEditionTool {
         arbre.setValid(true);
         arbre.setForeignParentId(parcelle.getDocumentId());
 
-        this.arbre.setDesignation(ui_Designation.getText());
-        this.arbre.setHauteurId(getElementIdOrnull(hauteurComboBox));
-        this.arbre.setDiametreId(getElementIdOrnull(diametreComboBox));
-        this.arbre.setTypePositionId(getElementIdOrnull(ui_typePositionId));
-        this.arbre.setTypeCoteId(getElementIdOrnull(ui_typeCoteId));
-        this.arbre.setContactEau(ui_contactEau.isSelected());
+        arbre.setDesignation(ui_Designation.getText());
+        arbre.setHauteurId(getElementIdOrnull(hauteurComboBox));
+        arbre.setDiametreId(getElementIdOrnull(diametreComboBox));
+        arbre.setTypePositionId(getElementIdOrnull(ui_typePositionId));
+        arbre.setTypeCoteId(getElementIdOrnull(ui_typeCoteId));
+        arbre.setContactEau(ui_contactEau.isSelected());
+        arbre.setEtatSanitaireId(getElementIdOrnull(ui_etatSanitaireId));
+        arbre.setTypeArbreId(getElementIdOrnull(ui_typeArbreId));
+        arbre.setEspeceId(getElementIdOrnull(ui_especeId));
 
         arbre.setCommentaire(ui_commentaire.getText());
 
@@ -211,6 +230,9 @@ public class CreateArbreTool extends AbstractEditionTool {
         hauteurComboBox.getSelectionModel().clearSelection();
         ui_typePositionId.getSelectionModel().clearSelection();
         ui_typeCoteId.getSelectionModel().clearSelection();
+        ui_etatSanitaireId.getSelectionModel().clearSelection();
+        ui_typeArbreId.getSelectionModel().clearSelection();
+        ui_especeId.getSelectionModel().clearSelection();
         ui_contactEau.setSelected(false);
         arbre = Injector.getSession().getElementCreator().createElement(ArbreVegetation.class);
         arbre.setTraitement(Injector.getSession().getElementCreator().createElement(TraitementZoneVegetation.class));

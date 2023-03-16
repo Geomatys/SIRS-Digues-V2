@@ -189,7 +189,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
                 new HBox(15, generateHeaderLabel(LABEL_DESIGNATION), ui_Designation),
                  new VBox(15, lbl2, new HBox(15, selectGeomOnMapButton), lblGeom),
                 attributeGrid,
-                new HBox(15, generateHeaderLabel("Commentaire :"), ui_commentaire),
+                new HBox(15, generateHeaderLabel(LABEL_COMMENTAIRE), ui_commentaire),
                 new HBox(30, end, cancel));
         vbox.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
         wizard.setCenter(vbox);
