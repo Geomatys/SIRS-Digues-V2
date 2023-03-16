@@ -50,6 +50,8 @@
                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
                </rowConstraints>
                <children>
                    <Label fx:id="ui_densiteLabel" text="Densité (nb tiges/ha)" styleClass="label-text" GridPane.rowIndex="0" />
@@ -64,6 +66,10 @@
                    <Spinner fx:id="ui_diametre" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4"  maxHeight="-Infinity" maxWidth="-Infinity"/>
                    <Label fx:id="ui_diametreIdLabel" text="Diametre" styleClass="label-text" GridPane.rowIndex="5" />
                    <ComboBox fx:id="ui_diametreId" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="5" />
+                   <Label fx:id="ui_etatSaniIdLabel" text="Etat sanitaire" styleClass="label-text" GridPane.rowIndex="6" />
+                   <ComboBox fx:id="ui_etatSanitaireId" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="6" />
+                   <Label fx:id="ui_especeArbreIdLabel" text="Espèce" styleClass="label-text" GridPane.rowIndex="7" />
+                   <ComboBox fx:id="ui_especeArbreId" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="7" />
                </children>
                    <padding>
                        <Insets bottom="10.0" left="10.0" right="10.0" top="0" />
