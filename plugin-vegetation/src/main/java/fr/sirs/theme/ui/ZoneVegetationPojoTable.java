@@ -268,7 +268,6 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
         final SystemeReperage sr = srRepo.get(srId);
 
         PluginVegetation.buildLinearGeometry(zone, sr, Mode.LINEAR_AREA);
-        zone.editedGeoCoordinateProperty().set(false);
     }
 
     public static void buildGeometryCoord(final ZoneVegetation zone) {

@@ -1195,7 +1195,7 @@ public class PluginVegetation extends Plugin {
             String borneId = zone.getBorneDebutId();
             if (borneId == null) return;
             final Map.Entry<LineString, Double> pointAndSegment = buildSegmentFromBorne(asLineString(troncon.getGeometry()),
-                    zone.getBorneDebutId(),
+                    borneId,
                     zone.getBorne_debut_aval(),
                     zone.getBorne_debut_distance(),
                     borneRepo);
@@ -1215,10 +1215,10 @@ public class PluginVegetation extends Plugin {
             geometry = getNonPonctualGeometry(zone, troncon, ratio, mode, borneRepo, null, null);
         }
 
-
         //sauvegarde de la geometrie
         zone.setGeometryMode(mode.value);
         zone.setGeometry(geometry);
+        zone.setEditedGeoCoordinate(false);
 
         // Hack for the case when geometry is a multipolygon as TronconUtils.getPointFromGeometry() does not support it.
         // This situation happens when TypePosition is "Berge" and TypeCote is "Deux côtés de la digue".

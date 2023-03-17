@@ -179,6 +179,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             }
             if (newValue != null) {
                 newValue.geometryProperty().addListener(geomListener);
+                // Listeners to update values in the pane when they are updated via the pojoTable.
                 newValue.positionDebutProperty().addListener(pointListener);
                 newValue.positionFinProperty().addListener(pointListener);
                 newValue.editedGeoCoordinateProperty().addListener(updateEditedGeoCoordinatesDisplay);

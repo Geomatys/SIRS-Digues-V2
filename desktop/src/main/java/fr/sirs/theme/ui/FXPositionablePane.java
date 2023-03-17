@@ -196,8 +196,13 @@ public class FXPositionablePane extends BorderPane {
 
                 //on active le mode dont le type correspond
                 final String modeName = Preferences.userNodeForPackage(FXPositionableMode.class).get("default", null);
-                Toggle active = group.getToggles().get(0);
+                Toggle active = null;
+                boolean first =true;
                 for (Toggle t : group.getToggles()) {
+                    if (first) {
+                        active = t;
+                        first =false;
+                    }
                     final FXPositionableMode mode = (FXPositionableMode) t.getUserData();
                     if (mode != null && mode.getID().equalsIgnoreCase(modeName)) {
                         active = t;

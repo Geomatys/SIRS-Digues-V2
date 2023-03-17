@@ -183,6 +183,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
                 newValue.geometryProperty().addListener(geomListener);
                 newValue.editedGeoCoordinateProperty().addListener(updateEditedGeoCoordinatesDisplay);
                 setCoordinatesLabel(null, posProperty.get().getEditedGeoCoordinate());
+                // Listeners to update values in the pane when they are updated via the pojoTable.
                 newValue.borneFinIdProperty().addListener(pointListener);
                 newValue.borneDebutIdProperty().addListener(pointListener);
                 newValue.borne_debut_avalProperty().addListener(pointListener);

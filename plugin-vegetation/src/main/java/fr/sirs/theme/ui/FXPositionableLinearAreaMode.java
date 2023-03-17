@@ -191,7 +191,6 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         if (!MODE.equals(positionable.getGeometryMode())) return;
 
         setValuesFromUi(positionable);
-        if (positionable.getBorneDebutId() == null || positionable.getBorneFinId() == null) return;
 
         PluginVegetation.buildLinearGeometry(positionable, uiSRs.getValue(), PluginVegetation.Mode.LINEAR_AREA);
     }
