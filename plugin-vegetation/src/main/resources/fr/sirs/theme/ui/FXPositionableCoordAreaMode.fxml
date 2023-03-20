@@ -10,7 +10,7 @@
    <center>
        <VBox>
            <children>
-      <GridPane hgap="10.0" styleClass="pos-bottom" vgap="10.0" BorderPane.alignment="CENTER">
+      <GridPane hgap="10.0" styleClass="pos-bottom" vgap="10.0" BorderPane.alignment="CENTER" prefWidth="675">
         <columnConstraints>
           <ColumnConstraints hgrow="NEVER" />
             <ColumnConstraints hgrow="ALWAYS" minWidth="2.0" prefWidth="2.0" />
