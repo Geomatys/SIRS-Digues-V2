@@ -63,30 +63,35 @@ public class FXPositionableForm extends BorderPane {
     @FXML
     private ComboBox uiType;
     @FXML
-    protected GridPane grid_pane_dens_haut_diam;
+    private GridPane grid_pane_dens_haut_diam;
     @FXML
     private Label ui_densiteLabel;
-    @FXML protected Spinner ui_densite;
+    @FXML
+    private Spinner ui_densite;
     @FXML
     private Label ui_densiteIdLabel;
-    @FXML protected ComboBox<Preview> ui_densiteId;
+    @FXML
+    private ComboBox<Preview> ui_densiteId;
     @FXML
     private Label ui_hauteurLabel;
     @FXML
-    protected Spinner ui_hauteur;
+    private Spinner ui_hauteur;
     @FXML
     private Label ui_hauteurIdLabel;
-    @FXML protected ComboBox<Preview> ui_hauteurId;
+    @FXML
+    private ComboBox<Preview> ui_hauteurId;
     @FXML
     private Label ui_diametreLabel;
-    @FXML protected Spinner ui_diametre;
+    @FXML
+    private Spinner ui_diametre;
     @FXML
     private Label ui_diametreIdLabel;
-    @FXML protected ComboBox<Preview> ui_diametreId;
     @FXML
-    protected Label ui_positionLabel;
+    private ComboBox<Preview> ui_diametreId;
     @FXML
-    protected ComboBox<Preview> ui_positionId;
+    private Label ui_positionLabel;
+    @FXML
+    private ComboBox<Preview> ui_positionId;
     @FXML
     private Label ui_typeCoteLabel;
     @FXML
@@ -103,22 +108,14 @@ public class FXPositionableForm extends BorderPane {
     public FXPositionableForm() {
         SIRS.loadFXML(this, Positionable.class);
 
-        positionableProperty.addListener(this::changed);
-        uiGoto.disableProperty().bind(positionableProperty.isNull());
-        uiDelete.disableProperty().bind(positionableProperty.isNull());
-        uiSave.disableProperty().bind(positionableProperty.isNull());
-        uiDesignation.disableProperty().bind(positionableProperty.isNull());
-        uiType.disableProperty().bind(positionableProperty.isNull());
-        ui_densite.disableProperty().bind(positionableProperty.isNull());
-        ui_hauteur.disableProperty().bind(positionableProperty.isNull());
-        ui_diametre.disableProperty().bind(positionableProperty.isNull());
-        ui_densiteId.disableProperty().bind(positionableProperty.isNull());
-        ui_hauteurId.disableProperty().bind(positionableProperty.isNull());
-        ui_diametreId.disableProperty().bind(positionableProperty.isNull());
+        ui_diametreLabel.setLabelFor(ui_diametre);
+        ui_diametreIdLabel.setLabelFor(ui_diametreId);
+        ui_hauteurLabel.setLabelFor(ui_hauteur);
+        ui_hauteurIdLabel.setLabelFor(ui_hauteurId);
+        ui_densiteLabel.setLabelFor(ui_densite);
+        ui_densiteIdLabel.setLabelFor(ui_densiteId);
 
-        uiTypeLabel.visibleProperty().bind(uiType.visibleProperty());
-        uiTypeLabel.managedProperty().bind(uiTypeLabel.visibleProperty());
-        uiType.managedProperty().bind(uiType.visibleProperty());
+        positionableProperty.addListener(this::changed);
 
         // The whole GridPane is ignored if none of the attributes is visible.
         grid_pane_dens_haut_diam.managedProperty().bind(grid_pane_dens_haut_diam.visibleProperty());
@@ -128,30 +125,27 @@ public class FXPositionableForm extends BorderPane {
                         Bindings.or(Bindings.or(ui_hauteurLabel.visibleProperty(), ui_hauteurIdLabel.visibleProperty()),
                                 Bindings.or(ui_diametreLabel.visibleProperty(), ui_diametreIdLabel.visibleProperty()))));
 
-        ui_densiteLabel.visibleProperty().bind(ui_densite.visibleProperty());
-        ui_densiteIdLabel.visibleProperty().bind(ui_densiteId.visibleProperty());
-        ui_densiteId.managedProperty().bind(ui_densiteId.visibleProperty());
-        ui_densiteIdLabel.managedProperty().bind(ui_densiteIdLabel.visibleProperty());
-        ui_densite.managedProperty().bind(ui_densite.visibleProperty());
-        ui_densiteLabel.managedProperty().bind(ui_densiteLabel.visibleProperty());
-
-        ui_hauteurLabel.visibleProperty().bind(ui_hauteur.visibleProperty());
-        ui_hauteurIdLabel.visibleProperty().bind(ui_hauteurId.visibleProperty());
-        ui_hauteurId.managedProperty().bind(ui_hauteurId.visibleProperty());
-        ui_hauteurIdLabel.managedProperty().bind(ui_hauteurIdLabel.visibleProperty());
-        ui_hauteur.managedProperty().bind(ui_hauteur.visibleProperty());
-        ui_hauteurLabel.managedProperty().bind(ui_hauteurLabel.visibleProperty());
-
-        ui_diametreLabel.visibleProperty().bind(ui_diametre.visibleProperty());
-        ui_diametreIdLabel.visibleProperty().bind(ui_diametreId.visibleProperty());
-        ui_diametreId.managedProperty().bind(ui_diametreId.visibleProperty());
-        ui_diametreIdLabel.managedProperty().bind(ui_diametreIdLabel.visibleProperty());
-        ui_diametre.managedProperty().bind(ui_diametre.visibleProperty());
-        ui_diametreLabel.managedProperty().bind(ui_diametreLabel.visibleProperty());
+        bindUiToNode(uiType, uiTypeLabel);
+        bindUiToNode(ui_densite, ui_densiteLabel);
+        bindUiToNode(ui_densiteId, ui_densiteIdLabel);
+        bindUiToNode(ui_hauteur, ui_hauteurLabel);
+        bindUiToNode(ui_hauteurId, ui_hauteurIdLabel);
+        bindUiToNode(ui_diametreId, ui_diametreIdLabel);
+        bindUiToNode(ui_diametre, ui_diametreLabel);
 
         ui_densite.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
         ui_hauteur.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
         ui_diametre.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
+    }
+
+    private void bindUiToNode(Node property, Label label) {
+        property.visibleProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue != null) {
+                label.visibleProperty().set(newValue);
+                property.managedProperty().set(newValue);
+                label.managedProperty().set(newValue);
+            }
+        });
     }
 
     @FXML
@@ -240,6 +234,18 @@ public class FXPositionableForm extends BorderPane {
                 ui_densite.getValueFactory().valueProperty().unbindBidirectional(peuplement.densiteProperty());
             }
         }
+        boolean isNewValueNull = newValue == null;
+        uiGoto.disableProperty().set(isNewValueNull);
+        uiDelete.disableProperty().set(isNewValueNull);
+        uiSave.disableProperty().set(isNewValueNull);
+        uiDesignation.disableProperty().set(isNewValueNull);
+        uiType.disableProperty().set(isNewValueNull);
+        ui_densite.disableProperty().set(isNewValueNull);
+        ui_hauteur.disableProperty().set(isNewValueNull);
+        ui_diametre.disableProperty().set(isNewValueNull);
+        ui_densiteId.disableProperty().set(isNewValueNull);
+        ui_hauteurId.disableProperty().set(isNewValueNull);
+        ui_diametreId.disableProperty().set(isNewValueNull);
 
         if (newValue instanceof PositionableVegetation) {
             PositionableVegetation pv = (PositionableVegetation) newValue;

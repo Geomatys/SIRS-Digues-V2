@@ -133,7 +133,7 @@ public class EditVegetationTool extends AbstractEditionTool {
             refreshDecoration();
         });
 
-        uiClose.setOnMouseClicked(event -> install(map));
+        uiClose.setOnAction(event -> install(map));
         uiClose.visibleProperty().bind(form.positionableProperty().isNotNull());
         uiClose.managedProperty().bind(uiClose.visibleProperty());
         wizard.setTop(uiClose);

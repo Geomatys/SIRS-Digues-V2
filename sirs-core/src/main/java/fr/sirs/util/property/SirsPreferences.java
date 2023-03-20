@@ -110,7 +110,7 @@ public class SirsPreferences extends Properties {
         if (!Files.isRegularFile(PREFERENCES_PATH)) {
             Files.createFile(PREFERENCES_PATH);
         }
-        showCaseProp = new SimpleObjectProperty();
+        showCaseProp = new SimpleObjectProperty(ShowCasePossibility.BOTH);
         reload();
     }
 
