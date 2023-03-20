@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -423,8 +423,8 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
                 if(isPositionable) {
                     positionDebut = pointReal;
                     positionFin = positionDebut;
-                    setPositionableGeometries((Positionable) editedObjet, pointProj, positionDebut, positionFin, troncon.getSystemeRepDefautId());
-                    ConvertPositionableCoordinates.computePositionableLinearCoordinate((Positionable) editedObjet);
+                    setPositionableGeometries(editedObjet, pointProj, positionDebut, positionFin, troncon.getSystemeRepDefautId());
+                    ConvertPositionableCoordinates.computePositionableLinearCoordinate(editedObjet);
                 } else {
                     editedObjet.setGeometry(pointProj);
                 }
@@ -473,11 +473,11 @@ public class ObjetOnTronconEditHandler<T extends Objet> extends AbstractOnTronco
 
                 if (isPositionable) {
                     if (reverse) {
-                        setPositionableGeometries((Positionable) editedObjet, projLine, positionFin, positionDebut, troncon.getSystemeRepDefautId());
+                        setPositionableGeometries(editedObjet, projLine, positionFin, positionDebut, troncon.getSystemeRepDefautId());
                     } else {
-                        setPositionableGeometries((Positionable) editedObjet, projLine, positionDebut, positionFin, troncon.getSystemeRepDefautId());
+                        setPositionableGeometries(editedObjet, projLine, positionDebut, positionFin, troncon.getSystemeRepDefautId());
                     }
-                    ConvertPositionableCoordinates.computePositionableLinearCoordinate((Positionable) editedObjet);
+                    ConvertPositionableCoordinates.computePositionableLinearCoordinate(editedObjet, true);
 
                 } else {
                     editedObjet.setGeometry(projLine);

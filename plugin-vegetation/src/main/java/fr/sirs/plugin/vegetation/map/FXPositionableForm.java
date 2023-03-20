@@ -23,6 +23,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.*;
+import fr.sirs.theme.ui.FXPositionableExplicitMode;
 import fr.sirs.theme.ui.FXPositionablePane;
 import fr.sirs.theme.ui.FXPositionableVegetationPane;
 import fr.sirs.util.SirsStringConverter;
@@ -168,9 +169,45 @@ public class FXPositionableForm extends BorderPane {
     void save(ActionEvent event) {
         setFormProperties();
         final Positionable pos = positionableProperty.get();
+        if (pos instanceof ZoneVegetation) {
+            ZoneVegetation zone = (ZoneVegetation) pos;
+            // the vegetation geometry has been updated via the carto
+            if (FXPositionableExplicitMode.MODE.equals(pos.getGeometryMode())) {
+                zone.setCartoEdited(true);
+                resetLinear(zone);
+                resetGeo(zone);
+                resetDistances(zone);
+            } else zone.setCartoEdited(false);
+        }
         final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(pos.getClass());
         repo.update(pos);
         positionableProperty.set(null);
+    }
+
+    protected void setCartoEditedMode(ZoneVegetation zone) {
+        zone.setCartoEdited(true);
+        resetLinear(zone);
+        resetGeo(zone);
+        resetDistances(zone);
+    }
+
+    private void resetLinear(Positionable pos) {
+        pos.setBorneDebutId(null);
+        pos.setBorneFinId(null);
+        pos.setBorne_debut_distance(0);
+        pos.setBorne_fin_distance(0);
+    }
+
+    private void resetGeo(Positionable pos) {
+        pos.setPositionDebut(null);
+        pos.setPositionFin(null);
+    }
+
+    private void resetDistances(ZoneVegetation pos) {
+        pos.setDistanceDebutMin(0);
+        pos.setDistanceDebutMax(0);
+        pos.setDistanceFinMin(0);
+        pos.setDistanceFinMax(0);
     }
 
     private void setFormProperties() {

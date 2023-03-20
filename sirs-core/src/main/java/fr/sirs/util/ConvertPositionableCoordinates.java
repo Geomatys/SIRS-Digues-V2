@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -264,9 +264,10 @@ public class ConvertPositionableCoordinates {
      * @param positionableWithGeo : le Positionable pour lequel les coordonnées
      * linéaires seront mises à jour. Les attributs startPoint et endPoint de ce
      * Positionable doivent être renseignés.
+     * @param forceRecomputeGeometry hack to avoid recomputing geometry for polygons of ZoneVegetation
      * @return boolean indiquant si des coordonnées ont été mises à jours
      */
-    public static boolean computePositionableLinearCoordinate(final SystemeReperage sr, final Positionable positionableWithGeo) {
+    public static boolean computePositionableLinearCoordinate(final SystemeReperage sr, final Positionable positionableWithGeo, final boolean forceRecomputeGeometry) {
         ArgumentChecks.ensureNonNull("Système de repérage", sr);
         ArgumentChecks.ensureNonNull("Positionable", positionableWithGeo);
 
@@ -281,10 +282,9 @@ public class ConvertPositionableCoordinates {
             }
 
             //Initialisation
-            final AbstractSIRSRepository<BorneDigue> borneRepo = InjectorCore.getBean(SessionCore.class).getRepositoryForClass(BorneDigue.class);
             final TronconDigue tronconFromPositionable = getTronconFromPositionable(positionableWithGeo);
             final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr, positionableWithGeo);
-            if (tronconFromPositionable != null) {
+            if (forceRecomputeGeometry && tronconFromPositionable != null) {
                 positionableWithGeo.setGeometry(null); // to recompute it
             }
             final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(positionableWithGeo, tronconFromPositionable, segments);
@@ -327,9 +327,10 @@ public class ConvertPositionableCoordinates {
      * représentation par défaut pour le positionable donné.
      *
      * @param positionableWithGeo
+     * @param forceRecomputeGeometry hack to avoid recomputing geometry for polygons of ZoneVegetation
      * @return boolean indiquant si des coordonnées ont été mises à jours
      */
-    public static boolean computePositionableLinearCoordinate(final Positionable positionableWithGeo) {
+    public static boolean computePositionableLinearCoordinate(final Positionable positionableWithGeo, final boolean forceRecomputeGeometry) {
         ArgumentChecks.ensureNonNull("Positionable", positionableWithGeo);
 
         final SystemeReperage sr = ConvertPositionableCoordinates.getDefaultSRforPositionable(positionableWithGeo);
@@ -338,7 +339,19 @@ public class ConvertPositionableCoordinates {
             throw new NullPointerException("Impossible d'identifier un Système de représentation par défaut pour le positionable : " + positionableWithGeo.getDesignation());
         }
 
-        return computePositionableLinearCoordinate(sr, positionableWithGeo);
+        return computePositionableLinearCoordinate(sr, positionableWithGeo, forceRecomputeGeometry);
+    }
+
+    /**
+     * Calcul des coordonnées linéaires et mise à jour d'un Positionable à
+     * partir de ses coordonnées Géométriques MAIS en cherchant un Système de
+     * représentation par défaut pour le positionable donné.
+     *
+     * @param positionableWithGeo
+     * @return boolean indiquant si des coordonnées ont été mises à jours
+     */
+    public static boolean computePositionableLinearCoordinate(final Positionable positionableWithGeo) {
+        return computePositionableLinearCoordinate(positionableWithGeo, true);
     }
 
     /**

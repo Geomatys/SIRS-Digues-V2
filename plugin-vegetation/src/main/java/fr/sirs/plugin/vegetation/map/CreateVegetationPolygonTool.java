@@ -191,6 +191,9 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     }
 
     void saveAction(final boolean saveInBase) {
+        // editedGeoCoordinate set to false by default when creating Positionable via carto.
+        // not enough to differentiate from a positionable edited via its bornes or the carto.
+        vegetation.setCartoEdited(true);
         vegetation.setGeometryMode(FXPositionableExplicitMode.MODE);
         vegetation.setValid(true);
         vegetation.setForeignParentId(parcelle.getDocumentId());
