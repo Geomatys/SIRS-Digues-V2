@@ -29,8 +29,10 @@ import fr.sirs.util.ResourceInternationalString;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -104,6 +106,8 @@ public class EditVegetationTool extends AbstractEditionTool {
     private boolean modified = false;
     private MouseButton pressed = null;
 
+    private final Button uiClose = new Button("Fermer");
+
     public EditVegetationTool(FXMap map) {
         super(SPI);
         wizard.getStylesheets().add(CSS_PATH);
@@ -129,6 +133,12 @@ public class EditVegetationTool extends AbstractEditionTool {
             refreshDecoration();
         });
 
+        uiClose.setOnAction(event -> install(map));
+        uiClose.visibleProperty().bind(form.positionableProperty().isNotNull());
+        uiClose.managedProperty().bind(uiClose.visibleProperty());
+        wizard.setTop(uiClose);
+        wizard.setAlignment(uiClose, Pos.CENTER_RIGHT);
+        uiClose.getStyleClass().add("btn-single");
     }
 
 

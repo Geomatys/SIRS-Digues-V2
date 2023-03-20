@@ -22,20 +22,20 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.*;
 import fr.sirs.theme.ui.FXPositionablePane;
 import fr.sirs.theme.ui.FXPositionableVegetationPane;
 import fr.sirs.util.SirsStringConverter;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 
 import static fr.sirs.SIRS.EDITION_PREDICATE;
@@ -62,7 +62,36 @@ public class FXPositionableForm extends BorderPane {
     private TextField uiDesignation;
     @FXML
     private ComboBox uiType;
-
+    @FXML
+    private GridPane grid_pane_dens_haut_diam;
+    @FXML
+    private Label ui_densiteLabel;
+    @FXML
+    private Spinner ui_densite;
+    @FXML
+    private Label ui_densiteIdLabel;
+    @FXML
+    private ComboBox<Preview> ui_densiteId;
+    @FXML
+    private Label ui_hauteurLabel;
+    @FXML
+    private Spinner ui_hauteur;
+    @FXML
+    private Label ui_hauteurIdLabel;
+    @FXML
+    private ComboBox<Preview> ui_hauteurId;
+    @FXML
+    private Label ui_diametreLabel;
+    @FXML
+    private Spinner ui_diametre;
+    @FXML
+    private Label ui_diametreIdLabel;
+    @FXML
+    private ComboBox<Preview> ui_diametreId;
+    @FXML
+    private Label ui_positionLabel;
+    @FXML
+    private ComboBox<Preview> ui_positionId;
     @FXML
     private Label ui_typeCoteLabel;
     @FXML
@@ -79,16 +108,44 @@ public class FXPositionableForm extends BorderPane {
     public FXPositionableForm() {
         SIRS.loadFXML(this, Positionable.class);
 
-        positionableProperty.addListener(this::changed);
-        uiGoto.disableProperty().bind(positionableProperty.isNull());
-        uiDelete.disableProperty().bind(positionableProperty.isNull());
-        uiSave.disableProperty().bind(positionableProperty.isNull());
-        uiDesignation.disableProperty().bind(positionableProperty.isNull());
-        uiType.disableProperty().bind(positionableProperty.isNull());
+        ui_diametreLabel.setLabelFor(ui_diametre);
+        ui_diametreIdLabel.setLabelFor(ui_diametreId);
+        ui_hauteurLabel.setLabelFor(ui_hauteur);
+        ui_hauteurIdLabel.setLabelFor(ui_hauteurId);
+        ui_densiteLabel.setLabelFor(ui_densite);
+        ui_densiteIdLabel.setLabelFor(ui_densiteId);
 
-        uiTypeLabel.managedProperty().bind(uiTypeLabel.visibleProperty());
-        uiTypeLabel.visibleProperty().bind(uiType.visibleProperty());
-        uiType.managedProperty().bind(uiType.visibleProperty());
+        positionableProperty.addListener(this::changed);
+
+        // The whole GridPane is ignored if none of the attributes is visible.
+        grid_pane_dens_haut_diam.managedProperty().bind(grid_pane_dens_haut_diam.visibleProperty());
+        grid_pane_dens_haut_diam.visibleProperty().bind(
+                Bindings.or(
+                        Bindings.or(ui_densiteLabel.visibleProperty(), ui_densiteIdLabel.visibleProperty()),
+                        Bindings.or(Bindings.or(ui_hauteurLabel.visibleProperty(), ui_hauteurIdLabel.visibleProperty()),
+                                Bindings.or(ui_diametreLabel.visibleProperty(), ui_diametreIdLabel.visibleProperty()))));
+
+        bindUiToNode(uiType, uiTypeLabel);
+        bindUiToNode(ui_densite, ui_densiteLabel);
+        bindUiToNode(ui_densiteId, ui_densiteIdLabel);
+        bindUiToNode(ui_hauteur, ui_hauteurLabel);
+        bindUiToNode(ui_hauteurId, ui_hauteurIdLabel);
+        bindUiToNode(ui_diametreId, ui_diametreIdLabel);
+        bindUiToNode(ui_diametre, ui_diametreLabel);
+
+        ui_densite.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
+        ui_hauteur.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
+        ui_diametre.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
+    }
+
+    private void bindUiToNode(Node property, Label label) {
+        property.visibleProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue != null) {
+                label.visibleProperty().set(newValue);
+                property.managedProperty().set(newValue);
+                label.managedProperty().set(newValue);
+            }
+        });
     }
 
     @FXML
@@ -132,13 +189,22 @@ public class FXPositionableForm extends BorderPane {
             final ZoneVegetation zone = (ZoneVegetation) pos;
             zone.setContactEau(checkContactEau.isSelected());
             zone.setTypeCoteId(getElementIdOrnull(ui_typeCoteId));
+            zone.setTypePositionId((getElementIdOrnull(ui_positionId)));
 
             if (zone instanceof InvasiveVegetation) {
                 final InvasiveVegetation iv = (InvasiveVegetation) zone;
                 iv.setTypeVegetationId((String) cbValue);
+                iv.setDensiteId((getElementIdOrnull(ui_densiteId)));
             } else if (zone instanceof PeuplementVegetation) {
                 final PeuplementVegetation pv = (PeuplementVegetation) zone;
                 pv.setTypeVegetationId((String) cbValue);
+                pv.setDensite((Double) ui_densite.getValueFactory().valueProperty().getValue());
+                pv.setHauteur((Double) ui_hauteur.getValueFactory().valueProperty().getValue());
+                pv.setDiametre((Double) ui_diametre.getValueFactory().valueProperty().getValue());
+            } else if (zone instanceof ArbreVegetation) {
+                final ArbreVegetation arbre = (ArbreVegetation) zone;
+                arbre.setHauteurId(getElementIdOrnull(ui_hauteurId));
+                arbre.setDiametreId(getElementIdOrnull(ui_diametreId));
             }
         }
     }
@@ -158,12 +224,33 @@ public class FXPositionableForm extends BorderPane {
 
     public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
 
+        if (oldValue != null) {
+            uiDesignation.textProperty().unbindBidirectional(oldValue.designationProperty());
+            if (oldValue instanceof PeuplementVegetation) {
+                final PeuplementVegetation peuplement = (PeuplementVegetation) oldValue;
+                initRefPreviewComboBox(uiType, RefTypePeuplementVegetation.class , peuplement.getTypeVegetationId());
+                ui_hauteur.getValueFactory().valueProperty().unbindBidirectional(peuplement.hauteurProperty());
+                ui_diametre.getValueFactory().valueProperty().unbindBidirectional(peuplement.diametreProperty());
+                ui_densite.getValueFactory().valueProperty().unbindBidirectional(peuplement.densiteProperty());
+            }
+        }
+        boolean isNewValueNull = newValue == null;
+        uiGoto.disableProperty().set(isNewValueNull);
+        uiDelete.disableProperty().set(isNewValueNull);
+        uiSave.disableProperty().set(isNewValueNull);
+        uiDesignation.disableProperty().set(isNewValueNull);
+        uiType.disableProperty().set(isNewValueNull);
+        ui_densite.disableProperty().set(isNewValueNull);
+        ui_hauteur.disableProperty().set(isNewValueNull);
+        ui_diametre.disableProperty().set(isNewValueNull);
+        ui_densiteId.disableProperty().set(isNewValueNull);
+        ui_hauteurId.disableProperty().set(isNewValueNull);
+        ui_diametreId.disableProperty().set(isNewValueNull);
+
         if (newValue instanceof PositionableVegetation) {
             PositionableVegetation pv = (PositionableVegetation) newValue;
             uiDesignation.textProperty().bindBidirectional(newValue.designationProperty());
-            final Element parent = newValue.getParent();
 
-            final String sreoid = newValue.getSystemeRepId();
             final Session session = Injector.getSession();
             AbstractSIRSRepository<ParcelleVegetation> repo = session.getRepositoryForClass(ParcelleVegetation.class);
             ParcelleVegetation sr = repo.get(pv.getForeignParentId());
@@ -175,34 +262,53 @@ public class FXPositionableForm extends BorderPane {
             ((FXPositionableVegetationPane) editor).setPositionable(newValue);
             ((FXPositionableVegetationPane) editor).disableFieldsProperty().set(false);
 
+            uiType.setVisible(false);
+            ui_densiteId.setVisible(false);
+            ui_densite.setVisible(false);
+            ui_hauteurId.setVisible(false);
+            ui_hauteur.setVisible(false);
+            ui_diametreId.setVisible(false);
+            ui_diametre.setVisible(false);
+
             if (newValue instanceof ArbreVegetation) {
-                uiType.setVisible(false);
+                ui_hauteurId.setVisible(true);
+                ui_diametreId.setVisible(true);
 
+                final ArbreVegetation arbre = (ArbreVegetation) newValue;
+                initRefPreviewComboBox(ui_hauteurId, RefHauteurVegetation.class , arbre.getHauteurId());
+                initRefPreviewComboBox(ui_diametreId, RefDiametreVegetation.class , arbre.getDiametreId());
             } else if (newValue instanceof HerbaceeVegetation) {
-                uiType.setVisible(false);
-                final HerbaceeVegetation hv = (HerbaceeVegetation) newValue;
-
+                // Default behaviour. Update if changed.
             } else if (newValue instanceof InvasiveVegetation) {
                 uiType.setVisible(true);
-                final InvasiveVegetation iv = (InvasiveVegetation) newValue;
-                Previews previewRepository = Injector.getSession().getPreviews();
-                SIRS.initCombo(uiType, FXCollections.observableList(
-                                previewRepository.getByClass(RefTypeInvasiveVegetation.class)),
-                        iv.getTypeVegetationId() == null ? null : previewRepository.get(iv.getTypeVegetationId()));
+                ui_densiteId.setVisible(true);
 
+                final InvasiveVegetation iv = (InvasiveVegetation) newValue;
+                initRefPreviewComboBox(uiType, RefTypeInvasiveVegetation.class , iv.getTypeVegetationId());
+                initRefPreviewComboBox(ui_densiteId, RefDensiteVegetation.class , iv.getDensiteId());
             } else if (newValue instanceof PeuplementVegetation) {
                 uiType.setVisible(true);
+                ui_hauteur.setVisible(true);
+                ui_diametre.setVisible(true);
+                ui_densite.setVisible(true);
+
                 final PeuplementVegetation peuplement = (PeuplementVegetation) newValue;
-                Previews previewRepository = Injector.getSession().getPreviews();
-                SIRS.initCombo(uiType, FXCollections.observableList(
-                                previewRepository.getByClass(RefTypePeuplementVegetation.class)),
-                        peuplement.getTypeVegetationId() == null ? null : previewRepository.get(peuplement.getTypeVegetationId()));
+                initRefPreviewComboBox(uiType, RefTypePeuplementVegetation.class , peuplement.getTypeVegetationId());
+                ui_hauteur.getValueFactory().valueProperty().bindBidirectional(peuplement.hauteurProperty());
+                ui_diametre.getValueFactory().valueProperty().bindBidirectional(peuplement.diametreProperty());
+                ui_densite.getValueFactory().valueProperty().bindBidirectional(peuplement.densiteProperty());
             }
 
             if (pv instanceof ZoneVegetation) {
                 final ZoneVegetation zone = (ZoneVegetation) pv;
-                initRefPreviewComboBox(ui_typeCoteId, RefCote.class , zone == null ? null : zone.getTypeCoteId());
-                checkContactEau.setSelected(zone.getContactEau());}
+                if (zone != null) {
+                    initRefPreviewComboBox(ui_typeCoteId, RefCote.class , zone.getTypeCoteId());
+                    checkContactEau.setSelected(zone.getContactEau());
+                    ui_positionId.setVisible(true);
+                    initRefPreviewComboBox(ui_positionId, RefPosition.class , zone.getTypePositionId());
+                }
+            }
+
 
         } else if (newValue != null) {
             uiType.setVisible(false);
