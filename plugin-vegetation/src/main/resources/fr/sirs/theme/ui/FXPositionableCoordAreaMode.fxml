@@ -17,7 +17,6 @@
             <ColumnConstraints hgrow="NEVER" />
             <ColumnConstraints hgrow="ALWAYS" minWidth="2.0" prefWidth="2.0" />
             <ColumnConstraints hgrow="NEVER" />
-            <ColumnConstraints hgrow="ALWAYS" minWidth="2.0" prefWidth="2.0" />
         </columnConstraints>
         <rowConstraints>
           <RowConstraints vgrow="NEVER" />
