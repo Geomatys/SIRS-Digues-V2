@@ -214,7 +214,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
      * editedGeoCoordinate du positionable courant. Null si on l'ignore.
      * @param newEditedGeoCoordinate nouvelle valeur.
      */
-    final protected void setCoordinatesLabel(Boolean oldEditedGeoCoordinate, Boolean newEditedGeoCoordinate){
+    protected void setCoordinatesLabel(Boolean oldEditedGeoCoordinate, Boolean newEditedGeoCoordinate){
         if (newEditedGeoCoordinate == null) {
             uiLinearCoordLabel.setText("Le mode d'obtention du type de coordonnées n'est pas renseigné.");
             return;

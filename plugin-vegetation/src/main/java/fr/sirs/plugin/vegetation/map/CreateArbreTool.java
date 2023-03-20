@@ -162,7 +162,7 @@ public class CreateArbreTool extends AbstractEditionTool {
         attributeGrid.add(ui_typePositionId,1,4);
         attributeGrid.add(generateHeaderLabel(LABEL_COTE_ID),0,5);
         attributeGrid.add(ui_typeCoteId,1,5);
-        
+
         final VBox vbox = new VBox(15,
                 new HBox(15, generateHeaderLabel("Parcelle :"), lblParcelle),
                 new HBox(15, generateHeaderLabel("Géométrie :"), lblPoint),
@@ -183,7 +183,9 @@ public class CreateArbreTool extends AbstractEditionTool {
 
 
     private void saveAction(final Geometry ptToSet ) {
-
+        // editedGeoCoordinate set to false by default when creating Positionable via carto.
+        // not enough to differentiate from a positionable edited via its bornes or the carto.
+        arbre.setCartoEdited(true);
         arbre.setExplicitGeometry(ptToSet);
         arbre.setGeometry(ptToSet);
         arbre.setGeometryType(GeometryType.PONCTUAL);

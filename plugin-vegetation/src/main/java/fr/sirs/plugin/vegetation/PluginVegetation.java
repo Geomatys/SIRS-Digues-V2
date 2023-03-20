@@ -1218,6 +1218,10 @@ public class PluginVegetation extends Plugin {
         //sauvegarde de la geometrie
         zone.setGeometryMode(mode.value);
         zone.setGeometry(geometry);
+        // hack to force the call to the changeListener of the EditedGeoCoordinate attribute when the geometry was previously created via the carto.
+        if (Boolean.TRUE.equals(zone.getCartoEdited()) && Boolean.FALSE.equals(zone.getEditedGeoCoordinate())) {
+            zone.setEditedGeoCoordinate(true);
+        }
         zone.setEditedGeoCoordinate(false);
 
         // Hack for the case when geometry is a multipolygon as TronconUtils.getPointFromGeometry() does not support it.

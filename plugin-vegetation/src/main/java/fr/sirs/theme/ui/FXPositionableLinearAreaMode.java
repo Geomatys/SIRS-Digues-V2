@@ -131,9 +131,16 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
 
         final ChangeListener posListener = (ObservableValue observable, Object oldValue, Object newValue) -> updateFields();
 
+        // Listener permettant d'indiquer si la géométrie a été créée via la carte
+        // ou bien a été calculée à partir des coordonnées (linéaire ou géo)
+        final ChangeListener<Boolean> updateCartoEditedDisplay = (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            if (newValue) setCoordinatesLabel(null, positionableProperty().get().getEditedGeoCoordinate());
+        };
+
         positionableProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue instanceof ZoneVegetation) {
                 ((ZoneVegetation) oldValue).typeCoteIdProperty().removeListener(typeCoteChangeListener);
+                ((ZoneVegetation) oldValue).cartoEditedProperty().removeListener(updateCartoEditedDisplay);
                 ((ZoneVegetation) oldValue).distanceDebutMinProperty().removeListener(posListener);
                 ((ZoneVegetation) oldValue).distanceDebutMaxProperty().removeListener(posListener);
                 ((ZoneVegetation) oldValue).distanceFinMinProperty().removeListener(posListener);
@@ -141,12 +148,50 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
             }
             if (newValue instanceof ZoneVegetation) {
                 ((ZoneVegetation) newValue).typeCoteIdProperty().addListener(typeCoteChangeListener);
+                ((ZoneVegetation) newValue).cartoEditedProperty().addListener(updateCartoEditedDisplay);
+                // Listeners to update values in the pane when they are updated via the pojoTable.
                 ((ZoneVegetation) newValue).distanceDebutMinProperty().addListener(posListener);
                 ((ZoneVegetation) newValue).distanceDebutMaxProperty().addListener(posListener);
                 ((ZoneVegetation) newValue).distanceFinMinProperty().addListener(posListener);
                 ((ZoneVegetation) newValue).distanceFinMaxProperty().addListener(posListener);
             }
         });
+    }
+
+    /**
+     * Méthode permettant de mettre à jour le label (FXML) indiquant si les
+     * coordonnées du mode ont été calculées ou éditées.
+     *
+     * @param oldEditedGeoCoordinate ancienne valeur de la propriété
+     * editedGeoCoordinate du positionable courant. Null si on l'ignore.
+     * @param newEditedGeoCoordinate nouvelle valeur.
+     */
+    @Override
+    final protected void setCoordinatesLabel(Boolean oldEditedGeoCoordinate, Boolean newEditedGeoCoordinate){
+        if (newEditedGeoCoordinate == null) {
+            uiLinearCoordLabel.setText("Le mode d'obtention du type de coordonnées n'est pas renseigné.");
+            return;
+        }
+        ZoneVegetation zone = (ZoneVegetation) positionableProperty().get();
+        if ((oldEditedGeoCoordinate != null) && (oldEditedGeoCoordinate.equals(newEditedGeoCoordinate))) {
+            if (!zone.getCartoEdited()) return;
+            // else the label has to be updated.
+        }
+        if (uiLinearCoordLabel != null) { //Occurred for vegetation
+            // Occurred for ZoneVegetation created via the carto as neither the coordinates nor the bornes are computed
+            // du to the 4 distance points that cannot be properly computed for a polygon without impacting the geometry.
+            if (zone.getGeometry() != null && zone.getBorneDebutId() == null && zone.getBorneFinId() == null
+                    && zone.getPositionDebut() == null && zone.getPositionFin() == null) {
+                zone.setCartoEdited(true);
+                uiLinearCoordLabel.setText("Géométrie créée via la carte");
+            } else if (newEditedGeoCoordinate) {
+                zone.setCartoEdited(false);
+                uiLinearCoordLabel.setText("Coordonnées calculées");
+            } else {
+                zone.setCartoEdited(false);
+                uiLinearCoordLabel.setText("Coordonnées saisies");
+            }
+        }
     }
 
     @Override

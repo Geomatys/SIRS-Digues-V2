@@ -24,6 +24,7 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PositionableVegetation;
+import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.theme.ui.FXPositionableExplicitMode;
 import fr.sirs.util.ResourceInternationalString;
 import javafx.beans.value.ObservableValue;
@@ -246,7 +247,8 @@ public class EditVegetationTool extends AbstractEditionTool {
                 } else if (e.getClickCount() >= 2 && helper != null) {
                     //double click = add a node
                     final Geometry result;
-                    final Geometry geom = form.positionableProperty().get().geometryProperty().get();
+                    final Positionable pos = form.positionableProperty().get();
+                    final Geometry geom = pos.geometryProperty().get();
                     if (geom instanceof LineString) {
                         result = helper.insertNode((LineString) geom, e.getX(), e.getY());
                     } else if (geom instanceof Polygon) {
@@ -257,8 +259,9 @@ public class EditVegetationTool extends AbstractEditionTool {
                         result = geom;
                     }
                     modified = modified || result != geom;
-                    form.positionableProperty().get().setGeometryMode(FXPositionableExplicitMode.MODE);
-                    form.positionableProperty().get().geometryProperty().set(result);
+                    pos.setGeometryMode(FXPositionableExplicitMode.MODE);
+                    form.setCartoEditedMode((ZoneVegetation) pos);
+                    pos.geometryProperty().set(result);
                     refreshDecoration();
                 } else if (e.getClickCount() == 1 && helper != null) {
                     //single click with a geometry = select a node
@@ -307,6 +310,7 @@ public class EditVegetationTool extends AbstractEditionTool {
                 final Positionable pos = form.positionableProperty().get();
                 if (pos != null) {
                     pos.setGeometryMode(FXPositionableExplicitMode.MODE);
+                    form.setCartoEditedMode((ZoneVegetation) pos);
                     selection.moveSelectedNode(helper.toCoord(e.getX(), e.getY()), true);
                     modified = true;
                     return;
@@ -320,7 +324,9 @@ public class EditVegetationTool extends AbstractEditionTool {
         public void keyReleased(KeyEvent e) {
             if (KeyCode.DELETE == e.getCode()) {
                 //delete node
-                form.positionableProperty().get().setGeometryMode(FXPositionableExplicitMode.MODE);
+                Positionable pos = form.positionableProperty().get();
+                pos.setGeometryMode(FXPositionableExplicitMode.MODE);
+                form.setCartoEditedMode((ZoneVegetation) pos);
                 selection.deleteSelectedNode();
                 refreshDecoration();
                 modified = true;
