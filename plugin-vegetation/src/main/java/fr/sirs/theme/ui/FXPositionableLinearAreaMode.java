@@ -49,7 +49,7 @@ import javafx.scene.control.SpinnerValueFactory;
  */
 public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMode {
 
-    public static final String MODE = "LINEAR_AREA";
+    public static final String MODE = PluginVegetation.Mode.LINEAR_AREA.getValue();
 
     //area
     @FXML private Spinner<Double> uiStartNear;
@@ -139,21 +139,23 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
 
         positionableProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue instanceof ZoneVegetation) {
-                ((ZoneVegetation) oldValue).typeCoteIdProperty().removeListener(typeCoteChangeListener);
-                ((ZoneVegetation) oldValue).cartoEditedProperty().removeListener(updateCartoEditedDisplay);
-                ((ZoneVegetation) oldValue).distanceDebutMinProperty().removeListener(posListener);
-                ((ZoneVegetation) oldValue).distanceDebutMaxProperty().removeListener(posListener);
-                ((ZoneVegetation) oldValue).distanceFinMinProperty().removeListener(posListener);
-                ((ZoneVegetation) oldValue).distanceFinMaxProperty().removeListener(posListener);
+                ZoneVegetation zone = (ZoneVegetation) oldValue;
+                zone.typeCoteIdProperty().removeListener(typeCoteChangeListener);
+                zone.cartoEditedProperty().removeListener(updateCartoEditedDisplay);
+                zone.distanceDebutMinProperty().removeListener(posListener);
+                zone.distanceDebutMaxProperty().removeListener(posListener);
+                zone.distanceFinMinProperty().removeListener(posListener);
+                zone.distanceFinMaxProperty().removeListener(posListener);
             }
             if (newValue instanceof ZoneVegetation) {
-                ((ZoneVegetation) newValue).typeCoteIdProperty().addListener(typeCoteChangeListener);
-                ((ZoneVegetation) newValue).cartoEditedProperty().addListener(updateCartoEditedDisplay);
+                ZoneVegetation zone = (ZoneVegetation) newValue;
+                zone.typeCoteIdProperty().addListener(typeCoteChangeListener);
+                zone.cartoEditedProperty().addListener(updateCartoEditedDisplay);
                 // Listeners to update values in the pane when they are updated via the pojoTable.
-                ((ZoneVegetation) newValue).distanceDebutMinProperty().addListener(posListener);
-                ((ZoneVegetation) newValue).distanceDebutMaxProperty().addListener(posListener);
-                ((ZoneVegetation) newValue).distanceFinMinProperty().addListener(posListener);
-                ((ZoneVegetation) newValue).distanceFinMaxProperty().addListener(posListener);
+                zone.distanceDebutMinProperty().addListener(posListener);
+                zone.distanceDebutMaxProperty().addListener(posListener);
+                zone.distanceFinMinProperty().addListener(posListener);
+                zone.distanceFinMaxProperty().addListener(posListener);
             }
         });
     }
@@ -168,30 +170,8 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
      */
     @Override
     final protected void setCoordinatesLabel(Boolean oldEditedGeoCoordinate, Boolean newEditedGeoCoordinate){
-        if (newEditedGeoCoordinate == null) {
-            uiLinearCoordLabel.setText("Le mode d'obtention du type de coordonnées n'est pas renseigné.");
-            return;
-        }
         ZoneVegetation zone = (ZoneVegetation) positionableProperty().get();
-        if ((oldEditedGeoCoordinate != null) && (oldEditedGeoCoordinate.equals(newEditedGeoCoordinate))) {
-            if (!zone.getCartoEdited()) return;
-            // else the label has to be updated.
-        }
-        if (uiLinearCoordLabel != null) { //Occurred for vegetation
-            // Occurred for ZoneVegetation created via the carto as neither the coordinates nor the bornes are computed
-            // du to the 4 distance points that cannot be properly computed for a polygon without impacting the geometry.
-            if (zone.getGeometry() != null && zone.getBorneDebutId() == null && zone.getBorneFinId() == null
-                    && zone.getPositionDebut() == null && zone.getPositionFin() == null) {
-                zone.setCartoEdited(true);
-                uiLinearCoordLabel.setText("Géométrie créée via la carte");
-            } else if (newEditedGeoCoordinate) {
-                zone.setCartoEdited(false);
-                uiLinearCoordLabel.setText("Coordonnées calculées");
-            } else {
-                zone.setCartoEdited(false);
-                uiLinearCoordLabel.setText("Coordonnées saisies");
-            }
-        }
+        PluginVegetation.setCoordinatesLabel(oldEditedGeoCoordinate, newEditedGeoCoordinate, uiLinearCoordLabel, zone, false);
     }
 
     @Override

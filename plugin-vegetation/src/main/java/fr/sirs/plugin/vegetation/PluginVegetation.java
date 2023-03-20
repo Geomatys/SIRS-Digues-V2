@@ -45,11 +45,13 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import fr.sirs.theme.ui.FXPositionableMode;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javax.imageio.ImageIO;
@@ -121,7 +123,8 @@ public class PluginVegetation extends Plugin {
 
     public enum Mode {
         COORD_AREA("COORD_AREA"),
-        LINEAR_AREA("LINEAR_AREA");
+        LINEAR_AREA("LINEAR_AREA"),
+        EXPLICIT("EXPLICIT");
         private String value;
 
         Mode(String value) {
@@ -1120,7 +1123,7 @@ public class PluginVegetation extends Plugin {
      *      *           Must be non null when mode is FXPositionableCoordAreaMode.Mode.
      * @return the geometry.
      */
-    public static Geometry getNonPonctualGeometry(final ZoneVegetation zone,
+    private static Geometry getNonPonctualGeometry(final ZoneVegetation zone,
                                                   final TronconDigue troncon,
                                                   double ratio,
                                                   final Mode mode,
@@ -1139,6 +1142,8 @@ public class PluginVegetation extends Plugin {
                 ArgumentChecks.ensureNonNull("borneRepo", borneRepo);
                 linear = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), zone, borneRepo);
                 break;
+            case EXPLICIT:
+                throw new IllegalStateException("Cannot compute geometry in EXPLICIT mode" + mode);
             default:
                 throw new IllegalStateException("Mode not recognised " + mode);
         }
@@ -1282,5 +1287,42 @@ public class PluginVegetation extends Plugin {
         zone.setGeometry(geometry);
         zone.setEditedGeoCoordinate(true);
         ConvertPositionableCoordinates.computePositionableLinearCoordinate(zone, false);
+    }
+
+    /**
+     * Méthode permettant de mettre à jour le label (FXML) indiquant si les
+     * coordonnées du mode ont été calculées ou éditées.
+     *
+     * @param oldEditedGeoCoordinate ancienne valeur de la propriété
+     * editedGeoCoordinate du positionable courant. Null si on l'ignore.
+     * @param newEditedGeoCoordinate nouvelle valeur.
+     * @param label the Label to update the text for.
+     * @param zone the ZoneVegetation to update the label for.
+     */
+    public final static void setCoordinatesLabel(Boolean oldEditedGeoCoordinate, Boolean newEditedGeoCoordinate, Label label, ZoneVegetation zone, Boolean isGeoModeToggle){
+        if (newEditedGeoCoordinate == null) {
+            label.setText(FXPositionableMode.COORDS_TYPE_UNKNOWN);
+            return;
+        }
+        if (newEditedGeoCoordinate.equals(oldEditedGeoCoordinate)) {
+            if (!zone.getCartoEdited()) return;
+            // else the label has to be updated.
+        }
+        if (label != null) { //Occurred for vegetation
+            // Occurred for ZoneVegetation created via the carto as neither the coordinates nor the bornes are computed
+            // du to the 4 distance points that cannot be properly computed for a polygon without impacting the geometry.
+            if (zone.getGeometry() != null && zone.getBorneDebutId() == null && zone.getBorneFinId() == null
+                    && zone.getPositionDebut() == null && zone.getPositionFin() == null) {
+                zone.setCartoEdited(true);
+                label.setText(FXPositionableMode.COORDS_TYPE_CARTO);
+            } else {
+                zone.setCartoEdited(false);
+                if (newEditedGeoCoordinate) {
+                    label.setText(isGeoModeToggle ? FXPositionableMode.COORDS_TYPE_ENTERED : FXPositionableMode.COORDS_TYPE_COMPUTED);
+                } else {
+                    label.setText(isGeoModeToggle ? FXPositionableMode.COORDS_TYPE_COMPUTED : FXPositionableMode.COORDS_TYPE_ENTERED);
+                }
+            }
+        }
     }
 }

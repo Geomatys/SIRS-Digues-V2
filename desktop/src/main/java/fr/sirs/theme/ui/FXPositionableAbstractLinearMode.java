@@ -216,16 +216,16 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
      */
     protected void setCoordinatesLabel(Boolean oldEditedGeoCoordinate, Boolean newEditedGeoCoordinate){
         if (newEditedGeoCoordinate == null) {
-            uiLinearCoordLabel.setText("Le mode d'obtention du type de coordonnées n'est pas renseigné.");
+            uiLinearCoordLabel.setText(COORDS_TYPE_UNKNOWN);
             return;
-        } else if ((oldEditedGeoCoordinate != null) && (oldEditedGeoCoordinate.equals(newEditedGeoCoordinate))) {
+        } else if (newEditedGeoCoordinate.equals(oldEditedGeoCoordinate)) {
             return;
         }
         if (uiLinearCoordLabel != null) { //Occurred for vegetation
             if (newEditedGeoCoordinate) {
-                uiLinearCoordLabel.setText("Coordonnées calculées");
+                uiLinearCoordLabel.setText(COORDS_TYPE_COMPUTED);
             } else {
-                uiLinearCoordLabel.setText("Coordonnées saisies");
+                uiLinearCoordLabel.setText(COORDS_TYPE_ENTERED);
             }
         }
     }

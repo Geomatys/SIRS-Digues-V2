@@ -207,17 +207,17 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
      */
     protected void setCoordinatesLabel(Boolean oldEditedGeoCoordinate, Boolean newEditedGeoCoordinate) {
         if (newEditedGeoCoordinate == null) {
-            uiGeoCoordLabel.setText("Le mode d'obtention du type de coordonnées n'est pas renseigné.");
+            uiGeoCoordLabel.setText(COORDS_TYPE_UNKNOWN);
             return;
-        } else if ((oldEditedGeoCoordinate != null) && (oldEditedGeoCoordinate.equals(newEditedGeoCoordinate))) {
+        } else if (newEditedGeoCoordinate.equals(oldEditedGeoCoordinate)) {
             return;
         }
 
         if (uiGeoCoordLabel != null) { //Occurred for vegetation
             if (newEditedGeoCoordinate) {
-                uiGeoCoordLabel.setText("Coordonnées saisies");
+                uiGeoCoordLabel.setText(COORDS_TYPE_ENTERED);
             } else {
-                uiGeoCoordLabel.setText("Coordonnées calculées");
+                uiGeoCoordLabel.setText(COORDS_TYPE_COMPUTED);
             }
         }
     }
@@ -333,7 +333,9 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
                 latSpinner.getValueFactory().valueProperty().set(point.getY());
         }
         // if the user erase the value, the old value is set back.
-        else SIRS.LOGGER.log(Level.WARNING,"test Value null for spinner " );
+        else {
+            SIRS.LOGGER.log(Level.WARNING,"test Value null for spinner " );
+        }
     }
 
     @Override
