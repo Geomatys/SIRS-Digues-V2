@@ -139,6 +139,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
             ui_Designation.setText(vegetation.getDesignation());
             ui_commentaire.setText(vegetation.getCommentaire());
         }
+        ui_commentaire.setPrefHeight(100);
 
         initRefPreviewComboBox(ui_typeCoteId, RefCote.class, vegetation == null ? null : vegetation.getTypeCoteId());
         initRefPreviewComboBox(ui_typePositionId, RefPosition.class, vegetation == null ? null : vegetation.getTypePositionId());

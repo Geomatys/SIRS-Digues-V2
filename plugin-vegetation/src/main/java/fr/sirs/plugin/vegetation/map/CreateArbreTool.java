@@ -145,8 +145,11 @@ public class CreateArbreTool extends AbstractEditionTool {
         lblPoint.setWrapText(true);
         lblParcelle.setWrapText(true);
 
-        ui_Designation.setText(arbre.getDesignation());
-        ui_commentaire.setText(arbre.getCommentaire());
+        if (arbre != null ) {
+            ui_Designation.setText(arbre.getDesignation());
+            ui_commentaire.setText(arbre.getCommentaire());
+        }
+        ui_commentaire.setPrefHeight(100);
 
         final GridPane attributeGrid = new GridPane();
         attributeGrid.setHgap(2);
