@@ -42,6 +42,9 @@ final class EditVegetationUtils {
     static final String LABEL_DENSITE = "Densité :";
     static final String LABEL_HAUTEUR ="Hauteur :";
     static final String LABEL_DIAMETRE ="Diamètre :";
+    static final String LABEL_ETAT_SANITAIRE_ID="Etat sanitaire :";
+    static final String LABEL_ESPECE_ID="Espèce :";
+    static final String LABEL_COMMENTAIRE="Commentaire :";
 
 
     static Label generateHeaderLabel(final String labelText) {
