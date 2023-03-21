@@ -100,7 +100,7 @@ public class VegetationToolBar extends ToolBar {
         if (!checkPlan()) return;
         if (editionVegetationStage == null) initEditionVegetationStage();
         editionVegetationStage.show();
-        editionVegetationStage.setWidth(800);
+        editionVegetationStage.setWidth(950);
         editionVegetationStage.setHeight(1000);
         editionVegetationStage.requestFocus();
     }
