@@ -125,7 +125,6 @@ public class FXPositionableForm extends BorderPane {
         ui_densiteLabel.setLabelFor(ui_densite);
         ui_densiteIdLabel.setLabelFor(ui_densiteId);
         ui_commentaire.setWrapText(true);
-        ui_commentaire.setPrefHeight(100);
 
         positionableProperty.addListener(this::changed);
 
