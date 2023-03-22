@@ -171,7 +171,7 @@ public class CreateArbreTool extends AbstractEditionTool {
         attributeGrid2.add(diametreComboBox,1,1);
         attributeGrid2.add(generateHeaderLabel(LABEL_ETAT_SANITAIRE_ID),0,2);
         attributeGrid2.add(ui_etatSanitaireId,1,2);
-        attributeGrid2.add(generateHeaderLabel(LABEL_TYPE_VEGETATION),0,3);
+        attributeGrid2.add(generateHeaderLabel(LABEL_TYPE_ARBRE),0,3);
         attributeGrid2.add(ui_typeArbreId,1,3);
         attributeGrid2.add(generateHeaderLabel(LABEL_ESPECE_ID),0,4);
         attributeGrid2.add(ui_especeId,1,4);

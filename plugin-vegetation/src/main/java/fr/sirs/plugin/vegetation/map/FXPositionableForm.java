@@ -96,21 +96,25 @@ public class FXPositionableForm extends BorderPane {
     @FXML
     private Label ui_typeCoteLabel;
     @FXML
-    protected ComboBox<Preview> ui_typeCoteId;
+    private ComboBox<Preview> ui_typeCoteId;
     @FXML
-    protected Label LabelContactEau;
+    private Label LabelContactEau;
     @FXML
-    protected CheckBox checkContactEau;
+    private CheckBox checkContactEau;
     @FXML
     private Label ui_etatSaniIdLabel;
     @FXML
-    protected ComboBox<Preview> ui_etatSanitaireId;
+    private ComboBox<Preview> ui_etatSanitaireId;
     @FXML
     private Label ui_especeArbreIdLabel;
     @FXML
-    protected ComboBox<Preview> ui_especeArbreId;
-    @FXML protected TextArea ui_commentaire;
-
+    private ComboBox<Preview> ui_especeArbreId;
+    @FXML
+    private TextArea ui_commentaire;
+    @FXML
+    private Label ui_typeArbreLabel;
+    @FXML
+    private ComboBox ui_typeArbreId;
 
     private final ObjectProperty<Positionable> positionableProperty = new SimpleObjectProperty<>();
     private Node editor = null;
@@ -143,14 +147,9 @@ public class FXPositionableForm extends BorderPane {
         bindUiToNode(ui_hauteurId, ui_hauteurIdLabel);
         bindUiToNode(ui_diametreId, ui_diametreIdLabel);
         bindUiToNode(ui_diametre, ui_diametreLabel);
-
-
-        ui_etatSaniIdLabel.visibleProperty().bind(ui_etatSanitaireId.visibleProperty());
-        ui_especeArbreIdLabel.visibleProperty().bind(ui_especeArbreId.visibleProperty());
-        ui_etatSanitaireId.managedProperty().bind(ui_etatSanitaireId.visibleProperty());
-        ui_etatSaniIdLabel.managedProperty().bind(ui_etatSaniIdLabel.visibleProperty());
-        ui_especeArbreId.managedProperty().bind(ui_especeArbreId.visibleProperty());
-        ui_especeArbreIdLabel.managedProperty().bind(ui_especeArbreIdLabel.visibleProperty());
+        bindUiToNode(ui_etatSanitaireId, ui_etatSaniIdLabel);
+        bindUiToNode(ui_especeArbreId, ui_especeArbreIdLabel);
+        bindUiToNode(ui_typeArbreId, ui_typeArbreLabel);
 
         ui_densite.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
         ui_hauteur.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
@@ -263,7 +262,7 @@ public class FXPositionableForm extends BorderPane {
                 arbre.setHauteurId(getElementIdOrnull(ui_hauteurId));
                 arbre.setDiametreId(getElementIdOrnull(ui_diametreId));
                 arbre.setEtatSanitaireId(getElementIdOrnull(ui_etatSanitaireId));
-                arbre.setTypeArbreId(getElementIdOrnull(uiType));
+                arbre.setTypeArbreId(getElementIdOrnull(ui_typeArbreId));
                 arbre.setEspeceId(getElementIdOrnull(ui_especeArbreId));
             }
         }
@@ -311,6 +310,7 @@ public class FXPositionableForm extends BorderPane {
         ui_commentaire.disableProperty().set(isNewValueNull);
         ui_etatSanitaireId.disableProperty().set(isNewValueNull);
         ui_especeArbreId.disableProperty().set(isNewValueNull);
+        ui_typeArbreId.disableProperty().set(isNewValueNull);
 
 
         if (newValue instanceof PositionableVegetation) {
@@ -340,20 +340,21 @@ public class FXPositionableForm extends BorderPane {
             ui_diametre.setVisible(false);
             ui_etatSanitaireId.setVisible(false);
             ui_especeArbreId.setVisible(false);
+            ui_typeArbreId.setVisible(false);
 
             if (newValue instanceof ArbreVegetation) {
-                uiType.setVisible(true);
                 ui_hauteurId.setVisible(true);
                 ui_diametreId.setVisible(true);
                 ui_etatSanitaireId.setVisible(true);
                 ui_especeArbreId.setVisible(true);
+                ui_typeArbreId.setVisible(true);
 
                 final ArbreVegetation arbre = (ArbreVegetation) newValue;
-                initRefPreviewComboBox(uiType, RefTypeArbreVegetation.class , arbre.getTypeArbreId());
                 initRefPreviewComboBox(ui_hauteurId, RefHauteurVegetation.class , arbre.getHauteurId());
                 initRefPreviewComboBox(ui_diametreId, RefDiametreVegetation.class , arbre.getDiametreId());
                 initRefPreviewComboBox(ui_etatSanitaireId, RefEtatSanitaireVegetation.class , arbre.getEtatSanitaireId());
                 initRefPreviewComboBox(ui_especeArbreId, RefEspeceArbreVegetation.class , arbre.getEspeceId());
+                initRefPreviewComboBox(ui_typeArbreId, RefTypeArbreVegetation.class , arbre.getTypeArbreId());
             } else if (newValue instanceof HerbaceeVegetation) {
                 // Default behaviour. Update if changed.
             } else if (newValue instanceof InvasiveVegetation) {

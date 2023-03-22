@@ -39,6 +39,7 @@ final class EditVegetationUtils {
     static final String LABEL_POSITION_ID = "Position :";
     static final String LABEL_COTE_ID = "Côté :";
     static final String LABEL_TYPE_VEGETATION = "Type de végétation :";
+    static final String LABEL_TYPE_ARBRE = "Type :";
     static final String LABEL_DENSITE = "Densité :";
     static final String LABEL_HAUTEUR ="Hauteur :";
     static final String LABEL_DIAMETRE ="Diamètre :";
