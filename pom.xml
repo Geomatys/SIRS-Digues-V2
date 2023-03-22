@@ -26,7 +26,7 @@
     <!-- Define parent projects versions -->
     <slf4j.version>1.7.7</slf4j.version>
     <sis.version>0.8-jdk7-M2</sis.version>
-    <geotoolkit.version>4.0.8</geotoolkit.version>
+    <geotoolkit.version>4.0.9</geotoolkit.version>
     <geotoolkit.esri.version>2.0.0-MC0005</geotoolkit.esri.version>
     <geotoolkit.h2.version>2.0.0-MC0005</geotoolkit.h2.version>
     <jai.version>1.1.4</jai.version>
@@ -132,7 +132,7 @@
       <id>geomatys.private</id>
       <url>https://nexus.geomatys.com/repository/maven-private</url>
     </repository>
-    <!-- this repository is retrieved transitively with the wrong protocol, 
+    <!-- this repository is retrieved transitively with the wrong protocol,
     as maven does not follow redirection we declare it here-->
     <repository>
       <id>jaspersoft</id>
