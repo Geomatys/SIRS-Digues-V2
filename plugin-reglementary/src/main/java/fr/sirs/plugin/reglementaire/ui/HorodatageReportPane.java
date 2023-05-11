@@ -19,10 +19,11 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
+import fr.sirs.core.model.report.AbstractSectionRapport;
 import fr.sirs.core.model.report.ModeleRapport;
+import fr.sirs.core.model.report.TableSectionRapport;
 import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.SirsStringConverter;
-import fr.sirs.util.StreamingIterable;
 import fr.sirs.util.odt.ODTUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -38,10 +39,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import org.apache.sis.measure.NumberRange;
-import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
-import org.geotoolkit.util.collection.CloseableIterator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -287,7 +286,16 @@ public class HorodatageReportPane extends BorderPane {
     @FXML
     private void generateReport(ActionEvent event) {
 //        final ModeleRapport report = modelProperty.get();
-        final ModeleRapport report = null;
+        final List<Prestation> prestations = uiPrestations.getItems();
+        if (prestations.isEmpty()) return;
+
+        final ModeleRapport report = new ModeleRapport();
+        final AbstractSectionRapport section = new TableSectionRapport();
+        section.setLibelle("Tableau de synthèse  prestation pour Registre horodaté");
+
+        prestations.forEach(p -> section.addChild(p));
+        report.setSections(Arrays.asList(section));
+
         if (report == null) return;
 
         /*
@@ -337,41 +345,14 @@ public class HorodatageReportPane extends BorderPane {
                 // on liste tous les elements a générer
                 updateMessage("Recherche des objets du rapport...");
                 final ObservableList<Prestation> prestations = uiPrestations.getSelectionModel().getSelectedItems();
-                final Collection<AbstractPositionableRepository<Objet>> repos = (Collection) session.getRepositoriesForClass(Objet.class);
-                final ArrayList<Objet> elements = new ArrayList<>();
-                for (Prestation prestation : prestations) {
-                    if (prestation == null)
-                        continue;
-
-                    for (final AbstractPositionableRepository<Objet> repo : repos) {
-                        StreamingIterable<Objet> tmpElements = repo.getByLinearIdStreaming(prestation.getId());
-                        try (final CloseableIterator<Objet> it = tmpElements.iterator()) {
-                            while (it.hasNext()) {
-                                Objet next = it.next();
-//                                if (dateRange != null) {
-//                                    //on vérifie la date
-//                                    final LocalDate objDateDebut = next.getDate_debut();
-//                                    final LocalDate objDateFin = next.getDate_fin();
-//                                    final long debut = objDateDebut == null ? 0 : objDateDebut.atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
-//                                    final long fin = objDateFin == null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
-//                                    final NumberRange objDateRange = NumberRange.create(debut, true, fin, true);
-//                                    if (!dateRange.intersectsAny(objDateRange)) {
-//                                        continue;
-//                                    }
-//                                }
-
-                                elements.add(next);
-                            }
-                        }
-                    }
-                }
+                if (prestations.isEmpty()) return false;
 
 
                 /*
                 2- génération du rapport
                 -----------------------*/
 
-                final Task reportGenerator = ODTUtils.generateReport(report, prestations.isEmpty() ? null : elements, output, titre);
+                final Task reportGenerator = ODTUtils.generateReport(report, prestations.isEmpty() ? null : prestations, output, titre);
                 Platform.runLater(() -> {
                     reportGenerator.messageProperty().addListener((obs, oldValue, newValue) -> updateMessage(newValue));
                     reportGenerator.workDoneProperty().addListener((obs, oldValue, newValue) -> updateProgress(newValue.doubleValue(), reportGenerator.getTotalWork()));
