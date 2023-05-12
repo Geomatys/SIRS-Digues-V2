@@ -18,30 +18,51 @@
  */
 package fr.sirs.core.model.report;
 
-import fr.sirs.core.SirsCore;
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
+import fr.sirs.core.component.ContactRepository;
+import fr.sirs.core.model.*;
 import fr.sirs.util.odt.ODTUtils;
 import org.geotoolkit.data.FeatureIterator;
 import org.geotoolkit.data.FeatureStoreRuntimeException;
 import org.geotoolkit.feature.Feature;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.Spliterators;
+import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+
+import static fr.sirs.core.SirsCore.*;
 
 /**
  * Used for printing Prestation synthese table reports.
  *
  * @author Estelle Idee (Geomatys)
  */
-@Component
-@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class PrestationTableSectionRapport extends TableSectionRapport {
+public class PrestationTableSectionRapport extends AbstractSectionRapport {
+
+    @Override
+    public Element copy() {
+        final PrestationTableSectionRapport rapport = ElementCreator.createAnonymValidElement(PrestationTableSectionRapport.class);
+        super.copy(rapport);
+        return rapport;
+    }
+
+    @Override
+    public boolean removeChild(Element toRemove) {
+        return false;
+    }
+
+    @Override
+    public boolean addChild(Element toAdd) {
+        return false;
+    }
+
+    @Override
+    public Element getChildById(String toSearch) {
+        if (toSearch != null && toSearch.equals(getId()))
+            return this;
+        return null;
+    }
 
     /**
      * Pour l'impression des tableaux, le comportement est le suivant :
@@ -60,43 +81,32 @@ public class PrestationTableSectionRapport extends TableSectionRapport {
     protected void printSection(final PrintContext ctx) throws Exception {
         // HACK : For tables, filter is considered to be data, and elements only
         // serve to filter request data by Ids.
-        if (ctx.queryResult!=null) {
 
-            // récupération des propriétés du résultat de la requête
-            final List<String> properties = propertyNames(ctx.queryResult.getFeatureType());
+        // récupération des propriétés du résultat de la requête
+//            final List<String> properties = propertyNames(ctx.queryResult.getFeatureType());
+        final List<String> properties = Arrays.asList(
+                DESIGNATION_FIELD, PREVIEW_BUNDLE_KEY_LIBELLE, LINEAR_ID_FIELD, "typePrestationId",
+                DATE_DEBUT_FIELD, DATE_FIN_FIELD, "intervenantsIds",
+                AUTHOR_FIELD, COMMENTAIRE_FIELD);
 
-            // on vérifie qu'un identifiant est présent dans les résultats de la requête
-            final boolean idPresent = properties.remove(SirsCore.ID_FIELD);
 
-            try (final FeatureIterator it = ctx.queryResult.iterator()) {
-                final FeatureIterator tmpIt;
+        final Map<String, Function<Element, String>> printMapping = new HashMap<>();
+        ContactRepository userRepo = (ContactRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(Contact.class);
+        printMapping.put("intervenantsIds", new Function<Element, String>() {
+            @Override
+            public String apply(Element element) {
+                StringBuilder result = new StringBuilder();
+                ((Prestation) element).getIntervenantsIds().forEach(interId -> {
+                    Contact user = userRepo.get(interId);
+                    result.append(user.getNom() + " " + user.getPrenom() +"\n");
+                });
 
-                /*
-                si on a des éléments et qu'on a un identifiant dans le résultat de la requête, on filtre les tuples
-                résultant de la requête en ne retenant que ceux relatifs aux éléments dont on dispose.
-                */
-                if (ctx.elements != null && idPresent){
-
-                    // récupération des identifiants des éléments
-                    final Set<String> idFilter = ctx.elements
-                        .map(elt -> elt.getId())
-                        .filter(id -> id != null)
-                        .collect(Collectors.toSet());
-
-                    tmpIt = new FilteredFeatureIterator(it, feat -> idFilter.contains(feat.getPropertyValue(SirsCore.ID_FIELD)));
-                }
-                else {
-                    tmpIt = it;
-                }
-
-                // ajout des éléments filtrés
-                ODTUtils.appendTable(ctx.target, tmpIt, properties);
+                return result.toString();
             }
-        }
-        // If there's no SQL query, we try to print elements
-        else if (ctx.elements != null) {
-            ODTUtils.appendTable(ctx.target, Spliterators.iterator(ctx.elements.spliterator()), ctx.propertyNames, Collections.emptyMap());
-        }
+        });
+        // ajout des éléments filtrés
+        ODTUtils.appendPrestationSyntheseTable(ctx.target, Spliterators.iterator(ctx.elements.spliterator()), properties, printMapping);
+
     }
 
     private static class FilteredFeatureIterator implements FeatureIterator {

@@ -21,7 +21,7 @@ import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
 import fr.sirs.core.model.report.AbstractSectionRapport;
 import fr.sirs.core.model.report.ModeleRapport;
-import fr.sirs.core.model.report.TableSectionRapport;
+import fr.sirs.core.model.report.PrestationTableSectionRapport;
 import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.odt.ODTUtils;
@@ -290,7 +290,7 @@ public class HorodatageReportPane extends BorderPane {
         if (prestations.isEmpty()) return;
 
         final ModeleRapport report = new ModeleRapport();
-        final AbstractSectionRapport section = new TableSectionRapport();
+        final AbstractSectionRapport section = new PrestationTableSectionRapport();
         section.setLibelle("Tableau de synthèse  prestation pour Registre horodaté");
 
         prestations.forEach(p -> section.addChild(p));

@@ -1410,6 +1410,136 @@ public class ODTUtils {
         }
     }
 
+    /**
+     * Create a table at the end of the given {@link TableContainer}, and fill
+     * it with input data.
+     *
+     * Note : if no property listing is given, no ordering will be performed on
+     * columns.
+     *
+     * @param target Document or section to put table into.
+     * @param data List of elements to extract properties from in order to fill
+     * table. Each element of the iterator is a row in output table.
+     * @param propertyNames List of properties (as returned by {@link PropertyDescriptor#getName()
+     * } to use for table columns. If null or empty, all properties of input
+     * objects will be used.
+     * @param printMapping
+     * @throws java.beans.IntrospectionException If an error occurs while
+     * analyzing properties of an element.
+     * @throws java.lang.ReflectiveOperationException If an error occurs while
+     * accessing an element property.
+     */
+    public static void appendPrestationSyntheseTable(final TableContainer target, final Iterator<Element> data, final List<String> propertyNames,
+                                   final Map<String, Function<Element, String>> printMapping)
+            throws IntrospectionException, ReflectiveOperationException {
+
+        ArgumentChecks.ensureNonNull("Target document", target);
+        if (data == null || !data.hasNext()) {
+            return; // No elements, do not create table
+        }
+
+        Element element = data.next();
+        Class<? extends Element> elementClass = element.getClass();
+        Map<String, PropertyDescriptor> elementProperties = SirsCore.listSimpleProperties(elementClass);
+        final Map<String, Map<String, PropertyDescriptor>> descriptorsByClass = new HashMap<>();
+        descriptorsByClass.put(elementClass.getCanonicalName(), elementProperties);
+
+        final List<String> headers;
+        if (propertyNames == null) {
+            headers = new ArrayList<>(elementProperties.keySet());
+        } else {
+            headers = propertyNames;
+        }
+
+        // Create table and headers
+        final Table table = target.addTable(1, headers.size());
+        final OdfStyle headerStyle;
+        if (target instanceof OdfSchemaDocument) {
+            headerStyle = getOrCreateTableHeaderStyle((OdfSchemaDocument) target);
+        } else {
+            headerStyle = null;
+        }
+
+        final LabelMapper lMapper_0 = LabelMapper.get(elementClass);
+        final Row dataRow_0 = table.getRowByIndex(0);
+        Cell currentCell;
+        for (int i = 0; i < headers.size(); i++) {
+            currentCell = dataRow_0.getCellByIndex(i);
+            currentCell.addParagraph(lMapper_0.mapPropertyName(headers.get(i)))
+                    .getFont().setFontStyle(StyleTypeDefinitions.FontStyle.BOLD);
+            if (headerStyle != null) {
+                currentCell.setCellStyleName(headerStyle.getStyleNameAttribute());
+            }
+            currentCell.setCellBackgroundColor("#89b66d");
+        }
+
+        // Fill first line
+        final Row dataRow_1 = table.appendRow();
+        for (int i = 0; i < headers.size(); i++) {
+            final String propertyName = headers.get(i);
+            final PropertyDescriptor desc = elementProperties.get(propertyName);
+            final PropertyPrinter printer = Printers.getPrinter(propertyName);
+            dataRow_1.getCellByIndex(i).setCellBackgroundColor("#89b66d");
+            if (desc != null) {
+                dataRow_1.getCellByIndex(i).addParagraph(printer.print(element, desc));
+            } else if (printMapping.get(propertyName) != null) {
+                if ("intervenantsIds".equals(propertyName)) {
+                    dataRow_1.getCellByIndex(i).addParagraph(printMapping.get(propertyName).apply(element));
+                } else {
+                    dataRow_1.getCellByIndex(i).addParagraph(printer.print(element, propertyName, printMapping.get(propertyName)));
+                }
+            } else {
+                SirsCore.LOGGER.log(Level.INFO, "Cannot handle {0} column (first line)", propertyName);
+            }
+        }
+
+        // Fill remaining lines
+        while (data.hasNext()) {
+            element = data.next();
+            elementClass = element.getClass();
+            final LabelMapper lMapper = LabelMapper.get(elementClass);
+            /*
+             * If current object is a new type of element, we retrieve its properties
+             * and add necessary columns in case none have been specified as input.
+             */
+            elementProperties = descriptorsByClass.get(elementClass.getCanonicalName());
+            if (elementProperties == null) {
+                elementProperties = SirsCore.listSimpleProperties(elementClass);
+                descriptorsByClass.put(elementClass.getCanonicalName(), elementProperties);
+                // If no properties have been specified, we put all properties of the current object in the table.
+                if (propertyNames == null) {
+                    final Set<String> tmpKeys = elementProperties.keySet();
+                    for (final String key : tmpKeys) {
+                        if (!headers.contains(key)) {
+                            headers.add(key);
+                            table.appendColumn().getCellByIndex(0).addParagraph(lMapper.mapPropertyName(key))
+                                    .getFont().setFontStyle(StyleTypeDefinitions.FontStyle.BOLD);
+                        }
+                    }
+                }
+            }
+
+            // Fill data
+            final Row dataRow = table.appendRow();
+            for (int i = 0; i < headers.size(); i++) {
+                final String propertyName = headers.get(i);
+                final PropertyDescriptor desc = elementProperties.get(propertyName);
+                final PropertyPrinter printer = Printers.getPrinter(propertyName);
+                if (desc != null) {
+                    dataRow.getCellByIndex(i).addParagraph(printer.print(element, desc));
+                } else if (printMapping.get(propertyName) != null) {
+                    if ("intervenantsIds".equals(propertyName)) {
+                        dataRow.getCellByIndex(i).addParagraph(printMapping.get(propertyName).apply(element));
+                    } else {
+                        dataRow.getCellByIndex(i).addParagraph(printer.print(element, propertyName, printMapping.get(propertyName)));
+                    }
+                } else {
+                    SirsCore.LOGGER.log(Level.INFO, "Cannot handle {0} column", propertyName);
+                }
+            }
+        }
+    }
+
     public static OdfStyle getOrCreateTableHeaderStyle(final OdfSchemaDocument source) {
         OdfOfficeStyles styles = source.getOrCreateDocumentStyles();
         OdfStyle style = styles.getStyle("table.header", OdfStyleFamily.TableCell);
