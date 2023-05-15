@@ -21,11 +21,8 @@ package fr.sirs;
 import com.sun.javafx.stage.StageHelper;
 import static fr.sirs.core.SirsCore.*;
 import static fr.sirs.core.SirsCore.DesordreFields.*;
-import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.TronconDigue;
+
+import fr.sirs.core.model.*;
 import fr.sirs.util.JRColumnParameter;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
@@ -328,6 +325,83 @@ public class PrintManager {
                 Injector.getSession().getPreviews(),
                 new SirsStringConverter(),
                 desordres, printPhoto, printReseauOuvrage, printVoirie, printLocationInsert, printPR, printXY, printBorne);
+        SIRS.openFile(fileToPrint);
+    }
+
+
+    /**
+     * Génère un rapport PDF des prestations requis.
+     *
+     * @param prestations
+     * @throws Exception
+     */
+    public final void printPrestations(final List<Prestation> prestations)
+            throws Exception {
+
+        final List<String> avoidPrestationFields = new ArrayList<>();
+        avoidPrestationFields.add(GEOMETRY_FIELD);
+        avoidPrestationFields.add(DOCUMENT_ID_FIELD);
+        avoidPrestationFields.add(ID_FIELD);
+        avoidPrestationFields.add(LONGITUDE_MIN_FIELD);
+        avoidPrestationFields.add(LONGITUDE_MAX_FIELD);
+        avoidPrestationFields.add(LATITUDE_MIN_FIELD);
+        avoidPrestationFields.add(LATITUDE_MAX_FIELD);
+        avoidPrestationFields.add(FOREIGN_PARENT_ID_FIELD);
+        avoidPrestationFields.add(REVISION_FIELD);
+        avoidPrestationFields.add(PARENT_FIELD);
+        avoidPrestationFields.add(COUCH_DB_DOCUMENT_FIELD);
+        avoidPrestationFields.add(OBSERVATIONS_REFERENCE);
+        avoidPrestationFields.add("coutMetre");
+        avoidPrestationFields.add("coutGlobal");
+        avoidPrestationFields.add("realisationInterne");
+        avoidPrestationFields.add("coteId");
+        avoidPrestationFields.add("positionId");
+        avoidPrestationFields.add("sourceId");
+        avoidPrestationFields.add("marcheId");
+        avoidPrestationFields.add("desordreIds");
+        avoidPrestationFields.add("evenementHydrauliqueIds");
+        avoidPrestationFields.add("rapportEtudeIds");
+        avoidPrestationFields.add("documentGrandeEchelleIds");
+        avoidPrestationFields.add("observations");
+        avoidPrestationFields.add(ECHELLE_LIMINIMETRIQUE_REFERENCE);
+        avoidPrestationFields.add(OUVRAGE_PARTICULIER_REFERENCE);
+        avoidPrestationFields.add(RESEAU_TELECOM_ENERGIE_REFERENCE);
+        avoidPrestationFields.add(OUVRAGE_TELECOM_ENERGIE_REFERENCE);
+        avoidPrestationFields.add(OUVRAGE_HYDRAULIQUE_REFERENCE);
+        avoidPrestationFields.add(RESEAU_HYDRAULIQUE_FERME_REFERENCE);
+        avoidPrestationFields.add(RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE);
+        avoidPrestationFields.add("stationPompageIds");
+        avoidPrestationFields.add(OUVRAGE_VOIRIE_REFERENCE);
+        avoidPrestationFields.add(VOIE_DIGUE_REFERENCE);
+        avoidPrestationFields.add("ouvertureBatardableIds");
+        avoidPrestationFields.add("voieAccesIds");
+        avoidPrestationFields.add("ouvrageFranchissementIds");
+        avoidPrestationFields.add("globalPrestationIds");
+        avoidPrestationFields.add("registreAttribution");
+        avoidPrestationFields.add("horodatageDate");
+        avoidPrestationFields.add("horodatageStatusId");
+        avoidPrestationFields.add("typePrestationId");
+
+        avoidPrestationFields.add(PRESTATION_REFERENCE);
+
+        avoidPrestationFields.add(VALID_FIELD);
+        avoidPrestationFields.add(AUTHOR_FIELD);
+        avoidPrestationFields.add(DATE_MAJ_FIELD);
+
+        final List<JRColumnParameter> prestationFields = new ArrayList<>();
+        prestationFields.add(new JRColumnParameter("designation", .7f, true));
+        prestationFields.add(new JRColumnParameter("libelle", 1.f));
+        prestationFields.add(new JRColumnParameter("intervenantsIds", 1.f));
+        prestationFields.add(new JRColumnParameter("date_debut", .7f));
+        prestationFields.add(new JRColumnParameter("date_fin", .7f));
+        prestationFields.add(new JRColumnParameter("commentaire", 2.5f));
+
+        final File fileToPrint = PrinterUtilities.printPrestations(
+                avoidPrestationFields,
+                prestationFields,
+                Injector.getSession().getPreviews(),
+                new SirsStringConverter(),
+                prestations);
         SIRS.openFile(fileToPrint);
     }
 

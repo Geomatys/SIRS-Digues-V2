@@ -24,6 +24,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
 
@@ -66,7 +67,7 @@ public class JRXMLUtil {
             try{
                 SirsCore.LOGGER.log(Level.FINEST, "extraction de la désignation de : {0}", input);
                 int endSubstring = input.indexOf(SirsStringConverter.LABEL_SEPARATOR);
-                endSubstring = endSubstring<0? input.length() :endSubstring; 
+                endSubstring = endSubstring<0? input.length() :endSubstring;
                 int startSubstring = input.indexOf(SirsStringConverter.DESIGNATION_SEPARATOR);
                 if(startSubstring<0){
                     return "";
@@ -85,7 +86,7 @@ public class JRXMLUtil {
 
     static String extractLabel(final String input){
         ArgumentChecks.ensureNonNull("String input", input);
-        
+
         final int index = input.indexOf(SirsStringConverter.LABEL_SEPARATOR);
         if(index>-1){
             return input.substring(index+SirsStringConverter.LABEL_SEPARATOR.length());
@@ -93,13 +94,13 @@ public class JRXMLUtil {
         else {
 //            SirsCore.LOGGER.log(Level.WARNING, "Label separator not found : {0}", input);  //Surcharge les logs.
             if ((input.length()>2) && (input.charAt(1) == ')')) {
-                //ATTENTION : Bricolage 
+                //ATTENTION : Bricolage
                 // Permet de ne pas considérer la numérotation ("1) ") lors de l'extraction de certain label.
                 // Ces cas ce produisent pas exemple dans la colonne 'Intervenants' des prestations au sein des fiches désordre.
                 // Sans cette opération, le "1) " est duppliqué.
                 // Je ne connais pas l'origine du "1) ".
                 SirsCore.LOGGER.log(Level.INFO, "Substring \"{0}\" extraite lors de l'extraction du label.", input.substring(0, 2));
-                return input.substring(2).trim(); 
+                return input.substring(2).trim();
             }
             return input;
         }
@@ -209,6 +210,21 @@ public class JRXMLUtil {
      */
     public static String dynamicDisplayLabels(final String fieldName){
         return "($F{"+fieldName+"}==null) ? \""+NULL_REPLACEMENT+"\" : fr.sirs.util.JRXMLUtil.displayLabels($F{"+fieldName+"}.toString(), true, 1)";
+    }
+
+    /**
+     * Affichage d'un champ récupéré comme {@link PrintableArrayList}.
+     *
+     * @param fieldName
+     * @return
+     * @see JRXMLUtil#displayLabels(java.lang.String, java.lang.Boolean, java.lang.Integer)
+     */
+    public static String dynamicDisplayLabels(final List<String> fieldName){
+        StringBuilder result = new StringBuilder();
+        fieldName.forEach(fn -> {
+            result.append(fn + "\n");
+        });
+        return "($F{"+fieldName+"}==null) ? \""+NULL_REPLACEMENT+"\" : fr.sirs.util.JRXMLUtil.displayLabels($F{"+result+"}.toString(), true, 1)";
     }
 
     /**

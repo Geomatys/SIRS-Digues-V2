@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="jasper_report_template" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="10e7ad18-cce4-4b7d-832d-94e5135fe8c0">
+	<property name="ireport.zoom" value="1.9487171000000172"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="table_CH" mode="Opaque" backcolor="#FFFFFF">
+		<box topPadding="5" leftPadding="3" bottomPadding="5" rightPadding="3">
+			<pen lineWidth="0.5" lineColor="#47DAFF"/>
+			<bottomPen lineWidth="2.0" lineColor="#47DAFF"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box topPadding="4" leftPadding="4" bottomPadding="4" rightPadding="4">
+			<pen lineWidth="0.5" lineColor="#47DAFF"/>
+		</box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue()%2==1)]]></conditionExpression>
+			<style backcolor="#D2EAF1"/>
+		</conditionalStyle>
+	</style>
+	<style name="background_white_when_PR">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$P{PRINT_PR}]]></conditionExpression>
+			<style backcolor="#FFFFFF"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[!$P{PRINT_PR}]]></conditionExpression>
+			<style backcolor="#D2EAF1"/>
+		</conditionalStyle>
+	</style>
+	<style name="background_blue_when_PR">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[!$P{PRINT_PR}]]></conditionExpression>
+			<style backcolor="#FFFFFF"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$P{PRINT_PR}]]></conditionExpression>
+			<style backcolor="#D2EAF1"/>
+		</conditionalStyle>
+	</style>
+<!--	<subDataset name="Observation Dataset" uuid="f87f5cd0-3234-40c4-9ea3-250724f36d5e"/>-->
+<!--	<subDataset name="Prestation Dataset" uuid="df00eaba-db68-4b08-8235-09c8aa0b6e8c"/>-->
+<!--	<subDataset name="ReseauOuvrage Dataset" uuid="ac0fddac-67df-47b9-83cb-4b6fb7d9d014"/>-->
+<!--	<subDataset name="Voirie Dataset" uuid="dafa0e8d-c219-44fe-9097-387a54fe781d"/>-->
+	<parameter name="INFO" class="java.lang.String"/>
+	<title>
+		<band/>
+	</title>
+	<pageHeader>
+		<band/>
+	</pageHeader>
+	<columnHeader>
+		<band/>
+	</columnHeader>
+	<detail>
+		<band height="278" splitType="Stretch">
+			<frame>
+				<reportElement mode="Opaque" x="0" y="0" width="555" height="48" uuid="7e90d220-3a9a-4a61-b736-a6cad2b30566"/>
+				<staticText>
+					<reportElement x="0" y="0" width="555" height="22" uuid="89c68cdb-b022-43cc-858f-04690206436b"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="16" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Tableau de synthèse  prestation pour Registre horodaté]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="0" y="22" width="555" height="16" uuid="6b160592-a1b4-4c55-b4e8-b07366d00184"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="12"/>
+					</textElement>
+					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{digueId})]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="48" width="555" height="14" backcolor="#47DAFF" uuid="e9515967-8551-4baf-9ece-675713572d85"/>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="1" width="545" height="12" uuid="f2e8836c-b61f-4ad0-aac7-590cd453e6e5"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Description générale]]></text>
+				</staticText>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="62" width="555" height="12" backcolor="#FFFFFF" uuid="b0a96719-0ed1-44d4-8762-38ac9bcc34fa"/>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="459226d2-85bf-4a43-ada4-b175ccaa4983"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Désignation]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="80" y="0" width="50" height="12" uuid="10400906-6fe6-4ab8-add5-fef0d9e5a411"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{designation}==null ? " - " : $F{designation}]]></textFieldExpression>
+				</textField>
+<!--				<staticText>-->
+<!--					<reportElement positionType="Float" x="130" y="0" width="100" height="12" uuid="2abd0d0e-c148-4174-a7d5-d37e5f896512"/>-->
+<!--					<textElement textAlignment="Left" verticalAlignment="Middle">-->
+<!--						<font size="8" isBold="true"/>-->
+<!--					</textElement>-->
+<!--					<text><![CDATA[Type de prestation]]></text>-->
+<!--				</staticText>-->
+<!--				<textField isStretchWithOverflow="true">-->
+<!--					<reportElement positionType="Float" x="230" y="0" width="300" height="12" uuid="baf87d65-4632-4d22-8377-982bdf6008d1"/>-->
+<!--					<textElement textAlignment="Justified" verticalAlignment="Middle">-->
+<!--						<font size="8"/>-->
+<!--					</textElement>-->
+<!--					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{typePrestationId})]]></textFieldExpression>-->
+<!--				</textField>-->
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="74" width="555" height="12" backcolor="#D2EAF1" uuid="02d9c324-3ac0-42d0-aa9e-0b401f14863d"/>
+				<staticText>
+					<reportElement positionType="Float" x="130" y="0" width="100" height="12" uuid="9caf9b0d-875c-40bd-bd75-4cd689980517"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Date de début]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="230" y="0" width="100" height="12" uuid="03d7cc2a-93c3-44da-8bda-a6e22c997ff2"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{date_debut}==null ? " - " : $F{date_debut}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="330" y="0" width="100" height="12" uuid="b1da5310-7da5-4a2a-8d9d-3689b5ad86ea"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Date de fin]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="430" y="0" width="100" height="12" uuid="8d9d6fc2-d4e8-497e-a20e-f70310e0b6ba"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{date_fin}==null ? " - " : $F{date_fin}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="98" width="555" height="12" backcolor="#D2EAF1" uuid="c22aaddd-a331-4518-82ac-464fd37a289c"/>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="120" height="12" uuid="05f85007-63da-4cf2-a91d-370c6f08e7cf"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Commentaire]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="130" y="0" width="400" height="12" uuid="6d4e5282-40d5-422c-9283-86b8e423382e"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{commentaire}==null ? " - " : $F{commentaire}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="134" width="555" height="14" backcolor="#47DAFF" uuid="62e862ef-7bf7-4e55-82f0-e1ecb659c0f1"/>
+				<staticText>
+					<reportElement x="10" y="1" width="545" height="12" uuid="cd0f4df6-f9f6-40c0-884e-053ad25fcb32"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false" isUnderline="false"/>
+					</textElement>
+					<text><![CDATA[Localisation]]></text>
+				</staticText>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="148" width="555" height="120" uuid="d400258e-92c6-4b8b-aa79-a0b049a5b32f">
+					<property name="com.jaspersoft.studio.element.name" value="properties"/>
+				</reportElement>
+				<frame>
+					<reportElement positionType="Float" mode="Opaque" x="0" y="0" width="555" height="12"
+								   backcolor="#FFFFFF" uuid="9a5c9dcb-362d-4582-b623-e2dc4851a4d3"/>
+					<staticText>
+						<reportElement positionType="Float" x="10" y="0" width="70" height="12"
+									   uuid="47354525-ae0e-4bfa-99b0-a8a5ff298881"/>
+						<textElement textAlignment="Left" verticalAlignment="Middle">
+							<font size="8" isBold="true"/>
+						</textElement>
+						<text><![CDATA[Tronçon]]></text>
+					</staticText>
+					<textField isStretchWithOverflow="true">
+						<reportElement positionType="Float" x="80" y="0" width="110" height="12"
+									   uuid="8ef77866-e00c-46a6-812d-288968bce4d6"/>
+						<textElement textAlignment="Justified" verticalAlignment="Middle">
+							<font size="8"/>
+						</textElement>
+						<textFieldExpression>
+							<![CDATA[fr.sirs.util.JRXMLUtil.displayDesignation($F{linearId})]]></textFieldExpression>
+					</textField>
+					<textField isStretchWithOverflow="true">
+						<reportElement positionType="Float" x="190" y="0" width="190" height="12"
+									   uuid="cf55d95d-d2c2-43a0-bdc2-d088849a8c32"/>
+						<textElement textAlignment="Justified" verticalAlignment="Middle">
+							<font size="8"/>
+						</textElement>
+						<textFieldExpression>
+							<![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{linearId})]]></textFieldExpression>
+					</textField>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" mode="Opaque" x="0" y="12" width="555" height="12"
+								   backcolor="#D2EAF1" uuid="cb3f6e9a-e5eb-4fdf-89c9-f8d4caf5bebf"/>
+					<staticText>
+						<reportElement positionType="Float" x="10" y="0" width="120" height="12"
+									   uuid="902a6a79-d700-4b9d-8629-de83910b379d"/>
+						<textElement textAlignment="Left" verticalAlignment="Middle">
+							<font size="8" isBold="true"/>
+						</textElement>
+						<text><![CDATA[Système de repérage]]></text>
+					</staticText>
+					<textField isStretchWithOverflow="true">
+						<reportElement positionType="Float" x="130" y="0" width="250" height="12"
+									   uuid="5a5856b2-3396-49af-8403-09282329adf5"/>
+						<textElement textAlignment="Justified" verticalAlignment="Middle">
+							<font size="8"/>
+						</textElement>
+						<textFieldExpression>
+							<![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{systemeRepId})]]></textFieldExpression>
+					</textField>
+				</frame>
+			</frame>
+		</band>
+	</detail>
+	<columnFooter>
+		<band/>
+	</columnFooter>
+	<pageFooter>
+		<band height="12" splitType="Stretch">
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="0" width="555" height="12" uuid="d3206e80-0590-474f-8765-7768d57c11e7"/>
+				<box>
+					<topPen lineWidth="0.2" lineColor="#000000"/>
+				</box>
+				<staticText>
+					<reportElement x="0" y="0" width="68" height="12" uuid="7a9a2a25-dcdf-495a-a6b9-86cd79c9ea05"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[SIRS Digues v2]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="153" y="0" width="250" height="12" uuid="72c5d883-8679-49c5-80f1-61b3453b6f82"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Date : "+java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("EEE dd/MMM/yyyy hh:mm", java.util.Locale.FRANCE))]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="466" y="0" width="50" height="12" uuid="fd135700-f76f-4940-8342-3b56ac4bd1dc"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" / "]]></textFieldExpression>
+				</textField>
+				<textField evaluationTime="Report">
+					<reportElement x="515" y="0" width="40" height="12" uuid="f89bacc3-3034-42f7-950b-08461d07d0c1"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[" "+$V{PAGE_NUMBER}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</pageFooter>
+</jasperReport>

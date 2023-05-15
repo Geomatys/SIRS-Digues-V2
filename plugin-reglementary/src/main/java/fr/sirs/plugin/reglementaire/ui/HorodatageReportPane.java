@@ -17,12 +17,14 @@ package fr.sirs.plugin.reglementaire.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
 import fr.sirs.core.model.report.AbstractSectionRapport;
 import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.core.model.report.PrestationTableSectionRapport;
 import fr.sirs.util.DatePickerConverter;
+import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.odt.ODTUtils;
 import javafx.application.Platform;
@@ -38,12 +40,19 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import net.sf.jasperreports.view.JRViewer;
 import org.apache.sis.measure.NumberRange;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.File;
+import javax.swing.*;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,6 +62,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static fr.sirs.SIRS.*;
 
@@ -62,6 +73,12 @@ import static fr.sirs.SIRS.*;
  * @author Estelle Idee (Geomatys)
  */
 public class HorodatageReportPane extends BorderPane {
+
+    private static final String MEMORY_ERROR_MSG = String.format(
+            "Impossible d'imprimer les tableaux de synthèse : la mémoire disponible est insuffisante. Vous devez soit :%n"
+                    + " - sélectionner moins de prestations,%n"
+                    + " - allouer plus de mémoire à l'application."
+    );
 
     // TODO : check ignored fields
     public static final String[] COLUMNS_TO_IGNORE = new String[]{
@@ -286,18 +303,18 @@ public class HorodatageReportPane extends BorderPane {
     @FXML
     private void generateReport(ActionEvent event) {
 //        final ModeleRapport report = modelProperty.get();
-        final List<Prestation> prestations = uiPrestations.getItems();
+        final ObservableList<Prestation> prestations = uiPrestations.getSelectionModel().getSelectedItems();
         if (prestations.isEmpty()) return;
 
-        final ModeleRapport report = new ModeleRapport();
-        final AbstractSectionRapport section = new PrestationTableSectionRapport();
-        section.setLibelle("Tableau de synthèse  prestation pour Registre horodaté");
-
-        prestations.forEach(p -> section.addChild(p));
-        report.setSections(Arrays.asList(section));
-
-        if (report == null) return;
-
+//        final ModeleRapport report = new ModeleRapport();
+//        final AbstractSectionRapport section = new PrestationTableSectionRapport();
+//        section.setLibelle("Tableau de synthèse  prestation pour Registre horodaté");
+//
+//        prestations.forEach(p -> section.addChild(p));
+//        report.setSections(Arrays.asList(section));
+//
+//        if (report == null) return;
+//
         /*
         A- détermination de l'emplacement du fichier de sortie
         ======================================================*/
@@ -306,7 +323,7 @@ public class HorodatageReportPane extends BorderPane {
         final Path previous = getPreviousPath();
         if (previous != null) {
             chooser.setInitialDirectory(previous.toFile());
-            chooser.setInitialFileName(".odt");
+            chooser.setInitialFileName(".pdf");
         }
         final File file = chooser.showSaveDialog(null);
         if (file == null) return;
@@ -314,76 +331,147 @@ public class HorodatageReportPane extends BorderPane {
         final Path output = file.toPath();
         setPreviousPath(output.getParent());
 
+//
+//
+//        /*
+//        B- détermination des paramètres de création de l'obligation réglementaire, le cas échéant
+//        =========================================================================================*/
+//
+//        final Preview sysEndi = uiSystemEndiguement.valueProperty().get();
+//        final String titre = uiTitre.getText();
+//
+//
+//
+//
+//        /*
+//        D- création de la tâche générale de création du rapport
+//        ======================================================*/
+//
+//        final Task task;
+//        task = new Task() {
+//
+//            @Override
+//            protected Object call() throws Exception {
+//                updateTitle("Création d'un rapport");
+//
+//
+//                /*
+//                1- détermination de la liste des éléments à inclure dans le rapport
+//                ------------------------------------------------------------------*/
+//
+//                // on liste tous les elements a générer
+//                updateMessage("Recherche des objets du rapport...");
+//                final ObservableList<Prestation> prestations = uiPrestations.getSelectionModel().getSelectedItems();
+//                if (prestations.isEmpty()) return false;
+//
+//
+//                /*
+//                2- génération du rapport
+//                -----------------------*/
+//
+//                final Task reportGenerator = ODTUtils.generateReport(report, prestations.isEmpty() ? null : prestations, output, titre);
+//                Platform.runLater(() -> {
+//                    reportGenerator.messageProperty().addListener((obs, oldValue, newValue) -> updateMessage(newValue));
+//                    reportGenerator.workDoneProperty().addListener((obs, oldValue, newValue) -> updateProgress(newValue.doubleValue(), reportGenerator.getTotalWork()));
+//                });
+//                reportGenerator.get();
+//
+//
+//                /*
+//                3- création de l'obligation réglementaire
+//                ----------------------------------------*/
+//
+//                updateProgress(-1, -1);
+//                return true;
+//            }
+//        };
+//
+//        uiProgress.visibleProperty().bind(task.runningProperty());
+//        uiProgress.progressProperty().bind(task.progressProperty());
+//        uiProgressLabel.visibleProperty().bind(task.runningProperty());
+//        uiProgressLabel.textProperty().bind(task.messageProperty());
+//        running.bind(task.runningProperty());
+//        disableProperty().bind(task.runningProperty());
+//
+//        task.setOnFailed((failEvent) -> {
+//            SIRS.LOGGER.log(Level.WARNING, "An error happened while creating a report.", task.getException());
+//            Platform.runLater(() -> GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du rapport.", task.getException()).show());
+//        });
+//
+//        task.setOnSucceeded((successEvent) -> Platform.runLater(() -> new Alert(Alert.AlertType.INFORMATION, "La génération du rapport s'est terminée avec succès", ButtonType.OK).show()));
+//
+//        TaskManager.INSTANCE.submit(task);
 
+//        String outputFile = "/home/estelle/Projects/SIRS-FranceDigues/test.pdf";
 
-        /*
-        B- détermination des paramètres de création de l'obligation réglementaire, le cas échéant
-        =========================================================================================*/
+        JRBeanCollectionDataSource beanColDataSource = new JRBeanCollectionDataSource(prestations);
+        Map<String, Object> parameters = new HashMap();
+//        parameters.put("INFO", "Hello");
+        parameters.put("CollectionBeanParam", beanColDataSource);
 
-        final Preview sysEndi = uiSystemEndiguement.valueProperty().get();
-        final String titre = uiTitre.getText();
+        try {
+            InputStream input = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/prestation_A4.jrxml");
+            JasperDesign jasperDesign = JRXmlLoader.load(input);
+            JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
 
+            OutputStream outputStream = new FileOutputStream(output.toFile());
+            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
 
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (JRException e) {
+            throw new RuntimeException(e);
+        }
 
+//
+//        JasperReport report = null;
+//        JasperPrint jasperPrint = null;
+//        try (final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplatePrestation.jrxml")) {
+//            jasperPrint = JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
+//        } catch (
+//                JRException | IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        JFrame frame = new JFrame("Report");
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        frame.getContentPane().add(new JRViewer(jasperPrint));
+//        frame.pack();
+//        frame.setVisible(true);
 
-        /*
-        D- création de la tâche générale de création du rapport
-        ======================================================*/
-
-        final Task task;
-        task = new Task() {
-
-            @Override
-            protected Object call() throws Exception {
-                updateTitle("Création d'un rapport");
-
-
-                /*
-                1- détermination de la liste des éléments à inclure dans le rapport
-                ------------------------------------------------------------------*/
-
-                // on liste tous les elements a générer
-                updateMessage("Recherche des objets du rapport...");
-                final ObservableList<Prestation> prestations = uiPrestations.getSelectionModel().getSelectedItems();
-                if (prestations.isEmpty()) return false;
-
-
-                /*
-                2- génération du rapport
-                -----------------------*/
-
-                final Task reportGenerator = ODTUtils.generateReport(report, prestations.isEmpty() ? null : prestations, output, titre);
-                Platform.runLater(() -> {
-                    reportGenerator.messageProperty().addListener((obs, oldValue, newValue) -> updateMessage(newValue));
-                    reportGenerator.workDoneProperty().addListener((obs, oldValue, newValue) -> updateProgress(newValue.doubleValue(), reportGenerator.getTotalWork()));
-                });
-                reportGenerator.get();
-
-
-                /*
-                3- création de l'obligation réglementaire
-                ----------------------------------------*/
-
-                updateProgress(-1, -1);
-                return true;
-            }
-        };
-
-        uiProgress.visibleProperty().bind(task.runningProperty());
-        uiProgress.progressProperty().bind(task.progressProperty());
-        uiProgressLabel.visibleProperty().bind(task.runningProperty());
-        uiProgressLabel.textProperty().bind(task.messageProperty());
-        running.bind(task.runningProperty());
-        disableProperty().bind(task.runningProperty());
-
-        task.setOnFailed((failEvent) -> {
-            SIRS.LOGGER.log(Level.WARNING, "An error happened while creating a report.", task.getException());
-            Platform.runLater(() -> GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du rapport.", task.getException()).show());
-        });
-
-        task.setOnSucceeded((successEvent) -> Platform.runLater(() -> new Alert(Alert.AlertType.INFORMATION, "La génération du rapport s'est terminée avec succès", ButtonType.OK).show()));
-
-        TaskManager.INSTANCE.submit(task);
+//        final Task<Boolean> printing = new TaskManager.MockTask<>("Génération de fiches détaillées", () -> {
+//
+//            try {
+//                if (!prestations.isEmpty() && !Thread.currentThread().isInterrupted())
+//                    Injector.getSession().getPrintManager().printPrestations(prestations);
+//
+//                PrinterUtilities.canPrint.set(true);
+//                return !prestations.isEmpty();
+//
+//            } catch (OutOfMemoryError error) {
+//                SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to lack of memory", error);
+//                Platform.runLater(() -> {
+//                    final Alert alert = new Alert(Alert.AlertType.ERROR, MEMORY_ERROR_MSG, ButtonType.OK);
+//                    alert.show();
+//                });
+//                PrinterUtilities.canPrint.set(true);
+//                throw error;
+//            } catch (Exception e) {
+//                SirsCore.LOGGER.log(Level.WARNING, "Cannot print prestations due to error", e);
+//                if (!prestations.isEmpty())
+//                    PrinterUtilities.restoreMap(prestations.get(0));
+//                PrinterUtilities.canPrint.set(true);
+//                throw e;
+//            }
+//        });
+//        if (PrinterUtilities.canPrint.compareAndSet(true, false)) {
+////            taskProperty.set(printing);
+//            TaskManager.INSTANCE.submit(printing);
+//        } else {
+//            SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to other printing on going");
+//            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Une impression de fiche est en cours,\nveuillez réessayer quand elle sera terminée", ButtonType.OK);
+//            alert.showAndWait();
+//        }
     }
 
     /**

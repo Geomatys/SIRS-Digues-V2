@@ -23,13 +23,8 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.Previews;
-import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.*;
+
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -51,6 +46,7 @@ import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.query.Query;
@@ -272,6 +268,46 @@ public final class PrinterUtilities {
         return fout;
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    // FICHES DE SYNTHESE DES PRESTATIONS
+    ////////////////////////////////////////////////////////////////////////////
+
+    public static File printPrestations(final List<String> avoidDesordreFields,
+                                        final List<JRColumnParameter> prestationFields,
+                                      final Previews previewLabelRepository,
+                                      final SirsStringConverter stringConverter,
+                                      final List<Prestation> prestations
+    )
+            throws ParserConfigurationException, SAXException, JRException, TransformerException, IOException {
+
+        // Creates the Jasper Reports specific template from the generic template.
+        final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
+        templateFile.deleteOnExit();
+
+        final JasperPrint print;
+        try (final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplatePrestation.jrxml")) {
+            final JRDomWriterPrestationSyntheseSheet templateWriter = new JRDomWriterPrestationSyntheseSheet(metaTemplateStream, avoidDesordreFields, prestationFields);
+            templateWriter.setOutput(templateFile);
+            templateWriter.write();
+
+            final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
+
+            final Map<String, Object> parameters = new HashMap<>();
+
+            prestations.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
+            print = createJasperPrint(jasperReport, prestations, previewLabelRepository, stringConverter, false, parameters);
+        }
+
+        // Generate the report -------------------------------------------------
+        final File fout = File.createTempFile("DESORDRE_OBSERVATION", PDF_EXTENSION);
+        fout.deleteOnExit();
+        try (final FileOutputStream outStream = new FileOutputStream(fout)) {
+            final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
+            JasperReportService.generate(print, output);
+        }
+        return fout;
+    }
+
     // TODO make this class generic
     private static JasperPrint createJasperPrint(JasperReport jasperReport,
                                                              final List<? extends Element> elementsToPrint,
@@ -293,6 +329,8 @@ public final class PrinterUtilities {
             source = new ReseauHydrauliqueFermeDataSource((List<ReseauHydrauliqueFerme>) elementsToPrint, previewLabelRepository, stringConverter, printLocationInsert);
         else if (elementsToPrint.get(0) instanceof OuvrageHydrauliqueAssocie)
             source = new OuvrageHydrauliqueAssocieDataSource((List<OuvrageHydrauliqueAssocie>) elementsToPrint, previewLabelRepository, stringConverter, printLocationInsert);
+        else if (elementsToPrint.get(0) instanceof Prestation)
+            source = new JRBeanCollectionDataSource(elementsToPrint);
         else
             throw new RuntimeException("Can't print the type of Elements selected : "+elementsToPrint.get(0).getClass().getSimpleName());
         print = JasperFillManager.fillReport(jasperReport, parameters, source);

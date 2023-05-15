@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -90,7 +90,7 @@ public abstract class AbstractJDomWriterSingleSheet extends AbstractJDomWriter {
         // Builds the name of the field.----------------------------------------
         final String fieldName = method.getName().substring(3, 4).toLowerCase()
                         + method.getName().substring(4);
-        writeField(method.getParameterTypes()[0], fieldName, "Champ ajouté par introspection.");
+        writeField(method.getParameterTypes()[0], fieldName, "Champ ajouté par introspection. " + fieldName);
     }
 
     protected void writeField(final Class type, final String name, final String description){
@@ -135,17 +135,17 @@ public abstract class AbstractJDomWriterSingleSheet extends AbstractJDomWriter {
     protected void writeTitle(final String titlePrefix, final Class classToMap) {
 
         if(title==null) return;
-        
+
         // Looks for the title content.-----------------------------------------
         final Element band = (Element) title.getElementsByTagName(TAG_BAND).item(0);
         if(band==null) return;
-        
+
         final Element staticText = (Element) band.getElementsByTagName(TAG_STATIC_TEXT).item(0);
         if(staticText==null) return;
-        
+
         final Element text = (Element) staticText.getElementsByTagName(TAG_TEXT).item(0);
         if(text==null) return;
-        
+
         // Sets the title.------------------------------------------------------
         final String className;
         final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName(), Locale.getDefault(),
