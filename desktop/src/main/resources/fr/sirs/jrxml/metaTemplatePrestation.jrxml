@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="jasper_report_template" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="10e7ad18-cce4-4b7d-832d-94e5135fe8c0">
 	<property name="ireport.zoom" value="1.9487171000000172"/>
 	<property name="ireport.x" value="0"/>
@@ -38,10 +39,6 @@
 			<style backcolor="#D2EAF1"/>
 		</conditionalStyle>
 	</style>
-<!--	<subDataset name="Observation Dataset" uuid="f87f5cd0-3234-40c4-9ea3-250724f36d5e"/>-->
-<!--	<subDataset name="Prestation Dataset" uuid="df00eaba-db68-4b08-8235-09c8aa0b6e8c"/>-->
-<!--	<subDataset name="ReseauOuvrage Dataset" uuid="ac0fddac-67df-47b9-83cb-4b6fb7d9d014"/>-->
-<!--	<subDataset name="Voirie Dataset" uuid="dafa0e8d-c219-44fe-9097-387a54fe781d"/>-->
 	<parameter name="INFO" class="java.lang.String"/>
 	<title>
 		<band/>
@@ -63,7 +60,7 @@
 					</textElement>
 					<text><![CDATA[Tableau de synthèse  prestation pour Registre horodaté]]></text>
 				</staticText>
-				<textField isStretchWithOverflow="true">
+				<textField textAdjust="StretchHeight">
 					<reportElement positionType="Float" x="0" y="22" width="555" height="16" uuid="6b160592-a1b4-4c55-b4e8-b07366d00184"/>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="12"/>
@@ -90,27 +87,13 @@
 					</textElement>
 					<text><![CDATA[Désignation]]></text>
 				</staticText>
-				<textField isStretchWithOverflow="true">
+				<textField textAdjust="StretchHeight">
 					<reportElement positionType="Float" x="80" y="0" width="50" height="12" uuid="10400906-6fe6-4ab8-add5-fef0d9e5a411"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{designation}==null ? " - " : $F{designation}]]></textFieldExpression>
 				</textField>
-<!--				<staticText>-->
-<!--					<reportElement positionType="Float" x="130" y="0" width="100" height="12" uuid="2abd0d0e-c148-4174-a7d5-d37e5f896512"/>-->
-<!--					<textElement textAlignment="Left" verticalAlignment="Middle">-->
-<!--						<font size="8" isBold="true"/>-->
-<!--					</textElement>-->
-<!--					<text><![CDATA[Type de prestation]]></text>-->
-<!--				</staticText>-->
-<!--				<textField isStretchWithOverflow="true">-->
-<!--					<reportElement positionType="Float" x="230" y="0" width="300" height="12" uuid="baf87d65-4632-4d22-8377-982bdf6008d1"/>-->
-<!--					<textElement textAlignment="Justified" verticalAlignment="Middle">-->
-<!--						<font size="8"/>-->
-<!--					</textElement>-->
-<!--					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{typePrestationId})]]></textFieldExpression>-->
-<!--				</textField>-->
 			</frame>
 			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="74" width="555" height="12" backcolor="#D2EAF1" uuid="02d9c324-3ac0-42d0-aa9e-0b401f14863d"/>
@@ -121,7 +104,7 @@
 					</textElement>
 					<text><![CDATA[Date de début]]></text>
 				</staticText>
-				<textField isStretchWithOverflow="true">
+				<textField textAdjust="StretchHeight">
 					<reportElement positionType="Float" x="230" y="0" width="100" height="12" uuid="03d7cc2a-93c3-44da-8bda-a6e22c997ff2"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8"/>
@@ -135,7 +118,7 @@
 					</textElement>
 					<text><![CDATA[Date de fin]]></text>
 				</staticText>
-				<textField isStretchWithOverflow="true">
+				<textField textAdjust="StretchHeight">
 					<reportElement positionType="Float" x="430" y="0" width="100" height="12" uuid="8d9d6fc2-d4e8-497e-a20e-f70310e0b6ba"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8"/>
@@ -152,7 +135,7 @@
 					</textElement>
 					<text><![CDATA[Commentaire]]></text>
 				</staticText>
-				<textField isStretchWithOverflow="true">
+				<textField textAdjust="StretchHeight">
 					<reportElement positionType="Float" x="130" y="0" width="400" height="12" uuid="6d4e5282-40d5-422c-9283-86b8e423382e"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8"/>
@@ -175,54 +158,44 @@
 					<property name="com.jaspersoft.studio.element.name" value="properties"/>
 				</reportElement>
 				<frame>
-					<reportElement positionType="Float" mode="Opaque" x="0" y="0" width="555" height="12"
-								   backcolor="#FFFFFF" uuid="9a5c9dcb-362d-4582-b623-e2dc4851a4d3"/>
+					<reportElement positionType="Float" mode="Opaque" x="0" y="0" width="555" height="12" backcolor="#FFFFFF" uuid="9a5c9dcb-362d-4582-b623-e2dc4851a4d3"/>
 					<staticText>
-						<reportElement positionType="Float" x="10" y="0" width="70" height="12"
-									   uuid="47354525-ae0e-4bfa-99b0-a8a5ff298881"/>
+						<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="47354525-ae0e-4bfa-99b0-a8a5ff298881"/>
 						<textElement textAlignment="Left" verticalAlignment="Middle">
 							<font size="8" isBold="true"/>
 						</textElement>
 						<text><![CDATA[Tronçon]]></text>
 					</staticText>
-					<textField isStretchWithOverflow="true">
-						<reportElement positionType="Float" x="80" y="0" width="110" height="12"
-									   uuid="8ef77866-e00c-46a6-812d-288968bce4d6"/>
+					<textField textAdjust="StretchHeight">
+						<reportElement positionType="Float" x="80" y="0" width="110" height="12" uuid="8ef77866-e00c-46a6-812d-288968bce4d6"/>
 						<textElement textAlignment="Justified" verticalAlignment="Middle">
 							<font size="8"/>
 						</textElement>
-						<textFieldExpression>
-							<![CDATA[fr.sirs.util.JRXMLUtil.displayDesignation($F{linearId})]]></textFieldExpression>
+						<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayDesignation($F{linearId})]]></textFieldExpression>
 					</textField>
-					<textField isStretchWithOverflow="true">
-						<reportElement positionType="Float" x="190" y="0" width="190" height="12"
-									   uuid="cf55d95d-d2c2-43a0-bdc2-d088849a8c32"/>
+					<textField textAdjust="StretchHeight">
+						<reportElement positionType="Float" x="190" y="0" width="190" height="12" uuid="cf55d95d-d2c2-43a0-bdc2-d088849a8c32"/>
 						<textElement textAlignment="Justified" verticalAlignment="Middle">
 							<font size="8"/>
 						</textElement>
-						<textFieldExpression>
-							<![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{linearId})]]></textFieldExpression>
+						<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{linearId})]]></textFieldExpression>
 					</textField>
 				</frame>
 				<frame>
-					<reportElement positionType="Float" mode="Opaque" x="0" y="12" width="555" height="12"
-								   backcolor="#D2EAF1" uuid="cb3f6e9a-e5eb-4fdf-89c9-f8d4caf5bebf"/>
+					<reportElement positionType="Float" mode="Opaque" x="0" y="12" width="555" height="12" backcolor="#D2EAF1" uuid="cb3f6e9a-e5eb-4fdf-89c9-f8d4caf5bebf"/>
 					<staticText>
-						<reportElement positionType="Float" x="10" y="0" width="120" height="12"
-									   uuid="902a6a79-d700-4b9d-8629-de83910b379d"/>
+						<reportElement positionType="Float" x="10" y="0" width="120" height="12" uuid="902a6a79-d700-4b9d-8629-de83910b379d"/>
 						<textElement textAlignment="Left" verticalAlignment="Middle">
 							<font size="8" isBold="true"/>
 						</textElement>
 						<text><![CDATA[Système de repérage]]></text>
 					</staticText>
-					<textField isStretchWithOverflow="true">
-						<reportElement positionType="Float" x="130" y="0" width="250" height="12"
-									   uuid="5a5856b2-3396-49af-8403-09282329adf5"/>
+					<textField textAdjust="StretchHeight">
+						<reportElement positionType="Float" x="130" y="0" width="250" height="12" uuid="5a5856b2-3396-49af-8403-09282329adf5"/>
 						<textElement textAlignment="Justified" verticalAlignment="Middle">
 							<font size="8"/>
 						</textElement>
-						<textFieldExpression>
-							<![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{systemeRepId})]]></textFieldExpression>
+						<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{systemeRepId})]]></textFieldExpression>
 					</textField>
 				</frame>
 			</frame>
@@ -245,7 +218,7 @@
 					</textElement>
 					<text><![CDATA[SIRS Digues v2]]></text>
 				</staticText>
-				<textField isStretchWithOverflow="true">
+				<textField textAdjust="StretchHeight">
 					<reportElement positionType="Float" x="153" y="0" width="250" height="12" uuid="72c5d883-8679-49c5-80f1-61b3453b6f82"/>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="8"/>

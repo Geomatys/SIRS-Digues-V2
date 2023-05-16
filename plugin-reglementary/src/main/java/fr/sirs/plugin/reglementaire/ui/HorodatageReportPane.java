@@ -20,20 +20,14 @@ import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
-import fr.sirs.core.model.report.AbstractSectionRapport;
-import fr.sirs.core.model.report.ModeleRapport;
-import fr.sirs.core.model.report.PrestationTableSectionRapport;
 import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
-import fr.sirs.util.odt.ODTUtils;
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -43,15 +37,10 @@ import javafx.stage.FileChooser;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.design.JasperDesign;
-import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
-import net.sf.jasperreports.view.JRViewer;
 import org.apache.sis.measure.NumberRange;
-import org.geotoolkit.gui.javafx.util.TaskManager;
-import org.geotoolkit.internal.GeotkFX;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.swing.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,10 +49,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.prefs.Preferences;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static fr.sirs.SIRS.*;
 
@@ -408,6 +394,7 @@ public class HorodatageReportPane extends BorderPane {
         Map<String, Object> parameters = new HashMap();
 //        parameters.put("INFO", "Hello");
         parameters.put("CollectionBeanParam", beanColDataSource);
+        parameters.put("systemEndiguement", uiSystemEndiguement.getSelectionModel().getSelectedItem().getLibelle());
 
         try {
             InputStream input = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/prestation_A4.jrxml");

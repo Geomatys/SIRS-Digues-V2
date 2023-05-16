@@ -18,6 +18,9 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.Injector;
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
 import java.text.DecimalFormat;
@@ -26,6 +29,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
+
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.ContactRepository;
+import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.component.UtilisateurRepository;
+import fr.sirs.core.model.*;
 import org.apache.sis.util.ArgumentChecks;
 
 /**
@@ -224,7 +233,7 @@ public class JRXMLUtil {
         fieldName.forEach(fn -> {
             result.append(fn + "\n");
         });
-        return "($F{"+fieldName+"}==null) ? \""+NULL_REPLACEMENT+"\" : fr.sirs.util.JRXMLUtil.displayLabels($F{"+result+"}.toString(), true, 1)";
+        return displayLabels(result.toString(), true, 1);
     }
 
     /**
@@ -246,4 +255,58 @@ public class JRXMLUtil {
     public static String dynamicDisplayReferenceCode(final String fieldName){
         return "fr.sirs.util.JRXMLUtil.displayReferenceCode($F{"+fieldName+"})";
     }
+
+    /**
+     *
+     * @param fieldNames @{@link List} containing the intervenants' ids.
+     * @return
+     * @see JRXMLUtil#displayReferenceCode(java.lang.String)
+     */
+    public static String displayIntervenants(final List<String> fieldNames){
+        StringBuilder result = new StringBuilder();
+        ContactRepository contactRepo = (ContactRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(Contact.class);
+        fieldNames.forEach(fn -> {
+            final Contact contact = contactRepo.get(fn);
+            if (contact == null) return;
+            result.append(contact.getNom() + " " + contact.getPrenom() +"\n");
+        });
+        return result.toString();
+    }
+
+    /**
+     *
+     * @param fieldName id of the @Utilisateur to display login for.
+     * @return
+     */
+    public static String displayLogin(final String fieldName){
+        UtilisateurRepository contactRepo = (UtilisateurRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(Utilisateur.class);
+        final Utilisateur utilisateur = contactRepo.get(fieldName);
+        if (utilisateur == null) return "";
+
+        return utilisateur.getLogin();
+    }
+
+    /**
+     *
+     * @param fieldName id of the @Utilisateur to display login for.
+     * @return
+     */
+    public static String displayLibelleFromId(final String fieldName, final String fieldClass){
+        if ("RefPrestation".equals(fieldClass)) {
+            AbstractSIRSRepository<RefPrestation> typeRepo = Injector.getSession().getRepositoryForClass(RefPrestation.class);
+            final RefPrestation refPrestation = typeRepo.get(fieldName);
+            if (refPrestation == null) return "";
+            return refPrestation.getLibelle();
+        } else if ("TronconDigue".equals(fieldClass)) {
+            TronconDigueRepository tronconRepo = (TronconDigueRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(TronconDigue.class);
+            final TronconDigue tronconDigue = tronconRepo.get(fieldName);
+            if (tronconDigue == null) return "";
+            return tronconDigue.getLibelle();
+
+        }
+
+        return "";
+    }
+
+
 }
