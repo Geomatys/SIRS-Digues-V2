@@ -268,7 +268,11 @@ public class JRXMLUtil {
         fieldNames.forEach(fn -> {
             final Contact contact = contactRepo.get(fn);
             if (contact == null) return;
-            result.append(contact.getNom() + " " + contact.getPrenom() +"\n");
+            String name = contact.getNom();
+            String prenom = contact.getPrenom();
+            if (result.length() != 0) result.append("\n");
+            if (name != null) result.append(name + " ");
+            if (prenom != null) result.append(contact.getPrenom());
         });
         return result.toString();
     }

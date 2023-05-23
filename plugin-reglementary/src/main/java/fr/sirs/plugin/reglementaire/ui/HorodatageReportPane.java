@@ -282,27 +282,16 @@ public class HorodatageReportPane extends BorderPane {
     }
 
     /**
-     * Méthode de génération du rapport.
+     * Method to generate the Rapport de synthèse for the selected prestations.
      *
-     * @param event
      */
     @FXML
-    private void generateReport(ActionEvent event) {
-//        final ModeleRapport report = modelProperty.get();
+    private void generateReport() throws FileNotFoundException {
         final ObservableList<Prestation> prestations = uiPrestations.getSelectionModel().getSelectedItems();
         if (prestations.isEmpty()) return;
 
-//        final ModeleRapport report = new ModeleRapport();
-//        final AbstractSectionRapport section = new PrestationTableSectionRapport();
-//        section.setLibelle("Tableau de synthèse  prestation pour Registre horodaté");
-//
-//        prestations.forEach(p -> section.addChild(p));
-//        report.setSections(Arrays.asList(section));
-//
-//        if (report == null) return;
-//
         /*
-        A- détermination de l'emplacement du fichier de sortie
+        A- Selection of the output file destination folder.
         ======================================================*/
 
         final FileChooser chooser = new FileChooser();
@@ -317,84 +306,17 @@ public class HorodatageReportPane extends BorderPane {
         final Path output = file.toPath();
         setPreviousPath(output.getParent());
 
-//
-//
-//        /*
-//        B- détermination des paramètres de création de l'obligation réglementaire, le cas échéant
-//        =========================================================================================*/
-//
-//        final Preview sysEndi = uiSystemEndiguement.valueProperty().get();
-//        final String titre = uiTitre.getText();
-//
-//
-//
-//
-//        /*
-//        D- création de la tâche générale de création du rapport
-//        ======================================================*/
-//
-//        final Task task;
-//        task = new Task() {
-//
-//            @Override
-//            protected Object call() throws Exception {
-//                updateTitle("Création d'un rapport");
-//
-//
-//                /*
-//                1- détermination de la liste des éléments à inclure dans le rapport
-//                ------------------------------------------------------------------*/
-//
-//                // on liste tous les elements a générer
-//                updateMessage("Recherche des objets du rapport...");
-//                final ObservableList<Prestation> prestations = uiPrestations.getSelectionModel().getSelectedItems();
-//                if (prestations.isEmpty()) return false;
-//
-//
-//                /*
-//                2- génération du rapport
-//                -----------------------*/
-//
-//                final Task reportGenerator = ODTUtils.generateReport(report, prestations.isEmpty() ? null : prestations, output, titre);
-//                Platform.runLater(() -> {
-//                    reportGenerator.messageProperty().addListener((obs, oldValue, newValue) -> updateMessage(newValue));
-//                    reportGenerator.workDoneProperty().addListener((obs, oldValue, newValue) -> updateProgress(newValue.doubleValue(), reportGenerator.getTotalWork()));
-//                });
-//                reportGenerator.get();
-//
-//
-//                /*
-//                3- création de l'obligation réglementaire
-//                ----------------------------------------*/
-//
-//                updateProgress(-1, -1);
-//                return true;
-//            }
-//        };
-//
-//        uiProgress.visibleProperty().bind(task.runningProperty());
-//        uiProgress.progressProperty().bind(task.progressProperty());
-//        uiProgressLabel.visibleProperty().bind(task.runningProperty());
-//        uiProgressLabel.textProperty().bind(task.messageProperty());
-//        running.bind(task.runningProperty());
-//        disableProperty().bind(task.runningProperty());
-//
-//        task.setOnFailed((failEvent) -> {
-//            SIRS.LOGGER.log(Level.WARNING, "An error happened while creating a report.", task.getException());
-//            Platform.runLater(() -> GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du rapport.", task.getException()).show());
-//        });
-//
-//        task.setOnSucceeded((successEvent) -> Platform.runLater(() -> new Alert(Alert.AlertType.INFORMATION, "La génération du rapport s'est terminée avec succès", ButtonType.OK).show()));
-//
-//        TaskManager.INSTANCE.submit(task);
-
-//        String outputFile = "/home/estelle/Projects/SIRS-FranceDigues/test.pdf";
-
+        /*
+        A- Creation of the PDF from the jasper template.
+        ======================================================*/
         JRBeanCollectionDataSource beanColDataSource = new JRBeanCollectionDataSource(prestations);
         Map<String, Object> parameters = new HashMap();
-//        parameters.put("INFO", "Hello");
         parameters.put("CollectionBeanParam", beanColDataSource);
-        parameters.put("systemEndiguement", uiSystemEndiguement.getSelectionModel().getSelectedItem().getLibelle());
+        parameters.put("systemeEndiguement", uiSystemEndiguement.getSelectionModel().getSelectedItem().getLibelle());
+        if (uiPeriod.isSelected()) {
+            parameters.put("dateDebutPicker", uiPeriodeDebut.getValue());
+            parameters.put("dateFinPicker", uiPeriodeFin.getValue());
+        }
 
         try {
             InputStream input = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/prestation_A4.jrxml");
@@ -406,59 +328,10 @@ public class HorodatageReportPane extends BorderPane {
             JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
 
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            throw e;
         } catch (JRException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Error while creating the synthese prestation report from jrxm file", e);
         }
-
-//
-//        JasperReport report = null;
-//        JasperPrint jasperPrint = null;
-//        try (final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplatePrestation.jrxml")) {
-//            jasperPrint = JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
-//        } catch (
-//                JRException | IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//        JFrame frame = new JFrame("Report");
-//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        frame.getContentPane().add(new JRViewer(jasperPrint));
-//        frame.pack();
-//        frame.setVisible(true);
-
-//        final Task<Boolean> printing = new TaskManager.MockTask<>("Génération de fiches détaillées", () -> {
-//
-//            try {
-//                if (!prestations.isEmpty() && !Thread.currentThread().isInterrupted())
-//                    Injector.getSession().getPrintManager().printPrestations(prestations);
-//
-//                PrinterUtilities.canPrint.set(true);
-//                return !prestations.isEmpty();
-//
-//            } catch (OutOfMemoryError error) {
-//                SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to lack of memory", error);
-//                Platform.runLater(() -> {
-//                    final Alert alert = new Alert(Alert.AlertType.ERROR, MEMORY_ERROR_MSG, ButtonType.OK);
-//                    alert.show();
-//                });
-//                PrinterUtilities.canPrint.set(true);
-//                throw error;
-//            } catch (Exception e) {
-//                SirsCore.LOGGER.log(Level.WARNING, "Cannot print prestations due to error", e);
-//                if (!prestations.isEmpty())
-//                    PrinterUtilities.restoreMap(prestations.get(0));
-//                PrinterUtilities.canPrint.set(true);
-//                throw e;
-//            }
-//        });
-//        if (PrinterUtilities.canPrint.compareAndSet(true, false)) {
-////            taskProperty.set(printing);
-//            TaskManager.INSTANCE.submit(printing);
-//        } else {
-//            SirsCore.LOGGER.log(Level.WARNING, "Cannot print disorders due to other printing on going");
-//            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Une impression de fiche est en cours,\nveuillez réessayer quand elle sera terminée", ButtonType.OK);
-//            alert.showAndWait();
-//        }
     }
 
     /**
