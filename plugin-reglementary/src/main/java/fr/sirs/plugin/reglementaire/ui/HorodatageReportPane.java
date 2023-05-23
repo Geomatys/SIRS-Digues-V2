@@ -17,7 +17,6 @@ package fr.sirs.plugin.reglementaire.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
 import fr.sirs.util.DatePickerConverter;
@@ -27,8 +26,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -106,15 +103,8 @@ public class HorodatageReportPane extends BorderPane {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
 
-//        uiGenerate.disableProperty().bind(
-//                Bindings.or(running, modelProperty.isNull()));
+        uiTitre.setText("Tableau de synthèse prestation pour Registre horodaté");
         uiGenerate.disableProperty().bind(running);
-
-        // model edition
-//        final FXModeleRapportsPane rapportEditor = new FXModeleRapportsPane();
-//        modelProperty.bind(rapportEditor.selectedModelProperty());
-//        uiListPane.setCenter(rapportEditor);
-//        uiEditorPane.setCenter(rapportEditor.editor);
 
         // Filter parameters
         uiPeriod.selectedProperty().addListener((observable, oldValue, newValue) -> {
@@ -153,31 +143,25 @@ public class HorodatageReportPane extends BorderPane {
 
         uiSystemEndiguement.valueProperty().addListener(this::systemeEndiguementChange);
         uiPrestations.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-//        uiPrestations.getSelectionModel().getSelectedItems().addListener(this::tronconSelectionChange);
         final SirsStringConverter converter = new SirsStringConverter();
-        uiPrestations.setCellFactory(param -> {
-            return new ListCell() {
-                @Override
-                protected void updateItem(Object item, boolean empty) {
-                    super.updateItem(item, empty);
-                    String text = converter.toString(item);
-                    if (item != null) {
-                        String id = ((Prestation) item).getTypePrestationId();
-                        if (id != null) {
-                            RefPrestationRepository refPrestationRepo = Injector.getBean(RefPrestationRepository.class);
-                            text = text + " / " + refPrestationRepo.get(id).getLibelle();
-                        }
+        uiPrestations.setCellFactory(param -> new ListCell() {
+            @Override
+            protected void updateItem(Object item, boolean empty) {
+                super.updateItem(item, empty);
+                String text = converter.toString(item);
+                if (item != null) {
+                    String id = ((Prestation) item).getTypePrestationId();
+                    if (id != null) {
+                        RefPrestationRepository refPrestationRepo = Injector.getBean(RefPrestationRepository.class);
+                        text = text + " / " + refPrestationRepo.get(id).getLibelle();
                     }
-                    setText(text);
                 }
-            };
+                setText(text);
+            }
         });
 
         final Previews previewRepository = session.getPreviews();
         SIRS.initCombo(uiSystemEndiguement, SIRS.observableList(previewRepository.getByClass(SystemeEndiguement.class)).sorted(), null);
-
-        // Pour mettre a jour l'etat actif des boutons
-//        tronconSelectionChange(null);
     }
 
     private void forceResetListBySelectedSeAndApplyFilters() {
@@ -282,13 +266,28 @@ public class HorodatageReportPane extends BorderPane {
     }
 
     /**
+     * Method to select all the prestations available in the @uiPrestations.
+     *
+     */
+    @FXML
+    private void selectAll() {
+        uiPrestations.getSelectionModel().selectAll();
+    }
+
+    /**
      * Method to generate the Rapport de synthèse for the selected prestations.
      *
      */
     @FXML
     private void generateReport() throws FileNotFoundException {
-        final ObservableList<Prestation> prestations = uiPrestations.getSelectionModel().getSelectedItems();
+        List<Prestation> prestations = FXCollections.observableArrayList(uiPrestations.getSelectionModel().getSelectedItems());
         if (prestations.isEmpty()) return;
+
+        prestations.sort((p1, p2) -> {
+            LocalDate date1 = p1.getDate_debut();
+            LocalDate date2 = p2.getDate_debut();
+            return date1.compareTo(date2);
+        });
 
         /*
         A- Selection of the output file destination folder.
@@ -311,7 +310,8 @@ public class HorodatageReportPane extends BorderPane {
         ======================================================*/
         JRBeanCollectionDataSource beanColDataSource = new JRBeanCollectionDataSource(prestations);
         Map<String, Object> parameters = new HashMap();
-        parameters.put("CollectionBeanParam", beanColDataSource);
+        parameters.put("title", uiTitre.getText());
+        parameters.put("collectionBeanParam", beanColDataSource);
         parameters.put("systemeEndiguement", uiSystemEndiguement.getSelectionModel().getSelectedItem().getLibelle());
         if (uiPeriod.isSelected()) {
             parameters.put("dateDebutPicker", uiPeriodeDebut.getValue());

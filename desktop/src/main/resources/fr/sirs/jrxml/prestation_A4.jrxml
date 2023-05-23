@@ -84,7 +84,8 @@
 			<variableExpression><![CDATA[$F{date_fin}==null ? " - " :$F{date_fin}.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))]]></variableExpression>
 		</variable>
 	</subDataset>
-	<parameter name="CollectionBeanParam" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+	<parameter name="title" class="java.lang.String"/>
+	<parameter name="collectionBeanParam" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<parameter name="systemeEndiguement" class="java.lang.String"/>
 	<parameter name="dateDebutPicker" class="java.time.LocalDate"/>
 	<parameter name="dateFinPicker" class="java.time.LocalDate"/>
@@ -102,13 +103,13 @@
 	</background>
 	<title>
 		<band height="54" splitType="Stretch">
-			<staticText>
+			<textField>
 				<reportElement x="0" y="0" width="800" height="30" uuid="ef7f228e-3b4c-46b2-bcf8-20b45209b949"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="11" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Tableau de synthèse prestation pour Registre horodaté]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+			</textField>
 			<textField>
 				<reportElement x="351" y="30" width="100" height="20" uuid="1d48a41b-3861-4fb6-8175-248e4a1441ec"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none"/>
@@ -127,7 +128,7 @@
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
 					<datasetRun subDataset="prestationDataSet" uuid="20f2dd14-5608-4cd8-8edd-2ad113f9a0f5">
-						<dataSourceExpression><![CDATA[$P{CollectionBeanParam}]]></dataSourceExpression>
+						<dataSourceExpression><![CDATA[$P{collectionBeanParam}]]></dataSourceExpression>
 					</datasetRun>
 					<jr:column width="50" uuid="18c479e6-54f6-4006-a2db-ba6effb5ab6c">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne1"/>
