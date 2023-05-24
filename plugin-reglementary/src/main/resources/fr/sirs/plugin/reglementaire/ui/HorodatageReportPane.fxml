@@ -1,26 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root id="BorderPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="507.0" prefWidth="816.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root id="BorderPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="507.0" prefWidth="1502.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <center>
-        <VBox prefHeight="492.0" prefWidth="848.0">
+        <VBox prefHeight="487.0" prefWidth="1405.0">
             <children>
                 <Label text="Propriétés du document" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
                     <font>
                         <Font size="18.0" />
                     </font>
                 </Label>
-                <GridPane fx:id="uiGrid" hgap="10.0" maxHeight="1.7976931348623157E308" styleClass="gray-light" vgap="10.0" GridPane.rowIndex="2">
+                <GridPane fx:id="uiGrid" hgap="10.0" maxHeight="1.7976931348623157E308" prefHeight="428.0" prefWidth="853.0" styleClass="gray-light" vgap="10.0" GridPane.rowIndex="2">
                     <columnConstraints>
                         <ColumnConstraints hgrow="NEVER" maxWidth="201.0" minWidth="161.0" prefWidth="171.0" />
-                        <ColumnConstraints hgrow="NEVER" maxWidth="304.0" minWidth="143.0" prefWidth="264.0" />
-                        <ColumnConstraints halignment="CENTER" hgrow="NEVER" maxWidth="139.0" minWidth="0.0" prefWidth="37.0" />
-                        <ColumnConstraints hgrow="NEVER" maxWidth="362.0" minWidth="238.0" prefWidth="264.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="362.0" minWidth="100.0" prefWidth="250.0" />
+                        <ColumnConstraints halignment="CENTER" hgrow="NEVER" maxWidth="37.0" minWidth="37.0" prefWidth="37.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="362.0" minWidth="100.0" prefWidth="250.0" />
+                  <ColumnConstraints hgrow="NEVER" maxWidth="50.0" minWidth="50.0" prefWidth="50.0" />
+                  <ColumnConstraints hgrow="NEVER" maxWidth="362.0" minWidth="100.0" prefWidth="250.0" />
+                  <ColumnConstraints hgrow="NEVER" maxWidth="37.0" minWidth="37.0" prefWidth="37.0" />
+                  <ColumnConstraints hgrow="NEVER" maxWidth="362.0" minWidth="238.0" prefWidth="250.0" />
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints vgrow="NEVER" />
@@ -28,11 +33,15 @@
                         <RowConstraints vgrow="NEVER" />
                         <RowConstraints vgrow="NEVER" />
                         <RowConstraints maxHeight="1.7976931348623157E308" valignment="TOP" vgrow="NEVER" />
-                        <RowConstraints vgrow="NEVER" />
-                        <RowConstraints vgrow="NEVER" />
-                        <RowConstraints vgrow="NEVER" />
-                        <RowConstraints minHeight="10.0" vgrow="NEVER" />
-                        <RowConstraints minHeight="10.0" vgrow="NEVER" />
+                        <RowConstraints maxHeight="38.0" minHeight="18.0" prefHeight="18.0" vgrow="NEVER" />
+                        <RowConstraints maxHeight="38.0" minHeight="18.0" prefHeight="18.0" vgrow="NEVER" />
+                        <RowConstraints maxHeight="38.0" minHeight="18.0" prefHeight="18.0" vgrow="NEVER" />
+                  <RowConstraints maxHeight="38.0" minHeight="18.0" prefHeight="18.0" vgrow="NEVER" />
+                  <RowConstraints maxHeight="38.0" minHeight="18.0" prefHeight="18.0" vgrow="NEVER" />
+                  <RowConstraints maxHeight="20.0" minHeight="0.0" prefHeight="20.0" vgrow="NEVER" />
+                  <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" vgrow="NEVER" />
+                  <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" vgrow="NEVER" />
+                  <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" vgrow="NEVER" />
                     </rowConstraints>
                     <children>
                         <Label text="Titre du document :" GridPane.rowIndex="0" />
@@ -60,20 +69,46 @@
                         <ComboBox fx:id="uiSystemEndiguement" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
 
                         <Label text="Prestations :" GridPane.rowIndex="4" />
-                        <ListView fx:id="uiPrestations" maxWidth="1.7976931348623157E308" minHeight="100.0" prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4" />
-                        <Button fx:id="uiSelectAll" mnemonicParsing="false" onAction="#selectAll" styleClass="btn-single" text="Tout sélectionner" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="LEFT" GridPane.rowIndex="5" GridPane.rowSpan="2" GridPane.valignment="CENTER" />
-
-                        <Button fx:id="uiGenerate" mnemonicParsing="false" onAction="#generateReport" styleClass="btn-single" text="Générer" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="5" GridPane.rowSpan="2" GridPane.valignment="CENTER">
+                        <ListView fx:id="uiPrestations" maxWidth="1.7976931348623157E308" minHeight="250.0" prefHeight="250.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4" />
+                        <Button fx:id="uiSelectAllLeft" mnemonicParsing="false" onAction="#selectAllLeft" styleClass="btn-single" text="Tout sélectionner" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="5" GridPane.rowSpan="2" GridPane.valignment="CENTER">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <cursor>
+                        <Cursor fx:constant="E_RESIZE" />
+                     </cursor>
                      <GridPane.margin>
                         <Insets right="50.0" />
                      </GridPane.margin></Button>
-                        <ProgressBar fx:id="uiProgress" maxWidth="1.7976931348623157E308" visible="false" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER" />
 
-                        <Label fx:id="uiProgressLabel" alignment="CENTER" visible="false" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="6">
-                            <font>
-                                <Font name="System Italic" size="13.0" />
-                            </font>
-                        </Label>
+                        <ProgressBar fx:id="uiProgress" maxWidth="1.7976931348623157E308" visible="false" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER" />
+                  <ListView fx:id="uiSelectedPrestations" maxWidth="1.7976931348623157E308" minHeight="250.0" prefHeight="250.0" prefWidth="200.0" GridPane.columnIndex="5" GridPane.columnSpan="3" GridPane.rowIndex="4" />
+                  <Button fx:id="uiGenerate" mnemonicParsing="false" onAction="#generateReport" styleClass="btn-single" text="Générer" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="7" GridPane.rowSpan="2" GridPane.valignment="CENTER">
+                     <GridPane.margin>
+                        <Insets right="50.0" />
+                     </GridPane.margin>
+                  </Button>
+                  <Button fx:id="uiAddArrow" mnemonicParsing="false" onAction="#addPrestations" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                     <GridPane.margin>
+                        <Insets bottom="50.0" />
+                     </GridPane.margin>
+                  </Button>
+                  <Button fx:id="uiRemoveArrow" mnemonicParsing="false" onAction="#removePrestations" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                     <GridPane.margin>
+                        <Insets top="50.0" />
+                     </GridPane.margin>
+                  </Button>
+                  <Button fx:id="uiSelectAllRight" mnemonicParsing="false" onAction="#selectAllRight" styleClass="btn-single" text="Tout sélectionner" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="5" GridPane.rowSpan="2" GridPane.valignment="CENTER">
+                     <cursor>
+                        <Cursor fx:constant="E_RESIZE" />
+                     </cursor>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <GridPane.margin>
+                        <Insets right="50.0" />
+                     </GridPane.margin>
+                  </Button>
 
                     </children>
                     <GridPane.margin>

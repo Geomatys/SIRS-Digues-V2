@@ -28,6 +28,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
@@ -75,6 +76,8 @@ public class HorodatageReportPane extends BorderPane {
     @FXML
     private ListView<Prestation> uiPrestations;
     @FXML
+    private ListView<Prestation> uiSelectedPrestations;
+    @FXML
     private DatePicker uiPeriodeFin;
     @FXML
     private DatePicker uiPeriodeDebut;
@@ -85,6 +88,14 @@ public class HorodatageReportPane extends BorderPane {
     @FXML
     private Button uiGenerate;
     @FXML
+    private Button uiAdd;
+    @FXML
+    private Button uiRemove;
+    @FXML
+    private Button uiAddArrow;
+    @FXML
+    private Button uiRemoveArrow;
+    @FXML
     private ProgressBar uiProgress;
     @FXML
     private Label uiProgressLabel;
@@ -94,6 +105,8 @@ public class HorodatageReportPane extends BorderPane {
     private CheckBox uiHorodateFilter;
 
     private final BooleanProperty running = new SimpleBooleanProperty(false);
+
+    private Preview selectedSE;
 
     @Autowired
     private Session session;
@@ -141,38 +154,61 @@ public class HorodatageReportPane extends BorderPane {
             }
         });
 
-        uiSystemEndiguement.valueProperty().addListener(this::systemeEndiguementChange);
+        uiSystemEndiguement.valueProperty().addListener(this::updatePrestationsList);
         uiPrestations.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         final SirsStringConverter converter = new SirsStringConverter();
         uiPrestations.setCellFactory(param -> new ListCell() {
             @Override
             protected void updateItem(Object item, boolean empty) {
                 super.updateItem(item, empty);
-                String text = converter.toString(item);
-                if (item != null) {
-                    String id = ((Prestation) item).getTypePrestationId();
-                    if (id != null) {
-                        RefPrestationRepository refPrestationRepo = Injector.getBean(RefPrestationRepository.class);
-                        text = text + " / " + refPrestationRepo.get(id).getLibelle();
-                    }
-                }
-                setText(text);
+                setText(getPrestationTextToDisplay(item, converter));
             }
         });
 
+        uiSelectedPrestations.setCellFactory(param -> new ListCell() {
+            @Override
+            protected void updateItem(Object item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(getPrestationTextToDisplay(item, converter));
+            }
+        });
+
+        uiSelectedPrestations.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
         final Previews previewRepository = session.getPreviews();
         SIRS.initCombo(uiSystemEndiguement, SIRS.observableList(previewRepository.getByClass(SystemeEndiguement.class)).sorted(), null);
+
+        // Add arrow buttons to add and remove prestations between the two @ViewList
+        uiAddArrow.setGraphic(new ImageView(SIRS.ICON_ARROW_RIGHT_BLACK));
+        uiAddArrow.setTooltip(new Tooltip("Ajouter les éléments sélectionnés"));
+        uiRemoveArrow.setGraphic(new ImageView(SIRS.ICON_ARROW_LEFT_BLACK));
+        uiRemoveArrow.setTooltip(new Tooltip("Retirer les éléments sélectionnés"));
+
+    }
+
+    private String getPrestationTextToDisplay(Object item, SirsStringConverter converter) {
+        String text = converter.toString(item);
+        if (item != null) {
+            String id = ((Prestation) item).getTypePrestationId();
+            if (id != null) {
+                RefPrestationRepository refPrestationRepo = Injector.getBean(RefPrestationRepository.class);
+                text = text + " / " + refPrestationRepo.get(id).getLibelle();
+            }
+        }
+        return text;
     }
 
     private void forceResetListBySelectedSeAndApplyFilters() {
         uiPrestations.setItems(FXCollections.observableArrayList(getAllPrestationsInSeRegistreAndApplyFilters(uiSystemEndiguement.getValue())));
     }
 
-    private void systemeEndiguementChange(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) {
+    private void updatePrestationsList(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) {
         if (newValue == null) {
             uiPrestations.setItems(FXCollections.emptyObservableList());
         } else {
+            this.selectedSE = newValue;
             final List<Prestation> prestations = getAllPrestationsInSeRegistreAndApplyFilters(newValue);
+            prestations.removeAll(uiSelectedPrestations.getItems());
 
             uiPrestations.setItems(FXCollections.observableArrayList(prestations));
 
@@ -270,8 +306,40 @@ public class HorodatageReportPane extends BorderPane {
      *
      */
     @FXML
-    private void selectAll() {
+    private void selectAllLeft() {
         uiPrestations.getSelectionModel().selectAll();
+    }
+
+    /**
+     * Method to select all the prestations available in the @uiSelectedPrestations.
+     *
+     */
+    @FXML
+    private void selectAllRight() {
+        uiSelectedPrestations.getSelectionModel().selectAll();
+    }
+
+    /**
+     * Method to add all the selected prestations to the right @{@link ListView}.
+     *
+     */
+    @FXML
+    private void addPrestations() {
+        ObservableList<Prestation> prestations = uiPrestations.getSelectionModel().getSelectedItems();
+        uiSelectedPrestations.getItems().addAll(prestations);
+        uiPrestations.getItems().removeAll(prestations);
+
+    }
+
+    /**
+     * Method to remove all the selected prestations from the right @{@link ListView}.
+     *
+     */
+    @FXML
+    private void removePrestations() {
+        ObservableList<Prestation> prestations = uiSelectedPrestations.getSelectionModel().getSelectedItems();
+        uiSelectedPrestations.getItems().removeAll(prestations);
+        updatePrestationsList(null, null, this.selectedSE);
     }
 
     /**
@@ -284,8 +352,10 @@ public class HorodatageReportPane extends BorderPane {
         if (prestations.isEmpty()) return;
 
         prestations.sort((p1, p2) -> {
-            LocalDate date1 = p1.getDate_debut();
-            LocalDate date2 = p2.getDate_debut();
+            LocalDate dateFin1 = p1.getDate_fin();
+            LocalDate dateFin2 = p2.getDate_fin();
+            LocalDate date1 = dateFin1 != null ? dateFin1 : p1.getDate_debut();
+            LocalDate date2 = dateFin2 != null ?  dateFin2 : p2.getDate_debut();
             return date1.compareTo(date2);
         });
 
@@ -312,7 +382,8 @@ public class HorodatageReportPane extends BorderPane {
         Map<String, Object> parameters = new HashMap();
         parameters.put("title", uiTitre.getText());
         parameters.put("collectionBeanParam", beanColDataSource);
-        parameters.put("systemeEndiguement", uiSystemEndiguement.getSelectionModel().getSelectedItem().getLibelle());
+        // TODO update in case prestations from different SEs can be selected
+        parameters.put("systemeEndiguement", this.selectedSE.getLibelle());
         if (uiPeriod.isSelected()) {
             parameters.put("dateDebutPicker", uiPeriodeDebut.getValue());
             parameters.put("dateFinPicker", uiPeriodeFin.getValue());
@@ -326,6 +397,14 @@ public class HorodatageReportPane extends BorderPane {
 
             OutputStream outputStream = new FileOutputStream(output.toFile());
             JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+            SIRS.openFile(output);
+
+            PrestationRepository repo = Injector.getBean(PrestationRepository.class);
+            prestations.forEach(p -> {
+                p.setHorodatageStatusId("RefHorodatageStatus:2");
+                repo.update(p);
+            });
+            updatePrestationsList(null, null, this.selectedSE);
 
         } catch (FileNotFoundException e) {
             throw e;
