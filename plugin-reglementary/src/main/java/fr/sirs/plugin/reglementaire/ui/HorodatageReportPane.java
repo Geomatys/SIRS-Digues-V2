@@ -26,6 +26,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -107,6 +108,8 @@ public class HorodatageReportPane extends BorderPane {
     private final BooleanProperty running = new SimpleBooleanProperty(false);
 
     private Preview selectedSE;
+
+    private Map<Prestation, Preview> prestationsToPrintWithSE = new HashMap<>();
 
     @Autowired
     private Session session;
@@ -328,7 +331,13 @@ public class HorodatageReportPane extends BorderPane {
         ObservableList<Prestation> prestations = uiPrestations.getSelectionModel().getSelectedItems();
         uiSelectedPrestations.getItems().addAll(prestations);
         uiPrestations.getItems().removeAll(prestations);
-
+        prestations.forEach(prestation -> this.prestationsToPrintWithSE.put(prestation, this.selectedSE));
+//        List<Prestation> sePrestations = this.prestationsToPrintBySE.get(selectedSE);
+//        if (sePrestations == null) {
+//            sePrestations = new ArrayList<>();
+//        }
+//        sePrestations.addAll(prestations);
+//        this.prestationsToPrintBySE.put(selectedSE, sePrestations);
     }
 
     /**
@@ -340,6 +349,10 @@ public class HorodatageReportPane extends BorderPane {
         ObservableList<Prestation> prestations = uiSelectedPrestations.getSelectionModel().getSelectedItems();
         uiSelectedPrestations.getItems().removeAll(prestations);
         updatePrestationsList(null, null, this.selectedSE);
+        prestations.forEach(prestation -> {
+            // TODO find corresponding key and remove prestation from its list
+            this.prestationsToPrintWithSE.remove(prestation);
+        });
     }
 
     /**
@@ -347,16 +360,20 @@ public class HorodatageReportPane extends BorderPane {
      *
      */
     @FXML
-    private void generateReport() throws FileNotFoundException {
-        List<Prestation> prestations = FXCollections.observableArrayList(uiPrestations.getSelectionModel().getSelectedItems());
-        if (prestations.isEmpty()) return;
+    private void generateReport() throws IOException {
+//        List<Prestation> prestations = FXCollections.observableArrayList(uiSelectedPrestations.getItems());
+        Map<Preview, List<Prestation>> prestationsToPrintBySE = new HashMap<>();
 
-        prestations.sort((p1, p2) -> {
-            LocalDate dateFin1 = p1.getDate_fin();
-            LocalDate dateFin2 = p2.getDate_fin();
-            LocalDate date1 = dateFin1 != null ? dateFin1 : p1.getDate_debut();
-            LocalDate date2 = dateFin2 != null ?  dateFin2 : p2.getDate_debut();
-            return date1.compareTo(date2);
+        if (this.prestationsToPrintWithSE.isEmpty()) return;
+
+        // sort prestations by SE
+        this.prestationsToPrintWithSE.forEach((prestation, se) -> {
+            List<Prestation> sePrestations = prestationsToPrintBySE.get(se);
+        if (sePrestations == null) {
+            sePrestations = new ArrayList<>();
+        }
+        sePrestations.add(prestation);
+            prestationsToPrintBySE.put(se, sePrestations);
         });
 
         /*
@@ -375,42 +392,63 @@ public class HorodatageReportPane extends BorderPane {
         final Path output = file.toPath();
         setPreviousPath(output.getParent());
 
-        /*
-        A- Creation of the PDF from the jasper template.
-        ======================================================*/
-        JRBeanCollectionDataSource beanColDataSource = new JRBeanCollectionDataSource(prestations);
-        Map<String, Object> parameters = new HashMap();
-        parameters.put("title", uiTitre.getText());
-        parameters.put("collectionBeanParam", beanColDataSource);
-        // TODO update in case prestations from different SEs can be selected
-        parameters.put("systemeEndiguement", this.selectedSE.getLibelle());
-        if (uiPeriod.isSelected()) {
-            parameters.put("dateDebutPicker", uiPeriodeDebut.getValue());
-            parameters.put("dateFinPicker", uiPeriodeFin.getValue());
-        }
 
-        try {
-            InputStream input = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/prestation_A4.jrxml");
-            JasperDesign jasperDesign = JRXmlLoader.load(input);
-            JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+        prestationsToPrintBySE.forEach((se, prestations) -> {
 
-            OutputStream outputStream = new FileOutputStream(output.toFile());
-            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
-            SIRS.openFile(output);
-
-            PrestationRepository repo = Injector.getBean(PrestationRepository.class);
-            prestations.forEach(p -> {
-                p.setHorodatageStatusId("RefHorodatageStatus:2");
-                repo.update(p);
+            // sort prestations by date_fin if available, by date_debut otherwise.
+            prestations.sort((p1, p2) -> {
+                LocalDate dateFin1 = p1.getDate_fin();
+                LocalDate dateFin2 = p2.getDate_fin();
+                LocalDate date1 = dateFin1 != null ? dateFin1 : p1.getDate_debut();
+                LocalDate date2 = dateFin2 != null ? dateFin2 : p2.getDate_debut();
+                return date1.compareTo(date2);
             });
-            updatePrestationsList(null, null, this.selectedSE);
 
-        } catch (FileNotFoundException e) {
-            throw e;
-        } catch (JRException e) {
-            throw new IllegalStateException("Error while creating the synthese prestation report from jrxm file", e);
-        }
+
+            /*
+            B- Creation of the PDF from the jasper template.
+            ======================================================*/
+            JRBeanCollectionDataSource beanColDataSource = new JRBeanCollectionDataSource(prestations);
+            Map<String, Object> parameters = new HashMap();
+            parameters.put("title", uiTitre.getText());
+            parameters.put("collectionBeanParam", beanColDataSource);
+            // TODO update in case prestations from different SEs can be selected
+            parameters.put("systemeEndiguement", se.getLibelle());
+            if (uiPeriod.isSelected()) {
+                parameters.put("dateDebutPicker", uiPeriodeDebut.getValue());
+                parameters.put("dateFinPicker", uiPeriodeFin.getValue());
+            }
+
+            try {
+                InputStream input = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/prestation_A4.jrxml");
+                JasperDesign jasperDesign = JRXmlLoader.load(input);
+                JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
+                JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+
+                OutputStream outputStream = new FileOutputStream(output.toFile());
+                JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+                SIRS.openFile(output);
+
+                PrestationRepository repo = Injector.getBean(PrestationRepository.class);
+                prestations.forEach(p -> {
+                    p.setHorodatageStatusId("RefHorodatageStatus:2");
+                    repo.update(p);
+                });
+                updatePrestationsList(null, null, this.selectedSE);
+
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (JRException e) {
+                throw new IllegalStateException("Error while creating the synthese prestation report from jrxm file", e);
+            }
+        });
+
+//        PdfReader reader = new PdfReader(output.toString());
+//        HashMap<String, String> info = reader.getInfo();
+//        char info1=reader.getPdfVersion();
+//        byte[] b1 = reader.getMetadata();
+//        System.out.println(info);
+//        System.out.println(info1);
     }
 
     /**
