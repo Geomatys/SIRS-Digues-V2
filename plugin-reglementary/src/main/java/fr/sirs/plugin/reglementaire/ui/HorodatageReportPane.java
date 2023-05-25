@@ -19,32 +19,25 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
-import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.util.DatePickerConverter;
+import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
-import fr.sirs.util.StreamingIterable;
-import fr.sirs.util.odt.ODTUtils;
-import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.apache.sis.measure.NumberRange;
-import org.ektorp.DocumentNotFoundException;
-import org.geotoolkit.gui.javafx.util.TaskManager;
-import org.geotoolkit.internal.GeotkFX;
-import org.geotoolkit.util.collection.CloseableIterator;
+import org.apache.sis.util.ArgumentChecks;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.File;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -55,22 +48,21 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 
-import static fr.sirs.SIRS.*;
-
 /**
- * Display print configuration for horodatage purpose : synthese boards report.
+ * Display print configuration and generate report for horodatage purpose : prestation synthese table report.
+ *
+ * <ul>
+ * <li> Allow to select the file destination folder.</li>
+ * <li> Modify the title inside the document.</li>
+ * <li> "Periode" checkbox allows to filter the prestations by date.</li>
+ * <li> Input dates are used inside the report to add a note for the time period.
+ *      User can set the dates even though the checkbox is unselected (client's request).</li>
+ * <li> Button to select "non horodatée" prestations in one click.</li>
+ * </ul>
  *
  * @author Estelle Idee (Geomatys)
  */
 public class HorodatageReportPane extends BorderPane {
-
-    // TODO : check ignored fields
-    public static final String[] COLUMNS_TO_IGNORE = new String[]{
-            AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD,
-            LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD,
-            DATE_MAJ_FIELD, COMMENTAIRE_FIELD,
-            "prDebut", "prFin", "valid", "positionDebut", "positionFin", "epaisseur"};
-
     @FXML
     private ComboBox<Preview> uiSystemEndiguement;
     @FXML
@@ -82,19 +74,14 @@ public class HorodatageReportPane extends BorderPane {
     @FXML
     private TextField uiTitre;
     @FXML
-    private GridPane uiGrid;
+    private Button uiSelectNonTimeStamped;
     @FXML
     private Button uiGenerate;
     @FXML
-    private ProgressBar uiProgress;
-    @FXML
-    private Label uiProgressLabel;
-    @FXML
     private CheckBox uiPeriod;
-    @FXML
-    private CheckBox uiHorodateFilter;
 
-    private final BooleanProperty running = new SimpleBooleanProperty(false);
+    private Preview selectedSE;
+    private List<Prestation> allPrestationsOnSE;
 
     @Autowired
     private Session session;
@@ -104,18 +91,11 @@ public class HorodatageReportPane extends BorderPane {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
 
-//        uiGenerate.disableProperty().bind(
-//                Bindings.or(running, modelProperty.isNull()));
-        uiGenerate.disableProperty().bind(running);
+        uiTitre.setText("Tableau de synthèse prestation pour Registre horodaté");
 
-        // model edition
-//        final FXModeleRapportsPane rapportEditor = new FXModeleRapportsPane();
-//        modelProperty.bind(rapportEditor.selectedModelProperty());
-//        uiListPane.setCenter(rapportEditor);
-//        uiEditorPane.setCenter(rapportEditor.editor);
-
-        // Filter parameters
+        // Date filter checkbox
         uiPeriod.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
             if (newValue) {
                 final LocalDate date = LocalDate.now();
                 if (uiPeriodeDebut.getValue() == null) {
@@ -124,139 +104,150 @@ public class HorodatageReportPane extends BorderPane {
                 if (uiPeriodeFin.getValue() == null) {
                     uiPeriodeFin.setValue(date);
                 }
-                // Keeps the prestations with dates inside the period range
-                uiPrestations.setItems(FXCollections.observableArrayList(filterPrestationsByDate(uiPrestations.getItems())));
-            } else {
-                forceResetListBySelectedSeAndApplyFilters();
             }
+            updateListBySelectedSeAndApplyDateFilter();
         });
 
-        uiPeriodeDebut.disableProperty().bind(uiPeriod.selectedProperty().not());
-        uiPeriodeDebut.editableProperty().bind(uiPeriod.selectedProperty());
-        uiPeriodeFin.disableProperty().bind(uiPeriod.selectedProperty().not());
-        uiPeriodeFin.editableProperty().bind(uiPeriod.selectedProperty());
         DatePickerConverter.register(uiPeriodeDebut);
         DatePickerConverter.register(uiPeriodeFin);
-        uiPeriodeDebut.valueProperty().addListener((observable, oldValue, newValue) -> forceResetListBySelectedSeAndApplyFilters());
-        uiPeriodeFin.valueProperty().addListener((observable, oldValue, newValue) -> forceResetListBySelectedSeAndApplyFilters());
-
-        uiHorodateFilter.setSelected(true);
-        uiHorodateFilter.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                uiPrestations.setItems(FXCollections.observableArrayList(filterPrestationsByNonHorodated(uiPrestations.getItems())));
-            } else {
-                forceResetListBySelectedSeAndApplyFilters();
-            }
+        uiPeriodeDebut.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (uiPeriod.isSelected()) updateListBySelectedSeAndApplyDateFilter();
+        });
+        uiPeriodeFin.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (uiPeriod.isSelected()) updateListBySelectedSeAndApplyDateFilter();
         });
 
-        uiSystemEndiguement.valueProperty().addListener(this::systemeEndiguementChange);
+        uiSystemEndiguement.valueProperty().addListener(this::updatePrestationsList);
         uiPrestations.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-//        uiPrestations.getSelectionModel().getSelectedItems().addListener(this::tronconSelectionChange);
         final SirsStringConverter converter = new SirsStringConverter();
-        uiPrestations.setCellFactory(param -> {
-            return new ListCell() {
-                @Override
-                protected void updateItem(Object item, boolean empty) {
-                    super.updateItem(item, empty);
-                    String text = converter.toString(item);
-                    if (item != null) {
-                        String id = ((Prestation) item).getTypePrestationId();
-                        if (id != null) {
-                            RefPrestationRepository refPrestationRepo = Injector.getBean(RefPrestationRepository.class);
-                            text = text + " / " + refPrestationRepo.get(id).getLibelle();
-                        }
+        uiPrestations.setCellFactory(param -> new ListCell() {
+            @Override
+            protected void updateItem(Object item, boolean empty) {
+                super.updateItem(item, empty);
+                String text = converter.toString(item);
+                if (item != null) {
+                    String id = ((Prestation) item).getTypePrestationId();
+                    if (id != null) {
+                        RefPrestationRepository refPrestationRepo = Injector.getBean(RefPrestationRepository.class);
+                        text = text + " / " + refPrestationRepo.get(id).getLibelle();
                     }
-                    setText(text);
                 }
-            };
+                setText(text);
+            }
         });
 
         final Previews previewRepository = session.getPreviews();
         SIRS.initCombo(uiSystemEndiguement, SIRS.observableList(previewRepository.getByClass(SystemeEndiguement.class)).sorted(), null);
 
-        // Pour mettre a jour l'etat actif des boutons
-//        tronconSelectionChange(null);
+        uiSelectNonTimeStamped.setTooltip(new Tooltip("Sélectionne toutes les prestations avec le status \"non horodatée\" de la liste."));
     }
 
-    private void forceResetListBySelectedSeAndApplyFilters() {
-        uiPrestations.setItems(FXCollections.observableArrayList(getAllPrestationsInSeRegistreAndApplyFilters(uiSystemEndiguement.getValue())));
+    /**
+     * Method to update the list of available prestations for the selected Systeme Endiguement
+     * and keeping the previously selected prestations if still available
+     */
+    private void updateListBySelectedSeAndApplyDateFilter() {
+        List<Prestation> selectedPresta = new ArrayList<>(uiPrestations.getSelectionModel().getSelectedItems());
+        updatePrestationsList(null, null, this.selectedSE);
+
+        final ObservableList<Prestation> items = uiPrestations.getItems();
+
+        if (items == null || items.isEmpty()) return;
+
+        uiPrestations.getSelectionModel().clearSelection();
+        // Keeps previous selection
+        selectedPresta.forEach(presta -> uiPrestations.getSelectionModel().select(presta));
     }
 
-    private void systemeEndiguementChange(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) {
+    /**
+     * Method to update the list of available prestations for the selected Systeme Endiguement
+     * and apply date filter if the checkbox has been selected.
+     */
+    private void updatePrestationsList(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) {
         if (newValue == null) {
             uiPrestations.setItems(FXCollections.emptyObservableList());
         } else {
-            final List<Prestation> prestations = getAllPrestationsInSeRegistreAndApplyFilters(newValue);
+            if (!newValue.equals(this.selectedSE)) {
+                this.selectedSE = newValue;
+                this.allPrestationsOnSE = getAllPrestationsOnSelectedSE();
+            }
 
+            if (this.allPrestationsOnSE == null || this.allPrestationsOnSE.isEmpty()) {
+                uiPrestations.setItems(FXCollections.emptyObservableList());
+            };
+
+            // copy the list to filter it without modifying the original one.
+            List<Prestation> prestations = new ArrayList<>(this.allPrestationsOnSE);
+            /*
+             * Apply date filter
+             */
+            if (uiPeriod.isSelected()) {
+                filterPrestationsByDate(prestations);
+            }
             uiPrestations.setItems(FXCollections.observableArrayList(prestations));
-
         }
     }
 
-    private List<Prestation> getAllPrestationsInSeRegistreAndApplyFilters(Preview sePreview) {
-        if (sePreview == null) return new ArrayList<>();
-        final SystemeEndiguementRepository sdRepo = (SystemeEndiguementRepository) session.getRepositoryForClass(SystemeEndiguement.class);
-        final DigueRepository digueRepo = (DigueRepository) session.getRepositoryForClass(Digue.class);
-        final TronconDigueRepository tronconRepo = Injector.getBean(TronconDigueRepository.class);
-        final PrestationRepository prestationRepo = Injector.getBean(PrestationRepository.class);
+    /**
+     * Method to get all the prestations on the selected @{@link SystemeEndiguement} from the @{@link Preview}
+     *
+     * @return the list of all the prestations on @this.selectedSE
+     */
+    private List<Prestation> getAllPrestationsOnSelectedSE() {
+        if (this.selectedSE == null) return new ArrayList<>();
+        final SystemeEndiguementRepository sdRepo   = (SystemeEndiguementRepository) session.getRepositoryForClass(SystemeEndiguement.class);
+        final DigueRepository digueRepo             = (DigueRepository) session.getRepositoryForClass(Digue.class);
+        final TronconDigueRepository tronconRepo    = Injector.getBean(TronconDigueRepository.class);
+        final PrestationRepository prestationRepo   = Injector.getBean(PrestationRepository.class);
 
-        final SystemeEndiguement se = sdRepo.get(sePreview.getElementId());
-        final Set<TronconDigue> troncons = new HashSet<>();
-        final List<Digue> digues = digueRepo.getBySystemeEndiguement(se);
+        final List<Prestation> prestations          = new ArrayList<>();
+
+        SystemeEndiguement se = null;
+        try {
+            se = sdRepo.get(this.selectedSE.getElementId());
+        } catch (RuntimeException re) {
+            SIRS.LOGGER.log(Level.WARNING, "Erreur lors de la récupération du Systeme d'endiguement avec l'id {0}", this.selectedSE.getElementId());
+        }
+        if (se == null) return prestations;
+
+        final Set<TronconDigue> troncons    = new HashSet<>();
+        final List<Digue> digues            = digueRepo.getBySystemeEndiguement(se);
+        if (digues.isEmpty()) return prestations;
+
         for (Digue digue : digues) {
             troncons.addAll(tronconRepo.getByDigue(digue));
         }
-        final List<Prestation> prestations = new ArrayList<>();
+        if (troncons.isEmpty()) return prestations;
+
         for (TronconDigue troncon : troncons) {
             List<Prestation> presta = prestationRepo.getByLinear(troncon);
             presta.forEach(p -> {
                 if (p.getRegistreAttribution())
                     prestations.add(p);
             });
-
-        }
-
-        /*
-         * Apply filter to keep only the non horodated prestations
-         */
-        if (uiHorodateFilter.isSelected()) {
-            filterPrestationsByNonHorodated(prestations);
-        }
-
-        /*
-         * Apply date filter
-         */
-        if (uiPeriod.isSelected()) {
-            filterPrestationsByDate(prestations);
         }
 
         return prestations;
     }
 
-    private List<Prestation> filterPrestationsByNonHorodated(List<Prestation> prestations) {
-        List<Prestation> prestationsToRemove = new ArrayList<>();
-        prestations.forEach(prestation -> {
-            String horodatageStatusId = prestation.getHorodatageStatusId();
-            // Remove all prestations with a status null or different from "Non horodaté"
-            if (horodatageStatusId == null || !"RefHorodatageStatus:1".equals(horodatageStatusId)) {
-                prestationsToRemove.add(prestation);
-            }
-        });
-        prestations.removeAll(prestationsToRemove);
-        return prestations;
-    }
-
+    /**
+     * Filter the list of the prestations according to the date pickers.
+     *
+     * @param prestations the list of the prestations to filter.
+     * @return the list of the prestations after date filtering.
+     */
     private List<Prestation> filterPrestationsByDate(List<Prestation> prestations) {
-        if (!uiPeriod.isSelected()) return prestations;
+        ArgumentChecks.ensureNonNull("prestations", prestations);
+        if (prestations.isEmpty() || !uiPeriod.isSelected()) return prestations;
 
-        final LocalDate periodeDebut = uiPeriodeDebut.getValue();
-        final LocalDate periodeFin = uiPeriodeFin.getValue();
+        final LocalDate periodeDebut    = uiPeriodeDebut.getValue();
+        final LocalDate periodeFin      = uiPeriodeFin.getValue();
         final NumberRange dateRange;
         if (periodeDebut == null && periodeFin == null) {
             dateRange = null;
         } else {
-            final long dateDebut = periodeDebut == null ? 0 : periodeDebut.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
-            final long dateFin = periodeFin == null ? Long.MAX_VALUE : periodeFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
+            final long dateDebut    = periodeDebut == null ? 0 : periodeDebut.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
+            final long dateFin      = periodeFin == null ? Long.MAX_VALUE : periodeFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
             dateRange = NumberRange.create(dateDebut, true, dateFin, true);
         }
 
@@ -264,10 +255,10 @@ public class HorodatageReportPane extends BorderPane {
             List<Prestation> prestationsToRemove = new ArrayList<>();
             for (Prestation presta : prestations) {
                 //on vérifie la date
-                final LocalDate objDateDebut = presta.getDate_debut();
-                final LocalDate objDateFin = presta.getDate_fin();
-                final long debut = objDateDebut == null ? 0 : objDateDebut.atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
-                final long fin = objDateFin == null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
+                final LocalDate objDateDebut    = presta.getDate_debut();
+                final LocalDate objDateFin      = presta.getDate_fin();
+                final long debut    = objDateDebut == null ? 0 : objDateDebut.atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
+                final long fin      = objDateFin == null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
                 final NumberRange objDateRange = NumberRange.create(debut, true, fin, true);
                 if (!dateRange.intersectsAny(objDateRange)) {
                     prestationsToRemove.add(presta);
@@ -280,25 +271,62 @@ public class HorodatageReportPane extends BorderPane {
     }
 
     /**
-     * Méthode de génération du rapport.
+     * Method to select all the prestations available in the @uiPrestations.
      *
-     * @param event
      */
     @FXML
-    private void generateReport(ActionEvent event) {
-//        final ModeleRapport report = modelProperty.get();
-        final ModeleRapport report = null;
-        if (report == null) return;
+    private void selectAll() {
+        uiPrestations.getSelectionModel().selectAll();
+    }
+
+    /**
+     * Method to select all "non horodatée" prestations available in the @uiPrestations.
+     *
+     */
+    @FXML
+    private void selectNonTimeStamped() {
+        List<Prestation> prestations = uiPrestations.getItems();
+        if (prestations.isEmpty()) return;
+        List<Prestation> nonTimeStampedPrestations = new ArrayList<>();
+        prestations.forEach(prestation -> {
+            String horodatageStatusId = prestation.getHorodatageStatusId();
+            // Keeps all prestations with a status "Non horodaté"
+            if ("RefHorodatageStatus:1".equals(horodatageStatusId)) {
+                nonTimeStampedPrestations.add(prestation);
+            }
+        });
+        nonTimeStampedPrestations.forEach(presta -> uiPrestations.getSelectionModel().select(presta));
+    }
+
+
+    /**
+     * Method to generate the Rapport de synthèse for the selected prestations.
+     *
+     */
+    @FXML
+    private void generateReport() throws FileNotFoundException {
+        List<Prestation> prestations = FXCollections.observableArrayList(uiPrestations.getSelectionModel().getSelectedItems());
+        if (prestations.isEmpty()) return;
+
+        // sort prestations by date_fin if available, by date_debut otherwise.
+        prestations.sort((p1, p2) -> {
+            LocalDate dateFin1  = p1.getDate_fin();
+            LocalDate dateFin2  = p2.getDate_fin();
+            LocalDate date1     = dateFin1 != null ? dateFin1 : p1.getDate_debut();
+            LocalDate date2     = dateFin2 != null ? dateFin2 : p2.getDate_debut();
+            return date1.compareTo(date2);
+        });
+
 
         /*
-        A- détermination de l'emplacement du fichier de sortie
+        A- Selection of the output file destination folder.
         ======================================================*/
 
-        final FileChooser chooser = new FileChooser();
-        final Path previous = getPreviousPath();
+        final FileChooser chooser   = new FileChooser();
+        final Path previous         = getPreviousPath();
         if (previous != null) {
             chooser.setInitialDirectory(previous.toFile());
-            chooser.setInitialFileName(".odt");
+            chooser.setInitialFileName(".pdf");
         }
         final File file = chooser.showSaveDialog(null);
         if (file == null) return;
@@ -306,103 +334,41 @@ public class HorodatageReportPane extends BorderPane {
         final Path output = file.toPath();
         setPreviousPath(output.getParent());
 
-
-
         /*
-        B- détermination des paramètres de création de l'obligation réglementaire, le cas échéant
-        =========================================================================================*/
-
-        final Preview sysEndi = uiSystemEndiguement.valueProperty().get();
-        final String titre = uiTitre.getText();
-
-
-
-
-        /*
-        D- création de la tâche générale de création du rapport
+        A- Creation of the PDF from the jasper template.
         ======================================================*/
+        JRBeanCollectionDataSource beanColDataSource    = new JRBeanCollectionDataSource(prestations);
+        Map<String, Object> parameters                  = new HashMap();
 
-        final Task task;
-        task = new Task() {
+        // set report parameters
+        parameters.put("title", uiTitre.getText());
+        parameters.put("collectionBeanParam", beanColDataSource);
+        parameters.put("systemeEndiguement", this.selectedSE.getLibelle());
+        parameters.put("dateDebutPicker", uiPeriodeDebut.getValue());
+        parameters.put("dateFinPicker", uiPeriodeFin.getValue());
 
-            @Override
-            protected Object call() throws Exception {
-                updateTitle("Création d'un rapport");
+        try {
+            InputStream input           = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplatePrestationSyntheseTable.jrxml");
+            JasperDesign jasperDesign   = JRXmlLoader.load(input);
+            JasperReport jasperReport   = JasperCompileManager.compileReport(jasperDesign);
+            JasperPrint jasperPrint     = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+            OutputStream outputStream   = new FileOutputStream(output.toFile());
 
+            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+            SIRS.openFile(output);
 
-                /*
-                1- détermination de la liste des éléments à inclure dans le rapport
-                ------------------------------------------------------------------*/
+            // Change prestations' horodatage status to "En attente".
+            PrestationRepository repo   = Injector.getBean(PrestationRepository.class);
+            prestations.forEach(p -> {
+                p.setHorodatageStatusId("RefHorodatageStatus:2");
+                repo.update(p);
+            });
 
-                // on liste tous les elements a générer
-                updateMessage("Recherche des objets du rapport...");
-                final ObservableList<Prestation> prestations = uiPrestations.getSelectionModel().getSelectedItems();
-                final Collection<AbstractPositionableRepository<Objet>> repos = (Collection) session.getRepositoriesForClass(Objet.class);
-                final ArrayList<Objet> elements = new ArrayList<>();
-                for (Prestation prestation : prestations) {
-                    if (prestation == null)
-                        continue;
-
-                    for (final AbstractPositionableRepository<Objet> repo : repos) {
-                        StreamingIterable<Objet> tmpElements = repo.getByLinearIdStreaming(prestation.getId());
-                        try (final CloseableIterator<Objet> it = tmpElements.iterator()) {
-                            while (it.hasNext()) {
-                                Objet next = it.next();
-//                                if (dateRange != null) {
-//                                    //on vérifie la date
-//                                    final LocalDate objDateDebut = next.getDate_debut();
-//                                    final LocalDate objDateFin = next.getDate_fin();
-//                                    final long debut = objDateDebut == null ? 0 : objDateDebut.atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
-//                                    final long fin = objDateFin == null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
-//                                    final NumberRange objDateRange = NumberRange.create(debut, true, fin, true);
-//                                    if (!dateRange.intersectsAny(objDateRange)) {
-//                                        continue;
-//                                    }
-//                                }
-
-                                elements.add(next);
-                            }
-                        }
-                    }
-                }
-
-
-                /*
-                2- génération du rapport
-                -----------------------*/
-
-                final Task reportGenerator = ODTUtils.generateReport(report, prestations.isEmpty() ? null : elements, output, titre);
-                Platform.runLater(() -> {
-                    reportGenerator.messageProperty().addListener((obs, oldValue, newValue) -> updateMessage(newValue));
-                    reportGenerator.workDoneProperty().addListener((obs, oldValue, newValue) -> updateProgress(newValue.doubleValue(), reportGenerator.getTotalWork()));
-                });
-                reportGenerator.get();
-
-
-                /*
-                3- création de l'obligation réglementaire
-                ----------------------------------------*/
-
-                updateProgress(-1, -1);
-                return true;
-            }
-        };
-
-        uiProgress.visibleProperty().bind(task.runningProperty());
-        uiProgress.progressProperty().bind(task.progressProperty());
-        uiProgressLabel.visibleProperty().bind(task.runningProperty());
-        uiProgressLabel.textProperty().bind(task.messageProperty());
-        running.bind(task.runningProperty());
-        disableProperty().bind(task.runningProperty());
-
-        task.setOnFailed((failEvent) -> {
-            SIRS.LOGGER.log(Level.WARNING, "An error happened while creating a report.", task.getException());
-            Platform.runLater(() -> GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du rapport.", task.getException()).show());
-        });
-
-        task.setOnSucceeded((successEvent) -> Platform.runLater(() -> new Alert(Alert.AlertType.INFORMATION, "La génération du rapport s'est terminée avec succès", ButtonType.OK).show()));
-
-        TaskManager.INSTANCE.submit(task);
+        } catch (FileNotFoundException e) {
+            throw e;
+        } catch (JRException e) {
+            throw new IllegalStateException("Error while creating the synthese prestation report from jrxm file", e);
+        }
     }
 
     /**
@@ -410,7 +376,7 @@ public class HorodatageReportPane extends BorderPane {
      */
     private static Path getPreviousPath() {
         final Preferences prefs = Preferences.userNodeForPackage(HorodatageReportPane.class);
-        final String str = prefs.get("path", null);
+        final String str        = prefs.get("path", null);
         if (str != null) {
             final Path file = Paths.get(str);
             if (Files.isDirectory(file)) {
