@@ -418,29 +418,29 @@ public class DocumentsPane extends GridPane {
     public void showAddFolderDialog(ActionEvent event) {
         final Dialog dialog    = new Dialog();
         final DialogPane pane  = new DialogPane();
-//        final NewFolderPane ipane = new NewFolderPane();
-//        pane.setContent(ipane);
-//        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-//        dialog.setDialogPane(pane);
-//        dialog.setResizable(true);
-//        dialog.setTitle("Création de dossier");
-//
-//        final Optional opt = dialog.showAndWait();
-//        if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
-//            String folderName  = ipane.folderNameField.getText();
-//            final File rootDir = root.getValue();
-//            switch (ipane.locCombo.getValue()) {
-//                case NewFolderPane.IN_CURRENT_FOLDER:
-//                    addToSelectedFolder(folderName);
-//                    break;
+        final NewFolderPane ipane = new NewFolderPane();
+        pane.setContent(ipane);
+        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Création de dossier");
+
+        final Optional opt = dialog.showAndWait();
+        if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+            String folderName  = ipane.folderNameField.getText();
+            final File rootDir = root.getValue();
+            switch (ipane.locCombo.getValue()) {
+                case NewFolderPane.IN_CURRENT_FOLDER:
+                    addToSelectedFolder(folderName);
+                    break;
 //                case NewFolderPane.IN_ALL_FOLDER:
 //                    addToAllFolder(rootDir, folderName);
 //                    update();
 //                    break;
-//                case NewFolderPane.IN_SE_FOLDER:
-//                    addToModelFolder(rootDir, folderName, SE);
-//                    update();
-//                    break;
+                case NewFolderPane.IN_SE_FOLDER:
+                    addToModelFolder(rootDir, folderName, SE);
+                    update();
+                    break;
 //                case NewFolderPane.IN_DG_FOLDER:
 //                    addToModelFolder(rootDir, folderName, DG);
 //                    update();
@@ -449,8 +449,8 @@ public class DocumentsPane extends GridPane {
 //                    addToModelFolder(rootDir, folderName, TR);
 //                    update();
 //                    break;
-//            }
-//        }
+            }
+        }
     }
 
     @FXML
@@ -509,41 +509,41 @@ public class DocumentsPane extends GridPane {
     }
 
     private void addToSelectedFolder(final String folderName) {
-//        File directory = getSelectedFile();
-//        if (directory != null && directory.isDirectory()) {
+        File directory = getSelectedFile();
+        if (directory != null && directory.isDirectory()) {
 //            if (getIsModelFolder(directory)) {
 //                directory = new File(directory, DOCUMENT_FOLDER);
 //                if (!directory.exists()) {
 //                    directory.mkdir();
 //                }
 //            }
-//            final File newDir = new File(directory, folderName);
-//            newDir.mkdir();
-//            update();
-//        } else {
-//            showErrorDialog("Vous devez sélectionner un dossier.");
-//        }
-    }
-
-    private void addToAllFolder(final File rootDir, final String folderName) {
-        for (File f : rootDir.listFiles()) {
-            if (f.isDirectory()) {
-                if (f.getName().equals(DOCUMENT_FOLDER)) {
-                    final File newDir = new File(f, folderName);
-                    if (!newDir.exists()) {
-                        newDir.mkdir();
-                    }
-                } else {
-                    addToAllFolder(f, folderName);
-                }
-            }
+            final File newDir = new File(directory, folderName);
+            newDir.mkdir();
+            update();
+        } else {
+            showErrorDialog("Vous devez sélectionner un dossier.");
         }
     }
 
-    private void addToModelFolder(final File rootDir, final String folderName, final String model) {
+//    private void addToAllFolder(final File rootDir, final String folderName) {
 //        for (File f : rootDir.listFiles()) {
 //            if (f.isDirectory()) {
-//                if (getIsModelFolder(f, model)) {
+//                if (f.getName().equals(DOCUMENT_FOLDER)) {
+//                    final File newDir = new File(f, folderName);
+//                    if (!newDir.exists()) {
+//                        newDir.mkdir();
+//                    }
+//                } else {
+//                    addToAllFolder(f, folderName);
+//                }
+//            }
+//        }
+//    }
+
+    private void addToModelFolder(final File rootDir, final String folderName, final String model) {
+        for (File f : rootDir.listFiles()) {
+            if (f.isDirectory()) {
+                if (getIsModelFolder(f, model)) {
 //                    final File docDir = new File(f, DOCUMENT_FOLDER);
 //                    if (!docDir.exists()) {
 //                        docDir.mkdir();
@@ -552,11 +552,14 @@ public class DocumentsPane extends GridPane {
 //                    if (!newDir.exists()) {
 //                        newDir.mkdir();
 //                    }
-//                } else {
-//                    addToModelFolder(f, folderName, model);
-//                }
-//            }
-//        }
+                    final File newDir = new File(f, folderName);
+                    newDir.mkdir();
+                    update();
+                } else {
+                    addToModelFolder(f, folderName, model);
+                }
+            }
+        }
     }
 
     private static class DOIntegatedCell extends TreeTableCell {
