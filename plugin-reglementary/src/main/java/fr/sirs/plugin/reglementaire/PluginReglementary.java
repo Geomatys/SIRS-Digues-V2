@@ -50,6 +50,7 @@ public class PluginReglementary extends Plugin {
 
     public PluginReglementary() {
         name = NAME;
+        final FileTreeItem root = new FileTreeItem(false);
         loadingMessage.set("module réglementaire");
         themes.add(new DocumentsTheme());
         themes.add(new StatesGeneratorTheme());
