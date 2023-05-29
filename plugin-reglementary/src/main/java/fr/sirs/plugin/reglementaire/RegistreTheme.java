@@ -86,6 +86,9 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         // TODO modify content to get a folder tree : SE -> year -> files
         final Tab gestionTab = new Tab("Gestion");
         gestionTab.setClosable(false);
+        // TODO add gestionTab pane to import timestamped doc and export summary report.
+        FileTreeItem root = new FileTreeItem(false);
+        gestionTab.setContent(new DocumentsPane(root));
 
         // Ajout des onglets
         tabPane.getTabs().add(syntheseTab);
