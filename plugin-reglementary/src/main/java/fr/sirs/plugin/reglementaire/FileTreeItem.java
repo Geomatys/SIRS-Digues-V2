@@ -202,12 +202,8 @@ public class FileTreeItem extends TreeItem<File> {
         return PropertiesFileUtilities.getStringSizeFile(getValue());
     }
 
-    public String getInventoryNumber() {
-        return PropertiesFileUtilities.getProperty(getValue(), DocumentsPane.INVENTORY_NUMBER);
-    }
-
-    public String getClassPlace() {
-        return PropertiesFileUtilities.getProperty(getValue(), DocumentsPane.CLASS_PLACE);
+    public String getTimeStampDate() {
+        return PropertiesFileUtilities.getProperty(getValue(), DocumentsPane.TIMESTAMP_DATE);
     }
 
     public boolean isDirectory() {
