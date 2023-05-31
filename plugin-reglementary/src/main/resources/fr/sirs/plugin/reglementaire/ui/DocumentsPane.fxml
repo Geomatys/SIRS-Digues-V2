@@ -28,6 +28,7 @@
         <columns>
           <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="200.0" prefWidth="-1.0" text="Nom" />
           <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="-1.0" text="Date de modification" />
+            <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="-1.0" text="Date d'horodatage" />
             <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="70.0" prefWidth="-1.0" text="Taille" />
             <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="50.0" prefWidth="-1.0" text="Intégré au DO de synthèse" />
             <TreeTableColumn maxWidth="70.0" minWidth="50.0" prefWidth="-1.0" text="Publier" />

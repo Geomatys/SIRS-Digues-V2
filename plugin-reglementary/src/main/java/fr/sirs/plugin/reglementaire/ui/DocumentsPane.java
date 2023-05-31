@@ -19,18 +19,17 @@
  */
 package fr.sirs.plugin.reglementaire.ui;
 
+import com.giaybac.traprange.PDFTableExtractor;
+import com.giaybac.traprange.entity.Table;
+import com.giaybac.traprange.entity.TableRow;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.primitives.Ints;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.Session;
-import fr.sirs.core.component.DigueRepository;
-import fr.sirs.core.component.ModeleRapportRepository;
-import fr.sirs.core.component.SystemeEndiguementRepository;
-import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.Digue;
+import fr.sirs.core.component.PrestationRepository;
+import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.Role;
-import fr.sirs.core.model.SystemeEndiguement;
-import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.plugin.reglementaire.FileTreeItem;
 import fr.sirs.plugin.reglementaire.RegistreTheme;
 import fr.sirs.ui.Growl;
@@ -39,9 +38,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -51,15 +48,16 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
-import org.apache.sis.measure.NumberRange;
+import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.nio.IOUtilities;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -121,8 +119,7 @@ public class DocumentsPane extends GridPane {
     public static final String ROOT_FOLDER      = "symadrem.root.folder";
 
     // SIRS hidden file properties
-    public static final String INVENTORY_NUMBER = "inventory_number";
-    public static final String CLASS_PLACE      = "class_place";
+    public static final String TIMESTAMP_DATE = "timestamp_date";
     public static final String DO_INTEGRATED    = "do_integrated";
     public static final String LIBELLE          = "libelle";
     public static final String DYNAMIC          = "dynamic";
@@ -185,102 +182,78 @@ public class DocumentsPane extends GridPane {
 
         // Name column
         tree1.getColumns().get(0).setEditable(false);
-        tree1.getColumns().get(0).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final TreeItem item = ((CellDataFeatures)param).getValue();
-                if (item != null) {
-                    final File f = (File) item.getValue();
-                    return new SimpleObjectProperty(f);
-                }
-                return null;
+        tree1.getColumns().get(0).setCellValueFactory((Callback) param -> {
+            final TreeItem item = ((CellDataFeatures)param).getValue();
+            if (item != null) {
+                final File f = (File) item.getValue();
+                return new SimpleObjectProperty(f);
             }
+            return null;
         });
-        tree1.getColumns().get(0).setCellFactory(new Callback() {
-            @Override
-            public TreeTableCell call(Object param) {
-                return new FileNameCell();
-            }
-        });
+        tree1.getColumns().get(0).setCellFactory((Callback) param -> new FileNameCell());
 
         // Date column
         tree1.getColumns().get(1).setEditable(false);
-        tree1.getColumns().get(1).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final TreeItem item = ((CellDataFeatures)param).getValue();
-                if (item != null) {
-                    final File f = (File) item.getValue();
-                    synchronized (DATE_FORMATTER) {
-                        return new SimpleStringProperty(DATE_FORMATTER.format(new Date(f.lastModified())));
-                    }
+        tree1.getColumns().get(1).setCellValueFactory((Callback) param -> {
+            final TreeItem item = ((CellDataFeatures)param).getValue();
+            if (item != null) {
+                final File f = (File) item.getValue();
+                synchronized (DATE_FORMATTER) {
+                    return new SimpleStringProperty(DATE_FORMATTER.format(new Date(f.lastModified())));
                 }
-                return null;
             }
+            return null;
         });
 
-        // Size column
+        // Timestamp Date column
         tree1.getColumns().get(2).setEditable(false);
-        tree1.getColumns().get(2).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
-                if (f != null) {
-                    return new SimpleStringProperty(f.getSize());
+        tree1.getColumns().get(2).setCellValueFactory((Callback) param -> {
+            final TreeItem item = ((CellDataFeatures)param).getValue();
+            if (item != null) {
+                final File f = (File) item.getValue();
+                synchronized (DATE_FORMATTER) {
+                    return new SimpleObjectProperty<>(f);
                 }
-                return null;
             }
+            return null;
+        });
+        tree1.getColumns().get(2).setCellFactory((Callback) param -> new TimeStampCell());
+
+        // Size column
+        tree1.getColumns().get(3).setEditable(false);
+        tree1.getColumns().get(3).setCellValueFactory((Callback) param -> {
+            final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
+            if (f != null) {
+                return new SimpleStringProperty(f.getSize());
+            }
+            return null;
         });
 
 
         // do integrated column
-        tree1.getColumns().get(3).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final TreeItem item = ((CellDataFeatures)param).getValue();
-                if (item != null) {
-                    final File f = (File) item.getValue();
-                    return new SimpleObjectProperty(f);
-                }
-                return null;
+        tree1.getColumns().get(4).setCellValueFactory((Callback) param -> {
+            final TreeItem item = ((CellDataFeatures)param).getValue();
+            if (item != null) {
+                final File f = (File) item.getValue();
+                return new SimpleObjectProperty(f);
             }
+            return null;
         });
-        tree1.getColumns().get(3).setCellFactory(new Callback() {
-            @Override
-            public TreeTableCell call(Object param) {
-                return new DOIntegatedCell();
-            }
-        });
+        tree1.getColumns().get(4).setCellFactory((Callback) param -> new DOIntegatedCell());
 
         // publish column
-        tree1.getColumns().get(4).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
-                return new SimpleObjectProperty(f);
-            }
+        tree1.getColumns().get(5).setCellValueFactory((Callback) param -> {
+            final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
+            return new SimpleObjectProperty(f);
         });
-        tree1.getColumns().get(4).setCellFactory(new Callback() {
-            @Override
-            public TreeTableCell call(Object param) {
-                return new PublicationCell(root);
-            }
-        });
+        tree1.getColumns().get(5).setCellFactory((Callback) param -> new PublicationCell(root));
 
         // open column
-        tree1.getColumns().get(5).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
-                return new SimpleObjectProperty(f);
-            }
+        tree1.getColumns().get(6).setCellValueFactory((Callback) param -> {
+            final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
+            return new SimpleObjectProperty(f);
         });
-        tree1.getColumns().get(5).setCellFactory(new Callback() {
-            @Override
-            public TreeTableCell call(Object param) {
-                return new OpenCell();
-            }
-        });
+        tree1.getColumns().get(6).setCellFactory((Callback) param -> new OpenCell());
 
 
         tree1.setShowRoot(false);
@@ -324,58 +297,174 @@ public class DocumentsPane extends GridPane {
 
     @FXML
     public void showImportDialog(ActionEvent event) throws IOException {
-//        final Dialog dialog    = new Dialog();
-//        final DialogPane pane  = new DialogPane();
-//        final ImportPane ipane = new ImportPane();
-//        pane.setContent(ipane);
-//        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-//        dialog.setDialogPane(pane);
-//        dialog.setResizable(true);
-//        dialog.setTitle("Import de document");
-//
-//        final Optional opt = dialog.showAndWait();
-//        if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
-//            File f = new File(ipane.fileField.getText());
-//            final File directory = getSelectedFile();
-//            if (directory != null && directory.isDirectory()) {
-//                final File newFile = new File(directory, f.getName());
-//                Files.copy(f.toPath(), newFile.toPath());
-//                setProperty(newFile, INVENTORY_NUMBER, ipane.inventoryNumField.getText());
-//                setProperty(newFile, CLASS_PLACE,      ipane.classPlaceField.getText());
-//
-//                // refresh tree
-//                update();
-//            }
-//        }
+        final Dialog dialog    = new Dialog();
+        final DialogPane pane  = new DialogPane();
+        final ImportPane ipane = new ImportPane();
+        pane.setContent(ipane);
+        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Import de document");
+
+        final Optional opt = dialog.showAndWait();
+        if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+
+            // Check if it is a Tableau de synthèse. If so, the timestamp date must be set.
+            final boolean isSyntheseTable = ipane.isSyntheseTable.isSelected();
+            final LocalDate timeStampDate = ipane.horodatageDate.getValue();
+            if (isSyntheseTable && timeStampDate == null) {
+                // TODO find how to show warning message and come bacl the dialog without closing it
+                return;
+            }
+            File f = new File(ipane.fileField.getText());
+            final File directory = getSelectedFile();
+            if (directory != null && directory.isDirectory()) {
+                final File newFile = new File(directory, f.getName());
+
+                if (isSyntheseTable) {
+                    extractElementsInFile(f, timeStampDate);
+                    setProperty(newFile, TIMESTAMP_DATE, timeStampDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                }
+
+                Files.copy(f.toPath(), newFile.toPath());
+
+                // refresh tree
+                update();
+            }
+        }
     }
+
+
+    /**
+     * Extract text information from pdf file and update @{@link fr.sirs.core.model.Prestation}.
+     *
+     * @param pdf_filename  pdf file to read.
+     * @param timeStampDate
+     */
+    private void extractElementsInFile(File pdf_filename, LocalDate timeStampDate) {
+        ArgumentChecks.ensureNonNull("pdf_filename", pdf_filename);
+
+        PDFTableExtractor extractor = (new PDFTableExtractor())
+                .setSource(pdf_filename);
+        List<Integer> pages = null;
+        List<Integer> exceptPages = null;
+
+        List<Integer[]> exceptLines = new ArrayList<>();
+        // two first lines of the doc : title and @SystemeEndiguement libelle
+        exceptLines.add(new Integer[]{0,0});
+        exceptLines.add(new Integer[]{1,0});
+
+        List<Integer> lastPageExceptLines = new ArrayList<>();
+        // exclude last line of the last page -> corresponds to "Période : xx/xx/xxxx - xx/xx/xxxx"
+        lastPageExceptLines.add(-1);
+
+        // requested pages - should not be present in exceptPage as well otherwise it will be ignored.
+        if (pages != null) {
+            for (Integer page : pages) {
+                extractor.addPage(page);
+            }
+        }
+
+        //except page
+        if (exceptPages != null) {
+            for (Integer exceptPage : exceptPages) {
+                extractor.exceptPage(exceptPage);
+            }
+        }
+
+        //except lines
+        if (exceptLines != null) {
+            List<Integer> exceptLineIdxes = new ArrayList<>();
+            Multimap<Integer, Integer> exceptLineInPages = LinkedListMultimap.create();
+            for (Integer[] exceptLine : exceptLines) {
+                if (exceptLine.length == 1) {
+                    exceptLineIdxes.add(exceptLine[0]);
+                } else if (exceptLine.length == 2) {
+                    int lineIdx = exceptLine[0];
+                    int pageIdx = exceptLine[1];
+                    exceptLineInPages.put(pageIdx, lineIdx);
+                }
+            }
+            if (!exceptLineIdxes.isEmpty()) {
+                extractor.exceptLine(Ints.toArray(exceptLineIdxes));
+            }
+            if (!exceptLineInPages.isEmpty()) {
+                for (int pageIdx : exceptLineInPages.keySet()) {
+                    extractor.exceptLine(pageIdx, Ints.toArray(exceptLineInPages.get(pageIdx)));
+                }
+            }
+        }
+        //except lines in last page
+        if (lastPageExceptLines != null) {
+            extractor.exceptLineInLastPage(lastPageExceptLines);
+        }
+        //begin parsing pdf file
+        List<Table> tables = extractor.extract();
+
+        final int columnsNo = tables.get(0).getRows().get(0).getCells().size();
+
+        for (Table table: tables) {
+            for (TableRow row : table.getRows()) {
+                // Check that the last column exists and is not empty.
+                // If not -> no identifiant SIRS, which means that the row is part of the previous row.
+                boolean oldRow = false;
+                String idSirs = "";
+                try {
+                    idSirs = row.getCells().get(columnsNo - 1).getContent();
+                    if (idSirs.isEmpty()) {
+                        oldRow = true;
+                    }
+                } catch (IndexOutOfBoundsException ex) {
+                    oldRow = true;
+                } finally {
+                    if (oldRow) continue;
+                    PrestationRepository prestationRepo = Injector.getBean(PrestationRepository.class);
+                    Prestation prestation = null;
+                    try {
+                        prestation = prestationRepo.get(idSirs);
+                    } catch (RuntimeException re) {
+                        SIRS.LOGGER.warning("Error while retrieving the Prestation with id " + idSirs);
+                    }
+                    if (prestation == null) continue;
+                    prestation.setHorodatageStatusId("RefHorodatageStatus:3");
+                    prestation.setHorodatageDate(timeStampDate);
+                    prestationRepo.update(prestation);
+                }
+            }
+        }
+
+    }
+
+
 
     @FXML
     public void showRemoveDialog(ActionEvent event) throws IOException {
-//        final Dialog dialog    = new Dialog();
-//        final DialogPane pane  = new DialogPane();
-//        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-//        dialog.setDialogPane(pane);
-//        dialog.setResizable(true);
-//        dialog.setTitle("Détruire document");
-//        dialog.setContentText("Détruire le fichier/dossier dans le système de fichier ?");
-//
-//        final Optional opt = dialog.showAndWait();
-//        if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
-//            final File f = getSelectedFile();
-//            if (f != null) {
-//                if (f.isDirectory()) {
-//                    IOUtilities.deleteRecursively(f.toPath());
-//                } else {
-//                    f.delete();
-//                }
-//                removeProperties(f);
-//
-//                // refresh tree
-//                update();
-//            } else {
-//                showErrorDialog("Vous devez sélectionner un dossier.");
-//            }
-//        }
+        final Dialog dialog    = new Dialog();
+        final DialogPane pane  = new DialogPane();
+        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Détruire document");
+        dialog.setContentText("Détruire le fichier/dossier dans le système de fichier ?");
+
+        final Optional opt = dialog.showAndWait();
+        if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+            final File f = getSelectedFile();
+            if (f != null) {
+                if (f.isDirectory()) {
+                    IOUtilities.deleteRecursively(f.toPath());
+                    removeProperty(f, TIMESTAMP_DATE);
+                } else {
+                    f.delete();
+                }
+                removeProperties(f);
+
+                // refresh tree
+                update();
+            } else {
+                showErrorDialog("Vous devez sélectionner un dossier.");
+            }
+        }
     }
 
     @FXML
@@ -691,38 +780,38 @@ public class DocumentsPane extends GridPane {
 //            }
         }
 
-        private Collection<TronconDigue> getTronconList() {
-            final FileTreeItem item = (FileTreeItem) getItem();
-            final File modelFolder  = getModelFolder(item.getValue());
-            Collection<TronconDigue> elements = null;
-//            if (getIsModelFolder(modelFolder, SE)) {
-//                final SystemeEndiguementRepository sdRepo = (SystemeEndiguementRepository) Injector.getSession().getRepositoryForClass(SystemeEndiguement.class);
-//                final SystemeEndiguement sd                = sdRepo.get(modelFolder.getName());
-//                final DigueRepository digueRepo          = (DigueRepository) Injector.getSession().getRepositoryForClass(Digue.class);
-//                final TronconDigueRepository tronconRepo = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
-//                final Set<TronconDigue> troncons         = new HashSet<>();
-//                final List<Digue> digues                 = digueRepo.getBySystemeEndiguement(sd);
-//                for(Digue digue : digues){
-//                    troncons.addAll(tronconRepo.getByDigue(digue));
-//                }
-//                return troncons;
-//            } else if (getIsModelFolder(modelFolder, TR)) {
-//                final TronconDigueRepository tronconRepo = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
-//                return Collections.singleton(tronconRepo.get(modelFolder.getName()));
-//            } else {
-//                elements = new ArrayList<>();
-//            }
-            return elements;
-        }
+//        private Collection<TronconDigue> getTronconList() {
+//            final FileTreeItem item = (FileTreeItem) getItem();
+//            final File modelFolder  = getModelFolder(item.getValue());
+//            Collection<TronconDigue> elements = null;
+////            if (getIsModelFolder(modelFolder, SE)) {
+////                final SystemeEndiguementRepository sdRepo = (SystemeEndiguementRepository) Injector.getSession().getRepositoryForClass(SystemeEndiguement.class);
+////                final SystemeEndiguement sd                = sdRepo.get(modelFolder.getName());
+////                final DigueRepository digueRepo          = (DigueRepository) Injector.getSession().getRepositoryForClass(Digue.class);
+////                final TronconDigueRepository tronconRepo = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
+////                final Set<TronconDigue> troncons         = new HashSet<>();
+////                final List<Digue> digues                 = digueRepo.getBySystemeEndiguement(sd);
+////                for(Digue digue : digues){
+////                    troncons.addAll(tronconRepo.getByDigue(digue));
+////                }
+////                return troncons;
+////            } else if (getIsModelFolder(modelFolder, TR)) {
+////                final TronconDigueRepository tronconRepo = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
+////                return Collections.singleton(tronconRepo.get(modelFolder.getName()));
+////            } else {
+////                elements = new ArrayList<>();
+////            }
+//            return elements;
+//        }
 
-        private File getModelFolder(File f) {
+//        private File getModelFolder(File f) {
 //            if (getIsModelFolder(f)) {
 //                return f;
 //            } else if (!f.getParentFile().equals(root.getValue())) {
 //                return getModelFolder(f.getParentFile());
 //            }
-            return null;
-        }
+//            return null;
+//        }
 
         @Override
         public void updateItem(Object item, boolean empty) {
@@ -761,18 +850,18 @@ public class DocumentsPane extends GridPane {
         }
 
         public void handle(ActionEvent event) {
-//            final FileTreeItem item = (FileTreeItem) getItem();
-//            if (item != null && item.getValue() != null) {
-//                File file = item.getValue();
-//
-//                SIRS.openFile(file).setOnSucceeded(evt -> {
-//                    if (!Boolean.TRUE.equals(evt.getSource().getValue())) {
-//                        Platform.runLater(() -> {
-//                            new Growl(Growl.Type.WARNING, "Impossible de trouver un programme pour ouvrir le document.").showAndFade();
-//                        });
-//                    }
-//                });
-//            }
+            final FileTreeItem item = (FileTreeItem) getItem();
+            if (item != null && item.getValue() != null) {
+                File file = item.getValue();
+
+                SIRS.openFile(file).setOnSucceeded(evt -> {
+                    if (!Boolean.TRUE.equals(evt.getSource().getValue())) {
+                        Platform.runLater(() -> {
+                            new Growl(Growl.Type.WARNING, "Impossible de trouver un programme pour ouvrir le document.").showAndFade();
+                        });
+                    }
+                });
+            }
         }
 
 
@@ -822,6 +911,32 @@ public class DocumentsPane extends GridPane {
                 }
             } else {
                label.setText("");
+            }
+        }
+    }
+
+    private static class TimeStampCell extends TreeTableCell {
+
+        private final Label label = new Label();
+
+        public TimeStampCell() {
+            setGraphic(label);
+        }
+
+        @Override
+        public void updateItem(Object item, boolean empty) {
+            super.updateItem(item, empty);
+            File f = (File) item;
+            label.opacityProperty().unbind();
+            if (f != null) {
+                final String name = getProperty(f, TIMESTAMP_DATE);
+                label.setText(name);
+                FileTreeItem fti = (FileTreeItem) getTreeTableRow().getTreeItem();
+                if (fti != null) {
+                    label.opacityProperty().bind(Bindings.when(fti.hidden).then(0.5).otherwise(1.0));
+                }
+            } else {
+                label.setText("");
             }
         }
     }
