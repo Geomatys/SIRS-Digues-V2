@@ -242,6 +242,7 @@ public class JRXMLUtil {
     }
 
     /**
+     * Method used in metaTemplatePrestationSyntheseTable.jrxml to convert the list of intervenants (@{@link Contact}) to String.
      *
      * @param fieldNames @{@link List} containing the intervenants' ids.
      * @return
@@ -249,20 +250,29 @@ public class JRXMLUtil {
      */
     public static String displayIntervenants(final List<String> fieldNames){
         StringBuilder result = new StringBuilder();
-        ContactRepository contactRepo = (ContactRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(Contact.class);
-        fieldNames.forEach(fn -> {
-            final Contact contact = contactRepo.get(fn);
-            if (contact == null) return;
-            String name = contact.getNom();
-            String prenom = contact.getPrenom();
-            if (result.length() != 0) result.append("\n");
-            if (name != null) result.append(name + " ");
-            if (prenom != null) result.append(contact.getPrenom());
-        });
+        if (fieldNames != null) {
+            final List<Contact> contacts = (InjectorCore.getBean(SessionCore.class).getRepositoryForClass(Contact.class)).get(fieldNames);
+            contacts.forEach(contact -> {
+                if (contact == null) return;
+                String name = contact.getNom();
+                String firstname = contact.getPrenom();
+                if (result.length() != 0) result.append("\n");
+                if (name != null) {
+                    result.append(name);
+                    if (firstname != null) result.append(" " + firstname);
+                } else if (firstname != null) {
+                    result.append(firstname);
+                } else {
+                    result.append("Nom non renseigné");
+                }
+            });
+        }
+        if (result.length() == 0) result.append("-");
         return result.toString();
     }
 
     /**
+     * Method used in metaTemplatePrestationSyntheseTable.jrxml to convert the Utilisateur (@{@link Utilisateur}) to String.
      *
      * @param fieldName id of the @Utilisateur to display login for.
      * @return
@@ -281,12 +291,12 @@ public class JRXMLUtil {
      * @return
      */
     public static String displayLibelleFromId(final String fieldName, final String fieldClass){
-        if ("RefPrestation".equals(fieldClass)) {
+        if (RefPrestation.class.getSimpleName().equals(fieldClass)) {
             AbstractSIRSRepository<RefPrestation> typeRepo = Injector.getSession().getRepositoryForClass(RefPrestation.class);
             final RefPrestation refPrestation = typeRepo.get(fieldName);
             if (refPrestation == null) return "";
             return refPrestation.getLibelle();
-        } else if ("TronconDigue".equals(fieldClass)) {
+        } else if (TronconDigue.class.getSimpleName().equals(fieldClass)) {
             TronconDigueRepository tronconRepo = (TronconDigueRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(TronconDigue.class);
             final TronconDigue tronconDigue = tronconRepo.get(fieldName);
             if (tronconDigue == null) return "";

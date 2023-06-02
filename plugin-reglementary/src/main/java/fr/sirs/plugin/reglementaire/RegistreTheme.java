@@ -65,22 +65,6 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         // TODO modify content to get a folder tree : SE -> year -> files
         final Tab gestionTab = new Tab("Gestion");
         gestionTab.setClosable(false);
-//        // Gestion du bouton consultation / édition pour la pojo table
-//        final Separator separatorEtape = new Separator();
-//        separatorEtape.setVisible(false);
-//        final SimpleFXEditMode editEtapeMode = new SimpleFXEditMode();
-//        final HBox topEtapePane = new HBox(separatorEtape, editEtapeMode);
-//        HBox.setHgrow(separatorEtape, Priority.ALWAYS);
-//        final EtapeObligationReglementaireRepository eorrRepo = Injector.getBean(EtapeObligationReglementaireRepository.class);
-//        final ObservableList<EtapeObligationReglementaire> allEtapes = FXCollections.observableList(eorrRepo.getAll());
-//        // Ajoute un listener sur tous les ajouts/suppression d'étapes d'obligations pour mettre à jour la liste et donc la table.
-////        final DocumentsTheme.ListDocumentListener<EtapeObligationReglementaire> etapeListener =
-////                new DocumentsTheme.ListDocumentListener<>(EtapeObligationReglementaire.class, allEtapes);
-////        Injector.getBean(DocumentChangeEmiter.class).addListener(etapeListener);
-//        final EtapesPojoTable etapesPojoTable = new EtapesPojoTable(tabPane, (ObjectProperty<? extends Element>) null);
-//        etapesPojoTable.setTableItems(() -> (ObservableList) allEtapes);
-//        etapesPojoTable.editableProperty().bind(editEtapeMode.editionState());
-//        gestionTab.setContent(new BorderPane(etapesPojoTable, topEtapePane, null, null, null));
 
         // Ajout des onglets
         tabPane.getTabs().add(syntheseTab);

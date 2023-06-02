@@ -22,7 +22,6 @@ import fr.sirs.core.model.*;
 import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -45,11 +44,15 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 /**
  * Display print configuration and generate report for horodatage purpose : prestation synthese table report.
+ *
+ * Redmine ticket #7782
  *
  * <ul>
  * <li> Allow to select the file destination folder.</li>
@@ -67,6 +70,10 @@ public class HorodatageReportPane extends BorderPane {
     private ComboBox<Preview> uiSystemEndiguement;
     @FXML
     private ListView<Prestation> uiPrestations;
+    /**
+     *  When the uiPeriod checkbox is unselected, the uiPeriodeDebut and uiPeriodeFin can still be updated.
+     *  The values are used in the generated Tableau de synthèse event though the uiPeriod is unselected.
+     */
     @FXML
     private DatePicker uiPeriodeFin;
     @FXML
@@ -83,6 +90,8 @@ public class HorodatageReportPane extends BorderPane {
     private Preview selectedSE;
     private List<Prestation> allPrestationsOnSE;
 
+    private final String JRXML_PATH = "/fr/sirs/jrxml/metaTemplatePrestationSyntheseTable.jrxml";
+    private static final String PATH_KEY = "path";
     @Autowired
     private Session session;
 
@@ -94,6 +103,8 @@ public class HorodatageReportPane extends BorderPane {
         uiTitre.setText("Tableau de synthèse prestation pour Registre horodaté");
 
         // Date filter checkbox
+        // When the the checkbox is unselected, the uiPeriodeDebut and uiPeriodeFin can still be updated.
+        // The values are used in the generated Tableau de synthèse event though the uiPeriod is unselected.
         uiPeriod.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == null) return;
             if (newValue) {
@@ -105,28 +116,28 @@ public class HorodatageReportPane extends BorderPane {
                     uiPeriodeFin.setValue(date);
                 }
             }
-            updateListBySelectedSeAndApplyDateFilter();
+            updatePrestationsAndKeepSelection();
         });
 
         DatePickerConverter.register(uiPeriodeDebut);
         DatePickerConverter.register(uiPeriodeFin);
         uiPeriodeDebut.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (uiPeriod.isSelected()) updateListBySelectedSeAndApplyDateFilter();
+            if (uiPeriod.isSelected()) updatePrestationsAndKeepSelection();
         });
         uiPeriodeFin.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (uiPeriod.isSelected()) updateListBySelectedSeAndApplyDateFilter();
+            if (uiPeriod.isSelected()) updatePrestationsAndKeepSelection();
         });
 
-        uiSystemEndiguement.valueProperty().addListener(this::updatePrestationsList);
+        uiSystemEndiguement.valueProperty().addListener((obs, o, n) -> updatePrestationsList(n));
         uiPrestations.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        final SirsStringConverter converter = new SirsStringConverter();
-        uiPrestations.setCellFactory(param -> new ListCell() {
+        uiPrestations.setCellFactory(param -> new ListCell<Prestation>() {
+            final SirsStringConverter converter = new SirsStringConverter();
             @Override
-            protected void updateItem(Object item, boolean empty) {
+            protected void updateItem(Prestation item, boolean empty) {
                 super.updateItem(item, empty);
                 String text = converter.toString(item);
                 if (item != null) {
-                    String id = ((Prestation) item).getTypePrestationId();
+                    String id = item.getTypePrestationId();
                     if (id != null) {
                         RefPrestationRepository refPrestationRepo = Injector.getBean(RefPrestationRepository.class);
                         text = text + " / " + refPrestationRepo.get(id).getLibelle();
@@ -143,12 +154,17 @@ public class HorodatageReportPane extends BorderPane {
     }
 
     /**
-     * Method to update the list of available prestations for the selected Systeme Endiguement
-     * and keeping the previously selected prestations if still available
+     * Method to update the list of available prestations for the selected Systeme Endiguement @this.selectedSE after a date filter modification :
+     * <ul>
+     *     <li>Selection/unselection of the Period checkbox @uiPeriod</li>
+     *     <li>Modification of the start date @uiPeriodeDebut</li>
+     *     <li>Modification of the end date @uiPeriodeFin</li>
+     * </ul>
+     * Keeps the previously selected prestations if still available.
      */
-    private void updateListBySelectedSeAndApplyDateFilter() {
+    private void updatePrestationsAndKeepSelection() {
         List<Prestation> selectedPresta = new ArrayList<>(uiPrestations.getSelectionModel().getSelectedItems());
-        updatePrestationsList(null, null, this.selectedSE);
+        updatePrestationsList(this.selectedSE);
 
         final ObservableList<Prestation> items = uiPrestations.getItems();
 
@@ -160,13 +176,19 @@ public class HorodatageReportPane extends BorderPane {
     }
 
     /**
-     * Method to update the list of available prestations for the selected Systeme Endiguement
+     * Method to update the list of available @{@link Prestation} for the input @{@link SystemeEndiguement}
      * and apply date filter if the checkbox has been selected.
+     *
+     * <p>If the input @{@link SystemeEndiguement} has changed since the last selection, then the @{@link Prestation} are collected from the data base.<br>
+     *  Otherwise the prestations are recovered from the class variable @allPrestationsOnSE.</p>
+     *
+     * @param newValue the @{@link SystemeEndiguement} for which to collect the available @{@link Prestation} and apply date filter if necessary.
      */
-    private void updatePrestationsList(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) {
+    private void updatePrestationsList(Preview newValue) {
         if (newValue == null) {
             uiPrestations.setItems(FXCollections.emptyObservableList());
         } else {
+            // the @SystemeEndiguement has changed, the class variables are updated with the new values.
             if (!newValue.equals(this.selectedSE)) {
                 this.selectedSE = newValue;
                 this.allPrestationsOnSE = getAllPrestationsOnSelectedSE();
@@ -174,7 +196,8 @@ public class HorodatageReportPane extends BorderPane {
 
             if (this.allPrestationsOnSE == null || this.allPrestationsOnSE.isEmpty()) {
                 uiPrestations.setItems(FXCollections.emptyObservableList());
-            };
+                return;
+            }
 
             // copy the list to filter it without modifying the original one.
             List<Prestation> prestations = new ArrayList<>(this.allPrestationsOnSE);
@@ -182,7 +205,7 @@ public class HorodatageReportPane extends BorderPane {
              * Apply date filter
              */
             if (uiPeriod.isSelected()) {
-                filterPrestationsByDate(prestations);
+                prestations = filterPrestationsByDate(prestations);
             }
             uiPrestations.setItems(FXCollections.observableArrayList(prestations));
         }
@@ -191,7 +214,11 @@ public class HorodatageReportPane extends BorderPane {
     /**
      * Method to get all the prestations on the selected @{@link SystemeEndiguement} from the @{@link Preview}
      *
-     * @return the list of all the prestations on @this.selectedSE
+     * @return The list of all the @{@link Prestation} available on @this.selectedSE. <br>
+     * <ul>
+     *     <li>Null if no @{@link Digue} on the SE;</li>
+     *     <li>Empty ArrayList if no @{@link TronconDigue} or no @{@link Prestation}.</li>
+     * </ul>
      */
     private List<Prestation> getAllPrestationsOnSelectedSE() {
         if (this.selectedSE == null) return new ArrayList<>();
@@ -200,34 +227,23 @@ public class HorodatageReportPane extends BorderPane {
         final TronconDigueRepository tronconRepo    = Injector.getBean(TronconDigueRepository.class);
         final PrestationRepository prestationRepo   = Injector.getBean(PrestationRepository.class);
 
-        final List<Prestation> prestations          = new ArrayList<>();
-
         SystemeEndiguement se = null;
         try {
             se = sdRepo.get(this.selectedSE.getElementId());
         } catch (RuntimeException re) {
             SIRS.LOGGER.log(Level.WARNING, "Erreur lors de la récupération du Systeme d'endiguement avec l'id {0}", this.selectedSE.getElementId());
         }
-        if (se == null) return prestations;
+        if (se == null) return null;
 
-        final Set<TronconDigue> troncons    = new HashSet<>();
-        final List<Digue> digues            = digueRepo.getBySystemeEndiguement(se);
-        if (digues.isEmpty()) return prestations;
+        final List<Digue> digues = digueRepo.getBySystemeEndiguement(se);
+        if (digues.isEmpty()) return null;
 
-        for (Digue digue : digues) {
-            troncons.addAll(tronconRepo.getByDigue(digue));
-        }
-        if (troncons.isEmpty()) return prestations;
-
-        for (TronconDigue troncon : troncons) {
-            List<Prestation> presta = prestationRepo.getByLinear(troncon);
-            presta.forEach(p -> {
-                if (p.getRegistreAttribution())
-                    prestations.add(p);
-            });
-        }
-
-        return prestations;
+        return digues.stream().flatMap(digue -> tronconRepo.getByDigue(digue).stream())
+                .flatMap(troncon -> {
+                    List<Prestation> presta = prestationRepo.getByLinear(troncon);
+                    return presta.stream().filter(Prestation::getRegistreAttribution);
+                })
+                .collect(Collectors.toList());
     }
 
     /**
@@ -252,20 +268,8 @@ public class HorodatageReportPane extends BorderPane {
         }
 
         if (dateRange != null) {
-            List<Prestation> prestationsToRemove = new ArrayList<>();
-            for (Prestation presta : prestations) {
-                //on vérifie la date
-                final LocalDate objDateDebut    = presta.getDate_debut();
-                final LocalDate objDateFin      = presta.getDate_fin();
-                final long debut    = objDateDebut == null ? 0 : objDateDebut.atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
-                final long fin      = objDateFin == null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
-                final NumberRange objDateRange = NumberRange.create(debut, true, fin, true);
-                if (!dateRange.intersectsAny(objDateRange)) {
-                    prestationsToRemove.add(presta);
-                }
-            }
-
-            prestations.removeAll(prestationsToRemove);
+            AvecBornesTemporelles.IntersectDateRange dateRangePredicate = new AvecBornesTemporelles.IntersectDateRange(dateRange);
+            return prestations.stream().filter(dateRangePredicate).collect(Collectors.toList());
         }
         return prestations;
     }
@@ -287,24 +291,24 @@ public class HorodatageReportPane extends BorderPane {
     private void selectNonTimeStamped() {
         List<Prestation> prestations = uiPrestations.getItems();
         if (prestations.isEmpty()) return;
-        List<Prestation> nonTimeStampedPrestations = new ArrayList<>();
-        prestations.forEach(prestation -> {
-            String horodatageStatusId = prestation.getHorodatageStatusId();
-            // Keeps all prestations with a status "Non horodaté"
-            if ("RefHorodatageStatus:1".equals(horodatageStatusId)) {
-                nonTimeStampedPrestations.add(prestation);
-            }
-        });
-        nonTimeStampedPrestations.forEach(presta -> uiPrestations.getSelectionModel().select(presta));
+        // Keeps all prestations with a status "Non horodaté"
+        prestations.stream()
+                .filter(prestation -> "RefHorodatageStatus:1".equals(prestation.getHorodatageStatusId()))
+                .forEach(presta -> uiPrestations.getSelectionModel().select(presta));
     }
 
 
     /**
-     * Method to generate the Rapport de synthèse for the selected prestations.
+     * <p>Method to generate the Rapport de synthèse for the selected prestations.</p>
+     * <ul>
+     *     <li>Let the user choose the destination folder and output file's name</li>
+     *     <li>Open the created PDF</li>
+     *     <li>Uses the JRXML "/fr/sirs/jrxml/metaTemplatePrestationSyntheseTable.jrxml"</li>
+     * </ul>
      *
      */
     @FXML
-    private void generateReport() throws FileNotFoundException {
+    private void generateReport() {
         List<Prestation> prestations = FXCollections.observableArrayList(uiPrestations.getSelectionModel().getSelectedItems());
         if (prestations.isEmpty()) return;
 
@@ -348,11 +352,11 @@ public class HorodatageReportPane extends BorderPane {
         parameters.put("dateFinPicker", uiPeriodeFin.getValue());
 
         try {
-            InputStream input           = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplatePrestationSyntheseTable.jrxml");
+            InputStream input           = PrinterUtilities.class.getResourceAsStream(JRXML_PATH);
             JasperDesign jasperDesign   = JRXmlLoader.load(input);
             JasperReport jasperReport   = JasperCompileManager.compileReport(jasperDesign);
             JasperPrint jasperPrint     = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
-            OutputStream outputStream   = new FileOutputStream(output.toFile());
+            OutputStream outputStream   = new FileOutputStream(file);
 
             JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
             SIRS.openFile(output);
@@ -365,9 +369,9 @@ public class HorodatageReportPane extends BorderPane {
             });
 
         } catch (FileNotFoundException e) {
-            throw e;
+            throw new IllegalStateException("The jrxml file was not found at \"/fr/sirs/jrxml/metaTemplatePrestationSyntheseTable.jrxml\"", e);
         } catch (JRException e) {
-            throw new IllegalStateException("Error while creating the synthese prestation report from jrxm file", e);
+            throw new IllegalStateException("Error while creating the synthese prestation report from jrxml file", e);
         }
     }
 
@@ -376,7 +380,7 @@ public class HorodatageReportPane extends BorderPane {
      */
     private static Path getPreviousPath() {
         final Preferences prefs = Preferences.userNodeForPackage(HorodatageReportPane.class);
-        final String str        = prefs.get("path", null);
+        final String str        = prefs.get(PATH_KEY, null);
         if (str != null) {
             final Path file = Paths.get(str);
             if (Files.isDirectory(file)) {
@@ -393,6 +397,6 @@ public class HorodatageReportPane extends BorderPane {
      */
     private static void setPreviousPath(final Path path) {
         final Preferences prefs = Preferences.userNodeForPackage(HorodatageReportPane.class);
-        prefs.put("path", path.toAbsolutePath().toString());
+        prefs.put(PATH_KEY, path.toAbsolutePath().toString());
     }
 }
