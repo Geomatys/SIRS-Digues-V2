@@ -44,6 +44,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -111,6 +112,8 @@ public class HorodatageReportPane extends BorderPane {
         this.refWaitingStatus = refWaitingStatus;
 
         // Date filter checkbox
+        // When the the checkbox is unselected, the uiPeriodeDebut and uiPeriodeFin can still be updated.
+        // The values are used in the generated Tableau de synthèse event though the uiPeriod is unselected.
         // When the checkbox is unselected, the uiPeriodeDebut and uiPeriodeFin can still be updated.
         // The values are used in the generated Tableau de synthèse event though the uiPeriod is unselected.
         uiPeriod.selectedProperty().addListener((observable, oldValue, newValue) -> {
