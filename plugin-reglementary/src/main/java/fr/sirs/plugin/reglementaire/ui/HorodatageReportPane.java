@@ -44,7 +44,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -92,18 +91,27 @@ public class HorodatageReportPane extends BorderPane {
 
     private final String JRXML_PATH = "/fr/sirs/jrxml/metaTemplatePrestationSyntheseTable.jrxml";
     private static final String PATH_KEY = "path";
+    private final String refNonTimeStampedStatus;
+    private final String refWaitingStatus;
+
     @Autowired
     private Session session;
 
-    public HorodatageReportPane() {
+    public HorodatageReportPane(final String refNonTimeStampedStatus, final String refWaitingStatus) {
         super();
+        ArgumentChecks.ensureNonNull("refNonTimeStampedStatus", refNonTimeStampedStatus);
+        ArgumentChecks.ensureNonNull("refWaitingStatus", refWaitingStatus);
+
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
 
         uiTitre.setText("Tableau de synthèse prestation pour Registre horodaté");
 
+        this.refNonTimeStampedStatus = refNonTimeStampedStatus;
+        this.refWaitingStatus = refWaitingStatus;
+
         // Date filter checkbox
-        // When the the checkbox is unselected, the uiPeriodeDebut and uiPeriodeFin can still be updated.
+        // When the checkbox is unselected, the uiPeriodeDebut and uiPeriodeFin can still be updated.
         // The values are used in the generated Tableau de synthèse event though the uiPeriod is unselected.
         uiPeriod.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == null) return;
@@ -264,7 +272,7 @@ public class HorodatageReportPane extends BorderPane {
         } else {
             final long dateDebut    = periodeDebut == null ? 0 : periodeDebut.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
             final long dateFin      = periodeFin == null ? Long.MAX_VALUE : periodeFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
-            dateRange = NumberRange.create(dateDebut, true, dateFin, true);
+            dateRange               = NumberRange.create(dateDebut, true, dateFin, true);
         }
 
         if (dateRange != null) {
@@ -293,7 +301,7 @@ public class HorodatageReportPane extends BorderPane {
         if (prestations.isEmpty()) return;
         // Keeps all prestations with a status "Non horodaté"
         prestations.stream()
-                .filter(prestation -> "RefHorodatageStatus:1".equals(prestation.getHorodatageStatusId()))
+                .filter(prestation -> this.refNonTimeStampedStatus.equals(prestation.getHorodatageStatusId()))
                 .forEach(presta -> uiPrestations.getSelectionModel().select(presta));
     }
 
@@ -364,7 +372,7 @@ public class HorodatageReportPane extends BorderPane {
             // Change prestations' horodatage status to "En attente".
             PrestationRepository repo   = Injector.getBean(PrestationRepository.class);
             prestations.forEach(p -> {
-                p.setHorodatageStatusId("RefHorodatageStatus:2");
+                p.setHorodatageStatusId(this.refWaitingStatus);
                 repo.update(p);
             });
 
