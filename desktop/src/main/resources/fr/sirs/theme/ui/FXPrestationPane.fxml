@@ -42,7 +42,7 @@
             </HBox>
 
 <!-- POSITIONEMENT -->
-    <FXPositionablePane fx:id="uiPositionable" />  
+    <FXPositionablePane fx:id="uiPositionable" />
 
 <!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
 
@@ -58,16 +58,16 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints-->
               <children>
-                   <!-- EString -->                 
+                   <!-- EString -->
                    <Label text="%libelle" GridPane.rowIndex="0" />
                    <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="0"  />
-                   <!-- EFloat -->                 
+                   <!-- EFloat -->
                    <Label text="%coutMetre" GridPane.rowIndex="1" />
                    <Spinner fx:id="ui_coutMetre" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <!-- EFloat -->                 
+                   <!-- EFloat -->
                    <Label text="%coutGlobal" GridPane.rowIndex="2" />
                    <Spinner fx:id="ui_coutGlobal" GridPane.columnIndex="1" GridPane.rowIndex="2"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <!-- EBoolean -->                 
+                   <!-- EBoolean -->
                    <Label text="%realisationInterne" GridPane.rowIndex="3" />
                    <CheckBox fx:id="ui_realisationInterne" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
                    <Label text="%coteId" GridPane.rowIndex="4" />
@@ -85,6 +85,14 @@
                    <Label text="%marcheId" GridPane.rowIndex="8" />
                    <ComboBox fx:id="ui_marcheId" GridPane.columnIndex="1" GridPane.rowIndex="8" />
                    <Button fx:id="ui_marcheId_link" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                  <Label text="%registreAttribution" GridPane.rowIndex="9" />
+                  <CheckBox fx:id="ui_registreAttribution" GridPane.columnIndex="1" GridPane.rowIndex="9"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                  <!-- EString -->
+                  <Label text="%horodatageDate" GridPane.rowIndex="10" />
+                  <DatePicker fx:id="ui_horodatageDate" GridPane.columnIndex="1" GridPane.rowIndex="10"  />
+                  <Label text="%horodatageStatusId" GridPane.rowIndex="11" />
+                  <ComboBox fx:id="ui_horodatageStatusId" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+                  <Button fx:id="ui_horodatageStatusId_link" GridPane.columnIndex="2" GridPane.rowIndex="11" />
 
               </children>
               <padding>
@@ -139,7 +147,7 @@
 
         <FXFreeTab fx:id="ui_globalPrestationIds" text="%globalPrestationIds"/>
         <FXFreeTab fx:id="ui_photos" text="%photos"/>
-        
+
       </tabs>
     </TabPane>
   </center>

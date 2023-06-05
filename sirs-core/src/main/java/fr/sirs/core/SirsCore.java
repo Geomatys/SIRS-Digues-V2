@@ -414,7 +414,7 @@ public class SirsCore {
         ArgumentChecks.ensureNonEmpty("Document relative path", ref.getChemin());
         final Optional<Path> docRoot = DocumentRoots.getRoot(ref);
         if (!docRoot.isPresent()) {
-            throw new IllegalStateException("Auncun dossier racine n'existe ou "
+            throw new IllegalStateException("Aucun dossier racine n'existe ou "
                     + "ne dénote un chemin valide. Vous pouvez vérifier sa valeur "
                     + "depuis les préférences de l'application (Fichier > Preferences).");
         }

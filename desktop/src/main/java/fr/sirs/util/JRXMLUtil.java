@@ -18,13 +18,23 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.Injector;
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
+
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.ContactRepository;
+import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.component.UtilisateurRepository;
+import fr.sirs.core.model.*;
 import org.apache.sis.util.ArgumentChecks;
 
 /**
@@ -66,7 +76,7 @@ public class JRXMLUtil {
             try{
                 SirsCore.LOGGER.log(Level.FINEST, "extraction de la désignation de : {0}", input);
                 int endSubstring = input.indexOf(SirsStringConverter.LABEL_SEPARATOR);
-                endSubstring = endSubstring<0? input.length() :endSubstring; 
+                endSubstring = endSubstring<0? input.length() :endSubstring;
                 int startSubstring = input.indexOf(SirsStringConverter.DESIGNATION_SEPARATOR);
                 if(startSubstring<0){
                     return "";
@@ -85,7 +95,7 @@ public class JRXMLUtil {
 
     static String extractLabel(final String input){
         ArgumentChecks.ensureNonNull("String input", input);
-        
+
         final int index = input.indexOf(SirsStringConverter.LABEL_SEPARATOR);
         if(index>-1){
             return input.substring(index+SirsStringConverter.LABEL_SEPARATOR.length());
@@ -93,13 +103,13 @@ public class JRXMLUtil {
         else {
 //            SirsCore.LOGGER.log(Level.WARNING, "Label separator not found : {0}", input);  //Surcharge les logs.
             if ((input.length()>2) && (input.charAt(1) == ')')) {
-                //ATTENTION : Bricolage 
+                //ATTENTION : Bricolage
                 // Permet de ne pas considérer la numérotation ("1) ") lors de l'extraction de certain label.
                 // Ces cas ce produisent pas exemple dans la colonne 'Intervenants' des prestations au sein des fiches désordre.
                 // Sans cette opération, le "1) " est duppliqué.
                 // Je ne connais pas l'origine du "1) ".
                 SirsCore.LOGGER.log(Level.INFO, "Substring \"{0}\" extraite lors de l'extraction du label.", input.substring(0, 2));
-                return input.substring(2).trim(); 
+                return input.substring(2).trim();
             }
             return input;
         }
@@ -230,4 +240,72 @@ public class JRXMLUtil {
     public static String dynamicDisplayReferenceCode(final String fieldName){
         return "fr.sirs.util.JRXMLUtil.displayReferenceCode($F{"+fieldName+"})";
     }
+
+    /**
+     * Method used in metaTemplatePrestationSyntheseTable.jrxml to convert the list of intervenants (@{@link Contact}) to String.
+     *
+     * @param fieldNames @{@link List} containing the intervenants' ids.
+     * @return
+     * @see JRXMLUtil#displayReferenceCode(java.lang.String)
+     */
+    public static String displayIntervenants(final List<String> fieldNames){
+        StringBuilder result = new StringBuilder();
+        if (fieldNames != null) {
+            final List<Contact> contacts = (InjectorCore.getBean(SessionCore.class).getRepositoryForClass(Contact.class)).get(fieldNames);
+            contacts.forEach(contact -> {
+                if (contact == null) return;
+                String name = contact.getNom();
+                String firstname = contact.getPrenom();
+                if (result.length() != 0) result.append("\n");
+                if (name != null) {
+                    result.append(name);
+                    if (firstname != null) result.append(" " + firstname);
+                } else if (firstname != null) {
+                    result.append(firstname);
+                } else {
+                    result.append("Nom non renseigné");
+                }
+            });
+        }
+        if (result.length() == 0) result.append("-");
+        return result.toString();
+    }
+
+    /**
+     * Method used in metaTemplatePrestationSyntheseTable.jrxml to convert the Utilisateur (@{@link Utilisateur}) to String.
+     *
+     * @param fieldName id of the @Utilisateur to display login for.
+     * @return
+     */
+    public static String displayLogin(final String fieldName){
+        UtilisateurRepository contactRepo = (UtilisateurRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(Utilisateur.class);
+        final Utilisateur utilisateur = contactRepo.get(fieldName);
+        if (utilisateur == null) return "";
+
+        return utilisateur.getLogin();
+    }
+
+    /**
+     *
+     * @param fieldName id of the @Utilisateur to display login for.
+     * @return
+     */
+    public static String displayLibelleFromId(final String fieldName, final String fieldClass){
+        if (RefPrestation.class.getSimpleName().equals(fieldClass)) {
+            AbstractSIRSRepository<RefPrestation> typeRepo = Injector.getSession().getRepositoryForClass(RefPrestation.class);
+            final RefPrestation refPrestation = typeRepo.get(fieldName);
+            if (refPrestation == null) return "";
+            return refPrestation.getLibelle();
+        } else if (TronconDigue.class.getSimpleName().equals(fieldClass)) {
+            TronconDigueRepository tronconRepo = (TronconDigueRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(TronconDigue.class);
+            final TronconDigue tronconDigue = tronconRepo.get(fieldName);
+            if (tronconDigue == null) return "";
+            return tronconDigue.getLibelle();
+
+        }
+
+        return "";
+    }
+
+
 }

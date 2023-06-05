@@ -19,8 +19,10 @@
 package fr.sirs.core.model;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.function.Predicate;
 import javafx.beans.property.ObjectProperty;
+import org.apache.sis.measure.NumberRange;
 
 /**
  * Spécifie un interval de validité temporelle, borné par une date de début et une
@@ -115,6 +117,31 @@ public interface AvecBornesTemporelles extends AvecFinTemporelle{
         @Override
         public boolean test(AvecBornesTemporelles dated) {
             return dated.getDate_fin()==null || dated.getDate_fin().isEqual(oldArchiveDate);
+        }
+    }
+
+    /**
+     * Check that given Element is within the date Range.
+     */
+    static final public class IntersectDateRange implements Predicate<AvecBornesTemporelles> {
+
+        /**
+         * The date range to use to filter the @{@link Prestation}
+         */
+        final NumberRange dateRange;
+
+        public IntersectDateRange(final NumberRange dateRange) {
+            this.dateRange = dateRange;
+        }
+
+        @Override
+        public boolean test(AvecBornesTemporelles prestation) {
+            final LocalDate objDateDebut    = prestation.getDate_debut();
+            final LocalDate objDateFin      = prestation.getDate_fin();
+            final long debut    = objDateDebut == null ? 0 : objDateDebut.atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
+            final long fin      = objDateFin == null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
+            final NumberRange objDateRange = NumberRange.create(debut, true, fin, true);
+            return dateRange.intersectsAny(objDateRange);
         }
     }
 }
