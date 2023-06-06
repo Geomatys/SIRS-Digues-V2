@@ -133,9 +133,26 @@ public class HorodatageReportPane extends BorderPane {
         DatePickerConverter.register(uiPeriodeDebut);
         DatePickerConverter.register(uiPeriodeFin);
         uiPeriodeDebut.valueProperty().addListener((observable, oldValue, newValue) -> {
+            uiPeriodeFin.setDayCellFactory(param -> new DateCell() {
+                @Override
+                public void updateItem(LocalDate date, boolean empty) {
+                    super.updateItem(date, empty);
+                    final LocalDate dateDebut = uiPeriodeDebut.getValue();
+                    setDisable(empty || (dateDebut != null && date.isBefore(dateDebut)));
+                }
+            });
             if (uiPeriod.isSelected()) updatePrestationsAndKeepSelection();
         });
+
         uiPeriodeFin.valueProperty().addListener((observable, oldValue, newValue) -> {
+            uiPeriodeDebut.setDayCellFactory(param -> new DateCell() {
+                @Override
+                public void updateItem(LocalDate date, boolean empty) {
+                    super.updateItem(date, empty);
+                    final LocalDate dateFin = uiPeriodeFin.getValue();
+                    setDisable(empty || (dateFin != null && date.isAfter(dateFin)));
+                }
+            });
             if (uiPeriod.isSelected()) updatePrestationsAndKeepSelection();
         });
 
@@ -250,10 +267,8 @@ public class HorodatageReportPane extends BorderPane {
         if (digues.isEmpty()) return null;
 
         return digues.stream().flatMap(digue -> tronconRepo.getByDigue(digue).stream())
-                .flatMap(troncon -> {
-                    List<Prestation> presta = prestationRepo.getByLinear(troncon);
-                    return presta.stream().filter(Prestation::getRegistreAttribution);
-                })
+                .flatMap(troncon -> prestationRepo.getByLinear(troncon).stream())
+                .filter(Prestation::getRegistreAttribution)
                 .collect(Collectors.toList());
     }
 
