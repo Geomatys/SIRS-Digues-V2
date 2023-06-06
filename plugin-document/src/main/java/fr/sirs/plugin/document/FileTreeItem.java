@@ -212,15 +212,15 @@ public class FileTreeItem extends TreeItem<File> {
     }
     
     public boolean isSe() {
-        return PropertiesFileUtilities.getIsModelFolder(getValue(), DocumentsPane.SE);
+        return PropertiesFileUtilities.getIsModelFolder(getValue(), PropertiesFileUtilities.SE);
     }
     
     public boolean isDg() {
-        return PropertiesFileUtilities.getIsModelFolder(getValue(), DocumentsPane.DG);
+        return PropertiesFileUtilities.getIsModelFolder(getValue(), PropertiesFileUtilities.DG);
     }
     
     public boolean isTr() {
-        return PropertiesFileUtilities.getIsModelFolder(getValue(), DocumentsPane.TR);
+        return PropertiesFileUtilities.getIsModelFolder(getValue(), PropertiesFileUtilities.TR);
     }
             
     private static class FileTreeItemComparator implements Comparator<TreeItem<File>> {

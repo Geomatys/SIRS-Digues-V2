@@ -150,11 +150,6 @@ public class DocumentsPane extends GridPane {
     public static final String DATE_RANGE_MIN   = "dateRangeMin";
     public static final String DATE_RANGE_MAX   = "dateRangeMax";
 
-    public static final String SE = "se";
-    public static final String TR = "tr";
-    public static final String DG = "dg";
-
-
     private static final Logger LOGGER = Logging.getLogger("fr.sirs");
 
     private final FileTreeItem root;
@@ -203,139 +198,85 @@ public class DocumentsPane extends GridPane {
 
         // Name column
         tree1.getColumns().get(0).setEditable(false);
-        tree1.getColumns().get(0).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final TreeItem item = ((CellDataFeatures)param).getValue();
-                if (item != null) {
-                    final File f = (File) item.getValue();
-                    return new SimpleObjectProperty(f);
-                }
-                return null;
+        tree1.getColumns().get(0).setCellValueFactory((Callback) param -> {
+            final TreeItem item = ((CellDataFeatures)param).getValue();
+            if (item != null) {
+                final File f = (File) item.getValue();
+                return new SimpleObjectProperty(f);
             }
+            return null;
         });
-        tree1.getColumns().get(0).setCellFactory(new Callback() {
-            @Override
-            public TreeTableCell call(Object param) {
-                return new FileNameCell();
-            }
-        });
+        tree1.getColumns().get(0).setCellFactory((Callback) param -> new FileNameCell());
 
         // Date column
         tree1.getColumns().get(1).setEditable(false);
-        tree1.getColumns().get(1).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final TreeItem item = ((CellDataFeatures)param).getValue();
-                if (item != null) {
-                    final File f = (File) item.getValue();
-                    synchronized (DATE_FORMATTER) {
-                        return new SimpleStringProperty(DATE_FORMATTER.format(new Date(f.lastModified())));
-                    }
+        tree1.getColumns().get(1).setCellValueFactory((Callback) param -> {
+            final TreeItem item = ((CellDataFeatures)param).getValue();
+            if (item != null) {
+                final File f = (File) item.getValue();
+                synchronized (DATE_FORMATTER) {
+                    return new SimpleStringProperty(DATE_FORMATTER.format(new Date(f.lastModified())));
                 }
-                return null;
             }
+            return null;
         });
 
         // Size column
         tree1.getColumns().get(2).setEditable(false);
-        tree1.getColumns().get(2).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
-                if (f != null) {
-                    return new SimpleStringProperty(f.getSize());
-                }
-                return null;
+        tree1.getColumns().get(2).setCellValueFactory((Callback) param -> {
+            final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
+            if (f != null) {
+                return new SimpleStringProperty(f.getSize());
             }
+            return null;
         });
 
         // Inventory number column
-        tree1.getColumns().get(3).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final TreeItem item = ((CellDataFeatures)param).getValue();
-                if (item != null) {
-                    final File f = (File) item.getValue();
-                    return new SimpleObjectProperty(f);
-                }
-                return null;
+        tree1.getColumns().get(3).setCellValueFactory((Callback) param -> {
+            final TreeItem item = ((CellDataFeatures)param).getValue();
+            if (item != null) {
+                final File f = (File) item.getValue();
+                return new SimpleObjectProperty(f);
             }
+            return null;
         });
-        tree1.getColumns().get(3).setCellFactory(new Callback() {
-            @Override
-            public TreeTableCell call(Object param) {
-                return new PropertyCell(INVENTORY_NUMBER);
-            }
-        });
+        tree1.getColumns().get(3).setCellFactory((Callback) param -> new PropertyCell(INVENTORY_NUMBER));
 
         // class place column
-        tree1.getColumns().get(4).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final TreeItem item = ((CellDataFeatures)param).getValue();
-                if (item != null) {
-                    final File f = (File) item.getValue();
-                    return new SimpleObjectProperty(f);
-                }
-                return null;
+        tree1.getColumns().get(4).setCellValueFactory((Callback) param -> {
+            final TreeItem item = ((CellDataFeatures)param).getValue();
+            if (item != null) {
+                final File f = (File) item.getValue();
+                return new SimpleObjectProperty(f);
             }
+            return null;
         });
-        tree1.getColumns().get(4).setCellFactory(new Callback() {
-            @Override
-            public TreeTableCell call(Object param) {
-                return new PropertyCell(CLASS_PLACE);
-            }
-        });
+        tree1.getColumns().get(4).setCellFactory((Callback) param -> new PropertyCell(CLASS_PLACE));
 
         // do integrated column
-        tree1.getColumns().get(5).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final TreeItem item = ((CellDataFeatures)param).getValue();
-                if (item != null) {
-                    final File f = (File) item.getValue();
-                    return new SimpleObjectProperty(f);
-                }
-                return null;
+        tree1.getColumns().get(5).setCellValueFactory((Callback) param -> {
+            final TreeItem item = ((CellDataFeatures)param).getValue();
+            if (item != null) {
+                final File f = (File) item.getValue();
+                return new SimpleObjectProperty(f);
             }
+            return null;
         });
-        tree1.getColumns().get(5).setCellFactory(new Callback() {
-            @Override
-            public TreeTableCell call(Object param) {
-                return new DOIntegatedCell();
-            }
-        });
+        tree1.getColumns().get(5).setCellFactory((Callback) param -> new DOIntegatedCell());
 
         // publish column
-        tree1.getColumns().get(6).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
-                return new SimpleObjectProperty(f);
-            }
+        tree1.getColumns().get(6).setCellValueFactory((Callback) param -> {
+            final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
+            return new SimpleObjectProperty(f);
         });
-        tree1.getColumns().get(6).setCellFactory(new Callback() {
-            @Override
-            public TreeTableCell call(Object param) {
-                return new PublicationCell(root);
-            }
-        });
+        tree1.getColumns().get(6).setCellFactory((Callback) param -> new PublicationCell(root));
 
         // open column
-        tree1.getColumns().get(7).setCellValueFactory(new Callback() {
-            @Override
-            public ObservableValue call(Object param) {
-                final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
-                return new SimpleObjectProperty(f);
-            }
+        tree1.getColumns().get(7).setCellValueFactory((Callback) param -> {
+            final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
+            return new SimpleObjectProperty(f);
         });
-        tree1.getColumns().get(7).setCellFactory(new Callback() {
-            @Override
-            public TreeTableCell call(Object param) {
-                return new OpenCell();
-            }
-        });
+        tree1.getColumns().get(7).setCellFactory((Callback) param -> new OpenCell());
 
 
         tree1.setShowRoot(false);
