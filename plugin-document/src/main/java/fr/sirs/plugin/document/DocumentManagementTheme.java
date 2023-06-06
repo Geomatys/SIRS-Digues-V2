@@ -52,14 +52,10 @@ public final class DocumentManagementTheme extends AbstractPluginsButtonTheme {
 
     @Override
     public ChangeListener<Boolean> getSelectedPropertyListener() {
-        return new ChangeListener<Boolean>() {
-
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if (newValue && root.getValue() != null) {
-                    PropertiesFileUtilities.updateFileSystem(root.getValue());
-                    root.update(root.rootShowHiddenFile);
-                }
+        return (observable, oldValue, newValue) -> {
+            if (newValue && root.getValue() != null) {
+                PropertiesFileUtilities.updateFileSystem(root.getValue());
+                root.update(root.rootShowHiddenFile);
             }
         };
     }

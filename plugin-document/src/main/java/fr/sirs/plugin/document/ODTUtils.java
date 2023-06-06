@@ -28,9 +28,9 @@ import static fr.sirs.plugin.document.PropertiesFileUtilities.getOrCreateDG;
 import static fr.sirs.plugin.document.PropertiesFileUtilities.getOrCreateTR;
 import static fr.sirs.plugin.document.PropertiesFileUtilities.setBooleanProperty;
 import static fr.sirs.plugin.document.PropertiesFileUtilities.setProperty;
+import static fr.sirs.plugin.document.ui.DocumentsPane.*;
 import fr.sirs.plugin.document.ui.DocumentsPane;
-import static fr.sirs.plugin.document.ui.DocumentsPane.DYNAMIC;
-import static fr.sirs.plugin.document.ui.DocumentsPane.MODELE;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -67,8 +67,8 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                 final AtomicInteger progress = new AtomicInteger(0);
                 final ArrayList<Task> tasks = new ArrayList<>();
                 for (TronconDigue troncon : troncons) {
-                    final File digDir = getOrCreateDG(seDir, digueRepo.get(troncon.getDigueId()));
-                    final File docDir = new File(getOrCreateTR(digDir, troncon), DocumentsPane.DOCUMENT_FOLDER);
+                    final File digDir = getOrCreateDG(seDir, digueRepo.get(troncon.getDigueId()), LIBELLE, true, DOCUMENT_FOLDER);
+                    final File docDir = new File(getOrCreateTR(digDir, troncon, LIBELLE, true, DOCUMENT_FOLDER), DOCUMENT_FOLDER);
                     final File newDoc = new File(docDir, docName);
 
                     List<Objet> elements = getElements(troncons, dateRange);
