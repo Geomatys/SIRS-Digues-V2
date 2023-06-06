@@ -32,7 +32,6 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Panneau regroupant les fonctionnalités en lien avec les Registres.
@@ -47,25 +46,27 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         super("Registre", "Registre", BUTTON_IMAGE);
     }
 
+    public static String refNonTimeStampedStatus;
+    public static String refWaitingStatus;
+    public static String refTimeStampedStatus;
+
     @Override
     public Parent createPane() {
         // Check whether all @RefHorodatageStatus are available : Non horodaté, En attente, Horodaté.
-        final String[] refNonTimeStampedStatus = new String[1];
-        final String[] refWaitingStatus = new String[1];
-        final String[] refTimeStampedStatus = new String[1];
 
-        if (!checkRefHorodatageStatusAllPresent(refNonTimeStampedStatus, refWaitingStatus, refTimeStampedStatus)) {
+        if (!checkRefHorodatageStatusAllPresent()) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setResizable(true);
             alert.getDialogPane().setMinWidth(650);
-            alert.getDialogPane().setMinHeight(300);
+            alert.getDialogPane().setMinHeight(400);
             alert.setTitle("Statuts d'horodatage manquant");
-            alert.setContentText("Les statuts d'horodatage suivant sont nécessaires au fonctionnement de la génération du tableau de synthèse des prestations : " +
+            alert.setContentText("Les statuts d'horodatage suivants sont nécessaires au fonctionnement de la génération du tableau de synthèse des prestations : " +
                     "\n" +
                     "\n- Non horodaté" +
                     "\n- En attente" +
                     "\n- Horodaté" +
-                    "\n\nVeuillez mettre à jour la table de référence avant de revenir au menu Registre.");
+                    "\n\nVeuillez mettre à jour la table de référence avant de revenir au menu Registre." +
+                    "\n\n Important : le redémarrage de l'application est nécessaire afin de prendre en compte les nouvelles valeurs de référence.");
 
             alert.showAndWait();
             final Session session = Injector.getSession();
@@ -80,7 +81,7 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         final Tab syntheseTab = new Tab("Tableaux de synthèse");
         syntheseTab.setClosable(false);
 
-        syntheseTab.setContent(new HorodatageReportPane(refNonTimeStampedStatus[0], refWaitingStatus[0]));
+        syntheseTab.setContent(new HorodatageReportPane());
 
         // Onglet to import timestamped "Tableaux de Synthèse" and create the final report with cover page and summary table.
         // TODO modify content to get a folder tree : SE -> year -> files
@@ -106,7 +107,7 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
      * </ul>
      * @return true if all the requested status are present.
      */
-    private boolean checkRefHorodatageStatusAllPresent(final String[] refNonTimeStampedStatus, final String[] refWaitingStatus, final String[] refTimeStampedStatus) {
+    private boolean checkRefHorodatageStatusAllPresent() {
         final List<RefHorodatageStatus> allStatus = Injector.getBean(RefHorodatageStatusRepository.class).getAll();
         if (allStatus == null || allStatus.isEmpty())
             return false;
@@ -115,13 +116,13 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         allStatus.stream().forEach(status -> {
             String libelle = status.getLibelle();
             if ("Non horodaté".equalsIgnoreCase(libelle.trim()))
-                refNonTimeStampedStatus[0] = status.getId();
+                refNonTimeStampedStatus = status.getId();
             else if ("En attente".equalsIgnoreCase(libelle.trim()))
-                refWaitingStatus[0] = status.getId();
+                refWaitingStatus = status.getId();
             else if ("Horodaté".equalsIgnoreCase(libelle.trim()))
-                refTimeStampedStatus[0] = status.getId();
+                refTimeStampedStatus = status.getId();
         });
-        return refNonTimeStampedStatus[0] != null && refWaitingStatus[0] != null && refTimeStampedStatus[0] != null;
+        return refNonTimeStampedStatus != null && refWaitingStatus != null && refTimeStampedStatus != null;
     }
 
 }
