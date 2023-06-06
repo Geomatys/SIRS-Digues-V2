@@ -19,6 +19,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
+import fr.sirs.plugin.reglementaire.RegistreTheme;
 import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
@@ -44,7 +45,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -92,24 +92,17 @@ public class HorodatageReportPane extends BorderPane {
 
     private final String JRXML_PATH = "/fr/sirs/jrxml/metaTemplatePrestationSyntheseTable.jrxml";
     private static final String PATH_KEY = "path";
-    private final String refNonTimeStampedStatus;
-    private final String refWaitingStatus;
 
     @Autowired
     private Session session;
 
-    public HorodatageReportPane(final String refNonTimeStampedStatus, final String refWaitingStatus) {
+    public HorodatageReportPane() {
         super();
-        ArgumentChecks.ensureNonNull("refNonTimeStampedStatus", refNonTimeStampedStatus);
-        ArgumentChecks.ensureNonNull("refWaitingStatus", refWaitingStatus);
 
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
 
         uiTitre.setText("Tableau de synthèse prestation pour Registre horodaté");
-
-        this.refNonTimeStampedStatus = refNonTimeStampedStatus;
-        this.refWaitingStatus = refWaitingStatus;
 
         // Date filter checkbox
         // When the the checkbox is unselected, the uiPeriodeDebut and uiPeriodeFin can still be updated.
@@ -319,7 +312,7 @@ public class HorodatageReportPane extends BorderPane {
         if (prestations.isEmpty()) return;
         // Keeps all prestations with a status "Non horodaté"
         prestations.stream()
-                .filter(prestation -> this.refNonTimeStampedStatus.equals(prestation.getHorodatageStatusId()))
+                .filter(prestation -> RegistreTheme.refNonTimeStampedStatus.equals(prestation.getHorodatageStatusId()))
                 .forEach(presta -> uiPrestations.getSelectionModel().select(presta));
     }
 
@@ -390,7 +383,7 @@ public class HorodatageReportPane extends BorderPane {
             // Change prestations' horodatage status to "En attente".
             PrestationRepository repo   = Injector.getBean(PrestationRepository.class);
             prestations.forEach(p -> {
-                p.setHorodatageStatusId(this.refWaitingStatus);
+                p.setHorodatageStatusId(RegistreTheme.refWaitingStatus);
                 repo.update(p);
             });
 

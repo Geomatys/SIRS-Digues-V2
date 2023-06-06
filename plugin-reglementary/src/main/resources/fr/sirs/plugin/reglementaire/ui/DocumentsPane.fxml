@@ -45,7 +45,7 @@
       <VBox maxWidth="1.7976931348623157E308" styleClass="buttonbarleftvert" GridPane.columnIndex="1" GridPane.rowIndex="4">
          <children>
             <Button fx:id="addFolderButton" mnemonicParsing="false" onAction="#showAddFolderDialog" />
-            <Button fx:id="importDocButton" mnemonicParsing="false" onAction="#showImportDialog" />
+            <Button fx:id="importDocButton" mnemonicParsing="false" onAction="#createAndShowImportDialog" />
             <Button fx:id="addDocButton" mnemonicParsing="false" onAction="#openDynamicDocTab" />
             <Button fx:id="deleteDocButton" mnemonicParsing="false" onAction="#showRemoveDialog" />
             <Pane prefHeight="20.0" prefWidth="20.0" />
