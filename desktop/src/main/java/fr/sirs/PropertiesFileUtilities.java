@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -81,7 +81,7 @@ public class PropertiesFileUtilities {
      * @param value The value to set.
      */
     public static void setProperty(final File f, final String property, final String value) {
-        final Properties prop   = getSirsProperties(f, true);
+        final Properties prop = getSirsProperties(f, true);
         prop.put(f.getName() + "_" + property, value);
         storeSirsProperties(prop, f, true);
     }
@@ -92,7 +92,7 @@ public class PropertiesFileUtilities {
      * @param property Name of the property.
      */
     public static void removeProperty(final File f, final String property) {
-        final Properties prop   = getSirsProperties(f, true);
+        final Properties prop = getSirsProperties(f, true);
         prop.remove(f.getName() + "_" + property);
         storeSirsProperties(prop, f, true);
     }
@@ -116,7 +116,7 @@ public class PropertiesFileUtilities {
      * @param value The value to set.
      */
     public static void setBooleanProperty(final File f, final String property, boolean value) {
-        final Properties prop   = getSirsProperties(f, true);
+        final Properties prop = getSirsProperties(f, true);
         prop.put(f.getName() + "_" + property, Boolean.toString(value));
 
         storeSirsProperties(prop, f, true);
@@ -149,11 +149,11 @@ public class PropertiesFileUtilities {
      * @param libelle The name that will be displayed in UI.
      */
     public static void setIsModelFolder(final File f, final String model, final String libelle, final String LIBELLE) {
-        final Properties prop   = getSirsProperties(f, true);
+        final Properties prop = getSirsProperties(f, true);
         prop.put(f.getName() + "_" + model, "true");
         prop.put(f.getName() + "_" + LIBELLE, libelle);
 
-       storeSirsProperties(prop, f, true);
+        storeSirsProperties(prop, f, true);
     }
 
     /**
@@ -162,11 +162,11 @@ public class PropertiesFileUtilities {
      * @param f A file.
      */
     public static void removeProperties(final File f) {
-        final Properties prop   = getSirsProperties(f, true);
+        final Properties prop = getSirsProperties(f, true);
 
-        Set<Entry<Object,Object>> properties = new HashSet<>(prop.entrySet());
-        for (Entry<Object,Object> entry : properties) {
-            if (((String)entry.getKey()).startsWith(f.getName())) {
+        Set<Entry<Object, Object>> properties = new HashSet<>(prop.entrySet());
+        for (Entry<Object, Object> entry : properties) {
+            if (((String) entry.getKey()).startsWith(f.getName())) {
                 prop.remove(entry.getKey());
             }
         }
@@ -264,7 +264,7 @@ public class PropertiesFileUtilities {
         final float sizeTerra  = sizeGo * sizeKb;
 
         if (size < sizeKb) {
-            return df.format(size)          + " o";
+            return df.format(size) + " o";
         } else if (size < sizeMo) {
             return df.format(size / sizeKb) + " Ko";
         } else if (size < sizeGo) {
@@ -291,19 +291,19 @@ public class PropertiesFileUtilities {
     }
 
     public static File getOrCreateSE(final File rootDirectory, final SystemeEndiguement sd, final String LIBELLE,
-                                     final boolean createDocumentFolder, final String DOCUMENT_FOLDER){
+                                     final boolean createDocumentFolder, final String DOCUMENT_FOLDER) {
         ArgumentChecks.ensureNonNull("Systeme d'endiguement sd", sd);
         if (createDocumentFolder && DOCUMENT_FOLDER == null)
-            throw new IllegalArgumentException("The attribute DOCUMENT_FOLDER must be not null when createDocumentFolder is true");
+            throw new IllegalArgumentException("The attribute DOCUMENT_FOLDER must not be null when createDocumentFolder is true");
 
         return getOrCreateForLibelledElement(rootDirectory, SE, sd, LIBELLE, createDocumentFolder, DOCUMENT_FOLDER);
     }
 
     public static File getOrCreateDG(final File rootDirectory, final Digue digue, final String LIBELLE,
-                                     final boolean createDocumentFolder, final String DOCUMENT_FOLDER){
+                                     final boolean createDocumentFolder, final String DOCUMENT_FOLDER) {
         ArgumentChecks.ensureNonNull("Digue", digue);
         if (createDocumentFolder && DOCUMENT_FOLDER == null)
-            throw new IllegalArgumentException("The attribute DOCUMENT_FOLDER must be not null when createDocumentFolder is true");
+            throw new IllegalArgumentException("The attribute DOCUMENT_FOLDER must not be null when createDocumentFolder is true");
         return getOrCreateForLibelledElement(rootDirectory, DG, digue, LIBELLE, createDocumentFolder, DOCUMENT_FOLDER);
     }
 
@@ -311,7 +311,7 @@ public class PropertiesFileUtilities {
                                      final boolean createDocumentFolder, final String DOCUMENT_FOLDER) {
         ArgumentChecks.ensureNonNull("TronconDigue", tronconDigue);
         if (createDocumentFolder && DOCUMENT_FOLDER == null)
-            throw new IllegalArgumentException("The attribute DOCUMENT_FOLDER must be not null when createDocumentFolder is true");
+            throw new IllegalArgumentException("The attribute DOCUMENT_FOLDER must not be null when createDocumentFolder is true");
         return getOrCreateForLibelledElement(rootDirectory, TR, tronconDigue, LIBELLE, createDocumentFolder, DOCUMENT_FOLDER);
     }
 
@@ -319,7 +319,7 @@ public class PropertiesFileUtilities {
      * @param model SE, DG or TR.
      */
     public static <T extends Element & AvecLibelle> File getOrCreateForLibelledElement(final File rootDirectory, final String model, final T libelledElement, final String LIBELLE,
-                                                                                        final boolean createDocumentFolder, final String DOCUMENT_FOLDER) {
+                                                                                       final boolean createDocumentFolder, final String DOCUMENT_FOLDER) {
         switch (model) {
             case SE:
             case DG:
@@ -341,7 +341,7 @@ public class PropertiesFileUtilities {
         setIsModelFolder(trDir, model, name, LIBELLE);
         if (createDocumentFolder) {
             if (DOCUMENT_FOLDER == null)
-                throw new IllegalArgumentException("The attribute DOCUMENT_FOLDER must be not null when createDocumentFolder is true");
+                throw new IllegalArgumentException("The attribute DOCUMENT_FOLDER must not be null when createDocumentFolder is true");
             final File docDir = new File(trDir, DOCUMENT_FOLDER);
             if (!docDir.exists()) {
                 docDir.mkdir();
@@ -366,7 +366,7 @@ public class PropertiesFileUtilities {
 
     public static void backupDirectories(final File saveDir, final Collection<File> files, final boolean createDocumentFolder, final String DOCUMENT_FOLDER) {
         if (createDocumentFolder && DOCUMENT_FOLDER == null)
-            throw new IllegalArgumentException("The attribute DOCUMENT_FOLDER must be not null when createDocumentFolder is true");
+            throw new IllegalArgumentException("The attribute DOCUMENT_FOLDER must not be null when createDocumentFolder is true");
         for (File f : files) {
             backupDirectory(saveDir, f, createDocumentFolder, DOCUMENT_FOLDER);
         }
@@ -374,14 +374,14 @@ public class PropertiesFileUtilities {
 
     public static void backupDirectory(final File saveDir, final File f, final boolean createDocumentFolder, final String DOCUMENT_FOLDER) {
         if (createDocumentFolder && DOCUMENT_FOLDER == null)
-            throw new IllegalArgumentException("The attribute DOCUMENT_FOLDER must be not null when createDocumentFolder is true");
+            throw new IllegalArgumentException("The attribute DOCUMENT_FOLDER must not be null when createDocumentFolder is true");
 
         // extract properties
-        final Map<Object, Object> extracted  = new HashMap<>();
-        final Properties prop                = getSirsProperties(f, true);
-        Set<Entry<Object,Object>> properties = new HashSet<>(prop.entrySet());
-        for (Entry<Object,Object> entry : properties) {
-            if (((String)entry.getKey()).startsWith(f.getName())) {
+        final Map<Object, Object> extracted = new HashMap<>();
+        final Properties prop = getSirsProperties(f, true);
+        Set<Entry<Object, Object>> properties = new HashSet<>(prop.entrySet());
+        for (Entry<Object, Object> entry : properties) {
+            if (((String) entry.getKey()).startsWith(f.getName())) {
                 extracted.put(entry.getKey(), entry.getValue());
                 prop.remove(entry.getKey());
             }
@@ -417,13 +417,13 @@ public class PropertiesFileUtilities {
         }
     }
 
-    public  static Set<File> listModel(final File rootDirectory, final String model) {
+    public static Set<File> listModel(final File rootDirectory, final String model) {
         Set<File> modelList = new HashSet<>();
         listModel(rootDirectory, modelList, model, true);
         return modelList;
     }
 
-    public  static Set<File> listModel(final File rootDirectory, final String model, final boolean deep) {
+    public static Set<File> listModel(final File rootDirectory, final String model, final boolean deep) {
         Set<File> modelList = new HashSet<>();
         listModel(rootDirectory, modelList, model, deep);
         return modelList;
@@ -434,7 +434,7 @@ public class PropertiesFileUtilities {
             if (f.isDirectory()) {
                 if (getIsModelFolder(f, model)) {
                     modelList.add(f);
-                } else if (deep){
+                } else if (deep) {
                     listModel(f, modelList, model, deep);
                 }
             }
@@ -456,7 +456,7 @@ public class PropertiesFileUtilities {
     }
 
     public static boolean verifyDatabaseVersion(final File rootDirectory) {
-        final String key         = getDatabaseIdentifier();
+        final String key = getDatabaseIdentifier();
         final String existingKey = getExistingDatabaseIdentifier(rootDirectory);
         if (existingKey == null) {
             return true;
@@ -467,15 +467,15 @@ public class PropertiesFileUtilities {
     }
 
     private static boolean showBadVersionDialog(final String existingKey, final String dbKey) {
-        final Dialog dialog    = new Alert(Alert.AlertType.ERROR);
-        final DialogPane pane  = new DialogPane();
+        final Dialog dialog = new Alert(Alert.AlertType.ERROR);
+        final DialogPane pane = new DialogPane();
         final DatabaseVersionPane ipane = new DatabaseVersionPane(existingKey, dbKey);
         pane.setContent(ipane);
         pane.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
         dialog.setDialogPane(pane);
         dialog.setResizable(true);
-        dialog.setTitle("Version de la base differente");
-        dialog.setContentText("Le système de fichier que vous tenter d'ouvrir correspond a une autre base de données.\n Voulez vous l'ouvrir quand même?");
+        dialog.setTitle("Version de la base différente");
+        dialog.setContentText("Le système de fichier que vous tentez d'ouvrir correspond à une autre base de données.\n Souhaitez-vous tout de même l'ouvrir ?");
         final Optional opt = dialog.showAndWait();
         return opt.isPresent() && ButtonType.YES.equals(opt.get());
     }
@@ -485,12 +485,12 @@ public class PropertiesFileUtilities {
         final Optional<SirsDBInfo> info = dbRepo.get();
         if (info.isPresent()) {
             final SirsDBInfo dbInfo = info.get();
-            return dbInfo.getUuid() + "|" + dbInfo.getEpsgCode() + "|" + dbInfo.getVersion()  + "|" + dbInfo.getRemoteDatabase();
+            return dbInfo.getUuid() + "|" + dbInfo.getEpsgCode() + "|" + dbInfo.getVersion() + "|" + dbInfo.getRemoteDatabase();
         }
         return null;
     }
 
-    public static  List<Objet> getElements(Collection<TronconDigue> troncons, final NumberRange dateRange) {
+    public static List<Objet> getElements(Collection<TronconDigue> troncons, final NumberRange dateRange) {
         final ArrayList<Objet> elements = new ArrayList<>();
         final Collection<AbstractPositionableRepository<Objet>> repos = (Collection) Injector.getSession().getRepositoriesForClass(Objet.class);
 
@@ -525,24 +525,65 @@ public class PropertiesFileUtilities {
     }
 
     public static void showErrorDialog(final String errorMsg) {
-        final Dialog dialog    = new Alert(Alert.AlertType.ERROR);
-        final DialogPane pane  = new DialogPane();
-        pane.getButtonTypes().addAll(ButtonType.OK);
-        dialog.setDialogPane(pane);
-        dialog.setResizable(true);
-        dialog.setTitle("Erreur");
-        dialog.setContentText(errorMsg);
-        dialog.showAndWait();
+        showErrorDialog(errorMsg, null, 0, 0);
     }
 
-    public static void showConfirmDialog(final String errorMsg) {
-        final Dialog dialog    = new Alert(Alert.AlertType.CONFIRMATION);
-        final DialogPane pane  = new DialogPane();
-        pane.getButtonTypes().addAll(ButtonType.OK);
-        dialog.setDialogPane(pane);
+    public static void showErrorDialog(final String errorMsg, final String title, final int width, final int height) {
+        createAlert(Alert.AlertType.ERROR, title, errorMsg, width, height);
+    }
+
+    public static void showInformationDialog(final String errorMsg) {
+        createAlert(Alert.AlertType.INFORMATION, errorMsg, 0, 0);
+    }
+
+    public static void showInformationDialog(final String errorMsg, final String title, final int width, final int height) {
+        createAlert(Alert.AlertType.INFORMATION, title, errorMsg, width, height);
+    }
+
+    public static void showSuccessDialog(final String errorMsg) {
+        createAlert(Alert.AlertType.INFORMATION, "succès", errorMsg, 0, 0);
+    }
+
+    public static void showSuccessDialog(final String errorMsg, String title, final int width, final int height) {
+        if (title == null) title = "Succès";
+        createAlert(Alert.AlertType.INFORMATION, title, errorMsg, width, height);
+    }
+
+    public static Optional showConfirmationDialog(final String errorMsg) {
+        return createAlert(Alert.AlertType.INFORMATION, errorMsg, 0, 0);
+    }
+
+    public static Optional showConfirmationDialog(final String errorMsg, final String title, final int width, final int height, final boolean addNoYesButton) {
+        return createAlert(Alert.AlertType.CONFIRMATION, title, errorMsg, width, height, addNoYesButton);
+    }
+
+    public static void showWarningDialog(final String errorMsg) {
+        createAlert(Alert.AlertType.WARNING, errorMsg, 0, 0);
+    }
+
+    public static void showWarningDialog(final String errorMsg, final String title, final int width, final int height) {
+        createAlert(Alert.AlertType.WARNING, title, errorMsg, width, height, false);
+    }
+
+    private static Optional createAlert(final Alert.AlertType type, final String contentMsg, final int width, final int height) {
+        return createAlert(type, null, contentMsg, width, height);
+    }
+
+    private static Optional createAlert(final Alert.AlertType type, final String title, final String contentMsg, final int width, final int height) {
+        return createAlert(type, title, contentMsg, width, height, false);
+    }
+
+    private static Optional createAlert(final Alert.AlertType type, final String contentMsg, final int width, final int height, final boolean addNoYesButton) {
+        return createAlert(type, null, contentMsg, width, height, addNoYesButton);
+    }
+
+    private static Optional createAlert(final Alert.AlertType type, final String title, final String contentMsg, final int width, final int height, final boolean addNoYesButton) {
+        final Alert dialog = addNoYesButton ? new Alert(type, contentMsg, ButtonType.CANCEL, ButtonType.NO, ButtonType.YES) : new Alert(type, contentMsg);
         dialog.setResizable(true);
-        dialog.setTitle("Succès");
-        dialog.setContentText(errorMsg);
-        dialog.showAndWait();
+        if (width != 0) dialog.getDialogPane().setPrefWidth(width);
+        if (height != 0) dialog.getDialogPane().setPrefHeight(height);
+        if (title != null) dialog.setTitle(title);
+        dialog.setHeaderText(null);
+        return dialog.showAndWait();
     }
 }
