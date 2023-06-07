@@ -21,6 +21,7 @@ package fr.sirs.plugin.reglementaire.ui;
 
 import com.giaybac.traprange.PDFTableExtractor;
 import com.giaybac.traprange.entity.Table;
+import com.giaybac.traprange.entity.TableCell;
 import com.giaybac.traprange.entity.TableRow;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
@@ -31,6 +32,7 @@ import fr.sirs.core.component.PrestationRepository;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.Role;
 import fr.sirs.plugin.reglementaire.FileTreeItem;
+import fr.sirs.plugin.reglementaire.PluginReglementary;
 import fr.sirs.plugin.reglementaire.PropertiesFileUtilities;
 import fr.sirs.plugin.reglementaire.RegistreTheme;
 import fr.sirs.ui.Growl;
@@ -259,7 +261,7 @@ public class DocumentsPane extends GridPane {
         tree1.setShowRoot(false);
         tree1.setRoot(root);
 
-        final Preferences prefs = Preferences.userRoot().node("ReglementaryPlugin");
+        final Preferences prefs = Preferences.userRoot().node(PluginReglementary.NODE_PREFERENCE_NAME);
         final String rootPath   = prefs.get(ROOT_FOLDER, null);
 
         if (rootPath != null && PropertiesFileUtilities.verifyDatabaseVersion(new File(rootPath))) {
@@ -299,10 +301,7 @@ public class DocumentsPane extends GridPane {
     public void createAndShowImportDialog(ActionEvent event) throws IOException {
         final File directory = getSelectedFile();
         if (directory == null || !directory.isDirectory()) {
-            final Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setHeaderText(null);
-            alert.setContentText("Veuillez sélectionner un dossier dans la liste des dossiers et fichiers");
-            alert.showAndWait();
+            showInformationDialog("Veuillez sélectionner un dossier dans la liste des dossiers et fichiers");
             return;
         }
         final Dialog dialog    = new Dialog();
@@ -348,50 +347,35 @@ public class DocumentsPane extends GridPane {
             final File newFile              = new File(directory, f.getName());
 
             if (newFile.exists()) {
-                final Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setContentText("Il existe déjà un fichier du même nom dans le répertoire sélectionné : \n\n" + newFile.getPath());
-                alert.setHeaderText(null);
-                alert.getDialogPane().setPrefWidth(600);
-                alert.getDialogPane().setPrefHeight(175);
-                alert.showAndWait();
+                showWarningDialog("Il existe déjà un fichier du même nom dans le répertoire sélectionné : \n\n" + newFile.getPath(), null, 600, 175);
                 showImportDialog(dialog, directory);
                 return;
             }
 
             if (isSyntheseTable) {
-                final String tip = fName.substring(fName.lastIndexOf(".") + 1);
-                if (!"pdf".equals(tip)) {
-                    final Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setContentText("Le tableau de synthèse doit être au format pdf.");
-                    alert.setHeaderText(null);
-                    alert.showAndWait();
+                if (fName == null || !fName.endsWith(".pdf")) {
+                    showWarningDialog("Le tableau de synthèse doit être au format pdf.");
                     showImportDialog(dialog, directory);
                     return;
                 }
 
-                final Alert al = new Alert(Alert.AlertType.CONFIRMATION,
-                        "Souhaitez-vous mettre automatiquement à jour la date d'horodatage des prestations ?" +
-                                "\n\n" +
-                                "Sélectionner 'Annuler' pour annuler l'importation du fichier.",
-                        ButtonType.CANCEL, ButtonType.NO, ButtonType.YES);
-                al.setHeaderText(null);
-                al.getDialogPane().setPrefWidth(500);
-                al.getDialogPane().setPrefHeight(150);
+
+                final Optional confirmOpt = showConfirmationDialog("Souhaitez-vous mettre automatiquement à jour la date d'horodatage des prestations ?" +
+                        "\n\nSélectionner 'Annuler' pour annuler l'importation du fichier.", null, 500, 150, true);
 
                 boolean updatePrestationsDate = false;
-                final Optional opt1 = al.showAndWait();
-                if (opt1.isPresent()) {
-                    if (ButtonType.YES.equals(opt1.get())) {
+                if (confirmOpt.isPresent()) {
+                    if (ButtonType.YES.equals(confirmOpt.get())) {
                         updatePrestationsDate = true;
-                    } else if (ButtonType.NO.equals(opt1.get())) {
+                    } else if (ButtonType.NO.equals(confirmOpt.get())) {
                         // do nothing
-                    } else if (ButtonType.CANCEL.equals(opt1.get())) {
+                    } else if (ButtonType.CANCEL.equals(confirmOpt.get())) {
                         // cancel the file import process.
                         return;
                     }
                 }
 
-                extractElementsInFile(f, timeStampDate, updatePrestationsDate);
+                if (!extractElementsInFile(f, timeStampDate, updatePrestationsDate)) return;
                 setProperty(newFile, TIMESTAMP_DATE, timeStampDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             }
 
@@ -410,7 +394,7 @@ public class DocumentsPane extends GridPane {
      * @param timeStampDate
      * @param updatePrestationsDate
      */
-    private void extractElementsInFile(final File pdf_filename, final LocalDate timeStampDate, final boolean updatePrestationsDate) {
+    private boolean extractElementsInFile(final File pdf_filename, final LocalDate timeStampDate, final boolean updatePrestationsDate) {
         ArgumentChecks.ensureNonNull("pdf_filename", pdf_filename);
 
         final PDFTableExtractor extractor = (new PDFTableExtractor())
@@ -452,10 +436,39 @@ public class DocumentsPane extends GridPane {
         }
         //begin parsing pdf file
         final List<Table> tables = extractor.extract();
+
+        // Check the first line corresponds to the Tableau de synthèse header.
+        // If not -> the document is not a Tableau de synthèse.
+         List<TableCell> firstLineCells = new ArrayList<>();
+         boolean isSyntheseDoc = true;
+        try {
+            final String[] headers = "Désignation;Libellé;Tronçon;Type de prestation;Date de début;Date de fin;Intervenant;Nom auteur;Commentaire;Identifiant SIRS".split(";");
+            firstLineCells = tables.get(0).getRows().get(0).getCells();
+            if (headers.length == firstLineCells.size()) {
+                for (int i = 0; i < headers.length; i++) {
+                    if (!headers[i].equals(firstLineCells.get(i).getContent())) {
+                        isSyntheseDoc = false;
+                        break;
+                    }
+                }
+            } else {
+                isSyntheseDoc = false;
+            }
+        } catch (RuntimeException re) {
+            isSyntheseDoc = false;
+        } finally {
+            if (!isSyntheseDoc) {
+                showErrorDialog("Le document n'est pas reconnu comme un tableau de synthèse", "Document non reconnu", 0, 0);
+                return false;
+            }
+        }
+
+
+
         // Removes the header row of each page's table.
         tables.forEach(table -> table.getRows().remove(0));
 
-        final int columnsNo = tables.get(0).getRows().get(0).getCells().size();
+        final int columnsNo = firstLineCells.size();
 
         final Map<String, String> prestationsIdsAndLibelleWithError = new HashMap<>();
         for (Table table: tables) {
@@ -474,7 +487,7 @@ public class DocumentsPane extends GridPane {
                 } finally {
                     if (oldRow) continue;
                     final PrestationRepository prestationRepo = Injector.getBean(PrestationRepository.class);
-                    Prestation prestation = null;
+                    final Prestation prestation;
                     try {
                         prestation = prestationRepo.get(idSirs);
                     } catch (RuntimeException re) {
@@ -497,31 +510,20 @@ public class DocumentsPane extends GridPane {
             }
         }
 
-        if (prestationsIdsAndLibelleWithError.isEmpty()) return;
+        if (prestationsIdsAndLibelleWithError.isEmpty()) return true;
 
         final StringBuilder text = new StringBuilder();
-        prestationsIdsAndLibelleWithError.forEach((id, libelle) -> {
-            text.append("\n  -  ").append(libelle).append(" / ").append(id);
-        });
-        final Alert alert = new Alert(Alert.AlertType.WARNING, "Erreur lors de la récupération de " + prestationsIdsAndLibelleWithError.size() + " prestations : \n" + text);
-        alert.getDialogPane().setPrefWidth(600);
-        alert.getDialogPane().setPrefHeight(400);
-        alert.setResizable(true);
-        alert.showAndWait();
+        prestationsIdsAndLibelleWithError.forEach((id, libelle) -> text.append("\n  -  ").append(libelle).append(" / ").append(id));
+        showWarningDialog("Erreur lors de la récupération de " + prestationsIdsAndLibelleWithError.size() + " prestations : \n" + text, null, 600, 400);
+
+        return true;
     }
 
 
     @FXML
     public void showRemoveDialog(ActionEvent event) throws IOException {
-        final Dialog dialog    = new Dialog();
-        final DialogPane pane  = new DialogPane();
-        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-        dialog.setDialogPane(pane);
-        dialog.setResizable(true);
-        dialog.setTitle("Détruire document");
-        dialog.setContentText("Détruire le fichier/dossier dans le système de fichier ?");
+        final Optional opt      = showConfirmationDialog("Détruire le fichier/dossier dans le système de fichier ?", "Détruire document", 0, 0, false);
 
-        final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
             final File f = getSelectedFile();
             if (f != null) {
@@ -559,7 +561,7 @@ public class DocumentsPane extends GridPane {
 //                    && verifyDatabaseVersion(f)) {
                 String rootPath = f.getPath();
 
-                final Preferences prefs = Preferences.userRoot().node("ReglementaryPlugin");
+                final Preferences prefs = Preferences.userRoot().node(PluginReglementary.NODE_PREFERENCE_NAME);
                 prefs.put(ROOT_FOLDER, rootPath);
                 importDocButton.disableProperty().set(false);
                 deleteDocButton.disableProperty().unbind();

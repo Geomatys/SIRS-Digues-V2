@@ -51,9 +51,9 @@ import java.util.stream.Collectors;
 
 /**
  * Display print configuration and generate report for horodatage purpose : prestation synthese table report.
- *
+ * <p>
  * Redmine ticket #7782
- *
+ * <p>
  * <ul>
  * <li> Allow to select the file destination folder.</li>
  * <li> Modify the title inside the document.</li>
@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
  *      User can set the dates even though the checkbox is unselected (client's request).</li>
  * <li> Button to select "non horodatée" prestations in one click.</li>
  * </ul>
- *
+ * <p>
  * @author Estelle Idee (Geomatys)
  */
 public class HorodatageReportPane extends BorderPane {
@@ -105,7 +105,7 @@ public class HorodatageReportPane extends BorderPane {
         uiTitre.setText("Tableau de synthèse prestation pour Registre horodaté");
 
         // Date filter checkbox
-        // When the the checkbox is unselected, the uiPeriodeDebut and uiPeriodeFin can still be updated.
+        // When the checkbox is unselected, the uiPeriodeDebut and uiPeriodeFin can still be updated.
         // The values are used in the generated Tableau de synthèse event though the uiPeriod is unselected.
         // When the checkbox is unselected, the uiPeriodeDebut and uiPeriodeFin can still be updated.
         // The values are used in the generated Tableau de synthèse event though the uiPeriod is unselected.
@@ -126,26 +126,12 @@ public class HorodatageReportPane extends BorderPane {
         DatePickerConverter.register(uiPeriodeDebut);
         DatePickerConverter.register(uiPeriodeFin);
         uiPeriodeDebut.valueProperty().addListener((observable, oldValue, newValue) -> {
-            uiPeriodeFin.setDayCellFactory(param -> new DateCell() {
-                @Override
-                public void updateItem(LocalDate date, boolean empty) {
-                    super.updateItem(date, empty);
-                    final LocalDate dateDebut = uiPeriodeDebut.getValue();
-                    setDisable(empty || (dateDebut != null && date.isBefore(dateDebut)));
-                }
-            });
+            uiPeriodeFin.setDayCellFactory(RegistreTheme.getUiPeriodFinDayCellFactory(uiPeriodeDebut));
             if (uiPeriod.isSelected()) updatePrestationsAndKeepSelection();
         });
 
         uiPeriodeFin.valueProperty().addListener((observable, oldValue, newValue) -> {
-            uiPeriodeDebut.setDayCellFactory(param -> new DateCell() {
-                @Override
-                public void updateItem(LocalDate date, boolean empty) {
-                    super.updateItem(date, empty);
-                    final LocalDate dateFin = uiPeriodeFin.getValue();
-                    setDisable(empty || (dateFin != null && date.isAfter(dateFin)));
-                }
-            });
+            uiPeriodeDebut.setDayCellFactory(RegistreTheme.getUiPeriodDebutDayCellFactory(uiPeriodeFin));
             if (uiPeriod.isSelected()) updatePrestationsAndKeepSelection();
         });
 
@@ -212,7 +198,7 @@ public class HorodatageReportPane extends BorderPane {
             // the @SystemeEndiguement has changed, the class variables are updated with the new values.
             if (!newValue.equals(this.selectedSE)) {
                 this.selectedSE = newValue;
-                this.allPrestationsOnSE = getAllPrestationsOnSelectedSE();
+                this.allPrestationsOnSE = getAllPrestationsInSelectedSeRegistre();
             }
 
             if (this.allPrestationsOnSE == null || this.allPrestationsOnSE.isEmpty()) {
@@ -241,8 +227,21 @@ public class HorodatageReportPane extends BorderPane {
      *     <li>Empty ArrayList if no @{@link TronconDigue} or no @{@link Prestation}.</li>
      * </ul>
      */
-    private List<Prestation> getAllPrestationsOnSelectedSE() {
+    private List<Prestation> getAllPrestationsInSelectedSeRegistre() {
         if (this.selectedSE == null) return new ArrayList<>();
+        return getAllPrestationsInSeRegistre(this.selectedSE, this.session);
+    }
+
+    /**
+     * Method to get all the prestations on the input @{@link SystemeEndiguement} from the @{@link Preview}
+     *
+     * @return The list of all the @{@link Prestation} available on the @{@link SystemeEndiguement}. <br>
+     * <ul>
+     *     <li>Null if no @{@link Digue} on the SE;</li>
+     *     <li>Empty ArrayList if no @{@link TronconDigue} or no @{@link Prestation}.</li>
+     * </ul>
+     */
+    protected static List<Prestation> getAllPrestationsInSeRegistre(final Preview sePreview, final Session session) {
         final SystemeEndiguementRepository sdRepo   = (SystemeEndiguementRepository) session.getRepositoryForClass(SystemeEndiguement.class);
         final DigueRepository digueRepo             = (DigueRepository) session.getRepositoryForClass(Digue.class);
         final TronconDigueRepository tronconRepo    = Injector.getBean(TronconDigueRepository.class);
@@ -250,9 +249,9 @@ public class HorodatageReportPane extends BorderPane {
 
         SystemeEndiguement se = null;
         try {
-            se = sdRepo.get(this.selectedSE.getElementId());
+            se = sdRepo.get(sePreview.getElementId());
         } catch (RuntimeException re) {
-            SIRS.LOGGER.log(Level.WARNING, "Erreur lors de la récupération du Systeme d'endiguement avec l'id {0}", this.selectedSE.getElementId());
+            SIRS.LOGGER.log(Level.WARNING, "Erreur lors de la récupération du Systeme d'endiguement avec l'id {0}", sePreview.getElementId());
         }
         if (se == null) return null;
 

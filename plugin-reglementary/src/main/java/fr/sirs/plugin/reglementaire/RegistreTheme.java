@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -25,12 +25,11 @@ import fr.sirs.core.model.RefHorodatageStatus;
 import fr.sirs.plugin.reglementaire.ui.*;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -90,10 +89,13 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         // TODO add gestionTab pane to import timestamped doc and export summary report.
         FileTreeItem root = new FileTreeItem(false);
         gestionTab.setContent(new DocumentsPane(root));
+        final Tab extractionTab = new Tab("Extraction");
+        extractionTab.setContent(new ExtractionDocumentsPane(root));
 
         // Ajout des onglets
         tabPane.getTabs().add(syntheseTab);
         tabPane.getTabs().add(gestionTab);
+        tabPane.getTabs().add(extractionTab);
         borderPane.setCenter(tabPane);
         return borderPane;
     }
@@ -113,7 +115,7 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
             return false;
 
 
-        allStatus.stream().forEach(status -> {
+        allStatus.forEach(status -> {
             String libelle = status.getLibelle();
             if ("Non horodaté".equalsIgnoreCase(libelle.trim()))
                 refNonTimeStampedStatus = status.getId();
@@ -123,6 +125,28 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
                 refTimeStampedStatus = status.getId();
         });
         return refNonTimeStampedStatus != null && refWaitingStatus != null && refTimeStampedStatus != null;
+    }
+
+     public static javafx.util.Callback<DatePicker, javafx.scene.control.DateCell> getUiPeriodDebutDayCellFactory(final DatePicker uiPeriodFin) {
+        return param -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                final LocalDate dateFin = uiPeriodFin.getValue();
+                setDisable(empty || (dateFin != null && date.isAfter(dateFin)));
+            }
+        };
+    }
+
+    public static javafx.util.Callback<DatePicker, javafx.scene.control.DateCell> getUiPeriodFinDayCellFactory(final DatePicker uiPeriodDebut) {
+        return param -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                final LocalDate dateDebut = uiPeriodDebut.getValue();
+                setDisable(empty || (dateDebut != null && date.isBefore(dateDebut)));
+            }
+        };
     }
 
 }
