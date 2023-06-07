@@ -528,6 +528,13 @@ public class PropertiesFileUtilities {
         showErrorDialog(errorMsg, null, 0, 0);
     }
 
+    /**
+     *
+     * @param errorMsg the message inside the alert window
+     * @param title the title of the alert window
+     * @param width the width of the alert window
+     * @param height the height of the alert window
+     */
     public static void showErrorDialog(final String errorMsg, final String title, final int width, final int height) {
         createAlert(Alert.AlertType.ERROR, title, errorMsg, width, height);
     }
