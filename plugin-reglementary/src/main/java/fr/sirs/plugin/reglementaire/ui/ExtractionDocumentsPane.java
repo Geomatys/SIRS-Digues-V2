@@ -40,7 +40,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.stage.FileChooser;
+import javafx.stage.Window;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.sis.measure.NumberRange;
+import org.apache.sis.util.ArgumentChecks;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
@@ -49,6 +52,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 import static fr.sirs.PropertiesFileUtilities.*;
 import static fr.sirs.plugin.reglementaire.ui.DocumentsPane.*;
@@ -81,6 +85,12 @@ public class ExtractionDocumentsPane extends BorderPane {
     @FXML private Button uiGenerateBtn;
     private final FileTreeItem root;
     private Preview selectedSe;
+    private List<Prestation> allPrestationsOnSelectedSe;
+    private final FileChooser fileChooser;
+    /**
+     * Supported formats for cover and conclusion pages
+     */
+    private final List<String> supportedFormat = Arrays.asList("*.pdf");
 
     @Autowired
     private Session session;
@@ -120,6 +130,11 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         SIRS.initCombo(uiSECombo, FXCollections.observableList(session.getPreviews().getByClass(SystemeEndiguement.class)), null);
 
+        uiSECombo.valueProperty().addListener((obs, oldValue, newValue) -> {
+            this.selectedSe = newValue;
+            this.allPrestationsOnSelectedSe = getAllPrestationsInSelectedSeRegistre();
+        });
+
         final SirsStringConverter converter = new SirsStringConverter();
 
         // model edition
@@ -133,8 +148,8 @@ public class ExtractionDocumentsPane extends BorderPane {
             final boolean isExternalPage = uiIsExternalPage.isSelected();
             return uiDocumentNameField.textProperty().getValue().isEmpty()
                             || (isValidityDebutNull && isValidityFinNull && isHorodatageDebutNull && isHorodatageFinNull)
-                            || (isValidityDebutNull != isValidityFinNull
-                            || isHorodatageDebutNull != isHorodatageFinNull)
+//                            || (isValidityDebutNull != isValidityFinNull
+//                            || isHorodatageDebutNull != isHorodatageFinNull)
                             || uiSECombo.getValue() == null
                     || (isExternalPage && uiCoverPath.getText().isEmpty())
                     || (!isExternalPage && uiTitle.getText().isEmpty());
@@ -179,10 +194,35 @@ public class ExtractionDocumentsPane extends BorderPane {
             showErrorDialog("Vous devez remplir le nom du fichier");
             return;
         }
+        if (uiPeriodeValidityDebut.getValue() == null && uiPeriodeValidityFin.getValue() == null
+                && uiPeriodeHorodatageDebut.getValue() == null && uiPeriodeHorodatageFin.getValue() == null) {
+            showErrorDialog("Vous devez renseigner au moins une date");
+            return;
+        }
+        if (this.allPrestationsOnSelectedSe == null || this.allPrestationsOnSelectedSe.isEmpty()) {
+            showErrorDialog("Aucune prestation disponible sur le système d'endiguement.");
+            return;
+        }
+        final String coverPath = uiCoverPath.getText();
+        if (uiIsExternalPage.isSelected() && !coverPath.endsWith(".pdf")) {
+            showErrorDialog("Le format du fichier de la page de garde n'est pas supporté.\n\n" +
+                    "Formats supportés :\n" +
+                    "- pdf", null, 0, 175);
+            return;
+        }
+        final String conclusionPath = uiConclusionPath.getText();
+        if (conclusionPath != null && !conclusionPath.endsWith(".pdf")) {
+            showErrorDialog("Le format du fichier de la page de conclusion n'est pas supporté.\n\n" +
+                    "Formats supportés :\n" +
+                    "- pdf", null, 0, 175);
+            return;
+        }
+        final File coverFile = new File(coverPath);
+        final File conclusionFile = new File(conclusionPath);
 
         final String docName;
         if (tmp.toLowerCase().endsWith(".pdf")) {
-            docName= tmp;
+            docName = tmp;
         } else {
             docName = tmp + ".pdf";
         }
@@ -197,21 +237,15 @@ public class ExtractionDocumentsPane extends BorderPane {
         root.setValue(rootDir);
 
         ModeleRapport modele = modelProperty.get();
-        if (modele == null) {
-            showErrorDialog("Vous devez sélectionner un modèle.");
+//        if (modele == null) {
+//            showErrorDialog("Vous devez sélectionner un modèle.");
+//            return;
+//        }
+
+        final List<Prestation> prestations = filterPrestationsByDateFilters(new ArrayList<>(this.allPrestationsOnSelectedSe));
+        if (prestations.isEmpty()) {
+            showErrorDialog("Aucune prestation disponible sur le système d'endiguement aux périodes renseignées.");
             return;
-        }
-
-
-        final LocalDate periodeDebut = uiPeriodeValidityDebut.getValue();
-        final LocalDate periodeFin = uiPeriodeValidityFin.getValue();
-        final NumberRange dateRange;
-        if (periodeDebut == null && periodeFin == null) {
-            dateRange = null;
-        } else {
-            final long dateDebut = periodeDebut == null ? 0 : periodeDebut.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
-            final long dateFin = periodeFin == null ? Long.MAX_VALUE : periodeFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
-            dateRange = NumberRange.create(dateDebut, true, dateFin, true);
         }
 
 //        final boolean onlySE = uiOnlySEBox.isSelected();
@@ -219,9 +253,9 @@ public class ExtractionDocumentsPane extends BorderPane {
         final Task generator;
 //        if (onlySE) {
 //            final Path outputDoc = seDir.toPath().resolve(DOCUMENT_FOLDER).resolve(docName);
-////            generator = ODTUtils.generateDoc(modele, getTronconList(), outputDoc.toFile(), root.getLibelle(), dateRange);
+////            generator = ODTUtils.generateDoc(modele, getTronconList(), outputDoc.toFile(), root.getLibelle(), dateRangeValidity);
 //        } else {
-//            generator = ODTUtils.generateDocsForDigues(docName, onlySE, modele, getTronconList(), seDir, root.getLibelle(), dateRange);
+//            generator = ODTUtils.generateDocsForDigues(docName, onlySE, modele, getTronconList(), seDir, root.getLibelle(), dateRangeValidity);
 //        }
 
 //        generator.setOnSucceeded(evt -> Platform.runLater(() -> root.update(false)));
@@ -252,11 +286,23 @@ public class ExtractionDocumentsPane extends BorderPane {
      */
     @FXML
     public void chooseCoverFile(TextField textField) {
-        final FileChooser fileChooser = new FileChooser();
-        final File file = fileChooser.showOpenDialog(null);
+
+        final Window owner = getParent().getScene().getWindow();
+        final File file = fileChooser.showOpenDialog(owner);
         if (file != null) {
             textField.setText(file.getPath());
+            if (!file.exists()) {
+                showErrorDialog("Le fichier est introuvable : \n" + file.getPath());
+                chooseCoverFile(textField);
+                return;
+            }
+            if (!file.isFile()) {
+                showErrorDialog("Veuillez sélectionner un fichier");
+                chooseCoverFile(textField);
+                return;
+            }
         }
+        fileChooser.setInitialDirectory(file.getParentFile());
     }
 
     public String setMainFolder() {
@@ -307,4 +353,45 @@ public class ExtractionDocumentsPane extends BorderPane {
         return HorodatageReportPane.getAllPrestationsInSeRegistre(this.selectedSe, this.session);
     }
 
+    private List<Prestation> filterPrestationsByDateFilters(List<Prestation> prestations) {
+        ArgumentChecks.ensureNonNull("prestations", prestations);
+        prestations = filterPrestationsByDateFilter(prestations, true);
+        return filterPrestationsByDateFilter(prestations, false);
+    }
+
+    /**
+     * Filter a @{@link List} of @{@link Prestation} by Validity dates or by Horodatage date.
+     *
+     * @param prestations the list of prestations to filter.
+     * @param isValidityDate indicate whether the filter is using the validity dates or the horodatage dates.
+     * @return the list of prestations after filtering.
+     */
+    private List<Prestation> filterPrestationsByDateFilter(List<Prestation> prestations, final boolean isValidityDate) {
+        ArgumentChecks.ensureNonNull("prestations", prestations);
+
+        final LocalDate periodeDebut = isValidityDate ? uiPeriodeValidityDebut.getValue() : uiPeriodeHorodatageDebut.getValue();
+        final LocalDate periodeFin = isValidityDate ? uiPeriodeValidityFin.getValue() : uiPeriodeHorodatageFin.getValue();
+
+        if (periodeDebut == null && periodeFin == null) {
+            return prestations;
+        }
+
+        NumberRange dateRange;
+        if (isValidityDate) {
+            final long dateDebut = periodeDebut == null ? 0 : periodeDebut.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
+            final long dateFin = periodeFin == null ? Long.MAX_VALUE : periodeFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
+            dateRange = NumberRange.create(dateDebut, true, dateFin, true);
+
+            AvecBornesTemporelles.IntersectDateRange dateRangePredicate = new AvecBornesTemporelles.IntersectDateRange(dateRange);
+            return prestations.stream().filter(dateRangePredicate).collect(Collectors.toList());
+
+        } else {
+            return prestations.stream().filter(p -> {
+                final LocalDate horodatageDate = p.getHorodatageDate();
+                if (horodatageDate == null) return false;
+
+                return (periodeDebut == null || horodatageDate.isAfter(periodeDebut)) && (periodeFin == null || horodatageDate.isBefore(periodeFin));
+            }).collect(Collectors.toList());
+        }
+    }
 }
