@@ -24,10 +24,12 @@ import fr.sirs.Session;
 import fr.sirs.core.model.*;
 import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.plugin.reglementaire.FileTreeItem;
+import fr.sirs.plugin.reglementaire.PDFUtils;
 import fr.sirs.plugin.reglementaire.RegistreTheme;
 import fr.sirs.ui.report.FXModeleRapportsPane;
 import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.SirsStringConverter;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -41,7 +43,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.sis.measure.NumberRange;
 import org.apache.sis.util.ArgumentChecks;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,6 +104,8 @@ public class ExtractionDocumentsPane extends BorderPane {
         Injector.injectDependencies(this);
         this.root = root;
 
+        fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported formats for cover and conclusion pages", supportedFormat));
         uiTitleLabel = new Label("Titre *");
         uiTitleLabel.setTooltip(new Tooltip("Titre en haut de la page de garde"));
         uiTitle = new TextField();
@@ -183,6 +186,11 @@ public class ExtractionDocumentsPane extends BorderPane {
             }
         });
 
+        uiDocumentNameField.setText("tes");
+        uiPeriodeValidityDebut.setValue(LocalDate.of(2023, 06, 05));
+        uiCoverPath.setText("/home/estelle/Projects/SIRS-FranceDigues/horodatage/679a6e678ded5da21c37576c420009bb/2021/20230109_tableau_synthese.pdf");
+        uiConclusionPath.setText("/home/estelle/Documents/tree_normalsize.pdf");
+
     }
 
 
@@ -204,21 +212,47 @@ public class ExtractionDocumentsPane extends BorderPane {
             return;
         }
         final String coverPath = uiCoverPath.getText();
-        if (uiIsExternalPage.isSelected() && !coverPath.endsWith(".pdf")) {
-            showErrorDialog("Le format du fichier de la page de garde n'est pas supporté.\n\n" +
-                    "Formats supportés :\n" +
-                    "- pdf", null, 0, 175);
-            return;
+        final File coverFile;
+        if (uiIsExternalPage.isSelected()) {
+            if (coverPath == null || coverPath.trim().isEmpty()) {
+                showErrorDialog("Veuillez sélectionner un fichier pour la page de garde.");
+                return;
+            }
+            if (!coverPath.endsWith(".pdf")) {
+                showErrorDialog("Le format du fichier de la page de garde n'est pas supporté.\n\n" +
+                        "Formats supportés :\n" +
+                        "- pdf", null, 0, 175);
+                return;
+            }
+            coverFile = new File(coverPath);
+            if (!coverFile.exists()) {
+                showErrorDialog("Le fichier est introuvable : \n" + coverFile.getPath(), null, 0, 175);
+                return;
+            }
+        } else {
+            // TODO create pdf for cover page from field
+            coverFile = null;
         }
         final String conclusionPath = uiConclusionPath.getText();
-        if (conclusionPath != null && !conclusionPath.endsWith(".pdf")) {
-            showErrorDialog("Le format du fichier de la page de conclusion n'est pas supporté.\n\n" +
-                    "Formats supportés :\n" +
-                    "- pdf", null, 0, 175);
-            return;
+        final File conclusionFile;
+        if (conclusionPath != null) {
+            if (!conclusionPath.endsWith(".pdf")){
+                showErrorDialog("Le format du fichier de la page de conclusion n'est pas supporté.\n\n" +
+                        "Formats supportés :\n" +
+                        "- pdf", null, 0, 175);
+                return;
+            }
+            conclusionFile = new File(coverPath);
+            if (!conclusionFile.exists()) {
+                showErrorDialog("Le fichier est introuvable : \n" + conclusionFile.getPath(), null, 0, 175);
+                return;
+            }
+        } else {
+            conclusionFile = null;
         }
-        final File coverFile = new File(coverPath);
-        final File conclusionFile = new File(conclusionPath);
+
+        List<File> filesToMerge = new ArrayList<>();
+        filesToMerge.add(new File(coverPath));
 
         final String docName;
         if (tmp.toLowerCase().endsWith(".pdf")) {
@@ -248,9 +282,19 @@ public class ExtractionDocumentsPane extends BorderPane {
             return;
         }
 
+        filesToMerge.add(coverFile);
+        filesToMerge.add(conclusionFile);
+        String output = rootPath + "/" + docName;
+
 //        final boolean onlySE = uiOnlySEBox.isSelected();
 //        final File seDir = getOrCreateSE(rootDir, getSelectedSE(), LIBELLE, true, DOCUMENT_FOLDER);
-        final Task generator;
+        final Task generator = PDFUtils.mergeFiles(filesToMerge, output, false, true, true);
+        generator.setOnSucceeded(evt -> Platform.runLater(() -> {
+            root.update(false);
+            showSuccessDialog("Document créé avec succès :\n" + rootDir);
+            SIRS.openFile(new File(output));
+        }));
+
 //        if (onlySE) {
 //            final Path outputDoc = seDir.toPath().resolve(DOCUMENT_FOLDER).resolve(docName);
 ////            generator = ODTUtils.generateDoc(modele, getTronconList(), outputDoc.toFile(), root.getLibelle(), dateRangeValidity);
@@ -262,6 +306,7 @@ public class ExtractionDocumentsPane extends BorderPane {
 //        disableProperty().bind(generator.runningProperty());
 //        LoadingPane.showDialog(generator);
     }
+
 
     /**
      * Event when button chooseCoverFileButton is clicked.
