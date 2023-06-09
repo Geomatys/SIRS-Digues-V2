@@ -222,7 +222,7 @@ public class DynamicDocumentsPane extends BorderPane {
 
         generator.setOnSucceeded(evt -> Platform.runLater(() -> root.update(false)));
         disableProperty().bind(generator.runningProperty());
-        LoadingPane.showDialog(generator);
+        DocumentLoadingPane.showDialog(generator);
     }
 
 

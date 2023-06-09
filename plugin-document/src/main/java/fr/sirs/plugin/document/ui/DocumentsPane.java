@@ -461,7 +461,7 @@ public class DocumentsPane extends GridPane {
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
             File f = new File(ipane.newFileFIeld.getText());
-            LoadingPane.showDialog(ODTUtils.writeSummary(root, f));
+            DocumentLoadingPane.showDialog(ODTUtils.writeSummary(root, f));
         }
     }
 
@@ -659,7 +659,7 @@ public class DocumentsPane extends GridPane {
             final Optional opt = dialog.showAndWait();
             if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
                 File f = new File(ipane.newFileFIeld.getText());
-                LoadingPane.showDialog(ODTUtils.writeDoSynth(item, f));
+                DocumentLoadingPane.showDialog(ODTUtils.writeDoSynth(item, f));
             }
         }
 
@@ -681,7 +681,7 @@ public class DocumentsPane extends GridPane {
                 if (modele != null) {
                     final Task<File> generator = ODTUtils.generateDoc(modele, getTronconList(), item, root.getLibelle(), dateRange);
                     generator.setOnSucceeded(evt -> Platform.runLater(() -> root.update(false)));
-                    LoadingPane.showDialog(generator);
+                    DocumentLoadingPane.showDialog(generator);
                 } else {
                     showErrorDialog("Pas de modèle disponible pour le fichier: " + item.getName());
                 }

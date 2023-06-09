@@ -22,16 +22,16 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.model.*;
-import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.plugin.reglementaire.FileTreeItem;
 import fr.sirs.plugin.reglementaire.PDFUtils;
 import fr.sirs.plugin.reglementaire.RegistreTheme;
+import fr.sirs.ui.LoadingPane;
 import fr.sirs.ui.report.FXModeleRapportsPane;
 import fr.sirs.util.DatePickerConverter;
+import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -43,12 +43,17 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.apache.sis.measure.NumberRange;
 import org.apache.sis.util.ArgumentChecks;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
-import java.io.File;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -93,10 +98,10 @@ public class ExtractionDocumentsPane extends BorderPane {
      */
     private final List<String> supportedFormat = Arrays.asList("*.pdf");
 
+    private final String JRXML_PATH = "/fr/sirs/jrxml/metaTemplateHorodatageCoverPage.jrxml";
+
     @Autowired
     private Session session;
-
-    private final SimpleObjectProperty<ModeleRapport> modelProperty = new SimpleObjectProperty<>();
 
     public ExtractionDocumentsPane(final FileTreeItem root) {
         super();
@@ -108,8 +113,8 @@ public class ExtractionDocumentsPane extends BorderPane {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported formats for cover and conclusion pages", supportedFormat));
         uiTitleLabel = new Label("Titre *");
         uiTitleLabel.setTooltip(new Tooltip("Titre en haut de la page de garde"));
-        uiTitle = new TextField();
-        uiStructureLabel = new Label("Structure *");
+        uiTitle = new TextField("Registre");
+        uiStructureLabel = new Label("Structure");
         uiStructureLabel.setTooltip(new Tooltip("Nom de la structure"));
         uiStructure = new TextField();
 
@@ -149,14 +154,16 @@ public class ExtractionDocumentsPane extends BorderPane {
             final boolean isHorodatageDebutNull = uiPeriodeHorodatageDebut.valueProperty().isNull().get();
             final boolean isHorodatageFinNull = uiPeriodeHorodatageFin.valueProperty().isNull().get();
             final boolean isExternalPage = uiIsExternalPage.isSelected();
-            return uiDocumentNameField.textProperty().getValue().isEmpty()
+            return disableProperty().get()
+                    || uiDocumentNameField.textProperty().getValue().trim().isEmpty()
                             || (isValidityDebutNull && isValidityFinNull && isHorodatageDebutNull && isHorodatageFinNull)
 //                            || (isValidityDebutNull != isValidityFinNull
 //                            || isHorodatageDebutNull != isHorodatageFinNull)
                             || uiSECombo.getValue() == null
-                    || (isExternalPage && uiCoverPath.getText().isEmpty())
-                    || (!isExternalPage && uiTitle.getText().isEmpty());
+                    || (isExternalPage && uiCoverPath.getText().trim().isEmpty())
+                    || (!isExternalPage && uiTitle.getText().trim().isEmpty());
                 },
+                disableProperty(),
                 uiPeriodeValidityDebut.valueProperty(),
                 uiPeriodeValidityFin.valueProperty(),
                 uiPeriodeHorodatageDebut.valueProperty(),
@@ -185,19 +192,16 @@ public class ExtractionDocumentsPane extends BorderPane {
                 uiCoverGridpane.addRow(2, uiStructureLabel, uiStructure);
             }
         });
-
-        uiDocumentNameField.setText("tes");
-        uiPeriodeValidityDebut.setValue(LocalDate.of(2023, 06, 05));
-        uiCoverPath.setText("/home/estelle/Projects/SIRS-FranceDigues/horodatage/679a6e678ded5da21c37576c420009bb/2021/20230109_tableau_synthese.pdf");
-        uiConclusionPath.setText("/home/estelle/Documents/tree_normalsize.pdf");
-
     }
 
 
 
     @FXML
     private void generateDocument(ActionEvent event) {
-        final String tmp = uiDocumentNameField.getText();
+        /*
+         * INPUT FIELDS VERIFICATIONS
+         */
+        final String tmp = uiDocumentNameField.getText().trim();
         if (tmp.isEmpty()) {
             showErrorDialog("Vous devez remplir le nom du fichier");
             return;
@@ -207,14 +211,11 @@ public class ExtractionDocumentsPane extends BorderPane {
             showErrorDialog("Vous devez renseigner au moins une date");
             return;
         }
-        if (this.allPrestationsOnSelectedSe == null || this.allPrestationsOnSelectedSe.isEmpty()) {
-            showErrorDialog("Aucune prestation disponible sur le système d'endiguement.");
-            return;
-        }
-        final String coverPath = uiCoverPath.getText();
+        final String coverPath = uiCoverPath.getText().trim();
         final File coverFile;
+        String title = uiTitle.getText().trim();
         if (uiIsExternalPage.isSelected()) {
-            if (coverPath == null || coverPath.trim().isEmpty()) {
+            if (coverPath == null || coverPath.isEmpty()) {
                 showErrorDialog("Veuillez sélectionner un fichier pour la page de garde.");
                 return;
             }
@@ -231,6 +232,11 @@ public class ExtractionDocumentsPane extends BorderPane {
             }
         } else {
             // TODO create pdf for cover page from field
+
+            if (title.isEmpty()) {
+                showErrorDialog("Veuillez renseigner le titre du document");
+                return;
+            }
             coverFile = null;
         }
         final String conclusionPath = uiConclusionPath.getText();
@@ -251,8 +257,14 @@ public class ExtractionDocumentsPane extends BorderPane {
             conclusionFile = null;
         }
 
-        List<File> filesToMerge = new ArrayList<>();
-        filesToMerge.add(new File(coverPath));
+        if (this.allPrestationsOnSelectedSe == null || this.allPrestationsOnSelectedSe.isEmpty()) {
+            showErrorDialog("Aucune prestation disponible sur le système d'endiguement.");
+            return;
+        }
+
+        /*
+         * OUTPUT PDF CREATION
+         */
 
         final String docName;
         if (tmp.toLowerCase().endsWith(".pdf")) {
@@ -270,43 +282,74 @@ public class ExtractionDocumentsPane extends BorderPane {
         final File rootDir = new File (rootPath);
         root.setValue(rootDir);
 
-        ModeleRapport modele = modelProperty.get();
-//        if (modele == null) {
-//            showErrorDialog("Vous devez sélectionner un modèle.");
-//            return;
-//        }
-
         final List<Prestation> prestations = filterPrestationsByDateFilters(new ArrayList<>(this.allPrestationsOnSelectedSe));
         if (prestations.isEmpty()) {
             showErrorDialog("Aucune prestation disponible sur le système d'endiguement aux périodes renseignées.");
             return;
         }
 
-        filesToMerge.add(coverFile);
-        filesToMerge.add(conclusionFile);
+        List<File> filesToMerge = new ArrayList<>();
+
+        // Add cover page to final PDF.
+        if (coverFile == null) {
+            try {
+                final File coverPageTmpPath = createCoverPageAndAddToList(title);
+                filesToMerge.add(coverPageTmpPath);
+            } catch (FileNotFoundException e) {
+                throw new IllegalStateException("The jrxml file was not found at " + JRXML_PATH, e);
+            } catch (JRException e) {
+                throw new IllegalStateException("Error while creating the cover page from jrxml file " + JRXML_PATH, e);
+            } catch (IOException e) {
+                throw new IllegalStateException("Error while creating temporary file for cover page.", e);
+            }
+        } else {
+            filesToMerge.add(coverFile);
+        }
+
+
+        // Add conclusion page to final PDF.
+        if (conclusionFile != null) filesToMerge.add(conclusionFile);
+
         String output = rootPath + "/" + docName;
 
-//        final boolean onlySE = uiOnlySEBox.isSelected();
-//        final File seDir = getOrCreateSE(rootDir, getSelectedSE(), LIBELLE, true, DOCUMENT_FOLDER);
         final Task generator = PDFUtils.mergeFiles(filesToMerge, output, false, true, true);
         generator.setOnSucceeded(evt -> Platform.runLater(() -> {
             root.update(false);
-            showSuccessDialog("Document créé avec succès :\n" + rootDir);
             SIRS.openFile(new File(output));
         }));
 
-//        if (onlySE) {
-//            final Path outputDoc = seDir.toPath().resolve(DOCUMENT_FOLDER).resolve(docName);
-////            generator = ODTUtils.generateDoc(modele, getTronconList(), outputDoc.toFile(), root.getLibelle(), dateRangeValidity);
-//        } else {
-//            generator = ODTUtils.generateDocsForDigues(docName, onlySE, modele, getTronconList(), seDir, root.getLibelle(), dateRangeValidity);
-//        }
-
-//        generator.setOnSucceeded(evt -> Platform.runLater(() -> root.update(false)));
-//        disableProperty().bind(generator.runningProperty());
-//        LoadingPane.showDialog(generator);
+        disableProperty().bind(generator.runningProperty());
+        LoadingPane.showDialog(generator);
     }
 
+    /**
+     * Create a standard cover page from user's inputs as a PDF file.
+     * @param title title from @uiTitle.
+     * @return the created temporary PDF file.
+     * @throws IOException if error when creating the temporary file.
+     * @throws JRException if error when creating the PDF file from the JRXML template.
+     */
+    private File createCoverPageAndAddToList(final String title) throws IOException, JRException {
+        Map<String, Object> parameters = new HashMap();
+
+        // set report parameters
+        parameters.put("title", title);
+        parameters.put("systemeEndiguement", this.selectedSe.getLibelle());
+        parameters.put("dateDebutPicker", uiPeriodeValidityDebut.getValue());
+        parameters.put("dateFinPicker", uiPeriodeValidityFin.getValue());
+        parameters.put("structure", this.uiStructure.getText());
+
+        Path coverPageTmpPath = Files.createTempFile("namefile", ".pdf");
+        InputStream input = PrinterUtilities.class.getResourceAsStream(JRXML_PATH);
+        JasperDesign jasperDesign = JRXmlLoader.load(input);
+        JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
+        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+        OutputStream outputStream = new FileOutputStream(coverPageTmpPath.toFile());
+
+        JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+        SIRS.openFile(coverPageTmpPath);
+        return coverPageTmpPath.toFile();
+    }
 
     /**
      * Event when button chooseCoverFileButton is clicked.

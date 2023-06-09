@@ -387,7 +387,7 @@ public class HorodatageReportPane extends BorderPane {
             });
 
         } catch (FileNotFoundException e) {
-            throw new IllegalStateException("The jrxml file was not found at \"/fr/sirs/jrxml/metaTemplatePrestationSyntheseTable.jrxml\"", e);
+            throw new IllegalStateException("The jrxml file was not found at " + JRXML_PATH, e);
         } catch (JRException e) {
             throw new IllegalStateException("Error while creating the synthese prestation report from jrxml file", e);
         }
