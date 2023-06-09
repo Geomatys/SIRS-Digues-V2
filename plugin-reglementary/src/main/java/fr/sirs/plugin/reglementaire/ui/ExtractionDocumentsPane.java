@@ -41,6 +41,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import net.sf.jasperreports.engine.*;
@@ -192,6 +193,12 @@ public class ExtractionDocumentsPane extends BorderPane {
                 uiCoverGridpane.addRow(2, uiStructureLabel, uiStructure);
             }
         });
+
+        uiDocumentNameField.setText("tes");
+        uiPeriodeValidityDebut.setValue(LocalDate.of(2023, 06, 05));
+        uiCoverPath.setText("/home/estelle/Projects/SIRS-FranceDigues/horodatage/679a6e678ded5da21c37576c420009bb/2021/20230109_tableau_synthese.pdf");
+        uiConclusionPath.setText("/home/estelle/Documents/tree_normalsize.pdf");
+
     }
 
 
@@ -199,8 +206,8 @@ public class ExtractionDocumentsPane extends BorderPane {
     @FXML
     private void generateDocument(ActionEvent event) {
         /*
-         * INPUT FIELDS VERIFICATIONS
-         */
+        A- INPUT FIELDS VERIFICATIONS
+        ======================================================*/
         final String tmp = uiDocumentNameField.getText().trim();
         if (tmp.isEmpty()) {
             showErrorDialog("Vous devez remplir le nom du fichier");
@@ -231,8 +238,6 @@ public class ExtractionDocumentsPane extends BorderPane {
                 return;
             }
         } else {
-            // TODO create pdf for cover page from field
-
             if (title.isEmpty()) {
                 showErrorDialog("Veuillez renseigner le titre du document");
                 return;
@@ -263,8 +268,23 @@ public class ExtractionDocumentsPane extends BorderPane {
         }
 
         /*
-         * OUTPUT PDF CREATION
-         */
+        B- Selection of the output file destination folder.
+        ======================================================*/
+
+        final DirectoryChooser chooser  = new DirectoryChooser();
+        final Path previous             = RegistreTheme.getPreviousPath(ExtractionDocumentsPane.class);;
+        if (previous != null) {
+            chooser.setInitialDirectory(previous.toFile());
+        }
+
+        chooser.setTitle("Sélection du répertoire de destination");
+        final File outputDirectory = chooser.showDialog(null);
+        if (outputDirectory == null) return;
+        RegistreTheme.setPreviousPath(outputDirectory.toPath(), ExtractionDocumentsPane.class);
+
+        /*
+        C- OUTPUT PDF CREATION
+        ======================================================*/
 
         final String docName;
         if (tmp.toLowerCase().endsWith(".pdf")) {
@@ -272,15 +292,14 @@ public class ExtractionDocumentsPane extends BorderPane {
         } else {
             docName = tmp + ".pdf";
         }
-        final Preferences prefs = Preferences.userRoot().node("ReglementaryPlugin");
-        String rootPath = prefs.get(ROOT_FOLDER, null);
 
-        if (rootPath == null || rootPath.isEmpty()) {
-            rootPath = setMainFolder();
+        String output = outputDirectory + "/" + docName;
+
+        if (new File(output).exists()) {
+            final Optional opt = showConfirmationDialog("Il existe déjà un fichier " + output + ".\n\n" +
+                    "Souhaitez-vous l'écraser ?", null, 400, 175, true);
+            if (opt.isPresent() && !ButtonType.OK.equals(opt.get())) return;
         }
-
-        final File rootDir = new File (rootPath);
-        root.setValue(rootDir);
 
         final List<Prestation> prestations = filterPrestationsByDateFilters(new ArrayList<>(this.allPrestationsOnSelectedSe));
         if (prestations.isEmpty()) {
@@ -306,11 +325,8 @@ public class ExtractionDocumentsPane extends BorderPane {
             filesToMerge.add(coverFile);
         }
 
-
         // Add conclusion page to final PDF.
         if (conclusionFile != null) filesToMerge.add(conclusionFile);
-
-        String output = rootPath + "/" + docName;
 
         final Task generator = PDFUtils.mergeFiles(filesToMerge, output, false, true, true);
         generator.setOnSucceeded(evt -> Platform.runLater(() -> {
@@ -347,7 +363,6 @@ public class ExtractionDocumentsPane extends BorderPane {
         OutputStream outputStream = new FileOutputStream(coverPageTmpPath.toFile());
 
         JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
-        SIRS.openFile(coverPageTmpPath);
         return coverPageTmpPath.toFile();
     }
 

@@ -29,8 +29,12 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 /**
  * Panneau regroupant les fonctionnalités en lien avec les Registres.
@@ -48,6 +52,7 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
     public static String refNonTimeStampedStatus;
     public static String refWaitingStatus;
     public static String refTimeStampedStatus;
+    private static final String PATH_KEY = "path";
 
     @Override
     public Parent createPane() {
@@ -147,6 +152,34 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
                 setDisable(empty || (dateDebut != null && date.isBefore(dateDebut)));
             }
         };
+    }
+
+    /**
+     * @return Last chosen path for generation report, or null if we cannot find any.
+     * @param clazz the class to get the preferences for.
+     * @return the path for the class.
+     */
+    public static Path getPreviousPath(final Class clazz) {
+        final Preferences prefs = Preferences.userNodeForPackage(clazz);
+        final String str        = prefs.get(PATH_KEY, null);
+        if (str != null) {
+            final Path file = Paths.get(str);
+            if (Files.isDirectory(file)) {
+                return file;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Set value to be retrieved by {@link #getPreviousPath(Class)} () }.
+     *
+     * @param path To put as previously chosen path. Should be a directory.
+     * @param clazz the class to set the preferences for.
+     */
+    public static void setPreviousPath(final Path path, final Class clazz) {
+        final Preferences prefs = Preferences.userNodeForPackage(clazz);
+        prefs.put(PATH_KEY, path.toAbsolutePath().toString());
     }
 
 }

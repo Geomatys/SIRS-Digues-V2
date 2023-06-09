@@ -91,7 +91,6 @@ public class HorodatageReportPane extends BorderPane {
     private List<Prestation> allPrestationsOnSE;
 
     private final String JRXML_PATH = "/fr/sirs/jrxml/metaTemplatePrestationSyntheseTable.jrxml";
-    private static final String PATH_KEY = "path";
 
     @Autowired
     private Session session;
@@ -345,7 +344,7 @@ public class HorodatageReportPane extends BorderPane {
         ======================================================*/
 
         final FileChooser chooser   = new FileChooser();
-        final Path previous         = getPreviousPath();
+        final Path previous         = RegistreTheme.getPreviousPath(HorodatageReportPane.class);
         if (previous != null) {
             chooser.setInitialDirectory(previous.toFile());
             chooser.setInitialFileName(".pdf");
@@ -354,7 +353,7 @@ public class HorodatageReportPane extends BorderPane {
         if (file == null) return;
 
         final Path output = file.toPath();
-        setPreviousPath(output.getParent());
+        RegistreTheme.setPreviousPath(output.getParent(), HorodatageReportPane.class);
 
         /*
         A- Creation of the PDF from the jasper template.
@@ -383,6 +382,7 @@ public class HorodatageReportPane extends BorderPane {
             PrestationRepository repo   = Injector.getBean(PrestationRepository.class);
             prestations.forEach(p -> {
                 p.setHorodatageStatusId(RegistreTheme.refWaitingStatus);
+                p.setSyntheseTablePath(file.getName());
                 repo.update(p);
             });
 
@@ -393,28 +393,5 @@ public class HorodatageReportPane extends BorderPane {
         }
     }
 
-    /**
-     * @return Last chosen path for generation report, or null if we cannot find any.
-     */
-    private static Path getPreviousPath() {
-        final Preferences prefs = Preferences.userNodeForPackage(HorodatageReportPane.class);
-        final String str        = prefs.get(PATH_KEY, null);
-        if (str != null) {
-            final Path file = Paths.get(str);
-            if (Files.isDirectory(file)) {
-                return file;
-            }
-        }
-        return null;
-    }
 
-    /**
-     * Set value to be retrieved by {@link #getPreviousPath() }.
-     *
-     * @param path To put as previously chosen path. Should be a directory.
-     */
-    private static void setPreviousPath(final Path path) {
-        final Preferences prefs = Preferences.userNodeForPackage(HorodatageReportPane.class);
-        prefs.put(PATH_KEY, path.toAbsolutePath().toString());
-    }
 }
