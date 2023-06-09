@@ -71,7 +71,6 @@ import static fr.sirs.plugin.reglementaire.ui.DocumentsPane.*;
  */
 public class ExtractionDocumentsPane extends BorderPane {
 
-    @FXML private TextField uiDocumentNameField;
     @FXML private DatePicker uiPeriodeValidityFin;
     @FXML private DatePicker uiPeriodeValidityDebut;
     @FXML private DatePicker uiPeriodeHorodatageFin;
@@ -150,26 +149,24 @@ public class ExtractionDocumentsPane extends BorderPane {
         final FXModeleRapportsPane rapportEditor = new FXModeleRapportsPane();
 
         uiGenerateBtn.disableProperty().bind(Bindings.createBooleanBinding(() -> {
-            final boolean isValidityDebutNull = uiPeriodeValidityDebut.valueProperty().isNull().get();
-            final boolean isValidityFinNull = uiPeriodeValidityFin.valueProperty().isNull().get();
-            final boolean isHorodatageDebutNull = uiPeriodeHorodatageDebut.valueProperty().isNull().get();
-            final boolean isHorodatageFinNull = uiPeriodeHorodatageFin.valueProperty().isNull().get();
-            final boolean isExternalPage = uiIsExternalPage.isSelected();
-            return disableProperty().get()
-                    || uiDocumentNameField.textProperty().getValue().trim().isEmpty()
+                    final boolean isValidityDebutNull = uiPeriodeValidityDebut.valueProperty().isNull().get();
+                    final boolean isValidityFinNull = uiPeriodeValidityFin.valueProperty().isNull().get();
+                    final boolean isHorodatageDebutNull = uiPeriodeHorodatageDebut.valueProperty().isNull().get();
+                    final boolean isHorodatageFinNull = uiPeriodeHorodatageFin.valueProperty().isNull().get();
+                    final boolean isExternalPage = uiIsExternalPage.isSelected();
+                    return disableProperty().get()
                             || (isValidityDebutNull && isValidityFinNull && isHorodatageDebutNull && isHorodatageFinNull)
 //                            || (isValidityDebutNull != isValidityFinNull
 //                            || isHorodatageDebutNull != isHorodatageFinNull)
                             || uiSECombo.getValue() == null
-                    || (isExternalPage && uiCoverPath.getText().trim().isEmpty())
-                    || (!isExternalPage && uiTitle.getText().trim().isEmpty());
+                            || (isExternalPage && uiCoverPath.getText().trim().isEmpty())
+                            || (!isExternalPage && uiTitle.getText().trim().isEmpty());
                 },
                 disableProperty(),
                 uiPeriodeValidityDebut.valueProperty(),
                 uiPeriodeValidityFin.valueProperty(),
                 uiPeriodeHorodatageDebut.valueProperty(),
                 uiPeriodeHorodatageFin.valueProperty(),
-                uiDocumentNameField.textProperty(),
                 uiSECombo.valueProperty(),
                 uiIsExternalPage.selectedProperty(),
                 uiCoverPath.textProperty(),
@@ -194,7 +191,6 @@ public class ExtractionDocumentsPane extends BorderPane {
             }
         });
 
-        uiDocumentNameField.setText("tes");
         uiPeriodeValidityDebut.setValue(LocalDate.of(2023, 06, 05));
         uiCoverPath.setText("/home/estelle/Projects/SIRS-FranceDigues/horodatage/679a6e678ded5da21c37576c420009bb/2021/20230109_tableau_synthese.pdf");
         uiConclusionPath.setText("/home/estelle/Documents/tree_normalsize.pdf");
@@ -208,11 +204,11 @@ public class ExtractionDocumentsPane extends BorderPane {
         /*
         A- INPUT FIELDS VERIFICATIONS
         ======================================================*/
-        final String tmp = uiDocumentNameField.getText().trim();
-        if (tmp.isEmpty()) {
-            showErrorDialog("Vous devez remplir le nom du fichier");
-            return;
-        }
+//        final String tmp = uiDocumentNameField.getText().trim();
+//        if (tmp.isEmpty()) {
+//            showErrorDialog("Vous devez remplir le nom du fichier");
+//            return;
+//        }
         if (uiPeriodeValidityDebut.getValue() == null && uiPeriodeValidityFin.getValue() == null
                 && uiPeriodeHorodatageDebut.getValue() == null && uiPeriodeHorodatageFin.getValue() == null) {
             showErrorDialog("Vous devez renseigner au moins une date");
@@ -268,37 +264,40 @@ public class ExtractionDocumentsPane extends BorderPane {
         }
 
         /*
-        B- Selection of the output file destination folder.
+        B- Selection of the outputFile file destination folder.
         ======================================================*/
 
-        final DirectoryChooser chooser  = new DirectoryChooser();
+        final FileChooser chooser  = new FileChooser();
         final Path previous             = RegistreTheme.getPreviousPath(ExtractionDocumentsPane.class);;
         if (previous != null) {
             chooser.setInitialDirectory(previous.toFile());
+            chooser.setInitialFileName(".pdf");
         }
 
         chooser.setTitle("Sélection du répertoire de destination");
-        final File outputDirectory = chooser.showDialog(null);
-        if (outputDirectory == null) return;
-        RegistreTheme.setPreviousPath(outputDirectory.toPath(), ExtractionDocumentsPane.class);
+        final File outputFile = chooser.showSaveDialog(null);
+        if (outputFile == null) return;
+
+        final String output = outputFile.getName();
+        RegistreTheme.setPreviousPath(outputFile.getParentFile().toPath(), ExtractionDocumentsPane.class);
 
         /*
         C- OUTPUT PDF CREATION
         ======================================================*/
 
-        final String docName;
-        if (tmp.toLowerCase().endsWith(".pdf")) {
-            docName = tmp;
-        } else {
-            docName = tmp + ".pdf";
-        }
+//        final String docName;
+//        if (tmp.toLowerCase().endsWith(".pdf")) {
+//            docName = tmp;
+//        } else {
+//            docName = tmp + ".pdf";
+//        }
+//
+//        String outputFile = outputFile + "/" + docName;
 
-        String output = outputDirectory + "/" + docName;
-
-        if (new File(output).exists()) {
-            final Optional opt = showConfirmationDialog("Il existe déjà un fichier " + output + ".\n\n" +
+        if (outputFile.exists()) {
+            final Optional opt = showConfirmationDialog("Il existe déjà un fichier " + outputFile + ".\n\n" +
                     "Souhaitez-vous l'écraser ?", null, 400, 175, true);
-            if (opt.isPresent() && !ButtonType.OK.equals(opt.get())) return;
+            if (opt.isPresent() && !ButtonType.YES.equals(opt.get())) return;
         }
 
         final List<Prestation> prestations = filterPrestationsByDateFilters(new ArrayList<>(this.allPrestationsOnSelectedSe));
@@ -331,7 +330,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         final Task generator = PDFUtils.mergeFiles(filesToMerge, output, false, true, true);
         generator.setOnSucceeded(evt -> Platform.runLater(() -> {
             root.update(false);
-            SIRS.openFile(new File(output));
+            SIRS.openFile(outputFile);
         }));
 
         disableProperty().bind(generator.runningProperty());
@@ -353,7 +352,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         parameters.put("systemeEndiguement", this.selectedSe.getLibelle());
         parameters.put("dateDebutPicker", uiPeriodeValidityDebut.getValue());
         parameters.put("dateFinPicker", uiPeriodeValidityFin.getValue());
-        parameters.put("structure", this.uiStructure.getText());
+        parameters.put("structure", "Structure " + this.uiStructure.getText());
 
         Path coverPageTmpPath = Files.createTempFile("namefile", ".pdf");
         InputStream input = PrinterUtilities.class.getResourceAsStream(JRXML_PATH);
