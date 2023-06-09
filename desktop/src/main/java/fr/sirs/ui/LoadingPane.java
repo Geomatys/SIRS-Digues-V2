@@ -16,10 +16,9 @@
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
-package fr.sirs.plugin.document.ui;
+package fr.sirs.ui;
 
 import fr.sirs.SIRS;
-import fr.sirs.plugin.document.FileAndUnsupportedFiles;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -71,7 +70,7 @@ public class LoadingPane extends GridPane {
         taskProperty.set(input);
     }
 
-    private void taskChanged(final ObservableValue<? extends Task> obs, final Task oldValue, final Task newValue) {
+    protected void taskChanged(final ObservableValue<? extends Task> obs, final Task oldValue, final Task newValue) {
         if (oldValue != null) {
             uiProgress.progressProperty().unbind();
             uiProgressLabel.textProperty().unbind();
@@ -91,20 +90,6 @@ public class LoadingPane extends GridPane {
             uiGenerateFinish.disableProperty().bind(newValue.runningProperty());
             newValue.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, evt -> {
                 final Object taskValue = newValue.getValue();
-                if (taskValue instanceof FileAndUnsupportedFiles) {
-                    FileAndUnsupportedFiles taskResult = (FileAndUnsupportedFiles) taskValue;
-                    final List<String> unsupportedFiles = taskResult.getUnsupportedFiles();
-                    if (unsupportedFiles != null && !unsupportedFiles.isEmpty()) {
-                        StringBuilder errorMsg = new StringBuilder("Information : \nLes fichiers suivants n'ont pas été ajoutés au dossier de synthèse \ncar leurs formats ne sont pas pris en charge:\n");
-                        for (String fileName : unsupportedFiles) {
-                            errorMsg.append("\n" + fileName);
-                        }
-                        errorMsg.append(" \n\nFormats pris en charge : ODF, PDF, Image et text\n");
-                        uiErrorLabel.setText(errorMsg.toString());
-                        uiErrorLabel.setVisible(true);
-                        this.getScene().getWindow().sizeToScene();
-                    }
-                }
                 // If bound task did not update its progress to finish state, we do it ourself.
                 if (uiProgress.getProgress() < 1) {
                     uiProgressLabel.textProperty().unbind();
