@@ -217,7 +217,9 @@ public class ExtractionDocumentsPane extends BorderPane {
         final String coverPath = uiCoverPath.getText().trim();
         final File coverFile;
         String title = uiTitle.getText().trim();
-        if (uiIsExternalPage.isSelected()) {
+        final boolean isExternalCoverPage = uiIsExternalPage.isSelected();
+
+        if (isExternalCoverPage) {
             if (coverPath == null || coverPath.isEmpty()) {
                 showErrorDialog("Veuillez sélectionner un fichier pour la page de garde.");
                 return;
@@ -249,7 +251,7 @@ public class ExtractionDocumentsPane extends BorderPane {
                         "- pdf", null, 0, 175);
                 return;
             }
-            conclusionFile = new File(coverPath);
+            conclusionFile = new File(conclusionPath);
             if (!conclusionFile.exists()) {
                 showErrorDialog("Le fichier est introuvable : \n" + conclusionFile.getPath(), null, 0, 175);
                 return;
@@ -278,7 +280,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         final File outputFile = chooser.showSaveDialog(null);
         if (outputFile == null) return;
 
-        final String output = outputFile.getName();
+        final String output = outputFile.toString();
         RegistreTheme.setPreviousPath(outputFile.getParentFile().toPath(), ExtractionDocumentsPane.class);
 
         /*
@@ -347,12 +349,14 @@ public class ExtractionDocumentsPane extends BorderPane {
     private File createCoverPageAndAddToList(final String title) throws IOException, JRException {
         Map<String, Object> parameters = new HashMap();
 
+        final String structure = this.uiStructure.getText();
+
         // set report parameters
         parameters.put("title", title);
         parameters.put("systemeEndiguement", this.selectedSe.getLibelle());
         parameters.put("dateDebutPicker", uiPeriodeValidityDebut.getValue());
         parameters.put("dateFinPicker", uiPeriodeValidityFin.getValue());
-        parameters.put("structure", "Structure " + this.uiStructure.getText());
+        parameters.put("structure", structure.isEmpty() ? null : structure);
 
         Path coverPageTmpPath = Files.createTempFile("namefile", ".pdf");
         InputStream input = PrinterUtilities.class.getResourceAsStream(JRXML_PATH);

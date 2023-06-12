@@ -10,6 +10,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="title" class="java.lang.String"/>
 	<parameter name="systemeEndiguement" class="java.lang.String"/>
 	<parameter name="dateDebutPicker" class="java.time.LocalDate"/>
 	<parameter name="dateFinPicker" class="java.time.LocalDate"/>
@@ -44,7 +45,7 @@
 					<font size="16" isBold="true"/>
 					<paragraph lineSpacing="Double" lineSpacingSize="2.0"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Registre \n" + $P{systemeEndiguement}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{title} + "\n" + $P{systemeEndiguement}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
