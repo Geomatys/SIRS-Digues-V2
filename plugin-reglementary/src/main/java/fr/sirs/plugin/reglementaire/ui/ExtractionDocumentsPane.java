@@ -41,10 +41,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.apache.sis.measure.NumberRange;
@@ -98,7 +98,8 @@ public class ExtractionDocumentsPane extends BorderPane {
      */
     private final List<String> supportedFormat = Arrays.asList("*.pdf");
 
-    private final String JRXML_PATH = "/fr/sirs/jrxml/metaTemplateHorodatageCoverPage.jrxml";
+    private final String COVER_JRXML_PATH = "/fr/sirs/jrxml/metaTemplateHorodatageCoverPage.jrxml";
+    private final String SUMMARY_JRXML_PATH = "/fr/sirs/jrxml/metaTemplatePrestationSummaryTable.jrxml";
 
     @Autowired
     private Session session;
@@ -193,7 +194,7 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         uiPeriodeValidityDebut.setValue(LocalDate.of(2023, 06, 05));
         uiCoverPath.setText("/home/estelle/Projects/SIRS-FranceDigues/horodatage/679a6e678ded5da21c37576c420009bb/2021/20230109_tableau_synthese.pdf");
-        uiConclusionPath.setText("/home/estelle/Documents/tree_normalsize.pdf");
+        uiConclusionPath.setText("/home/estelle/Projects/SIRS-FranceDigues/horodatage/output/tes.pdf");
 
     }
 
@@ -287,21 +288,6 @@ public class ExtractionDocumentsPane extends BorderPane {
         C- OUTPUT PDF CREATION
         ======================================================*/
 
-//        final String docName;
-//        if (tmp.toLowerCase().endsWith(".pdf")) {
-//            docName = tmp;
-//        } else {
-//            docName = tmp + ".pdf";
-//        }
-//
-//        String outputFile = outputFile + "/" + docName;
-
-        if (outputFile.exists()) {
-            final Optional opt = showConfirmationDialog("Il existe déjà un fichier " + outputFile + ".\n\n" +
-                    "Souhaitez-vous l'écraser ?", null, 400, 175, true);
-            if (opt.isPresent() && !ButtonType.YES.equals(opt.get())) return;
-        }
-
         final List<Prestation> prestations = filterPrestationsByDateFilters(new ArrayList<>(this.allPrestationsOnSelectedSe));
         if (prestations.isEmpty()) {
             showErrorDialog("Aucune prestation disponible sur le système d'endiguement aux périodes renseignées.");
@@ -312,19 +298,13 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         // Add cover page to final PDF.
         if (coverFile == null) {
-            try {
-                final File coverPageTmpPath = createCoverPageAndAddToList(title);
-                filesToMerge.add(coverPageTmpPath);
-            } catch (FileNotFoundException e) {
-                throw new IllegalStateException("The jrxml file was not found at " + JRXML_PATH, e);
-            } catch (JRException e) {
-                throw new IllegalStateException("Error while creating the cover page from jrxml file " + JRXML_PATH, e);
-            } catch (IOException e) {
-                throw new IllegalStateException("Error while creating temporary file for cover page.", e);
-            }
+            addPageToFiles(filesToMerge, COVER_JRXML_PATH, null, title);
         } else {
             filesToMerge.add(coverFile);
         }
+
+        // Add Summary table to final PDF
+        addPageToFiles(filesToMerge, SUMMARY_JRXML_PATH, prestations, null);
 
         // Add conclusion page to final PDF.
         if (conclusionFile != null) filesToMerge.add(conclusionFile);
@@ -340,13 +320,74 @@ public class ExtractionDocumentsPane extends BorderPane {
     }
 
     /**
+     * Create the temporary file for the input jrxml template and add it to the list of files to merge.
+     * @param filesToMerge The list of files to merge.
+     * @param JRXML_PATH the JRXML template.
+     * @param prestations the list of prestations to show in the table - used for SUMMARY_JRXML_PATH.
+     * @param title title from @uiTitle - used for COVER_JRXML_PATH.
+     * @return
+     */
+    private boolean addPageToFiles(final List<File> filesToMerge, final String JRXML_PATH, final List<Prestation> prestations, final String title) {
+        ArgumentChecks.ensureNonNull("filesToMerge", filesToMerge);
+        ArgumentChecks.ensureNonNull("JRXML_PATH", JRXML_PATH);
+
+        final boolean isSummaryPage = SUMMARY_JRXML_PATH.equals(JRXML_PATH);
+
+        final String pageType = isSummaryPage ? "summary" : "cover";
+        try {
+            if (isSummaryPage) {
+                return filesToMerge.add(generateSummaryPage(prestations));
+            }
+            else {
+                return filesToMerge.add(generateCoverPage(title));
+            }
+        } catch (FileNotFoundException e) {
+            throw new IllegalStateException("The jrxml file was not found at " + JRXML_PATH, e);
+        } catch (JRException e) {
+            throw new IllegalStateException("Error while creating the " + pageType + " page from jrxml file " + JRXML_PATH, e);
+        } catch (IOException e) {
+            throw new IllegalStateException("Error while creating temporary file for summary page.", e);
+        }
+    }
+
+    /**
+     * Generate a temporary file for the summary table.
+     * @param prestations the list of prestations to show in the table.
+     * @return the created temporary file.
+     * @throws IOException if error when creating the temporary file.
+     * @throws JRException if error when creating the PDF file from the JRXML template.
+     */
+    private File generateSummaryPage(final List<Prestation> prestations) throws IOException, JRException {
+        ArgumentChecks.ensureNonNull("prestations", prestations);
+        JRBeanCollectionDataSource beanColDataSource    = new JRBeanCollectionDataSource(prestations);
+        Map<String, Object> parameters                  = new HashMap();
+
+        // set report parameters
+        parameters.put("collectionBeanParam", beanColDataSource);
+        parameters.put("systemeEndiguement", this.selectedSe.getLibelle());
+        parameters.put("dateDebutPicker", uiPeriodeValidityDebut.getValue());
+        parameters.put("dateFinPicker", uiPeriodeValidityFin.getValue());
+
+        Path summaryTmpPath = Files.createTempFile("summaryPage", ".pdf");
+        InputStream input           = PrinterUtilities.class.getResourceAsStream(SUMMARY_JRXML_PATH);
+        JasperDesign jasperDesign   = JRXmlLoader.load(input);
+        JasperReport jasperReport   = JasperCompileManager.compileReport(jasperDesign);
+        JasperPrint jasperPrint     = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+        OutputStream outputStream   = new FileOutputStream(summaryTmpPath.toFile());
+
+        JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+        return summaryTmpPath.toFile();
+    }
+
+    /**
      * Create a standard cover page from user's inputs as a PDF file.
      * @param title title from @uiTitle.
      * @return the created temporary PDF file.
      * @throws IOException if error when creating the temporary file.
      * @throws JRException if error when creating the PDF file from the JRXML template.
      */
-    private File createCoverPageAndAddToList(final String title) throws IOException, JRException {
+    private File generateCoverPage(final String title) throws IOException, JRException {
+        ArgumentChecks.ensureNonNull("title", title);
         Map<String, Object> parameters = new HashMap();
 
         final String structure = this.uiStructure.getText();
@@ -358,8 +399,8 @@ public class ExtractionDocumentsPane extends BorderPane {
         parameters.put("dateFinPicker", uiPeriodeValidityFin.getValue());
         parameters.put("structure", structure.isEmpty() ? null : structure);
 
-        Path coverPageTmpPath = Files.createTempFile("namefile", ".pdf");
-        InputStream input = PrinterUtilities.class.getResourceAsStream(JRXML_PATH);
+        Path coverPageTmpPath = Files.createTempFile("coverPage", ".pdf");
+        InputStream input = PrinterUtilities.class.getResourceAsStream(COVER_JRXML_PATH);
         JasperDesign jasperDesign = JRXmlLoader.load(input);
         JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
         JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
