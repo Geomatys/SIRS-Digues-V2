@@ -194,7 +194,7 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         uiPeriodeValidityDebut.setValue(LocalDate.of(2023, 06, 05));
         uiCoverPath.setText("/home/estelle/Projects/SIRS-FranceDigues/horodatage/679a6e678ded5da21c37576c420009bb/2021/20230109_tableau_synthese.pdf");
-        uiConclusionPath.setText("/home/estelle/Projects/SIRS-FranceDigues/horodatage/output/tes.pdf");
+//        uiConclusionPath.setText("/home/estelle/Projects/SIRS-FranceDigues/horodatage/output/tes.pdf");
 
     }
 
@@ -205,11 +205,6 @@ public class ExtractionDocumentsPane extends BorderPane {
         /*
         A- INPUT FIELDS VERIFICATIONS
         ======================================================*/
-//        final String tmp = uiDocumentNameField.getText().trim();
-//        if (tmp.isEmpty()) {
-//            showErrorDialog("Vous devez remplir le nom du fichier");
-//            return;
-//        }
         if (uiPeriodeValidityDebut.getValue() == null && uiPeriodeValidityFin.getValue() == null
                 && uiPeriodeHorodatageDebut.getValue() == null && uiPeriodeHorodatageFin.getValue() == null) {
             showErrorDialog("Vous devez renseigner au moins une date");
@@ -243,9 +238,9 @@ public class ExtractionDocumentsPane extends BorderPane {
             }
             coverFile = null;
         }
-        final String conclusionPath = uiConclusionPath.getText();
+        final String conclusionPath = uiConclusionPath.getText().trim();
         final File conclusionFile;
-        if (conclusionPath != null) {
+        if (conclusionPath != null && !conclusionPath.isEmpty()) {
             if (!conclusionPath.endsWith(".pdf")){
                 showErrorDialog("Le format du fichier de la page de conclusion n'est pas supporté.\n\n" +
                         "Formats supportés :\n" +
@@ -281,7 +276,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         final File outputFile = chooser.showSaveDialog(null);
         if (outputFile == null) return;
 
-        final String output = outputFile.toString();
+        final String output = outputFile.getPath();
         RegistreTheme.setPreviousPath(outputFile.getParentFile().toPath(), ExtractionDocumentsPane.class);
 
         /*
@@ -294,24 +289,74 @@ public class ExtractionDocumentsPane extends BorderPane {
             return;
         }
 
+        // sort prestations by dateHorodatage.
+        prestations.sort(Comparator.comparing(Prestation::getHorodatageDate));
+
+        /*
+         C.1- Add cover page to final PDF.
+        ======================================================*/
+
         List<File> filesToMerge = new ArrayList<>();
 
-        // Add cover page to final PDF.
         if (coverFile == null) {
             addPageToFiles(filesToMerge, COVER_JRXML_PATH, null, title);
         } else {
             filesToMerge.add(coverFile);
         }
 
-        // Add Summary table to final PDF
+        /*
+         C.2- Add Summary table to final PDF
+        ======================================================*/
         addPageToFiles(filesToMerge, SUMMARY_JRXML_PATH, prestations, null);
 
-        // Add conclusion page to final PDF.
+        /*
+         C.3- Add Synthese table pdf files
+        ======================================================*/
+        final Map<String, List<Prestation>> syntheseTablePrestationsMap = new HashMap<>();
+        prestations.forEach(prestation -> {
+            final String syntheseTablePath = prestation.getSyntheseTablePath();
+            List<Prestation> tablePrestations = syntheseTablePrestationsMap.get(syntheseTablePath);
+            if (tablePrestations == null) {
+                tablePrestations = new ArrayList<>();
+                tablePrestations.add(prestation);
+                syntheseTablePrestationsMap.put(syntheseTablePath, tablePrestations);
+            } else {
+                tablePrestations.add(prestation);
+            }
+        });
+
+        // Add synthese table files to the list of files to merge.
+        // If file does not exist, store data to show warning message after merge.
+        final StringBuilder tablesNotFound = new StringBuilder();
+        syntheseTablePrestationsMap.forEach((tablePath, prestationsList) -> {
+            File table = new File(tablePath);
+            if (!table.exists()) {
+                tablesNotFound.append("\n\n- " + tablePath + "\n" +
+                        "Prestations associées :");
+                prestationsList.forEach(presta -> {
+                    String designation = presta.getDesignation();
+                    String libelle = presta.getLibelle();
+                    designation = designation == null ? "" : designation;
+                    libelle = libelle == null ? "" : libelle;
+                    tablesNotFound.append("\n      - " + designation + " - " + libelle + " " + presta.getId());
+                });
+            } else {
+                filesToMerge.add(table);
+            }
+        });
+
+
+        /*
+         C.4- Add conclusion page to final PDF.
+        ======================================================*/
         if (conclusionFile != null) filesToMerge.add(conclusionFile);
 
         final Task generator = PDFUtils.mergeFiles(filesToMerge, output, false, true, true);
         generator.setOnSucceeded(evt -> Platform.runLater(() -> {
             root.update(false);
+            if (!"".equals(tablesNotFound)) showWarningDialog("Erreur lors de la récupération des tableaux de synthèse suivants : "
+                    + tablesNotFound
+                    + "\n\nVeuillez vérifier les chemins d'accès avant de relancer la génération du document.", "Tableaux de synthèse introuvables", 600,400);
             SIRS.openFile(outputFile);
         }));
 

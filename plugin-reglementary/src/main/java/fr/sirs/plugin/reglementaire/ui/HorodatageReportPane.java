@@ -382,7 +382,7 @@ public class HorodatageReportPane extends BorderPane {
             PrestationRepository repo   = Injector.getBean(PrestationRepository.class);
             prestations.forEach(p -> {
                 p.setHorodatageStatusId(RegistreTheme.refWaitingStatus);
-                p.setSyntheseTablePath(file.getName());
+                p.setSyntheseTablePath(file.getPath());
                 repo.update(p);
             });
 

@@ -95,6 +95,7 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         FileTreeItem root = new FileTreeItem(false);
         gestionTab.setContent(new DocumentsPane(root));
         final Tab extractionTab = new Tab("Extraction");
+        extractionTab.setClosable(false);
         extractionTab.setContent(new ExtractionDocumentsPane(root));
 
         // Ajout des onglets
