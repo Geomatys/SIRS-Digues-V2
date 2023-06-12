@@ -418,6 +418,7 @@
           <eAnnotations source="localDate"/>
         </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EReference" name="horodatageStatusId" eType="#//RefHorodatageStatus"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="syntheseTablePath" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PositionDocument" eSuperTypes="#//AbstractPositionDocumentAssociable">
     <eAnnotations source="couchDBDocument"/>
