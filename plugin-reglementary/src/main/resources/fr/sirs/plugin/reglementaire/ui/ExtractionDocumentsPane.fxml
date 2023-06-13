@@ -65,7 +65,7 @@
                             </children>
                         </GridPane>
                         <ComboBox fx:id="uiSECombo" GridPane.columnIndex="1"
-                                  GridPane.rowIndex="2"/>
+                                  GridPane.rowIndex="2" maxWidth="500.0" prefWidth="440.0"/>
                     </children>
                     <padding>
                         <Insets bottom="25.0" top="15.0"/>
