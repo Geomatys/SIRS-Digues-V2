@@ -27,21 +27,15 @@ import java.util.List;
 import java.util.Set;
 
 import static fr.sirs.plugin.reglementaire.ui.DocumentsPane.LIBELLE;
-import static fr.sirs.plugin.reglementaire.ui.DocumentsPane.SAVE_FOLDER;
 
 /**
  * Utility class managing the properties file adding different properties to the filesystem objects.
  *
- * @author Guilhem Legal (Geomatys)
+ * @author Estelle Idée (Geomatys)
  */
 public class PropertiesFileUtilities extends fr.sirs.PropertiesFileUtilities {
 
     public static void updateFileSystem(final File rootDirectory) {
-
-        final File saveDir = new File(rootDirectory, SAVE_FOLDER);
-        if (!saveDir.exists()) {
-            saveDir.mkdir();
-        }
 
         final SystemeEndiguementRepository SErepo = Injector.getBean(SystemeEndiguementRepository.class);
 
@@ -55,7 +49,5 @@ public class PropertiesFileUtilities extends fr.sirs.PropertiesFileUtilities {
             final File seDir = getOrCreateSE(rootDirectory, se, LIBELLE, false, null);
             seFiles.remove(seDir);
         });
-
-        backupDirectories(saveDir, seFiles, false, null);
     }
 }

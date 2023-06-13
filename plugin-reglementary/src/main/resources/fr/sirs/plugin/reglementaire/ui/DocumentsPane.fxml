@@ -30,8 +30,6 @@
           <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="-1.0" text="Date de modification" />
             <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="-1.0" text="Date d'horodatage" />
             <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="70.0" prefWidth="-1.0" text="Taille" />
-            <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="50.0" prefWidth="-1.0" text="Intégré au DO de synthèse" />
-            <TreeTableColumn maxWidth="70.0" minWidth="50.0" prefWidth="-1.0" text="Publier" />
             <TreeTableColumn maxWidth="70.0" minWidth="50.0" prefWidth="-1.0" text="Ouvrir" />
         </columns>
          <columnResizePolicy>
@@ -46,11 +44,10 @@
          <children>
             <Button fx:id="addFolderButton" mnemonicParsing="false" onAction="#showAddFolderDialog" />
             <Button fx:id="importDocButton" mnemonicParsing="false" onAction="#createAndShowImportDialog" />
-            <Button fx:id="addDocButton" mnemonicParsing="false" onAction="#openDynamicDocTab" />
+            <Button fx:id="addExtractionButton" mnemonicParsing="false" onAction="#openExtractionTab" />
             <Button fx:id="deleteDocButton" mnemonicParsing="false" onAction="#showRemoveDialog" />
             <Pane prefHeight="20.0" prefWidth="20.0" />
             <Button fx:id="setFolderButton" mnemonicParsing="false" onAction="#setMainFolder" />
-            <Button fx:id="listButton" mnemonicParsing="false" onAction="#exportOdtSummary" />
             <Pane prefHeight="20.0" prefWidth="20.0" />
             <Button fx:id="hideFileButton" mnemonicParsing="false" onAction="#hideFiles" />
             <Button fx:id="hideShowButton" mnemonicParsing="false" onAction="#hideShowFiles" />

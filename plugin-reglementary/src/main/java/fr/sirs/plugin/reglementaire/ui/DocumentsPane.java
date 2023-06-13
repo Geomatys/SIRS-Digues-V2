@@ -43,7 +43,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.TreeTableColumn.CellDataFeatures;
 import javafx.scene.image.Image;
@@ -51,7 +50,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
 import org.apache.sis.util.ArgumentChecks;
-import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.nio.IOUtilities;
 
 import java.io.*;
@@ -61,14 +59,24 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import static fr.sirs.plugin.reglementaire.PropertiesFileUtilities.*;
 
 /**
+ * Display Registre tree.
+ * <ul>
+ *     <li>Allows to add folders,</li>
+ *     <li><ul>Allows to import timestamped synthese table PDF files :
+ *          <li>Input horodatage date</li>
+ *          <li>Option to automatically update the table prestations</li>
+ *     </ul></li>
+ *     <li>Allows to configure the root folder,</li>
+ * </ul>
+ * Supported external document formats : PDF
+ * <p>
  *
- * @author guilhem
+ * @author Estelle Idée (Geomatys)
  */
 public class DocumentsPane extends GridPane {
 
@@ -85,13 +93,10 @@ public class DocumentsPane extends GridPane {
     private TreeTableView<File> tree1;
 
     @FXML
-    private Button addDocButton;
+    private Button addExtractionButton;
 
     @FXML
     private Button addFolderButton;
-
-    @FXML
-    private Button listButton;
 
     @FXML
     private Button hideShowButton;
@@ -106,47 +111,31 @@ public class DocumentsPane extends GridPane {
     private static final Image IMP_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/import.png"));
     private static final Image DEL_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/remove.png"));
     private static final Image SET_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/set.png"));
-    private static final Image LIST_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/list.png"));
-    private static final Image PUB_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/publish.png"), 17, 20, false, false);
-    private static final Image OP_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/ouvrir.png"));
+   private static final Image OP_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/ouvrir.png"));
     private static final Image HIDE_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/cocher-decocher.png"));
     private static final Image HI_HISH_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/afficher.png"));
     private static final Image SH_HISH_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/masquer.png"));
 
     private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yyyy");
-
-    public static final String UNCLASSIFIED     = "Non classés";
-    public static final String SAVE_FOLDER      = "Sauvegarde";
-    public static final String DOCUMENT_FOLDER  = "Dossier d'ouvrage";
     public static final String ROOT_FOLDER      = "symadrem.root.folder";
 
     // SIRS hidden file properties
     public static final String TIMESTAMP_DATE = "timestamp_date";
-    public static final String DO_INTEGRATED    = "do_integrated";
     public static final String LIBELLE          = "libelle";
-    public static final String DYNAMIC          = "dynamic";
-    public static final String MODELE           = "modele";
     public static final String HIDDEN           = "hidden";
-    public static final String DATE_RANGE_MIN   = "dateRangeMin";
-    public static final String DATE_RANGE_MAX   = "dateRangeMax";
 
     public static final String SE = "se";
     public static final String TR = "tr";
     public static final String DG = "dg";
-
-
-    private static final Logger LOGGER = Logging.getLogger("fr.sirs");
 
     private final FileTreeItem root;
 
 //    private final DynamicDocumentTheme dynDcTheme;
 
     public DocumentsPane(final FileTreeItem root) {
-        //   , final DynamicDocumentTheme dynDcTheme) {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
         this.root = root;
-//        this.dynDcTheme = dynDcTheme;
 
         getStylesheets().add(SIRS.CSS_PATH);
 
@@ -154,8 +143,7 @@ public class DocumentsPane extends GridPane {
         importDocButton.setGraphic(new ImageView(IMP_BUTTON_IMAGE));
         deleteDocButton.setGraphic(new ImageView(DEL_BUTTON_IMAGE));
         setFolderButton.setGraphic(new ImageView(SET_BUTTON_IMAGE));
-        addDocButton.setGraphic(new ImageView(ADDD_BUTTON_IMAGE));
-        listButton.setGraphic(new ImageView(LIST_BUTTON_IMAGE));
+        addExtractionButton.setGraphic(new ImageView(ADDD_BUTTON_IMAGE));
         hideFileButton.setGraphic(new ImageView(HIDE_BUTTON_IMAGE));
         if (root.rootShowHiddenFile) {
             hideShowButton.setGraphic(new ImageView(SH_HISH_BUTTON_IMAGE));
@@ -168,8 +156,7 @@ public class DocumentsPane extends GridPane {
         importDocButton.setTooltip(new Tooltip("Importer un fichier"));
         deleteDocButton.setTooltip(new Tooltip("Supprimer un fichier"));
         setFolderButton.setTooltip(new Tooltip("Configurer le dossier racine"));
-        addDocButton.setTooltip(new Tooltip("Ajouter un dossier dynamique"));
-        listButton.setTooltip(new Tooltip("Exporter le sommaire"));
+        addExtractionButton.setTooltip(new Tooltip("Extraire un registre"));
         hideShowButton.setTooltip(new Tooltip("Cacher/Afficher les fichiers cachés"));
         hideFileButton.setTooltip(new Tooltip("Cacher/Afficher le fichier sélectionné"));
 
@@ -177,8 +164,7 @@ public class DocumentsPane extends GridPane {
         importDocButton.getStyleClass().add(BUTTON_STYLE);
         deleteDocButton.getStyleClass().add(BUTTON_STYLE);
         setFolderButton.getStyleClass().add(BUTTON_STYLE);
-        addDocButton.getStyleClass().add(BUTTON_STYLE);
-        listButton.getStyleClass().add(BUTTON_STYLE);
+        addExtractionButton.getStyleClass().add(BUTTON_STYLE);
         hideShowButton.getStyleClass().add(BUTTON_STYLE);
         hideFileButton.getStyleClass().add(BUTTON_STYLE);
 
@@ -231,31 +217,12 @@ public class DocumentsPane extends GridPane {
             return null;
         });
 
-
-        // do integrated column
-        tree1.getColumns().get(4).setCellValueFactory((Callback) param -> {
-            final TreeItem item = ((CellDataFeatures)param).getValue();
-            if (item != null) {
-                final File f = (File) item.getValue();
-                return new SimpleObjectProperty(f);
-            }
-            return null;
-        });
-        tree1.getColumns().get(4).setCellFactory((Callback) param -> new DOIntegatedCell());
-
-        // publish column
-        tree1.getColumns().get(5).setCellValueFactory((Callback) param -> {
-            final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
-            return new SimpleObjectProperty(f);
-        });
-        tree1.getColumns().get(5).setCellFactory((Callback) param -> new PublicationCell(root));
-
         // open column
-        tree1.getColumns().get(6).setCellValueFactory((Callback) param -> {
+        tree1.getColumns().get(4).setCellValueFactory((Callback) param -> {
             final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
             return new SimpleObjectProperty(f);
         });
-        tree1.getColumns().get(6).setCellFactory((Callback) param -> new OpenCell());
+        tree1.getColumns().get(4).setCellFactory((Callback) param -> new OpenCell());
 
 
         tree1.setShowRoot(false);
@@ -273,11 +240,8 @@ public class DocumentsPane extends GridPane {
         } else {
             importDocButton.disableProperty().set(true);
             deleteDocButton.disableProperty().set(true);
-            addDocButton.disableProperty().set(true);
             addFolderButton.disableProperty().set(true);
-            listButton .disableProperty().set(true);
         }
-
 
         final BooleanBinding guestOrExtern = new BooleanBinding() {
 
@@ -297,6 +261,17 @@ public class DocumentsPane extends GridPane {
         deleteDocButton.disableProperty().bind(guestOrExtern);
     }
 
+    /**
+     * Method used by action on button importDocButton.
+     * <p>
+     * Allows to import the timestamped PDF files, or other type of files.
+     * <p>
+     * User must first select a directory in the tree.
+     * <p>
+     * For timestamped "Tableau de synthèse", the user has the option to automatically update the Prestations' horodatage attributes with the input date and file.
+     * @param event
+     * @throws IOException if error when copying the files to the selected directory.
+     */
     @FXML
     public void createAndShowImportDialog(ActionEvent event) throws IOException {
         final File directory = getSelectedFile();
@@ -324,7 +299,6 @@ public class DocumentsPane extends GridPane {
         dialog.setResizable(true);
         dialog.setTitle("Import de document");
         showImportDialog(dialog, directory);
-
     }
 
     /**
@@ -360,8 +334,12 @@ public class DocumentsPane extends GridPane {
                 }
 
 
-                final Optional confirmOpt = showConfirmationDialog("Souhaitez-vous mettre automatiquement à jour la date d'horodatage des prestations ?" +
-                        "\n\nSélectionner 'Annuler' pour annuler l'importation du fichier.", null, 500, 150, true);
+                final Optional confirmOpt = showConfirmationDialog("Souhaitez-vous mettre automatiquement à jour les prestations du tableau?" +
+                        "\n\nLes éléments suivants seront mis à jour pour chaque prestation :" +
+                        "\n\n    - la date d'horodatage;" +
+                        "\n    - le statut d'horodatage en " + RegistreTheme.refTimeStampedStatus + ";" +
+                        "\n    - le lien vers le Tableau de synthèse : " + newFile + "." +
+                        "\n\nSélectionner 'Annuler' pour annuler l'importation du fichier.", null, 600, 300, true);
 
                 boolean updatePrestationsDate = false;
                 if (confirmOpt.isPresent()) {
@@ -390,9 +368,11 @@ public class DocumentsPane extends GridPane {
     /**
      * Extract text information from pdf file and update @{@link fr.sirs.core.model.Prestation}.
      *
-     * @param pdf_filename          pdf file to read.
-     * @param timeStampDate
-     * @param updatePrestationsDate
+     * @param pdf_filename pdf file to read.
+     * @param timeStampDate timestamp date entered by user and used to update Prestations' horodatageDate if necessary.
+     * @param updatePrestationsDate whether to automatically update the Prestations' horodatageDate.
+     * @return true if the document has been successfully extracted.<p>
+     * false otherwise.
      */
     private boolean extractElementsInFile(final File pdf_filename, final LocalDate timeStampDate, final boolean updatePrestationsDate) {
         ArgumentChecks.ensureNonNull("pdf_filename", pdf_filename);
@@ -557,8 +537,7 @@ public class DocumentsPane extends GridPane {
         final Optional opt = dialog.showAndWait();
         if (opt.isPresent() && ButtonType.OK.equals(opt.get())) {
             File f = new File(ipane.rootFolderField.getText());
-            if (f.isDirectory()) {
-//                    && verifyDatabaseVersion(f)) {
+            if (f.isDirectory() && verifyDatabaseVersion(f)) {
                 String rootPath = f.getPath();
 
                 final Preferences prefs = Preferences.userRoot().node(PluginReglementary.NODE_PREFERENCE_NAME);
@@ -566,9 +545,8 @@ public class DocumentsPane extends GridPane {
                 importDocButton.disableProperty().set(false);
                 deleteDocButton.disableProperty().unbind();
                 deleteDocButton.disableProperty().set(false);
-                addDocButton.disableProperty().set(false);
                 addFolderButton.disableProperty().set(false);
-                listButton.disableProperty().set(false);
+                addExtractionButton.disableProperty().set(false);
                 // refresh tree
                 final File rootDirectory = new File(rootPath);
                 updateFileSystem(rootDirectory);
@@ -598,10 +576,6 @@ public class DocumentsPane extends GridPane {
                 case NewFolderPane.IN_CURRENT_FOLDER:
                     addToSelectedFolder(folderName);
                     break;
-//                case NewFolderPane.IN_ALL_FOLDER:
-//                    addToAllFolder(rootDir, folderName);
-//                    update();
-//                    break;
                 case NewFolderPane.IN_SE_FOLDER:
                     addToModelFolder(rootDir, folderName, SE);
                     update();
@@ -610,47 +584,37 @@ public class DocumentsPane extends GridPane {
         }
     }
 
+    /**
+     * Method used when action on button @addExtractionButton.
+     * Opens the Extraction tab.
+     * @param event
+     */
     @FXML
-    public void exportOdtSummary(ActionEvent event) {
-//        final Dialog dialog    = new Dialog();
-//        final DialogPane pane  = new DialogPane();
-//        final SaveSummaryPane ipane = new SaveSummaryPane();
-//        pane.setContent(ipane);
-//        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-//        dialog.setDialogPane(pane);
-//        dialog.setResizable(true);
-//        dialog.setTitle("Exporter le sommaire");
-//
-//        final Optional opt = dialog.showAndWait();
-//        if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
-//            File f = new File(ipane.newFileFIeld.getText());
-//            LoadingPane.showDialog(ODTUtils.writeSummary(root, f));
-//        }
-    }
-
-    @FXML
-    public void openDynamicDocTab(ActionEvent event) {
-//        Session session = Injector.getSession();
-//        final Tab result = session.getOrCreateThemeTab(dynDcTheme);
-//        session.getFrame().addTab(result);
+    public void openExtractionTab(ActionEvent event) {
+        final TabPane result = (TabPane) this.getParent().getParent();
+        final Tab extraction = result.getTabs().filtered(tab -> RegistreTheme.EXTRACTION_TAB.equals(tab.getText())).stream().findFirst().orElseGet(null);
+        if (extraction == null) {
+            showErrorDialog("Erreur lors de l'ouverture de l'onglet l'extraction des registres.");
+        }
+        result.getSelectionModel().select(extraction);
     }
 
     @FXML
     public void hideFiles(ActionEvent event) {
-//        FileTreeItem item = (FileTreeItem) tree1.getSelectionModel().getSelectedItem();
-//        item.hidden.setValue(!item.hidden.getValue());
-//        update();
+        FileTreeItem item = (FileTreeItem) tree1.getSelectionModel().getSelectedItem();
+        item.hidden.setValue(!item.hidden.getValue());
+        update();
     }
 
     @FXML
     public void hideShowFiles(ActionEvent event) {
-//        root.rootShowHiddenFile = !root.rootShowHiddenFile;
-//        if (root.rootShowHiddenFile) {
-//            hideShowButton.setGraphic(new ImageView(SH_HISH_BUTTON_IMAGE));
-//        } else {
-//            hideShowButton.setGraphic(new ImageView(HI_HISH_BUTTON_IMAGE));
-//        }
-//        update();
+        root.rootShowHiddenFile = !root.rootShowHiddenFile;
+        if (root.rootShowHiddenFile) {
+            hideShowButton.setGraphic(new ImageView(SH_HISH_BUTTON_IMAGE));
+        } else {
+            hideShowButton.setGraphic(new ImageView(HI_HISH_BUTTON_IMAGE));
+        }
+        update();
     }
 
     private File getSelectedFile() {
@@ -668,12 +632,6 @@ public class DocumentsPane extends GridPane {
     private void addToSelectedFolder(final String folderName) {
         File directory = getSelectedFile();
         if (directory != null && directory.isDirectory()) {
-//            if (getIsModelFolder(directory)) {
-//                directory = new File(directory, DOCUMENT_FOLDER);
-//                if (!directory.exists()) {
-//                    directory.mkdir();
-//                }
-//            }
             final File newDir = new File(directory, folderName);
             newDir.mkdir();
             update();
@@ -682,33 +640,11 @@ public class DocumentsPane extends GridPane {
         }
     }
 
-//    private void addToAllFolder(final File rootDir, final String folderName) {
-//        for (File f : rootDir.listFiles()) {
-//            if (f.isDirectory()) {
-//                if (f.getName().equals(DOCUMENT_FOLDER)) {
-//                    final File newDir = new File(f, folderName);
-//                    if (!newDir.exists()) {
-//                        newDir.mkdir();
-//                    }
-//                } else {
-//                    addToAllFolder(f, folderName);
-//                }
-//            }
-//        }
-//    }
 
     private void addToModelFolder(final File rootDir, final String folderName, final String model) {
         for (File f : rootDir.listFiles()) {
             if (f.isDirectory()) {
                 if (getIsModelFolder(f, model)) {
-//                    final File docDir = new File(f, DOCUMENT_FOLDER);
-//                    if (!docDir.exists()) {
-//                        docDir.mkdir();
-//                    }
-//                    final File newDir = new File(docDir, folderName);
-//                    if (!newDir.exists()) {
-//                        newDir.mkdir();
-//                    }
                     final File newDir = new File(f, folderName);
                     newDir.mkdir();
                     update();
@@ -716,159 +652,6 @@ public class DocumentsPane extends GridPane {
                     addToModelFolder(f, folderName, model);
                 }
             }
-        }
-    }
-
-    private static class DOIntegatedCell extends TreeTableCell {
-
-        private final CheckBox box = new CheckBox();
-
-        public DOIntegatedCell() {
-            setGraphic(box);
-            setAlignment(Pos.CENTER);
-            box.disableProperty().bind(editingProperty());
-            box.selectedProperty().addListener((observable, oldValue, newValue) -> {
-                File f = (File) getItem();
-                if (f != null) {
-//                        setBooleanProperty(f, DO_INTEGRATED, newValue);
-                }
-            });
-        }
-
-        @Override
-        public void updateItem(Object item, boolean empty) {
-            super.updateItem(item, empty);
-            File f = (File) item;
-            if (f == null || f.isDirectory()) {
-                box.setVisible(false);
-            } else {
-                box.setVisible(true);
-//                box.setSelected(getBooleanProperty(f, DO_INTEGRATED));
-            }
-        }
-    }
-
-    private static class PublicationCell extends TreeTableCell {
-
-        private final Button button = new Button();
-
-        private final FileTreeItem root;
-
-        public PublicationCell(final FileTreeItem root) {
-            setGraphic(button);
-            this.root = root;
-            button.setGraphic(new ImageView(PUB_BUTTON_IMAGE));
-            button.getStyleClass().add(BUTTON_STYLE);
-            button.disableProperty().bind(editingProperty());
-            button.setOnAction(this::handle);
-
-        }
-
-        public void handle(ActionEvent event) {
-//            final FileTreeItem item = (FileTreeItem) getItem();
-//            if (getBooleanProperty(item.getValue(), DYNAMIC)) {
-//                regenerateDynamicDocument(item.getValue());
-//            } else if (item.getValue().getName().equals(DOCUMENT_FOLDER)) {
-//                printSynthesisDoc(item);
-//            }
-        }
-
-        private void printSynthesisDoc(final FileTreeItem item) {
-//            final Dialog dialog    = new Dialog();
-//            final DialogPane pane  = new DialogPane();
-//            final SaveSummaryPane ipane = new SaveSummaryPane();
-//            pane.setContent(ipane);
-//            pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-//            dialog.setDialogPane(pane);
-//            dialog.setResizable(true);
-//            dialog.setTitle("Exporter le dossier de synthèse");
-//
-//            final Optional opt = dialog.showAndWait();
-//            if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
-//                File f = new File(ipane.newFileFIeld.getText());
-//                LoadingPane.showDialog(ODTUtils.writeDoSynth(item, f));
-//            }
-        }
-
-        private void regenerateDynamicDocument(final File item) {
-//            final ModeleRapportRepository modelRepo = Injector.getBean(ModeleRapportRepository.class);
-//            String modelId = getProperty(item, MODELE);
-//            final String dateRangeMin = getProperty(item, DocumentsPane.DATE_RANGE_MIN);
-//            final String dateRangeMax = getProperty(item, DocumentsPane.DATE_RANGE_MAX);
-//
-//            final NumberRange dateRange;
-//            if(dateRangeMin.isEmpty() && dateRangeMax.isEmpty()) {
-//                dateRange = null;
-//            } else {
-//                dateRange = NumberRange.create(dateRangeMin.isEmpty() ? 0 : Long.parseLong(dateRangeMin), true,
-//                        dateRangeMax.isEmpty() ? Long.MAX_VALUE : Long.parseLong(dateRangeMax), true);
-//            }
-//            if (modelId != null && !modelId.isEmpty()) {
-//                final ModeleRapport modele = modelRepo.get(modelId);
-//                if (modele != null) {
-//                    final Task<File> generator = ODTUtils.generateDoc(modele, getTronconList(), item, root.getLibelle(), dateRange);
-//                    generator.setOnSucceeded(evt -> Platform.runLater(() -> root.update(false)));
-//                    LoadingPane.showDialog(generator);
-//                } else {
-//                    showErrorDialog("Pas de modèle disponible pour le fichier: " + item.getName());
-//                }
-//            } else {
-//                showErrorDialog("Impossible de résoudre l'identifiant du modèle pour le fichier: " + item.getName());
-//            }
-        }
-
-//        private Collection<TronconDigue> getTronconList() {
-//            final FileTreeItem item = (FileTreeItem) getItem();
-//            final File modelFolder  = getModelFolder(item.getValue());
-//            Collection<TronconDigue> elements = null;
-////            if (getIsModelFolder(modelFolder, SE)) {
-////                final SystemeEndiguementRepository sdRepo = (SystemeEndiguementRepository) Injector.getSession().getRepositoryForClass(SystemeEndiguement.class);
-////                final SystemeEndiguement sd                = sdRepo.get(modelFolder.getName());
-////                final DigueRepository digueRepo          = (DigueRepository) Injector.getSession().getRepositoryForClass(Digue.class);
-////                final TronconDigueRepository tronconRepo = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
-////                final Set<TronconDigue> troncons         = new HashSet<>();
-////                final List<Digue> digues                 = digueRepo.getBySystemeEndiguement(sd);
-////                for(Digue digue : digues){
-////                    troncons.addAll(tronconRepo.getByDigue(digue));
-////                }
-////                return troncons;
-////            } else if (getIsModelFolder(modelFolder, TR)) {
-////                final TronconDigueRepository tronconRepo = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
-////                return Collections.singleton(tronconRepo.get(modelFolder.getName()));
-////            } else {
-////                elements = new ArrayList<>();
-////            }
-//            return elements;
-//        }
-
-//        private File getModelFolder(File f) {
-//            if (getIsModelFolder(f)) {
-//                return f;
-//            } else if (!f.getParentFile().equals(root.getValue())) {
-//                return getModelFolder(f.getParentFile());
-//            }
-//            return null;
-//        }
-
-        @Override
-        public void updateItem(Object item, boolean empty) {
-//            super.updateItem(item, empty);
-//            final FileTreeItem ft = (FileTreeItem) item;
-//            if (ft != null) {
-//                final File f          = ft.getValue();
-//                if (f != null && (getBooleanProperty(f, DYNAMIC) || f.getName().equals(DOCUMENT_FOLDER))) {
-//                    if (getBooleanProperty(f, DYNAMIC)) {
-//                        button.setTooltip(new Tooltip("Mettre à jour le fichier dynamique"));
-//                    } else if (f.getName().equals(DOCUMENT_FOLDER)) {
-//                        button.setTooltip(new Tooltip("Exporter le dossier de synthèse"));
-//                    }
-//                    button.setVisible(true);
-//                } else {
-//                    button.setVisible(false);
-//                }
-//            } else {
-//                button.setVisible(false);
-//            }
         }
     }
 

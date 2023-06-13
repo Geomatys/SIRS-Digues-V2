@@ -29,15 +29,12 @@ import javafx.scene.layout.GridPane;
 
 /**
  *
- * @author guilhem
+ * @author Estelle Idee (Geomatys)
  */
 public class NewFolderPane extends GridPane {
 
     public static final String IN_CURRENT_FOLDER = " Dans le dossier sélectionné";
-//    public static final String IN_ALL_FOLDER     = " Dans tous les dossiers de SE, digues et tronçons";
     public static final String IN_SE_FOLDER      = " Uniquement dans les systèmes d'endiguement";
-//    public static final String IN_DG_FOLDER      = " Uniquement dans les digues";
-//    public static final String IN_TR_FOLDER      = " Uniquement dans les tronçons";
 
     @FXML
     public TextField folderNameField;
@@ -51,10 +48,7 @@ public class NewFolderPane extends GridPane {
 
         final ObservableList<String> prop = FXCollections.observableArrayList();
         prop.add(IN_CURRENT_FOLDER);
-//        prop.add(IN_ALL_FOLDER);
         prop.add(IN_SE_FOLDER);
-//        prop.add(IN_DG_FOLDER);
-//        prop.add(IN_TR_FOLDER);
         locCombo.setItems(prop);
         locCombo.getSelectionModel().selectFirst();
     }
