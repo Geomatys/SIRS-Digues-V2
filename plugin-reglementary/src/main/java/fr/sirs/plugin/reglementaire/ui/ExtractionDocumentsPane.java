@@ -79,11 +79,10 @@ import static fr.sirs.plugin.reglementaire.ui.DocumentsPane.*;
  * @author Estelle Idée (Geomatys)
  */
 public class ExtractionDocumentsPane extends BorderPane {
-
-    @FXML private DatePicker uiPeriodeValidityFin;
-    @FXML private DatePicker uiPeriodeValidityDebut;
-    @FXML private DatePicker uiPeriodeHorodatageFin;
-    @FXML private DatePicker uiPeriodeHorodatageDebut;
+    @FXML private CheckBox ui_isValidityFiltre;
+    @FXML private CheckBox ui_isHorodatageFiltre;
+    @FXML private DatePicker uiPeriodeFin;
+    @FXML private DatePicker uiPeriodeDebut;
     @FXML private ComboBox<Preview> uiSECombo;
     @FXML private GridPane uiCoverGridpane;
     @FXML private CheckBox uiIsExternalPage;
@@ -129,21 +128,14 @@ public class ExtractionDocumentsPane extends BorderPane {
         uiStructure = new TextField();
 
         uiGenerateBtn.setTooltip(new Tooltip("Générer le document dynamique"));
-        DatePickerConverter.register(uiPeriodeValidityDebut);
-        DatePickerConverter.register(uiPeriodeValidityFin);
-        uiPeriodeValidityDebut.valueProperty().addListener((observable, oldValue, newValue) ->
-                uiPeriodeValidityFin.setDayCellFactory(RegistreTheme.getUiPeriodFinDayCellFactory(uiPeriodeValidityDebut))
+        DatePickerConverter.register(uiPeriodeDebut);
+        DatePickerConverter.register(uiPeriodeFin);
+        uiPeriodeDebut.valueProperty().addListener((observable, oldValue, newValue) ->
+                uiPeriodeFin.setDayCellFactory(RegistreTheme.getUiPeriodFinDayCellFactory(uiPeriodeDebut))
         );
 
-        uiPeriodeValidityFin.valueProperty().addListener((observable, oldValue, newValue) ->
-                uiPeriodeValidityDebut.setDayCellFactory(RegistreTheme.getUiPeriodDebutDayCellFactory(uiPeriodeValidityFin))
-        );
-        uiPeriodeHorodatageDebut.valueProperty().addListener((observable, oldValue, newValue) ->
-                uiPeriodeHorodatageFin.setDayCellFactory(RegistreTheme.getUiPeriodFinDayCellFactory(uiPeriodeHorodatageDebut))
-        );
-
-        uiPeriodeHorodatageFin.valueProperty().addListener((observable, oldValue, newValue) ->
-                uiPeriodeHorodatageDebut.setDayCellFactory(RegistreTheme.getUiPeriodDebutDayCellFactory(uiPeriodeHorodatageFin))
+        uiPeriodeFin.valueProperty().addListener((observable, oldValue, newValue) ->
+                uiPeriodeDebut.setDayCellFactory(RegistreTheme.getUiPeriodDebutDayCellFactory(uiPeriodeFin))
         );
 
         SIRS.initCombo(uiSECombo, FXCollections.observableList(session.getPreviews().getByClass(SystemeEndiguement.class)), null);
@@ -153,30 +145,22 @@ public class ExtractionDocumentsPane extends BorderPane {
             this.allPrestationsOnSelectedSe = getAllPrestationsInSelectedSeRegistre();
         });
 
-        final SirsStringConverter converter = new SirsStringConverter();
-
-        // model edition
-        final FXModeleRapportsPane rapportEditor = new FXModeleRapportsPane();
-
         uiGenerateBtn.disableProperty().bind(Bindings.createBooleanBinding(() -> {
-                    final boolean isValidityDebutNull = uiPeriodeValidityDebut.valueProperty().isNull().get();
-                    final boolean isValidityFinNull = uiPeriodeValidityFin.valueProperty().isNull().get();
-                    final boolean isHorodatageDebutNull = uiPeriodeHorodatageDebut.valueProperty().isNull().get();
-                    final boolean isHorodatageFinNull = uiPeriodeHorodatageFin.valueProperty().isNull().get();
+                    final boolean isDebutNull = uiPeriodeDebut.valueProperty().isNull().get();
+                    final boolean isFinNull = uiPeriodeFin.valueProperty().isNull().get();
                     final boolean isExternalPage = uiIsExternalPage.isSelected();
                     return disableProperty().get()
-                            || (isValidityDebutNull && isValidityFinNull && isHorodatageDebutNull && isHorodatageFinNull)
-//                            || (isValidityDebutNull != isValidityFinNull
-//                            || isHorodatageDebutNull != isHorodatageFinNull)
+                            || (!ui_isValidityFiltre.isSelected() && !ui_isHorodatageFiltre.isSelected())
+                            || (isDebutNull && isFinNull)
                             || uiSECombo.getValue() == null
                             || (isExternalPage && uiCoverPath.getText().trim().isEmpty())
                             || (!isExternalPage && uiTitle.getText().trim().isEmpty());
                 },
                 disableProperty(),
-                uiPeriodeValidityDebut.valueProperty(),
-                uiPeriodeValidityFin.valueProperty(),
-                uiPeriodeHorodatageDebut.valueProperty(),
-                uiPeriodeHorodatageFin.valueProperty(),
+                ui_isValidityFiltre.selectedProperty(),
+                ui_isHorodatageFiltre.selectedProperty(),
+                uiPeriodeDebut.valueProperty(),
+                uiPeriodeFin.valueProperty(),
                 uiSECombo.valueProperty(),
                 uiIsExternalPage.selectedProperty(),
                 uiCoverPath.textProperty(),
@@ -201,7 +185,7 @@ public class ExtractionDocumentsPane extends BorderPane {
             }
         });
 
-        uiPeriodeValidityDebut.setValue(LocalDate.of(2023, 06, 05));
+        uiPeriodeDebut.setValue(LocalDate.of(2023, 06, 05));
         uiCoverPath.setText("/home/estelle/Projects/SIRS-FranceDigues/horodatage/679a6e678ded5da21c37576c420009bb/2021/20230109_tableau_synthese.pdf");
 //        uiConclusionPath.setText("/home/estelle/Projects/SIRS-FranceDigues/horodatage/output/tes.pdf");
 
@@ -214,8 +198,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         /*
         A- INPUT FIELDS VERIFICATIONS
         ======================================================*/
-        if (uiPeriodeValidityDebut.getValue() == null && uiPeriodeValidityFin.getValue() == null
-                && uiPeriodeHorodatageDebut.getValue() == null && uiPeriodeHorodatageFin.getValue() == null) {
+        if (uiPeriodeDebut.getValue() == null && uiPeriodeFin.getValue() == null) {
             showErrorDialog("Vous devez renseigner au moins une date");
             return;
         }
@@ -462,8 +445,8 @@ public class ExtractionDocumentsPane extends BorderPane {
         // set report parameters
         parameters.put("collectionBeanParam", beanColDataSource);
         parameters.put("systemeEndiguement", this.selectedSe.getLibelle());
-        parameters.put("dateDebutPicker", uiPeriodeValidityDebut.getValue());
-        parameters.put("dateFinPicker", uiPeriodeValidityFin.getValue());
+        parameters.put("dateDebutPicker", uiPeriodeDebut.getValue());
+        parameters.put("dateFinPicker", uiPeriodeFin.getValue());
 
         Path summaryTmpPath = Files.createTempFile("summaryPage", ".pdf");
         InputStream input           = PrinterUtilities.class.getResourceAsStream(SUMMARY_JRXML_PATH);
@@ -492,8 +475,8 @@ public class ExtractionDocumentsPane extends BorderPane {
         // set report parameters
         parameters.put("title", title);
         parameters.put("systemeEndiguement", this.selectedSe.getLibelle());
-        parameters.put("dateDebutPicker", uiPeriodeValidityDebut.getValue());
-        parameters.put("dateFinPicker", uiPeriodeValidityFin.getValue());
+        parameters.put("dateDebutPicker", uiPeriodeDebut.getValue());
+        parameters.put("dateFinPicker", uiPeriodeFin.getValue());
         parameters.put("structure", structure.isEmpty() ? null : structure);
 
         Path coverPageTmpPath = Files.createTempFile("coverPage", ".pdf");
@@ -574,15 +557,6 @@ public class ExtractionDocumentsPane extends BorderPane {
         return rootPath;
     }
 
-//    private SystemeEndiguement getSelectedSE() {
-//        final Preview newValue = uiSECombo.getSelectionModel().getSelectedItem();
-//        if (newValue != null) {
-//            return session.getRepositoryForClass(SystemeEndiguement.class).get(newValue.getElementId());
-//        } else {
-//            return null;
-//        }
-//    }
-
     /**
      * Method to get all the prestations on the selected @{@link SystemeEndiguement} from the @{@link Preview}
      *
@@ -599,43 +573,44 @@ public class ExtractionDocumentsPane extends BorderPane {
 
     private List<Prestation> filterPrestationsByDateFilters(List<Prestation> prestations) {
         ArgumentChecks.ensureNonNull("prestations", prestations);
-        prestations = filterPrestationsByDateFilter(prestations, true);
-        return filterPrestationsByDateFilter(prestations, false);
+        return filterPrestationsByDateFilter(prestations);
     }
 
     /**
      * Filter a @{@link List} of @{@link Prestation} by Validity dates or by Horodatage date.
      *
      * @param prestations the list of prestations to filter.
-     * @param isValidityDate indicate whether the filter is using the validity dates or the horodatage dates.
      * @return the list of prestations after filtering.
      */
-    private List<Prestation> filterPrestationsByDateFilter(List<Prestation> prestations, final boolean isValidityDate) {
+    private List<Prestation> filterPrestationsByDateFilter(List<Prestation> prestations) {
         ArgumentChecks.ensureNonNull("prestations", prestations);
 
-        final LocalDate periodeDebut = isValidityDate ? uiPeriodeValidityDebut.getValue() : uiPeriodeHorodatageDebut.getValue();
-        final LocalDate periodeFin = isValidityDate ? uiPeriodeValidityFin.getValue() : uiPeriodeHorodatageFin.getValue();
+        final LocalDate periodeDebut    = uiPeriodeDebut.getValue();
+        final LocalDate periodeFin      = uiPeriodeFin.getValue();
 
         if (periodeDebut == null && periodeFin == null) {
             return prestations;
         }
 
         NumberRange dateRange;
-        if (isValidityDate) {
+        if (ui_isValidityFiltre.isSelected()) {
             final long dateDebut = periodeDebut == null ? 0 : periodeDebut.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
             final long dateFin = periodeFin == null ? Long.MAX_VALUE : periodeFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
             dateRange = NumberRange.create(dateDebut, true, dateFin, true);
 
             AvecBornesTemporelles.IntersectDateRange dateRangePredicate = new AvecBornesTemporelles.IntersectDateRange(dateRange);
-            return prestations.stream().filter(dateRangePredicate).collect(Collectors.toList());
+            prestations = prestations.stream().filter(dateRangePredicate).collect(Collectors.toList());
 
-        } else {
-            return prestations.stream().filter(p -> {
+        }
+        if (ui_isHorodatageFiltre.isSelected()){
+            prestations = prestations.stream().filter(p -> {
                 final LocalDate horodatageDate = p.getHorodatageDate();
                 if (horodatageDate == null) return false;
 
                 return (periodeDebut == null || horodatageDate.isAfter(periodeDebut)) && (periodeFin == null || horodatageDate.isBefore(periodeFin));
             }).collect(Collectors.toList());
         }
+
+        return prestations;
     }
 }

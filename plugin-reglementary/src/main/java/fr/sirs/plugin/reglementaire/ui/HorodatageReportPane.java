@@ -38,15 +38,12 @@ import org.apache.sis.util.ArgumentChecks;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 /**

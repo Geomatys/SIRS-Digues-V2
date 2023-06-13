@@ -6,132 +6,108 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0"
-         type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="457.0" prefWidth="747.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <padding>
-        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0"/>
+        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
     </padding>
     <center>
         <VBox prefWidth="619.0" BorderPane.alignment="CENTER">
             <children>
-                <Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefHeight="20.0" prefWidth="482.0"
-                       styleClass="pojotable-header" text="Génération du document"/>
+                <Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefHeight="20.0" prefWidth="482.0" styleClass="pojotable-header" text="Génération du document" />
                 <GridPane hgap="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vgap="10.0">
                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="190.0" minWidth="10.0" prefWidth="100.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="530.0" minWidth="10.0" prefWidth="450.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="100.0" prefWidth="200.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="256.0" minWidth="10.0" prefWidth="206.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="37.0" minWidth="10.0" prefWidth="37.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="256.0" minWidth="10.0" prefWidth="206.0"/>
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
-                        <Label text="Période de validité du :" GridPane.rowIndex="0"/>
-                        <Label text="Période d'horodatage du :" GridPane.rowIndex="1"/>
+                        <Label text="Appliquer le filtre sur * :" GridPane.rowIndex="0"/>
+                        <Label text="Période du :" GridPane.rowIndex="1"/>
                         <Label text="Système d'endiguement *" GridPane.rowIndex="2">
                             <GridPane.margin>
                                 <Insets/>
                             </GridPane.margin>
                         </Label>
-                        <GridPane GridPane.columnIndex="1" GridPane.rowIndex="0">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="150.0"/>
-                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="29.0" minWidth="10.0" prefWidth="29.0"/>
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="150.0"/>
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                            </rowConstraints>
-                            <children>
-                                <DatePicker fx:id="uiPeriodeValidityDebut"/>
-                                <DatePicker fx:id="uiPeriodeValidityFin" GridPane.columnIndex="2" GridPane.halignment="LEFT"/>
-                                <Label text="au :" GridPane.columnIndex="1" GridPane.halignment="CENTER"/>
-                            </children>
-                        </GridPane>
-                        <GridPane GridPane.columnIndex="1" GridPane.rowIndex="1">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="150.0"/>
-                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="29.0" minWidth="10.0" prefWidth="29.0"/>
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="150.0"/>
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                            </rowConstraints>
-                            <children>
-                                <DatePicker fx:id="uiPeriodeHorodatageDebut"/>
-                                <DatePicker fx:id="uiPeriodeHorodatageFin" GridPane.columnIndex="2" GridPane.halignment="LEFT"/>
-                                <Label text="au :" GridPane.columnIndex="1" GridPane.halignment="CENTER"/>
-                            </children>
-                        </GridPane>
-                        <ComboBox fx:id="uiSECombo" GridPane.columnIndex="1"
+                        <CheckBox fx:id="ui_isValidityFiltre" mnemonicParsing="false" text="date de validité"
+                                  GridPane.columnIndex="1"/>
+                        <CheckBox fx:id="ui_isHorodatageFiltre" mnemonicParsing="false" text="date d'horodatage" GridPane.columnIndex="3" />
+                        <DatePicker fx:id="uiPeriodeDebut" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <Label text="au :" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
+                        <DatePicker fx:id="uiPeriodeFin" GridPane.columnIndex="3" GridPane.halignment="LEFT"
+                                    GridPane.rowIndex="1"/>
+                        <ComboBox fx:id="uiSECombo" GridPane.columnIndex="1" GridPane.columnSpan="3"
                                   GridPane.rowIndex="2"/>
                     </children>
                     <padding>
-                        <Insets bottom="25.0" top="15.0"/>
+                        <Insets bottom="25.0" top="15.0" />
                     </padding>
                 </GridPane>
-                <Separator prefWidth="200.0"/>
+                <Separator prefWidth="200.0" />
                 <Label text="Sélection de la page de garde">
                     <padding>
-                        <Insets top="10.0"/>
+                        <Insets top="10.0" />
                     </padding>
                 </Label>
-                <GridPane fx:id="uiCoverGridpane" hgap="10.0" vgap="10.0"  maxWidth="1.7976931348623157E308" >
+                <GridPane fx:id="uiCoverGridpane" hgap="10.0" maxWidth="1.7976931348623157E308" vgap="10.0">
                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="190.0" minWidth="10.0" prefWidth="100.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="500.0" minWidth="10.0" prefWidth="440.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="30.0" minWidth="10.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="500.0" minWidth="10.0" prefWidth="440.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="30.0" minWidth="10.0" />
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints vgrow="ALWAYS"/>
-                        <RowConstraints vgrow="ALWAYS"/>
+                        <RowConstraints vgrow="ALWAYS" />
+                        <RowConstraints vgrow="ALWAYS" />
                     </rowConstraints>
                     <children>
                         <Label text="Page de garde externe">
                             <tooltip>
-                                <Tooltip text="Cochez la case pour charger un document externe."/>
+                                <Tooltip text="Cochez la case pour charger un document externe." />
                             </tooltip>
                         </Label>
                         <Label fx:id="uiCoverPathLabel" text="Chemin *" GridPane.rowIndex="1">
                             <tooltip>
-                                <Tooltip text="Chemin vers la page de garde externe"/>
+                                <Tooltip text="Chemin vers la page de garde externe" />
                             </tooltip>
                         </Label>
-                        <CheckBox fx:id="uiIsExternalPage" selected="true" mnemonicParsing="false" GridPane.columnIndex="1"/>
-                        <TextField fx:id="uiCoverPath" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                        <Button fx:id="chooseCoverFileButton" mnemonicParsing="false" onAction="#chooseCoverFile" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                        <CheckBox fx:id="uiIsExternalPage" mnemonicParsing="false" selected="true" GridPane.columnIndex="1" />
+                        <TextField fx:id="uiCoverPath" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Button fx:id="chooseCoverFileButton" mnemonicParsing="false" onAction="#chooseCoverFile" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
                     </children>
                     <padding>
-                        <Insets bottom="25.0" top="15.0"/>
+                        <Insets bottom="25.0" top="15.0" />
                     </padding>
                 </GridPane>
-                <Separator prefWidth="200.0"/>
+                <Separator prefWidth="200.0" />
                 <Label text="Page de conclusion">
                     <padding>
-                        <Insets top="10.0"/>
+                        <Insets top="10.0" />
                     </padding>
                 </Label>
                 <GridPane hgap="10.0" vgap="10.0">
                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="190.0" minWidth="10.0" prefWidth="100.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="500.0" minWidth="10.0" prefWidth="440.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="30.0" minWidth="10.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="500.0" minWidth="10.0" prefWidth="440.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="30.0" minWidth="10.0" />
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <padding>
-                        <Insets bottom="25.0" top="15.0"/>
+                        <Insets bottom="25.0" top="15.0" />
                     </padding>
                     <children>
-                        <Label text="Chemin"/>
-                        <TextField fx:id="uiConclusionPath" GridPane.columnIndex="1"/>
-                        <Button fx:id="chooseConclusionFileButton" mnemonicParsing="false" onAction="#chooseConclusionFile" text="..." GridPane.columnIndex="2"/>
+                        <Label text="Chemin" />
+                        <TextField fx:id="uiConclusionPath" GridPane.columnIndex="1" />
+                        <Button fx:id="chooseConclusionFileButton" mnemonicParsing="false" onAction="#chooseConclusionFile" text="..." GridPane.columnIndex="2" />
                     </children>
                 </GridPane>
-                <Button fx:id="uiGenerateBtn" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false"
-                        onAction="#generateDocument" styleClass="btn-single" text="Générer"/>
+                <Button fx:id="uiGenerateBtn" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onAction="#generateDocument" styleClass="btn-single" text="Générer" />
             </children>
         </VBox>
     </center>
