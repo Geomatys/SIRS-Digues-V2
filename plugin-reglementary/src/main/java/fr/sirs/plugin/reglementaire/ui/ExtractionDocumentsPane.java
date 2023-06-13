@@ -65,7 +65,16 @@ import static fr.sirs.PropertiesFileUtilities.*;
 import static fr.sirs.plugin.reglementaire.ui.DocumentsPane.*;
 
 /**
- * Panneau de gestion de création de documents d'extraction des données de registre.
+ * Display print configuration and generate final report for horodatage purpose.
+ * <ul>
+ *     <li>Allows to select the @{@link SystemeEndiguement},</li>
+ *     <li>Filter by prestations's validity and / or horodatage dates,</li>
+ *     <li>Cover page can be external file or automatically created by the SIRS,</li>
+ *     <li>Possibility to add a conclusion external document,</li>
+ *     <li>Select the destination folder and file name.</li>
+ * </ul>
+ * Supported external document formats : PDF
+ * <p>
  *
  * @author Estelle Idée (Geomatys)
  */
@@ -313,6 +322,7 @@ public class ExtractionDocumentsPane extends BorderPane {
          C.3- Add Synthese table pdf files
         ======================================================*/
         final Map<String, List<Prestation>> syntheseTablePrestationsMap = new HashMap<>();
+        // Gathers prestations by synthese table.
         prestations.forEach(prestation -> {
             final String syntheseTablePath = prestation.getSyntheseTablePath();
             List<Prestation> tablePrestations = syntheseTablePrestationsMap.get(syntheseTablePath);
@@ -325,21 +335,26 @@ public class ExtractionDocumentsPane extends BorderPane {
             }
         });
 
+        if (syntheseTablePrestationsMap.isEmpty()) {
+            showInformationDialog("Aucun tableau de synthèse n'existe pour le système d'endiguement et les dates sélectionnés");
+            return;
+        }
+
         // Add synthese table files to the list of files to merge.
-        // If file does not exist, store data to show warning message after merge.
-        final StringBuilder tablesNotFound = new StringBuilder();
+        // If file does not exist or not PDF file, store data to show warning message after merge.
+        final Map<String, List<Prestation>> tablesNotFound = new HashMap<>();
+        final Map<String, List<Prestation>> tablesNotPdf = new HashMap<>();
+        final List<Prestation> noTable = new ArrayList<>();
         syntheseTablePrestationsMap.forEach((tablePath, prestationsList) -> {
+            if (tablePath == null || tablePath.isEmpty()) {
+                noTable.addAll(prestationsList);
+                return;
+            }
             File table = new File(tablePath);
-            if (!table.exists()) {
-                tablesNotFound.append("\n\n- " + tablePath + "\n" +
-                        "Prestations associées :");
-                prestationsList.forEach(presta -> {
-                    String designation = presta.getDesignation();
-                    String libelle = presta.getLibelle();
-                    designation = designation == null ? "" : designation;
-                    libelle = libelle == null ? "" : libelle;
-                    tablesNotFound.append("\n      - " + designation + " - " + libelle + " " + presta.getId());
-                });
+            if (!table.getPath().endsWith(".pdf")) {
+                tablesNotPdf.put(tablePath, prestationsList);
+            } else if (!table.exists()) {
+                tablesNotFound.put(tablePath, prestationsList);
             } else {
                 filesToMerge.add(table);
             }
@@ -354,14 +369,51 @@ public class ExtractionDocumentsPane extends BorderPane {
         final Task generator = PDFUtils.mergeFiles(filesToMerge, output, false, true, true);
         generator.setOnSucceeded(evt -> Platform.runLater(() -> {
             root.update(false);
-            if (!"".equals(tablesNotFound)) showWarningDialog("Erreur lors de la récupération des tableaux de synthèse suivants : "
-                    + tablesNotFound
-                    + "\n\nVeuillez vérifier les chemins d'accès avant de relancer la génération du document.", "Tableaux de synthèse introuvables", 600,400);
-            SIRS.openFile(outputFile);
+            final StringBuilder errorMsg = new StringBuilder();
+            if (!tablesNotFound.isEmpty()) {
+                errorMsg.append("Fichiers introuvables : ");
+                tablesNotFound.forEach((table, prestaList) -> {
+                    errorMsg.append("\n\n- " + table + "\n" +
+                            "       Prestations associées :");
+                    createErrorMessage(errorMsg, prestaList);
+                });
+                errorMsg.append("\n\nVeuillez vérifier les chemins d'accès avant de relancer la génération du document.");
+            }
+            if (!tablesNotPdf.isEmpty()) {
+                if (errorMsg.length() != 0) errorMsg.append("\n\n" +
+                        "--------------------------------------\n\n");
+                errorMsg.append("Format incorrect : ");
+                tablesNotPdf.forEach((table, prestaList) -> {
+                    errorMsg.append("\n\n- " + table + "\n" +
+                            "       Prestations associées :");
+                    createErrorMessage(errorMsg, prestaList);
+                });
+                errorMsg.append("\n\nFormats supportés : PDF.");
+            }
+            if (!noTable.isEmpty()) {
+                if (errorMsg.length() != 0) errorMsg.append("\n\n" +
+                        "--------------------------------------\n\n");
+
+                errorMsg.append("Aucun tableau de synthèse pour les prestations suivantes : \n");
+                createErrorMessage(errorMsg, noTable);
+            }
+            errorMsg.insert(0,"Erreur lors de la récupération des tableaux de synthèse suivants : \n\n");
+            showWarningDialog(errorMsg.toString(), "Erreurs tableaux de synthèse", 600,500);
+        SIRS.openFile(outputFile);
         }));
 
         disableProperty().bind(generator.runningProperty());
         LoadingPane.showDialog(generator);
+    }
+
+    private static void createErrorMessage(StringBuilder stbuilder, List<Prestation> prestationsList) {
+        prestationsList.forEach(presta -> {
+            String designation = presta.getDesignation();
+            String libelle = presta.getLibelle();
+            designation = designation == null ? "" : designation;
+            libelle = libelle == null ? "" : libelle;
+            stbuilder.append("\n      - " + designation + " - " + libelle + " / " + presta.getId());
+        });
     }
 
     /**
