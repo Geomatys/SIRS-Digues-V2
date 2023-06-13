@@ -32,7 +32,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import static fr.sirs.plugin.reglementaire.PropertiesFileUtilities.getBooleanProperty;
-import static fr.sirs.plugin.reglementaire.ui.DocumentsPane.DO_INTEGRATED;
 import static fr.sirs.plugin.reglementaire.ui.DocumentsPane.HIDDEN;
 
 /**
@@ -158,35 +157,16 @@ public class FileTreeItem extends TreeItem<File> {
         return results;
     }
 
-    public List<FileTreeItem> listChildrenItem(boolean directory, boolean doSynt) {
+    public List<FileTreeItem> listChildrenItem(boolean directory) {
         final List<FileTreeItem> results = new ArrayList<>();
         for (TreeItem item : getChildren()) {
             final FileTreeItem fitem = (FileTreeItem) item;
-
-            if (doSynt) {
-                if (!fitem.isDirectory() && !directory && getBooleanProperty(fitem.getValue(), DO_INTEGRATED) ||
-                     fitem.isDirectory() &&  directory && containsDoSynth(fitem.getValue())) {
-                    results.add(fitem);
-                }
-            } else {
-                if ( fitem.isDirectory() &&  directory ||
-                    !fitem.isDirectory() && !directory) {
-                    results.add(fitem);
-                }
+            if ( fitem.isDirectory() &&  directory ||
+                !fitem.isDirectory() && !directory) {
+                results.add(fitem);
             }
         }
         return results;
-    }
-
-    private boolean containsDoSynth(File directory) {
-        for (File f : directory.listFiles()) {
-            if (f.isDirectory() && containsDoSynth(f)) {
-                return true;
-            } else if (getBooleanProperty(f, DO_INTEGRATED)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public String getLibelle() {
@@ -229,21 +209,7 @@ public class FileTreeItem extends TreeItem<File> {
             if (o1 == null && o2 == null) {
                 return 0;
             } else if (o1 != null && o2 != null && o1.getValue() != null && o2.getValue() != null) {
-                if (o1.getValue().getName().equals(DocumentsPane.SAVE_FOLDER)) {
-                    return 1;
-                } else if (o2.getValue().getName().equals(DocumentsPane.SAVE_FOLDER)) {
-                    return -1;
-                } else if (o1.getValue().getName().equals(DocumentsPane.UNCLASSIFIED)) {
-                    return 1;
-                } else if (o2.getValue().getName().equals(DocumentsPane.UNCLASSIFIED)) {
-                    return -1;
-                } else if (o1.getValue().getName().equals(DocumentsPane.DOCUMENT_FOLDER)) {
-                    return -1;
-                } else if (o2.getValue().getName().equals(DocumentsPane.DOCUMENT_FOLDER)) {
-                    return 1;
-                } else {
-                    return o1.getValue().getName().compareTo(o2.getValue().getName());
-                }
+                return o1.getValue().getName().compareTo(o2.getValue().getName());
             } else if (o1 == null || o1.getValue() == null){
                 return -1;
             } else if (o2 == null || o2.getValue() == null){

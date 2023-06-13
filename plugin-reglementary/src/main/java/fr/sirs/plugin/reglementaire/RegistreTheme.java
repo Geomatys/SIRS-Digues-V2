@@ -37,7 +37,9 @@ import java.util.List;
 import java.util.prefs.Preferences;
 
 /**
- * Panneau regroupant les fonctionnalités en lien avec les Registres.
+ * Panel gathering the Registre functionalities.
+ * <p>
+ * Redmine ticket #7782
  *
  * @author Estelle Idee (Geomatys)
  */
@@ -52,6 +54,7 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
     public static String refNonTimeStampedStatus;
     public static String refWaitingStatus;
     public static String refTimeStampedStatus;
+    public static String EXTRACTION_TAB = "Extraction";
     private static final String PATH_KEY = "path";
 
     @Override
@@ -70,7 +73,7 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
                     "\n- En attente" +
                     "\n- Horodaté" +
                     "\n\nVeuillez mettre à jour la table de référence avant de revenir au menu Registre." +
-                    "\n\n Important : le redémarrage de l'application est nécessaire afin de prendre en compte les nouvelles valeurs de référence.");
+                    "\n\nImportant : le redémarrage de l'application est nécessaire afin de prendre en compte les nouvelles valeurs de référence.");
 
             alert.showAndWait();
             final Session session = Injector.getSession();
@@ -81,24 +84,24 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         final BorderPane borderPane = new BorderPane();
         final TabPane tabPane = new TabPane();
 
-        // Onglet to generate "Tableaux de Synthese" for Prestation.
+        // Tab to generate "Tableaux de Synthese" for Prestation.
         final Tab syntheseTab = new Tab("Tableaux de synthèse");
         syntheseTab.setClosable(false);
 
         syntheseTab.setContent(new HorodatageReportPane());
 
-        // Onglet to import timestamped "Tableaux de Synthèse" and create the final report with cover page and summary table.
-        // TODO modify content to get a folder tree : SE -> year -> files
+        // Tab to import timestamped "Tableaux de Synthèse" and organise files.
         final Tab gestionTab = new Tab("Gestion");
         gestionTab.setClosable(false);
-        // TODO add gestionTab pane to import timestamped doc and export summary report.
         FileTreeItem root = new FileTreeItem(false);
         gestionTab.setContent(new DocumentsPane(root));
-        final Tab extractionTab = new Tab("Extraction");
+
+        // Tab to create the final report with cover page and summary table.
+        final Tab extractionTab = new Tab(EXTRACTION_TAB);
         extractionTab.setClosable(false);
         extractionTab.setContent(new ExtractionDocumentsPane(root));
 
-        // Ajout des onglets
+        // Add created tabs
         tabPane.getTabs().add(syntheseTab);
         tabPane.getTabs().add(gestionTab);
         tabPane.getTabs().add(extractionTab);
