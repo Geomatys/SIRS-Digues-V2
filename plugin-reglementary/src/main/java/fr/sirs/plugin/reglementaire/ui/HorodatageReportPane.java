@@ -30,6 +30,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import net.sf.jasperreports.engine.*;
@@ -208,10 +209,20 @@ public class HorodatageReportPane extends BorderPane {
                 if (item != null) {
                     try {
                         final RefHorodatageStatus status = Injector.getBean(RefHorodatageStatusRepository.class).get(item);
-                        if (status != null)
+                        if (status != null) {
                             text = status.getLibelle();
+                            if (RegistreTheme.refNonTimeStampedStatus.equals(item))
+                                setTextFill(Color.BROWN);
+                            else if (RegistreTheme.refWaitingStatus.equals(item))
+                                setTextFill(Color.SALMON);
+                            else if (RegistreTheme.refTimeStampedStatus.equals(item))
+                                setTextFill(Color.SEAGREEN);
+                            else
+                                setTextFill(Color.BLACK);
+                        }
                     } catch (DocumentNotFoundException e) {
                         SIRS.LOGGER.warning("Error while getting RefHorodatageStatus with id :" + item);
+                        setTextFill(Color.BLACK);
                     }
                 }
                 if ("".equals(text)) text = item;
