@@ -36,6 +36,8 @@ import static fr.sirs.util.odt.ODTUtils.askPassword;
 /**
  *
  * @author Tho Mar 22, 2015 3:34:29 PM
+ * @author Estelle Idée (Geomatys)
+ * Modified extract() method to deal with password protected files.
  */
 public class PDFTableExtractor {
     private final Logger logger = LoggerFactory.getLogger(PDFTableExtractor.class);
@@ -258,17 +260,14 @@ public class PDFTableExtractor {
     private TableRow buildRow(int rowIdx, List<TextPosition> rowContent, List<Range<Integer>> columnTrapRanges) {
         TableRow retVal = new TableRow(rowIdx);
         //Sort rowContent
-        Collections.sort(rowContent, new Comparator<TextPosition>() {
-            @Override
-            public int compare(TextPosition o1, TextPosition o2) {
-                int retVal = 0;
-                if (o1.getX() < o2.getX()) {
-                    retVal = -1;
-                } else if (o1.getX() > o2.getX()) {
-                    retVal = 1;
-                }
-                return retVal;
+        Collections.sort(rowContent, (o1, o2) -> {
+            int retVal1 = 0;
+            if (o1.getX() < o2.getX()) {
+                retVal1 = -1;
+            } else if (o1.getX() > o2.getX()) {
+                retVal1 = 1;
             }
+            return retVal1;
         });
         int idx = 0;
         int columnIdx = 0;
@@ -298,17 +297,14 @@ public class PDFTableExtractor {
     }
 
     private TableCell buildCell(int columnIdx, List<TextPosition> cellContent) {
-        Collections.sort(cellContent, new Comparator<TextPosition>() {
-            @Override
-            public int compare(TextPosition o1, TextPosition o2) {
-                int retVal = 0;
-                if (o1.getX() < o2.getX()) {
-                    retVal = -1;
-                } else if (o1.getX() > o2.getX()) {
-                    retVal = 1;
-                }
-                return retVal;
+        Collections.sort(cellContent, (o1, o2) -> {
+            int retVal = 0;
+            if (o1.getX() < o2.getX()) {
+                retVal = -1;
+            } else if (o1.getX() > o2.getX()) {
+                retVal = 1;
             }
+            return retVal;
         });
         //String cellContentString = Joiner.on("").join(cellContent.stream().map(e -> e.getCharacter()).iterator());
         StringBuilder cellContentBuilder = new StringBuilder();
@@ -437,18 +433,15 @@ public class PDFTableExtractor {
         private List<TextPosition> extract() throws IOException {
             this.stripPage(pageId);
             //sort
-            Collections.sort(textPositions, new Comparator<TextPosition>() {
-                @Override
-                public int compare(TextPosition o1, TextPosition o2) {
-                    int retVal = 0;
-                    if (o1.getY() < o2.getY()) {
-                        retVal = -1;
-                    } else if (o1.getY() > o2.getY()) {
-                        retVal = 1;
-                    }
-                    return retVal;
-
+            Collections.sort(textPositions, (o1, o2) -> {
+                int retVal = 0;
+                if (o1.getY() < o2.getY()) {
+                    retVal = -1;
+                } else if (o1.getY() > o2.getY()) {
+                    retVal = 1;
                 }
+                return retVal;
+
             });
             return this.textPositions;
         }
