@@ -54,7 +54,11 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
     public static String refNonTimeStampedStatus;
     public static String refWaitingStatus;
     public static String refTimeStampedStatus;
-    public static String EXTRACTION_TAB = "Extraction";
+    public static final String NON_TIME_STAMPED= "Non horodaté";
+    public static final String WAITING = "En attente";
+    public static final String TIME_STAMPED = "Horodaté";
+
+    public static final String EXTRACTION_TAB = "Extraction";
     private static final String PATH_KEY = "path";
 
     @Override
@@ -126,11 +130,11 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
 
         allStatus.forEach(status -> {
             String libelle = status.getLibelle();
-            if ("Non horodaté".equalsIgnoreCase(libelle.trim()))
+            if (NON_TIME_STAMPED.equalsIgnoreCase(libelle.trim()))
                 refNonTimeStampedStatus = status.getId();
-            else if ("En attente".equalsIgnoreCase(libelle.trim()))
+            else if (WAITING.equalsIgnoreCase(libelle.trim()))
                 refWaitingStatus = status.getId();
-            else if ("Horodaté".equalsIgnoreCase(libelle.trim()))
+            else if (TIME_STAMPED.equalsIgnoreCase(libelle.trim()))
                 refTimeStampedStatus = status.getId();
         });
         return refNonTimeStampedStatus != null && refWaitingStatus != null && refTimeStampedStatus != null;

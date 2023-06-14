@@ -23,30 +23,31 @@ import fr.sirs.plugin.reglementaire.RegistreTheme;
 import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
+
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
+import javafx.util.Callback;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.apache.sis.measure.NumberRange;
 import org.apache.sis.util.ArgumentChecks;
+import org.ektorp.DocumentNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 /**
@@ -69,7 +70,8 @@ public class HorodatageReportPane extends BorderPane {
     @FXML
     private ComboBox<Preview> uiSystemEndiguement;
     @FXML
-    private ListView<Prestation> uiPrestations;
+    private TableView<Prestation> uiPrestationTable;
+
     /**
      *  When the uiPeriod checkbox is unselected, the uiPeriodeDebut and uiPeriodeFin can still be updated.
      *  The values are used in the generated Tableau de synthèse event though the uiPeriod is unselected.
@@ -135,28 +137,87 @@ public class HorodatageReportPane extends BorderPane {
         });
 
         uiSystemEndiguement.valueProperty().addListener((obs, o, n) -> updatePrestationsList(n));
-        uiPrestations.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        uiPrestations.setCellFactory(param -> new ListCell<Prestation>() {
-            final SirsStringConverter converter = new SirsStringConverter();
-            @Override
-            protected void updateItem(Prestation item, boolean empty) {
-                super.updateItem(item, empty);
-                String text = converter.toString(item);
-                if (item != null) {
-                    String id = item.getTypePrestationId();
-                    if (id != null) {
-                        RefPrestationRepository refPrestationRepo = Injector.getBean(RefPrestationRepository.class);
-                        text = text + " / " + refPrestationRepo.get(id).getLibelle();
-                    }
-                }
-                setText(text);
-            }
-        });
 
         final Previews previewRepository = session.getPreviews();
         SIRS.initCombo(uiSystemEndiguement, SIRS.observableList(previewRepository.getByClass(SystemeEndiguement.class)).sorted(), null);
 
         uiSelectNonTimeStamped.setTooltip(new Tooltip("Sélectionne toutes les prestations avec le status \"non horodatée\" de la liste."));
+
+        // TableView to show the prestations and their status.
+        uiPrestationTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        uiPrestationTable.getColumns().get(0).setEditable(false);
+        uiPrestationTable.getColumns().get(0).setCellValueFactory((Callback) param -> {
+            final Object item = ((TableColumn.CellDataFeatures)param).getValue();
+            if (item != null) {
+                return new SimpleObjectProperty(item);
+            }
+            return null;
+        });
+        uiPrestationTable.getColumns().get(0).setCellFactory((Callback) param -> new TableCell<Prestation, Prestation>() {
+            final SirsStringConverter converter = new SirsStringConverter();
+            @Override
+            protected void updateItem(Prestation item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(converter.toString(item));
+            }
+        });
+
+        uiPrestationTable.getColumns().get(1).setEditable(false);
+        uiPrestationTable.getColumns().get(1).setCellValueFactory((Callback) param -> {
+            final Object item = ((TableColumn.CellDataFeatures)param).getValue();
+            if (item != null) {
+                Prestation presta = (Prestation) item;
+                return new SimpleObjectProperty(presta.getTypePrestationId());
+            }
+            return null;
+        });
+        uiPrestationTable.getColumns().get(1).setCellFactory((Callback) param -> new TableCell<Prestation, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                String text = "";
+                if (item != null) {
+                    try {
+                        final RefPrestation typePresta = Injector.getBean(RefPrestationRepository.class).get(item);
+                        if (typePresta != null)
+                            text = typePresta.getLibelle();
+                    } catch (DocumentNotFoundException e) {
+                        SIRS.LOGGER.warning("Error while getting RefPrestation with id :" + item);
+                    }
+                }
+                if ("".equals(text)) text = item;
+                setText(text);
+            }
+        });
+
+        uiPrestationTable.getColumns().get(2).setEditable(false);
+        uiPrestationTable.getColumns().get(2).setStyle("-fx-alignment: CENTER");
+        uiPrestationTable.getColumns().get(2).setCellValueFactory((Callback) param -> {
+            final Object item = ((TableColumn.CellDataFeatures)param).getValue();
+            if (item != null) {
+                Prestation presta = (Prestation) item;
+                return new SimpleObjectProperty(presta.getHorodatageStatusId());
+            }
+            return null;
+        });
+        uiPrestationTable.getColumns().get(2).setCellFactory((Callback) param -> new TableCell<Prestation, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                String text = "";
+                if (item != null) {
+                    try {
+                        final RefHorodatageStatus status = Injector.getBean(RefHorodatageStatusRepository.class).get(item);
+                        if (status != null)
+                            text = status.getLibelle();
+                    } catch (DocumentNotFoundException e) {
+                        SIRS.LOGGER.warning("Error while getting RefHorodatageStatus with id :" + item);
+                    }
+                }
+                if ("".equals(text)) text = item;
+                setText(text);
+            }
+        });
     }
 
     /**
@@ -169,16 +230,16 @@ public class HorodatageReportPane extends BorderPane {
      * Keeps the previously selected prestations if still available.
      */
     private void updatePrestationsAndKeepSelection() {
-        List<Prestation> selectedPresta = new ArrayList<>(uiPrestations.getSelectionModel().getSelectedItems());
+        List<Prestation> selectedPresta = new ArrayList<>(uiPrestationTable.getSelectionModel().getSelectedItems());
         updatePrestationsList(this.selectedSE);
 
-        final ObservableList<Prestation> items = uiPrestations.getItems();
+        final ObservableList<Prestation> items = uiPrestationTable.getItems();
 
         if (items == null || items.isEmpty()) return;
 
-        uiPrestations.getSelectionModel().clearSelection();
+        uiPrestationTable.getSelectionModel().clearSelection();
         // Keeps previous selection
-        selectedPresta.forEach(presta -> uiPrestations.getSelectionModel().select(presta));
+        selectedPresta.forEach(presta -> uiPrestationTable.getSelectionModel().select(presta));
     }
 
     /**
@@ -192,7 +253,7 @@ public class HorodatageReportPane extends BorderPane {
      */
     private void updatePrestationsList(Preview newValue) {
         if (newValue == null) {
-            uiPrestations.setItems(FXCollections.emptyObservableList());
+            uiPrestationTable.setItems(FXCollections.emptyObservableList());
         } else {
             // the @SystemeEndiguement has changed, the class variables are updated with the new values.
             if (!newValue.equals(this.selectedSE)) {
@@ -201,7 +262,7 @@ public class HorodatageReportPane extends BorderPane {
             }
 
             if (this.allPrestationsOnSE == null || this.allPrestationsOnSE.isEmpty()) {
-                uiPrestations.setItems(FXCollections.emptyObservableList());
+                uiPrestationTable.setItems(FXCollections.emptyObservableList());
                 return;
             }
 
@@ -213,7 +274,7 @@ public class HorodatageReportPane extends BorderPane {
             if (uiPeriod.isSelected()) {
                 prestations = filterPrestationsByDate(prestations);
             }
-            uiPrestations.setItems(FXCollections.observableArrayList(prestations));
+            uiPrestationTable.setItems(FXCollections.observableArrayList(prestations));
         }
     }
 
@@ -297,7 +358,7 @@ public class HorodatageReportPane extends BorderPane {
      */
     @FXML
     private void selectAll() {
-        uiPrestations.getSelectionModel().selectAll();
+        uiPrestationTable.getSelectionModel().selectAll();
     }
 
     /**
@@ -306,12 +367,12 @@ public class HorodatageReportPane extends BorderPane {
      */
     @FXML
     private void selectNonTimeStamped() {
-        List<Prestation> prestations = uiPrestations.getItems();
+        List<Prestation> prestations = uiPrestationTable.getItems();
         if (prestations.isEmpty()) return;
         // Keeps all prestations with a status "Non horodaté"
         prestations.stream()
                 .filter(prestation -> RegistreTheme.refNonTimeStampedStatus.equals(prestation.getHorodatageStatusId()))
-                .forEach(presta -> uiPrestations.getSelectionModel().select(presta));
+                .forEach(presta -> uiPrestationTable.getSelectionModel().select(presta));
     }
 
 
@@ -326,7 +387,7 @@ public class HorodatageReportPane extends BorderPane {
      */
     @FXML
     private void generateReport() {
-        List<Prestation> prestations = FXCollections.observableArrayList(uiPrestations.getSelectionModel().getSelectedItems());
+        List<Prestation> prestations = FXCollections.observableArrayList(uiPrestationTable.getSelectionModel().getSelectedItems());
         if (prestations.isEmpty()) return;
 
         // sort prestations by date_fin if available, by date_debut otherwise.

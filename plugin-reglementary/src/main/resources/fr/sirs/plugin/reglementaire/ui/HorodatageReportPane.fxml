@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root id="BorderPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="507.0" prefWidth="816.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root id="BorderPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="507.0" prefWidth="999.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <center>
         <VBox prefHeight="492.0" prefWidth="848.0">
             <children>
@@ -17,10 +17,10 @@
                 </Label>
                 <GridPane fx:id="uiGrid" hgap="10.0" maxHeight="1.7976931348623157E308" styleClass="gray-light" vgap="10.0" GridPane.rowIndex="2">
                     <columnConstraints>
-                        <ColumnConstraints hgrow="NEVER" maxWidth="201.0" minWidth="161.0" prefWidth="171.0" />
-                        <ColumnConstraints hgrow="NEVER" maxWidth="304.0" minWidth="143.0" prefWidth="264.0" />
-                        <ColumnConstraints halignment="CENTER" hgrow="NEVER" maxWidth="139.0" minWidth="0.0" prefWidth="37.0" />
-                        <ColumnConstraints hgrow="NEVER" maxWidth="362.0" minWidth="238.0" prefWidth="264.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="201.0" minWidth="171.0" prefWidth="171.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="360.0" minWidth="335.0" prefWidth="345.0" />
+                        <ColumnConstraints halignment="CENTER" hgrow="NEVER" maxWidth="139.0" minWidth="36.0" prefWidth="36.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="360.0" minWidth="335.0" prefWidth="345.0" />
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints vgrow="NEVER" />
@@ -51,7 +51,10 @@
                         </HBox>
                         <DatePicker fx:id="uiPeriodeDebut" prefHeight="29.0" prefWidth="264.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label text="au :" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                        <DatePicker fx:id="uiPeriodeFin" prefHeight="29.0" prefWidth="264.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        <DatePicker fx:id="uiPeriodeFin" prefHeight="29.0" prefWidth="264.0" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+                     <GridPane.margin>
+                        <Insets />
+                     </GridPane.margin></DatePicker>
 
                         <Label text="Non horodatées : " GridPane.columnIndex="0" GridPane.rowIndex="2" />
                         <Button fx:id="uiSelectNonTimeStamped" mnemonicParsing="false" onAction="#selectNonTimeStamped" styleClass="btn-single" text="Sélectionner" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
@@ -60,7 +63,6 @@
                         <ComboBox fx:id="uiSystemEndiguement" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
 
                         <Label text="Prestations :" GridPane.rowIndex="4" />
-                        <ListView fx:id="uiPrestations" maxWidth="1.7976931348623157E308" minHeight="100.0" prefHeight="300.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4" />
                         <Button fx:id="uiSelectAll" mnemonicParsing="false" onAction="#selectAll" styleClass="btn-single" text="Tout sélectionner" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="LEFT" GridPane.rowIndex="5" GridPane.rowSpan="2" GridPane.valignment="CENTER" />
 
                         <Button fx:id="uiGenerate" mnemonicParsing="false" onAction="#generateReport" styleClass="btn-single" text="Générer" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="5" GridPane.rowSpan="2" GridPane.valignment="CENTER">
@@ -68,7 +70,13 @@
                                 <Insets right="50.0" />
                              </GridPane.margin>
                         </Button>
-
+                        <TableView fx:id="uiPrestationTable" layoutX="44.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4">
+                            <columns>
+                                <TableColumn minWidth="188.0" prefWidth="276.0" text="Prestation" />
+                                <TableColumn minWidth="270.0" prefWidth="332.0" text="Type de prestation" />
+                                <TableColumn maxWidth="285.0" minWidth="4.0" prefWidth="135.0" text="Statut" />
+                            </columns>
+                        </TableView>
                     </children>
                     <GridPane.margin>
                         <Insets />
