@@ -26,10 +26,8 @@ import fr.sirs.plugin.reglementaire.FileTreeItem;
 import fr.sirs.plugin.reglementaire.PDFUtils;
 import fr.sirs.plugin.reglementaire.RegistreTheme;
 import fr.sirs.ui.LoadingPane;
-import fr.sirs.ui.report.FXModeleRapportsPane;
 import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.PrinterUtilities;
-import fr.sirs.util.SirsStringConverter;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -69,6 +67,7 @@ import static fr.sirs.plugin.reglementaire.ui.DocumentsPane.*;
  * <ul>
  *     <li>Allows to select the @{@link SystemeEndiguement},</li>
  *     <li>Filter by prestations's validity and / or horodatage dates,</li>
+ *     <li>Auto generate the summary table,</li>
  *     <li>Cover page can be external file or automatically created by the SIRS,</li>
  *     <li>Possibility to add a conclusion external document,</li>
  *     <li>Select the destination folder and file name.</li>
@@ -153,11 +152,6 @@ public class ExtractionDocumentsPane extends BorderPane {
             this.allPrestationsOnSelectedSe = getAllPrestationsInSelectedSeRegistre();
         });
 
-        final SirsStringConverter converter = new SirsStringConverter();
-
-        // model edition
-        final FXModeleRapportsPane rapportEditor = new FXModeleRapportsPane();
-
         uiGenerateBtn.disableProperty().bind(Bindings.createBooleanBinding(() -> {
                     final boolean isValidityDebutNull = uiPeriodeValidityDebut.valueProperty().isNull().get();
                     final boolean isValidityFinNull = uiPeriodeValidityFin.valueProperty().isNull().get();
@@ -166,8 +160,6 @@ public class ExtractionDocumentsPane extends BorderPane {
                     final boolean isExternalPage = uiIsExternalPage.isSelected();
                     return disableProperty().get()
                             || (isValidityDebutNull && isValidityFinNull && isHorodatageDebutNull && isHorodatageFinNull)
-//                            || (isValidityDebutNull != isValidityFinNull
-//                            || isHorodatageDebutNull != isHorodatageFinNull)
                             || uiSECombo.getValue() == null
                             || (isExternalPage && uiCoverPath.getText().trim().isEmpty())
                             || (!isExternalPage && uiTitle.getText().trim().isEmpty());
@@ -200,11 +192,6 @@ public class ExtractionDocumentsPane extends BorderPane {
                 uiCoverGridpane.addRow(2, uiStructureLabel, uiStructure);
             }
         });
-
-        uiPeriodeValidityDebut.setValue(LocalDate.of(2023, 06, 05));
-        uiCoverPath.setText("/home/estelle/Projects/SIRS-FranceDigues/horodatage/679a6e678ded5da21c37576c420009bb/2021/20230109_tableau_synthese.pdf");
-//        uiConclusionPath.setText("/home/estelle/Projects/SIRS-FranceDigues/horodatage/output/tes.pdf");
-
     }
 
 

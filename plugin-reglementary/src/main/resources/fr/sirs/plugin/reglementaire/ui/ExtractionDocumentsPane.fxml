@@ -27,7 +27,11 @@
                         <RowConstraints minHeight="28.0" prefHeight="30.0" vgrow="SOMETIMES"/>
                     </rowConstraints>
                     <children>
-                        <Label text="Période de validité du :" GridPane.rowIndex="0"/>
+                        <Label text="Période de validité du :" GridPane.rowIndex="0">
+                            <tooltip>
+                                <Tooltip text="Ces dates apparaîtront sur le rapport final."/>
+                            </tooltip>
+                        </Label>
                         <Label text="Période d'horodatage du :" GridPane.rowIndex="1"/>
                         <Label text="Système d'endiguement *" GridPane.rowIndex="2">
                             <GridPane.margin>
