@@ -33,9 +33,12 @@ public class DynamicDocumentTheme extends AbstractPluginsButtonTheme {
     private static final Image BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/gen_etats.png"));
 
     private final FileTreeItem root;
-    
+
     public DynamicDocumentTheme(final FileTreeItem root) {
         super("Documents dynamiques", "Documents dynamiques", BUTTON_IMAGE);
+        if (root == null) {
+            throw new IllegalArgumentException("root cannot be null");
+        }
         this.root = root;
     }
 
@@ -43,12 +46,12 @@ public class DynamicDocumentTheme extends AbstractPluginsButtonTheme {
     public Parent createPane() {
         return new DynamicDocumentsPane(root);
     }
-    
+
     @Override
     public ChangeListener<Boolean> getSelectedPropertyListener() {
         return (observable, oldValue, newValue) -> {
             if (newValue && root.getValue() != null) {
-                PropertiesFileUtilities.updateFileSystem(root.getValue());
+                DocumentPropertiesFileUtilities.updateFileSystem(root.getValue());
                 root.update(root.rootShowHiddenFile);
             }
         };

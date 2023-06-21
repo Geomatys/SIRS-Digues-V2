@@ -31,7 +31,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.plugin.document.FileTreeItem;
 import fr.sirs.plugin.document.ODTUtils;
-import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
+import static fr.sirs.plugin.document.DocumentPropertiesFileUtilities.*;
 import static fr.sirs.plugin.document.ui.DocumentsPane.*;
 import fr.sirs.ui.report.FXModeleRapportsPane;
 import fr.sirs.util.DatePickerConverter;

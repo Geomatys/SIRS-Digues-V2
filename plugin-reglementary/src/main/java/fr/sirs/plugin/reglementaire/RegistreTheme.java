@@ -98,7 +98,7 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         final Tab gestionTab = new Tab("Gestion");
         gestionTab.setClosable(false);
         FileTreeItem root = new FileTreeItem(false);
-        gestionTab.setContent(new DocumentsPane(root));
+        gestionTab.setContent(new RegistreDocumentsPane(root));
 
         // Tab to create the final report with cover page and summary table.
         final Tab extractionTab = new Tab(EXTRACTION_TAB);

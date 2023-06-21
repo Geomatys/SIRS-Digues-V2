@@ -30,6 +30,7 @@
             <version>2.x-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <!-- TODO : try to remove it using standard java api -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>

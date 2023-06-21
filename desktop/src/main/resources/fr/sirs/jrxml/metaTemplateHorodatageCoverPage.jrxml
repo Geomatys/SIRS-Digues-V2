@@ -18,11 +18,11 @@
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
-	<variable name="dateFinFormatPicker" class="java.lang.String">
-		<variableExpression><![CDATA[$P{dateFinPicker}==null ? "  " :$P{dateFinPicker}.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))]]></variableExpression>
-	</variable>
 	<variable name="dateDebutFormatPicker" class="java.lang.String">
-		<variableExpression><![CDATA[$P{dateDebutPicker}==null ? "  " :$P{dateDebutPicker}.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))]]></variableExpression>
+		<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayFormattedDate($P{dateDebutPicker})]]></variableExpression>
+	</variable>
+	<variable name="dateFinFormatPicker" class="java.lang.String">
+		<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayFormattedDate($P{dateFinPicker})]]></variableExpression>
 	</variable>
 	<background>
 		<band splitType="Stretch"/>
@@ -74,7 +74,7 @@
 			<textField>
 				<reportElement x="350" y="27" width="210" height="30" uuid="dc5cdaf4-4a93-4ddd-86d2-84e563e99883"/>
 				<textElement verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA["Date édition du rapport : " + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy", java.util.Locale.FRANCE))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Date édition du rapport : " + fr.sirs.util.JRXMLUtil.displayCurrentDate()]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>

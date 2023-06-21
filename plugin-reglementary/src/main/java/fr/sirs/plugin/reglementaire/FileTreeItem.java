@@ -18,8 +18,7 @@
  */
 package fr.sirs.plugin.reglementaire;
 
-import fr.sirs.plugin.reglementaire.ui.DocumentsPane;
-import fr.sirs.plugin.reglementaire.ui.DocumentsPane;
+import fr.sirs.plugin.reglementaire.ui.RegistreDocumentsPane;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -31,8 +30,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import static fr.sirs.plugin.reglementaire.PropertiesFileUtilities.getBooleanProperty;
-import static fr.sirs.plugin.reglementaire.ui.DocumentsPane.HIDDEN;
+import static fr.sirs.plugin.reglementaire.ReglementaryPropertiesFileUtilities.getBooleanProperty;
+import static fr.sirs.plugin.reglementaire.ui.RegistreDocumentsPane.HIDDEN;
 
 /**
  * Tree item used in the tree-table representing the documents.
@@ -59,7 +58,7 @@ public class FileTreeItem extends TreeItem<File> {
         super(item);
         hidden.setValue(getBooleanProperty(item, HIDDEN));
         hidden.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            PropertiesFileUtilities.setBooleanProperty(getValue(), HIDDEN, newValue);
+            ReglementaryPropertiesFileUtilities.setBooleanProperty(getValue(), HIDDEN, newValue);
         });
 
         if (item != null && item.isDirectory()) {
@@ -171,7 +170,7 @@ public class FileTreeItem extends TreeItem<File> {
 
     public String getLibelle() {
         final File f = getValue();
-        String name = PropertiesFileUtilities.getProperty(getValue(), DocumentsPane.LIBELLE);
+        String name = ReglementaryPropertiesFileUtilities.getProperty(getValue(), RegistreDocumentsPane.LIBELLE);
         if (name.isEmpty()) {
             name = f.getName();
         }
@@ -179,11 +178,11 @@ public class FileTreeItem extends TreeItem<File> {
     }
 
     public String getSize() {
-        return PropertiesFileUtilities.getStringSizeFile(getValue());
+        return ReglementaryPropertiesFileUtilities.getStringSizeFile(getValue());
     }
 
     public String getTimeStampDate() {
-        return PropertiesFileUtilities.getProperty(getValue(), DocumentsPane.TIMESTAMP_DATE);
+        return ReglementaryPropertiesFileUtilities.getProperty(getValue(), RegistreDocumentsPane.TIMESTAMP_DATE);
     }
 
     public boolean isDirectory() {
@@ -191,15 +190,15 @@ public class FileTreeItem extends TreeItem<File> {
     }
 
     public boolean isSe() {
-        return PropertiesFileUtilities.getIsModelFolder(getValue(), DocumentsPane.SE);
+        return ReglementaryPropertiesFileUtilities.getIsModelFolder(getValue(), ReglementaryPropertiesFileUtilities.SE);
     }
 
     public boolean isDg() {
-        return PropertiesFileUtilities.getIsModelFolder(getValue(), DocumentsPane.DG);
+        return ReglementaryPropertiesFileUtilities.getIsModelFolder(getValue(), ReglementaryPropertiesFileUtilities.DG);
     }
 
     public boolean isTr() {
-        return PropertiesFileUtilities.getIsModelFolder(getValue(), DocumentsPane.TR);
+        return ReglementaryPropertiesFileUtilities.getIsModelFolder(getValue(), ReglementaryPropertiesFileUtilities.TR);
     }
 
     private static class FileTreeItemComparator implements Comparator<TreeItem<File>> {

@@ -12,32 +12,24 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Range;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.*;
-import java.util.logging.Level;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.util.*;
+
+import static fr.sirs.PropertiesFileUtilities.showErrorDialog;
 import static fr.sirs.util.odt.ODTUtils.askPassword;
 
 /**
  *
  * @author Tho Mar 22, 2015 3:34:29 PM
  * @author Estelle Idée (Geomatys)
- * Modified extract() method to deal with password protected files.
+ * Modified extract() method to deal with password-protected files.
  */
 public class PDFTableExtractor {
     private final Logger logger = LoggerFactory.getLogger(PDFTableExtractor.class);
@@ -58,6 +50,20 @@ public class PDFTableExtractor {
     private String password;
     private int lastPageNo;
 
+    /**
+     * Method to be used to open a InputStream.
+     * User's responsibility to close the inputStream in the class using the extractor by using a try-with-resource.
+     *
+     * Do not add constructor for File or String. Convert the File or String to an InputStream in the class using the extractor
+     * and use it in a try-with-resource :
+     *
+     * try (final InputStream inputStream = new FileInputStream(new File(filePath))) {
+     *     [...]
+     * }
+     *
+     * @param inputStream the InputStream containing the data to extract.
+     * @return this
+     */
     public PDFTableExtractor setSource(InputStream inputStream) {
         this.inputStream = inputStream;
         return this;
@@ -67,30 +73,6 @@ public class PDFTableExtractor {
         this.inputStream = inputStream;
         this.password = password;
         return this;
-    }
-
-    public PDFTableExtractor setSource(File file) {
-        try {
-            return this.setSource(new FileInputStream(file));
-        } catch (FileNotFoundException ex) {
-            throw new RuntimeException("Invalid pdf file", ex);
-        }
-    }
-
-    public PDFTableExtractor setSource(String filePath) {
-        return this.setSource(new File(filePath));
-    }
-
-    public PDFTableExtractor setSource(File file,String password) {
-        try {
-            return this.setSource(new FileInputStream(file),password);
-        } catch (FileNotFoundException ex) {
-            throw new RuntimeException("Invalid pdf file", ex);
-        }
-    }
-
-    public PDFTableExtractor setSource(String filePath,String password) {
-        return this.setSource(new File(filePath),password);
     }
 
     /**
@@ -150,6 +132,7 @@ public class PDFTableExtractor {
 
     public List<Table> extract() {
         List<Table> retVal = new ArrayList<>();
+        // TODO remove google.guava dependency
         Multimap<Integer, Range<Integer>> pageIdNLineRangesMap = LinkedListMultimap.create();
         Multimap<Integer, TextPosition> pageIdNTextsMap = LinkedListMultimap.create();
         try {
@@ -157,15 +140,21 @@ public class PDFTableExtractor {
             try {
                 this.document = this.password != null ? PDDocument.load(inputStream, this.password) : PDDocument.load(inputStream);
             } catch (InvalidPasswordException e) {
+                int passwordTry = 0;
                 // Request for password if the PDF file is password protected.
                 Optional<String> pwd = askPassword("Le document suivant est protégé par mot de passe. Veuillez insérer le mot de passe pour continuer.", document);
-                while (pwd.isPresent()) {
+                while (pwd.isPresent() && passwordTry < 3) {
+                    passwordTry++;
                     try {
                         this.document = PDDocument.load(inputStream, pwd.get());
                         break;
                     } catch (InvalidPasswordException ipe) {
                         pwd = askPassword("Le mot de passe est invalide. Veuillez recommencer.", document);
                     }
+                }
+                if (passwordTry >= 3) {
+                    showErrorDialog("Limite de 3 essais atteinte.");
+                    return null;
                 }
                 if (!pwd.isPresent()) {
                     throw new IOException("No password available to decode PDF file.");
@@ -260,15 +249,7 @@ public class PDFTableExtractor {
     private TableRow buildRow(int rowIdx, List<TextPosition> rowContent, List<Range<Integer>> columnTrapRanges) {
         TableRow retVal = new TableRow(rowIdx);
         //Sort rowContent
-        Collections.sort(rowContent, (o1, o2) -> {
-            int retVal1 = 0;
-            if (o1.getX() < o2.getX()) {
-                retVal1 = -1;
-            } else if (o1.getX() > o2.getX()) {
-                retVal1 = 1;
-            }
-            return retVal1;
-        });
+        sortContentByX(rowContent);
         int idx = 0;
         int columnIdx = 0;
         List<TextPosition> cellContent = new ArrayList<>();
@@ -296,8 +277,8 @@ public class PDFTableExtractor {
         return retVal;
     }
 
-    private TableCell buildCell(int columnIdx, List<TextPosition> cellContent) {
-        Collections.sort(cellContent, (o1, o2) -> {
+    private static void sortContentByX(List<TextPosition> content) {
+        Collections.sort(content, (o1, o2) -> {
             int retVal = 0;
             if (o1.getX() < o2.getX()) {
                 retVal = -1;
@@ -306,6 +287,10 @@ public class PDFTableExtractor {
             }
             return retVal;
         });
+    }
+
+    private TableCell buildCell(int columnIdx, List<TextPosition> cellContent) {
+        sortContentByX(cellContent);
         //String cellContentString = Joiner.on("").join(cellContent.stream().map(e -> e.getCharacter()).iterator());
         StringBuilder cellContentBuilder = new StringBuilder();
         for (TextPosition textPosition : cellContent) {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
+<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.0.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="summaryTable" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="966d62a7-748d-4aeb-bd58-9729ca20d4d5">
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -79,10 +79,10 @@
 			<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLibelleFromId($F{linearId}, "TronconDigue")]]></variableExpression>
 		</variable>
 		<variable name="dateDebutFormat" class="java.lang.String">
-			<variableExpression><![CDATA[$F{date_debut}==null ? " - " :$F{date_debut}.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))]]></variableExpression>
+			<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayFormattedDate($F{date_debut})]]></variableExpression>
 		</variable>
 		<variable name="dateFinFormat" class="java.lang.String">
-			<variableExpression><![CDATA[$F{date_fin}==null ? " - " :$F{date_fin}.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))]]></variableExpression>
+			<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayFormattedDate($F{date_fin})]]></variableExpression>
 		</variable>
 	</subDataset>
 	<parameter name="title" class="java.lang.String"/>
@@ -93,11 +93,11 @@
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
-	<variable name="dateFinFormatPicker" class="java.lang.String">
-		<variableExpression><![CDATA[$P{dateFinPicker}==null ? "  " :$P{dateFinPicker}.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))]]></variableExpression>
-	</variable>
 	<variable name="dateDebutFormatPicker" class="java.lang.String">
-		<variableExpression><![CDATA[$P{dateDebutPicker}==null ? "  " :$P{dateDebutPicker}.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))]]></variableExpression>
+		<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayFormattedDate($P{dateDebutPicker})]]></variableExpression>
+	</variable>
+	<variable name="dateFinFormatPicker" class="java.lang.String">
+		<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayFormattedDate($P{dateFinPicker})]]></variableExpression>
 	</variable>
 	<background>
 		<band splitType="Stretch"/>
@@ -121,7 +121,7 @@
 	<detail>
 		<band height="287" splitType="Stretch">
 			<componentElement>
-				<reportElement x="1" y="10" width="800" height="240" isRemoveLineWhenBlank="true" uuid="87b8c7d8-bab1-4492-b0e4-255af077e46e">
+				<reportElement x="1" y="10" width="800" height="277" isRemoveLineWhenBlank="true" uuid="87b8c7d8-bab1-4492-b0e4-255af077e46e">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
 					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
 					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
@@ -410,19 +410,13 @@
 			</componentElement>
 		</band>
 	</detail>
-	<columnFooter>
-		<band height="73" splitType="Stretch">
+	<pageFooter>
+		<band height="42" splitType="Stretch">
 			<textField>
-				<reportElement x="0" y="0" width="800" height="33" uuid="fb9ea3b7-14ea-439d-b5e7-cb8ef8575224"/>
+				<reportElement x="1" y="3" width="800" height="33" uuid="fb9ea3b7-14ea-439d-b5e7-cb8ef8575224"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA["Période "+$V{dateDebutFormatPicker}+" - "+$V{dateFinFormatPicker}]]></textFieldExpression>
 			</textField>
 		</band>
-	</columnFooter>
-	<pageFooter>
-		<band height="54" splitType="Stretch"/>
 	</pageFooter>
-	<summary>
-		<band height="42" splitType="Stretch"/>
-	</summary>
 </jasperReport>

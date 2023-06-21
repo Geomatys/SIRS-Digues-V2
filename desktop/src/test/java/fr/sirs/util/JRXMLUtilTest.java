@@ -21,6 +21,7 @@ package fr.sirs.util;
 import fr.sirs.core.SirsCore;
 import java.io.File;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.prefs.Preferences;
 import java.util.prefs.BackingStoreException;
 import org.junit.AfterClass;
@@ -73,5 +74,11 @@ public class JRXMLUtilTest {
                         "2) Ct - 4 : Gomes\n" +
                         "3) Ct - 7 : Cardinet\n" +
                         "4) Ct - 3 : Platz", true, 1));
+    }
+
+    @Test
+    public void test_displayFormattedDate() {
+        assertEquals("28/06/2023",
+                JRXMLUtil.displayFormattedDate(LocalDate.of(2023,06,28)));
     }
 }

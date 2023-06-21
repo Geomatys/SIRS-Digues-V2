@@ -55,12 +55,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import static fr.sirs.PropertiesFileUtilities.*;
-import static fr.sirs.plugin.reglementaire.ui.DocumentsPane.*;
+import static fr.sirs.plugin.reglementaire.ui.RegistreDocumentsPane.*;
 
 /**
  * Display print configuration and generate final report for horodatage purpose.
@@ -108,6 +109,7 @@ public class ExtractionDocumentsPane extends BorderPane {
 
     private final String COVER_JRXML_PATH = "/fr/sirs/jrxml/metaTemplateHorodatageCoverPage.jrxml";
     private final String SUMMARY_JRXML_PATH = "/fr/sirs/jrxml/metaTemplatePrestationSummaryTable.jrxml";
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Autowired
     private Session session;
@@ -285,8 +287,18 @@ public class ExtractionDocumentsPane extends BorderPane {
             return;
         }
 
-        // sort prestations by dateHorodatage.
-        prestations.sort(Comparator.comparing(Prestation::getHorodatageDate));
+        // sort prestations by dateHorodatage or end date or start date.
+        prestations.sort((p1, p2) -> {
+            LocalDate timeStampDate1 = p1.getHorodatageDate();
+            LocalDate timeStampDate2 = p2.getHorodatageDate();
+            int result = timeStampDate1.compareTo(timeStampDate2);
+            if (result != 0) return result;
+            LocalDate dateFin1  = p1.getDate_fin();
+            LocalDate dateFin2  = p2.getDate_fin();
+            LocalDate date1     = dateFin1 != null ? dateFin1 : p1.getDate_debut();
+            LocalDate date2     = dateFin2 != null ? dateFin2 : p2.getDate_debut();
+            return date1.compareTo(date2);
+        });
 
         /*
          C.1- Add cover page to final PDF.
@@ -384,8 +396,10 @@ public class ExtractionDocumentsPane extends BorderPane {
                 errorMsg.append("Aucun tableau de synthèse pour les prestations suivantes : \n");
                 createErrorMessage(errorMsg, noTable);
             }
-            errorMsg.insert(0,"Erreur lors de la récupération des tableaux de synthèse suivants : \n\n");
-            showWarningDialog(errorMsg.toString(), "Erreurs tableaux de synthèse", 600,500);
+            if (errorMsg.length() != 0) {
+                errorMsg.insert(0, "Erreur lors de la récupération des tableaux de synthèse suivants : \n\n");
+                showWarningDialog(errorMsg.toString(), "Erreurs tableaux de synthèse", 600, 500);
+            }
         SIRS.openFile(outputFile);
         }));
 
@@ -445,7 +459,6 @@ public class ExtractionDocumentsPane extends BorderPane {
         ArgumentChecks.ensureNonNull("prestations", prestations);
         JRBeanCollectionDataSource beanColDataSource    = new JRBeanCollectionDataSource(prestations);
         Map<String, Object> parameters                  = new HashMap();
-
         // set report parameters
         parameters.put("collectionBeanParam", beanColDataSource);
         parameters.put("systemeEndiguement", this.selectedSe.getLibelle());

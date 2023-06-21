@@ -19,6 +19,7 @@
 package fr.sirs.plugin.reglementaire;
 
 import fr.sirs.Injector;
+import fr.sirs.PropertiesFileUtilities;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.model.SystemeEndiguement;
 
@@ -26,14 +27,14 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
-import static fr.sirs.plugin.reglementaire.ui.DocumentsPane.LIBELLE;
+import static fr.sirs.plugin.reglementaire.ui.RegistreDocumentsPane.LIBELLE;
 
 /**
  * Utility class managing the properties file adding different properties to the filesystem objects.
  *
  * @author Estelle Idée (Geomatys)
  */
-public class PropertiesFileUtilities extends fr.sirs.PropertiesFileUtilities {
+public final class ReglementaryPropertiesFileUtilities extends PropertiesFileUtilities {
 
     public static void updateFileSystem(final File rootDirectory) {
 

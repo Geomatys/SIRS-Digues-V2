@@ -25,9 +25,13 @@ import fr.sirs.core.SirsCore;
 import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -62,6 +66,8 @@ public class JRXMLUtil {
     private static final NumberFormat PR_FORMAT = new DecimalFormat("#.##");
 
     private JRXMLUtil(){}
+
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // MÉTHODES CŒUR DES FONCTIONNALITÉS.                                                                             //
@@ -244,14 +250,14 @@ public class JRXMLUtil {
     /**
      * Method used in metaTemplatePrestationSyntheseTable.jrxml to convert the list of intervenants (@{@link Contact}) to String.
      *
-     * @param fieldNames @{@link List} containing the intervenants' ids.
+     * @param fieldIds @{@link List} containing the intervenants' ids.
      * @return
      * @see JRXMLUtil#displayReferenceCode(java.lang.String)
      */
-    public static String displayIntervenants(final List<String> fieldNames){
+    public static String displayIntervenants(final List<String> fieldIds){
         StringBuilder result = new StringBuilder();
-        if (fieldNames != null) {
-            final List<Contact> contacts = (InjectorCore.getBean(SessionCore.class).getRepositoryForClass(Contact.class)).get(fieldNames);
+        if (fieldIds != null) {
+            final List<Contact> contacts = (InjectorCore.getBean(SessionCore.class).getRepositoryForClass(Contact.class)).get(fieldIds);
             contacts.forEach(contact -> {
                 if (contact == null) return;
                 String name = contact.getNom();
@@ -275,7 +281,7 @@ public class JRXMLUtil {
      * Method used in metaTemplatePrestationSyntheseTable.jrxml to convert the Utilisateur (@{@link Utilisateur}) to String.
      *
      * @param fieldName id of the @Utilisateur to display login for.
-     * @return
+     * @return the login of the Utilisateur.
      */
     public static String displayLogin(final String fieldName){
         UtilisateurRepository contactRepo = (UtilisateurRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(Utilisateur.class);
@@ -286,19 +292,21 @@ public class JRXMLUtil {
     }
 
     /**
+     * Method to get the libelle of an item.
      *
-     * @param fieldName id of the @Utilisateur to display login for.
-     * @return
+     * @param fieldId id of the item to display libelle for.
+     * @param fieldClass class of the item to display libelle for.
+     * @return the libelle of the item.
      */
-    public static String displayLibelleFromId(final String fieldName, final String fieldClass){
+    public static String displayLibelleFromId(final String fieldId, final String fieldClass){
         if (RefPrestation.class.getSimpleName().equals(fieldClass)) {
             AbstractSIRSRepository<RefPrestation> typeRepo = Injector.getSession().getRepositoryForClass(RefPrestation.class);
-            final RefPrestation refPrestation = typeRepo.get(fieldName);
+            final RefPrestation refPrestation = typeRepo.get(fieldId);
             if (refPrestation == null) return "";
             return refPrestation.getLibelle();
         } else if (TronconDigue.class.getSimpleName().equals(fieldClass)) {
             TronconDigueRepository tronconRepo = (TronconDigueRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(TronconDigue.class);
-            final TronconDigue tronconDigue = tronconRepo.get(fieldName);
+            final TronconDigue tronconDigue = tronconRepo.get(fieldId);
             if (tronconDigue == null) return "";
             return tronconDigue.getLibelle();
 
@@ -307,5 +315,23 @@ public class JRXMLUtil {
         return "";
     }
 
+    /**
+     * Method used to format a date and convert it to String.
+     *
+     * @param date the date to be formatted.
+     * @return the date as a String.
+     */
+    public static String displayFormattedDate(final LocalDate date){
+        if (date == null) return " ";
 
+        return date.format(dateTimeFormatter);
+    }
+
+    /**
+     * Method to get the current date and converted to String.
+     * @return the current date as a String.
+     */
+    public static String displayCurrentDate(){
+        return LocalDate.now(ZoneId.of("Europe/Paris")).format(dateTimeFormatter);
+    }
 }

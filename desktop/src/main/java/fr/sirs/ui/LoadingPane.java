@@ -23,6 +23,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -31,8 +32,6 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import java.util.List;
 
 /**
  * A simple panel whose aim is to display advancement of a given task.
@@ -89,8 +88,8 @@ public class LoadingPane extends GridPane {
             uiProgressLabel.textProperty().bind(newValue.messageProperty());
             uiGenerateFinish.disableProperty().bind(newValue.runningProperty());
             newValue.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, evt -> {
-                final Object taskValue = newValue.getValue();
-                // If bound task did not update its progress to finish state, we do it ourself.
+                checkTask(newValue);
+                // If bound task did not update its progress to finish state, we do it ourselves.
                 if (uiProgress.getProgress() < 1) {
                     uiProgressLabel.textProperty().unbind();
                     uiProgressLabel.setText("");
@@ -99,22 +98,36 @@ public class LoadingPane extends GridPane {
                 }
             });
 
-            newValue.addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, evt -> {
-                    uiProgressLabel.textProperty().unbind();
-                    uiProgressLabel.setText("Une erreur est survenue !");
-                    uiProgressLabel.setStyle("-fx-text-fill:red");
-                    uiProgress.progressProperty().unbind();
-                    uiProgress.setProgress(0);
-            });
+            newValue.addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, onWorkerFailure());
 
 
-            newValue.addEventHandler(WorkerStateEvent.WORKER_STATE_CANCELLED, evt -> {
-                    uiProgressLabel.textProperty().unbind();
-                    uiProgressLabel.setText("La tâche a été interrompue !");
-                    uiProgress.progressProperty().unbind();
-                    uiProgress.setProgress(0);
-            });
+            newValue.addEventHandler(WorkerStateEvent.WORKER_STATE_CANCELLED, onWorkerCancelation());
         }
+    }
+
+    /**
+     * Method called by taskChanged(...). To be overridden.
+     * @param newValue
+     */
+    protected void checkTask(Task newValue){}
+
+    protected EventHandler onWorkerFailure() {
+        return evt -> {
+            uiProgressLabel.textProperty().unbind();
+            uiProgressLabel.setText("Une erreur est survenue !");
+            uiProgressLabel.setStyle("-fx-text-fill:red");
+            uiProgress.progressProperty().unbind();
+            uiProgress.setProgress(0);
+        };
+    }
+
+    protected EventHandler onWorkerCancelation() {
+        return evt -> {
+            uiProgressLabel.textProperty().unbind();
+            uiProgressLabel.setText("La tâche a été interrompue !");
+            uiProgress.progressProperty().unbind();
+            uiProgress.setProgress(0);
+        };
     }
 
     public static void showDialog(final Task t) {

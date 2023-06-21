@@ -23,11 +23,11 @@ import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.report.ModeleRapport;
-import static fr.sirs.plugin.document.PropertiesFileUtilities.getElements;
-import static fr.sirs.plugin.document.PropertiesFileUtilities.getOrCreateDG;
-import static fr.sirs.plugin.document.PropertiesFileUtilities.getOrCreateTR;
-import static fr.sirs.plugin.document.PropertiesFileUtilities.setBooleanProperty;
-import static fr.sirs.plugin.document.PropertiesFileUtilities.setProperty;
+import static fr.sirs.plugin.document.DocumentPropertiesFileUtilities.getElements;
+import static fr.sirs.plugin.document.DocumentPropertiesFileUtilities.getOrCreateDG;
+import static fr.sirs.plugin.document.DocumentPropertiesFileUtilities.getOrCreateTR;
+import static fr.sirs.plugin.document.DocumentPropertiesFileUtilities.setBooleanProperty;
+import static fr.sirs.plugin.document.DocumentPropertiesFileUtilities.setProperty;
 import static fr.sirs.plugin.document.ui.DocumentsPane.*;
 import fr.sirs.plugin.document.ui.DocumentsPane;
 

@@ -31,7 +31,7 @@ import javafx.stage.DirectoryChooser;
 import java.io.File;
 import java.util.prefs.Preferences;
 
-import static fr.sirs.plugin.reglementaire.ui.DocumentsPane.ROOT_FOLDER;
+import static fr.sirs.plugin.reglementaire.ui.RegistreDocumentsPane.ROOT_FOLDER;
 
 /**
  *

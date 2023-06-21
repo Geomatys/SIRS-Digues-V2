@@ -19,6 +19,7 @@
 package fr.sirs.plugin.document;
 
 import fr.sirs.Injector;
+import fr.sirs.PropertiesFileUtilities;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
@@ -39,7 +40,7 @@ import static fr.sirs.plugin.document.ui.DocumentsPane.*;
  *
  * @author Guilhem Legal (Geomatys)
  */
-public class PropertiesFileUtilities extends fr.sirs.PropertiesFileUtilities {
+public final class DocumentPropertiesFileUtilities extends PropertiesFileUtilities {
 
     public static File getOrCreateUnclassif(final File rootDirectory){
         final File unclassifiedDir = new File(rootDirectory, UNCLASSIFIED);
