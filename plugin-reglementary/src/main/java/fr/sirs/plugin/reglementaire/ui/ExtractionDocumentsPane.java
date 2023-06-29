@@ -100,7 +100,7 @@ public class ExtractionDocumentsPane extends BorderPane {
     @FXML private Button uiGenerateBtn;
     private final FileTreeItem root;
     private Preview selectedSe;
-    private List<Prestation> allPrestationsOnSelectedSe;
+    private List<Prestation> allTimeStampedPrestationsOnSelectedSe;
     private final FileChooser fileChooser;
     /**
      * Supported formats for cover and conclusion pages
@@ -151,7 +151,9 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         uiSECombo.valueProperty().addListener((obs, oldValue, newValue) -> {
             this.selectedSe = newValue;
-            this.allPrestationsOnSelectedSe = getAllPrestationsInSelectedSeRegistre();
+            this.allTimeStampedPrestationsOnSelectedSe = getAllPrestationsInSelectedSeRegistre().stream()
+                    .filter(prestation -> prestation.getHorodatageDate() != null)
+                    .collect(Collectors.toList());
         });
 
         uiGenerateBtn.disableProperty().bind(Bindings.createBooleanBinding(() -> {
@@ -254,7 +256,7 @@ public class ExtractionDocumentsPane extends BorderPane {
             conclusionFile = null;
         }
 
-        if (this.allPrestationsOnSelectedSe == null || this.allPrestationsOnSelectedSe.isEmpty()) {
+        if (this.allTimeStampedPrestationsOnSelectedSe == null || this.allTimeStampedPrestationsOnSelectedSe.isEmpty()) {
             showErrorDialog("Aucune prestation disponible sur le système d'endiguement.");
             return;
         }
@@ -281,7 +283,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         C- OUTPUT PDF CREATION
         ======================================================*/
 
-        final List<Prestation> prestations = filterPrestationsByDateFilters(new ArrayList<>(this.allPrestationsOnSelectedSe));
+        final List<Prestation> prestations = filterPrestationsByDateFilters(new ArrayList<>(this.allTimeStampedPrestationsOnSelectedSe));
         if (prestations.isEmpty()) {
             showErrorDialog("Aucune prestation disponible sur le système d'endiguement aux périodes renseignées.");
             return;
