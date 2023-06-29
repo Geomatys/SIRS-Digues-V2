@@ -382,6 +382,7 @@ public class HorodatageReportPane extends BorderPane {
         if (prestations.isEmpty()) return;
         // Keeps all prestations with a status "Non horodaté"
         prestations.stream()
+                .filter(prestation -> prestation != null)
                 .filter(prestation -> HorodatageReference.getRefNonTimeStampedStatus().equals(prestation.getHorodatageStatusId()))
                 .forEach(presta -> uiPrestationTable.getSelectionModel().select(presta));
     }

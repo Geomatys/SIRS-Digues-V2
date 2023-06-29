@@ -67,22 +67,27 @@ public abstract class AbstractPositionableRepository<T extends Positionable> ext
     @Override
     protected T onLoad(T loaded) {
         loaded = super.onLoad(loaded);
-        boolean toSave = false;
-        try {
-            toSave = ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test(loaded);
-        } catch (ClassCastException cce) {
-            SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément chargé : \n" + loaded.toString(), cce);
-        }
-
-        if (loaded.getGeometry() == null) {
-            ConvertPositionableCoordinates.updateGeometryAndPRs(loaded);
-        }
+        boolean toSave = checkAndAdaptOnload(loaded);
 
         if (toSave) {
             update(loaded);
         }
 
         return loaded;
+    }
+
+    protected boolean checkAndAdaptOnload(T loaded) {
+        boolean toSave = false;
+        try {
+            toSave = ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test(loaded);
+        } catch (RuntimeException cce) {
+            SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément chargé : \n" + loaded.toString(), cce);
+        }
+
+        if (loaded.getGeometry() == null) {
+            ConvertPositionableCoordinates.updateGeometryAndPRs(loaded);
+        }
+        return toSave;
     }
 
 }

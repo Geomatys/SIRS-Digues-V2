@@ -44,29 +44,13 @@ public class PrestationRepository extends AbstractPositionableRepository<Prestat
     }
 
     @Override
-    public Prestation onLoad(Prestation prestation) {
-        prestation = super.onLoad(prestation);
-        boolean toSave = false;
-        try {
-            toSave = ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test(prestation);
-        } catch (ClassCastException cce) {
-            SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément chargé : \n" + prestation.toString(), cce);
-        }
-
-        if (prestation.getGeometry() == null) {
-            ConvertPositionableCoordinates.updateGeometryAndPRs(prestation);
-        }
-
+    protected boolean checkAndAdaptOnload(Prestation prestation) {
+        boolean toSave = super.checkAndAdaptOnload(prestation);
         if (prestation.getHorodatageStatusId() == null) {
             toSave = true;
             prestation.setHorodatageStatusId(HorodatageReference.getRefNonTimeStampedStatus());
         }
-
-        if (toSave) {
-            update(prestation);
-        }
-
-        return prestation;
+        return toSave;
     }
 }
 
