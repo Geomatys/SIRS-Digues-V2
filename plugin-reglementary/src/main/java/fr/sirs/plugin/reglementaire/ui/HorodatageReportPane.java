@@ -211,11 +211,11 @@ public class HorodatageReportPane extends BorderPane {
                         final RefHorodatageStatus status = Injector.getBean(RefHorodatageStatusRepository.class).get(item);
                         if (status != null) {
                             text = status.getLibelle();
-                            if (RegistreTheme.refNonTimeStampedStatus.equals(item))
+                            if (HorodatageReference.getRefNonTimeStampedStatus().equals(item))
                                 setTextFill(Color.BROWN);
-                            else if (RegistreTheme.refWaitingStatus.equals(item))
+                            else if (HorodatageReference.getRefWaitingStatus().equals(item))
                                 setTextFill(Color.SALMON);
-                            else if (RegistreTheme.refTimeStampedStatus.equals(item))
+                            else if (HorodatageReference.getRefTimeStampedStatus().equals(item))
                                 setTextFill(Color.SEAGREEN);
                             else
                                 setTextFill(Color.BLACK);
@@ -382,7 +382,7 @@ public class HorodatageReportPane extends BorderPane {
         if (prestations.isEmpty()) return;
         // Keeps all prestations with a status "Non horodaté"
         prestations.stream()
-                .filter(prestation -> RegistreTheme.refNonTimeStampedStatus.equals(prestation.getHorodatageStatusId()))
+                .filter(prestation -> HorodatageReference.getRefNonTimeStampedStatus().equals(prestation.getHorodatageStatusId()))
                 .forEach(presta -> uiPrestationTable.getSelectionModel().select(presta));
     }
 
@@ -453,7 +453,7 @@ public class HorodatageReportPane extends BorderPane {
             // Change prestations' horodatage status to "En attente".
             PrestationRepository repo   = Injector.getBean(PrestationRepository.class);
             prestations.forEach(p -> {
-                p.setHorodatageStatusId(RegistreTheme.refWaitingStatus);
+                p.setHorodatageStatusId(HorodatageReference.getRefWaitingStatus());
                 p.setSyntheseTablePath(file.getPath());
                 repo.update(p);
             });

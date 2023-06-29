@@ -19,8 +19,9 @@
 package fr.sirs.plugin.reglementaire;
 
 import fr.sirs.Injector;
+import fr.sirs.PropertiesFileUtilities;
 import fr.sirs.Session;
-import fr.sirs.core.component.RefHorodatageStatusRepository;
+import fr.sirs.core.model.HorodatageReference;
 import fr.sirs.core.model.RefHorodatageStatus;
 import fr.sirs.plugin.reglementaire.ui.*;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
@@ -33,7 +34,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.prefs.Preferences;
 
 /**
@@ -51,13 +51,6 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         super("Registre", "Registre", BUTTON_IMAGE);
     }
 
-    public static String refNonTimeStampedStatus;
-    public static String refWaitingStatus;
-    public static String refTimeStampedStatus;
-    public static final String NON_TIME_STAMPED= "Non horodaté";
-    public static final String WAITING = "En attente";
-    public static final String TIME_STAMPED = "Horodaté";
-
     public static final String EXTRACTION_TAB = "Extraction";
     private static final String PATH_KEY = "path";
 
@@ -65,21 +58,17 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
     public Parent createPane() {
         // Check whether all @RefHorodatageStatus are available : Non horodaté, En attente, Horodaté.
 
-        if (!checkRefHorodatageStatusAllPresent()) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setResizable(true);
-            alert.getDialogPane().setMinWidth(650);
-            alert.getDialogPane().setMinHeight(400);
-            alert.setTitle("Statuts d'horodatage manquant");
-            alert.setContentText("Les statuts d'horodatage suivants sont nécessaires au fonctionnement de la génération du tableau de synthèse des prestations : " +
+        if (HorodatageReference.getRefNonTimeStampedStatus() == null || HorodatageReference.getRefWaitingStatus() == null || HorodatageReference.getRefTimeStampedStatus() == null) {
+            PropertiesFileUtilities.showInformationDialog("Les statuts d'horodatage suivants sont nécessaires au fonctionnement de la génération du tableau de synthèse des prestations : " +
                     "\n" +
                     "\n- Non horodaté" +
                     "\n- En attente" +
                     "\n- Horodaté" +
                     "\n\nVeuillez mettre à jour la table de référence avant de revenir au menu Registre." +
-                    "\n\nImportant : le redémarrage de l'application est nécessaire afin de prendre en compte les nouvelles valeurs de référence.");
+                    "\n\nImportant : le redémarrage de l'application est nécessaire afin de prendre en compte les nouvelles valeurs de référence.",
+                    "Statuts d'horodatage manquant",
+                    650, 400);
 
-            alert.showAndWait();
             final Session session = Injector.getSession();
             session.getFrame().addTab(session.getOrCreateReferenceTypeTab(RefHorodatageStatus.class));
             throw new IllegalStateException("Missing timestamp status in " + RefHorodatageStatus.class.getSimpleName());
@@ -111,33 +100,6 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         tabPane.getTabs().add(extractionTab);
         borderPane.setCenter(tabPane);
         return borderPane;
-    }
-
-    /**
-     * Check that all the requested time stamped status are available in SIRS :
-     * <ul>
-     *     <li>Non horodaté</li>
-     *     <li>En attente</li>
-     *     <li>Horodaté</li>
-     * </ul>
-     * @return true if all the requested status are present.
-     */
-    private boolean checkRefHorodatageStatusAllPresent() {
-        final List<RefHorodatageStatus> allStatus = Injector.getBean(RefHorodatageStatusRepository.class).getAll();
-        if (allStatus == null || allStatus.isEmpty())
-            return false;
-
-
-        allStatus.forEach(status -> {
-            String libelle = status.getLibelle();
-            if (NON_TIME_STAMPED.equalsIgnoreCase(libelle.trim()))
-                refNonTimeStampedStatus = status.getId();
-            else if (WAITING.equalsIgnoreCase(libelle.trim()))
-                refWaitingStatus = status.getId();
-            else if (TIME_STAMPED.equalsIgnoreCase(libelle.trim()))
-                refTimeStampedStatus = status.getId();
-        });
-        return refNonTimeStampedStatus != null && refWaitingStatus != null && refTimeStampedStatus != null;
     }
 
      public static javafx.util.Callback<DatePicker, javafx.scene.control.DateCell> getUiPeriodDebutDayCellFactory(final DatePicker uiPeriodFin) {

@@ -26,6 +26,7 @@ import com.giaybac.traprange.entity.TableRow;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.PrestationRepository;
+import fr.sirs.core.model.HorodatageReference;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.Role;
 import fr.sirs.plugin.reglementaire.FileTreeItem;
@@ -351,7 +352,7 @@ public final class RegistreDocumentsPane extends GridPane {
                 final Optional confirmOpt = showConfirmationDialog("Souhaitez-vous mettre automatiquement à jour les prestations du tableau?" +
                         "\n\nLes éléments suivants seront mis à jour pour chaque prestation :" +
                         "\n\n    - la date d'horodatage;" +
-                        "\n    - le statut d'horodatage en " + RegistreTheme.refTimeStampedStatus + ";" +
+                        "\n    - le statut d'horodatage en " + HorodatageReference.getRefTimeStampedStatus() + ";" +
                         "\n    - le lien vers le Tableau de synthèse : " + newFile + "." +
                         "\n\nSélectionner 'Annuler' pour annuler l'importation du fichier.", null, 600, 300, true);
 
@@ -506,7 +507,7 @@ public final class RegistreDocumentsPane extends GridPane {
             final SirsStringConverter converter = new SirsStringConverter();
             final StringBuilder textUpdate = new StringBuilder();
             prestationsToUpdate.forEach(prestation -> {
-                prestation.setHorodatageStatusId(RegistreTheme.refTimeStampedStatus);
+                prestation.setHorodatageStatusId(HorodatageReference.getRefTimeStampedStatus());
                 prestation.setHorodatageDate(timeStampDate);
                 prestationRepo.update(prestation);
                 textUpdate.append("\n  -  ").append(converter.toString(prestation)).append(" / ").append(prestation.getId());
