@@ -31,11 +31,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.component.ContactRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.*;
@@ -67,7 +65,7 @@ public class JRXMLUtil {
 
     private JRXMLUtil(){}
 
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // MÉTHODES CŒUR DES FONCTIONNALITÉS.                                                                             //
@@ -324,7 +322,7 @@ public class JRXMLUtil {
     public static String displayFormattedDate(final LocalDate date){
         if (date == null) return " ";
 
-        return date.format(dateTimeFormatter);
+        return date.format(DATE_TIME_FORMATTER);
     }
 
     /**
@@ -332,6 +330,6 @@ public class JRXMLUtil {
      * @return the current date as a String.
      */
     public static String displayCurrentDate(){
-        return LocalDate.now(ZoneId.of("Europe/Paris")).format(dateTimeFormatter);
+        return LocalDate.now(ZoneId.of("Europe/Paris")).format(DATE_TIME_FORMATTER);
     }
 }
