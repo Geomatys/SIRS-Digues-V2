@@ -31,7 +31,7 @@ public class HorodatageReference {
     private static String refTimeStampedStatus;
     private static final String NON_TIME_STAMPED= "Non horodaté";
     private static final String WAITING = "En attente";
-    private static final String TIME_STAMPED = "Horodaté";
+    public static final String TIME_STAMPED = "Horodaté";
 
     public static String getRefNonTimeStampedStatus() {
         if (refNonTimeStampedStatus == null) {

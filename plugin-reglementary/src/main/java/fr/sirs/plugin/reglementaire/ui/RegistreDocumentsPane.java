@@ -351,8 +351,8 @@ public final class RegistreDocumentsPane extends GridPane {
 
                 final Optional confirmOpt = showConfirmationDialog("Souhaitez-vous mettre automatiquement à jour les prestations du tableau?" +
                         "\n\nLes éléments suivants seront mis à jour pour chaque prestation :" +
-                        "\n\n    - la date d'horodatage;" +
-                        "\n    - le statut d'horodatage en " + HorodatageReference.getRefTimeStampedStatus() + ";" +
+                        "\n\n    - la date d'horodatage : " + timeStampDate + ";" +
+                        "\n    - le statut d'horodatage : \"" + HorodatageReference.TIME_STAMPED + "\";" +
                         "\n    - le lien vers le Tableau de synthèse : " + newFile + "." +
                         "\n\nSélectionner 'Annuler' pour annuler l'importation du fichier.", null, 600, 300, true);
 
@@ -512,7 +512,7 @@ public final class RegistreDocumentsPane extends GridPane {
                 prestationRepo.update(prestation);
                 textUpdate.append("\n  -  ").append(converter.toString(prestation)).append(" / ").append(prestation.getId());
             });
-            showInformationDialog(prestationsToUpdate.size() + " prestations ont été mises à jour : \n" + textUpdate, null, 800, 600);
+            showInformationDialog(prestationsToUpdate.size() + " prestations ont été mises à jour : \n" + textUpdate, "Succès", 800, 600);
         }
 
         if (countErrorPrestations == 0) return true;
@@ -527,7 +527,7 @@ public final class RegistreDocumentsPane extends GridPane {
     public void showRemoveDialog(ActionEvent event) throws IOException {
         final Optional opt      = showConfirmationDialog("Détruire le fichier/dossier dans le système de fichier ?" +
                 "\nDans le cas d'un dossier, les sous-dossiers seront également supprimés." +
-                "\nCette action est irréversible.", "Détruire document", 0, 0, false);
+                "\nCette action est irréversible.", "Détruire document", 600, 200, false);
 
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
             final File f = getSelectedFile();
@@ -632,6 +632,7 @@ public final class RegistreDocumentsPane extends GridPane {
         final Tab extraction = result.getTabs().filtered(tab -> RegistreTheme.EXTRACTION_TAB.equals(tab.getText())).stream().findFirst().orElseGet(null);
         if (extraction == null) {
             showErrorDialog("Erreur lors de l'ouverture de l'onglet l'extraction des registres.");
+            return;
         }
         result.getSelectionModel().select(extraction);
     }

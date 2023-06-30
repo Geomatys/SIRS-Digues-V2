@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
+<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.0.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="HorodatageCoverPage_A4" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="5475a4a3-904b-4ee3-b1d8-d81506f65277">
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -52,13 +52,13 @@
 	<detail>
 		<band height="251" splitType="Stretch">
 			<textField>
-				<reportElement x="181" y="200" width="193" height="30" uuid="9fcf24bd-2118-403e-b8f8-1eecf203d7c7">
+				<reportElement x="2" y="190" width="550" height="50" uuid="9fcf24bd-2118-403e-b8f8-1eecf203d7c7">
 					<printWhenExpression><![CDATA[$P{structure} != null]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="14" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Structure " + $P{structure}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{structure}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="77" y="90" width="400" height="30" uuid="d66e34c7-f0c4-4354-9de6-31d2aabfb0b6"/>
