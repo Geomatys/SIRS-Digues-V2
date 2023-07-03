@@ -897,6 +897,8 @@ public class SirsCore {
                     if (Files.isDirectory(potentialConf)) {
                         final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Le dossier de configuration ." + SirsCore.NAME + " existe déjà dans le répertoire indiqué. Souhaitez-vous écraser le dossier existant ?", ButtonType.NO, ButtonType.YES);
                         alert.setResizable(true);
+                        alert.getDialogPane().setPrefWidth(500);
+                        alert.getDialogPane().setPrefHeight(200);
                         final Optional<ButtonType> res = alert.showAndWait();
                         if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                             try {
