@@ -144,7 +144,7 @@ public class HorodatageReportPane extends BorderPane {
 
         uiSelectNonTimeStamped.setTooltip(new Tooltip("Sélectionne toutes les prestations avec le status \"non horodatée\" de la liste."));
 
-        // TableView to show the prestations and their status.
+        // TableView to show the prestations, their tronçon, their type and their status.
         uiPrestationTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         uiPrestationTable.getColumns().get(0).setEditable(false);
         uiPrestationTable.getColumns().get(0).setCellValueFactory((Callback) param -> {
@@ -168,11 +168,39 @@ public class HorodatageReportPane extends BorderPane {
             final Object item = ((TableColumn.CellDataFeatures)param).getValue();
             if (item != null) {
                 Prestation presta = (Prestation) item;
-                return new SimpleObjectProperty(presta.getTypePrestationId());
+                return new SimpleObjectProperty(presta.getLinearId());
             }
             return null;
         });
         uiPrestationTable.getColumns().get(1).setCellFactory((Callback) param -> new TableCell<Prestation, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                String text = "";
+                if (item != null) {
+                    try {
+                        final TronconDigue troncon = Injector.getBean(TronconDigueRepository.class).get(item);
+                        if (troncon != null)
+                            text = troncon.getLibelle();
+                    } catch (DocumentNotFoundException e) {
+                        SIRS.LOGGER.warning("Error while getting TronconDigue with id :" + item);
+                    }
+                }
+                if ("".equals(text)) text = item;
+                setText(text);
+            }
+        });
+
+        uiPrestationTable.getColumns().get(2).setEditable(false);
+        uiPrestationTable.getColumns().get(2).setCellValueFactory((Callback) param -> {
+            final Object item = ((TableColumn.CellDataFeatures)param).getValue();
+            if (item != null) {
+                Prestation presta = (Prestation) item;
+                return new SimpleObjectProperty(presta.getTypePrestationId());
+            }
+            return null;
+        });
+        uiPrestationTable.getColumns().get(2).setCellFactory((Callback) param -> new TableCell<Prestation, String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -191,9 +219,9 @@ public class HorodatageReportPane extends BorderPane {
             }
         });
 
-        uiPrestationTable.getColumns().get(2).setEditable(false);
-        uiPrestationTable.getColumns().get(2).setStyle("-fx-alignment: CENTER");
-        uiPrestationTable.getColumns().get(2).setCellValueFactory((Callback) param -> {
+        uiPrestationTable.getColumns().get(3).setEditable(false);
+        uiPrestationTable.getColumns().get(3).setStyle("-fx-alignment: CENTER");
+        uiPrestationTable.getColumns().get(3).setCellValueFactory((Callback) param -> {
             final Object item = ((TableColumn.CellDataFeatures)param).getValue();
             if (item != null) {
                 Prestation presta = (Prestation) item;
@@ -201,7 +229,7 @@ public class HorodatageReportPane extends BorderPane {
             }
             return null;
         });
-        uiPrestationTable.getColumns().get(2).setCellFactory((Callback) param -> new TableCell<Prestation, String>() {
+        uiPrestationTable.getColumns().get(3).setCellFactory((Callback) param -> new TableCell<Prestation, String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);

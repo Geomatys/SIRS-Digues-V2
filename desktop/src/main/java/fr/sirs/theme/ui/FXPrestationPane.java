@@ -7,6 +7,7 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.*;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -43,6 +44,13 @@ public class FXPrestationPane extends FXPrestationPaneStub {
     @FXML
     private Label ui_errorMessage;
 
+    /**
+     * REDMINE 7782
+     * List of RefPrestation ids for which the prestation shall be automatically added to the SE registre.
+     */
+    private static final List<Integer> typeInRegistreIds = Arrays.asList(1, 2, 3, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+            22, 23, 24, 25, 26, 27, 28, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39);
+
     public FXPrestationPane(final Prestation prestation){
         super(prestation);
         final Session session = Injector.getBean(Session.class);
@@ -70,6 +78,42 @@ public class FXPrestationPane extends FXPrestationPaneStub {
         ui_errorMessage.visibleProperty().bind(ui_errorMessage.textProperty().isNotEmpty());
         ui_errorMessage.setTextFill(Color.RED);
         ui_errorMessage.setFont(new Font(12));
+
+        // The Prestation shall automatically be added to the SE registre depending on the type of Prestation.
+        ui_typePrestationId.valueProperty().addListener(autoSelectRegistreListener());
+    }
+
+    /**
+     * Change listener on typePrestationId to auto select/deselect the registreAttribution checkbox.
+     * @return the @{@link ChangeListener}
+     */
+    private ChangeListener<RefPrestation> autoSelectRegistreListener() {
+        return (obs, oldValue, newValue) -> {
+            if (newValue != null) {
+                final String id = newValue.getId();
+                autoSelectRegistre(elementProperty().get(), id);
+            }
+        };
+    }
+
+    /**
+     * Update prestation's registreAttribution value depending on the typePrestationId.
+     * @param prestation the prestation to update.
+     * @param refTypeId
+     */
+    static void autoSelectRegistre(Prestation prestation, String refTypeId) {
+        if (refTypeId != null) {
+            boolean isInRegistre = false;
+            String typeRef;
+            for (Integer typeInRegistreId : typeInRegistreIds) {
+                typeRef = "RefPrestation:" + typeInRegistreId;
+                if (typeRef.equals(refTypeId)) {
+                    isInRegistre = true;
+                    break;
+                }
+            }
+            prestation.setRegistreAttribution(isInRegistre);
+        }
     }
 
     /**

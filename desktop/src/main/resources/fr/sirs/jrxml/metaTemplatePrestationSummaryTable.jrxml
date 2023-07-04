@@ -147,7 +147,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="45" height="15" isPrintWhenDetailOverflows="true" uuid="8dc8f98f-fa9e-41c0-8af5-56801e49aa94"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="45" height="15" isPrintWhenDetailOverflows="true" uuid="8dc8f98f-fa9e-41c0-8af5-56801e49aa94"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -170,7 +170,7 @@
 						<jr:detailCell style="Table_TD" height="15">
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="45" height="15" isPrintWhenDetailOverflows="true" uuid="2783d580-c0f8-4aba-a483-e6303340b8c4"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="45" height="15" isPrintWhenDetailOverflows="true" uuid="2783d580-c0f8-4aba-a483-e6303340b8c4"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -191,7 +191,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="80" height="15" isPrintWhenDetailOverflows="true" uuid="67e1faf2-345c-4df6-84c6-5cda38f0b513"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="15" isPrintWhenDetailOverflows="true" uuid="67e1faf2-345c-4df6-84c6-5cda38f0b513"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -213,7 +213,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="50" height="15" isPrintWhenDetailOverflows="true" uuid="e1dcbabe-ac86-42fc-a241-38ad01135621"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="15" isPrintWhenDetailOverflows="true" uuid="e1dcbabe-ac86-42fc-a241-38ad01135621"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -235,7 +235,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="80" height="15" isPrintWhenDetailOverflows="true" uuid="359e2a99-0ca2-40ca-a346-a8eca3805781">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="15" isPrintWhenDetailOverflows="true" uuid="359e2a99-0ca2-40ca-a346-a8eca3805781">
 									<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 								</reportElement>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -259,7 +259,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="50" height="15" isPrintWhenDetailOverflows="true" uuid="0fb55ba8-f95a-4a04-9969-0eccc3b0ff2f">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="15" isPrintWhenDetailOverflows="true" uuid="0fb55ba8-f95a-4a04-9969-0eccc3b0ff2f">
 									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 								</reportElement>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -283,7 +283,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="50" height="15" isPrintWhenDetailOverflows="true" uuid="2eabfcdf-7f7f-444f-92e5-985fe6189809"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="15" isPrintWhenDetailOverflows="true" uuid="2eabfcdf-7f7f-444f-92e5-985fe6189809"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -305,7 +305,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="65" height="15" isPrintWhenDetailOverflows="true" uuid="247a0a2c-0238-4c6b-98d5-c893db0d1fbf"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="65" height="15" isPrintWhenDetailOverflows="true" uuid="247a0a2c-0238-4c6b-98d5-c893db0d1fbf"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
 									<font size="7"/>
 								</textElement>
@@ -327,7 +327,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="65" height="15" isPrintWhenDetailOverflows="true" uuid="89ab9772-2d33-4e8d-b6de-7e204e97bc60"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="65" height="15" isPrintWhenDetailOverflows="true" uuid="89ab9772-2d33-4e8d-b6de-7e204e97bc60"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
 									<font size="7"/>
 								</textElement>
@@ -349,7 +349,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="120" height="15" isPrintWhenDetailOverflows="true" uuid="6453119b-3084-410e-bc59-271af0590611">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="120" height="15" isPrintWhenDetailOverflows="true" uuid="6453119b-3084-410e-bc59-271af0590611">
 									<property name="com.jaspersoft.studio.unit.firstLineIndent" value="px"/>
 									<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 									<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
@@ -376,7 +376,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="110" height="15" isPrintWhenDetailOverflows="true" uuid="731d346f-58f0-4638-9bcc-4c7a38ee123d"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="110" height="15" isPrintWhenDetailOverflows="true" uuid="731d346f-58f0-4638-9bcc-4c7a38ee123d"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -398,7 +398,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="40" height="15" isPrintWhenDetailOverflows="true" uuid="c51de157-cfcc-4f2a-8bbc-067713c1fa2a"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="40" height="15" isPrintWhenDetailOverflows="true" uuid="c51de157-cfcc-4f2a-8bbc-067713c1fa2a"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>

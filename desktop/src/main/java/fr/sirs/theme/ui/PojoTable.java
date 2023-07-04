@@ -2141,14 +2141,22 @@ public class PojoTable extends BorderPane implements Printable {
             final Object oldValue = value.getValue();
 
             try {
-                ((WritableValue) value).setValue(event.getNewValue());
+                final Object newValue = event.getNewValue();
+                ((WritableValue) value).setValue(newValue);
+                final Class<?> rowClass = rowElement.getClass();
 
                 //On recalcule les coordonnées si la colonne modifiée correspond à une des propriétées de coordonnées géo ou linéaire.
                 String modifiedPropretieName = ((PojoTable.PropertyColumn) col).getName();
-                if ((event.getRowValue() != null) && (Positionable.class.isAssignableFrom(event.getRowValue().getClass()))) {
+                if ((rowElement != null) && (Positionable.class.isAssignableFrom(rowClass))) {
 
-                    ConvertPositionableCoordinates.computeForModifiedPropertie((Positionable) event.getRowValue(), modifiedPropretieName);
+                    ConvertPositionableCoordinates.computeForModifiedPropertie((Positionable) rowElement, modifiedPropretieName);
 
+                }
+
+                // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
+                if ("typePrestationId".equals(modifiedPropretieName) && Prestation.class.isAssignableFrom(rowClass)
+                && (oldValue == null || !oldValue.equals(newValue))) {
+                    FXPrestationPane.autoSelectRegistre((Prestation) rowElement, (String) newValue);
                 }
 
                 elementEdited(event);
