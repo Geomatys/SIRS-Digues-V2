@@ -399,9 +399,8 @@ public final class RegistreDocumentsPane extends GridPane {
             // two first lines of the doc : title and @SystemeEndiguement libelle
             extractor.exceptLine(0, new int[]{0});
             extractor.exceptLine(0, new int[]{1});
-
-            // exclude last line of the last page -> corresponds to "Période : xx/xx/xxxx - xx/xx/xxxx"
-            extractor.exceptLineInLastPage(Arrays.asList(-1));
+            // exclude last line in each page -> corresponds to "Période : xx/xx/xxxx - xx/xx/xxxx"
+            extractor.exceptLine(new int[]{-1});
 
             //begin parsing pdf file
             tables = extractor.extract();
@@ -509,6 +508,7 @@ public final class RegistreDocumentsPane extends GridPane {
             prestationsToUpdate.forEach(prestation -> {
                 prestation.setHorodatageStatusId(HorodatageReference.getRefTimeStampedStatus());
                 prestation.setHorodatageDate(timeStampDate);
+                prestation.setSyntheseTablePath(pdf_filename.toString());
                 prestationRepo.update(prestation);
                 textUpdate.append("\n  -  ").append(converter.toString(prestation)).append(" / ").append(prestation.getId());
             });

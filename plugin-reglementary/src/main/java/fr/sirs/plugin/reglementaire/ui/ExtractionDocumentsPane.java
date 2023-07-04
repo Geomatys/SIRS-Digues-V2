@@ -45,6 +45,8 @@ import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.apache.sis.measure.NumberRange;
 import org.apache.sis.util.ArgumentChecks;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -302,29 +304,38 @@ public class ExtractionDocumentsPane extends BorderPane {
             return date1.compareTo(date2);
         });
 
+        List<PrestationWithPage> prestationsWithPage = new ArrayList<>();
+        prestations.forEach(presta -> prestationsWithPage.add(new PrestationWithPage(presta)));
+
         /*
          C.1- Add cover page to final PDF.
         ======================================================*/
 
         List<File> filesToMerge = new ArrayList<>();
 
+        final int[] pageIncrement = {0};
         if (coverFile == null) {
             addPageToFiles(filesToMerge, COVER_JRXML_PATH, null, title);
+            pageIncrement[0]++;
         } else {
             filesToMerge.add(coverFile);
+            pageIncrement[0] = pageIncrement[0] + getDocPageNumber(coverFile);
         }
 
         /*
-         C.2- Add Summary table to final PDF
+         C.2- Get Summary total page number
         ======================================================*/
-        addPageToFiles(filesToMerge, SUMMARY_JRXML_PATH, prestations, null);
+        // Generate the summary a first time without the column "Page" filled in to get the total page number of the summary table.
+        final File summaryFile = generateSummaryPage(prestationsWithPage);
+        pageIncrement[0] = pageIncrement[0] + getDocPageNumber(summaryFile);
 
         /*
          C.3- Add Synthese table pdf files
         ======================================================*/
         final Map<String, List<Prestation>> syntheseTablePrestationsMap = new HashMap<>();
         // Gathers prestations by synthese table.
-        prestations.forEach(prestation -> {
+        prestationsWithPage.forEach(prestaWithPage -> {
+            final Prestation prestation = prestaWithPage.getPrestation();
             final String syntheseTablePath = prestation.getSyntheseTablePath();
             List<Prestation> tablePrestations = syntheseTablePrestationsMap.get(syntheseTablePath);
             if (tablePrestations == null) {
@@ -357,13 +368,23 @@ public class ExtractionDocumentsPane extends BorderPane {
             } else if (!table.exists()) {
                 tablesNotFound.put(tablePath, prestationsList);
             } else {
+                prestationsWithPage.forEach(prestaWithPage -> {
+                    if (prestationsList.contains(prestaWithPage.getPrestation())) {
+                        prestaWithPage.setPage(pageIncrement[0] + 1);
+                    }
+                });
+                pageIncrement[0] = pageIncrement[0] + getDocPageNumber(new File(tablePath));
                 filesToMerge.add(table);
             }
         });
 
+        /*
+         C.4- Add Summary table to final PDF - method add summary at index 1, after the cover page.
+        ======================================================*/
+        addPageToFiles(filesToMerge, SUMMARY_JRXML_PATH, prestationsWithPage, null);
 
         /*
-         C.4- Add conclusion page to final PDF.
+         C.5- Add conclusion page to final PDF.
         ======================================================*/
         if (conclusionFile != null) filesToMerge.add(conclusionFile);
 
@@ -409,6 +430,16 @@ public class ExtractionDocumentsPane extends BorderPane {
         LoadingPane.showDialog(generator);
     }
 
+    private static int getDocPageNumber(File file) {
+        try (PDDocument doc = PDDocument.load(file)) {
+            return doc.getNumberOfPages();
+        } catch (InvalidPasswordException e) {
+            throw new IllegalStateException("Document protected by password : " + file, e);
+        } catch (IOException e) {
+            throw new IllegalStateException("Error while opening file : " + file, e);
+        }
+    }
+
     private static void createErrorMessage(StringBuilder stbuilder, List<Prestation> prestationsList) {
         prestationsList.forEach(presta -> {
             String designation = presta.getDesignation();
@@ -427,7 +458,7 @@ public class ExtractionDocumentsPane extends BorderPane {
      * @param title title from @uiTitle - used for COVER_JRXML_PATH.
      * @return
      */
-    private boolean addPageToFiles(final List<File> filesToMerge, final String JRXML_PATH, final List<Prestation> prestations, final String title) {
+    private boolean addPageToFiles(final List<File> filesToMerge, final String JRXML_PATH, final List<PrestationWithPage> prestations, final String title) {
         ArgumentChecks.ensureNonNull("filesToMerge", filesToMerge);
         ArgumentChecks.ensureNonNull("JRXML_PATH", JRXML_PATH);
 
@@ -436,7 +467,8 @@ public class ExtractionDocumentsPane extends BorderPane {
         final String pageType = isSummaryPage ? "summary" : "cover";
         try {
             if (isSummaryPage) {
-                return filesToMerge.add(generateSummaryPage(prestations));
+                filesToMerge.add(1, generateSummaryPage(prestations));
+                return true;
             }
             else {
                 return filesToMerge.add(generateCoverPage(title));
@@ -457,7 +489,7 @@ public class ExtractionDocumentsPane extends BorderPane {
      * @throws IOException if error when creating the temporary file.
      * @throws JRException if error when creating the PDF file from the JRXML template.
      */
-    private File generateSummaryPage(final List<Prestation> prestations) throws IOException, JRException {
+    private File generateSummaryPage(final List<PrestationWithPage> prestations) {
         ArgumentChecks.ensureNonNull("prestations", prestations);
         JRBeanCollectionDataSource beanColDataSource    = new JRBeanCollectionDataSource(prestations);
         Map<String, Object> parameters                  = new HashMap();
@@ -467,15 +499,28 @@ public class ExtractionDocumentsPane extends BorderPane {
         parameters.put("dateDebutPicker", uiPeriodeValidityDebut.getValue());
         parameters.put("dateFinPicker", uiPeriodeValidityFin.getValue());
 
-        Path summaryTmpPath = Files.createTempFile("summaryPage", ".pdf");
-        InputStream input           = PrinterUtilities.class.getResourceAsStream(SUMMARY_JRXML_PATH);
-        JasperDesign jasperDesign   = JRXmlLoader.load(input);
-        JasperReport jasperReport   = JasperCompileManager.compileReport(jasperDesign);
-        JasperPrint jasperPrint     = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
-        OutputStream outputStream   = new FileOutputStream(summaryTmpPath.toFile());
+        Path summaryTmpPath;
+        try {
+            summaryTmpPath = Files.createTempFile("summaryPage", ".pdf");
+        } catch (IOException e) {
+            throw new IllegalStateException("Error while creating tempory file for summaryPage", e);
+        }
+        InputStream input = PrinterUtilities.class.getResourceAsStream(SUMMARY_JRXML_PATH);
+        JasperDesign jasperDesign;
+        try {
+            jasperDesign = JRXmlLoader.load(input);
 
-        JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
-        return summaryTmpPath.toFile();
+            JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+            OutputStream outputStream = new FileOutputStream(summaryTmpPath.toFile());
+
+            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+            return summaryTmpPath.toFile();
+        } catch (JRException e) {
+            throw new IllegalStateException("Error while creating summary page", e);
+        } catch (FileNotFoundException e) {
+            throw new IllegalStateException("Can't find file " + summaryTmpPath, e);
+        }
     }
 
     /**
@@ -638,6 +683,33 @@ public class ExtractionDocumentsPane extends BorderPane {
 
                 return (periodeDebut == null || horodatageDate.isAfter(periodeDebut)) && (periodeFin == null || horodatageDate.isBefore(periodeFin));
             }).collect(Collectors.toList());
+        }
+    }
+
+    /**
+     * Class created to add page column to the metaTemplatePrestationSummaryTable.jrxml report for the summary table.
+     */
+    public class PrestationWithPage {
+
+        private int page;
+        private Prestation prestation;
+
+        protected PrestationWithPage(final Prestation prestation) {
+            this.prestation = prestation;
+        }
+
+        // Do not remove nor modify class accessor - used by JasperReport
+        public int getPage() {
+            return page;
+        }
+
+        protected void setPage(int page) {
+            this.page = page;
+        }
+
+        // Do not remove nor modify class accessor - used by JasperReport
+        public Prestation getPrestation() {
+            return prestation;
         }
     }
 }

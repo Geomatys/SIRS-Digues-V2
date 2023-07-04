@@ -58,31 +58,32 @@
 		<queryString>
 			<![CDATA[]]>
 		</queryString>
-		<field name="horodatageDate" class="java.time.LocalDate"/>
-		<field name="designation" class="java.lang.String"/>
-		<field name="libelle" class="java.lang.String"/>
-		<field name="linearId" class="java.lang.String"/>
-		<field name="typePrestationId" class="java.lang.String"/>
-		<field name="date_debut" class="java.time.LocalDate"/>
-		<field name="date_fin" class="java.time.LocalDate"/>
-		<field name="intervenantsIds" class="java.util.List"/>
-		<field name="author" class="java.lang.String"/>
-		<field name="commentaire" class="java.lang.String"/>
-		<field name="id" class="java.lang.String"/>
+		<field name="prestation.horodatageDate" class="java.time.LocalDate"/>
+		<field name="prestation.designation" class="java.lang.String"/>
+		<field name="prestation.libelle" class="java.lang.String"/>
+		<field name="prestation.linearId" class="java.lang.String"/>
+		<field name="prestation.typePrestationId" class="java.lang.String"/>
+		<field name="prestation.date_debut" class="java.time.LocalDate"/>
+		<field name="prestation.date_fin" class="java.time.LocalDate"/>
+		<field name="prestation.intervenantsIds" class="java.util.List"/>
+		<field name="prestation.author" class="java.lang.String"/>
+		<field name="prestation.commentaire" class="java.lang.String"/>
+		<field name="prestation.id" class="java.lang.String"/>
+		<field name="page" class="java.lang.Integer"/>
 		<variable name="author_login" class="java.lang.String">
-			<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLogin($F{author})]]></variableExpression>
+			<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLogin($F{prestation.author})]]></variableExpression>
 		</variable>
 		<variable name="typePrestation" class="java.lang.String">
-			<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLibelleFromId($F{typePrestationId}, "RefPrestation")]]></variableExpression>
+			<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLibelleFromId($F{prestation.typePrestationId}, "RefPrestation")]]></variableExpression>
 		</variable>
 		<variable name="tronconLibelle" class="java.lang.String">
-			<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLibelleFromId($F{linearId}, "TronconDigue")]]></variableExpression>
+			<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLibelleFromId($F{prestation.linearId}, "TronconDigue")]]></variableExpression>
 		</variable>
 		<variable name="dateDebutFormat" class="java.lang.String">
-			<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayFormattedDate($F{date_debut})]]></variableExpression>
+			<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayFormattedDate($F{prestation.date_debut})]]></variableExpression>
 		</variable>
 		<variable name="dateFinFormat" class="java.lang.String">
-			<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayFormattedDate($F{date_fin})]]></variableExpression>
+			<variableExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayFormattedDate($F{prestation.date_fin})]]></variableExpression>
 		</variable>
 	</subDataset>
 	<parameter name="title" class="java.lang.String"/>
@@ -132,7 +133,7 @@
 						<dataSourceExpression><![CDATA[$P{collectionBeanParam}]]></dataSourceExpression>
 					</datasetRun>
 					<jr:column width="45" uuid="710518e9-280e-4345-ab2a-d5241939e4a5">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="horodatageDate"/>
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="prestation.horodatageDate"/>
 						<jr:columnHeader style="Table_CH" height="29" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
@@ -151,12 +152,12 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{horodatageDate} == null ? " - " : $F{horodatageDate}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{prestation.horodatageDate} == null ? " - " : $F{prestation.horodatageDate}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="45" uuid="18c479e6-54f6-4006-a2db-ba6effb5ab6c">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="designation"/>
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="prestation.designation"/>
 						<jr:columnHeader style="Table_CH" height="29" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
@@ -174,12 +175,12 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{designation}==null ? " - " : $F{designation}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{prestation.designation}==null ? " - " : $F{prestation.designation}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="80" uuid="8fd27a15-4501-46ca-a309-ea95af16229e">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="libelle"/>
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="prestation.libelle"/>
 						<jr:columnHeader style="Table_CH" height="29" rowSpan="1">
 							<staticText>
 								<reportElement x="0" y="0" width="80" height="29" forecolor="#FFFFFF" uuid="0963a429-4977-4f22-8a64-7fd1c49beefb"/>
@@ -195,7 +196,7 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{libelle}==null ? " - " : $F{libelle}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{prestation.libelle}==null ? " - " : $F{prestation.libelle}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -309,7 +310,7 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
 									<font size="7"/>
 								</textElement>
-								<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayIntervenants($F{intervenantsIds})]]></textFieldExpression>
+								<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayIntervenants($F{prestation.intervenantsIds})]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -358,7 +359,7 @@
 									<font size="7"/>
 									<paragraph leftIndent="3" rightIndent="3"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{commentaire}==null ? " - " : $F{commentaire}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{prestation.commentaire}==null ? " - " : $F{prestation.commentaire}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -380,7 +381,7 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{id}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{prestation.id}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -402,7 +403,7 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
-								<textFieldExpression><![CDATA["todo"]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{page}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
