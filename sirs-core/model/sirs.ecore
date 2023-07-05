@@ -414,11 +414,15 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="globalPrestationIds" upperBound="-1"
         eType="#//GlobalPrestation" eOpposite="#//GlobalPrestation/prestationIds"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="registreAttribution" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="horodatageDate" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-          <eAnnotations source="localDate"/>
-        </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="horodatageStartDate" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+        <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="horodatageEndDate" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+       <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EReference" name="horodatageStatusId" eType="#//RefHorodatageStatus"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="syntheseTablePath" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="syntheseTablePathStart" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="syntheseTablePathEnd" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PositionDocument" eSuperTypes="#//AbstractPositionDocumentAssociable">
     <eAnnotations source="couchDBDocument"/>
