@@ -125,6 +125,11 @@ public class FXPrestationPane extends FXPrestationPaneStub {
         ui_horodatagePane.add(ui_synthesisTableFieldStart, 1, 4);
         ui_horodatagePane.add(ui_synthesisTableFieldEnd, 1, 8);
 
+        // Remove components for logged start and end validity dates when Prestation is timestamped.
+        ui_horodatagePane.getChildren().remove(ui_horodatageDateDebutStart);
+        ui_horodatagePane.getChildren().remove(ui_horodatageDateDebutEnd);
+        ui_horodatagePane.getChildren().remove(ui_horodatageDateFinEnd);
+
         setTableField(ui_synthesisTableFieldStart, ui_errorMessageStart);
 
         setTableField(ui_synthesisTableFieldEnd, ui_errorMessageEnd);
@@ -155,22 +160,34 @@ public class FXPrestationPane extends FXPrestationPaneStub {
             }
 
             final RefHorodatageStatus selectedItem = (RefHorodatageStatus) ui_horodatageStatusId.getSelectionModel().getSelectedItem();
-            if (ui_registreAttribution.isSelected() && HorodatageReference.getRefTimeStampedStatus().equals(selectedItem.getId())) {
+            if (selectedItem == null) return;
+            final String refHoroId = selectedItem.getId();
+
+            // prestation in the SE's registre :
+            // - if "Non horodaté" -> no message, no effect
+            // - if "En attente" -> message to warn the user it is "En attente" and ask if reset status to "Non horodaté"
+            // - if "Horodaté" and "date d'horodatage de fin" not null -> message to warn the user it has already been timestamped for the end date
+            //   and ask if reset status to "Non horodaté"
+            if (ui_registreAttribution.isSelected() && !HorodatageReference.getRefNonTimeStampedStatus().equals(refHoroId)) {
                 String message;
-                if (ui_horodatageEndDate.getValue() == null) {
-                    message = "La prestation a déjà été horodatée pour sa date de début." +
-                            "\n\nSouhaitez-vous l'horodater une nouvelle fois pour la date de fin ?" +
-                            "\n\nSi oui, le statut d'horodatage passera automatiquement en \"Non horodaté\"." +
-                            "\n\nSi Annuler, la date de fin ne sera pas modifiée.";
+                if (HorodatageReference.getRefWaitingStatus().equals(refHoroId)) {
+                    message = "La prestation est en cours d'horodatage." +
+                            "\n\nSouhaitez-vous automatiquement mettre à jour son statut d'horodatage en \"Non horodaté\" ?";
+                } else if (ui_horodatageEndDate.getValue() == null) {
+                    message = "La prestation est horodatée pour sa date de début." +
+                            "\n\nSouhaitez-vous préparer le processurs d'horodatage pour la date de fin ?";
                 } else {
                     message = "La prestation a déjà été horodatée pour sa date de fin." +
-                            "\n\nSouhaitez-vous l'horodater une nouvelle fois pour la date de fin ?" +
-                            "\n\nSi oui, le statut d'horodatage passera automatiquement en \"Non horodaté\"." +
-                            "\n\nSi Annuler, la date de fin ne sera pas modifiée.";
+                            "\n\nSouhaitez-vous l'horodater une nouvelle fois pour la date de fin ?" ;
                 }
 
+                message = message.concat("\n\nSi Oui, le statut d'horodatage passera automatiquement en \"Non horodaté\"." +
+                        "\n\nSi Non, le statut d'horodatage ne sera pas modifié.") +
+                        "\n\nSi Annuler, la date de fin ne sera pas modifiée.";
+
+                String finalMessage = message;
                 Platform.runLater(() -> {
-                    final Optional optional = PropertiesFileUtilities.showConfirmationDialog(message, "Horodatage pour date de fin", 600, 200, true);
+                    final Optional optional = PropertiesFileUtilities.showConfirmationDialog(finalMessage, "Modification date de fin", 600, 450, true);
                     if (optional.isPresent()) {
                         if (ButtonType.YES.equals(optional.get())) {
                             final Optional<RefHorodatageStatus> notTimeStampedItem = ui_horodatageStatusId.getItems().stream().filter(s -> HorodatageReference.getRefNonTimeStampedStatus().equals(((RefHorodatageStatus) s).getId())).findFirst();
