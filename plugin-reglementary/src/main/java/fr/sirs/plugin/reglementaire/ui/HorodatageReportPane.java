@@ -15,6 +15,7 @@
 package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
+import fr.sirs.PropertiesFileUtilities;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.*;
@@ -48,6 +49,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -402,7 +404,7 @@ public class HorodatageReportPane extends BorderPane {
 
     /**
      * Method to select all the prestations available in the @uiPrestations.
-     *
+     * Action directly implemented in the .fxml
      */
     @FXML
     private void selectAll() {
@@ -439,15 +441,75 @@ public class HorodatageReportPane extends BorderPane {
         List<Prestation> prestations = FXCollections.observableArrayList(uiPrestationTable.getSelectionModel().getSelectedItems());
         if (prestations.isEmpty()) return;
 
+        // Check each prestation :
+        // 1. it has never been horodated (no start timestamp nor end timestamp) :
+        //     a. status : "Non horodaté" -> no warning
+        //     b. status : "En attente" or "horodaté" -> warning
+        // 2. it has a start timestamp but no validity end date -> warning message
+        // 3. it has an end timestamp -> warning message
+        final List<Prestation> prestationsToKeep = new ArrayList<>();
+        boolean yesForAll = false;
+        ButtonType yesForAllButton = new ButtonType("Oui et suivants", ButtonBar.ButtonData.APPLY);
+        ButtonType noForAllButton = new ButtonType("Non et suivants", ButtonBar.ButtonData.FINISH);
+        for (Prestation prestation : prestations) {
+            if (!yesForAll) {
+                final LocalDate horodatageStartDate = prestation.getHorodatageStartDate();
+                final LocalDate horodatageEndDate = prestation.getHorodatageEndDate();
+                String message = null;
+                final SirsStringConverter converter = new SirsStringConverter();
+                final String prestaText =  converter.toString(prestation) + " / " + prestation.getId();
+                if (horodatageStartDate == null && horodatageEndDate == null) {
+                    if (HorodatageReference.getRefWaitingStatus().equals(prestation.getHorodatageStatusId())) {
+                        message = "La prestation " + prestaText + " est en cours d'horodatage.";
+                    } else if (HorodatageReference.getRefTimeStampedStatus().equals(prestation.getHorodatageStatusId())) {
+                        message = "Le statut de la prestation " + prestaText + " est \"Horodaté\" mais aucune date d'horodatage n'est renseignée.";
+                    }
+                } else if (horodatageEndDate != null) {
+                    message = "La prestation " + prestaText + " a déjà été horodatée le " + horodatageEndDate + " pour la date de fin de validité : " + prestation.getHorodatageDateFinEnd() + ".";
+                } else if (horodatageStartDate != null && prestation.getDate_fin() == null) {
+                    message = "La prestation " + prestaText + " a déjà été horodatée le " + horodatageStartDate + " pour la date de début de validité : " + prestation.getHorodatageDateDebutStart() + ".";
+                }
+
+                if (message != null) {
+                    message = message.concat("\n\nSouhaitez-vous tout de même relancer le processus d'horodatage pour cette prestation ?" +
+                            "\n\nAnnuler : la création du tableau de synthèse sera annulée.");
+                    final Optional optional;
+                    if (prestations.size() == 1) {
+                        optional = PropertiesFileUtilities.showConfirmationDialog(message, "Conflit", 700, 200, true);
+                    } else {
+                        optional = PropertiesFileUtilities.createAlert(Alert.AlertType.CONFIRMATION, "Conflit", message, 700, 200, ButtonType.YES, ButtonType.NO, yesForAllButton, noForAllButton, ButtonType.CANCEL);
+                    }
+
+                    if (optional.isPresent()) {
+                        final Object result = optional.get();
+                        if (ButtonType.NO.equals(result)) {
+                            continue;
+                        } else if (ButtonType.CANCEL.equals(result)) {
+                            return;
+                        } else if (noForAllButton.equals(result)) {
+                            break;
+                        } else if (yesForAllButton.equals(result)) {
+                            yesForAll = true;
+                        }
+                    }
+                }
+            }
+            prestationsToKeep.add(prestation);
+        }
+
+        if (prestationsToKeep.isEmpty()) {
+            PropertiesFileUtilities.showInformationDialog("Aucune prestation à ajouter au tableau de synthèse.");
+            return;
+        }
+
         // sort prestations by date_fin if available, by date_debut otherwise.
-        prestations.sort((p1, p2) -> {
+        prestationsToKeep.sort((p1, p2) -> {
             LocalDate dateFin1  = p1.getDate_fin();
             LocalDate dateFin2  = p2.getDate_fin();
             LocalDate date1     = dateFin1 != null ? dateFin1 : p1.getDate_debut();
             LocalDate date2     = dateFin2 != null ? dateFin2 : p2.getDate_debut();
             return date1.compareTo(date2);
         });
-
 
         /*
         A- Selection of the output file destination folder.
@@ -468,7 +530,7 @@ public class HorodatageReportPane extends BorderPane {
         /*
         A- Creation of the PDF from the jasper template.
         ======================================================*/
-        JRBeanCollectionDataSource beanColDataSource    = new JRBeanCollectionDataSource(prestations);
+        JRBeanCollectionDataSource beanColDataSource    = new JRBeanCollectionDataSource(prestationsToKeep);
         Map<String, Object> parameters                  = new HashMap();
 
         // set report parameters
@@ -490,9 +552,8 @@ public class HorodatageReportPane extends BorderPane {
 
             // Change prestations' horodatage status to "En attente".
             PrestationRepository repo   = Injector.getBean(PrestationRepository.class);
-            prestations.forEach(p -> {
+            prestationsToKeep.forEach(p -> {
                 p.setHorodatageStatusId(HorodatageReference.getRefWaitingStatus());
-                p.setSyntheseTablePath(file.getPath());
                 repo.update(p);
             });
 

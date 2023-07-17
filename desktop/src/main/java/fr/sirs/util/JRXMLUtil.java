@@ -65,7 +65,7 @@ public class JRXMLUtil {
 
     private JRXMLUtil(){}
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // MÉTHODES CŒUR DES FONCTIONNALITÉS.                                                                             //

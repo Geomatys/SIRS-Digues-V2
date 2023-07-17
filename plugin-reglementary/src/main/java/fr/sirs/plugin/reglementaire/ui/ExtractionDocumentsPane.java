@@ -156,7 +156,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         uiSECombo.valueProperty().addListener((obs, oldValue, newValue) -> {
             this.selectedSe = newValue;
             this.allTimeStampedPrestationsOnSelectedSe = getAllPrestationsInSelectedSeRegistre().stream()
-                    .filter(prestation -> prestation.getHorodatageDate() != null)
+                    .filter(prestation -> prestation.getHorodatageStartDate() != null || prestation.getHorodatageEndDate() != null)
                     .collect(Collectors.toList());
         });
 
@@ -270,7 +270,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         ======================================================*/
 
         final FileChooser chooser  = new FileChooser();
-        final Path previous             = RegistreTheme.getPreviousPath(ExtractionDocumentsPane.class);;
+        final Path previous        = RegistreTheme.getPreviousPath(ExtractionDocumentsPane.class);;
         if (previous != null) {
             chooser.setInitialDirectory(previous.toFile());
             chooser.setInitialFileName(".pdf");
@@ -287,14 +287,22 @@ public class ExtractionDocumentsPane extends BorderPane {
         C- OUTPUT PDF CREATION
         ======================================================*/
 
-        final List<Prestation> prestations = filterPrestationsByDateFilters(new ArrayList<>(this.allTimeStampedPrestationsOnSelectedSe));
-        if (prestations.isEmpty()) {
+        List<PrestationWithPage> tmpPrestasWithPage = new ArrayList<>();
+        this.allTimeStampedPrestationsOnSelectedSe.forEach(presta -> {
+            if (presta.getHorodatageStartDate() != null)
+                tmpPrestasWithPage.add(new PrestationWithPage(presta, true));
+            if (presta.getHorodatageEndDate() != null)
+                tmpPrestasWithPage.add(new PrestationWithPage(presta, false));
+        });
+
+        final List<PrestationWithPage> prestationsWithPage = filterPrestationsByDateFilters(tmpPrestasWithPage);
+        if (prestationsWithPage.isEmpty()) {
             showErrorDialog("Aucune prestation disponible sur le système d'endiguement aux périodes renseignées.");
             return;
         }
 
         // sort prestations by dateHorodatage or end date or start date.
-        prestations.sort((p1, p2) -> {
+        prestationsWithPage.sort((p1, p2) -> {
             LocalDate timeStampDate1 = p1.getHorodatageDate();
             LocalDate timeStampDate2 = p2.getHorodatageDate();
             int result = timeStampDate1.compareTo(timeStampDate2);
@@ -305,9 +313,6 @@ public class ExtractionDocumentsPane extends BorderPane {
             LocalDate date2     = dateFin2 != null ? dateFin2 : p2.getDate_debut();
             return date1.compareTo(date2);
         });
-
-        List<PrestationWithPage> prestationsWithPage = new ArrayList<>();
-        prestations.forEach(presta -> prestationsWithPage.add(new PrestationWithPage(presta)));
 
         /*
          C.1- Add cover page to final PDF.
@@ -334,18 +339,17 @@ public class ExtractionDocumentsPane extends BorderPane {
         /*
          C.3- Add Synthese table pdf files
         ======================================================*/
-        final Map<String, List<Prestation>> syntheseTablePrestationsMap = new HashMap<>();
+        final Map<String, List<PrestationWithPage>> syntheseTablePrestationsMap = new HashMap<>();
         // Gathers prestations by synthese table.
         prestationsWithPage.forEach(prestaWithPage -> {
-            final Prestation prestation = prestaWithPage.getPrestation();
-            final String syntheseTablePath = prestation.getSyntheseTablePath();
-            List<Prestation> tablePrestations = syntheseTablePrestationsMap.get(syntheseTablePath);
+            final String syntheseTablePath = prestaWithPage.getSyntheseTablePath();
+            List<PrestationWithPage> tablePrestations = syntheseTablePrestationsMap.get(syntheseTablePath);
             if (tablePrestations == null) {
                 tablePrestations = new ArrayList<>();
-                tablePrestations.add(prestation);
+                tablePrestations.add(prestaWithPage);
                 syntheseTablePrestationsMap.put(syntheseTablePath, tablePrestations);
             } else {
-                tablePrestations.add(prestation);
+                tablePrestations.add(prestaWithPage);
             }
         });
 
@@ -356,9 +360,9 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         // Add synthese table files to the list of files to merge.
         // If file does not exist or not PDF file, store data to show warning message after merge.
-        final Map<String, List<Prestation>> tablesNotFound = new HashMap<>();
-        final Map<String, List<Prestation>> tablesNotPdf = new HashMap<>();
-        final List<Prestation> noTable = new ArrayList<>();
+        final Map<String, List<PrestationWithPage>> tablesNotFound = new HashMap<>();
+        final Map<String, List<PrestationWithPage>> tablesNotPdf = new HashMap<>();
+        final List<PrestationWithPage> noTable = new ArrayList<>();
         syntheseTablePrestationsMap.forEach((tablePath, prestationsList) -> {
             if (tablePath == null || tablePath.isEmpty()) {
                 noTable.addAll(prestationsList);
@@ -371,8 +375,8 @@ public class ExtractionDocumentsPane extends BorderPane {
                 tablesNotFound.put(tablePath, prestationsList);
             } else {
                 prestationsWithPage.forEach(prestaWithPage -> {
-                    if (prestationsList.contains(prestaWithPage.getPrestation())) {
-                        prestaWithPage.setPage(pageIncrement + 1);
+                    if (prestationsList.contains(prestaWithPage)) {
+                        prestaWithPage.setPage(String.valueOf(pageIncrement + 1));
                     }
                 });
                 pageIncrement = pageIncrement + getDocPageNumber(new File(tablePath));
@@ -442,8 +446,8 @@ public class ExtractionDocumentsPane extends BorderPane {
         }
     }
 
-    private static void createErrorMessage(StringBuilder stbuilder, List<Prestation> prestationsList) {
-        prestationsList.forEach(presta -> {
+    private static void createErrorMessage(StringBuilder stbuilder, List<PrestationWithPage> prestationsList) {
+        prestationsList.stream().map(presta -> presta.getPrestation()).forEach(presta -> {
             String designation = presta.getDesignation();
             String libelle = presta.getLibelle();
             designation = designation == null ? "" : designation;
@@ -625,15 +629,6 @@ public class ExtractionDocumentsPane extends BorderPane {
         return rootPath;
     }
 
-//    private SystemeEndiguement getSelectedSE() {
-//        final Preview newValue = uiSECombo.getSelectionModel().getSelectedItem();
-//        if (newValue != null) {
-//            return session.getRepositoryForClass(SystemeEndiguement.class).get(newValue.getElementId());
-//        } else {
-//            return null;
-//        }
-//    }
-
     /**
      * Method to get all the prestations on the selected @{@link SystemeEndiguement} from the @{@link Preview}
      *
@@ -648,9 +643,11 @@ public class ExtractionDocumentsPane extends BorderPane {
         return HorodatageReportPane.getAllPrestationsInSeRegistre(this.selectedSe, this.session);
     }
 
-    private List<Prestation> filterPrestationsByDateFilters(List<Prestation> prestations) {
+    private List<PrestationWithPage> filterPrestationsByDateFilters(List<PrestationWithPage> prestations) {
         ArgumentChecks.ensureNonNull("prestations", prestations);
+        // First filter by validity date
         prestations = filterPrestationsByDateFilter(prestations, true);
+        // Then filter by timestamp date
         return filterPrestationsByDateFilter(prestations, false);
     }
 
@@ -661,7 +658,7 @@ public class ExtractionDocumentsPane extends BorderPane {
      * @param isValidityDate indicate whether the filter is using the validity dates or the horodatage dates.
      * @return the list of prestations after filtering.
      */
-    private List<Prestation> filterPrestationsByDateFilter(List<Prestation> prestations, final boolean isValidityDate) {
+    private List<PrestationWithPage> filterPrestationsByDateFilter(List<PrestationWithPage> prestations, final boolean isValidityDate) {
         ArgumentChecks.ensureNonNull("prestations", prestations);
 
         final LocalDate periodeDebut = isValidityDate ? uiPeriodeValidityDebut.getValue() : uiPeriodeHorodatageDebut.getValue();
@@ -677,8 +674,7 @@ public class ExtractionDocumentsPane extends BorderPane {
             final long dateFin = periodeFin == null ? Long.MAX_VALUE : periodeFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
             dateRange = NumberRange.create(dateDebut, true, dateFin, true);
 
-            AvecBornesTemporelles.IntersectDateRange dateRangePredicate = new AvecBornesTemporelles.IntersectDateRange(dateRange);
-            return prestations.stream().filter(dateRangePredicate).collect(Collectors.toList());
+            return prestations.stream().filter(presta -> presta.test(dateRange)).collect(Collectors.toList());
 
         } else {
             return prestations.stream().filter(p -> {
@@ -695,25 +691,67 @@ public class ExtractionDocumentsPane extends BorderPane {
      */
     public class PrestationWithPage {
 
-        private int page;
-        private Prestation prestation;
+        private String page;
+        private final LocalDate horodatageDate;
+        // date_debut is the start validity date inside the Tableau de synthèse corresponding to the
+        private final LocalDate date_debut;
+        private final LocalDate date_fin;
+        private final Prestation prestation;
+        private final String syntheseTablePath;
 
-        protected PrestationWithPage(final Prestation prestation) {
+        protected PrestationWithPage(final Prestation prestation, final boolean isStartDate) {
+            if (isStartDate) {
+                this.horodatageDate = prestation.getHorodatageStartDate();
+                this.syntheseTablePath = prestation.getSyntheseTablePathStart();
+                this.date_debut = prestation.getHorodatageDateDebutStart();
+                this.date_fin = null;
+            }
+            else {
+                this.horodatageDate = prestation.getHorodatageEndDate();
+                this.syntheseTablePath = prestation.getSyntheseTablePathEnd();
+                this.date_debut = prestation.getHorodatageDateDebutEnd();
+                this.date_fin = prestation.getHorodatageDateFinEnd();
+            }
             this.prestation = prestation;
         }
 
         // Do not remove nor modify class accessor - used by JasperReport
-        public int getPage() {
+        public String getPage() {
             return page;
         }
 
-        protected void setPage(int page) {
+        protected void setPage(String page) {
             this.page = page;
         }
 
         // Do not remove nor modify class accessor - used by JasperReport
         public Prestation getPrestation() {
             return prestation;
+        }
+
+        public LocalDate getHorodatageDate() {
+            return horodatageDate;
+        }
+
+        public LocalDate getDate_debut() {
+            return date_debut;
+        }
+
+        public LocalDate getDate_fin() {
+            return date_fin;
+        }
+
+        public String getSyntheseTablePath() {
+            return syntheseTablePath;
+        }
+
+        public boolean test(final NumberRange dateRange) {
+            final LocalDate objDateDebut    = date_debut;
+            final LocalDate objDateFin      = date_fin;
+            final long debut    = objDateDebut == null ? 0 : objDateDebut.atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
+            final long fin      = objDateFin == null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
+            final NumberRange objDateRange = NumberRange.create(debut, true, fin, true);
+            return dateRange.intersectsAny(objDateRange);
         }
     }
 }

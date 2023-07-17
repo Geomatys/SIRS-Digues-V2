@@ -24,10 +24,7 @@ import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.model.*;
 import fr.sirs.ui.DatabaseVersionPane;
 import fr.sirs.util.StreamingIterable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
+import javafx.scene.control.*;
 import org.apache.sis.measure.NumberRange;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.logging.Logging;
@@ -585,7 +582,18 @@ public class PropertiesFileUtilities {
     }
 
     private static Optional createAlert(final Alert.AlertType type, final String title, final String contentMsg, final int width, final int height, final boolean addNoYesButton) {
-        final Alert dialog = addNoYesButton ? new Alert(type, contentMsg, ButtonType.CANCEL, ButtonType.NO, ButtonType.YES) : new Alert(type, contentMsg);
+        if (addNoYesButton)
+            return createAlert(type, title, contentMsg, width, height, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+        else
+            return createAlert(type, title, contentMsg, width, height, null);
+    }
+
+    public static Optional createAlert(final Alert.AlertType type, final String title, final String contentMsg, final int width, final int height, ButtonType... buttons) {
+        final Alert dialog = new Alert(type, contentMsg, buttons);
+        if (buttons != null && buttons.length > 1) {
+            ButtonBar buttonBar = (ButtonBar) dialog.getDialogPane().lookup(".button-bar");
+            buttonBar.setButtonOrder(ButtonBar.BUTTON_ORDER_NONE);
+        }
         dialog.setResizable(true);
         if (width != 0) dialog.getDialogPane().setPrefWidth(width);
         if (height != 0) dialog.getDialogPane().setPrefHeight(height);

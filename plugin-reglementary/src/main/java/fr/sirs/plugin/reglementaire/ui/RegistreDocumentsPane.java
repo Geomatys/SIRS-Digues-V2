@@ -24,6 +24,7 @@ import com.giaybac.traprange.entity.Table;
 import com.giaybac.traprange.entity.TableCell;
 import com.giaybac.traprange.entity.TableRow;
 import fr.sirs.Injector;
+import fr.sirs.PropertiesFileUtilities;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.PrestationRepository;
 import fr.sirs.core.model.HorodatageReference;
@@ -34,6 +35,7 @@ import fr.sirs.plugin.reglementaire.PluginReglementary;
 import fr.sirs.plugin.reglementaire.ReglementaryPropertiesFileUtilities;
 import fr.sirs.plugin.reglementaire.RegistreTheme;
 import fr.sirs.ui.Growl;
+import fr.sirs.util.JRXMLUtil;
 import fr.sirs.util.SirsStringConverter;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -137,6 +139,9 @@ public final class RegistreDocumentsPane extends GridPane {
     public static final String HIDDEN           = "hidden";
 
     private final FileTreeItem root;
+    private final int ID_SIRS_IDX = 9;
+    private final int START_DATE_IDX = 4;
+    private final int END_DATE_IDX = 5;
 
     /**
      * Synthesis table colomn header that should match the @metaTemplatePrestationSyntheseTable.jrxml
@@ -460,7 +465,7 @@ public final class RegistreDocumentsPane extends GridPane {
         }
 
         final PrestationRepository prestationRepo = Injector.getBean(PrestationRepository.class);
-        final List<Prestation> prestationsToUpdate = new ArrayList<>();
+        final Map<Prestation, LocalDate[]> prestationsToUpdate = new HashMap<>();
         // error message if prestations not found
         final StringBuilder errorText = new StringBuilder();
         int countErrorPrestations = 0;
@@ -478,7 +483,7 @@ public final class RegistreDocumentsPane extends GridPane {
 
                 if (cells == null || cells.size() != headersLength) continue;
 
-                final String idSirs = cells.get(headersLength - 1).getContent();
+                final String idSirs = cells.get(ID_SIRS_IDX).getContent();
 
                 if (idSirs.isEmpty()) continue;
 
@@ -497,22 +502,98 @@ public final class RegistreDocumentsPane extends GridPane {
                 }
                 if (prestation == null) continue;
 
-                prestationsToUpdate.add(prestation);
+                // Collect start and end validity dates from the table.
+                final LocalDate startDate = extractedValidityDate(cells, START_DATE_IDX);
+                final LocalDate endDate = extractedValidityDate(cells, END_DATE_IDX);
+
+                prestationsToUpdate.put(prestation, new LocalDate[]{startDate, endDate});
             }
         }
+
+        boolean yesForAll = false;
+        ButtonType yesForAllButton = new ButtonType("Oui et suivants", ButtonBar.ButtonData.APPLY);
+        ButtonType noForAllButton = new ButtonType("Non et suivants", ButtonBar.ButtonData.FINISH);
+
+        List<Prestation> prestationsToKeep = new ArrayList<>();
 
         // Update prestations if user's choice.
         if (updatePrestations) {
             final SirsStringConverter converter = new SirsStringConverter();
             final StringBuilder textUpdate = new StringBuilder();
-            prestationsToUpdate.forEach(prestation -> {
+            for (Map.Entry<Prestation, LocalDate[]> entry : prestationsToUpdate.entrySet()) {
+                final Prestation prestation = entry.getKey();
+                final LocalDate[] dates = entry.getValue();
+                final LocalDate startDate = dates[0];
+                final LocalDate endDate = dates[1];
+                final boolean isStartTimeStamp = endDate == null;
+
+                if (!yesForAll) {
+                    // Check whether there is already a timestamp date for start validity.
+                    final LocalDate horodatageStartDate = prestation.getHorodatageStartDate();
+
+                    String typeDate = null;
+                    LocalDate horoDate = null;
+                    LocalDate validityDate = null;
+                    if (isStartTimeStamp) {
+                        if (horodatageStartDate != null) {
+                            typeDate = "début";
+                            horoDate = horodatageStartDate;
+                            validityDate = prestation.getHorodatageDateDebutStart();
+                        }
+                    } else {
+                        // Check whether there is already a timestamp date for end validity.
+                        final LocalDate horodatageEndDate = prestation.getHorodatageEndDate();
+                        if (horodatageEndDate != null) {
+                            typeDate = "fin";
+                            horoDate = horodatageEndDate;
+                            validityDate = prestation.getHorodatageDateFinEnd();
+                        }
+                    }
+                    if (typeDate != null) {
+                        final String horoDateStg = horoDate == null ? null : horoDate.format(JRXMLUtil.DATE_TIME_FORMATTER);
+                        final String validityDateStg = validityDate == null ? null : validityDate.format(JRXMLUtil.DATE_TIME_FORMATTER);
+                        final String message = "La prestation " + converter.toString(prestation) + " / " + prestation.getId() +
+                                " a déjà été horodatée le " + horoDateStg + " avec une date de " + typeDate + " le " + validityDateStg + "." +
+                                "\n\nSouhaitez-vous écraser les données d'horodatage avec les nouvelles informations ?";
+                        final Optional opt = PropertiesFileUtilities.createAlert(Alert.AlertType.CONFIRMATION,
+                                "Date d'horodatage de " + typeDate + " existante", message, 700, 200,
+                                ButtonType.YES, ButtonType.NO, yesForAllButton, noForAllButton, ButtonType.CANCEL);
+
+                        if (!opt.isPresent()) return false;
+
+                        final Object result = opt.get();
+                        if (ButtonType.NO.equals(result)) {
+                            continue;
+                        } else if (ButtonType.CANCEL.equals(result)) {
+                            return false;
+                        } else if (yesForAllButton.equals(result)) {
+                            yesForAll = true;
+                        } else if (noForAllButton.equals(result)) {
+                            break;
+                        }
+                    }
+                }
+
+                if (isStartTimeStamp) {
+                    prestation.setHorodatageStartDate(timeStampDate);
+                    prestation.setSyntheseTablePathStart(pdf_filename.toString());
+                    prestation.setHorodatageDateDebutStart(startDate);
+                } else {
+                    prestation.setHorodatageEndDate(timeStampDate);
+                    prestation.setSyntheseTablePathEnd(pdf_filename.toString());
+                    prestation.setHorodatageDateDebutEnd(startDate);
+                    prestation.setHorodatageDateFinEnd(endDate);
+                }
                 prestation.setHorodatageStatusId(HorodatageReference.getRefTimeStampedStatus());
-                prestation.setHorodatageDate(timeStampDate);
-                prestation.setSyntheseTablePath(pdf_filename.toString());
-                prestationRepo.update(prestation);
-                textUpdate.append("\n  -  ").append(converter.toString(prestation)).append(" / ").append(prestation.getId());
-            });
-            showInformationDialog(prestationsToUpdate.size() + " prestations ont été mises à jour : \n" + textUpdate, "Succès", 800, 600);
+                prestationsToKeep.add(prestation);
+            }
+            // Update prestations outside the above for loop in case of CANCEL or CLOSE button action.
+            prestationsToKeep.forEach(prestation -> {
+                        prestationRepo.update(prestation);
+                        textUpdate.append("\n  -  ").append(converter.toString(prestation)).append(" / ").append(prestation.getId());
+                    }
+            );
+            showInformationDialog(prestationsToKeep.size() + " prestations ont été mises à jour : \n" + textUpdate, "Succès", 800, 600);
         }
 
         if (countErrorPrestations == 0) return true;
@@ -520,6 +601,11 @@ public final class RegistreDocumentsPane extends GridPane {
         showWarningDialog("Erreur lors de la récupération de " + countErrorPrestations + " prestations : \n" + errorText, null, 600, 400);
 
         return true;
+    }
+
+    private LocalDate extractedValidityDate(List<TableCell> cells, int dateIdx) {
+        final String dateString = cells.get(dateIdx).getContent();
+        return dateString == null || dateString.trim().isEmpty() ? null : LocalDate.parse(dateString, JRXMLUtil.DATE_TIME_FORMATTER);
     }
 
 
