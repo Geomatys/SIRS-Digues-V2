@@ -517,9 +517,9 @@ public final class RegistreDocumentsPane extends GridPane {
                     final LocalDate endDate = extractedValidityDate(cells, END_DATE_IDX);
                     final boolean isStartTimeStamp = endDate == null;
 
+                    final LocalDate horodatageStartDate = prestation.getHorodatageStartDate();
                     if (!updateAll) {
                         // Check whether there is already a timestamp date for start validity.
-                        final LocalDate horodatageStartDate = prestation.getHorodatageStartDate();
 
                         String typeDate = null;
                         LocalDate horoDate = null;
@@ -574,6 +574,13 @@ public final class RegistreDocumentsPane extends GridPane {
                         prestation.setSyntheseTablePathEnd(pdf_filename.toString());
                         prestation.setHorodatageDateDebutEnd(startDate);
                         prestation.setHorodatageDateFinEnd(endDate);
+
+                        // if the prestation has not been timestamped for its start, then the data are copied into the start timestamp attributs.
+                        if (horodatageStartDate == null) {
+                            prestation.setHorodatageStartDate(timeStampDate);
+                            prestation.setSyntheseTablePathStart(pdf_filename.toString());
+                            prestation.setHorodatageDateDebutStart(startDate);
+                        }
                     }
                     prestation.setHorodatageStatusId(HorodatageReference.getRefTimeStampedStatus());
                     prestationsToKeep.add(prestation);

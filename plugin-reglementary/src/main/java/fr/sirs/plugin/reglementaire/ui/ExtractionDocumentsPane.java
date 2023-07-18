@@ -289,7 +289,10 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         List<PrestationWithPage> tmpPrestasWithPage = new ArrayList<>();
         this.allTimeStampedPrestationsOnSelectedSe.forEach(presta -> {
-            if (presta.getHorodatageStartDate() != null)
+            final String syntheseTablePathStart = presta.getSyntheseTablePathStart();
+            final String syntheseTablePathEnd = presta.getSyntheseTablePathEnd();
+            final boolean isStartSameAsEnd = syntheseTablePathStart != null && syntheseTablePathStart.equals(syntheseTablePathEnd);
+            if (presta.getHorodatageStartDate() != null && !isStartSameAsEnd)
                 tmpPrestasWithPage.add(new PrestationWithPage(presta, true));
             if (presta.getHorodatageEndDate() != null)
                 tmpPrestasWithPage.add(new PrestationWithPage(presta, false));
