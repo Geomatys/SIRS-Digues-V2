@@ -307,11 +307,7 @@ public class ExtractionDocumentsPane extends BorderPane {
             LocalDate timeStampDate2 = p2.getHorodatageDate();
             int result = timeStampDate1.compareTo(timeStampDate2);
             if (result != 0) return result;
-            LocalDate dateFin1  = p1.getDate_fin();
-            LocalDate dateFin2  = p2.getDate_fin();
-            LocalDate date1     = dateFin1 != null ? dateFin1 : p1.getDate_debut();
-            LocalDate date2     = dateFin2 != null ? dateFin2 : p2.getDate_debut();
-            return date1.compareTo(date2);
+            return HorodatageReportPane.compareDates(p1.getDate_fin(), p2.getDate_fin(), p1.getDate_debut(), p2.getDate_debut());
         });
 
         /*
@@ -447,7 +443,7 @@ public class ExtractionDocumentsPane extends BorderPane {
     }
 
     private static void createErrorMessage(StringBuilder stbuilder, List<PrestationWithPage> prestationsList) {
-        prestationsList.stream().map(presta -> presta.getPrestation()).forEach(presta -> {
+        prestationsList.stream().map(PrestationWithPage::getPrestation).forEach(presta -> {
             String designation = presta.getDesignation();
             String libelle = presta.getLibelle();
             designation = designation == null ? "" : designation;
@@ -693,8 +689,9 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         private String page;
         private final LocalDate horodatageDate;
-        // date_debut is the start validity date inside the Tableau de synthèse corresponding to the
+        // date_debut is the start validity date inside the Tableau de synthèse
         private final LocalDate date_debut;
+        // date_fin is the end validity date inside the Tableau de synthèse
         private final LocalDate date_fin;
         private final Prestation prestation;
         private final String syntheseTablePath;
@@ -748,10 +745,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         public boolean test(final NumberRange dateRange) {
             final LocalDate objDateDebut    = date_debut;
             final LocalDate objDateFin      = date_fin;
-            final long debut    = objDateDebut == null ? 0 : objDateDebut.atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
-            final long fin      = objDateFin == null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
-            final NumberRange objDateRange = NumberRange.create(debut, true, fin, true);
-            return dateRange.intersectsAny(objDateRange);
+            return AvecBornesTemporelles.checkDatesIntersectRange(objDateDebut, objDateFin, dateRange);
         }
     }
 }

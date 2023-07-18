@@ -65,7 +65,7 @@ public class JRXMLUtil {
 
     private JRXMLUtil(){}
 
-    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    public static final DateTimeFormatter DD_MM_YYYY_FORMATER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // MÉTHODES CŒUR DES FONCTIONNALITÉS.                                                                             //
@@ -322,7 +322,7 @@ public class JRXMLUtil {
     public static String displayFormattedDate(final LocalDate date){
         if (date == null) return " ";
 
-        return date.format(DATE_TIME_FORMATTER);
+        return date.format(DD_MM_YYYY_FORMATER);
     }
 
     /**
@@ -330,6 +330,6 @@ public class JRXMLUtil {
      * @return the current date as a String.
      */
     public static String displayCurrentDate(){
-        return LocalDate.now(ZoneId.of("Europe/Paris")).format(DATE_TIME_FORMATTER);
+        return LocalDate.now(ZoneId.of("Europe/Paris")).format(DD_MM_YYYY_FORMATER);
     }
 }

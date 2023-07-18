@@ -38,6 +38,13 @@ public interface AvecBornesTemporelles extends AvecFinTemporelle{
 
     public void setDate_debut(LocalDate date_debut);
 
+    public static boolean checkDatesIntersectRange(final LocalDate objDateDebut, final LocalDate objDateFin, final NumberRange dateRange) {
+        final long debut    = objDateDebut == null ? 0 : objDateDebut.atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
+        final long fin      = objDateFin == null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
+        final NumberRange objDateRange = NumberRange.create(debut, true, fin, true);
+        return dateRange.intersectsAny(objDateRange);
+    }
+
 
     /**
      * Méthode d'archivage des tronçons de digue et des objets s'y référant dotés d'une validité temporelle (c'est à dire
@@ -138,10 +145,7 @@ public interface AvecBornesTemporelles extends AvecFinTemporelle{
         public boolean test(AvecBornesTemporelles prestation) {
             final LocalDate objDateDebut    = prestation.getDate_debut();
             final LocalDate objDateFin      = prestation.getDate_fin();
-            final long debut    = objDateDebut == null ? 0 : objDateDebut.atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
-            final long fin      = objDateFin == null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
-            final NumberRange objDateRange = NumberRange.create(debut, true, fin, true);
-            return dateRange.intersectsAny(objDateRange);
+            return checkDatesIntersectRange(objDateDebut, objDateFin, dateRange);
         }
     }
 }

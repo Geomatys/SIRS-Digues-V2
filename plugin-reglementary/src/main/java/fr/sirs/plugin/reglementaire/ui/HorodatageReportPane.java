@@ -49,7 +49,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -104,6 +103,14 @@ public class HorodatageReportPane extends BorderPane {
     private List<Prestation> allPrestationsOnSE;
 
     private final String JRXML_PATH = "/fr/sirs/jrxml/metaTemplatePrestationSyntheseTable.jrxml";
+    private final SirsStringConverter converter = new SirsStringConverter();
+
+    static int compareDates(LocalDate dateFin1, LocalDate dateFin2, LocalDate dateDebut1, LocalDate dateDebut2) {
+        LocalDate date1     = dateFin1 != null ? dateFin1 : dateDebut1;
+        LocalDate date2     = dateFin2 != null ? dateFin2 : dateDebut2;
+        return date1.compareTo(date2);
+    }
+
 
     @Autowired
     private Session session;
@@ -167,7 +174,6 @@ public class HorodatageReportPane extends BorderPane {
                     return null;
                 });
                 column.setCellFactory((Callback) param -> new TableCell<Prestation, Prestation>() {
-                    final SirsStringConverter converter = new SirsStringConverter();
                     @Override
                     protected void updateItem(Prestation item, boolean empty) {
                         super.updateItem(item, empty);
@@ -456,7 +462,6 @@ public class HorodatageReportPane extends BorderPane {
                 final LocalDate horodatageStartDate = prestation.getHorodatageStartDate();
                 final LocalDate horodatageEndDate = prestation.getHorodatageEndDate();
                 String message = null;
-                final SirsStringConverter converter = new SirsStringConverter();
                 final String prestaText =  converter.toString(prestation) + " / " + prestation.getId();
                 if (horodatageStartDate == null && horodatageEndDate == null) {
                     if (HorodatageReference.getRefWaitingStatus().equals(prestation.getHorodatageStatusId())) {
@@ -503,13 +508,7 @@ public class HorodatageReportPane extends BorderPane {
         }
 
         // sort prestations by date_fin if available, by date_debut otherwise.
-        prestationsToKeep.sort((p1, p2) -> {
-            LocalDate dateFin1  = p1.getDate_fin();
-            LocalDate dateFin2  = p2.getDate_fin();
-            LocalDate date1     = dateFin1 != null ? dateFin1 : p1.getDate_debut();
-            LocalDate date2     = dateFin2 != null ? dateFin2 : p2.getDate_debut();
-            return date1.compareTo(date2);
-        });
+        prestationsToKeep.sort((p1, p2) -> compareDates(p1.getDate_fin(), p2.getDate_fin(), p1.getDate_debut(), p2.getDate_debut()));
 
         /*
         A- Selection of the output file destination folder.

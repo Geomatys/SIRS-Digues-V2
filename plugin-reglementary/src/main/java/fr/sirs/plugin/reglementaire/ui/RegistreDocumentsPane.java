@@ -465,10 +465,19 @@ public final class RegistreDocumentsPane extends GridPane {
         }
 
         final PrestationRepository prestationRepo = Injector.getBean(PrestationRepository.class);
-        final Map<Prestation, LocalDate[]> prestationsToUpdate = new HashMap<>();
         // error message if prestations not found
         final StringBuilder errorText = new StringBuilder();
         int countErrorPrestations = 0;
+
+        boolean updateAll = false;
+        boolean doNotUpdateNext = false;
+        ButtonType yesForAllButton = new ButtonType("Oui et suivants", ButtonBar.ButtonData.APPLY);
+        ButtonType noForAllButton = new ButtonType("Non et suivants", ButtonBar.ButtonData.FINISH);
+        final SirsStringConverter converter = new SirsStringConverter();
+        final StringBuilder textUpdate = new StringBuilder();
+
+        List<Prestation> prestationsToKeep = new ArrayList<>();
+
         for (Table table : tables) {
             final List<TableRow> rows = table.getRows();
             if (rows.isEmpty()) continue;
@@ -502,91 +511,79 @@ public final class RegistreDocumentsPane extends GridPane {
                 }
                 if (prestation == null) continue;
 
-                // Collect start and end validity dates from the table.
-                final LocalDate startDate = extractedValidityDate(cells, START_DATE_IDX);
-                final LocalDate endDate = extractedValidityDate(cells, END_DATE_IDX);
+                if (updatePrestations && !doNotUpdateNext) {
+                    // Collect start and end validity dates from the table.
+                    final LocalDate startDate = extractedValidityDate(cells, START_DATE_IDX);
+                    final LocalDate endDate = extractedValidityDate(cells, END_DATE_IDX);
+                    final boolean isStartTimeStamp = endDate == null;
 
-                prestationsToUpdate.put(prestation, new LocalDate[]{startDate, endDate});
+                    if (!updateAll) {
+                        // Check whether there is already a timestamp date for start validity.
+                        final LocalDate horodatageStartDate = prestation.getHorodatageStartDate();
+
+                        String typeDate = null;
+                        LocalDate horoDate = null;
+                        LocalDate validityDate = null;
+                        if (isStartTimeStamp) {
+                            if (horodatageStartDate != null) {
+                                typeDate = "début";
+                                horoDate = horodatageStartDate;
+                                validityDate = prestation.getHorodatageDateDebutStart();
+                            }
+                        } else {
+                            // Check whether there is already a timestamp date for end validity.
+                            final LocalDate horodatageEndDate = prestation.getHorodatageEndDate();
+                            if (horodatageEndDate != null) {
+                                typeDate = "fin";
+                                horoDate = horodatageEndDate;
+                                validityDate = prestation.getHorodatageDateFinEnd();
+                            }
+                        }
+                        if (typeDate != null) {
+                            final String horoDateStg = horoDate == null ? null : horoDate.format(JRXMLUtil.DD_MM_YYYY_FORMATER);
+                            final String validityDateStg = validityDate == null ? null : validityDate.format(JRXMLUtil.DD_MM_YYYY_FORMATER);
+                            final String message = "La prestation " + converter.toString(prestation) + " / " + prestation.getId() +
+                                    " a déjà été horodatée le " + horoDateStg + " avec une date de " + typeDate + " le " + validityDateStg + "." +
+                                    "\n\nSouhaitez-vous écraser les données d'horodatage avec les nouvelles informations ?";
+                            final Optional opt = PropertiesFileUtilities.createAlert(Alert.AlertType.CONFIRMATION,
+                                    "Date d'horodatage de " + typeDate + " existante", message, 700, 200,
+                                    ButtonType.YES, ButtonType.NO, yesForAllButton, noForAllButton, ButtonType.CANCEL);
+
+                            if (!opt.isPresent()) return false;
+
+                            final Object result = opt.get();
+                            if (ButtonType.NO.equals(result)) {
+                                continue;
+                            } else if (ButtonType.CANCEL.equals(result)) {
+                                return false;
+                            } else if (yesForAllButton.equals(result)) {
+                                updateAll = true;
+                            } else if (noForAllButton.equals(result)) {
+                                doNotUpdateNext = true;
+                                continue;
+                            }
+                        }
+                    }
+
+                    if (isStartTimeStamp) {
+                        prestation.setHorodatageStartDate(timeStampDate);
+                        prestation.setSyntheseTablePathStart(pdf_filename.toString());
+                        prestation.setHorodatageDateDebutStart(startDate);
+                    } else {
+                        prestation.setHorodatageEndDate(timeStampDate);
+                        prestation.setSyntheseTablePathEnd(pdf_filename.toString());
+                        prestation.setHorodatageDateDebutEnd(startDate);
+                        prestation.setHorodatageDateFinEnd(endDate);
+                    }
+                    prestation.setHorodatageStatusId(HorodatageReference.getRefTimeStampedStatus());
+                    prestationsToKeep.add(prestation);
+                }
+
             }
         }
 
-        boolean yesForAll = false;
-        ButtonType yesForAllButton = new ButtonType("Oui et suivants", ButtonBar.ButtonData.APPLY);
-        ButtonType noForAllButton = new ButtonType("Non et suivants", ButtonBar.ButtonData.FINISH);
-
-        List<Prestation> prestationsToKeep = new ArrayList<>();
-
         // Update prestations if user's choice.
         if (updatePrestations) {
-            final SirsStringConverter converter = new SirsStringConverter();
-            final StringBuilder textUpdate = new StringBuilder();
-            for (Map.Entry<Prestation, LocalDate[]> entry : prestationsToUpdate.entrySet()) {
-                final Prestation prestation = entry.getKey();
-                final LocalDate[] dates = entry.getValue();
-                final LocalDate startDate = dates[0];
-                final LocalDate endDate = dates[1];
-                final boolean isStartTimeStamp = endDate == null;
-
-                if (!yesForAll) {
-                    // Check whether there is already a timestamp date for start validity.
-                    final LocalDate horodatageStartDate = prestation.getHorodatageStartDate();
-
-                    String typeDate = null;
-                    LocalDate horoDate = null;
-                    LocalDate validityDate = null;
-                    if (isStartTimeStamp) {
-                        if (horodatageStartDate != null) {
-                            typeDate = "début";
-                            horoDate = horodatageStartDate;
-                            validityDate = prestation.getHorodatageDateDebutStart();
-                        }
-                    } else {
-                        // Check whether there is already a timestamp date for end validity.
-                        final LocalDate horodatageEndDate = prestation.getHorodatageEndDate();
-                        if (horodatageEndDate != null) {
-                            typeDate = "fin";
-                            horoDate = horodatageEndDate;
-                            validityDate = prestation.getHorodatageDateFinEnd();
-                        }
-                    }
-                    if (typeDate != null) {
-                        final String horoDateStg = horoDate == null ? null : horoDate.format(JRXMLUtil.DATE_TIME_FORMATTER);
-                        final String validityDateStg = validityDate == null ? null : validityDate.format(JRXMLUtil.DATE_TIME_FORMATTER);
-                        final String message = "La prestation " + converter.toString(prestation) + " / " + prestation.getId() +
-                                " a déjà été horodatée le " + horoDateStg + " avec une date de " + typeDate + " le " + validityDateStg + "." +
-                                "\n\nSouhaitez-vous écraser les données d'horodatage avec les nouvelles informations ?";
-                        final Optional opt = PropertiesFileUtilities.createAlert(Alert.AlertType.CONFIRMATION,
-                                "Date d'horodatage de " + typeDate + " existante", message, 700, 200,
-                                ButtonType.YES, ButtonType.NO, yesForAllButton, noForAllButton, ButtonType.CANCEL);
-
-                        if (!opt.isPresent()) return false;
-
-                        final Object result = opt.get();
-                        if (ButtonType.NO.equals(result)) {
-                            continue;
-                        } else if (ButtonType.CANCEL.equals(result)) {
-                            return false;
-                        } else if (yesForAllButton.equals(result)) {
-                            yesForAll = true;
-                        } else if (noForAllButton.equals(result)) {
-                            break;
-                        }
-                    }
-                }
-
-                if (isStartTimeStamp) {
-                    prestation.setHorodatageStartDate(timeStampDate);
-                    prestation.setSyntheseTablePathStart(pdf_filename.toString());
-                    prestation.setHorodatageDateDebutStart(startDate);
-                } else {
-                    prestation.setHorodatageEndDate(timeStampDate);
-                    prestation.setSyntheseTablePathEnd(pdf_filename.toString());
-                    prestation.setHorodatageDateDebutEnd(startDate);
-                    prestation.setHorodatageDateFinEnd(endDate);
-                }
-                prestation.setHorodatageStatusId(HorodatageReference.getRefTimeStampedStatus());
-                prestationsToKeep.add(prestation);
-            }
             // Update prestations outside the above for loop in case of CANCEL or CLOSE button action.
             prestationsToKeep.forEach(prestation -> {
                         prestationRepo.update(prestation);
@@ -605,7 +602,7 @@ public final class RegistreDocumentsPane extends GridPane {
 
     private LocalDate extractedValidityDate(List<TableCell> cells, int dateIdx) {
         final String dateString = cells.get(dateIdx).getContent();
-        return dateString == null || dateString.trim().isEmpty() ? null : LocalDate.parse(dateString, JRXMLUtil.DATE_TIME_FORMATTER);
+        return dateString == null || dateString.trim().isEmpty() ? null : LocalDate.parse(dateString, JRXMLUtil.DD_MM_YYYY_FORMATER);
     }
 
 
