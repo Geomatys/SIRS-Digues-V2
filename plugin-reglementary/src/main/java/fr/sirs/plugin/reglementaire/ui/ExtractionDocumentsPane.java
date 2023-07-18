@@ -112,6 +112,8 @@ public class ExtractionDocumentsPane extends BorderPane {
     private final String COVER_JRXML_PATH = "/fr/sirs/jrxml/metaTemplateHorodatageCoverPage.jrxml";
     private final String SUMMARY_JRXML_PATH = "/fr/sirs/jrxml/metaTemplatePrestationSummaryTable.jrxml";
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    // Used to compute the page in the final report where to get each Tableau de Synthèse.
+    private int pageIncrement;
 
     @Autowired
     private Session session;
@@ -313,13 +315,13 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         List<File> filesToMerge = new ArrayList<>();
 
-        final int[] pageIncrement = {0};
+        pageIncrement = 0;
         if (coverFile == null) {
             addPageToFiles(filesToMerge, COVER_JRXML_PATH, null, title);
-            pageIncrement[0]++;
+            pageIncrement++;
         } else {
             filesToMerge.add(coverFile);
-            pageIncrement[0] = pageIncrement[0] + getDocPageNumber(coverFile);
+            pageIncrement = pageIncrement + getDocPageNumber(coverFile);
         }
 
         /*
@@ -327,7 +329,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         ======================================================*/
         // Generate the summary a first time without the column "Page" filled in to get the total page number of the summary table.
         final File summaryFile = generateSummaryPage(prestationsWithPage);
-        pageIncrement[0] = pageIncrement[0] + getDocPageNumber(summaryFile);
+        pageIncrement = pageIncrement + getDocPageNumber(summaryFile);
 
         /*
          C.3- Add Synthese table pdf files
@@ -370,10 +372,10 @@ public class ExtractionDocumentsPane extends BorderPane {
             } else {
                 prestationsWithPage.forEach(prestaWithPage -> {
                     if (prestationsList.contains(prestaWithPage.getPrestation())) {
-                        prestaWithPage.setPage(pageIncrement[0] + 1);
+                        prestaWithPage.setPage(pageIncrement + 1);
                     }
                 });
-                pageIncrement[0] = pageIncrement[0] + getDocPageNumber(new File(tablePath));
+                pageIncrement = pageIncrement + getDocPageNumber(new File(tablePath));
                 filesToMerge.add(table);
             }
         });
@@ -505,21 +507,23 @@ public class ExtractionDocumentsPane extends BorderPane {
         } catch (IOException e) {
             throw new IllegalStateException("Error while creating tempory file for summaryPage", e);
         }
-        InputStream input = PrinterUtilities.class.getResourceAsStream(SUMMARY_JRXML_PATH);
-        JasperDesign jasperDesign;
-        try {
-            jasperDesign = JRXmlLoader.load(input);
 
-            JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
-            OutputStream outputStream = new FileOutputStream(summaryTmpPath.toFile());
+        JasperDesign jasperDesign;
+        try (InputStream input          = PrinterUtilities.class.getResourceAsStream(SUMMARY_JRXML_PATH);
+             OutputStream outputStream  = new FileOutputStream(summaryTmpPath.toFile());){
+
+            jasperDesign                = JRXmlLoader.load(input);
+            JasperReport jasperReport   = JasperCompileManager.compileReport(jasperDesign);
+            JasperPrint jasperPrint     = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
 
             JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
             return summaryTmpPath.toFile();
         } catch (JRException e) {
-            throw new IllegalStateException("Error while creating summary page", e);
+            throw new IllegalStateException("Error while creating summary page.", e);
         } catch (FileNotFoundException e) {
             throw new IllegalStateException("Can't find file " + summaryTmpPath, e);
+        } catch (IOException e) {
+            throw new IllegalStateException("Error while creating inputStream.", e);
         }
     }
 

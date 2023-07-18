@@ -64,10 +64,10 @@
 
                         <TableView fx:id="uiPrestationTable" layoutX="44.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="3">
                             <columns>
-                                <TableColumn minWidth="188.0" prefWidth="276.0" text="Prestation" />
-                                <TableColumn minWidth="188.0" prefWidth="276.0" text="Tronçon" />
-                                <TableColumn minWidth="270.0" prefWidth="332.0" text="Type de prestation" />
-                                <TableColumn maxWidth="285.0" minWidth="4.0" prefWidth="135.0" text="Statut" />
+                                <TableColumn fx:id="ui_prestation" minWidth="188.0" prefWidth="276.0" text="Prestation" />
+                                <TableColumn fx:id="ui_troncon" minWidth="188.0" prefWidth="276.0" text="Tronçon" />
+                                <TableColumn fx:id="ui_type" minWidth="270.0" prefWidth="332.0" text="Type de prestation" />
+                                <TableColumn fx:id="ui_statut" maxWidth="285.0" minWidth="4.0" prefWidth="135.0" text="Statut" />
                             </columns>
                         </TableView>
 

@@ -89,6 +89,14 @@ public class HorodatageReportPane extends BorderPane {
     private Button uiGenerate;
     @FXML
     private CheckBox uiPeriod;
+    @FXML
+    private TableColumn ui_prestation;
+    @FXML
+    private TableColumn ui_troncon;
+    @FXML
+    private TableColumn ui_type;
+    @FXML
+    private TableColumn ui_statut;
 
     private Preview selectedSE;
     private List<Prestation> allPrestationsOnSE;
@@ -146,115 +154,116 @@ public class HorodatageReportPane extends BorderPane {
 
         // TableView to show the prestations, their tronçon, their type and their status.
         uiPrestationTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        uiPrestationTable.getColumns().get(0).setEditable(false);
-        uiPrestationTable.getColumns().get(0).setCellValueFactory((Callback) param -> {
-            final Object item = ((TableColumn.CellDataFeatures)param).getValue();
-            if (item != null) {
-                return new SimpleObjectProperty(item);
-            }
-            return null;
-        });
-        uiPrestationTable.getColumns().get(0).setCellFactory((Callback) param -> new TableCell<Prestation, Prestation>() {
-            final SirsStringConverter converter = new SirsStringConverter();
-            @Override
-            protected void updateItem(Prestation item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(converter.toString(item));
-            }
-        });
-
-        uiPrestationTable.getColumns().get(1).setEditable(false);
-        uiPrestationTable.getColumns().get(1).setCellValueFactory((Callback) param -> {
-            final Object item = ((TableColumn.CellDataFeatures)param).getValue();
-            if (item != null) {
-                Prestation presta = (Prestation) item;
-                return new SimpleObjectProperty(presta.getLinearId());
-            }
-            return null;
-        });
-        uiPrestationTable.getColumns().get(1).setCellFactory((Callback) param -> new TableCell<Prestation, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                String text = "";
-                if (item != null) {
-                    try {
-                        final TronconDigue troncon = Injector.getBean(TronconDigueRepository.class).get(item);
-                        if (troncon != null)
-                            text = troncon.getLibelle();
-                    } catch (DocumentNotFoundException e) {
-                        SIRS.LOGGER.warning("Error while getting TronconDigue with id :" + item);
+        uiPrestationTable.getColumns().forEach(column -> {
+            column.setEditable(false);
+            if (column.equals(ui_prestation)) {
+                column.setCellValueFactory((Callback) param -> {
+                    final Object item = ((TableColumn.CellDataFeatures)param).getValue();
+                    if (item != null) {
+                        return new SimpleObjectProperty(item);
                     }
-                }
-                if ("".equals(text)) text = item;
-                setText(text);
-            }
-        });
-
-        uiPrestationTable.getColumns().get(2).setEditable(false);
-        uiPrestationTable.getColumns().get(2).setCellValueFactory((Callback) param -> {
-            final Object item = ((TableColumn.CellDataFeatures)param).getValue();
-            if (item != null) {
-                Prestation presta = (Prestation) item;
-                return new SimpleObjectProperty(presta.getTypePrestationId());
-            }
-            return null;
-        });
-        uiPrestationTable.getColumns().get(2).setCellFactory((Callback) param -> new TableCell<Prestation, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                String text = "";
-                if (item != null) {
-                    try {
-                        final RefPrestation typePresta = Injector.getBean(RefPrestationRepository.class).get(item);
-                        if (typePresta != null)
-                            text = typePresta.getLibelle();
-                    } catch (DocumentNotFoundException e) {
-                        SIRS.LOGGER.warning("Error while getting RefPrestation with id :" + item);
+                    return null;
+                });
+                column.setCellFactory((Callback) param -> new TableCell<Prestation, Prestation>() {
+                    final SirsStringConverter converter = new SirsStringConverter();
+                    @Override
+                    protected void updateItem(Prestation item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setText(converter.toString(item));
                     }
-                }
-                if ("".equals(text)) text = item;
-                setText(text);
-            }
-        });
-
-        uiPrestationTable.getColumns().get(3).setEditable(false);
-        uiPrestationTable.getColumns().get(3).setStyle("-fx-alignment: CENTER");
-        uiPrestationTable.getColumns().get(3).setCellValueFactory((Callback) param -> {
-            final Object item = ((TableColumn.CellDataFeatures)param).getValue();
-            if (item != null) {
-                Prestation presta = (Prestation) item;
-                return new SimpleObjectProperty(presta.getHorodatageStatusId());
-            }
-            return null;
-        });
-        uiPrestationTable.getColumns().get(3).setCellFactory((Callback) param -> new TableCell<Prestation, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                String text = "";
-                if (item != null) {
-                    try {
-                        final RefHorodatageStatus status = Injector.getBean(RefHorodatageStatusRepository.class).get(item);
-                        if (status != null) {
-                            text = status.getLibelle();
-                            if (HorodatageReference.getRefNonTimeStampedStatus().equals(item))
-                                setTextFill(Color.BROWN);
-                            else if (HorodatageReference.getRefWaitingStatus().equals(item))
-                                setTextFill(Color.SALMON);
-                            else if (HorodatageReference.getRefTimeStampedStatus().equals(item))
-                                setTextFill(Color.SEAGREEN);
-                            else
-                                setTextFill(Color.BLACK);
+                });
+            } else if (column.equals(ui_troncon)) {
+                column.setCellValueFactory((Callback) param -> {
+                    final Object item = ((TableColumn.CellDataFeatures)param).getValue();
+                    if (item != null) {
+                        Prestation presta = (Prestation) item;
+                        return new SimpleObjectProperty(presta.getLinearId());
+                    }
+                    return null;
+                });
+                column.setCellFactory((Callback) param -> new TableCell<Prestation, String>() {
+                    @Override
+                    protected void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        String text = "";
+                        if (item != null) {
+                            try {
+                                final TronconDigue troncon = Injector.getBean(TronconDigueRepository.class).get(item);
+                                if (troncon != null)
+                                    text = troncon.getLibelle();
+                            } catch (DocumentNotFoundException e) {
+                                SIRS.LOGGER.warning("Error while getting TronconDigue with id :" + item);
+                            }
                         }
-                    } catch (DocumentNotFoundException e) {
-                        SIRS.LOGGER.warning("Error while getting RefHorodatageStatus with id :" + item);
-                        setTextFill(Color.BLACK);
+                        if ("".equals(text)) text = item;
+                        setText(text);
                     }
-                }
-                if ("".equals(text)) text = item;
-                setText(text);
+                });
+            } else if (column.equals(ui_type)) {
+                column.setCellValueFactory((Callback) param -> {
+                    final Object item = ((TableColumn.CellDataFeatures)param).getValue();
+                    if (item != null) {
+                        Prestation presta = (Prestation) item;
+                        return new SimpleObjectProperty(presta.getTypePrestationId());
+                    }
+                    return null;
+                });
+                column.setCellFactory((Callback) param -> new TableCell<Prestation, String>() {
+                    @Override
+                    protected void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        String text = "";
+                        if (item != null) {
+                            try {
+                                final RefPrestation typePresta = Injector.getBean(RefPrestationRepository.class).get(item);
+                                if (typePresta != null)
+                                    text = typePresta.getLibelle();
+                            } catch (DocumentNotFoundException e) {
+                                SIRS.LOGGER.warning("Error while getting RefPrestation with id :" + item);
+                            }
+                        }
+                        if ("".equals(text)) text = item;
+                        setText(text);
+                    }
+                });
+            } else if (column.equals(ui_statut)) {
+                column.setStyle("-fx-alignment: CENTER");
+                column.setCellValueFactory((Callback) param -> {
+                    final Object item = ((TableColumn.CellDataFeatures)param).getValue();
+                    if (item != null) {
+                        Prestation presta = (Prestation) item;
+                        return new SimpleObjectProperty(presta.getHorodatageStatusId());
+                    }
+                    return null;
+                });
+                column.setCellFactory((Callback) param -> new TableCell<Prestation, String>() {
+                    @Override
+                    protected void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        String text = "";
+                        if (item != null) {
+                            try {
+                                final RefHorodatageStatus status = Injector.getBean(RefHorodatageStatusRepository.class).get(item);
+                                if (status != null) {
+                                    text = status.getLibelle();
+                                    if (HorodatageReference.getRefNonTimeStampedStatus().equals(item))
+                                        setTextFill(Color.BROWN);
+                                    else if (HorodatageReference.getRefWaitingStatus().equals(item))
+                                        setTextFill(Color.SALMON);
+                                    else if (HorodatageReference.getRefTimeStampedStatus().equals(item))
+                                        setTextFill(Color.SEAGREEN);
+                                    else
+                                        setTextFill(Color.BLACK);
+                                }
+                            } catch (DocumentNotFoundException e) {
+                                SIRS.LOGGER.warning("Error while getting RefHorodatageStatus with id :" + item);
+                                setTextFill(Color.BLACK);
+                            }
+                        }
+                        if ("".equals(text)) text = item;
+                        setText(text);
+                    }
+                });
             }
         });
     }

@@ -45,8 +45,41 @@ public class FXPrestationPane extends FXPrestationPaneStub {
     private Label ui_errorMessage;
 
     /**
-     * REDMINE 7782
+     * REDMINE 7782 - doc "Prestation cochée par défaut.xlsx"
      * List of RefPrestation ids for which the prestation shall be automatically added to the SE registre.
+     * 1	Entretien
+     * 2	Construction
+     * 3	Confortement
+     * 9	Diagnostic visuel
+     * 10	Intervention d'urgence sur végétation
+     * 11	Travaux de confortement en urgence
+     * 12	Contrôle
+     * 13	Coupe
+     * 14	Débroussaillage
+     * 15	Plantation
+     * 16	Traitement d'invasive
+     * 17	Sondage à la pelle
+     * 18	Réparation
+     * 19	Pose de portail
+     * 20	Entretien de portail
+     * 21	Sondage destructif
+     * 22	Panneau électrique
+     * 23	Sondage pénétrométrique
+     * 24	Evacuation d'ordures
+     * 25	Abattage arbre isolé
+     * 26	Traitement de terrier
+     * 27	Création de merlon
+     * 28	Traitement de passage sauvage
+     * 29	Visite technique approfondie
+     * 30	Inspection de digues
+     * 32	Déterrage de blaireaux
+     * 33	Dessouchage
+     * 34	Sondage carotté
+     * 35	Travaux d'entretien forestier
+     * 36	Surveillance continue
+     * 37	Surveillance annuelle
+     * 38	Fauchage
+     * 39	Capture de lapins
      */
     private static final List<Integer> typeInRegistreIds = Arrays.asList(1, 2, 3, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
             22, 23, 24, 25, 26, 27, 28, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39);
@@ -99,20 +132,14 @@ public class FXPrestationPane extends FXPrestationPaneStub {
     /**
      * Update prestation's registreAttribution value depending on the typePrestationId.
      * @param prestation the prestation to update.
-     * @param refTypeId
+     * @param refTypeId a prestation's type reference id with the format : "RefPrestation:2"
      */
-    static void autoSelectRegistre(Prestation prestation, String refTypeId) {
-        if (refTypeId != null) {
-            boolean isInRegistre = false;
-            String typeRef;
-            for (Integer typeInRegistreId : typeInRegistreIds) {
-                typeRef = "RefPrestation:" + typeInRegistreId;
-                if (typeRef.equals(refTypeId)) {
-                    isInRegistre = true;
-                    break;
-                }
-            }
-            prestation.setRegistreAttribution(isInRegistre);
+    static void autoSelectRegistre(final Prestation prestation, final String refTypeId) {
+        final int length = "RefPrestation:".length();
+        if (refTypeId != null && refTypeId.length() > length) {
+            final String refTypeIdShort = refTypeId.substring(length);
+            if (refTypeIdShort != null)
+                prestation.setRegistreAttribution(typeInRegistreIds.contains(refTypeIdShort));
         }
     }
 

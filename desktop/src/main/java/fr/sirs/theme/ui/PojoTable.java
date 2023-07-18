@@ -2154,8 +2154,8 @@ public class PojoTable extends BorderPane implements Printable {
                 }
 
                 // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
-                if ("typePrestationId".equals(modifiedPropretieName) && Prestation.class.isAssignableFrom(rowClass)
-                && (oldValue == null || !oldValue.equals(newValue))) {
+                if ("typePrestationId".equals(modifiedPropretieName) && rowElement instanceof Prestation
+                && (newValue instanceof String && !newValue.equals(oldValue))) {
                     FXPrestationPane.autoSelectRegistre((Prestation) rowElement, (String) newValue);
                 }
 
