@@ -500,11 +500,17 @@ public class Session extends SessionCore {
         try {
             return openEditors.getOrCreate(target, () -> {
                 final FXFreeTab newTab = tabCreator.call();
-                if (newTab != null) {
-                    newTab.setOnClosed(event -> {
-                        openEditors.remove(target);
-                                });
-                }
+                // This section was commented as it deals to creating a new FXFreeTab every time the tab is reopened after being closed.
+                // The result is that the listener remains in place in the old FXFreeTab and are still called, leading to as many calls as it has been reopened.
+                // However, as the openEditors is a Cache<Object, FXFreeTab>, the FXTreeTab might be recreated back leading again to multiple calls to the listeners.
+                // TODO find a better solution. Possible solution : setOnClosed in the tabCreator.call() in the Platform.runLater part.
+                //  The setOnClosed would call a removedAllListenerBeforeClosingPane() method added in the fxml-controller.jet
+                //  The limitation of this solution is that the FXFreeTab is still created every time the tab is closed/reopened and the old versions remain existing.
+//                if (newTab != null) {
+//                    newTab.setOnClosed(event -> {
+//                        openEditors.remove(target);
+//                                });
+//                }
                 return newTab;
             });
         } catch (Exception e) {

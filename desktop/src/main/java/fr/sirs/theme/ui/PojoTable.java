@@ -20,9 +20,8 @@ package fr.sirs.theme.ui;
 
 import com.sun.javafx.property.PropertyReference;
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.Injector;
-import fr.sirs.Printable;
-import fr.sirs.SIRS;
+import fr.sirs.*;
+
 import static fr.sirs.SIRS.AUTHOR_FIELD;
 import static fr.sirs.SIRS.COMMENTAIRE_FIELD;
 import static fr.sirs.SIRS.DATE_MAJ_FIELD;
@@ -38,8 +37,6 @@ import static fr.sirs.SIRS.REVISION_FIELD;
 import static fr.sirs.SIRS.NEW_FIELD;
 import static fr.sirs.core.SirsCore.LOGGER;
 
-import fr.sirs.Session;
-import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -2153,10 +2150,17 @@ public class PojoTable extends BorderPane implements Printable {
 
                 }
 
-                // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
-                if ("typePrestationId".equals(modifiedPropretieName) && rowElement instanceof Prestation
-                && (newValue instanceof String && !newValue.equals(oldValue))) {
-                    FXPrestationPane.autoSelectRegistre((Prestation) rowElement, (String) newValue);
+                if (rowElement instanceof Prestation) {
+
+                    Prestation prestation = (Prestation) rowElement;
+                    // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
+                    if ("typePrestationId".equals(modifiedPropretieName)
+                            && (newValue instanceof String && !newValue.equals(oldValue))) {
+                        FXPrestationPane.autoSelectRegistre(prestation, (String) newValue);
+                    } else if (SirsCore.DATE_FIN_FIELD.equals(modifiedPropretieName)) {
+                        // REDMINE 7782 - when changing prestation's end validity date, check the end timestamp date and show warnings if necessary.
+//                        Injector.getSession().getOrCreateElementTab(prestation, SIRS.CONSULTATION_PREDICATE);
+                    }
                 }
 
                 elementEdited(event);
