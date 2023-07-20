@@ -20,9 +20,8 @@ package fr.sirs.theme.ui;
 
 import com.sun.javafx.property.PropertyReference;
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.Injector;
-import fr.sirs.Printable;
-import fr.sirs.SIRS;
+import fr.sirs.*;
+
 import static fr.sirs.SIRS.AUTHOR_FIELD;
 import static fr.sirs.SIRS.COMMENTAIRE_FIELD;
 import static fr.sirs.SIRS.DATE_MAJ_FIELD;
@@ -38,15 +37,13 @@ import static fr.sirs.SIRS.REVISION_FIELD;
 import static fr.sirs.SIRS.NEW_FIELD;
 import static fr.sirs.core.SirsCore.LOGGER;
 
-import fr.sirs.Session;
-import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.*;
 import fr.sirs.theme.ColumnOrder;
-import fr.sirs.util.ConvertPositionableCoordinates;
+import fr.sirs.util.*;
 import fr.sirs.theme.ui.columns.ColumnState;
 import fr.sirs.theme.ui.columns.TableColumnsPreferences;
 import fr.sirs.theme.ui.pojotable.ChoiceStage;
@@ -61,10 +58,6 @@ import fr.sirs.theme.ui.pojotable.ImportAction;
 import fr.sirs.theme.ui.pojotable.ShowOnMapColumn;
 import fr.sirs.theme.ui.pojotable.SimpleCell;
 import fr.sirs.ui.Growl;
-import fr.sirs.util.FXReferenceEqualsOperator;
-import fr.sirs.util.LabelComparator;
-import fr.sirs.util.SEClassementEqualsOperator;
-import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.odt.ODTUtils;
 import fr.sirs.util.property.Computed;
 import fr.sirs.util.property.Internal;
@@ -2153,10 +2146,37 @@ public class PojoTable extends BorderPane implements Printable {
 
                 }
 
-                // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
-                if ("typePrestationId".equals(modifiedPropretieName) && rowElement instanceof Prestation
-                && (newValue instanceof String && !newValue.equals(oldValue))) {
-                    FXPrestationPane.autoSelectRegistre((Prestation) rowElement, (String) newValue);
+                if (rowElement instanceof Prestation) {
+
+                    Prestation prestation = (Prestation) rowElement;
+                    // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
+                    if ("typePrestationId".equals(modifiedPropretieName)
+                            && (newValue instanceof String && !newValue.equals(oldValue))) {
+                        FXPrestationPane.autoSelectRegistre(prestation, (String) newValue);
+                    } else if (SirsCore.DATE_FIN_FIELD.equals(modifiedPropretieName)) {
+                        // REDMINE 7782 - when changing prestation's end validity date, check the end timestamp date and show warnings if necessary.
+                        final String refHoroId = prestation.getHorodatageStatusId();
+
+                        // prestation in the SE's registre :
+                        // - if "Non horodaté" -> no message, no effect
+                        // - if "En attente" -> message to warn the user it is "En attente" and ask if reset status to "Non horodaté"
+                        // - if "Horodaté" and "date d'horodatage de fin" not null -> message to warn the user it has already been timestamped for the end date
+                        //   and ask if reset status to "Non horodaté"
+                        if (prestation.getRegistreAttribution() && !HorodatageReference.getRefNonTimeStampedStatus().equals(refHoroId)) {
+                            final StringBuilder message = FXPrestationPane.constructMessage(refHoroId, prestation.getHorodatageEndDate());
+
+                            final Optional optional = PropertiesFileUtilities.showConfirmationDialog(message.toString(), "Modification date de fin", 600, 450, true);
+                            if (optional.isPresent()) {
+                                if (ButtonType.YES.equals(optional.get())) {
+                                    prestation.setHorodatageStatusId(HorodatageReference.getRefNonTimeStampedStatus());
+                                } else if (ButtonType.NO.equals(optional.get())) {
+                                    // do nothing
+                                } else if (ButtonType.CANCEL.equals(optional.get())) {
+                                    prestation.setDate_fin((LocalDate) oldValue);
+                                }
+                            }
+                        }
+                    }
                 }
 
                 elementEdited(event);
