@@ -24,16 +24,13 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
-import fr.sirs.core.model.AvecLibelle;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.PositionDocument;
-import fr.sirs.core.model.ReferenceType;
-import fr.sirs.core.model.Utilisateur;
+import fr.sirs.core.model.*;
 import fr.sirs.other.FXDesignationPane;
 import fr.sirs.other.FXReferencePane;
 import fr.sirs.other.FXValidationPane;
 import fr.sirs.theme.Theme;
+import fr.sirs.theme.ui.AbstractFXElementPane;
+import fr.sirs.theme.ui.FXElementContainerPane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.ui.report.FXModeleRapportsPane;
 import fr.sirs.ui.ModeleElementTable;
@@ -56,12 +53,15 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
@@ -500,11 +500,12 @@ public class Session extends SessionCore {
         try {
             return openEditors.getOrCreate(target, () -> {
                 final FXFreeTab newTab = tabCreator.call();
-                if (newTab != null) {
-                    newTab.setOnClosed(event -> {
-                        openEditors.remove(target);
-                                });
-                }
+                // Moved to the tabCreator.call() method
+//                if (newTab != null) {
+//                    newTab.setOnClosed(event -> {
+//                        openEditors.remove(target);
+//                                });
+//                }
                 return newTab;
             });
         } catch (Exception e) {
@@ -583,6 +584,25 @@ public class Session extends SessionCore {
                 Platform.runLater(() -> {
                     content.setCenter(n);
                     n.requestFocus();
+                    tab.setOnClosed(event -> {
+                        if (!(n instanceof FXElementContainerPane)) return;
+
+                        // Force to remove listeners before closing the tab.
+                        FXElementContainerPane containerPane = (FXElementContainerPane) n;
+                        final ObservableList<Node> children = containerPane.getChildren();
+                        if (children.isEmpty()) return;
+
+                        final List<AbstractFXElementPane> elementPanes = children.stream().filter(child -> child instanceof AbstractFXElementPane)
+                                .map(child -> (AbstractFXElementPane) child)
+                                .collect(Collectors.toList());
+
+                        if (elementPanes.isEmpty()) return;
+                        elementPanes.forEach(pane -> pane.removeListenersBeforeClosingTab());
+
+                        // line moved from method getOrCreateTab(final Object target, final Callable<FXFreeTab> tabCreator)
+                        // since more complex setOnClosed event required.
+                        Injector.getSession().openEditors.remove(target);
+                    });
                     ft.play();
                 });
             });
