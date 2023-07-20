@@ -29,6 +29,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
@@ -46,9 +47,9 @@ public class FXValidityPeriodPane extends BorderPane {
     private final SimpleObjectProperty<AvecBornesTemporelles> target = new SimpleObjectProperty<>();
 
     private final SimpleBooleanProperty disableFieldsProperty = new SimpleBooleanProperty(false);
-    private ChangeListener<LocalDate> endDateListener = (obs, oldVal, newVal) -> {
-        checkEndDateOk(oldVal, newVal);
-    };
+    // do not use directly. Use endDateWeakListener.
+    private ChangeListener<LocalDate> endDateListener = (obs, oldVal, newVal) -> checkEndDateOk(oldVal, newVal);
+    private WeakChangeListener<LocalDate> endDateWeakListener = new WeakChangeListener<>(endDateListener);
 
     public FXValidityPeriodPane() {
         super();
@@ -78,7 +79,7 @@ public class FXValidityPeriodPane extends BorderPane {
             }
         });
 
-        uiDateFin.valueProperty().addListener(endDateListener);
+        uiDateFin.valueProperty().addListener(endDateWeakListener);
         DatePickerConverter.register(uiDateDebut);
         DatePickerConverter.register(uiDateFin);
     }
@@ -139,7 +140,10 @@ public class FXValidityPeriodPane extends BorderPane {
         return uiDateFin;
     }
 
-    ChangeListener<LocalDate> getEndDateListener() {
-        return endDateListener;
+    WeakChangeListener<LocalDate> getEndDateListener() {
+        return endDateWeakListener;
+    }
+    public void removeListeners() {
+        uiDateFin.valueProperty().removeListener(endDateWeakListener);
     }
 }

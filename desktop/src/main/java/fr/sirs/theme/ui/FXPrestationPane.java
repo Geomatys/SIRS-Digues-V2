@@ -103,9 +103,10 @@ public class FXPrestationPane extends FXPrestationPaneStub {
 
     private final DatePicker dateFinPicker = uiValidityPeriod.getDateFinPicker();
 
-    // Allows to not get into the dateFinPickerListener when the modification was done throw the PojoTable
+    // Allows to not get into the dateFinPickerListener when the modification was done through the PojoTable
     // Modifications are then done in the PojoTable directly.
     private boolean changeFromDatePicker = false;
+    private boolean changeFromPojo = false;
 
     /**
      * Listener on dateFinPicker.
@@ -122,9 +123,17 @@ public class FXPrestationPane extends FXPrestationPaneStub {
 
 
     private final ChangeListener<LocalDate> dateFinListener = (obs, oldValue, newValue) -> {
-        if (resetEndDate) return;
-        if (changeFromDatePicker) {
+        if (resetEndDate) {
+            changeFromPojo = false;
             changeFromDatePicker = false;
+            return;
+        }
+        if (changeFromPojo) {
+            changeFromPojo = false;
+            return;
+        }
+        if (!changeFromPojo && !changeFromDatePicker) {
+            changeFromDatePicker = true;
         }
     };
 
@@ -165,10 +174,11 @@ public class FXPrestationPane extends FXPrestationPaneStub {
 
         // The Prestation shall automatically be added to the SE registre depending on the type of Prestation.
         ui_typePrestationId.valueProperty().addListener(autoSelectRegistreListener());
-
+        initDateFinPickerListener();
+        // Remove the listener from FXValidityPeriodPane. Method called on dateFinPickerListener.
         dateFinPicker.valueProperty().removeListener(uiValidityPeriod.getEndDateListener());
-        dateFinPicker.valueProperty().addListener(getDateFinPickerListener());
-        prestation.date_finProperty().addListener(getDateFinPickerListener());
+        dateFinPicker.valueProperty().addListener(dateFinPickerListener);
+        prestation.date_finProperty().addListener(dateFinListener);
     }
 
     /**
@@ -178,15 +188,19 @@ public class FXPrestationPane extends FXPrestationPaneStub {
      *
      * @return the listener to add/remove on validity dateFinPicker.
      */
-    private ChangeListener<LocalDate> getDateFinPickerListener() {
+    private void initDateFinPickerListener() {
         if (dateFinPickerListener == null) {
             dateFinPickerListener = (obs, oldValue, newValue) -> {
-                if (!uiValidityPeriod.checkEndDateOk(oldValue, newValue)) return;
                 if (resetEndDate) {
                     resetEndDate = false;
+                    changeFromPojo = false;
+                    changeFromDatePicker = false;
                     return;
                 }
-                if (!changeFromDatePicker) {
+                if (!uiValidityPeriod.checkEndDateOk(oldValue, newValue)) return;
+
+                if (!changeFromDatePicker && !changeFromPojo) {
+                    changeFromPojo = true;
                     return;
                 }
                 changeFromDatePicker = false;
@@ -222,7 +236,6 @@ public class FXPrestationPane extends FXPrestationPaneStub {
                 }
             };
         }
-        return dateFinPickerListener;
     }
 
     private void setTableField(FXHorodatageFileField ui_synthesisTableFieldStart, Label ui_errorMessageStart) {
@@ -407,7 +420,7 @@ public class FXPrestationPane extends FXPrestationPaneStub {
     @Override
     public void removeListenersBeforeClosingTab() {
         super.removeListenersBeforeClosingTab();
-        dateFinPicker.valueProperty().removeListener(getDateFinPickerListener());
+        dateFinPicker.valueProperty().removeListener(dateFinPickerListener);
         this.prestation.date_finProperty().removeListener(dateFinListener);
     }
 }

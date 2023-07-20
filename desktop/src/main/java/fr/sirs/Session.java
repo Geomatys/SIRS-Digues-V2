@@ -500,12 +500,6 @@ public class Session extends SessionCore {
         try {
             return openEditors.getOrCreate(target, () -> {
                 final FXFreeTab newTab = tabCreator.call();
-                // Moved to the tabCreator.call() method
-//                if (newTab != null) {
-//                    newTab.setOnClosed(event -> {
-//                        openEditors.remove(target);
-//                                });
-//                }
                 return newTab;
             });
         } catch (Exception e) {
@@ -581,28 +575,27 @@ public class Session extends SessionCore {
                 FadeTransition ft = new FadeTransition(Duration.millis(1000), n);
                 ft.setFromValue(0.0);
                 ft.setToValue(1.0);
+
+                tab.setOnClosed(event -> {
+                    // line moved from method getOrCreateTab(final Object target, final Callable<FXFreeTab> tabCreator)
+                    // since more complex setOnClosed event required.
+                    Injector.getSession().openEditors.remove(target);
+
+                    if (!(n instanceof FXElementContainerPane)) return;
+
+                    // Force to remove listeners before closing the tab.
+                    FXElementContainerPane containerPane = (FXElementContainerPane) n;
+                    final ObservableList<Node> children = containerPane.getChildren();
+                    if (children.isEmpty()) return;
+
+                    children.stream().filter(child -> child instanceof AbstractFXElementPane)
+                            .map(child -> (AbstractFXElementPane) child)
+                            .forEach(pane -> pane.removeListenersBeforeClosingTab());
+                });
+
                 Platform.runLater(() -> {
                     content.setCenter(n);
                     n.requestFocus();
-                    tab.setOnClosed(event -> {
-                        if (!(n instanceof FXElementContainerPane)) return;
-
-                        // Force to remove listeners before closing the tab.
-                        FXElementContainerPane containerPane = (FXElementContainerPane) n;
-                        final ObservableList<Node> children = containerPane.getChildren();
-                        if (children.isEmpty()) return;
-
-                        final List<AbstractFXElementPane> elementPanes = children.stream().filter(child -> child instanceof AbstractFXElementPane)
-                                .map(child -> (AbstractFXElementPane) child)
-                                .collect(Collectors.toList());
-
-                        if (elementPanes.isEmpty()) return;
-                        elementPanes.forEach(pane -> pane.removeListenersBeforeClosingTab());
-
-                        // line moved from method getOrCreateTab(final Object target, final Callable<FXFreeTab> tabCreator)
-                        // since more complex setOnClosed event required.
-                        Injector.getSession().openEditors.remove(target);
-                    });
                     ft.play();
                 });
             });

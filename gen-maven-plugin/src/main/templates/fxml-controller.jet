@@ -1161,7 +1161,7 @@ else if (helper.isParcelleVegetation()){
     @Override
     public void removeListenersBeforeClosingTab() {
 <% if(helper.hasBornesTemporelles() ) { %>
-            uiValidityPeriod.getDateFinPicker().valueProperty().removeListener(uiValidityPeriod.getEndDateListener());
+            uiValidityPeriod.removeListeners();
 <%}%>
     }
 }
