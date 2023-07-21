@@ -2167,11 +2167,12 @@ public class PojoTable extends BorderPane implements Printable {
 
                             final Optional optional = PropertiesFileUtilities.showConfirmationDialog(message.toString(), "Modification date de fin", 600, 450, true);
                             if (optional.isPresent()) {
-                                if (ButtonType.YES.equals(optional.get())) {
+                                final Object result = optional.get();
+                                if (ButtonType.YES.equals(result)) {
                                     prestation.setHorodatageStatusId(HorodatageReference.getRefNonTimeStampedStatus());
-                                } else if (ButtonType.NO.equals(optional.get())) {
+                                } else if (ButtonType.NO.equals(result)) {
                                     // do nothing
-                                } else if (ButtonType.CANCEL.equals(optional.get())) {
+                                } else if (ButtonType.CANCEL.equals(result)) {
                                     prestation.setDate_fin((LocalDate) oldValue);
                                 }
                             }
