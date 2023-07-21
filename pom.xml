@@ -12,7 +12,7 @@
   <groupId>fr.sirs</groupId>
     <artifactId>sirs</artifactId>
     <packaging>pom</packaging>
-    <version>2.x-SNAPSHOT</version>
+    <version>2.42</version>
   <name>SIRS</name>
 
   <organization>
@@ -184,7 +184,7 @@
         <plugin>
           <groupId>fr.sirs.maven</groupId>
           <artifactId>gen-maven-plugin</artifactId>
-          <version>2.x-SNAPSHOT</version>
+          <version>2.42</version>
         <configuration>
             <bundleArguments>
                 <installdirChooser>true</installdirChooser>
