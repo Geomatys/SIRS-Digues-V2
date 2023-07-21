@@ -33,6 +33,7 @@ import java.net.Authenticator;
 import java.net.MalformedURLException;
 import java.net.ProxySelector;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.X509Certificate;
 import java.util.Optional;
 
 import java.util.concurrent.ExecutionException;
@@ -62,6 +63,8 @@ import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
+
+import javax.net.ssl.*;
 
 /**
  * @author Johann Sorel (Geomatys)
@@ -188,6 +191,8 @@ public class Launcher extends Application {
             System.exit(0);
         });
         TaskManager.INSTANCE.submit(initer);
+
+        trustAllCerts();
     }
 
     @Override
@@ -333,5 +338,39 @@ public class Launcher extends Application {
         } else {
             System.exit(1);
         }
+    }
+
+    /**
+     * REDMINE-7929
+     * HACK to accept https certificates when connecting to WMS and others.
+     * code found on http://www.java2s.com/example/java/security/trust-all-certificate.html
+     * @throws Exception
+     */
+    public static void trustAllCerts() throws Exception {
+        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+
+            @Override
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+        } };
+
+        // Install the all-trusting trust manager
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, trustAllCerts, new java.security.SecureRandom());
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+        // Create all-trusting host name verifier
+        HostnameVerifier allHostsValid = (hostname, session) -> true;
+
+        // Install the all-trusting host verifier
+        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+
     }
 }
