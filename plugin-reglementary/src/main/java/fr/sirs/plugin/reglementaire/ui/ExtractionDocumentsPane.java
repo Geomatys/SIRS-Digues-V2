@@ -428,7 +428,7 @@ public class ExtractionDocumentsPane extends BorderPane {
                 errorMsg.insert(0, "Erreur lors de la récupération des tableaux de synthèse suivants : \n\n");
                 showWarningDialog(errorMsg.toString(), "Erreurs tableaux de synthèse", 600, 500);
             }
-        SIRS.openFile(outputFile);
+            SIRS.openFile(outputFile);
         }));
 
         disableProperty().bind(generator.runningProperty());
@@ -551,14 +551,15 @@ public class ExtractionDocumentsPane extends BorderPane {
         parameters.put("structure", structure.isEmpty() ? null : structure);
 
         Path coverPageTmpPath = Files.createTempFile("coverPage", ".pdf");
-        InputStream input = PrinterUtilities.class.getResourceAsStream(COVER_JRXML_PATH);
-        JasperDesign jasperDesign = JRXmlLoader.load(input);
-        JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
-        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
-        OutputStream outputStream = new FileOutputStream(coverPageTmpPath.toFile());
+        try (InputStream input = PrinterUtilities.class.getResourceAsStream(COVER_JRXML_PATH);
+             OutputStream outputStream = new FileOutputStream(coverPageTmpPath.toFile());) {
+            JasperDesign jasperDesign = JRXmlLoader.load(input);
+            JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
 
-        JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
-        return coverPageTmpPath.toFile();
+            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+            return coverPageTmpPath.toFile();
+        }
     }
 
     /**

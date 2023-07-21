@@ -541,15 +541,14 @@ public class HorodatageReportPane extends BorderPane {
         parameters.put("dateDebutPicker", uiPeriodeDebut.getValue());
         parameters.put("dateFinPicker", uiPeriodeFin.getValue());
 
-        try {
-            InputStream input           = PrinterUtilities.class.getResourceAsStream(JRXML_PATH);
+        try (InputStream input = PrinterUtilities.class.getResourceAsStream(JRXML_PATH);
+             OutputStream outputStream   = new FileOutputStream(file);){
+
             JasperDesign jasperDesign   = JRXmlLoader.load(input);
             JasperReport jasperReport   = JasperCompileManager.compileReport(jasperDesign);
             JasperPrint jasperPrint     = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
-            OutputStream outputStream   = new FileOutputStream(file);
 
             JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
-            SIRS.openFile(output);
 
             // Change prestations' horodatage status to "En attente".
             PrestationRepository repo   = Injector.getBean(PrestationRepository.class);
@@ -562,8 +561,9 @@ public class HorodatageReportPane extends BorderPane {
             throw new IllegalStateException("The jrxml file was not found at " + JRXML_PATH, e);
         } catch (JRException e) {
             throw new IllegalStateException("Error while creating the synthese prestation report from jrxml file", e);
+        } catch (IOException e) {
+            throw new IllegalStateException("Error while creating inputStream for " + JRXML_PATH);
         }
+        SIRS.openFile(output);
     }
-
-
 }
