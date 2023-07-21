@@ -108,6 +108,8 @@ public class HorodatageReportPane extends BorderPane {
     static int compareDates(LocalDate dateFin1, LocalDate dateFin2, LocalDate dateDebut1, LocalDate dateDebut2) {
         LocalDate date1     = dateFin1 != null ? dateFin1 : dateDebut1;
         LocalDate date2     = dateFin2 != null ? dateFin2 : dateDebut2;
+        if (date1 == null) return -1;
+        if (date2 == null) return 1;
         return date1.compareTo(date2);
     }
 
