@@ -36,6 +36,7 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.RefTypeTroncon;
+import fr.sirs.core.model.RefTypologieTroncon;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXSystemeReperagePane;
@@ -83,6 +84,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     @FXML protected Button ui_digueId_link;
     @FXML ComboBox ui_typeRiveId;
     @FXML ComboBox ui_typeTronconId;
+    @FXML ComboBox ui_typologieTronconId;
     @FXML ComboBox ui_systemeRepDefautId;
 
     // Onglet "SR"
@@ -172,6 +174,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
 
         ui_typeRiveId.disableProperty().bind(disableFieldsProperty());
         ui_typeTronconId.disableProperty().bind(disableFieldsProperty());
+        ui_typologieTronconId.disableProperty().bind(disableFieldsProperty());
         ui_systemeRepDefautId.disableProperty().bind(disableFieldsProperty());
 
         srController.editableProperty().bind(disableFieldsProperty().not());
@@ -315,7 +318,9 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             SIRS.initCombo(ui_typeTronconId, SIRS.observableList(
                     previewRepository.getByClass(RefTypeTroncon.class)).sorted(),
                     newElement.getTypeTronconId() == null ? null : previewRepository.get(newElement.getTypeTronconId()));
-
+            SIRS.initCombo(ui_typologieTronconId, SIRS.observableList(
+                            previewRepository.getByClass(RefTypologieTroncon.class)).sorted(),
+                    newElement.getTypologieTronconId() == null ? null : previewRepository.get(newElement.getTypologieTronconId()));
 
             final SystemeReperageRepository srRepo = Injector.getBean(SystemeReperageRepository.class);
             final SystemeReperage defaultSR = newElement.getSystemeRepDefautId() == null? null : srRepo.get(newElement.getSystemeRepDefautId());;
@@ -376,6 +381,14 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             element.setTypeTronconId(((Element)cbValue).getId());
         } else if (cbValue == null) {
             element.setTypeTronconId(null);
+        }
+        cbValue = ui_typologieTronconId.getValue();
+        if (cbValue instanceof Preview) {
+            element.setTypologieTronconId(((Preview)cbValue).getElementId());
+        } else if (cbValue instanceof Element) {
+            element.setTypologieTronconId(((Element)cbValue).getId());
+        } else if (cbValue == null) {
+            element.setTypologieTronconId(null);
         }
         cbValue = ui_systemeRepDefautId.getValue();
         if (cbValue instanceof Preview) {
