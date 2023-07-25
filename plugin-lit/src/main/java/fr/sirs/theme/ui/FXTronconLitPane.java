@@ -302,8 +302,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
 
     @Override
     public void preSave() {
-        final Session session = Injector.getBean(Session.class);
-        final TronconLit element = (TronconLit) elementProperty().get();
+        final TronconLit element = elementProperty().get();
 
         Object cbValue;
         cbValue = ui_litId.getValue();

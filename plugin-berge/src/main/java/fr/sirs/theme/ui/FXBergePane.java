@@ -166,8 +166,7 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
     }
     @Override
     public void preSave() {
-        final Session session = Injector.getBean(Session.class);
-        final Berge element = (Berge) elementProperty().get();
+        final Berge element = elementProperty().get();
 
         Object cbValue;
         cbValue = ui_typeRiveId.getValue();

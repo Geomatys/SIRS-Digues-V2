@@ -43,6 +43,8 @@ import fr.sirs.digue.FXSystemeReperagePane;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -355,7 +357,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
 
     @Override
     public void preSave() {
-        final TronconDigue element = (TronconDigue) elementProperty().get();
+        final TronconDigue element = elementProperty().get();
 
         Object cbValue;
         cbValue = ui_digueId.getValue();
@@ -389,6 +391,8 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             element.setTypologieTronconId(((Element)cbValue).getId());
         } else if (cbValue == null) {
             element.setTypologieTronconId(null);
+        } else {
+            SIRS.LOGGER.log(Level.WARNING, "Value not supported for TronconDigue ui_typologieTronconId : {0}", ui_typologieTronconId);
         }
         cbValue = ui_systemeRepDefautId.getValue();
         if (cbValue instanceof Preview) {
