@@ -151,7 +151,7 @@ public class ExtractionDocumentsPane extends BorderPane {
                 uiPeriodeHorodatageDebut.setDayCellFactory(RegistreTheme.getUiPeriodDebutDayCellFactory(uiPeriodeHorodatageFin))
         );
 
-        SIRS.initCombo(uiSECombo, FXCollections.observableList(session.getPreviews().getByClass(SystemeEndiguement.class)), null);
+        HorodatageReportPane.initSeCombo(uiSECombo);
 
         uiSECombo.valueProperty().addListener((obs, oldValue, newValue) -> {
             this.selectedSe = newValue;

@@ -18,7 +18,6 @@ import fr.sirs.Injector;
 import fr.sirs.PropertiesFileUtilities;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
 import fr.sirs.plugin.reglementaire.RegistreTheme;
@@ -26,6 +25,7 @@ import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -164,8 +164,7 @@ public class HorodatageReportPane extends BorderPane {
 
         uiSystemEndiguement.valueProperty().addListener((obs, o, n) -> updatePrestationsList(n));
 
-        final Previews previewRepository = session.getPreviews();
-        SIRS.initCombo(uiSystemEndiguement, SIRS.observableList(previewRepository.getByClass(SystemeEndiguement.class)).sorted(), null);
+        initSeCombo(uiSystemEndiguement);
 
         uiSelectNonTimeStamped.setTooltip(new Tooltip("Sélectionne toutes les prestations avec le status \"non horodatée\" de la liste."));
 
@@ -284,6 +283,17 @@ public class HorodatageReportPane extends BorderPane {
         });
     }
 
+    static void initSeCombo(final ComboBox<Preview> comboBox) {
+        final Previews previewRepository = Injector.getSession().getPreviews();
+        // Create sePreviews first and then add elements otherwise it adds the Preview to the previewRepository.
+        final List<Preview> sePreviews = new ArrayList<>();
+        sePreviews.addAll(previewRepository.getByClass(SystemeEndiguement.class));
+        final Preview noSEPreview = new Preview();
+        noSEPreview.setLibelle("Tronçon(s) sans système d'endiguement actuellement");
+        sePreviews.add(sePreviews.size(), noSEPreview);
+        SIRS.initCombo(comboBox, SIRS.observableList(sePreviews).sorted(), null);
+    }
+
     /**
      * Method to update the list of available prestations for the selected Systeme Endiguement @this.selectedSE after a date filter modification :
      * <ul>
@@ -372,17 +382,40 @@ public class HorodatageReportPane extends BorderPane {
         final PrestationRepository prestationRepo   = Injector.getBean(PrestationRepository.class);
 
         SystemeEndiguement se = null;
-        try {
-            se = sdRepo.get(sePreview.getElementId());
-        } catch (RuntimeException re) {
-            SIRS.LOGGER.log(Level.WARNING, "Erreur lors de la récupération du Systeme d'endiguement avec l'id {0}", sePreview.getElementId());
+        final String elementId = sePreview.getElementId();
+        if (elementId != null) {
+            try {
+                se = sdRepo.get(elementId);
+            } catch (RuntimeException re) {
+                SIRS.LOGGER.log(Level.WARNING, "Erreur lors de la récupération du Systeme d endiguement avec l id {0}", elementId);
+            }
+            if (se == null) return null;
         }
-        if (se == null) return null;
 
-        final List<Digue> digues = digueRepo.getBySystemeEndiguement(se);
-        if (digues.isEmpty()) return null;
+        final List<TronconDigue> tronconList = new ArrayList<>();
+        if (se == null) {
+            final List<TronconDigue> tronconOnDigueWithNoSe = digueRepo.getAll().stream()
+                    .filter(digue -> digue.getSystemeEndiguementId() == null)
+                    .flatMap(digue -> tronconRepo.getByDigue(digue).stream())
+                    .collect(Collectors.toList());
+            if (!tronconOnDigueWithNoSe.isEmpty()) {
+                tronconList.addAll(tronconOnDigueWithNoSe);
+            }
+            final List<TronconDigue> tronconWithNoDigue = tronconRepo.getAll().stream()
+                    .filter(troncon -> troncon.getDigueId() == null)
+                    .collect(Collectors.toList());
+            if (!tronconWithNoDigue.isEmpty()) {
+                tronconList.addAll(tronconWithNoDigue);
+            }
+        } else {
+            final List<Digue> digues = digueRepo.getBySystemeEndiguement(se);
+            if (digues.isEmpty()) return null;
 
-        return digues.stream().flatMap(digue -> tronconRepo.getByDigue(digue).stream())
+            tronconList.addAll(digues.stream().flatMap(digue -> tronconRepo.getByDigue(digue).stream())
+                    .collect(Collectors.toList()));
+        }
+
+        return tronconList.stream()
                 .flatMap(troncon -> prestationRepo.getByLinear(troncon).stream())
                 .filter(Prestation::getRegistreAttribution)
                 .collect(Collectors.toList());
@@ -571,6 +604,10 @@ public class HorodatageReportPane extends BorderPane {
             throw new IllegalStateException("Error while creating inputStream for " + JRXML_PATH);
         }
         SIRS.openFile(output);
+        // Refresh the table to update timestamp status.
+        Platform.runLater(() -> {
+            refresh();
+        });
     }
 
     public void resetPane() {
@@ -579,5 +616,9 @@ public class HorodatageReportPane extends BorderPane {
         uiPeriodeDebut.setValue(null);
         uiPeriodeFin.setValue(null);
         uiSystemEndiguement.getSelectionModel().clearSelection();
+    }
+
+    public void refresh() {
+        uiPrestationTable.refresh();
     }
 }
