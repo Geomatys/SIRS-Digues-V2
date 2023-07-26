@@ -108,7 +108,10 @@ public class HorodatageReportPane extends BorderPane {
     static int compareDates(LocalDate dateFin1, LocalDate dateFin2, LocalDate dateDebut1, LocalDate dateDebut2) {
         LocalDate date1     = dateFin1 != null ? dateFin1 : dateDebut1;
         LocalDate date2     = dateFin2 != null ? dateFin2 : dateDebut2;
-        if (date1 == null) return -1;
+        if (date1 == null) {
+            if (date2 == null) return 0;
+            return -1;
+        }
         if (date2 == null) return 1;
         return date1.compareTo(date2);
     }
@@ -429,7 +432,7 @@ public class HorodatageReportPane extends BorderPane {
         if (prestations.isEmpty()) return;
         // Keeps all prestations with a status "Non horodaté"
         prestations.stream()
-                .filter(prestation -> prestation != null)
+                .filter(Objects::nonNull)
                 .filter(prestation -> HorodatageReference.getRefNonTimeStampedStatus().equals(prestation.getHorodatageStatusId()))
                 .forEach(presta -> uiPrestationTable.getSelectionModel().select(presta));
     }
@@ -532,7 +535,7 @@ public class HorodatageReportPane extends BorderPane {
         A- Creation of the PDF from the jasper template.
         ======================================================*/
         JRBeanCollectionDataSource beanColDataSource    = new JRBeanCollectionDataSource(prestationsToKeep);
-        Map<String, Object> parameters                  = new HashMap();
+        Map<String, Object> parameters                  = new HashMap<>();
 
         // set report parameters
         parameters.put("title", uiTitre.getText());
@@ -542,7 +545,7 @@ public class HorodatageReportPane extends BorderPane {
         parameters.put("dateFinPicker", uiPeriodeFin.getValue());
 
         try (InputStream input = PrinterUtilities.class.getResourceAsStream(JRXML_PATH);
-             OutputStream outputStream   = new FileOutputStream(file);){
+             OutputStream outputStream   = new FileOutputStream(file)){
 
             JasperDesign jasperDesign   = JRXmlLoader.load(input);
             JasperReport jasperReport   = JasperCompileManager.compileReport(jasperDesign);

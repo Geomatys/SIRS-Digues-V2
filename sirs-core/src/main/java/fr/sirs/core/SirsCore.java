@@ -242,6 +242,13 @@ public class SirsCore {
     /** Libellé de la borne de fin du SR élémentaire. */
     public static final String SR_ELEMENTAIRE_END_BORNE = "Fin du tronçon";
 
+    /** Timestamp specific properties' names **/
+    public static final String TIMESTAMP_START_DATE_START_VALIDITY = "horodatageDateDebutStart";
+    public static final String TIMESTAMP_END_DATE_START_VALIDITY = "horodatageDateDebutEnd";
+    public static final String TIMESTAMP_END_DATE_END_VALIDITY = "horodatageDateFinEnd";
+    public static final String TIMESTAMP_START_DATE = "horodatageStartDate";
+    public static final String TIMESTAMP_END_DATE = "horodatageEndDate";
+
     //--------------------------------------------------------------------------
     // Champs particuliers aux désordres
     //--------------------------------------------------------------------------

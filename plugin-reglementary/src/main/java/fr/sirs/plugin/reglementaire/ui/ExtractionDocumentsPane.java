@@ -27,6 +27,7 @@ import fr.sirs.plugin.reglementaire.PDFUtils;
 import fr.sirs.plugin.reglementaire.RegistreTheme;
 import fr.sirs.ui.LoadingPane;
 import fr.sirs.util.DatePickerConverter;
+import fr.sirs.util.JRXMLUtil;
 import fr.sirs.util.PrinterUtilities;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -107,11 +108,10 @@ public class ExtractionDocumentsPane extends BorderPane {
     /**
      * Supported formats for cover and conclusion pages
      */
-    private final List<String> supportedFormat = Arrays.asList("*.pdf");
+    private final List<String> supportedFormat = Collections.singletonList("*.pdf");
 
     private final String COVER_JRXML_PATH = "/fr/sirs/jrxml/metaTemplateHorodatageCoverPage.jrxml";
     private final String SUMMARY_JRXML_PATH = "/fr/sirs/jrxml/metaTemplatePrestationSummaryTable.jrxml";
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     // Used to compute the page in the final report where to get each Tableau de Synthèse.
     private int pageIncrement;
 
@@ -270,7 +270,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         ======================================================*/
 
         final FileChooser chooser  = new FileChooser();
-        final Path previous        = RegistreTheme.getPreviousPath(ExtractionDocumentsPane.class);;
+        final Path previous        = RegistreTheme.getPreviousPath(ExtractionDocumentsPane.class);
         if (previous != null) {
             chooser.setInitialDirectory(previous.toFile());
             chooser.setInitialFileName(".pdf");
@@ -304,13 +304,40 @@ public class ExtractionDocumentsPane extends BorderPane {
             return;
         }
 
-        // sort prestations by dateHorodatage or end date or start date.
+        // sort prestations by dateHorodatage or troncon or date_debut or designation or date_fin.
         prestationsWithPage.sort((p1, p2) -> {
-            LocalDate timeStampDate1 = p1.getHorodatageDate();
-            LocalDate timeStampDate2 = p2.getHorodatageDate();
+            // by timestamp date
+            final LocalDate timeStampDate1 = p1.getHorodatageDate();
+            final LocalDate timeStampDate2 = p2.getHorodatageDate();
             int result = timeStampDate1.compareTo(timeStampDate2);
             if (result != 0) return result;
-            return HorodatageReportPane.compareDates(p1.getDate_fin(), p2.getDate_fin(), p1.getDate_debut(), p2.getDate_debut());
+
+            final Prestation prestation1 = p1.getPrestation();
+            final Prestation prestation2 = p2.getPrestation();
+            // by troncon
+            final String troncon1 = JRXMLUtil.displayLibelleFromId(prestation1.getLinearId(), "TronconDigue");
+            final String troncon2 = JRXMLUtil.displayLibelleFromId(prestation2.getLinearId(), "TronconDigue");
+            result = troncon1.compareTo(troncon2);
+            if (result != 0) return result;
+
+            // by date_debut
+            result = HorodatageReportPane.compareDates(null, null, p1.getDate_debut(), p2.getDate_debut());
+            if (result != 0) return result;
+
+            // by designation
+            final String designation1 = prestation1.getDesignation();
+            final String designation2 = prestation2.getDesignation();
+            if (designation1 == null) {
+                if (designation2 != null) return -1;
+                result = 0;
+            } else if (designation2 == null) {
+                return 1;
+            } else {
+                result = designation1.compareTo(designation2);
+            }
+            if (result != 0) return result;
+
+            return HorodatageReportPane.compareDates(p1.getDate_fin(), p2.getDate_fin(), null, null);
         });
 
         /*
@@ -400,8 +427,7 @@ public class ExtractionDocumentsPane extends BorderPane {
             if (!tablesNotFound.isEmpty()) {
                 errorMsg.append("Fichiers introuvables : ");
                 tablesNotFound.forEach((table, prestaList) -> {
-                    errorMsg.append("\n\n- " + table + "\n" +
-                            "       Prestations associées :");
+                    errorMsg.append("\n\n- ").append(table).append("\n").append("       Prestations associées :");
                     createErrorMessage(errorMsg, prestaList);
                 });
                 errorMsg.append("\n\nVeuillez vérifier les chemins d'accès avant de relancer la génération du document.");
@@ -411,8 +437,7 @@ public class ExtractionDocumentsPane extends BorderPane {
                         "--------------------------------------\n\n");
                 errorMsg.append("Format incorrect : ");
                 tablesNotPdf.forEach((table, prestaList) -> {
-                    errorMsg.append("\n\n- " + table + "\n" +
-                            "       Prestations associées :");
+                    errorMsg.append("\n\n- ").append(table).append("\n").append("       Prestations associées :");
                     createErrorMessage(errorMsg, prestaList);
                 });
                 errorMsg.append("\n\nFormats supportés : PDF.");
@@ -451,7 +476,7 @@ public class ExtractionDocumentsPane extends BorderPane {
             String libelle = presta.getLibelle();
             designation = designation == null ? "" : designation;
             libelle = libelle == null ? "" : libelle;
-            stbuilder.append("\n      - " + designation + " - " + libelle + " / " + presta.getId());
+            stbuilder.append("\n      - ").append(designation).append(" - ").append(libelle).append(" / ").append(presta.getId());
         });
     }
 
@@ -461,7 +486,7 @@ public class ExtractionDocumentsPane extends BorderPane {
      * @param JRXML_PATH the JRXML template.
      * @param prestations the list of prestations to show in the table - used for SUMMARY_JRXML_PATH.
      * @param title title from @uiTitle - used for COVER_JRXML_PATH.
-     * @return
+     * @return true if the page was added.
      */
     private boolean addPageToFiles(final List<File> filesToMerge, final String JRXML_PATH, final List<PrestationWithPage> prestations, final String title) {
         ArgumentChecks.ensureNonNull("filesToMerge", filesToMerge);
@@ -497,7 +522,7 @@ public class ExtractionDocumentsPane extends BorderPane {
     private File generateSummaryPage(final List<PrestationWithPage> prestations) {
         ArgumentChecks.ensureNonNull("prestations", prestations);
         JRBeanCollectionDataSource beanColDataSource    = new JRBeanCollectionDataSource(prestations);
-        Map<String, Object> parameters                  = new HashMap();
+        Map<String, Object> parameters                  = new HashMap<>();
         // set report parameters
         parameters.put("collectionBeanParam", beanColDataSource);
         parameters.put("systemeEndiguement", this.selectedSe.getLibelle());
@@ -513,7 +538,7 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         JasperDesign jasperDesign;
         try (InputStream input          = PrinterUtilities.class.getResourceAsStream(SUMMARY_JRXML_PATH);
-             OutputStream outputStream  = new FileOutputStream(summaryTmpPath.toFile());){
+             OutputStream outputStream  = new FileOutputStream(summaryTmpPath.toFile())){
 
             jasperDesign                = JRXmlLoader.load(input);
             JasperReport jasperReport   = JasperCompileManager.compileReport(jasperDesign);
@@ -539,7 +564,7 @@ public class ExtractionDocumentsPane extends BorderPane {
      */
     private File generateCoverPage(final String title) throws IOException, JRException {
         ArgumentChecks.ensureNonNull("title", title);
-        Map<String, Object> parameters = new HashMap();
+        Map<String, Object> parameters = new HashMap<>();
 
         final String structure = this.uiStructure.getText();
 
@@ -552,7 +577,7 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         Path coverPageTmpPath = Files.createTempFile("coverPage", ".pdf");
         try (InputStream input = PrinterUtilities.class.getResourceAsStream(COVER_JRXML_PATH);
-             OutputStream outputStream = new FileOutputStream(coverPageTmpPath.toFile());) {
+             OutputStream outputStream = new FileOutputStream(coverPageTmpPath.toFile())) {
             JasperDesign jasperDesign = JRXmlLoader.load(input);
             JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
@@ -747,9 +772,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         }
 
         public boolean test(final NumberRange dateRange) {
-            final LocalDate objDateDebut    = date_debut;
-            final LocalDate objDateFin      = date_fin;
-            return AvecBornesTemporelles.checkDatesIntersectRange(objDateDebut, objDateFin, dateRange);
+            return AvecBornesTemporelles.checkDatesIntersectRange(date_debut, date_fin, dateRange);
         }
     }
 }

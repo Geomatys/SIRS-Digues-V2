@@ -35,7 +35,7 @@ import static fr.sirs.SIRS.VALID_FIELD;
 import static fr.sirs.SIRS.ID_FIELD;
 import static fr.sirs.SIRS.REVISION_FIELD;
 import static fr.sirs.SIRS.NEW_FIELD;
-import static fr.sirs.core.SirsCore.LOGGER;
+import static fr.sirs.core.SirsCore.*;
 
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
@@ -73,16 +73,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -200,7 +191,8 @@ public class PojoTable extends BorderPane implements Printable {
     public static final String[] COLUMNS_TO_IGNORE = new String[]{
             AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD,
             LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD, DATE_MAJ_FIELD,
-            COMMENTAIRE_FIELD, GEOMETRY_MODE_FIELD, REVISION_FIELD, ID_FIELD, NEW_FIELD
+            COMMENTAIRE_FIELD, GEOMETRY_MODE_FIELD, REVISION_FIELD, ID_FIELD, NEW_FIELD,
+            TIMESTAMP_START_DATE_START_VALIDITY, TIMESTAMP_END_DATE_START_VALIDITY, TIMESTAMP_END_DATE_END_VALIDITY
     };
 
     /**
@@ -2090,7 +2082,11 @@ public class PojoTable extends BorderPane implements Printable {
                 } else if (LocalDateTime.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
                 } else if (LocalDate.class.isAssignableFrom(type)) {
-                    setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateCell());
+                    if (TIMESTAMP_START_DATE.equalsIgnoreCase(name) || TIMESTAMP_END_DATE.equalsIgnoreCase(name)) {
+                        setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateCell(true));
+                    } else {
+                        setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateCell());
+                    }
                 } else if (Point.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXPointCell());
                 } else {

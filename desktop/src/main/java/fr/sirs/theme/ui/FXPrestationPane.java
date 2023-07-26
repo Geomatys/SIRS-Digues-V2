@@ -16,6 +16,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
@@ -132,7 +133,7 @@ public class FXPrestationPane extends FXPrestationPaneStub {
             changeFromPojo = false;
             return;
         }
-        if (!changeFromPojo && !changeFromDatePicker) {
+        if (!changeFromDatePicker) {
             changeFromDatePicker = true;
         }
     };
@@ -172,6 +173,10 @@ public class FXPrestationPane extends FXPrestationPaneStub {
 
         setTableField(ui_synthesisTableFieldEnd, ui_errorMessageEnd);
 
+        // Block timestamp dates in the future.
+        blockDateInFuture(ui_horodatageStartDate);
+        blockDateInFuture(ui_horodatageEndDate);
+
         // The Prestation shall automatically be added to the SE registre depending on the type of Prestation.
         ui_typePrestationId.valueProperty().addListener(autoSelectRegistreListener());
         initDateFinPickerListener();
@@ -182,11 +187,23 @@ public class FXPrestationPane extends FXPrestationPaneStub {
     }
 
     /**
+     * Method to block a @{@link DatePicker} dates in the future.
+     * @param ui_horodatageDate the @{@link DatePicker} to block dates in the future for.
+     */
+    static void blockDateInFuture(final DatePicker ui_horodatageDate) {
+        ui_horodatageDate.setDayCellFactory(param -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.isAfter(LocalDate.now()));
+            }
+        });
+    }
+
+    /**
      * Listener triggered when the validity dateFinPicker is modified by the user.
      * If the change comes from the prestation's date_fin modification,
      * then it must quit the method -> reason for the @changeFromDataPicker boolean.
-     *
-     * @return the listener to add/remove on validity dateFinPicker.
      */
     private void initDateFinPickerListener() {
         if (dateFinPickerListener == null) {

@@ -19,37 +19,37 @@
 			<rightPen lineWidth="0.5" lineColor="#000000"/>
 		</box>
 	</style>
-	<style name="Table_CH" mode="Opaque" backcolor="#679C53">
+	<style name="Table_CH" mode="Opaque" backcolor="#6D95B6">
 		<box>
-			<pen lineWidth="0.5" lineColor="#96B081"/>
-			<topPen lineWidth="0.5" lineColor="#96B081"/>
-			<leftPen lineWidth="0.5" lineColor="#96B081"/>
-			<bottomPen lineWidth="0.5" lineColor="#96B081"/>
-			<rightPen lineWidth="0.5" lineColor="#96B081"/>
+			<pen lineWidth="0.5" lineColor="#A4CAEB"/>
+			<topPen lineWidth="0.5" lineColor="#A4CAEB"/>
+			<leftPen lineWidth="0.5" lineColor="#A4CAEB"/>
+			<bottomPen lineWidth="0.5" lineColor="#A4CAEB"/>
+			<rightPen lineWidth="0.5" lineColor="#A4CAEB"/>
 		</box>
 	</style>
-	<style name="Table_TD" mode="Opaque" backcolor="#E7EFE4">
+	<style name="Table_TD" mode="Opaque" backcolor="#DFE9F2">
 		<conditionalStyle>
 			<conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue() %2 == 0)]]></conditionExpression>
 			<style backcolor="#FFFFFF">
 				<box>
-					<pen lineWidth="0.5" lineColor="#96B081"/>
-					<topPen lineWidth="0.5" lineColor="#96B081"/>
-					<leftPen lineWidth="0.5" lineColor="#96B081"/>
-					<bottomPen lineWidth="0.5" lineColor="#96B081"/>
-					<rightPen lineWidth="0.5" lineColor="#96B081"/>
+					<pen lineWidth="0.5" lineColor="#A4CAEB"/>
+					<topPen lineWidth="0.5" lineColor="#A4CAEB"/>
+					<leftPen lineWidth="0.5" lineColor="#A4CAEB"/>
+					<bottomPen lineWidth="0.5" lineColor="#A4CAEB"/>
+					<rightPen lineWidth="0.5" lineColor="#A4CAEB"/>
 				</box>
 			</style>
 		</conditionalStyle>
 		<conditionalStyle>
 			<conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue() %2 != 0)]]></conditionExpression>
-			<style backcolor="#E3EFE9">
+			<style backcolor="#DFE9F2">
 				<box>
-					<pen lineWidth="0.5" lineColor="#96B081"/>
-					<topPen lineWidth="0.5" lineColor="#96B081"/>
-					<leftPen lineWidth="0.5" lineColor="#96B081"/>
-					<bottomPen lineWidth="0.5" lineColor="#96B081"/>
-					<rightPen lineWidth="0.5" lineColor="#96B081"/>
+					<pen lineWidth="0.5" lineColor="#A4CAEB"/>
+					<topPen lineWidth="0.5" lineColor="#A4CAEB"/>
+					<leftPen lineWidth="0.5" lineColor="#A4CAEB"/>
+					<bottomPen lineWidth="0.5" lineColor="#A4CAEB"/>
+					<rightPen lineWidth="0.5" lineColor="#A4CAEB"/>
 				</box>
 			</style>
 		</conditionalStyle>
@@ -113,7 +113,7 @@
 				<textFieldExpression><![CDATA["Sommaire - Registre horodaté"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="351" y="30" width="100" height="20" uuid="1d48a41b-3861-4fb6-8175-248e4a1441ec"/>
+				<reportElement x="1" y="30" width="799" height="20" uuid="1d48a41b-3861-4fb6-8175-248e4a1441ec"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none"/>
 				<textFieldExpression><![CDATA[$P{systemeEndiguement}]]></textFieldExpression>
 			</textField>
@@ -200,12 +200,14 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="50" uuid="4dc90b0e-7287-456b-a8ff-0507be47a429">
+					<jr:column width="170" uuid="4dc90b0e-7287-456b-a8ff-0507be47a429">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="tronconLibelle"/>
 						<jr:columnHeader style="Table_CH" height="29" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="50" height="29" forecolor="#FFFFFF" uuid="07a3e61a-d324-4a9a-8b3b-fa82a8f1dbfa"/>
+								<reportElement x="0" y="0" width="170" height="29" forecolor="#FFFFFF" uuid="07a3e61a-d324-4a9a-8b3b-fa82a8f1dbfa">
+									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+								</reportElement>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -214,7 +216,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="15" isPrintWhenDetailOverflows="true" uuid="e1dcbabe-ac86-42fc-a241-38ad01135621"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="170" height="15" isPrintWhenDetailOverflows="true" uuid="e1dcbabe-ac86-42fc-a241-38ad01135621"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -239,28 +241,29 @@
 								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="15" isPrintWhenDetailOverflows="true" uuid="359e2a99-0ca2-40ca-a346-a8eca3805781">
 									<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 								</reportElement>
-								<textElement textAlignment="Center" verticalAlignment="Middle">
+								<textElement textAlignment="Center" verticalAlignment="Middle" markup="styled">
 									<font size="7"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$V{typePrestation}==null ? " - " : $V{typePrestation}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="50" uuid="cb32dff6-0d94-4ca0-a406-ed0f26ad599d">
+					<jr:column width="45" uuid="cb32dff6-0d94-4ca0-a406-ed0f26ad599d">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="startDate"/>
 						<jr:columnHeader style="Table_CH" height="29" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="50" height="29" forecolor="#FFFFFF" uuid="d7d03bba-e731-4946-b7be-42dc976689ba"/>
+								<reportElement x="0" y="0" width="45" height="29" forecolor="#FFFFFF" uuid="d7d03bba-e731-4946-b7be-42dc976689ba"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
-								<text><![CDATA[Date de début]]></text>
+								<text><![CDATA[Date de 
+début]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="15" isPrintWhenDetailOverflows="true" uuid="0fb55ba8-f95a-4a04-9969-0eccc3b0ff2f">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="45" height="15" isPrintWhenDetailOverflows="true" uuid="0fb55ba8-f95a-4a04-9969-0eccc3b0ff2f">
 									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 								</reportElement>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -270,12 +273,12 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="50" uuid="1dd331b5-d4bc-4785-944b-3ba5bdc85f57">
+					<jr:column width="45" uuid="1dd331b5-d4bc-4785-944b-3ba5bdc85f57">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="endDate"/>
 						<jr:columnHeader style="Table_CH" height="29" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="50" height="29" forecolor="#FFFFFF" uuid="43c9e1a0-a95e-407c-9412-710e9ef1a2bc"/>
+								<reportElement x="0" y="0" width="45" height="29" forecolor="#FFFFFF" uuid="43c9e1a0-a95e-407c-9412-710e9ef1a2bc"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -284,7 +287,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="15" isPrintWhenDetailOverflows="true" uuid="2eabfcdf-7f7f-444f-92e5-985fe6189809"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="45" height="15" isPrintWhenDetailOverflows="true" uuid="2eabfcdf-7f7f-444f-92e5-985fe6189809"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -292,12 +295,12 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="65" uuid="aebc8045-c5d5-404d-bc93-bd91d3293268">
+					<jr:column width="50" uuid="aebc8045-c5d5-404d-bc93-bd91d3293268">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="intervenant"/>
 						<jr:columnHeader style="Table_CH" height="29" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="65" height="29" forecolor="#FFFFFF" uuid="5f93383b-6e2a-483c-ab71-a8b850791e72"/>
+								<reportElement x="0" y="0" width="50" height="29" forecolor="#FFFFFF" uuid="5f93383b-6e2a-483c-ab71-a8b850791e72"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -306,7 +309,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="65" height="15" isPrintWhenDetailOverflows="true" uuid="247a0a2c-0238-4c6b-98d5-c893db0d1fbf"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="15" isPrintWhenDetailOverflows="true" uuid="247a0a2c-0238-4c6b-98d5-c893db0d1fbf"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
 									<font size="7"/>
 								</textElement>
@@ -314,12 +317,12 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="65" uuid="683ea33f-948f-4262-b9cd-f6a364b25819">
+					<jr:column width="50" uuid="683ea33f-948f-4262-b9cd-f6a364b25819">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="author_login"/>
 						<jr:columnHeader style="Table_CH" height="29" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="65" height="29" forecolor="#FFFFFF" uuid="46542cae-67fa-4976-a292-2b2fefa23483"/>
+								<reportElement x="0" y="0" width="50" height="29" forecolor="#FFFFFF" uuid="46542cae-67fa-4976-a292-2b2fefa23483"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -328,7 +331,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="65" height="15" isPrintWhenDetailOverflows="true" uuid="89ab9772-2d33-4e8d-b6de-7e204e97bc60"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="15" isPrintWhenDetailOverflows="true" uuid="89ab9772-2d33-4e8d-b6de-7e204e97bc60"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
 									<font size="7"/>
 								</textElement>
@@ -336,12 +339,12 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="120" uuid="5c2b9625-c37f-4281-9611-13e244ee20e3">
+					<jr:column width="150" uuid="5c2b9625-c37f-4281-9611-13e244ee20e3">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="commentaire"/>
 						<jr:columnHeader style="Table_CH" height="29" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="120" height="29" forecolor="#FFFFFF" uuid="9c2352fc-9734-4242-a50b-9e5ff979df0c"/>
+								<reportElement x="0" y="0" width="150" height="29" forecolor="#FFFFFF" uuid="9c2352fc-9734-4242-a50b-9e5ff979df0c"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -350,7 +353,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="120" height="15" isPrintWhenDetailOverflows="true" uuid="6453119b-3084-410e-bc59-271af0590611">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="150" height="15" isPrintWhenDetailOverflows="true" uuid="6453119b-3084-410e-bc59-271af0590611">
 									<property name="com.jaspersoft.studio.unit.firstLineIndent" value="px"/>
 									<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 									<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
@@ -360,28 +363,6 @@
 									<paragraph leftIndent="3" rightIndent="3"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{prestation.commentaire}==null ? " - " : $F{prestation.commentaire}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="110" uuid="b8f72b7f-1ba3-4fdb-bb64-723a71294fbc">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="id"/>
-						<jr:columnHeader style="Table_CH" height="29" rowSpan="1">
-							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<staticText>
-								<reportElement x="0" y="0" width="110" height="29" forecolor="#FFFFFF" uuid="303d12fd-6ee6-483b-9a93-f9dbcab78dc3"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="7"/>
-								</textElement>
-								<text><![CDATA[Identifiant SIRS]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="15">
-							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="110" height="15" isPrintWhenDetailOverflows="true" uuid="731d346f-58f0-4638-9bcc-4c7a38ee123d"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="7"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{prestation.id}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
