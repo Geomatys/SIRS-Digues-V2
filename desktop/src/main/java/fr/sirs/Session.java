@@ -435,6 +435,9 @@ public class Session extends SessionCore {
                     return null;
                 } else {
                     final FXFreeTab tab = new FXFreeTab(theme.getName());
+                    if (SirsCore.REGISTRE_THEME_NAME.equals(theme.getName())) {
+                        tab.setOnClosed(event -> theme.resetContent());
+                    }
                     tab.setContent(parent);
                     tab.selectedProperty().addListener(theme.getSelectedPropertyListener());
                     return tab;

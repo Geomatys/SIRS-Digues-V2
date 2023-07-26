@@ -18,6 +18,7 @@ import fr.sirs.Injector;
 import fr.sirs.PropertiesFileUtilities;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
 import fr.sirs.plugin.reglementaire.RegistreTheme;
@@ -120,13 +121,15 @@ public class HorodatageReportPane extends BorderPane {
     @Autowired
     private Session session;
 
+    private static final String title = "Tableau de synthèse prestation pour Registre horodaté";
+
     public HorodatageReportPane() {
         super();
 
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
 
-        uiTitre.setText("Tableau de synthèse prestation pour Registre horodaté");
+        uiTitre.setText(title);
 
         // Date filter checkbox
         // When the checkbox is unselected, the uiPeriodeDebut and uiPeriodeFin can still be updated.
@@ -568,5 +571,13 @@ public class HorodatageReportPane extends BorderPane {
             throw new IllegalStateException("Error while creating inputStream for " + JRXML_PATH);
         }
         SIRS.openFile(output);
+    }
+
+    public void resetPane() {
+        uiTitre.setText(title);
+        uiPeriod.setSelected(false);
+        uiPeriodeDebut.setValue(null);
+        uiPeriodeFin.setValue(null);
+        uiSystemEndiguement.getSelectionModel().clearSelection();
     }
 }

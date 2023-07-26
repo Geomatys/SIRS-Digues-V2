@@ -163,7 +163,7 @@ public class SirsCore {
     /**
      * Les requêtes préprogrammées de référence sont désormatis enregistrées sur le serveur de France-Digues et sont
      * téléchargées à chaque nouvelle connexion lorsque le réseau est disponible.
-     *
+     * <p>
      * Mais afin que les requêtes préprogrammées soient utilisables même hors-ligne (du moins dans leur dernière version
      * connue), ce n'est pas le fichier distant qui est directement utilisé pour la lecture et l'exécution des
      * requêtes, mais une copie locale mise à jour à chaque nouvelle connexion avec le contenu du fichier distant.
@@ -299,6 +299,8 @@ public class SirsCore {
     protected static final String NTV2_RESOURCE = "/fr/sirs/ntv2/";
 
     public static final int GEO_CLIENT_TIMEOUT = 60000;
+
+    public static final String REGISTRE_THEME_NAME = "Registre";
 
     /**
      * Configuration directory root folder.

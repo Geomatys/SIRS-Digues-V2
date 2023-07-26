@@ -775,4 +775,17 @@ public class ExtractionDocumentsPane extends BorderPane {
             return AvecBornesTemporelles.checkDatesIntersectRange(date_debut, date_fin, dateRange);
         }
     }
+
+    public void resetPane() {
+        uiPeriodeValidityDebut.setValue(null);
+        uiPeriodeValidityFin.setValue(null);
+        uiPeriodeHorodatageDebut.setValue(null);
+        uiPeriodeHorodatageFin.setValue(null);
+        uiSECombo.getSelectionModel().clearSelection();
+        uiIsExternalPage.setSelected(true);
+        uiCoverPath.setText("");
+        uiTitle.setText("Registre");
+        uiStructure.setText("");
+        uiConclusionPath.setText("");
+    }
 }

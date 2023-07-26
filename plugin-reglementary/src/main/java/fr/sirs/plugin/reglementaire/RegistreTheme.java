@@ -21,10 +21,12 @@ package fr.sirs.plugin.reglementaire;
 import fr.sirs.Injector;
 import fr.sirs.PropertiesFileUtilities;
 import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.HorodatageReference;
 import fr.sirs.core.model.RefHorodatageStatus;
 import fr.sirs.plugin.reglementaire.ui.*;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
+import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -48,11 +50,13 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
             RegistreTheme.class.getResourceAsStream("images/gen_etats.png"));
 
     public RegistreTheme() {
-        super("Registre", "Registre", BUTTON_IMAGE);
+        super(SirsCore.REGISTRE_THEME_NAME, SirsCore.REGISTRE_THEME_NAME, BUTTON_IMAGE);
     }
 
     public static final String EXTRACTION_TAB = "Extraction";
     private static final String PATH_KEY = "path";
+    private HorodatageReportPane horodatageReportPane;
+    private ExtractionDocumentsPane extractionPane;
 
     @Override
     public Parent createPane() {
@@ -80,8 +84,8 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         // Tab to generate "Tableaux de Synthese" for Prestation.
         final Tab syntheseTab = new Tab("Tableaux de synthèse");
         syntheseTab.setClosable(false);
-
-        syntheseTab.setContent(new HorodatageReportPane());
+        horodatageReportPane = new HorodatageReportPane();
+        syntheseTab.setContent(horodatageReportPane);
 
         // Tab to import timestamped "Tableaux de Synthèse" and organise files.
         final Tab gestionTab = new Tab("Gestion");
@@ -92,7 +96,8 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         // Tab to create the final report with cover page and summary table.
         final Tab extractionTab = new Tab(EXTRACTION_TAB);
         extractionTab.setClosable(false);
-        extractionTab.setContent(new ExtractionDocumentsPane(root));
+        extractionPane = new ExtractionDocumentsPane(root);
+        extractionTab.setContent(extractionPane);
 
         // Add created tabs
         tabPane.getTabs().add(syntheseTab);
@@ -150,6 +155,14 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
     public static void setPreviousPath(final Path path, final Class clazz) {
         final Preferences prefs = Preferences.userNodeForPackage(clazz);
         prefs.put(PATH_KEY, path.toAbsolutePath().toString());
+    }
+
+    @Override
+    public void resetContent() {
+        Platform.runLater(() -> {
+            if (horodatageReportPane != null) horodatageReportPane.resetPane();
+            if (extractionPane != null) extractionPane.resetPane();
+        });
     }
 
 }
