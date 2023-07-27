@@ -97,14 +97,33 @@
                                 <Tooltip text="Cochez la case pour charger un document externe."/>
                             </tooltip>
                         </Label>
+                        <CheckBox fx:id="uiIsExternalPage" selected="true" mnemonicParsing="false" GridPane.columnIndex="1"/>
                         <Label fx:id="uiCoverPathLabel" text="Chemin *" GridPane.rowIndex="1">
                             <tooltip>
-                                <Tooltip text="Chemin vers la page de garde externe"/>
+                                <Tooltip text="Chemin vers la page de garde externe. Format PDF."/>
                             </tooltip>
                         </Label>
-                        <CheckBox fx:id="uiIsExternalPage" selected="true" mnemonicParsing="false" GridPane.columnIndex="1"/>
                         <TextField fx:id="uiCoverPath" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                         <Button fx:id="chooseCoverFileButton" mnemonicParsing="false" onAction="#chooseCoverFile" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                        <Label fx:id="uiTitleLabel" text="Titre *" GridPane.rowIndex="2">
+                            <tooltip>
+                                <Tooltip text="Titre en haut de la page de garde"/>
+                            </tooltip>
+                        </Label>
+                        <TextField fx:id="uiTitle" text="Registre" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                        <Label fx:id="uiStructureLabel" text="Structure" GridPane.rowIndex="3">
+                            <tooltip>
+                                <Tooltip text="Nom de la structure"/>
+                            </tooltip>
+                        </Label>
+                        <TextField fx:id="uiStructure" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                        <Label fx:id="uiLogoPathLabel" text="Logo" GridPane.rowIndex="4">
+                            <tooltip>
+                                <Tooltip text="Image au format .PNG, .JPEG ou .JPS"/>
+                            </tooltip>
+                        </Label>
+                        <TextField fx:id="uiLogoPath" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                        <Button fx:id="chooseLogoFileButton" mnemonicParsing="false" onAction="#chooseLogoFile" text="..." GridPane.columnIndex="2" GridPane.rowIndex="4"/>
                     </children>
                     <padding>
                         <Insets bottom="25.0" top="15.0"/>

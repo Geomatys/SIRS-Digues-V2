@@ -409,7 +409,7 @@ public class HorodatageReportPane extends BorderPane {
             }
         } else {
             final List<Digue> digues = digueRepo.getBySystemeEndiguement(se);
-            if (digues.isEmpty()) return null;
+            if (digues.isEmpty()) return new ArrayList<>();
 
             tronconList.addAll(digues.stream().flatMap(digue -> tronconRepo.getByDigue(digue).stream())
                     .collect(Collectors.toList()));

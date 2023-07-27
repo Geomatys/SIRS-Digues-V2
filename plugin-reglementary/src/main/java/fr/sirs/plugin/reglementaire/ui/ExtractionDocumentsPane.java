@@ -19,6 +19,7 @@
 package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
+import fr.sirs.PropertiesFileUtilities;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.model.*;
@@ -31,12 +32,15 @@ import fr.sirs.util.JRXMLUtil;
 import fr.sirs.util.PrinterUtilities;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
@@ -52,14 +56,13 @@ import org.apache.sis.measure.NumberRange;
 import org.apache.sis.util.ArgumentChecks;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
@@ -97,6 +100,9 @@ public class ExtractionDocumentsPane extends BorderPane {
     @FXML private TextField uiTitle;
     @FXML private Label uiStructureLabel;
     @FXML private TextField uiStructure;
+    @FXML private Label uiLogoPathLabel;
+    @FXML private TextField uiLogoPath;
+    @FXML private Button chooseLogoFileButton;
     @FXML private TextField uiConclusionPath;
     @FXML private Button chooseConclusionFileButton;
 
@@ -126,12 +132,8 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported formats for cover and conclusion pages", supportedFormat));
-        uiTitleLabel = new Label("Titre *");
-        uiTitleLabel.setTooltip(new Tooltip("Titre en haut de la page de garde"));
-        uiTitle = new TextField("Registre");
-        uiStructureLabel = new Label("Structure");
-        uiStructureLabel.setTooltip(new Tooltip("Nom de la structure"));
-        uiStructure = new TextField();
+
+        uiCoverGridpane.getChildren().removeAll(uiTitleLabel, uiTitle, uiStructureLabel, uiStructure, uiLogoPathLabel, uiLogoPath, chooseLogoFileButton);
 
         uiGenerateBtn.setTooltip(new Tooltip("Générer le document dynamique"));
         DatePickerConverter.register(uiPeriodeValidityDebut);
@@ -192,12 +194,13 @@ public class ExtractionDocumentsPane extends BorderPane {
                 rowConstraints.remove(i);
             }
             if (newValue) {
-                uiCoverGridpane.getChildren().removeAll(uiTitleLabel, uiTitle, uiStructureLabel, uiStructure);
+                uiCoverGridpane.getChildren().removeAll(uiTitleLabel, uiTitle, uiStructureLabel, uiStructure, uiLogoPathLabel, uiLogoPath, chooseLogoFileButton);
                 uiCoverGridpane.addRow(1, uiCoverPathLabel, uiCoverPath, chooseCoverFileButton);
             } else {
                 uiCoverGridpane.getChildren().removeAll(uiCoverPathLabel, uiCoverPath, chooseCoverFileButton);
                 uiCoverGridpane.addRow(1, uiTitleLabel, uiTitle);
                 uiCoverGridpane.addRow(2, uiStructureLabel, uiStructure);
+                uiCoverGridpane.addRow(4, uiLogoPathLabel, uiLogoPath, chooseLogoFileButton);
             }
         });
     }
@@ -220,7 +223,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         final boolean isExternalCoverPage = uiIsExternalPage.isSelected();
 
         if (isExternalCoverPage) {
-            if (coverPath == null || coverPath.isEmpty()) {
+            if (coverPath.isEmpty()) {
                 showErrorDialog("Veuillez sélectionner un fichier pour la page de garde.");
                 return;
             }
@@ -244,7 +247,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         }
         final String conclusionPath = uiConclusionPath.getText().trim();
         final File conclusionFile;
-        if (conclusionPath != null && !conclusionPath.isEmpty()) {
+        if (!conclusionPath.isEmpty()) {
             if (!conclusionPath.endsWith(".pdf")){
                 showErrorDialog("Le format du fichier de la page de conclusion n'est pas supporté.\n\n" +
                         "Formats supportés :\n" +
@@ -348,7 +351,9 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         pageIncrement = 0;
         if (coverFile == null) {
-            addPageToFiles(filesToMerge, COVER_JRXML_PATH, null, title);
+            if (!addPageToFiles(filesToMerge, COVER_JRXML_PATH, null, title)) {
+                return;
+            }
             pageIncrement++;
         } else {
             filesToMerge.add(coverFile);
@@ -501,7 +506,9 @@ public class ExtractionDocumentsPane extends BorderPane {
                 return true;
             }
             else {
-                return filesToMerge.add(generateCoverPage(title));
+                final File file = generateCoverPage(title);
+                if (file == null) return false;
+                return filesToMerge.add(file);
             }
         } catch (FileNotFoundException e) {
             throw new IllegalStateException("The jrxml file was not found at " + JRXML_PATH, e);
@@ -567,6 +574,20 @@ public class ExtractionDocumentsPane extends BorderPane {
         Map<String, Object> parameters = new HashMap<>();
 
         final String structure = this.uiStructure.getText();
+        final String logoPath = this.uiLogoPath.getText().trim();
+
+        if (!logoPath.isEmpty()) {
+            final String logoLC = logoPath.toLowerCase();
+            if (!logoLC.endsWith(".jpg") && !logoLC.endsWith(".png") && !logoLC.endsWith(".jps")) {
+                PropertiesFileUtilities.showErrorDialog("Format du logoPath non supporté. Seuls les formats PNG, JPEG et JPS sont supportés.", "Logo erreur", 0, 0);
+                return null;
+            }
+            final File file = new File(logoPath);
+            if (!file.exists()) {
+                PropertiesFileUtilities.showErrorDialog("Fichier introuvable : " + logoPath, "Logo erreur", 0, 0);
+                return null;
+            }
+        }
 
         // set report parameters
         parameters.put("title", title);
@@ -574,6 +595,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         parameters.put("dateDebutPicker", uiPeriodeValidityDebut.getValue());
         parameters.put("dateFinPicker", uiPeriodeValidityFin.getValue());
         parameters.put("structure", structure.isEmpty() ? null : structure);
+        parameters.put("logoPath", logoPath.isEmpty() ? null : logoPath);
 
         Path coverPageTmpPath = Files.createTempFile("coverPage", ".pdf");
         try (InputStream input = PrinterUtilities.class.getResourceAsStream(COVER_JRXML_PATH);
@@ -589,19 +611,17 @@ public class ExtractionDocumentsPane extends BorderPane {
 
     /**
      * Event when button chooseCoverFileButton is clicked.
-     * @param event
      */
     @FXML
-    public void chooseCoverFile(ActionEvent event) {
+    public void chooseCoverFile() {
         chooseCoverFile(uiCoverPath);
     }
 
     /**
      * Event when button chooseCoverFileButton is clicked.
-     * @param event
      */
     @FXML
-    public void chooseConclusionFile(ActionEvent event) {
+    public void chooseConclusionFile() {
         chooseCoverFile(uiConclusionPath);
     }
 
@@ -627,6 +647,33 @@ public class ExtractionDocumentsPane extends BorderPane {
             }
         }
         fileChooser.setInitialDirectory(file.getParentFile());
+    }
+
+    /**
+     * Event when button chooseCoverFileButton is clicked.
+     */
+    @FXML
+    public void chooseLogoFile() {
+
+        final Window owner = getParent().getScene().getWindow();
+        final FileChooser logoChooser = new FileChooser();
+        logoChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported formats for cover and conclusion pages", Arrays.asList("*.jpg", "*.jps", "*.png")));
+
+        final File file = logoChooser.showOpenDialog(owner);
+        if (file != null) {
+            uiLogoPath.setText(file.getPath());
+            if (!file.exists()) {
+                showErrorDialog("Le fichier est introuvable : \n" + file.getPath());
+                chooseLogoFile();
+                return;
+            }
+            if (!file.isFile()) {
+                showErrorDialog("Veuillez sélectionner un fichier");
+                chooseLogoFile();
+                return;
+            }
+        }
+        logoChooser.setInitialDirectory(file.getParentFile());
     }
 
     public String setMainFolder() {
@@ -786,6 +833,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         uiCoverPath.setText("");
         uiTitle.setText("Registre");
         uiStructure.setText("");
+        uiLogoPath.setText("");
         uiConclusionPath.setText("");
     }
 }
