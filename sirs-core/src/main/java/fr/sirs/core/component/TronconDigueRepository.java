@@ -31,8 +31,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.sis.util.ArgumentChecks;
-import org.ektorp.ViewQuery;
-import org.ektorp.ViewResult;
 import org.ektorp.support.Views;
 import org.springframework.stereotype.Component;
 
@@ -97,6 +95,10 @@ public class TronconDigueRepository extends AbstractTronconDigueRepository<Tronc
     public List<TronconDigue> getTronconDiguesByAhId(final String ahId) {
         ArgumentChecks.ensureNonNull("Amenagement hydraulique", ahId);
         return this.queryView(AbstractTronconDigueRepository.BY_AH_ID, ahId);
+    }
+
+    public List<TronconDigue> getAllWithNoAh() {
+        return this.queryView(AbstractTronconDigueRepository.BY_AH_ID);
     }
 
     public Set<Photo> getAllTronconPhotos() {

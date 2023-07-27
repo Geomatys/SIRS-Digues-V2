@@ -26,7 +26,6 @@ import fr.sirs.core.model.HorodatageReference;
 import fr.sirs.core.model.RefHorodatageStatus;
 import fr.sirs.plugin.reglementaire.ui.*;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
-import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -106,10 +105,8 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
 
         tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
             if (newValue != null && newValue.equals(syntheseTab)) {
-                Platform.runLater(() -> {
-                    // forces to refresh the Prestation list when prestations have been modified from the PojoTable, the FXPrestationPane or elsewhere.
-                    if (horodatageReportPane != null) horodatageReportPane.refresh();
-                });
+                // forces to refresh the Prestation list when prestations have been modified from the PojoTable, the FXPrestationPane or elsewhere.
+                if (horodatageReportPane != null) horodatageReportPane.refresh();
             }
         });
 
@@ -169,15 +166,8 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
 
     @Override
     public void resetContent() {
-        if (Platform.isFxApplicationThread()) {
-            if (horodatageReportPane != null) horodatageReportPane.resetPane();
-            if (extractionPane != null) extractionPane.resetPane();
-        } else {
-            Platform.runLater(() -> {
-                if (horodatageReportPane != null) horodatageReportPane.resetPane();
-                if (extractionPane != null) extractionPane.resetPane();
-            });
-        }
+        if (horodatageReportPane != null) horodatageReportPane.resetPane();
+        if (extractionPane != null) extractionPane.resetPane();
     }
 
     /**
@@ -185,13 +175,7 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
      * Modify method Session.getOrCreateThemeTab(Theme) to call this method when selecting/unselecting the theme tab for a specific Theme.
      */
     public void refresh() {
-        if (Platform.isFxApplicationThread()) {
-            if (horodatageReportPane != null) horodatageReportPane.refresh();
-        } else {
-            Platform.runLater(() -> {
-                // forces to refresh the Prestation list when prestations have been modified from the PojoTable, the FXPrestationPane or elsewhere.
-                if (horodatageReportPane != null) horodatageReportPane.refresh();
-            });
-        }
+        // forces to refresh the Prestation list when prestations have been modified from the PojoTable, the FXPrestationPane or elsewhere.
+        if (horodatageReportPane != null) horodatageReportPane.refresh();
     }
 }

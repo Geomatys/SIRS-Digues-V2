@@ -308,40 +308,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         }
 
         // sort prestations by dateHorodatage or troncon or date_debut or designation or date_fin.
-        prestationsWithPage.sort((p1, p2) -> {
-            // by timestamp date
-            final LocalDate timeStampDate1 = p1.getHorodatageDate();
-            final LocalDate timeStampDate2 = p2.getHorodatageDate();
-            int result = timeStampDate1.compareTo(timeStampDate2);
-            if (result != 0) return result;
-
-            final Prestation prestation1 = p1.getPrestation();
-            final Prestation prestation2 = p2.getPrestation();
-            // by troncon
-            final String troncon1 = JRXMLUtil.displayLibelleFromId(prestation1.getLinearId(), "TronconDigue");
-            final String troncon2 = JRXMLUtil.displayLibelleFromId(prestation2.getLinearId(), "TronconDigue");
-            result = troncon1.compareTo(troncon2);
-            if (result != 0) return result;
-
-            // by date_debut
-            result = HorodatageReportPane.compareDates(null, null, p1.getDate_debut(), p2.getDate_debut());
-            if (result != 0) return result;
-
-            // by designation
-            final String designation1 = prestation1.getDesignation();
-            final String designation2 = prestation2.getDesignation();
-            if (designation1 == null) {
-                if (designation2 != null) return -1;
-                result = 0;
-            } else if (designation2 == null) {
-                return 1;
-            } else {
-                result = designation1.compareTo(designation2);
-            }
-            if (result != 0) return result;
-
-            return HorodatageReportPane.compareDates(p1.getDate_fin(), p2.getDate_fin(), null, null);
-        });
+        prestationsWithPage.sort((p1, p2) -> comparePrestationsWithPage(p1, p2));
 
         /*
          C.1- Add cover page to final PDF.
@@ -463,6 +430,62 @@ public class ExtractionDocumentsPane extends BorderPane {
 
         disableProperty().bind(generator.runningProperty());
         LoadingPane.showDialog(generator);
+    }
+
+    private static int comparePrestationsWithPage(PrestationWithPage p1, PrestationWithPage p2) {
+        ArgumentChecks.ensureNonNull("prestationWithPage1", p1);
+        ArgumentChecks.ensureNonNull("prestationWithPage2", p2);
+
+        int result = 0;
+        // by timestamp date
+        final LocalDate timeStampDate1 = p1.getHorodatageDate();
+        final LocalDate timeStampDate2 = p2.getHorodatageDate();
+
+        if (timeStampDate1 == null) {
+            if (timeStampDate2 != null) return -1;
+            result = 0;
+        } else if (timeStampDate2 == null) {
+            return 1;
+        } else {
+            result = timeStampDate1.compareTo(timeStampDate2);
+        }
+
+        if (result != 0) return result;
+
+        final Prestation prestation1 = p1.getPrestation();
+        final Prestation prestation2 = p2.getPrestation();
+        // by troncon
+        final String troncon1 = JRXMLUtil.displayLibelleFromId(prestation1.getLinearId(), "TronconDigue");
+        final String troncon2 = JRXMLUtil.displayLibelleFromId(prestation2.getLinearId(), "TronconDigue");
+
+        if (troncon1 == null) {
+            if (troncon2 != null) return -1;
+            result = 0;
+        } else if (troncon2 == null) {
+            return 1;
+        } else {
+            result = troncon1.compareTo(troncon2);
+        }
+        if (result != 0) return result;
+
+        // by date_debut
+        result = HorodatageReportPane.compareDates(p1.getDate_debut(), p2.getDate_debut());
+        if (result != 0) return result;
+
+        // by designation
+        final String designation1 = prestation1.getDesignation();
+        final String designation2 = prestation2.getDesignation();
+        if (designation1 == null) {
+            if (designation2 != null) return -1;
+            result = 0;
+        } else if (designation2 == null) {
+            return 1;
+        } else {
+            result = designation1.compareTo(designation2);
+        }
+        if (result != 0) return result;
+
+        return HorodatageReportPane.compareDates(p1.getDate_fin(), p2.getDate_fin());
     }
 
     private static int getDocPageNumber(File file) {
@@ -773,6 +796,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         private final String syntheseTablePath;
 
         protected PrestationWithPage(final Prestation prestation, final boolean isStartDate) {
+            ArgumentChecks.ensureNonNull("prestation", prestation);
             if (isStartDate) {
                 this.horodatageDate = prestation.getHorodatageStartDate();
                 this.syntheseTablePath = prestation.getSyntheseTablePathStart();

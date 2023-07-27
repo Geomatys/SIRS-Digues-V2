@@ -25,7 +25,6 @@ import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
 
-import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -50,7 +49,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
@@ -109,6 +107,10 @@ public class HorodatageReportPane extends BorderPane {
     static int compareDates(LocalDate dateFin1, LocalDate dateFin2, LocalDate dateDebut1, LocalDate dateDebut2) {
         LocalDate date1     = dateFin1 != null ? dateFin1 : dateDebut1;
         LocalDate date2     = dateFin2 != null ? dateFin2 : dateDebut2;
+        return compareDates(date1, date2);
+    }
+
+    static int compareDates(LocalDate date1, LocalDate date2) {
         if (date1 == null) {
             if (date2 == null) return 0;
             return -1;
@@ -121,7 +123,7 @@ public class HorodatageReportPane extends BorderPane {
     @Autowired
     private Session session;
 
-    private static final String title = "Tableau de synthèse prestation pour Registre horodaté";
+    private static final String TITLE = "Tableau de synthèse prestation pour Registre horodaté";
 
     public HorodatageReportPane() {
         super();
@@ -129,7 +131,7 @@ public class HorodatageReportPane extends BorderPane {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
 
-        uiTitre.setText(title);
+        uiTitre.setText(TITLE);
 
         // Date filter checkbox
         // When the checkbox is unselected, the uiPeriodeDebut and uiPeriodeFin can still be updated.
@@ -286,11 +288,10 @@ public class HorodatageReportPane extends BorderPane {
     static void initSeCombo(final ComboBox<Preview> comboBox) {
         final Previews previewRepository = Injector.getSession().getPreviews();
         // Create sePreviews first and then add elements otherwise it adds the Preview to the previewRepository.
-        final List<Preview> sePreviews = new ArrayList<>();
-        sePreviews.addAll(previewRepository.getByClass(SystemeEndiguement.class));
+        final List<Preview> sePreviews = new ArrayList<>(previewRepository.getByClass(SystemeEndiguement.class));
         final Preview noSEPreview = new Preview();
         noSEPreview.setLibelle("Tronçon(s) sans système d'endiguement actuellement");
-        sePreviews.add(sePreviews.size(), noSEPreview);
+        sePreviews.add(noSEPreview);
         SIRS.initCombo(comboBox, SIRS.observableList(sePreviews).sorted(), null);
     }
 
@@ -384,26 +385,19 @@ public class HorodatageReportPane extends BorderPane {
         SystemeEndiguement se = null;
         final String elementId = sePreview.getElementId();
         if (elementId != null) {
-            try {
-                se = sdRepo.get(elementId);
-            } catch (RuntimeException re) {
-                SIRS.LOGGER.log(Level.WARNING, "Erreur lors de la récupération du Systeme d endiguement avec l id {0}", elementId);
-            }
+            se = sdRepo.get(elementId);
             if (se == null) return null;
         }
 
         final List<TronconDigue> tronconList = new ArrayList<>();
         if (se == null) {
-            final List<TronconDigue> tronconOnDigueWithNoSe = digueRepo.getAll().stream()
-                    .filter(digue -> digue.getSystemeEndiguementId() == null)
+            final List<TronconDigue> tronconOnDigueWithNoSe = digueRepo.getAllWithNoSystemeEndiguement().stream()
                     .flatMap(digue -> tronconRepo.getByDigue(digue).stream())
                     .collect(Collectors.toList());
             if (!tronconOnDigueWithNoSe.isEmpty()) {
                 tronconList.addAll(tronconOnDigueWithNoSe);
             }
-            final List<TronconDigue> tronconWithNoDigue = tronconRepo.getAll().stream()
-                    .filter(troncon -> troncon.getDigueId() == null)
-                    .collect(Collectors.toList());
+            final List<TronconDigue> tronconWithNoDigue = tronconRepo.getAllWithNoAh();
             if (!tronconWithNoDigue.isEmpty()) {
                 tronconList.addAll(tronconWithNoDigue);
             }
@@ -605,13 +599,11 @@ public class HorodatageReportPane extends BorderPane {
         }
         SIRS.openFile(output);
         // Refresh the table to update timestamp status.
-        Platform.runLater(() -> {
-            refresh();
-        });
+        refresh();
     }
 
     public void resetPane() {
-        uiTitre.setText(title);
+        uiTitre.setText(TITLE);
         uiPeriod.setSelected(false);
         uiPeriodeDebut.setValue(null);
         uiPeriodeFin.setValue(null);
