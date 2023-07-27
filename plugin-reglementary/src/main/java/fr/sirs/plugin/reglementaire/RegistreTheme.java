@@ -103,6 +103,16 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         tabPane.getTabs().add(syntheseTab);
         tabPane.getTabs().add(gestionTab);
         tabPane.getTabs().add(extractionTab);
+
+        tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue != null && newValue.equals(syntheseTab)) {
+                Platform.runLater(() -> {
+                    // forces to refresh the Prestation list when prestations have been modified from the PojoTable, the FXPrestationPane or elsewhere.
+                    if (horodatageReportPane != null) horodatageReportPane.refresh();
+                });
+            }
+        });
+
         borderPane.setCenter(tabPane);
         return borderPane;
     }
@@ -165,4 +175,14 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
         });
     }
 
+    /**
+     * Method to be implemented if required to refresh the theme content.
+     * Modify method Session.getOrCreateThemeTab(Theme) to call this method when selecting/unselecting the theme tab for a specific Theme.
+     */
+    public void refresh() {
+        Platform.runLater(() -> {
+            // forces to refresh the Prestation list when prestations have been modified from the PojoTable, the FXPrestationPane or elsewhere.
+            if (horodatageReportPane != null) horodatageReportPane.refresh();
+        });
+    }
 }

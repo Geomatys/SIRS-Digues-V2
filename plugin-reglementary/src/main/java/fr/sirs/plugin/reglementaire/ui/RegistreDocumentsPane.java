@@ -121,7 +121,6 @@ public final class RegistreDocumentsPane extends GridPane {
     protected static final String BUTTON_STYLE = "buttonbar-button";
 
     private static final Image ADDF_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/add_folder.png"));
-    private static final Image ADDD_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/add_doc.png"));
     private static final Image IMP_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/import.png"));
     private static final Image DEL_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/remove.png"));
     private static final Image SET_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/set.png"));
@@ -129,6 +128,7 @@ public final class RegistreDocumentsPane extends GridPane {
     private static final Image HIDE_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/cocher-decocher.png"));
     private static final Image HI_HISH_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/afficher.png"));
     private static final Image SH_HISH_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/masquer.png"));
+    private static final Image PUBLISH_BUTTON_IMAGE = new Image(RegistreTheme.class.getResourceAsStream("images/publish.png"));
 
     private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yyyy");
     public static final String ROOT_FOLDER      = "symadrem.root.folder";
@@ -160,7 +160,7 @@ public final class RegistreDocumentsPane extends GridPane {
         importDocButton.setGraphic(new ImageView(IMP_BUTTON_IMAGE));
         deleteDocButton.setGraphic(new ImageView(DEL_BUTTON_IMAGE));
         setFolderButton.setGraphic(new ImageView(SET_BUTTON_IMAGE));
-        addExtractionButton.setGraphic(new ImageView(ADDD_BUTTON_IMAGE));
+        addExtractionButton.setGraphic(new ImageView(PUBLISH_BUTTON_IMAGE));
         hideFileButton.setGraphic(new ImageView(HIDE_BUTTON_IMAGE));
         if (root.rootShowHiddenFile) {
             hideShowButton.setGraphic(new ImageView(SH_HISH_BUTTON_IMAGE));

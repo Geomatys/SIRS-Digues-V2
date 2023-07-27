@@ -19,7 +19,7 @@
 			<rightPen lineWidth="0.5" lineColor="#000000"/>
 		</box>
 	</style>
-	<style name="Table_CH" mode="Opaque" backcolor="#6D95B6">
+	<style name="Table_CH" mode="Opaque" backcolor="#5681A5">
 		<box>
 			<pen lineWidth="0.5" lineColor="#A4CAEB"/>
 			<topPen lineWidth="0.5" lineColor="#A4CAEB"/>

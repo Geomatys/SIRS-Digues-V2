@@ -122,4 +122,10 @@ public abstract class Theme {
      * Modify method Session.getOrCreateThemeTab(Theme) to call this method when closing the tab for a specific Theme.
      */
     public void resetContent() {}
+
+    /**
+     * Method to be implemented if required to refresh the theme content.
+     * Modify method Session.getOrCreateThemeTab(Theme) to call this method when selecting/unselecting the theme tab for a specific Theme.
+     */
+    public void refresh() {}
 }

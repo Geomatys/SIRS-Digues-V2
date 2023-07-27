@@ -437,6 +437,11 @@ public class Session extends SessionCore {
                     final FXFreeTab tab = new FXFreeTab(theme.getName());
                     if (SirsCore.REGISTRE_THEME_NAME.equals(theme.getName())) {
                         tab.setOnClosed(event -> theme.resetContent());
+                        tab.setOnSelectionChanged(event -> {
+                            if (((FXFreeTab) event.getSource()).isSelected()) {
+                                theme.refresh();
+                            }
+                        });
                     }
                     tab.setContent(parent);
                     tab.selectedProperty().addListener(theme.getSelectedPropertyListener());
