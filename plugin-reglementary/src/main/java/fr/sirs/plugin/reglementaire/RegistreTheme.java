@@ -169,10 +169,15 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
 
     @Override
     public void resetContent() {
-        Platform.runLater(() -> {
+        if (Platform.isFxApplicationThread()) {
             if (horodatageReportPane != null) horodatageReportPane.resetPane();
             if (extractionPane != null) extractionPane.resetPane();
-        });
+        } else {
+            Platform.runLater(() -> {
+                if (horodatageReportPane != null) horodatageReportPane.resetPane();
+                if (extractionPane != null) extractionPane.resetPane();
+            });
+        }
     }
 
     /**
@@ -180,9 +185,13 @@ public final class RegistreTheme extends AbstractPluginsButtonTheme {
      * Modify method Session.getOrCreateThemeTab(Theme) to call this method when selecting/unselecting the theme tab for a specific Theme.
      */
     public void refresh() {
-        Platform.runLater(() -> {
-            // forces to refresh the Prestation list when prestations have been modified from the PojoTable, the FXPrestationPane or elsewhere.
+        if (Platform.isFxApplicationThread()) {
             if (horodatageReportPane != null) horodatageReportPane.refresh();
-        });
+        } else {
+            Platform.runLater(() -> {
+                // forces to refresh the Prestation list when prestations have been modified from the PojoTable, the FXPrestationPane or elsewhere.
+                if (horodatageReportPane != null) horodatageReportPane.refresh();
+            });
+        }
     }
 }
