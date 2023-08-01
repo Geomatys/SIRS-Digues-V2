@@ -15,7 +15,7 @@
 	<parameter name="dateDebutPicker" class="java.time.LocalDate"/>
 	<parameter name="dateFinPicker" class="java.time.LocalDate"/>
 	<parameter name="structure" class="java.lang.String"/>
-	<parameter name="logo" class="java.lang.String"/>
+	<parameter name="logoPath" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -65,9 +65,9 @@
 				<reportElement x="230" y="78" width="95" height="95" uuid="eda533e7-0d2f-4df0-8ef1-b3cce6a63936">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<printWhenExpression><![CDATA[$P{logo} != null]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$P{logoPath} != null]]></printWhenExpression>
 				</reportElement>
-				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
+				<imageExpression><![CDATA[$P{logoPath}]]></imageExpression>
 			</image>
 			<textField>
 				<reportElement x="77" y="22" width="400" height="30" uuid="d66e34c7-f0c4-4354-9de6-31d2aabfb0b6"/>
