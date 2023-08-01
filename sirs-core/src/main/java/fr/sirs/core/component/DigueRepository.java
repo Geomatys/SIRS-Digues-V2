@@ -60,8 +60,16 @@ public class DigueRepository extends AbstractSIRSRepository<Digue> {
         return this.queryView(BY_SYSTEME_ENDIGUEMENT_ID, se.getId());
     }
 
-    public List<Digue> getAllWithNoSystemeEndiguement() {
-        return this.queryView(BY_SYSTEME_ENDIGUEMENT_ID);
+    /**
+     * Method to get all @{@link fr.sirs.core.model.Digue} by their SystemeEndiguement's id.
+     * @param seIds the array of SystemeEndiguements' ids of the @{@link fr.sirs.core.model.SystemeEndiguement}. If one element of the array is null -> get all Digue with no SE.
+     * <p>
+     * To collect only elements with no systemeEndiguementId, then use String[] {null} as method argument.
+     * <p>
+     * @return the list of the@{@link fr.sirs.core.model.Digue}
+     */
+    public List<Digue> getBySystemeEndiguementIds(final String... seIds) {
+        return this.queryView(BY_SYSTEME_ENDIGUEMENT_ID, seIds);
     }
 }
 

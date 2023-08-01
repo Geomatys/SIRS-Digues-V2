@@ -390,23 +390,12 @@ public class HorodatageReportPane extends BorderPane {
         }
 
         final List<TronconDigue> tronconList = new ArrayList<>();
-        if (se == null) {
-            final List<TronconDigue> tronconOnDigueWithNoSe = digueRepo.getAllWithNoSystemeEndiguement().stream()
-                    .flatMap(digue -> tronconRepo.getByDigue(digue).stream())
-                    .collect(Collectors.toList());
-            if (!tronconOnDigueWithNoSe.isEmpty()) {
-                tronconList.addAll(tronconOnDigueWithNoSe);
-            }
-            final List<TronconDigue> tronconWithNoDigue = tronconRepo.getAllWithNoAh();
-            if (!tronconWithNoDigue.isEmpty()) {
-                tronconList.addAll(tronconWithNoDigue);
-            }
-        } else {
-            final List<Digue> digues = digueRepo.getBySystemeEndiguement(se);
-            if (digues.isEmpty()) return new ArrayList<>();
 
-            tronconList.addAll(digues.stream().flatMap(digue -> tronconRepo.getByDigue(digue).stream())
-                    .collect(Collectors.toList()));
+        // new String[] {elementId} in case elementId is null.
+        tronconList.addAll(digueRepo.getBySystemeEndiguementIds(new String[] {elementId}).stream().flatMap(digue -> tronconRepo.getByDigue(digue).stream())
+                .collect(Collectors.toList()));
+        if (se == null) {
+            tronconList.addAll(tronconRepo.getByDigueIds(new String[] {null}));
         }
 
         return tronconList.stream()

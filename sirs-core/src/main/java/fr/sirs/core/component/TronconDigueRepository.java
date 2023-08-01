@@ -41,11 +41,13 @@ import org.springframework.stereotype.Component;
 @Views({
     @View(name = AbstractTronconDigueRepository.STREAM_LIGHT, map = "classpath:TronconDigueLight-map.js"),
     @View(name = AbstractTronconDigueRepository.ALL_TRONCON_IDS, map = "classpath:TronconDigue_ids.js"),
-    @View(name = AbstractTronconDigueRepository.BY_AH_ID, map = "classpath:TronconDigue-ah-map.js")
+    @View(name = AbstractTronconDigueRepository.BY_AH_ID, map = "classpath:TronconDigue-ah-map.js"),
+    @View(name=TronconDigueRepository.BY_DIGUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}")
 })
-@Component
+@Component("fr.sirs.core.component.TronconDigueRepository")
 public class TronconDigueRepository extends AbstractTronconDigueRepository<TronconDigue> {
 
+    public static final String BY_DIGUE_ID = "tronconByDigueId";
     @Autowired
     private TronconDigueRepository(CouchDbConnector db) {
         super(db, TronconDigue.class);
@@ -97,8 +99,16 @@ public class TronconDigueRepository extends AbstractTronconDigueRepository<Tronc
         return this.queryView(AbstractTronconDigueRepository.BY_AH_ID, ahId);
     }
 
-    public List<TronconDigue> getAllWithNoAh() {
-        return this.queryView(AbstractTronconDigueRepository.BY_AH_ID);
+    /**
+     * Method to get all @{@link TronconDigue} by their Digue's id.
+     * @param digueIds the array of digues' ids. if one element of the array is "null" -> get all TronconDigue with no Digue.
+     * <p>
+     * To collect only elements with no DigueId, then use String[] {null} as method argument.
+     * <p>
+     * @return the list of the @{@link TronconDigue}
+     */
+    public List<TronconDigue> getByDigueIds(final String... digueIds) {
+        return this.queryView(BY_DIGUE_ID, digueIds);
     }
 
     public Set<Photo> getAllTronconPhotos() {
