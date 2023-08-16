@@ -51,9 +51,9 @@
 		</band>
 	</pageHeader>
 	<detail>
-		<band height="251" splitType="Stretch">
+		<band height="470" splitType="Stretch">
 			<textField>
-				<reportElement x="2" y="190" width="550" height="50" uuid="9fcf24bd-2118-403e-b8f8-1eecf203d7c7">
+				<reportElement x="2" y="69" width="550" height="50" uuid="9fcf24bd-2118-403e-b8f8-1eecf203d7c7">
 					<printWhenExpression><![CDATA[$P{structure} != null]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -62,7 +62,7 @@
 				<textFieldExpression><![CDATA[$P{structure}]]></textFieldExpression>
 			</textField>
 			<image>
-				<reportElement x="230" y="78" width="95" height="95" uuid="eda533e7-0d2f-4df0-8ef1-b3cce6a63936">
+				<reportElement x="182" y="170" width="190" height="190" uuid="eda533e7-0d2f-4df0-8ef1-b3cce6a63936">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[$P{logoPath} != null]]></printWhenExpression>

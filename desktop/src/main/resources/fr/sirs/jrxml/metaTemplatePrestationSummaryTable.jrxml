@@ -179,11 +179,12 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="80" uuid="8fd27a15-4501-46ca-a309-ea95af16229e">
+					<jr:column width="105" uuid="8fd27a15-4501-46ca-a309-ea95af16229e">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="prestation.libelle"/>
 						<jr:columnHeader style="Table_CH" height="29" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="80" height="29" forecolor="#FFFFFF" uuid="0963a429-4977-4f22-8a64-7fd1c49beefb"/>
+								<reportElement x="0" y="0" width="105" height="29" forecolor="#FFFFFF" uuid="0963a429-4977-4f22-8a64-7fd1c49beefb"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -192,7 +193,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="15" isPrintWhenDetailOverflows="true" uuid="67e1faf2-345c-4df6-84c6-5cda38f0b513"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="105" height="15" isPrintWhenDetailOverflows="true" uuid="67e1faf2-345c-4df6-84c6-5cda38f0b513"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -200,12 +201,12 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="170" uuid="4dc90b0e-7287-456b-a8ff-0507be47a429">
+					<jr:column width="130" uuid="4dc90b0e-7287-456b-a8ff-0507be47a429">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="tronconLibelle"/>
 						<jr:columnHeader style="Table_CH" height="29" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="170" height="29" forecolor="#FFFFFF" uuid="07a3e61a-d324-4a9a-8b3b-fa82a8f1dbfa">
+								<reportElement x="0" y="0" width="130" height="29" forecolor="#FFFFFF" uuid="07a3e61a-d324-4a9a-8b3b-fa82a8f1dbfa">
 									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 								</reportElement>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -216,7 +217,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="170" height="15" isPrintWhenDetailOverflows="true" uuid="e1dcbabe-ac86-42fc-a241-38ad01135621"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="130" height="15" isPrintWhenDetailOverflows="true" uuid="e1dcbabe-ac86-42fc-a241-38ad01135621"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -339,12 +340,12 @@ début]]></text>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="150" uuid="5c2b9625-c37f-4281-9611-13e244ee20e3">
+					<jr:column width="165" uuid="5c2b9625-c37f-4281-9611-13e244ee20e3">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="commentaire"/>
 						<jr:columnHeader style="Table_CH" height="29" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="150" height="29" forecolor="#FFFFFF" uuid="9c2352fc-9734-4242-a50b-9e5ff979df0c"/>
+								<reportElement x="0" y="0" width="165" height="29" forecolor="#FFFFFF" uuid="9c2352fc-9734-4242-a50b-9e5ff979df0c"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="7"/>
 								</textElement>
@@ -353,7 +354,7 @@ début]]></text>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="15">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="150" height="15" isPrintWhenDetailOverflows="true" uuid="6453119b-3084-410e-bc59-271af0590611">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="165" height="15" isPrintWhenDetailOverflows="true" uuid="6453119b-3084-410e-bc59-271af0590611">
 									<property name="com.jaspersoft.studio.unit.firstLineIndent" value="px"/>
 									<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 									<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>

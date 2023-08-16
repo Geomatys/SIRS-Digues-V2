@@ -133,7 +133,7 @@ public class PDFUtils {
             final int pageNb = doc.getNumberOfPages();
             for (PDPage page : doc.getPages()) {
                 PDRectangle pageSize = page.getMediaBox();
-                float stringWidth = font.getStringWidth("page 900 / " + pageNb) * fontSize / 1000f;
+                float stringWidth = font.getStringWidth("900 / " + pageNb) * fontSize / 1000f;
                 if (forceRotatePortrait) page.setRotation(0);
 
                 int rotation = page.getRotation();
@@ -165,7 +165,7 @@ public class PDFUtils {
                     } else {
                         contentStream.setTextMatrix(Matrix.getTranslateInstance(xStart, yStart));
                     }
-                    contentStream.showText("page " + i + " / " + pageNb);
+                    contentStream.showText(i + " / " + pageNb);
                     contentStream.endText();
                     i++;
                 } catch (RuntimeException e) {
