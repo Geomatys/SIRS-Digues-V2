@@ -6,6 +6,7 @@ Rem -----------------------------------------
 
 Rem    Entrez le chemin pour accéder au projet SIRS ici
 set pathToProject="C:\Program Files\SIRS2"
+Rem set pathToProject="%userprofile%\AppData\Local\SIRS2"
 
 
 Rem    Ne pas éditer le reste
@@ -39,7 +40,12 @@ set /p alias="Entrez un alias pour le certificat: "
 Rem Path to cacerts file relative to the project folder.
 set relativePathToCacerts=\runtime\lib\security\cacerts
 
-keytool -importcert -noprompt -trustcacerts -alias %alias% -file %pathToCertificate% -keystore %pathToProject%%relativePathToCacerts% -storepass changeit
+cd C:\
+FOR /F "tokens=*" %%g IN ('where java') do (SET JAVA_BIN_EXE=%%g)
+
+set JAVA_BIN=%JAVA_BIN_EXE:~0,-8%
+
+%JAVA_BIN%\keytool -importcert -noprompt -trustcacerts -alias %alias% -file %pathToCertificate% -keystore %pathToProject%%relativePathToCacerts% -storepass changeit
 
 :END
 
