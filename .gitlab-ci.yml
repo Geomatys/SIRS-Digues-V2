@@ -20,13 +20,14 @@ variables:
   GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
 
 build-linux:
-  image: images.geomatys.com/ci/maven:sirs
+  image: images.geomatys.com/ci/maven:jdk8-liberica-fx
   stage: build
   rules:
     - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_TAG != null
   script:
     # Import certificate to fulfill part 5 of the readme
-    - keytool -importcert -file $CERTIFICATE -alias certificate -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit -noprompt
+    # Commented out since part 5 has been removed, uncomment if issue resurfaces
+    # - keytool -importcert -file $CERTIFICATE -alias certificate -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit -noprompt
     # Do a clean build
     - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -Pall
     # Build native JFX packages
