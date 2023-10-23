@@ -207,6 +207,19 @@ public class FXValidationPane extends BorderPane {
         tronconColumn.setEditable(false);
         table.getColumns().add(tronconColumn);
 
+        // Redmine-7961 : Ajout Colonne Date de dernière mise à jour
+        final TableColumn<Preview, String> lastUpdateColumn = new TableColumn<>("Dernière mise à jour");
+        lastUpdateColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
+            final Preview value = param.getValue();
+            if (value != null) {
+                final LocalDate dateMaj = value.getDateMaj();
+                return new SimpleObjectProperty(dateMaj);
+            }
+            return null;
+        });
+        lastUpdateColumn.setEditable(false);
+        table.getColumns().add(lastUpdateColumn);
+
 
         table.getColumns().add(new ValidColumn());
 

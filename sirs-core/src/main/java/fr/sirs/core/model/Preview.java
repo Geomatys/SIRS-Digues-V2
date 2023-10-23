@@ -38,7 +38,7 @@ import java.time.LocalDate;
  * @author Alexis Manin (Geomatys)
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class Preview implements AvecFinTemporelle, AvecLibelle, Comparable {
+public class Preview implements AvecFinTemporelle, AvecLibelle, Comparable, AvecDateMaj {
 
     @JsonProperty("docId")
     private String docId;
@@ -173,6 +173,7 @@ public class Preview implements AvecFinTemporelle, AvecLibelle, Comparable {
                 ", date_fin=" + date_fin +
                 ", designationProperty=" + designationProperty +
                 ", libelleProperty=" + libelleProperty +
+                ", dateMaj=" + dateMaj +
                 '}';
     }
 
@@ -190,6 +191,25 @@ public class Preview implements AvecFinTemporelle, AvecLibelle, Comparable {
     @Override
     public void setLibelle(String libelle) {
         libelleProperty.set(libelle);
+    }
+
+    @JsonProperty("dateMaj")
+    private final ObjectProperty<LocalDate>  dateMaj = new SimpleObjectProperty<>();
+    @Override
+    public ObjectProperty<LocalDate> dateMajProperty() {
+        return dateMaj;
+    }
+
+    @Override
+    @JsonSerialize(using=LocalDateSerializer.class)
+    public LocalDate getDateMaj() {
+        return dateMaj.get();
+    }
+
+    @Override
+    @JsonDeserialize(using= LocalDateDeserializer.class)
+    public void setDateMaj(LocalDate dateMaj) {
+        this.dateMaj.set(dateMaj);
     }
 
     /**

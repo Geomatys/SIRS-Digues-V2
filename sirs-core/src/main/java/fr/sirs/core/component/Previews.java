@@ -88,7 +88,7 @@ public class Previews extends CouchDbRepositorySupport<Preview> implements Docum
 
     public static final String BY_ID = "previewsWithDate";
     public static final String BY_CLASS = "designationWithDate";
-    public static final String VALIDATION = "validation";
+    public static final String VALIDATION = "validationWithMajDate";
 
     @Autowired
     private Previews(CouchDbConnector couchDbConnector) {
