@@ -43,6 +43,8 @@ import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.FXPreviewToElementTableColumn;
 import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.SirsStringConverter;
+
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
