@@ -56,6 +56,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -1516,6 +1517,9 @@ public class PojoTable extends BorderPane implements Printable {
                         if (Desordre.class.isAssignableFrom(pojoClass)) {
                             allValues.forEach(value -> {
                                 final ObservableList<Observation> observations = ((Desordre) value).getObservations();
+//                                observations.addListener( ->  {
+//
+//                                });
                                 Collections.sort(observations, OBSERVATION_COMPARATOR);
                             });
                         }
@@ -1723,6 +1727,18 @@ public class PojoTable extends BorderPane implements Printable {
             if (obj == null) {
                 return;
             }
+            final Object source = event.getSource();
+            if (source != null && source instanceof ObservationPropertyColumn) {
+                final ObservationPropertyColumn obsColumn = (ObservationPropertyColumn) source;
+                final AbstractObservation observation = ((AvecObservations) obj).getObservations().get(obsColumn.getObsOrder());
+                try {
+                    obsColumn.writterMethod.invoke(observation, event.getNewValue());
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    SIRS.fxRun(false, () -> new Growl(Growl.Type.WARNING, "Erreur lors de la mise à jour de l'élément.").showAndFade());
+                    throw new IllegalStateException("Error while updating pojo", e);
+                }
+            }
+
             repo.update(obj);
         }
     }
@@ -2302,20 +2318,20 @@ public class PojoTable extends BorderPane implements Printable {
                 // On conditionne a priori l'édition au fait que la méthode de lecture n'est pas indiquée comme autocalculée.
                 isEditable = !readMethod.isAnnotationPresent(Computed.class);
 
-                setCellFactory(param -> {
-                    final ObservationTableCell tableCell = new ObservationTableCell();
-                    final int index = tableCell.getIndex();
-                    final Element element = this.getTableView().getItems().get(index);
-                    if (Desordre.class.isAssignableFrom(element.getClass())) {
-                        final Desordre desordre = (Desordre) element;
-                        final ObservableList<Observation> observations = desordre.getObservations();
-                        if (obsOrder <= observations.size()) {
-                            tableCell.setObservationId(observations.get(obsOrder - 1).getId());
-                        }
-                    }
-                    tableCell.setEditable(true);
-                    return tableCell;
-                });
+//                setCellFactory(param -> {
+//                    final ObservationTableCell tableCell = new ObservationTableCell();
+//                    final int index = tableCell.getIndex();
+//                    final Element element = this.getTableView().getItems().get(index);
+//                    if (Desordre.class.isAssignableFrom(element.getClass())) {
+//                        final Desordre desordre = (Desordre) element;
+//                        final ObservableList<Observation> observations = desordre.getObservations();
+//                        if (obsOrder <= observations.size()) {
+//                            tableCell.setObservationId(observations.get(obsOrder - 1).getId());
+//                        }
+//                    }
+//                    tableCell.setEditable(true);
+//                    return tableCell;
+//                });
                 final Class type = readMethod.getReturnType();
                 if (Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
@@ -2454,48 +2470,60 @@ public class PojoTable extends BorderPane implements Printable {
                 ((WritableValue) value).setValue(newValue);
                 final Class<?> rowClass = rowElement.getClass();
 
-                //On recalcule les coordonnées si la colonne modifiée correspond à une des propriétées de coordonnées géo ou linéaire.
-                String modifiedPropretieName = ((PojoTable.PropertyColumn) col).getName();
-                if ((rowElement != null) && (Positionable.class.isAssignableFrom(rowClass))) {
+//                if (col instanceof PojoTable.ObservationPropertyColumn) {
+//                    // TODO modify way to edit value
+//                    elementEdited(event);
+//                } else {
+                    //On recalcule les coordonnées si la colonne modifiée correspond à une des propriétées de coordonnées géo ou linéaire.
+                    String modifiedPropretieName = ((PojoTable.AbstractPropertyColumn) col).getName();
+                    if ((rowElement != null) && (Positionable.class.isAssignableFrom(rowClass))) {
 
-                    ConvertPositionableCoordinates.computeForModifiedPropertie((Positionable) rowElement, modifiedPropretieName);
+                        ConvertPositionableCoordinates.computeForModifiedPropertie((Positionable) rowElement, modifiedPropretieName);
 
-                }
+                    }
 
-                if (rowElement instanceof Prestation) {
+                    if (rowElement instanceof Prestation) {
 
-                    Prestation prestation = (Prestation) rowElement;
-                    // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
-                    if ("typePrestationId".equals(modifiedPropretieName)
-                            && (newValue instanceof String && !newValue.equals(oldValue))) {
-                        FXPrestationPane.autoSelectRegistre(prestation, (String) newValue);
-                    } else if (SirsCore.DATE_FIN_FIELD.equals(modifiedPropretieName)) {
-                        // REDMINE 7782 - when changing prestation's end validity date, check the end timestamp date and show warnings if necessary.
-                        final String refHoroId = prestation.getHorodatageStatusId();
+                        Prestation prestation = (Prestation) rowElement;
+                        // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
+                        if ("typePrestationId".equals(modifiedPropretieName)
+                                && (newValue instanceof String && !newValue.equals(oldValue))) {
+                            FXPrestationPane.autoSelectRegistre(prestation, (String) newValue);
+                        } else if (SirsCore.DATE_FIN_FIELD.equals(modifiedPropretieName)) {
+                            // REDMINE 7782 - when changing prestation's end validity date, check the end timestamp date and show warnings if necessary.
+                            final String refHoroId = prestation.getHorodatageStatusId();
 
-                        // prestation in the SE's registre :
-                        // - if "Non horodaté" -> no message, no effect
-                        // - if "En attente" -> message to warn the user it is "En attente" and ask if reset status to "Non horodaté"
-                        // - if "Horodaté" and "date d'horodatage de fin" not null -> message to warn the user it has already been timestamped for the end date
-                        //   and ask if reset status to "Non horodaté"
-                        if (prestation.getRegistreAttribution() && !HorodatageReference.getRefNonTimeStampedStatus().equals(refHoroId)) {
-                            final StringBuilder message = FXPrestationPane.constructMessage(refHoroId, prestation.getHorodatageEndDate());
+                            // prestation in the SE's registre :
+                            // - if "Non horodaté" -> no message, no effect
+                            // - if "En attente" -> message to warn the user it is "En attente" and ask if reset status to "Non horodaté"
+                            // - if "Horodaté" and "date d'horodatage de fin" not null -> message to warn the user it has already been timestamped for the end date
+                            //   and ask if reset status to "Non horodaté"
+                            if (prestation.getRegistreAttribution() && !HorodatageReference.getRefNonTimeStampedStatus().equals(refHoroId)) {
+                                final StringBuilder message = FXPrestationPane.constructMessage(refHoroId, prestation.getHorodatageEndDate());
 
-                            final Optional optional = PropertiesFileUtilities.showConfirmationDialog(message.toString(), "Modification date de fin", 600, 450, true);
-                            if (optional.isPresent()) {
-                                final Object result = optional.get();
-                                if (ButtonType.YES.equals(result)) {
-                                    prestation.setHorodatageStatusId(HorodatageReference.getRefNonTimeStampedStatus());
-                                } else if (ButtonType.NO.equals(result)) {
-                                    // do nothing
-                                } else if (ButtonType.CANCEL.equals(result)) {
-                                    prestation.setDate_fin((LocalDate) oldValue);
+                                final Optional optional = PropertiesFileUtilities.showConfirmationDialog(message.toString(), "Modification date de fin", 600, 450, true);
+                                if (optional.isPresent()) {
+                                    final Object result = optional.get();
+                                    if (ButtonType.YES.equals(result)) {
+                                        prestation.setHorodatageStatusId(HorodatageReference.getRefNonTimeStampedStatus());
+                                    } else if (ButtonType.NO.equals(result)) {
+                                        // do nothing
+                                    } else if (ButtonType.CANCEL.equals(result)) {
+                                        prestation.setDate_fin((LocalDate) oldValue);
+                                    }
                                 }
                             }
                         }
-                    }
+//                    }
                 }
+                    if (rowElement instanceof AvecObservations) {
+                        AvecObservations avecObs = (AvecObservations) rowElement;
+                        // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
+                        if ("date".equals(modifiedPropretieName)
+                                && (newValue instanceof String && !newValue.equals(oldValue))) {
 
+                        }
+                    }
                 // HACK - Redmine 6449 : Deal with the 1-n relation.
                 // For now, in the app, this type of relation only exists between the EvenementHydraulique and :
                 // - MonteeEaux
