@@ -61,7 +61,7 @@
       <artifactId>org.ektorp.spring</artifactId>
       <version>${ektorp.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-feature-store</artifactId>
@@ -97,7 +97,7 @@
       <artifactId>geotk-widgets-javafx</artifactId>
       <version>${geotoolkit.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
@@ -137,7 +137,7 @@
       <artifactId>geotk-h2</artifactId>
       <version>${geotoolkit.h2.version}</version>
     </dependency>
-    
+
         <!-- JAI -->
     <dependency>
       <groupId>javax.media</groupId>
@@ -154,14 +154,14 @@
       <artifactId>jai_imageio</artifactId>
       <version>${jai-io.version}</version>
     </dependency>
-    
+
     <!-- Proxy analysis / configuration -->
     <dependency>
         <groupId>com.github.markusbernhardt</groupId>
         <artifactId>proxy-vole</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.5</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.apache.odftoolkit</groupId>
       <artifactId>simple-odf</artifactId>
@@ -177,7 +177,7 @@
         <groupId>org.apache.pdfbox</groupId>
         <artifactId>pdfbox</artifactId>
     </dependency>
-    
+
     <dependency>
         <groupId>org.apache.sis.core</groupId>
         <artifactId>sis-utility</artifactId>

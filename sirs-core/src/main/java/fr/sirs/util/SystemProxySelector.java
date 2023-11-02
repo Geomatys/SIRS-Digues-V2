@@ -19,6 +19,7 @@
 package fr.sirs.util;
 
 import com.github.markusbernhardt.proxy.ProxySearch;
+import com.github.markusbernhardt.proxy.selector.misc.BufferedProxySelector;
 import com.sun.javafx.PlatformUtil;
 import fr.sirs.core.SirsCore;
 import java.io.IOException;
@@ -45,7 +46,7 @@ public class SystemProxySelector extends ProxySelector {
 
         public SystemProxySelector() {
             ProxySearch ps = ProxySearch.getDefaultProxySearch();
-            ps.setPacCacheSettings(32, 300000); // keep at most 32 uri configuration in cache for 5 minutes max.
+            ps.setPacCacheSettings(32, 300000L, BufferedProxySelector.CacheScope.CACHE_SCOPE_URL); // keep at most 32 uri configuration in cache for 5 minutes max.
 
             if (PlatformUtil.isWindows()) {
                 ps.addStrategy(ProxySearch.Strategy.IE);
