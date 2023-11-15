@@ -1,5 +1,5 @@
 <%@ jet package="fr.sirs.couchdb.generator"
-class="RepositoryGenerator" imports ="java.util.Iterator org.eclipse.emf.ecore.* org.eclipse.emf.common.util.EList;" %>
+class="RepositoryGenerator" imports ="java.util.* org.eclipse.emf.ecore.* org.eclipse.emf.common.util.EList;" %>
 
 <% RepositoryHelper helper = (RepositoryHelper) argument; %>
 
@@ -11,9 +11,12 @@ import <%= imp %>;
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
+import fr.sirs.core.model.*;
+import javafx.collections.ObservableList;
 
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
+import org.ektorp.Options;
 import org.springframework.beans.factory.annotation.Autowired;
 
 <% 
@@ -25,11 +28,15 @@ import org.springframework.stereotype.Component;
 %>
 import <%= helper.getModelQualifiedClassName() %>;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /**
  * Outil g�rant les �changes avec la bdd CouchDB pour tous les objets <%= helper.getClassName() %>.
  * 
  * @author Olivier Nouguier (Geomatys)
  * @author Alexis Manin     (Geomatys)
+ * @author Estelle Idée     (Geomatys)
  */
 
 <% 
@@ -61,6 +68,42 @@ AbstractSIRSRepository
 <%
 }
 %><<%= helper.getClassName() %>> <%= helper.getImplements()%>{
+
+
+<%
+
+final Map<EClass, List<EReference>> r1nReferences = new HashMap<>();
+
+for(EClass eClass: helper.getTypeTree() ) {
+
+
+    final List<EReference> cbRefs = new ArrayList<>();
+
+    for(EReference eRef: eClass.getEReferences() ) {
+        // We want to collect all reference 1 - n.
+        final EReference oppositeRef = eRef.getEOpposite();
+
+        if (oppositeRef != null && oppositeRef.isContainment()) {
+            continue;
+        }
+        if (Helper.isComboBoxReference(eRef) && eRef.isUnique() && eRef.getEOpposite() != null) {
+                cbRefs.add(eRef);
+        }
+    }
+
+    if (!cbRefs.isEmpty()) {
+        r1nReferences.put(eClass, cbRefs);
+    }
+}
+
+if (!r1nReferences.isEmpty()) {
+%>
+
+    @Autowired
+    private SessionCore session;
+<%
+}
+%>
         
     @Autowired
     private <%= helper.getRepositoryClassName() %> ( CouchDbConnector db) {
@@ -72,5 +115,77 @@ AbstractSIRSRepository
     public <%= helper.getClassName() %> create() {
         return InjectorCore.getBean(SessionCore.class).getElementCreator().createElement(<%= helper.getClassName() %>.class);
     }
-}
 
+<%
+if (!r1nReferences.isEmpty()) {
+%>
+    @Override
+    public void update(final <%= helper.getClassName() %> entity) {
+        update1NRelations(entity);
+        super.update(entity);
+    }
+
+    /**
+     * Method to automatically update the elements linked to this element via a 1-n relation.
+     *
+     * @param entity : the entity to update the 1-n relations for.
+     */
+    @Override
+    protected void update1NRelations(final <%= helper.getClassName() %> entity) {
+        final String id = entity.getId();
+        <%
+            for (Map.Entry<EClass, List<EReference>> r1nRef : r1nReferences.entrySet()) {
+
+                for(EReference eRef: r1nRef.getValue()) {
+                    EReference eOpp = eRef.getEOpposite();
+                    String eRefClassName = helper.getClassName(eRef);
+                    String eRefLittleName = Helper.lcFirst(eRefClassName);
+                    String className = helper.getClassName();
+                    String eRefName = Helper.ucFirst(eRef.getName());
+                    String eOppClassName = helper.getClassName(eOpp);
+        %>
+
+        // Update the relation 1-n with <%= eRefClassName %>.
+        {
+            final <%= className %> previousVersion = id == null ? null : get(entity.getId(), new Options().revision(entity.getRevision()));
+            final String old<%= eRefName %> = previousVersion != null ? previousVersion.get<%= eRefName %>() : null;
+            final String new<%= eRefName %> = entity.get<%= eRefName %>();
+
+            final boolean updateOld<%= eRefClassName %> = old<%= eRefClassName %>Id != null && !old<%= eRefClassName %>Id.equals(new<%= eRefClassName %>Id);
+            final boolean updateNew<%= eRefClassName %> = new<%= eRefClassName %>Id != null && !new<%= eRefClassName %>Id.equals(old<%= eRefClassName %>Id);
+            final AbstractSIRSRepository<<%= eRefClassName %>> <%= eRefLittleName %>Repo = session.getRepositoryForClass(<%= eRefClassName %>.class);
+
+            if (updateOld<%= eRefClassName %>) {
+                // Update the previously selected <%= eRefClassName %> to reflect the 1 - n relation.
+                final <%= eRefClassName %> old<%= eRefClassName %> = <%= eRefLittleName %>Repo.get(old<%= eRefClassName %>Id);
+
+                if (old<%= eRefClassName %> != null) {
+                    final ObservableList<String> old<%= eOppClassName %><%= eOppClassName %>Ids = old<%= eRefClassName %>.get<%= eOppClassName %>Ids();
+                    old<%= eOppClassName %><%= eOppClassName %>Ids.remove(id);
+                    <%= eRefLittleName %>Repo.update(old<%= eRefClassName %>);
+                }
+            }
+
+            if (updateNew<%= eRefClassName %>) {
+                // Update the newly selected <%= eRefClassName %> to reflect the 1 - n relation.
+                final <%= eRefClassName %> new<%= eRefClassName %> = <%= eRefLittleName %>Repo.get(new<%= eRefClassName %>Id);
+
+                if (new<%= eRefClassName %> != null) {
+                    final ObservableList<String> new<%= eOppClassName %><%= eOppClassName %>Ids = new<%= eRefClassName %>.get<%= eOppClassName %>Ids();
+                    if (!new<%= eOppClassName %><%= eOppClassName %>Ids.contains(id)) {
+                        new<%= eOppClassName %><%= eOppClassName %>Ids.add(id);
+                        <%= eRefLittleName %>Repo.update(new<%= eRefClassName %>);
+                    }
+                }
+            }
+        }
+<%
+            }
+        }
+
+%>
+    }
+<%
+}
+%>
+}

@@ -18,7 +18,11 @@
  */
 package fr.sirs.couchdb.generator;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RepositoryHelper extends Helper {
     
@@ -81,6 +85,16 @@ public class RepositoryHelper extends Helper {
         if (customized)
             return super.getClassName() + "RepositoryGen";
         return super.getClassName() + "Repository";
+    }
+
+    public List<EClass> getTypeTree() {
+        final List<EClass> eClasses = new ArrayList<>();
+        eClasses.add(eClass);
+        for (final EClass e : eClass.getEAllSuperTypes()) {
+            if (!POSITIONABLE_CLASS_NAME.equals(e.getName()) && !POSITIONABLE_VEGETATION_CLASS_NAME.equals(e.getName()))
+                eClasses.add(e);
+        }
+        return eClasses;
     }
 
 }

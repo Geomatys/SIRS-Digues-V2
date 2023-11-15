@@ -23,12 +23,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import fr.sirs.core.CacheRules;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
-import fr.sirs.core.model.AvecDateMaj;
-import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Identifiable;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.ReferenceType;
+import fr.sirs.core.model.*;
 import fr.sirs.util.ClosingDaemon;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.util.StreamingIterable;
@@ -242,6 +237,9 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
             }
             cachedBulkList.add(entity);
         }
+        for (T t : cachedBulkList) {
+            update1NRelations(t);
+        }
         final List<DocumentOperationResult> result = db.executeBulk(cachedBulkList);
 
         // Avant de renvoyer le résultat, il faut ajouter au cache les entités qui n'avaient pas d'ID et qui en ont maintenant un après leur premier enregistrement.
@@ -250,6 +248,17 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
             cache.put(e.getId(), e);
         }
         return result;
+    }
+
+    /**
+     * overriden by the .jet to be specific to each Class containing at least one 1-n relation.
+     * Exemple : LaisseCrue, LigneEau and MonteeEaux that contain the reference "evenementHydrauliqueId".
+     * And EvenementHydraulique contains the opposite references : laisseCrueIds, MonteeEauxIds and LigneEauIds.
+     *
+     * @param entity : the entity to update the 1-n relations for.
+     */
+    protected void update1NRelations(final T entity) {
+        // Do something only for Class containing at least one 1-n relation.
     }
 
     /**
