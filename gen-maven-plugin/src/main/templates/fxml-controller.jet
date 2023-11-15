@@ -353,67 +353,6 @@ else if (helper.isParcelleVegetation()){
 %>
         ui_<%= eRef.getName()  %>.disableProperty().bind(disableFieldsProperty());
 <%
-            /*
-             Si on a une référence bidirectionnelle 1-N, il faut mettre à jour
-             l'entité précedemment sélectionnée et la nouvelle entité sélectionnée
-             de manière à ce que l'ancienne oublie l'association avec l'élément
-             courant et que la nouvelle ajoute l'association nouvellement créée
-             dans l'autre sens de navigation.
-            */
-            if(eRef.isUnique() && eRef.getEOpposite()!=null && eRef.getEOpposite().isMany()) {
-%>
-        // Gestion réciproque de l'association 1-N
-        // WARNING Me semble buggué TODO s'assurer du retour notament de l'ajout d'un écouteur pour prendre en compte les modifications (exemple suppression) du côté N de la relation.
-        ui_<%= eRef.getName()  %>.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                final <%= helper.getClassName() %> element = elementProperty().get();
-                if(element!=null){
-                    /*
-                    Retrait de l'identifiant de l'élément courant de la liste des
-                    identifiants contenue dans l'ancienne entité précédemment sélectionnée
-                    dans la liste déroulante.
-                    */
-                    if(oldValue instanceof Preview){
-                        // Récupération de l'ancienne entité sélectionnée.
-                        final Preview oldPreview = (Preview) oldValue;
-                        final <%= eRef.getEReferenceType().getName()  %> <%= Helper.lcFirst(eRef.getEReferenceType().getName())  %> = Injector.getSession().getRepositoryForClass(<%= eRef.getEReferenceType().getName()  %>.class).get((oldPreview.getElementId()));
-
-                        // Retrait de l'identifiant de l'élément courant de la liste des identifiants de l'entité précedemment sélectionnée
-                        final ObservableList<String> <%= eRef.getEOpposite().getName()  %> = <%= Helper.lcFirst(eRef.getEReferenceType().getName())  %>.get<%= Helper.ucFirst(eRef.getEOpposite().getName())  %>();
-                        <%= eRef.getEOpposite().getName()  %>.remove(element.getId());
-
-                        // Mise à jour de l'entité précédemment sélectionnée
-                        Injector.getSession().getRepositoryForClass(<%= eRef.getEReferenceType().getName()  %>.class).update(<%= Helper.lcFirst(eRef.getEReferenceType().getName())  %>);
-                    }
-
-                    /*
-                    Ajout de l'identifiant de l'élément courant dans la liste des
-                    identifiants contenue dans la nouvelle entitée sélectionnée
-                    dans la liste déroulante.
-                    */
-                    if(newValue instanceof Preview){
-
-                        // Récupération de la nouvelle entité sélectionnée
-                        final Preview newPreview = (Preview) newValue;
-                        final <%= eRef.getEReferenceType().getName()  %> <%= Helper.lcFirst(eRef.getEReferenceType().getName())  %> = Injector.getSession().getRepositoryForClass(<%= eRef.getEReferenceType().getName()  %>.class).get((newPreview.getElementId()));
-
-                        // Ajout de l'identifiant de l'élément courant dans la liste des identifiants de l'entité nouvellement sélectionnée
-                        final ObservableList<String> <%= eRef.getEOpposite().getName()  %> = <%= Helper.lcFirst(eRef.getEReferenceType().getName())  %>.get<%= Helper.ucFirst(eRef.getEOpposite().getName())  %>();
-                        if(!<%= eRef.getEOpposite().getName()  %>.contains(element.getId())){
-                            <%= eRef.getEOpposite().getName()  %>.add(element.getId());
-                        }
-
-                        // Mise à jour de l'entité précédemment sélectionnée
-                        Injector.getSession().getRepositoryForClass(<%= eRef.getEReferenceType().getName()  %>.class).update(<%= Helper.lcFirst(eRef.getEReferenceType().getName())  %>);
-                    }
-                }
-            }
-        });
-
-<%
-            }
-
             // Si le lien pointe vers un type r�f�rence, on n'affiche pas le boutton
             if(Helper.isReferenceTypeReference(eRef)){
 %>
