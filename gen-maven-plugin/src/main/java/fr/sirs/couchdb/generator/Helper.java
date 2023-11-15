@@ -65,6 +65,7 @@ public class  Helper {
     public static final String LINEAR_ID_FIELD_NAME = "linearId";
     public static final String LIBELLE_FIELD_NAME = "libelle";
     public static final String COMMENTAIRE_FIELD_NAME = "commentaire";
+    public static final String EVENEMENT_HYDRAULIQUE_FIELD_NAME = "evenementHydrauliqueId";
     public static final String CHEMIN_FIELD_NAME = "chemin";
     public static final String DATE_MAJ_FIELD_NAME = "dateMaj";
     public static final String DATE_DEBUT_FIELD_NAME = "date_debut";
@@ -89,6 +90,7 @@ public class  Helper {
     public static final String AVEC_DATE_MAJ_INTERFACE_NAME = "AvecDateMaj";
     public static final String AVEC_BORNES_TEMPORELLES_INTERFACE_NAME = "AvecBornesTemporelles";
     public static final String AVEC_FOREIGN_PARENT_INTERFACE_NAME = "AvecForeignParent";
+    public static final String AVEC_EVENEMENT_HYDRAULIQUE_INTERFACE_NAME = "AvecEvenementHydraulique";
 
     public static final String ANNOTATION_COUCHDB_DOCUMENT = "couchDBDocument";
     public static final String ANNOTATION_OWNER = "owner";

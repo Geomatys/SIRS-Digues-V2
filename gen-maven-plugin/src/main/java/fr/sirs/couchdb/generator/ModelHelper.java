@@ -353,6 +353,15 @@ public class ModelHelper extends Helper {
         return false;
     }
 
+    public boolean isAvecEvenementHydraulique() {
+        if (eClass.getEStructuralFeature(EVENEMENT_HYDRAULIQUE_FIELD_NAME) != null) return true;
+        final EList<EClass> eAllSuperTypes = eClass.getEAllSuperTypes();
+        for (final EClass superEClass : eAllSuperTypes) {
+            if (superEClass.getEStructuralFeature(EVENEMENT_HYDRAULIQUE_FIELD_NAME) != null) return true;
+        }
+        return false;
+    }
+
     public static boolean isManaged(EAttribute eAtt) {
         if (COMMENTAIRE_FIELD_NAME.equals(eAtt.getName())) {
             return true;
@@ -461,7 +470,8 @@ public class ModelHelper extends Helper {
                 + getAvecDateMajInterface()
                 + getAvecBornesTemporellesInterface()
                 + getAvecForeignParentInterface()
-                + getAvecPhotosInterface();
+                + getAvecPhotosInterface()
+                + getAvecEvenementHydrauliqueInterface();
     }
 
     public String getAvecLibelleInterface() {
@@ -475,6 +485,14 @@ public class ModelHelper extends Helper {
     public String getAvecCommentaireInterface() {
         if (eClass.getEStructuralFeature(COMMENTAIRE_FIELD_NAME) != null) {
             return ", " + AVEC_COMMENTAIRE_INTERFACE_NAME;
+        } else {
+            return "";
+        }
+    }
+
+    public String getAvecEvenementHydrauliqueInterface() {
+        if (eClass.getEStructuralFeature(EVENEMENT_HYDRAULIQUE_FIELD_NAME) != null) {
+            return ", " + AVEC_EVENEMENT_HYDRAULIQUE_INTERFACE_NAME;
         } else {
             return "";
         }

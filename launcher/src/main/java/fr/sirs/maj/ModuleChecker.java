@@ -131,7 +131,7 @@ public class ModuleChecker extends Task<Boolean> {
      * @return True if user has validated module upgrade. False if user refused / cancelled.
      */
     private boolean askForUpgrade() {
-        final StringBuilder message = new StringBuilder("Les modules suivants requièrent une mise à jour de la base de donnée :");
+        final StringBuilder message = new StringBuilder("Les modules suivants requièrent une mise à jour de la base de données :");
         for (final Upgrade upgrade : upgrades) {
             final PluginInfo conf = upgrade.toUpgrade.getConfiguration();
                 message.append(System.lineSeparator()).append('\t').append(upgrade.toUpgrade.getTitle())

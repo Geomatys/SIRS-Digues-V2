@@ -87,6 +87,7 @@ import fr.sirs.map.FXMapPane;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.migration.HtmlRemoval;
 import fr.sirs.migration.RemoveOldDependanceConf;
+import fr.sirs.migration.upgrade.v2and23.UpgradeEvenementHydrauliqueLinkWithMesureH;
 import fr.sirs.migration.upgrade.v2and23.UpgradeLink1NtoNN;
 import fr.sirs.migration.upgrade.v2and23.UpgradePrestationsCoordinates;
 import fr.sirs.migration.upgrade.v2and23.Upgrades1NtoNNSupported;
@@ -1255,6 +1256,9 @@ public class CorePlugin extends Plugin {
         }
         if (fromMajor < 2 || (fromMajor == 2 && fromMinor < 36)) {
             upgradeTasks.add(new RemoveOldDependanceConf(dbConnector));
+        }
+        if (fromMajor < 2 || (fromMajor == 2 && fromMinor < 46)) {
+            upgradeTasks.add(new UpgradeEvenementHydrauliqueLinkWithMesureH(dbRegistry[0], dbConnector.getDatabaseName(), 2, 46));
         }
         super.findUpgradeTasks(fromMajor, fromMinor, dbConnector, upgradeTasks);
     }
