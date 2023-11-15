@@ -183,7 +183,7 @@ import org.opengis.filter.Filter;
 public class PojoTable extends BorderPane implements Printable {
 
     private static final Callback<TableColumn.CellDataFeatures, ObservableValue> DEFAULT_VALUE_FACTORY = param -> new SimpleObjectProperty(param.getValue());
-    private static final Predicate DEFAULT_VISIBLE_PREDICATE = o -> o != null;
+    private static final Predicate DEFAULT_VISIBLE_PREDICATE = Objects::nonNull;
 
     protected static final String BUTTON_STYLE = "buttonbar-button";
     private static final Image ICON_SHOWONMAP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR), null);
@@ -234,7 +234,7 @@ public class PojoTable extends BorderPane implements Printable {
     protected final BooleanProperty openEditorOnNewProperty = new SimpleBooleanProperty(true);
     /**
      * Créer un nouvel objet à l'ajout.
-     *
+     * <p>
      * Si cette propriété contient "vrai", l'action sur le bouton d'ajout sera
      * de créer de nouvelles instances ajoutées dans le tableau. Si elle
      * contient "faux", l'action sur le bouton d'ajout sera de proposer l'ajout
@@ -339,11 +339,11 @@ public class PojoTable extends BorderPane implements Printable {
     // Préférences utilisateur pour cette PojoTable.
     TableColumnsPreferences columnsPreferences;
     //A déplacer avec les autres attributs :
-    private BooleanProperty isColumnModifying = new SimpleBooleanProperty(false);
+    private final BooleanProperty isColumnModifying = new SimpleBooleanProperty(false);
     // ScheduledExecutorService permettant d'instancier un délais avant de sauvegarder les modifications apportées à des colonnes
-    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
     //Liste des colonnes modifiées :
-    private Set<Integer> modifiedColumnsIndices = new HashSet<>();
+    private final Set<Integer> modifiedColumnsIndices = new HashSet<>();
 
     /**
      * Un bug de javafx est constaté lorsque l'on déplace des colonnes d'une
@@ -468,7 +468,7 @@ public class PojoTable extends BorderPane implements Printable {
                 (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> editCol.setVisible(newValue));
 
         uiTable.getColumns().add(deleteColumn);
-        uiTable.getColumns().add((TableColumn) editCol);
+        uiTable.getColumns().add(editCol);
 
         if (AvecGeometrie.class.isAssignableFrom(pojoClass)) {
             uiTable.getColumns().add(new ShowOnMapColumn(DEFAULT_VALUE_FACTORY, ICON_SHOWONMAP, DEFAULT_VISIBLE_PREDICATE));
@@ -523,7 +523,7 @@ public class PojoTable extends BorderPane implements Printable {
             }
 
             for (final PropertyDescriptor desc : properties.values()) {
-                getPropertyColumn(desc).ifPresent(column -> cols.add(column));
+                getPropertyColumn(desc).ifPresent(cols::add);
             }
 
             //on trie les colonnes
@@ -683,7 +683,7 @@ public class PojoTable extends BorderPane implements Printable {
         // Copie des éléments sélectionnés.
         uiCopyTo.getStyleClass().add(BUTTON_STYLE);
         uiCopyTo.setOnAction((ActionEvent event) -> {
-            final Element[] elements = ((List<Element>) uiTable.getSelectionModel().getSelectedItems()).toArray(new Element[0]);
+            final Element[] elements = uiTable.getSelectionModel().getSelectedItems().toArray(new Element[0]);
             if (elements.length > 0) {
                 try {
 
@@ -719,7 +719,7 @@ public class PojoTable extends BorderPane implements Printable {
 
         uiDelete.getStyleClass().add(BUTTON_STYLE);
         uiDelete.setOnAction((ActionEvent event) -> {
-            final Element[] elements = ((List<Element>) uiTable.getSelectionModel().getSelectedItems()).toArray(new Element[0]);
+            final Element[] elements = uiTable.getSelectionModel().getSelectedItems().toArray(new Element[0]);
             if (elements.length > 0) {
                 final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?", ButtonType.NO, ButtonType.YES);
                 alert.setResizable(true);
@@ -751,12 +751,7 @@ public class PojoTable extends BorderPane implements Printable {
         if (AvecPhotos.class.isAssignableFrom(this.pojoClass) || AbstractPhoto.class.isAssignableFrom(this.pojoClass) || Desordre.class.isAssignableFrom(this.pojoClass)) {
             commentPhotoView = new FXCommentPhotoView();
             commentPhotoView.valueProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
-            commentPhotoView.visibleProperty().addListener(new ChangeListener<Boolean>() {
-                @Override
-                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                    updateView();
-                }
-            });
+            commentPhotoView.visibleProperty().addListener((observable, oldValue, newValue) -> updateView());
         } else {
             commentPhotoView = null;
         }
@@ -796,18 +791,15 @@ public class PojoTable extends BorderPane implements Printable {
         final ChangeListener<Number> selectedIndexListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             uiCurrent.setText("" + (newValue.intValue() + 1) + " / " + uiTable.getItems().size());
         };
-        uiFicheMode.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if (newValue) {
-                    uiTable.getSelectionModel().selectedIndexProperty().addListener(selectedIndexListener);
-                    uiTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-                } else {
-                    uiTable.getSelectionModel().selectedIndexProperty().removeListener(selectedIndexListener);
-                    uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-                }
-                updateView();
+        uiFicheMode.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                uiTable.getSelectionModel().selectedIndexProperty().addListener(selectedIndexListener);
+                uiTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+            } else {
+                uiTable.getSelectionModel().selectedIndexProperty().removeListener(selectedIndexListener);
+                uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
             }
+            updateView();
         });
         uiFicheMode.disableProperty().bind(fichableProperty.not());
 
@@ -899,9 +891,9 @@ public class PojoTable extends BorderPane implements Printable {
             // l'appli) gère mal le déplacement de colonnes lorsque des colonnes ne
             // sont pas visibles.
             //    -> voir aussi col.visibleProperty().addListener ~l.880
-            TableColumn<Element, ?> deplacedCol = null;
+            TableColumn<Element, ?> deplacedCol;
             for (int i = uiTable.getColumns().size() - 1; i > 0; i--) {//On ne veut pas déplacer la première colonne (suppression)
-                if ((uiTable.getColumns().get(i).visibleProperty().get() == false)) {
+                if ((!uiTable.getColumns().get(i).visibleProperty().get())) {
                     deplacedCol = uiTable.getColumns().get(i);
                     uiTable.getColumns().remove(i);
                     uiTable.getColumns().add(deplacedCol);
@@ -933,7 +925,7 @@ public class PojoTable extends BorderPane implements Printable {
     /**
      * Méthode permettant de lancer une sauvegarde de préférences utilisateur
      * lorsqu'un changement de la tableView {@code  uiTable} a été détécté.
-     *
+     * <p>
      * Un délai de 4 seconde est mis en place pour n'effectuer qu'une seule
      * sauvegarde lors de plusieurs changements ce succédant.
      */
@@ -949,7 +941,7 @@ public class PojoTable extends BorderPane implements Printable {
      * Runnable permettant d'exécuter la sauvegarde des préférences utilisateur
      * {@link modifiedColumn}.
      */
-    private Runnable saveColumnsPreferences = new Runnable() {
+    private final Runnable saveColumnsPreferences = new Runnable() {
         @Override
         public void run() {
 
@@ -984,7 +976,7 @@ public class PojoTable extends BorderPane implements Printable {
     /**
      * Set listeners for visibility, width and position changes of the uiTable's
      * columns.
-     *
+     * <p>
      * TODO : should call 3 methods : one by listener.
      *
      */
@@ -1076,7 +1068,6 @@ public class PojoTable extends BorderPane implements Printable {
                                 try {
                                     int maxVisible = nbreCol - 1;
                                     if (colInitId == listEnd.get(maxVisible).getId()) {
-                                        ;
                                         for (int j = maxVisible - 1; j > 0; j--) {
                                             if (listEnd.get(j).isVisible()) {
                                                 break;
@@ -1135,7 +1126,7 @@ public class PojoTable extends BorderPane implements Printable {
 
     /**
      * Mise à jour de l'interface en mode "fiche".
-     *
+     * <p>
      * SYM-1764 : On crée un nouveau panneau à chaque fois qu'on change de
      * fiche. Sinon le rechargement des positions provoque des anomalies de
      * recalcul des positions.
@@ -1173,11 +1164,11 @@ public class PojoTable extends BorderPane implements Printable {
     /**
      * Définit l'élément en paramètre comme parent de tout élément créé via
      * cette table.
-     *
+     * <p>
      * Note : Ineffectif dans le cas où les éléments de la PojoTable sont créés
      * et listés directement depuis un repository couchDB, ou que l'élément créé
      * est déjà un CouchDB document.
-     *
+     * <p>
      * @param parentElement L'élément qui doit devenir le parent de tout objet
      * créé via la PojoTable.
      */
@@ -1855,7 +1846,7 @@ public class PojoTable extends BorderPane implements Printable {
             alert.setResizable(true);
             alert.showAndWait();
         }
-        return (Element) result;
+        return result;
     }
 
     /**
@@ -2321,7 +2312,7 @@ public class PojoTable extends BorderPane implements Printable {
     private class ValidityRow extends TableRow<Element> {
 
         ValidityRow() {
-            final BooleanBinding authorizedBinding = Bindings.createBooleanBinding(() -> getItem() == null ? false : session.editionAuthorized(getItem()), itemProperty());
+            final BooleanBinding authorizedBinding = Bindings.createBooleanBinding(() -> getItem() != null && session.editionAuthorized(getItem()), itemProperty());
             this.editableProperty().bind(cellEditableProperty.and(authorizedBinding));
             // Hack : Apparently, forbidding row editability is not enough to prevent
             // the contained cells to be edited, so we have to force disability on thes cases.
