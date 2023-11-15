@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javafx.beans.value.ChangeListener;
 
 /**
@@ -822,32 +823,30 @@ else if (helper.isParcelleVegetation()){
 
 
     protected void update<%=Helper.ucFirst(eRef.getName())%>Table(final Session session, final <%= helper.getClassName() %> newElement) {
-            if (<%=eRef.getName()%>Table == null)
-                return;
+        if (<%=eRef.getName()%>Table == null)
+            return;
 
-            if (newElement == null) {
-                <%= eRef.getName()%>Table.setTableItems(null);
-            } else {
+        if (newElement == null) {
+            <%= eRef.getName()%>Table.setTableItems(null);
+        } else {
 <%
-        if (Helper.hasDocument(eRef.getEReferenceType())) {
+            if (Helper.hasDocument(eRef.getEReferenceType())) {
 %>
-        <%= eRef.getName()%>Table.setParentElement(null);
-        final AbstractSIRSRepository<<%= helper.getClassName(eRef) %>> <%= eRef.getName()%>Repo = session.getRepositoryForClass(<%= helper.getClassName(eRef) %>.class);
-        <%= eRef.getName()%>Table.setTableItems(()-> SIRS.toElementList(newElement.get<%= Helper.ucFirst(eRef.getName()) %>(), <%= eRef.getName()%>Repo));
+            <%= eRef.getName()%>Table.setParentElement(null);
+            final AbstractSIRSRepository<<%= helper.getClassName(eRef) %>> <%= eRef.getName()%>Repo = session.getRepositoryForClass(<%= helper.getClassName(eRef) %>.class);
+            final ObservableList<String> observableList = newElement.get<%= Helper.ucFirst(eRef.getName()) %>();
+            <%= eRef.getName()%>Table.setTableItems(()-> SIRS.toElementList(observableList, <%= eRef.getName()%>Repo));
 <%
 
-                    if(Helper.isOwnerReference(eRef)){
+                if(Helper.isOwnerReference(eRef)){
 %>
-        <%= eRef.getName()%>Table.ownerElementProperty().set(newElement);
+            <%= eRef.getName()%>Table.ownerElementProperty().set(newElement);
 <%
-                    }
-
-
-
+                }
             } else if (eRef.isContainment()) {
 %>
-        <%= eRef.getName()%>Table.setParentElement(newElement);
-        <%= eRef.getName()%>Table.setTableItems(()-> (ObservableList) newElement.get<%= Helper.ucFirst(eRef.getName())  %>());
+            <%= eRef.getName()%>Table.setParentElement(newElement);
+            <%= eRef.getName()%>Table.setTableItems(()-> (ObservableList) newElement.get<%= Helper.ucFirst(eRef.getName())  %>());
 <%
             } else { // Liens entre objets du tron�on.
 %>
@@ -876,7 +875,7 @@ else if (helper.isParcelleVegetation()){
 
             if (!eRef.isContainment() && !Helper.isOwnerReference(eRef)) {
 %>
-            <%=eRef.getName()%>Table.setObservableListToListen(newElement.get<%= Helper.ucFirst(eRef.getName()) %>());
+            <%=eRef.getName()%>Table.setObservableListToListen(observableList);
 <%
             }
 %>
@@ -898,7 +897,7 @@ else if (helper.isParcelleVegetation()){
     public void preSave() {
         final Session session = Injector.getBean(Session.class);
         final <%= helper.getClassName() %> element = (<%= helper.getClassName() %>) elementProperty().get();
-
+        final String elementId = element.getId();
 <% if (!helper.hasDocument()) { %>
         final Object selectedParent = ui_parent_choice.getSelectionModel().selectedItemProperty().get();
         if (selectedParent == null) {
@@ -923,9 +922,9 @@ else if (helper.isParcelleVegetation()){
             }
             originalParent = newParent;
         }
-<% } %>
+<% }
 
-<% if(helper.isAvecCommentaire()) { %>
+ if(helper.isAvecCommentaire()) { %>
         element.setCommentaire(<%=Helper.COMMENTAIRE_UI%>.getText());
 <% } %>
 
@@ -954,115 +953,165 @@ else if (helper.isParcelleVegetation()){
 <%
                 if(Helper.isOwnerReference(eRef)){
 %>
-        // Reference principale : prevoir la suppression des documents qui ne seraient plus references
-        final List<String> toDeletes = element.get<%= Helper.ucFirst(eRef.getName())%>();
-        final ObservableList<String> toDeleteList<%= Helper.ucFirst(eRef.getName())%>;
-        if(toDeletes != null) {
-            toDeleteList<%= Helper.ucFirst(eRef.getName())%> = FXCollections.observableArrayList(toDeletes.stream().filter(it -> it != null).collect(java.util.stream.Collectors.toList()));
-            element.get<%= Helper.ucFirst(eRef.getName())%>().clear();
-        } else {
-            toDeleteList<%= Helper.ucFirst(eRef.getName())%> = FXCollections.observableArrayList();
-        }
-        // final ObservableList<String> toDeleteList<%= Helper.ucFirst(eRef.getName())%> = FXCollections.observableArrayList(element.get<%= Helper.ucFirst(eRef.getName())%>());
-        // element.get<%= Helper.ucFirst(eRef.getName())%>().clear();
-<%
-                }
-                if(eRef.getEOpposite()!=null){
-%>
-        /*
-        * En cas de reference opposee on se prepare a stocker les objets
-        * "opposes" pour les mettre � jour.
-        */
-        final List<<%= helper.getClassName(eRef) %>> current<%= helper.getClassName(eRef) %>List = new ArrayList<>();
+            // Reference principale : prevoir la suppression des documents qui ne seraient plus references
+            final List<String> toDeletes = element.get<%= Helper.ucFirst(eRef.getName())%>();
+            final ObservableList<String> toDeleteList<%= Helper.ucFirst(eRef.getName())%>;
+            if(toDeletes != null) {
+                toDeleteList<%= Helper.ucFirst(eRef.getName())%> = FXCollections.observableArrayList(toDeletes.stream().filter(it -> it != null).collect(java.util.stream.Collectors.toList()));
+                element.get<%= Helper.ucFirst(eRef.getName())%>().clear();
+            } else {
+                toDeleteList<%= Helper.ucFirst(eRef.getName())%> = FXCollections.observableArrayList();
+            }
+            // final ObservableList<String> toDeleteList<%= Helper.ucFirst(eRef.getName())%> = FXCollections.observableArrayList(element.get<%= Helper.ucFirst(eRef.getName())%>());
+            // element.get<%= Helper.ucFirst(eRef.getName())%>().clear();
 <%
                 }
 %>
-        // Manage opposite references for <%= eRef.getEReferenceType().getName()%>...
 <%
-                if(Helper.hasDocument(eRef.getEReferenceType())
-                    && (eRef.getEOpposite()!=null || Helper.isOwnerReference(eRef))){
+                    if (Helper.hasDocument(eRef.getEReferenceType())
+                        && (eRef.getEOpposite() != null || Helper.isOwnerReference(eRef))) {
+
+                    /*
+                    * Si on est sur une reference principale, on a besoin du depot pour
+                    * supprimer reellement les elements que l'on va retirer du tableau.
+                    * Si on a une reference opposee, on a besoin du depot pour mettre a jour
+                    * les objets qui referencent l'objet courant en sens contraire.
+                    */
 %>
-        /*
-        * Si on est sur une reference principale, on a besoin du depot pour
-        * supprimer reellement les elements que l'on va retirer du tableau.
-        * Si on a une reference opposee, on a besoin du depot pour mettre a jour
-        * les objets qui referencent l'objet courant en sens contraire.
-        */
-        final AbstractSIRSRepository<<%= helper.getClassName(eRef) %>> <%= Helper.lcFirst(helper.getClassName(eRef))%>Repository = session.getRepositoryForClass(<%= eRef.getEReferenceType().getName()%>.class);
+            final AbstractSIRSRepository<<%= helper.getClassName(eRef) %>> <%= Helper.lcFirst(helper.getClassName(eRef))%>Repository = session.getRepositoryForClass(<%= eRef.getEReferenceType().getName()%>.class);
+
+<%
+                        final EReference eOpp = eRef.getEOpposite();
+                        if (eOpp != null && eRef.isMany() && !eOpp.isMany()) {
+%>
+            // First we detect which elements have been removed from the <%= eRef.getName()%>Table.
+            final ObservableList<Element> allValues = <%= eRef.getName()%>Table.getAllValues();
+            final AbstractSIRSRepository<<%= Helper.getClassName(eOpp) %>> <%= Helper.lcFirst(helper.getClassName(eOpp))%>Repository = session.getRepositoryForClass(<%= eOpp.getEReferenceType().getName()%>.class);
+            final <%= Helper.getClassName(eOpp) %> <%= eOpp.getName() %>FromDb = <%= Helper.lcFirst(helper.getClassName(eOpp))%>Repository.get(element.getId());
+            if (<%= eOpp.getName() %>FromDb != null) {
+                final List<String> new<%= helper.getClassName(eRef) %>Ids = allValues.stream().map(Identifiable::getId).collect(Collectors.toList());
+                final List<String> deleted<%= helper.getClassName(eRef) %>IdsList = new ArrayList<>();
+
+                for (final String oldId : <%= eOpp.getName() %>FromDb.get<%= helper.getClassName(eRef) %>Ids()) {
+                    if (!new<%= helper.getClassName(eRef) %>Ids.contains(oldId)) {
+                        deleted<%= helper.getClassName(eRef) %>IdsList.add(oldId);
+                    }
+                }
+
+                // The link is removed from the unlinked element.
+                if (!deleted<%= helper.getClassName(eRef) %>IdsList.isEmpty()) {
+                    final List<<%= helper.getClassName(eRef) %>> old<%= helper.getClassName(eRef) %>s = <%= Helper.lcFirst(helper.getClassName(eRef))%>Repository.get(deleted<%= helper.getClassName(eRef) %>IdsList);
+                    for (<%= helper.getClassName(eRef) %> old<%= helper.getClassName(eRef) %> : old<%= helper.getClassName(eRef) %>s) {
+                        final String <%= Helper.lcFirst(helper.getClassName(eOpp))%>Id = old<%= helper.getClassName(eRef) %>.get<%= helper.getClassName(eOpp) %>Id();
+                        if (<%= Helper.lcFirst(helper.getClassName(eOpp))%>Id != null && <%= Helper.lcFirst(helper.getClassName(eOpp))%>Id.equals(element.getId())) {
+                            old<%= helper.getClassName(eRef) %>.set<%= helper.getClassName(eOpp) %>Id(null);
+                        }
+                    }
+                    <%= Helper.lcFirst(helper.getClassName(eRef))%>Repository.executeBulk(old<%= helper.getClassName(eRef) %>s);
+                }
+            }
+
+<%
+                        }
+                    }
+%>
+
+            // Manage opposite references for <%= eRef.getEReferenceType().getName()%>...
+<%
+                if (eRef.getEOpposite() != null) {
+%>
+            /*
+            * En cas de reference opposee on se prepare a stocker les objets
+            * "opposes" pour les mettre � jour.
+            */
+            final List<<%= helper.getClassName(eRef) %>> current<%= helper.getClassName(eRef) %>List = new ArrayList<>();
+<%
+                }
+                final EReference eOpp = eRef.getEOpposite();
+                if (!(eRef.isMany() && eOpp != null && !eOpp.isMany())) {
+%>
+            final List<String> current<%= helper.getClassName(eRef) %>IdsList = new ArrayList<>();
 <%
                 }
 %>
-        final List<String> current<%= helper.getClassName(eRef) %>IdsList = new ArrayList<>();
-        for(final Element elt : <%= eRef.getName()%>Table.getAllValues()){
-            final <%= helper.getClassName(eRef)%> <%= Helper.lcFirst(helper.getClassName(eRef))%> = (<%= helper.getClassName(eRef)%>) elt;
-            current<%= helper.getClassName(eRef)%>IdsList.add(<%= Helper.lcFirst(helper.getClassName(eRef))%>.getId());
+            for (final Element elt : <%= eRef.getName()%>Table.getAllValues()) {
+                final <%= helper.getClassName(eRef)%> <%= Helper.lcFirst(helper.getClassName(eRef))%> = (<%= helper.getClassName(eRef)%>) elt;
+
 <%
+                if (!(eRef.isMany() && eOpp != null && !eOpp.isMany())) {
+%>
+                current<%= helper.getClassName(eRef) %>IdsList.add(<%= Helper.lcFirst(helper.getClassName(eRef))%>.getId());
+<%
+                }
 
                 // Cas particulier : s il s agit d une reference principale alors
                 // il faut oublier les elements du tableau de maniere a ne pas
                 // les supprimer de la base.
                 if(Helper.isOwnerReference(eRef)){
 %>
-            toDeleteList<%= Helper.ucFirst(eRef.getName())%>.remove(elt.getId());
+                toDeleteList<%= Helper.ucFirst(eRef.getName())%>.remove(elt.getId());
 <%
                 }
 
                 // En cas de reference opposee, il faut les gerer
-                if(eRef.getEOpposite()!=null){
-                    final EReference eOpp = eRef.getEOpposite();
+                if (eOpp != null) {
                     if(Helper.hasDocument(eRef.getEReferenceType())){
 
 %>
-            current<%= helper.getClassName(eRef)%>List.add(<%= Helper.lcFirst(helper.getClassName(eRef))%>);
+                current<%= helper.getClassName(eRef)%>List.add(<%= Helper.lcFirst(helper.getClassName(eRef))%>);
 
-            // Addition
+                // Addition
 <%
-                        if(eOpp.isMany()){
+                        if (eOpp.isMany()) {
 %>
-            if(!<%= Helper.lcFirst(eRef.getEReferenceType().getName())%>.get<%= Helper.ucFirst(eOpp.getName())%>().contains(element.getId())){
-                <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>.get<%= Helper.ucFirst(eOpp.getName())%>().add(element.getId());
-            }
+                if(!<%= Helper.lcFirst(eRef.getEReferenceType().getName())%>.get<%= Helper.ucFirst(eOpp.getName())%>().contains(element.getId())){
+                    <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>.get<%= Helper.ucFirst(eOpp.getName())%>().add(element.getId());
+                }
 <%
-                        }
-                        else{
+                        } else{
 %>
-            //<%= Helper.lcFirst(eRef.getEReferenceType().getName())%>.get<%= Helper.ucFirst(eOpp.getName())%>().add(element.getId());
+                <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>.set<%= Helper.ucFirst(eOpp.getName())%>(element.getId());
 <%
                         }
                     }
                 }
 %>
-        }
+            }
 <%
-                if(eRef.getEOpposite()!=null){
+                if (eOpp != null) {
 %>
-        <%= Helper.lcFirst(helper.getClassName(eRef))%>Repository.executeBulk(current<%= helper.getClassName(eRef)%>List);
+            <%= Helper.lcFirst(helper.getClassName(eRef))%>Repository.executeBulk(current<%= helper.getClassName(eRef)%>List);
 <%
                 }
+                /*
+                * In case of a 1-n relation, the relation is performed during the update through the repository of the element containing the n reference.
+                * We thus don't want the below setter.
+                */
+                if (!(eRef.isMany() && eOpp != null && !eOpp.isMany())) {
 %>
-        element.set<%= Helper.ucFirst(eRef.getName())%>(current<%= helper.getClassName(eRef)%>IdsList);
+            element.set<%= Helper.ucFirst(eRef.getName())%>(current<%= helper.getClassName(eRef) %>IdsList);
 
 <%
+                }
                 if(Helper.hasDocument(eRef.getEReferenceType())){
-                    if(eRef.isMany() && eRef.getEOpposite()!=null){
-                        final EReference eOpp = eRef.getEOpposite();
-                        if(eOpp.isMany()){
+                    if (eRef.isMany() && eOpp != null) {
+                        if (eOpp.isMany()) {
 %>
-        // Deletion
-        final StreamingIterable<<%= eRef.getEReferenceType().getName()%>> list<%= eRef.getEReferenceType().getName()%> = <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.getAllStreaming();
-        try (final CloseableIterator<<%= eRef.getEReferenceType().getName()%>> it = list<%= eRef.getEReferenceType().getName()%>.iterator()) {
-            while (it.hasNext()) {
-                final <%= eRef.getEReferenceType().getName()%> i = it.next();
-                if(i.get<%= Helper.ucFirst(eOpp.getName())%>().contains(element.getId())
-                    || element.get<%= Helper.ucFirst(eRef.getName())%>().contains(i.getId())){
-                    if(!<%= eRef.getName()%>Table.getAllValues().contains(i)){
-                        element.get<%= Helper.ucFirst(eRef.getName())%>().remove(i.getId()); //Normalement inutile du fait du  clear avant les op�rations d'ajout
-                        i.get<%= Helper.ucFirst(eOpp.getName())%>().remove(element.getId());
-                        <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.update(i);
+            // Deletion
+            final StreamingIterable<<%= eRef.getEReferenceType().getName()%>> list<%= eRef.getEReferenceType().getName()%> = <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.getAllStreaming();
+            try (final CloseableIterator<<%= eRef.getEReferenceType().getName()%>> it = list<%= eRef.getEReferenceType().getName()%>.iterator()) {
+                while (it.hasNext()) {
+                    final <%= eRef.getEReferenceType().getName()%> i = it.next();
+                    if(i.get<%= Helper.ucFirst(eOpp.getName())%>().contains(element.getId())
+                        || element.get<%= Helper.ucFirst(eRef.getName())%>().contains(i.getId())){
+                        if(!<%= eRef.getName()%>Table.getAllValues().contains(i)){
+                            element.get<%= Helper.ucFirst(eRef.getName())%>().remove(i.getId()); //Normalement inutile du fait du  clear avant les op�rations d'ajout
+                            i.get<%= Helper.ucFirst(eOpp.getName())%>().remove(element.getId());
+                            <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.update(i);
+                        }
                     }
                 }
             }
-        }
 <%
                         }
                     }
@@ -1070,55 +1119,54 @@ else if (helper.isParcelleVegetation()){
                     // supprimee, il faut supprimer le document correspondant
                     else if(Helper.isOwnerReference(eRef)){
 %>
-        /*for(final String idToDelete : toDeleteList<%= Helper.ucFirst(eRef.getName())%>){
-            <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.remove(<%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.get(idToDelete));
-        }*/
-        <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.executeBulkDelete(<%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.get(toDeleteList<%= Helper.ucFirst(eRef.getName())%>));
+            /*for(final String idToDelete : toDeleteList<%= Helper.ucFirst(eRef.getName())%>){
+                <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.remove(<%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.get(idToDelete));
+            }*/
+            <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.executeBulkDelete(<%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.get(toDeleteList<%= Helper.ucFirst(eRef.getName())%>));
 <%
                     }
                 }
                 else if (!eRef.isContainment()){
                     if(eRef.isMany()){
                         if(eRef.getEOpposite()!=null){
-                            final EReference eOpp = eRef.getEOpposite();
                             if(eOpp.isMany()){
 %>
-        Ce cas ne doit plus appara�tre
-        // Deletion
-        final List<<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>> list<%= Helper.ucFirst(eRef.getEReferenceType().getName())%> = session.getTronconDigueRepository().getAll<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>s();
-        for(final <%= Helper.ucFirst(eRef.getEReferenceType().getName())%> i : list<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>){
-            if(i.get<%= Helper.ucFirst(eOpp.getName())%>().contains(element.getId())
-                    || element.get<%= Helper.ucFirst(eRef.getName())%>().contains(i.getId())){
-                if(!<%= eRef.getName()%>Table.getAllValues().contains(i)){
-                    element.get<%= Helper.ucFirst(eRef.getName())%>().remove(i.getId()); //Normalement inutile du fait du  clear avant les op�rations d'ajout
-                    final TronconDigue couchDBDocument  = (i.getDocumentId().equals(element.getDocumentId())) ? (TronconDigue) element.getCouchDBDocument() : session.getTronconDigueRepository().get(i.getDocumentId());
-                    i.get<%= Helper.ucFirst(eOpp.getName())%>().remove(element.getId());
-                    couchDBDocument.getStructures().replaceAll(new UnaryOperator<Objet>() {
+            Ce cas ne doit plus appara�tre
+            // Deletion
+            final List<<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>> list<%= Helper.ucFirst(eRef.getEReferenceType().getName())%> = session.getTronconDigueRepository().getAll<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>s();
+            for(final <%= Helper.ucFirst(eRef.getEReferenceType().getName())%> i : list<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>){
+                if(i.get<%= Helper.ucFirst(eOpp.getName())%>().contains(element.getId())
+                        || element.get<%= Helper.ucFirst(eRef.getName())%>().contains(i.getId())){
+                    if(!<%= eRef.getName()%>Table.getAllValues().contains(i)){
+                        element.get<%= Helper.ucFirst(eRef.getName())%>().remove(i.getId()); //Normalement inutile du fait du  clear avant les op�rations d'ajout
+                        final TronconDigue couchDBDocument  = (i.getDocumentId().equals(element.getDocumentId())) ? (TronconDigue) element.getCouchDBDocument() : session.getTronconDigueRepository().get(i.getDocumentId());
+                        i.get<%= Helper.ucFirst(eOpp.getName())%>().remove(element.getId());
+                        couchDBDocument.getStructures().replaceAll(new UnaryOperator<Objet>() {
 
-                        @Override
-                        public Objet apply(Objet t) {
-                            return (i.equals(t)) ? i : t;
-                        }
-                    });
-                    if(!i.getDocumentId().equals(element.getDocumentId())) session.getTronconDigueRepository().update(couchDBDocument);
+                            @Override
+                            public Objet apply(Objet t) {
+                                return (i.equals(t)) ? i : t;
+                            }
+                        });
+                        if(!i.getDocumentId().equals(element.getDocumentId())) session.getTronconDigueRepository().update(couchDBDocument);
+                    }
                 }
             }
-        }
 <%
                             }
                         }
                         else{
 %>
-        // Deletion
-        final List<<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>> list<%= Helper.ucFirst(eRef.getEReferenceType().getName())%> = session.getTronconDigueRepository().getAll<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>s();
-        for(final <%= Helper.ucFirst(eRef.getEReferenceType().getName())%> i : list<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>){
-            if(element.get<%= Helper.ucFirst(eRef.getName())%>().contains(i.getId())){
-                if(!<%= eRef.getName()%>Table.getAllValues().contains(i)){
-                    element.get<%= Helper.ucFirst(eRef.getName())%>().remove(i.getId()); //Normalement inutile du fait du  clear avant les op�rations d'ajout
+            // Deletion
+            final List<<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>> list<%= Helper.ucFirst(eRef.getEReferenceType().getName())%> = session.getTronconDigueRepository().getAll<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>s();
+            for(final <%= Helper.ucFirst(eRef.getEReferenceType().getName())%> i : list<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>){
+                if(element.get<%= Helper.ucFirst(eRef.getName())%>().contains(i.getId())){
+                    if(!<%= eRef.getName()%>Table.getAllValues().contains(i)){
+                        element.get<%= Helper.ucFirst(eRef.getName())%>().remove(i.getId()); //Normalement inutile du fait du  clear avant les op�rations d'ajout
 
+                    }
                 }
             }
-        }
 <%
                       }
                     }
