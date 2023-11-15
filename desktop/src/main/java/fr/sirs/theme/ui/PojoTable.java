@@ -561,72 +561,115 @@ public class PojoTable extends BorderPane implements Printable {
         uiRefresh.getStyleClass().add(BUTTON_STYLE);
         uiRefresh.setOnAction((ActionEvent event) -> updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get()));
 
-        final EventHandler<ActionEvent> addHandler = new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
+        final EventHandler<ActionEvent> addHandler = event -> {
 
-                final Element p;
-                if (createNewProperty.get()) {
-                    p = createPojo();
-                    if (p != null && openEditorOnNewProperty.get()) {
-                        editPojo(p, SIRS.EDITION_PREDICATE);
-                    }
-                } else {
-                    final ObservableList<Preview> choices;
-                    final Element cont = PojoTable.this.container.get();
-                    if (Objet.class.isAssignableFrom(pojoClass) && cont instanceof Objet) {
+            final Element p;
+            if (createNewProperty.get()) {
+                p = createPojo();
+                if (p != null && openEditorOnNewProperty.get()) {
+                    editPojo(p, SIRS.EDITION_PREDICATE);
+                }
+            } else {
+                final ObservableList<Preview> choices;
+                final Element cont = PojoTable.this.container.get();
+                if (Objet.class.isAssignableFrom(pojoClass) && cont instanceof Objet) {
 
-                        // récupération de tous les éléments du type compatible avec le tableau courant
-                        final List<Preview> possiblePreviews = new ArrayList<>(session.getPreviews().getByClass(pojoClass));
+                    // récupération de tous les éléments du type compatible avec le tableau courant
+                    final List<Preview> possiblePreviews = new ArrayList<>(session.getPreviews().getByClass(pojoClass));
 
-                        // récupération des identifiants
-                        final List<String> possibleIds = possiblePreviews.stream().map(e -> e.getElementId()).collect(Collectors.toList());
+                    // récupération des identifiants
+                    final List<String> possibleIds = possiblePreviews.stream().map(Preview::getElementId).collect(Collectors.toList());
 
-                        // recupération des objets correspondant aux identifiants
-                        final List<Objet> entities = PojoTable.this.session.getRepositoryForClass(pojoClass).get(possibleIds);
+                    // recupération des objets correspondant aux identifiants
+                    final List<Objet> entities = PojoTable.this.session.getRepositoryForClass(pojoClass).get(possibleIds);
 
-                        // retrait des entités qui ne sont pas sur le même tronçon que le "conteneur"
-                        entities.removeIf(new Predicate<Objet>() {
-                            @Override
-                            public boolean test(Objet t) {
-                                return !((Objet) cont).getLinearId().equals(t.getLinearId());
-                            }
-                        });
-
-                        // récupération des identifiants des éléments sur le même tronçon
-                        final List<String> sameContainerIds = entities.stream().map(o -> o.getId()).collect(Collectors.toList());
-
-                        // filtrage des previews correspondants
-                        possiblePreviews.removeIf(new Predicate<Preview>() {
-                            @Override
-                            public boolean test(Preview t) {
-                                return !sameContainerIds.contains(t.getElementId());
-                            }
-                        });
-
-                        choices = SIRS.observableList(possiblePreviews);
-
-                    } else {
-                        choices = SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted();
-                    }
-
-                    final PojoTableChoiceStage<Element> stage = new ChoiceStage(
-                            PojoTable.this.repo, choices, null, "Choix de l'élément", "Ajouter");
-                    stage.showAndWait();
-                    p = stage.getRetrievedElement().get();
-                    if (p != null) {
-                        if (getAllValues().contains(p)) {
-                            final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le lien que vous souhaitez ajouter est déjà présent dans la table.");
-                            alert.setResizable(true);
-                            alert.showAndWait();
-                        } else {
-                            getAllValues().add(p);
+                    // retrait des entités qui ne sont pas sur le même tronçon que le "conteneur"
+                    entities.removeIf(new Predicate<Objet>() {
+                        @Override
+                        public boolean test(Objet t) {
+                            return !((Objet) cont).getLinearId().equals(t.getLinearId());
                         }
-                    } else {
-                        final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
+                    });
+
+                    // récupération des identifiants des éléments sur le même tronçon
+                    final List<String> sameContainerIds = entities.stream().map(Identifiable::getId).collect(Collectors.toList());
+
+                    // filtrage des previews correspondants
+                    possiblePreviews.removeIf(t -> !sameContainerIds.contains(t.getElementId()));
+
+                    choices = SIRS.observableList(possiblePreviews);
+
+                } else {
+                    final List<Preview> previews = session.getPreviews().getByClass(pojoClass);
+                    final List<String> allValuesIds = allValues.stream().map(Identifiable::getId).collect(Collectors.toList());
+                    final List<Preview> possiblePreviews = new ArrayList<>();
+                    // Keep only Previews not present in the table yet.
+                    for (Preview preview : previews) {
+                        if (!allValuesIds.contains(preview.getElementId())) {
+                            possiblePreviews.add(preview);
+                        }
+                    }
+                    choices = SIRS.observableList(possiblePreviews).sorted();
+                }
+
+                final PojoTableChoiceStage<Element> stage = new ChoiceStage(
+                        PojoTable.this.repo, choices, null, "Choix de l'élément", "Ajouter");
+                stage.showAndWait();
+                p = stage.getRetrievedElement().get();
+                if (p != null) {
+                    if (getAllValues().contains(p)) {
+                        final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le lien que vous souhaitez ajouter est déjà présent dans la table.");
                         alert.setResizable(true);
                         alert.showAndWait();
+                    } else {
+                        boolean addElement = true;
+                        // HACK - Redmine 6449 : Deal with the 1-n relation.
+                        // Special situation : relation 1-n. The element we want to add to the table can only have one container.
+                        // For now, in the app, this type of relation only exists between the EvenementHydraulique and :
+                        // - MonteeEaux
+                        // - LigneEau
+                        // - LaisseCrue
+                        // TODO - find a way to make it generic for each Class containing a 1-n relation.
+                        // The link with the previous EH will be removed only once the user will click on the Sauvegarder button.
+                        // The link with the new EH will be created only once the user will clicked on the Sauvegarder button.
+                        // These processes are performed in the method @AbstractSIRSRepository.update1NRelations(entity) called by executeBulk(list).
+                        if (EvenementHydraulique.class.isAssignableFrom(cont.getClass())) {
+                            final String ehId;
+
+                            if (AvecEvenementHydraulique.class.isAssignableFrom(pojoClass)) {
+                                AvecEvenementHydraulique avecEvenementHydraulique = (AvecEvenementHydraulique) p;
+                                ehId = avecEvenementHydraulique.getEvenementHydrauliqueId();
+                            } else {
+                                ehId = null;
+                            }
+
+                            if (ehId != null && !ehId.equals(cont.getId())) {
+                                final Optional optional = PropertiesFileUtilities.showConfirmationDialog("L'élément que vous souhaitez ajouter est déjà lié à un autre événement hydraulique." +
+                                                "\nSouhaitez-vous rompre ce lien afin d'ajouter l'élément à l'événement hydraulique " + cont.getDesignation() + " - " + ((EvenementHydraulique) cont).getLibelle() + "?",
+                                        "Elément déjà lié.", 700, 180, true);
+                                if (optional.isPresent()) {
+                                    final Object result = optional.get();
+                                    if (!ButtonType.YES.equals(result)) {
+                                        addElement = false;
+                                    }
+                                }
+                            }
+
+                            if (addElement) {
+                                PropertiesFileUtilities.showWarningDialog(
+                                        "ATTENTION : Pour que le changement d'événement hydraulique soit effectif, veuillez enregistrer en cliquant sur le bouton Enregistrer.",
+                                        "Avertissement", 550, 160);
+                            }
+                        }
+
+                        if (addElement) {
+                            getAllValues().add(p);
+                        }
                     }
+                } else {
+                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
+                    alert.setResizable(true);
+                    alert.showAndWait();
                 }
             }
         };
@@ -2131,6 +2174,15 @@ public class PojoTable extends BorderPane implements Printable {
 
             try {
                 final Object newValue = event.getNewValue();
+
+                // Hack : The setOnPropertyCommit is called when the user click on a cell.
+                // And called again once he has modified the value or exited the cell.
+                // We skip the commit process when the value has not changed.
+                if ((oldValue != null && oldValue.equals(newValue))
+                        || (newValue != null && newValue.equals(oldValue))) {
+                    return;
+                }
+
                 ((WritableValue) value).setValue(newValue);
                 final Class<?> rowClass = rowElement.getClass();
 
@@ -2173,6 +2225,29 @@ public class PojoTable extends BorderPane implements Printable {
                                 }
                             }
                         }
+                    }
+                }
+
+                // HACK - Redmine 6449 : Deal with the 1-n relation.
+                // For now, in the app, this type of relation only exists between the EvenementHydraulique and :
+                // - MonteeEaux
+                // - LigneEau
+                // - LaisseCrue
+                // TODO - find a way to make it generic for each Class containing a 1-n relation.
+                final Element cont = container == null ? null : container.get();
+                if (cont != null && EvenementHydraulique.class.isAssignableFrom(cont.getClass()) && ObjetMesure.class.isAssignableFrom(pojoClass)) {
+                    if ("evenementHydrauliqueId".equalsIgnoreCase(modifiedPropretieName)) {
+                        // The link with the previous EH will be removed during the update of the Element.
+                        // The link with the new EH will be created during the update of the Element.
+                        // These processes are performed in the method @AbstractSIRSRepository.update1NRelations(entity) called
+                        // by update(entity), that is called by elementEdited(event) below.
+                        Platform.runLater(() -> PropertiesFileUtilities.showWarningDialog(
+                                "ATTENTION : " +
+                                        "\n\nL'élément est toujours visible dans la liste. Veuillez recharger la table pour la rafraîchir." +
+                                        "\n\nDans le cas où l'élément est à présent lié à un autre événement Hydraulique, veuillez également rafraîchir la liste" +
+                                        " de cet événement hydraulique.",
+                                "Avertissement", 600, 200));
+
                     }
                 }
 
