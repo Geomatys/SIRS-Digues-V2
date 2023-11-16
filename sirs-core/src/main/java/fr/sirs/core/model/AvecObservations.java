@@ -3,6 +3,8 @@
 package fr.sirs.core.model;
 
 import fr.sirs.util.SirsComparator;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.apache.sis.measure.Range;
 
 import java.time.LocalDate;
@@ -19,8 +21,34 @@ public interface AvecObservations extends  Element {
     default Optional<? extends AbstractObservation> getLastObservation() {
         List<? extends AbstractObservation> observations = getObservations();
         if (observations == null) return Optional.empty();
-        return getObservations().stream()
+        return observations.stream()
                 .min(SirsComparator.OBSERVATION_COMPARATOR);
+    }
+
+    /**
+     * Get the degres d'urgence of the last Observation with a degrés d'urgence.
+     * @return
+     */
+    default String getLastDegreUrgence() {
+        if (!(this instanceof Desordre)) {
+            throw new IllegalStateException("Method only valid for Desordre.");
+        }
+
+        final ObservableList<AbstractObservation> observations = FXCollections.observableArrayList(getObservations());
+
+        if (observations == null || observations.isEmpty()) return null;
+        observations.sort(SirsComparator.OBSERVATION_COMPARATOR);
+
+        String lastUrgence = null;
+        for (int i = 0; i < observations.size(); i--) {
+            final String urgenceId = ((Observation) observations.get(i)).getUrgenceId();
+            if (urgenceId != null) {
+                lastUrgence = urgenceId;
+                break;
+            }
+        }
+
+        return lastUrgence;
     }
 
     /**

@@ -27,61 +27,11 @@ import static fr.sirs.SIRS.SIRSDOCUMENT_REFERENCE;
 import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.AbstractPositionDocument;
-import fr.sirs.core.model.AbstractPositionDocumentAssociable;
-import fr.sirs.core.model.ArticleJournal;
-import fr.sirs.core.model.AvecGeometrie;
-import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Crete;
-import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Deversoir;
-import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.DocumentGrandeEchelle;
-import fr.sirs.core.model.EchelleLimnimetrique;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Epi;
-import fr.sirs.core.model.Fondation;
-import fr.sirs.core.model.GardeTroncon;
-import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.LaisseCrue;
-import fr.sirs.core.model.LargeurFrancBord;
-import fr.sirs.core.model.LigneEau;
-import fr.sirs.core.model.Marche;
-import fr.sirs.core.model.MonteeEaux;
-import fr.sirs.core.model.OuvertureBatardable;
-import fr.sirs.core.model.OuvrageFranchissement;
-import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.OuvrageParticulier;
-import fr.sirs.core.model.OuvrageRevanche;
-import fr.sirs.core.model.OuvrageTelecomEnergie;
-import fr.sirs.core.model.OuvrageVoirie;
-import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.PiedDigue;
-import fr.sirs.core.model.PositionDocument;
-import fr.sirs.core.model.PositionProfilTravers;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.Prestation;
-import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.ProfilLong;
-import fr.sirs.core.model.ProfilTravers;
-import fr.sirs.core.model.ProprieteTroncon;
-import fr.sirs.core.model.RapportEtude;
-import fr.sirs.core.model.RefTypeDesordre;
-import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauTelecomEnergie;
-import fr.sirs.core.model.SIRSDocument;
-import fr.sirs.core.model.SommetRisberme;
-import fr.sirs.core.model.StationPompage;
-import fr.sirs.core.model.SystemeEndiguement;
-import fr.sirs.core.model.TalusDigue;
-import fr.sirs.core.model.TalusRisberme;
-import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.model.VoieAcces;
-import fr.sirs.core.model.VoieDigue;
+import fr.sirs.core.model.*;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.map.FXMapTab;
@@ -98,6 +48,7 @@ import fr.sirs.theme.GlobalPrestationTheme;
 import fr.sirs.theme.PositionDocumentTheme;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.TronconTheme;
+import fr.sirs.util.DesordreUrgenceLayerFunction;
 import fr.sirs.util.FXFreeTab;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -468,6 +419,14 @@ public class CorePlugin extends Plugin {
             desordresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(desordresLayer);
 
+            final MapItem desordreUrgencesGroup = MapBuilder.createItem();
+            desordreUrgencesGroup.setName("Degrés d'urgence");
+            final AbstractSIRSRepository<RefUrgence> refUrgenceRepo = getSession().getRepositoryForClass(RefUrgence.class);
+            desordreUrgencesGroup.items().addAll(buildUrgenceLayers(desordreStore, createDefaultSelectionStyle(), false, refUrgenceRepo));
+            desordreUrgencesGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            desordresLayer.items().add(0, desordreUrgencesGroup);
+
+
             // Prestations
             final BeanStore prestaStore = new BeanStore(suppliers.get(Prestation.class));
             final MapItem prestaLayer = MapBuilder.createItem();
@@ -635,6 +594,63 @@ public class CorePlugin extends Plugin {
 
             layers.add(fml);
             i++;
+        }
+        return layers;
+    }
+
+    public static List<MapLayer> buildUrgenceLayers(BeanStore store, MutableStyle selectionStyle, boolean visible, final AbstractSIRSRepository<RefUrgence> refUrgenceRepo) throws DataStoreException {
+        final List<MapLayer> layers = new ArrayList<>();
+        final org.geotoolkit.data.session.Session symSession = store.createSession(false);
+
+        //une couche pour chaque type d'urgence.
+        for (RefUrgence ref : refUrgenceRepo.getAll()) {
+            final String id = ref.getId();
+            final Filter filter = FF.equals(
+                    FF.function(DesordreUrgenceLayerFunction.NAME, FF.literal(id)),
+                    FF.literal(true)
+            );
+            final FeatureCollection col = symSession.getFeatureCollection(
+                    QueryBuilder.all(store.getNames().iterator().next()));
+            final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col);
+            fml.setQuery(QueryBuilder.filtered(col.getFeatureType().getName(), filter));
+            fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            if (col.getFeatureType().getDescriptor(DATE_DEBUT_FIELD) != null && col.getFeatureType().getDescriptor(DATE_FIN_FIELD) != null) {
+                final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
+                        CommonCRS.Temporal.JAVA.crs(),
+                        GO2Utilities.FILTER_FACTORY.property(DATE_DEBUT_FIELD),
+                        GO2Utilities.FILTER_FACTORY.property(DATE_FIN_FIELD)
+                );
+                fml.getExtraDimensions().add(datefilter);
+            }
+            final Color color;
+            switch (id) {
+                case "RefUrgence:1":
+                    color = new Color(255, 255, 0);
+                    break;
+                case "RefUrgence:2":
+                    color = new Color(255, 150, 0);
+                    break;
+                case "RefUrgence:3":
+                    color = new Color(255, 0, 0);
+                    break;
+                case "RefUrgence:4":
+                    color = new Color(180, 0, 250);
+                    break;
+                case "RefUrgence:99":
+                    color = new Color(255, 255, 255);
+                    break;
+                default:
+                    color = RandomStyleBuilder.randomColor();
+            }
+
+            final MutableStyle baseStyle = createDefaultStyle(color);
+            final MutableStyle style = (baseStyle == null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
+            fml.setStyle(style);
+            fml.setName(ref.getLibelle());
+            fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            fml.setVisible(visible);
+            if (selectionStyle != null) fml.setSelectionStyle(selectionStyle);
+            layers.add(fml);
         }
         return layers;
     }
