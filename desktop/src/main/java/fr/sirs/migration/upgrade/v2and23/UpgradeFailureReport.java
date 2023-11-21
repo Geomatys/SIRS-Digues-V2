@@ -36,7 +36,7 @@ public class UpgradeFailureReport {
 
     private final StringBuilder report = new StringBuilder();
 
-    synchronized String addFailure(final Element element, final String id) {
+    public synchronized String addFailure(final Element element, final String id) {
 
         failed.compute(element, (elt, list) -> {
             if (list == null) {

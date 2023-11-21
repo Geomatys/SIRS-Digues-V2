@@ -14,6 +14,7 @@ import fr.sirs.core.SessionCore;
 import fr.sirs.core.model.*;
 import javafx.collections.ObservableList;
 
+import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
 import org.ektorp.Options;
@@ -119,12 +120,6 @@ if (!r1nReferences.isEmpty()) {
 <%
 if (!r1nReferences.isEmpty()) {
 %>
-    @Override
-    public void update(final <%= helper.getClassName() %> entity) {
-        update1NRelations(entity);
-        super.update(entity);
-    }
-
     /**
      * Method to automatically update the elements linked to this element via a 1-n relation.
      *
@@ -147,7 +142,7 @@ if (!r1nReferences.isEmpty()) {
 
         // Update the relation 1-n with <%= eRefClassName %>.
         {
-            final <%= className %> previousVersion = id == null ? null : get(entity.getId(), new Options().revision(entity.getRevision()));
+            final <%= className %> previousVersion = id == null ? null : get(id, new Options().revision(entity.getRevision()));
             final String old<%= eRefName %> = previousVersion != null ? previousVersion.get<%= eRefName %>() : null;
             final String new<%= eRefName %> = entity.get<%= eRefName %>();
 

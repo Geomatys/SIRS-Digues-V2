@@ -87,7 +87,7 @@ import fr.sirs.map.FXMapPane;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.migration.HtmlRemoval;
 import fr.sirs.migration.RemoveOldDependanceConf;
-import fr.sirs.migration.upgrade.v2and23.UpgradeEvenementHydrauliqueLinkWithMesureH;
+import fr.sirs.migration.upgrade.v2.UpgradeEvenementHydrauliqueLinkWithMesureH;
 import fr.sirs.migration.upgrade.v2and23.UpgradeLink1NtoNN;
 import fr.sirs.migration.upgrade.v2and23.UpgradePrestationsCoordinates;
 import fr.sirs.migration.upgrade.v2and23.Upgrades1NtoNNSupported;

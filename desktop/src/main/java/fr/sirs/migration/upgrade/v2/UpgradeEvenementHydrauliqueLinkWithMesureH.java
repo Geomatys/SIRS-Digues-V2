@@ -18,13 +18,14 @@
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
 
-package fr.sirs.migration.upgrade.v2and23;
+package fr.sirs.migration.upgrade.v2;
 
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.model.*;
+import fr.sirs.migration.upgrade.v2and23.UpgradeFailureReport;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -35,6 +36,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +51,7 @@ import static fr.sirs.core.SirsCore.LOGGER;
  *
  * @author Estelle Idée (Geomatys)
  */
-public class UpgradeEvenementHydrauliqueLinkWithMesureH extends Task {
+public final class UpgradeEvenementHydrauliqueLinkWithMesureH extends Task {
 
     private final DatabaseRegistry dbRegistry;
     private final String dbName;
@@ -95,27 +97,28 @@ public class UpgradeEvenementHydrauliqueLinkWithMesureH extends Task {
             final AbstractSIRSRepository<LigneEau> ligneEauRepository = session.getRepositoryForClass(LigneEau.class);
 
             if (ehRepository == null) {
-                SirsCore.LOGGER.info("Echec de la récupération du répository des EvenementHydraulique.");
-                return false;
+                throw new IllegalStateException("Echec de la récupération du répository des EvenementHydraulique.");
             } else if (monteeEauRepository == null) {
-                SirsCore.LOGGER.info("Echec de la récupération du répository des MonteeEaux.");
-                return false;
+                throw new IllegalStateException("Echec de la récupération du répository des MonteeEaux.");
             } else if (laisseCrueRepository == null) {
-                SirsCore.LOGGER.info("Echec de la récupération du répository des LaisseCrue.");
-                return false;
+                throw new IllegalStateException("Echec de la récupération du répository des LaisseCrue.");
             } else if (ligneEauRepository == null) {
-                SirsCore.LOGGER.info("Echec de la récupération du répository des LigneEau.");
-                return false;
+                throw new IllegalStateException("Echec de la récupération du répository des LigneEau.");
             }
 
             updateMessage("Parcours des MonteeEaux.");
 
             final Map<String, EvenementHydraulique> ehToUpdateMap = new HashMap<>();
-            update(monteeEauRepository, ehToUpdateMap, ehRepository);
-            update(ligneEauRepository, ehToUpdateMap, ehRepository);
-            update(laisseCrueRepository, ehToUpdateMap, ehRepository);
+            final List<MonteeEaux> monteeEauxToUpdate = update(MonteeEaux.class, monteeEauRepository, ehToUpdateMap, ehRepository);
+            final List<LigneEau> ligneEauxToUpdate = update(LigneEau.class, ligneEauRepository, ehToUpdateMap, ehRepository);
+            final List<LaisseCrue> laisseCruesToUpdate = update(LaisseCrue.class, laisseCrueRepository, ehToUpdateMap, ehRepository);
 
-            updateMessage("Sauvegarde en base des Prestations modifiées");
+            updateMessage("Sauvegarde en base des Mesures Hydrauliques modifiées");
+            monteeEauRepository.executeBulk(monteeEauxToUpdate);
+            ligneEauRepository.executeBulk(ligneEauxToUpdate);
+            laisseCrueRepository.executeBulk(laisseCruesToUpdate);
+
+            updateMessage("Sauvegarde en base des Evenements Hydrauliques modifiées");
             ehRepository.executeBulk(ehToUpdateMap.values());
 
             return true;
@@ -143,26 +146,28 @@ public class UpgradeEvenementHydrauliqueLinkWithMesureH extends Task {
         return false;
     }
 
-    private void update(final AbstractSIRSRepository<? extends AvecEvenementHydraulique> mesureRepo, final Map<String, EvenementHydraulique> ehToUpdateMap,
-                        final AbstractSIRSRepository<EvenementHydraulique> ehRepository) throws NoSuchMethodException {
-        ArgumentChecks.ensureNonNull("mesureRepo", mesureRepo);
-        ArgumentChecks.ensureNonNull("ehToUpdateMap", ehToUpdateMap);
-        ArgumentChecks.ensureNonNull("ehRepository", ehRepository);
+    private <T extends AvecEvenementHydraulique> List<T> update(final Class<T> clazz, final AbstractSIRSRepository<T> mesureRepo, final Map<String, EvenementHydraulique> ehToUpdateMap,
+                                     final AbstractSIRSRepository<EvenementHydraulique> ehRepository) throws NoSuchMethodException {
 
-        final Class<? extends AvecEvenementHydraulique> mesureClass = mesureRepo.getModelClass();
-        final Method getMesureIds = EvenementHydraulique.class.getMethod("get" + mesureClass.getSimpleName() + "Ids");
+        final Method getMesureIds = EvenementHydraulique.class.getMethod("get" + clazz.getSimpleName() + "Ids");
+        final List<T> mesuresToUpdate = new ArrayList<>();
 
-        final List<? extends AvecEvenementHydraulique> allMesures = mesureRepo.getAll();
-        for (AvecEvenementHydraulique mesure : allMesures) {
+        final List<T> allMesures = mesureRepo.getAll();
+        for (T mesure : allMesures) {
             if (mesure != null) {
-                final String elementInfo = String.format(mesureClass + " parcourue : %s   -> %s ", mesureClass.getCanonicalName(), mesure.getDesignation());
+                final String elementInfo = String.format(clazz + " parcourue : %s   -> %s ", clazz.getCanonicalName(), mesure.getDesignation());
                 updateMessage(elementInfo);
                 final String evenementHydrauliqueId = mesure.getEvenementHydrauliqueId();
                 if (evenementHydrauliqueId != null) {
                     final EvenementHydraulique eh;
                     if (!ehToUpdateMap.containsKey(evenementHydrauliqueId)) {
                         eh = ehRepository.get(evenementHydrauliqueId);
-                        if (eh == null) return;
+                        if (eh == null) {
+                            // remove the link with the non-existing eh
+                            mesure.setEvenementHydrauliqueId(null);
+                            mesuresToUpdate.add(mesure);
+                            continue;
+                        }
                         ehToUpdateMap.put(evenementHydrauliqueId, eh);
                     } else {
                         eh = ehToUpdateMap.get(evenementHydrauliqueId);
@@ -185,6 +190,7 @@ public class UpgradeEvenementHydrauliqueLinkWithMesureH extends Task {
                 }
             }
         }
+        return mesuresToUpdate;
     }
 
 }

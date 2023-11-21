@@ -604,12 +604,8 @@ public class PojoTable extends BorderPane implements Printable {
                     final List<String> allValuesIds = allValues.stream().map(Identifiable::getId).collect(Collectors.toList());
                     final List<Preview> possiblePreviews = new ArrayList<>();
                     // Keep only Previews not present in the table yet.
-                    for (Preview preview : previews) {
-                        if (!allValuesIds.contains(preview.getElementId())) {
-                            possiblePreviews.add(preview);
-                        }
-                    }
-                    choices = SIRS.observableList(possiblePreviews).sorted();
+                    previews.removeIf(preview -> allValuesIds.contains(preview.getElementId()));
+                    choices = SIRS.observableList(previews).sorted();
                 }
 
                 final PojoTableChoiceStage<Element> stage = new ChoiceStage(
@@ -634,23 +630,18 @@ public class PojoTable extends BorderPane implements Printable {
                         // The link with the new EH will be created only once the user will clicked on the Sauvegarder button.
                         // These processes are performed in the method @AbstractSIRSRepository.update1NRelations(entity) called by executeBulk(list).
                         if (EvenementHydraulique.class.isAssignableFrom(cont.getClass())) {
-                            final String ehId;
-
                             if (AvecEvenementHydraulique.class.isAssignableFrom(pojoClass)) {
                                 AvecEvenementHydraulique avecEvenementHydraulique = (AvecEvenementHydraulique) p;
-                                ehId = avecEvenementHydraulique.getEvenementHydrauliqueId();
-                            } else {
-                                ehId = null;
-                            }
-
-                            if (ehId != null && !ehId.equals(cont.getId())) {
-                                final Optional optional = PropertiesFileUtilities.showConfirmationDialog("L'élément que vous souhaitez ajouter est déjà lié à un autre événement hydraulique." +
-                                                "\nSouhaitez-vous rompre ce lien afin d'ajouter l'élément à l'événement hydraulique " + cont.getDesignation() + " - " + ((EvenementHydraulique) cont).getLibelle() + "?",
-                                        "Elément déjà lié.", 700, 180, true);
-                                if (optional.isPresent()) {
-                                    final Object result = optional.get();
-                                    if (!ButtonType.YES.equals(result)) {
-                                        addElement = false;
+                                final String ehId = avecEvenementHydraulique.getEvenementHydrauliqueId();
+                                if (ehId != null && !ehId.equals(cont.getId())) {
+                                    final Optional optional = PropertiesFileUtilities.showConfirmationDialog("L'élément que vous souhaitez ajouter est déjà lié à un autre événement hydraulique." +
+                                                    "\nSouhaitez-vous rompre ce lien afin d'ajouter l'élément à l'événement hydraulique " + cont.getDesignation() + " - " + ((EvenementHydraulique) cont).getLibelle() + "?",
+                                            "Elément déjà lié.", 700, 180, true);
+                                    if (optional.isPresent()) {
+                                        final Object result = optional.get();
+                                        if (!ButtonType.YES.equals(result)) {
+                                            addElement = false;
+                                        }
                                     }
                                 }
                             }
@@ -667,9 +658,8 @@ public class PojoTable extends BorderPane implements Printable {
                         }
                     }
                 } else {
-                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
-                    alert.setResizable(true);
-                    alert.showAndWait();
+                    // No element has been selected or the element has not been found: null.
+                    new Growl(Growl.Type.INFO, "Aucune entrée ne peut être créée.").showAndFade();
                 }
             }
         };
@@ -2169,8 +2159,7 @@ public class PojoTable extends BorderPane implements Printable {
                 // Hack : The setOnPropertyCommit is called when the user click on a cell.
                 // And called again once he has modified the value or exited the cell.
                 // We skip the commit process when the value has not changed.
-                if ((oldValue != null && oldValue.equals(newValue))
-                        || (newValue != null && newValue.equals(oldValue))) {
+                if (oldValue != null && oldValue.equals(newValue)) {
                     return;
                 }
 

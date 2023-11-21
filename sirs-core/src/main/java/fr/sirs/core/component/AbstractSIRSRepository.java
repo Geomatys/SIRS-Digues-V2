@@ -309,6 +309,9 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
             ((AvecDateMaj) entity).setDateMaj(LocalDate.now());
         }
+        // Update the 1-n relations in case there are some.
+        update1NRelations(entity);
+
         super.update(entity);
         // Put the updated entity into cache in case the old entity is different.
         if (entity != cache.get(entity.getId())) {
