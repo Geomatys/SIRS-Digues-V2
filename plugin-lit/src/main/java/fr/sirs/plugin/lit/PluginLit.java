@@ -28,6 +28,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.SirsCoreRuntimeException;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AutreOuvrageLit;
 import fr.sirs.core.model.DesordreLit;
 import fr.sirs.core.model.DomanialiteLit;
@@ -40,6 +41,7 @@ import fr.sirs.core.model.OccupationRiveraineLit;
 import fr.sirs.core.model.OuvrageAssocieLit;
 import fr.sirs.core.model.PenteLit;
 import fr.sirs.core.model.PlageDepotLit;
+import fr.sirs.core.model.RefUrgence;
 import fr.sirs.core.model.RegimeEcoulementLit;
 import fr.sirs.core.model.SeuilLit;
 import fr.sirs.core.model.TronconLit;
@@ -219,14 +221,19 @@ public class PluginLit extends Plugin {
                 ilesLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
                 container.items().add(ilesLayer);
 
-
+                final BeanStore desordreStore = new BeanStore(suppliers.get(DesordreLit.class));
                 final MapItem desordreLayer = MapBuilder.createItem();
                 desordreLayer.setName("Désordres (lit)");
-                final BeanStore desordreStore = new BeanStore(suppliers.get(DesordreLit.class));
                 desordreLayer.items().addAll(buildLayers(desordreStore, nameMap, colors, createDefaultSelectionStyle(), false));
                 desordreLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
                 container.items().add(desordreLayer);
 
+                final MapItem desordreUrgencesGroup = MapBuilder.createItem();
+                desordreUrgencesGroup.setName("Degrés d'urgence");
+                final AbstractSIRSRepository<RefUrgence> refUrgenceRepo = getSession().getRepositoryForClass(RefUrgence.class);
+                desordreUrgencesGroup.items().addAll(CorePlugin.buildUrgenceLayers(desordreStore, createDefaultSelectionStyle(), false, refUrgenceRepo));
+                desordreUrgencesGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+                desordreLayer.items().add(0, desordreUrgencesGroup);
 
                 final MapItem otherLayer = MapBuilder.createItem();
                 otherLayer.setName("Autre (lit)");
