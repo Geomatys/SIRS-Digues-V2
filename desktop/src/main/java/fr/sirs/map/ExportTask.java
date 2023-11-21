@@ -25,37 +25,41 @@ import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.logging.Level;
+import fr.sirs.ui.Growl;
+import fr.sirs.util.DesordreUrgenceLayerFunction;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArraysExt;
 import org.ektorp.DocumentNotFoundException;
-import org.geotoolkit.data.FeatureCollection;
-import org.geotoolkit.data.FeatureStore;
-import org.geotoolkit.data.FeatureStoreRuntimeException;
-import org.geotoolkit.data.FeatureStoreUtilities;
-import org.geotoolkit.data.FileFeatureStoreFactory;
+import org.geotoolkit.data.*;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.data.memory.WrapFeatureCollection;
+import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.session.Session;
 import org.geotoolkit.feature.Attribute;
 import org.geotoolkit.feature.Feature;
-import static org.geotoolkit.feature.FeatureTypeUtilities.createSubType;
 import org.geotoolkit.feature.FeatureUtilities;
 import org.geotoolkit.feature.Property;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.PropertyDescriptor;
+import org.geotoolkit.filter.binarycomparison.DefaultPropertyIsEqualTo;
 import org.geotoolkit.internal.Loggers;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.storage.FactoryMetadata;
 import org.geotoolkit.temporal.object.TemporalUtilities;
+import org.opengis.filter.Filter;
+import org.opengis.filter.expression.Expression;
 import org.opengis.geometry.Geometry;
 import org.opengis.util.GenericName;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Level;
+
+import static org.geotoolkit.feature.FeatureTypeUtilities.createSubType;
 
 /**
  *
@@ -85,7 +89,22 @@ public class ExportTask extends Task<Boolean> {
     @Override
     protected Boolean call() throws Exception {
         try {
-            final FeatureCollection baseCol = new FillCoordCollection(layer.getCollection());
+            final Query query = layer.getQuery();
+            final FeatureCollection baseCol;
+            String extraLayerName = "";
+            if (query != null) {
+                baseCol = new FillCoordCollection(layer.getCollection().subCollection(layer.getQuery()));
+                final Filter filter = query.getFilter();
+                if (filter instanceof DefaultPropertyIsEqualTo) {
+                    DefaultPropertyIsEqualTo fil = (DefaultPropertyIsEqualTo) filter;
+                    final Expression expression1 = fil.getExpression1();
+                    if (expression1 instanceof DesordreUrgenceLayerFunction) {
+                        extraLayerName = "_" + layer.getName().replace(" ", "-");
+                    }
+                }
+            } else {
+                baseCol = new FillCoordCollection(layer.getCollection());
+            }
             final FeatureType baseType = baseCol.getFeatureType();
             final FactoryMetadata metadata = factory.getMetadata();
             final Class<Geometry>[] supportedGeometryTypes = metadata.supportedGeometryTypes();
@@ -129,15 +148,17 @@ public class ExportTask extends Task<Boolean> {
                     }
                 };
             }
+            boolean allColsEmpty = true;
             for (FeatureCollection col : cols) {
                 if (col.isEmpty()) {
                     continue;
                 }
+                allColsEmpty = false;
                 FeatureType inType = col.getFeatureType();
                 inType = filterFTByColumns(inType);
                 final String inTypeName = inType.getName().tip().toString();
                 //output file path
-                File file = new File(folder, inTypeName + factory.getFileExtensions()[0]);
+                File file = new File(folder, inTypeName + extraLayerName + factory.getFileExtensions()[0]);
                 //if file exist, add date aside it
                 if (file.exists()) {
                     //generate name + time
@@ -159,6 +180,10 @@ public class ExportTask extends Task<Boolean> {
                 session.addFeatures(outName, col);
                 //close store
                 store.close();
+            }
+            if (allColsEmpty) {
+                Platform.runLater(() ->
+                    new Growl(Growl.Type.WARNING, "La couche sélectionnée est vide.").showAndFade());
             }
             done();
         } catch (DataStoreException ex) {
