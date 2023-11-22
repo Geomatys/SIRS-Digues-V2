@@ -353,6 +353,7 @@ public final class RegistreDocumentsPane extends GridPane {
                     return;
                 }
 
+                Files.copy(f.toPath(), newFile.toPath());
 
                 final Optional confirmOpt = showConfirmationDialog("Souhaitez-vous mettre automatiquement à jour les prestations du tableau?" +
                         "\n\nLes éléments suivants seront mis à jour pour chaque prestation :" +
@@ -373,11 +374,9 @@ public final class RegistreDocumentsPane extends GridPane {
                     }
                 }
 
-                if (!extractElementsInFile(f, timeStampDate, updatePrestations)) return;
+                if (!extractElementsInFile(newFile, timeStampDate, updatePrestations)) return;
                 setProperty(newFile, TIMESTAMP_DATE, timeStampDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             }
-
-            Files.copy(f.toPath(), newFile.toPath());
 
             // refresh tree
             update();
@@ -805,9 +804,7 @@ public final class RegistreDocumentsPane extends GridPane {
 
                 SIRS.openFile(file).setOnSucceeded(evt -> {
                     if (!Boolean.TRUE.equals(evt.getSource().getValue())) {
-                        Platform.runLater(() -> {
-                            new Growl(Growl.Type.WARNING, "Impossible de trouver un programme pour ouvrir le document.").showAndFade();
-                        });
+                        Platform.runLater(() -> new Growl(Growl.Type.WARNING, "Impossible de trouver un programme pour ouvrir le document.").showAndFade());
                     }
                 });
             }
