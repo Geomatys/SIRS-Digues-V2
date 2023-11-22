@@ -100,6 +100,20 @@ public class SirsStringConverter extends StringConverter {
             final Session session = Injector.getBean(Session.class);
             item = session.getRepositoryForClass(BorneDigue.class).get(srb.getBorneId());
         }
+        if (item instanceof Preview) {
+            try {
+                Preview preview = (Preview) item;
+                final String elementClass = preview.getElementClass();
+                final String elementId = preview.getElementId();
+                if (elementClass != null && elementId != null) {
+                    final Session session = Injector.getBean(Session.class);
+                    final AbstractSIRSRepository<Element> repository = session.getRepositoryForType(elementClass);
+                    item = repository.get(elementId);
+                }
+            } catch (RuntimeException e) {
+                SIRS.LOGGER.log(Level.WARNING, "Error while getting element from preview.", e);
+            }
+        }
 
         StringBuilder text = new StringBuilder();
         // Start title with element designation
