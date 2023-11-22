@@ -67,6 +67,8 @@ public class  Helper {
     public static final String COMMENTAIRE_FIELD_NAME = "commentaire";
     public static final String EVENEMENT_HYDRAULIQUE_FIELD_NAME = "evenementHydrauliqueId";
     public static final String CHEMIN_FIELD_NAME = "chemin";
+    public static final String SYNTHESE_TABLE_PATH_START_FIELD_NAME = "syntheseTablePathStart";
+    public static final String SYNTHESE_TABLE_PATH_END_FIELD_NAME = "syntheseTablePathEnd";
     public static final String DATE_MAJ_FIELD_NAME = "dateMaj";
     public static final String DATE_DEBUT_FIELD_NAME = "date_debut";
     public static final String DATE_FIN_FIELD_NAME = "date_fin";

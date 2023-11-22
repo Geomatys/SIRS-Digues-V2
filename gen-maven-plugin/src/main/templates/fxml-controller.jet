@@ -10,6 +10,7 @@ import fr.sirs.Injector;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
 import fr.sirs.util.FXFileTextField;
+import fr.sirs.util.FXFileWithoutRefTextField;
 import fr.sirs.util.FXComponentField;
 import fr.sirs.util.javafx.FloatSpinnerValueFactory;
 import fr.sirs.util.StreamingIterable;
@@ -310,6 +311,10 @@ else if (helper.isParcelleVegetation()){
         ui_<%= eAtt.getName()  %>.refProperty.bind(elementProperty);
         ui_<%= eAtt.getName()  %>.disableFieldsProperty.bind(disableFieldsProperty());
 <%
+            } else if ("FXFileWithoutRefTextField".equals(attEditorName) ){
+%>
+        ui_<%= eAtt.getName()  %>.disableFieldsProperty.bind(disableFieldsProperty());
+<%
             } else if("TextArea".equals(attEditorName)) {
 %>
         ui_<%= eAtt.getName()  %>.setWrapText(true);
@@ -525,6 +530,7 @@ else if (helper.isParcelleVegetation()){
             else if ("TextField".equals(attEditorName)
                     || "TextArea".equals(attEditorName)
                     || "FXFileTextField".equals(attEditorName)
+                    || "FXFileWithoutRefTextField".equals(attEditorName)
                     || "FXDirectoryTextField".equals(attEditorName)) {
 %>
             ui_<%= eAtt.getName()  %>.textProperty().unbindBidirectional(oldElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
@@ -662,6 +668,7 @@ else if (helper.isParcelleVegetation()){
             else if ("TextField".equals(attEditorName)
                     || "TextArea".equals(attEditorName)
                     || "FXFileTextField".equals(attEditorName)
+                    || "FXFileWithoutRefTextField".equals(attEditorName)
                     || "FXDirectoryTextField".equals(attEditorName)) {
 %>
         ui_<%= eAtt.getName()  %>.textProperty().bindBidirectional(newElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());

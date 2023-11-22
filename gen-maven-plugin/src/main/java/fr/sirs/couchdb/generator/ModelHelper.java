@@ -394,6 +394,9 @@ public class ModelHelper extends Helper {
                 if (null != eAtt.getName()) switch (eAtt.getName()) {
                     case CHEMIN_FIELD_NAME:
                         return "FXFileTextField";
+                    case SYNTHESE_TABLE_PATH_START_FIELD_NAME:
+                    case SYNTHESE_TABLE_PATH_END_FIELD_NAME:
+                        return "FXFileWithoutRefTextField";
                     case COMMENTAIRE_FIELD_NAME:
                     case SUITE_FIELD_NAME:
                     case EVOLUTION_FIELD_NAME:

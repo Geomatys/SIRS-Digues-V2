@@ -6,6 +6,7 @@ class="FXMLGenerator" imports ="java.util.* org.eclipse.emf.ecore.* org.eclipse.
 <?import fr.sirs.theme.ui.*?>
 <?import fr.sirs.util.FXFreeTab?>
 <?import fr.sirs.util.FXFileTextField?>
+<?import fr.sirs.util.FXFileWithoutRefTextField?>
 <?import fr.sirs.util.FXComponentField?>
 <?import org.geotoolkit.gui.javafx.util.*?>
 <?import jidefx.scene.control.field.*?>
@@ -315,4 +316,3 @@ for(final EClass eClass : helper.getTypeTree() ) {
   </center>
 
 </fx:root>
-
