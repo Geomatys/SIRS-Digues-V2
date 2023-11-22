@@ -5,6 +5,7 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import fr.sirs.util.FXFileWithoutRefTextField?>
 <fx:root fx:id="uiBorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
   <center>
     <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
@@ -92,17 +93,15 @@
                   <Label text="%horodatageStartDate" GridPane.rowIndex="3" />
                   <DatePicker fx:id="ui_horodatageStartDate" GridPane.columnIndex="1" GridPane.rowIndex="3"  />
                   <Label text="%syntheseTablePathStart" GridPane.rowIndex="4" />
-                  <Label fx:id="ui_errorMessageStart" text="" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                  <FXFileWithoutRefTextField fx:id="ui_syntheseTablePathStart" GridPane.columnIndex="1" GridPane.rowIndex="4"  />
 
                   <Separator prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="6" GridPane.valignment="TOP"/>
                   <Label text="%horodatageEndDate" GridPane.rowIndex="7" />
                   <DatePicker fx:id="ui_horodatageEndDate" GridPane.columnIndex="1" GridPane.rowIndex="7"  />
                   <Label text="%syntheseTablePathEnd" GridPane.rowIndex="8" />
-                  <Label fx:id="ui_errorMessageEnd" text="" GridPane.columnIndex="1" GridPane.rowIndex="9"/>
+                  <FXFileWithoutRefTextField fx:id="ui_syntheseTablePathEnd" GridPane.columnIndex="1" GridPane.rowIndex="8"  />
 
                   <!-- Auto generated but do not want to show them -->
-                  <TextField fx:id="ui_syntheseTablePathStart" GridPane.columnIndex="1" GridPane.rowIndex="10"  />
-                  <TextField fx:id="ui_syntheseTablePathEnd" GridPane.columnIndex="1" GridPane.rowIndex="11"  />
                   <DatePicker fx:id="ui_horodatageDateDebutStart" GridPane.columnIndex="1" GridPane.rowIndex="12"  />
                   <DatePicker fx:id="ui_horodatageDateDebutEnd" GridPane.columnIndex="1" GridPane.rowIndex="13"  />
                   <DatePicker fx:id="ui_horodatageDateFinEnd" GridPane.columnIndex="1" GridPane.rowIndex="14"  />
@@ -165,4 +164,3 @@
   </center>
 
 </fx:root>
-

@@ -4,38 +4,22 @@ package fr.sirs.theme.ui;
 import fr.sirs.Injector;
 import fr.sirs.PropertiesFileUtilities;
 import fr.sirs.Session;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.*;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.stage.FileChooser;
-import org.geotoolkit.gui.javafx.util.AbstractPathTextField;
 
-import java.io.File;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
 
 /**
  * Class used to group prestations' linked pojotables  in 'categories' as for Desordres.
@@ -43,20 +27,12 @@ import java.util.logging.Level;
  * @author Maxime Gavens (Geomatys)
  */
 public class FXPrestationPane extends FXPrestationPaneStub {
-    // As the Prestation's attribute syntheseTablePath is a String, the .jet automatically creates
-    // a TextField ui_syntheseTablePath in FXPrestationPaneStub.java that shall also appear in FXPrestationPane.fxml.
-    // However, we would like to have a FXHorodatageFileField instead of the basic TextField.
-    // To do so, the ui_syntheseTablePath is removed from the parent, and we add synthesisTableField instead.
-    private FXHorodatageFileField ui_synthesisTableFieldStart;
     @FXML
     private GridPane ui_horodatagePane;
-    @FXML
-    private Label ui_errorMessageStart;
-    private FXHorodatageFileField ui_synthesisTableFieldEnd;
-    @FXML
-    private Label ui_errorMessageEnd;
 
     @FXML private FXValidityPeriodPane uiValidityPeriod;
+
+    private final List<String> supportedFormat = Collections.singletonList("*.pdf");
 
     /**
      * REDMINE 7782 - doc "Prestation cochée par défaut.xlsx"
@@ -158,20 +134,16 @@ public class FXPrestationPane extends FXPrestationPaneStub {
             return desordreIdsTable;
         });
         final ObservableList<Node> children = ui_horodatagePane.getChildren();
-        // ui_syntheseTablePath is removed as it is replaced by ui_synthesisTableField
-        children.remove(ui_syntheseTablePathStart);
-        children.remove(ui_syntheseTablePathEnd);
-        ui_horodatagePane.add(ui_synthesisTableFieldStart, 1, 4);
-        ui_horodatagePane.add(ui_synthesisTableFieldEnd, 1, 8);
+
+        ui_syntheseTablePathStart.setSupportedFormats(supportedFormat);
+        ui_syntheseTablePathStart.checkInputTextValid();
+        ui_syntheseTablePathEnd.setSupportedFormats(supportedFormat);
+        ui_syntheseTablePathEnd.checkInputTextValid();
 
         // Remove components for logged start and end validity dates when Prestation is timestamped.
         children.remove(ui_horodatageDateDebutStart);
         children.remove(ui_horodatageDateDebutEnd);
         children.remove(ui_horodatageDateFinEnd);
-
-        setTableField(ui_synthesisTableFieldStart, ui_errorMessageStart);
-
-        setTableField(ui_synthesisTableFieldEnd, ui_errorMessageEnd);
 
         // Block timestamp dates in the future.
         blockDateInFuture(ui_horodatageStartDate);
@@ -255,13 +227,6 @@ public class FXPrestationPane extends FXPrestationPaneStub {
         }
     }
 
-    private void setTableField(FXHorodatageFileField ui_synthesisTableFieldStart, Label ui_errorMessageStart) {
-        ui_synthesisTableFieldStart.disableFieldsProperty.bind(disableFieldsProperty());
-        ui_errorMessageStart.visibleProperty().bind(ui_errorMessageStart.textProperty().isNotEmpty());
-        ui_errorMessageStart.setTextFill(Color.RED);
-        ui_errorMessageStart.setFont(new Font(12));
-    }
-
     /**
      * Change listener on typePrestationId to auto select/deselect the registreAttribution checkbox.
      * @return the @{@link ChangeListener}
@@ -310,120 +275,6 @@ public class FXPrestationPane extends FXPrestationPaneStub {
         if (refTypeId != null && refTypeId.length() > length) {
             final String refTypeIdShort = refTypeId.substring(length);
             prestation.setRegistreAttribution(typeInRegistreIds.contains(Integer.parseInt(refTypeIdShort)));
-        }
-    }
-
-    /**
-     * Initialize fields at element setting.
-     */
-    @Override
-    protected void initFields(ObservableValue<? extends Prestation > observableElement, Prestation oldElement, Prestation newElement) {
-        super.initFields(observableElement, oldElement, newElement);
-        // Cannot instantiate ui_synthesisTableField when creating the class attributes as it passes through initFields()
-        // before creating the class attributes, leading to a NullPointerException.
-        if (ui_synthesisTableFieldStart == null ) ui_synthesisTableFieldStart = new FXHorodatageFileField(ui_errorMessageStart);
-        if (ui_synthesisTableFieldEnd == null ) ui_synthesisTableFieldEnd = new FXHorodatageFileField(ui_errorMessageEnd);
-        // Unbind fields bound to previous element.
-        if (oldElement != null) {
-            // Propriétés de Prestation
-            ui_synthesisTableFieldStart.textProperty().unbindBidirectional(oldElement.syntheseTablePathStartProperty());
-            ui_synthesisTableFieldStart.setText(null);
-            ui_synthesisTableFieldEnd.textProperty().unbindBidirectional(oldElement.syntheseTablePathEndProperty());
-            ui_synthesisTableFieldEnd.setText(null);
-        }
-
-        if (newElement != null) {
-
-            /*
-             * Bind control properties to Element ones.
-             */
-            // Propriétés de Prestation
-            // * syntheseTablePath
-            ui_synthesisTableFieldStart.textProperty().bindBidirectional(newElement.syntheseTablePathStartProperty());
-            ui_synthesisTableFieldStart.checkInputTextValid();
-            ui_synthesisTableFieldEnd.textProperty().bindBidirectional(newElement.syntheseTablePathEndProperty());
-            ui_synthesisTableFieldEnd.checkInputTextValid();
-        }
-    }
-
-    private class FXHorodatageFileField extends AbstractPathTextField {
-
-        private final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty();
-
-        /**
-         * Supported formats for timestamped files.
-         */
-        private final List<String> supportedFormat = Collections.singletonList("*.pdf");
-
-        private final Label ui_errorMessage;
-
-        public FXHorodatageFileField(final Label ui_errorMessage) {
-            this.ui_errorMessage = ui_errorMessage;
-            inputText.disableProperty().bind(disableFieldsProperty);
-            choosePathButton.disableProperty().bind(disableFieldsProperty);
-
-            inputText.focusedProperty().addListener((obs, oldValue, newValue) -> {
-                if (oldValue && !newValue) {
-                    checkInputTextValid();
-                }
-            });
-
-            // Override the OnAction set in the parent.
-            choosePathButton.setOnAction((ActionEvent e)-> {
-                final String content = chooseInputContent();
-                if (content != null) {
-                    setText(content);
-                }
-                checkInputTextValid();
-            });
-        }
-
-        private void checkInputTextValid() {
-            final String text = this.getText();
-            if (text != null && !text.isEmpty()) {
-                if (!text.endsWith(".pdf")) {
-                    ui_errorMessage.setText("Veuillez sélectionner un fichier au format PDF.");
-                    return;
-                }
-
-                final File syntheseFile = new File(text);
-                if (!syntheseFile.exists()) {
-                    ui_errorMessage.setText("Le fichier est introuvable.");
-                    return;
-                }
-            }
-            ui_errorMessage.setText("");
-        }
-
-        @Override
-        protected String chooseInputContent() {
-            final FileChooser chooser = new FileChooser();
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported formats for cover and conclusion pages", supportedFormat));
-
-            try {
-                URI uriForText = getURIForText(getText());
-                final Path basePath = Paths.get(uriForText);
-                if (Files.isDirectory(basePath)) {
-                    chooser.setInitialDirectory(basePath.toFile());
-                } else if (Files.isDirectory(basePath.getParent())) {
-                    chooser.setInitialDirectory(basePath.getParent().toFile());
-                }
-            } catch (Exception e) {
-                // Well, we'll try without it...
-                SirsCore.LOGGER.log(Level.FINE, "Input path cannot be decoded.", e);
-            }
-            File returned = chooser.showOpenDialog(null);
-            if (returned == null) {
-                return null;
-            } else {
-                return (completor.root != null) ?
-                        completor.root.relativize(returned.toPath()).toString() : returned.getAbsolutePath();
-            }
-        }
-
-        @Override
-        protected URI getURIForText(String inputText) throws Exception {
-            return new URI(inputText);
         }
     }
 
