@@ -20,6 +20,7 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.model.Photo;
+import fr.sirs.ui.Growl;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -64,16 +65,28 @@ public class FXPhotoPane extends FXPhotoPaneStub {
                 ui_photo.minWidth(0);
                 ui_photo.minHeight(0);
                 Image image = ui_photo.getImage();
-                if (image != null) {
-                    isVerticalPhoto = image.getHeight() > image.getWidth();
+                if (image == null) {
+                    new Growl(Growl.Type.WARNING, "Impossible de charger l'image. Veuillez vérifier le chemin d'accès.").showAndFade();
+                    return;
                 }
+                isVerticalPhoto = image.getHeight() > image.getWidth();
+
                 // Compute height when parent size or padding change.
                 ui_photo.fitHeightProperty().bind(Bindings.createDoubleBinding(() -> {
-                    double height = Math.min(ui_hbox_container.getHeight(), getHeight());
+                    double height;
+                    // HACK-REDMINE-7842 : limit the image height to the max height for portrait photos.
+                    // Don't apply to landscape pictures otherwise the picture box will be smaller than expected.
+                    if (isVerticalPhoto) {
+                        height = Math.min(ui_hbox_container.getHeight(), getHeight());
+                    } else {
+                        height = ui_hbox_container.getHeight();
+                    }
+
                     final Insets padding = ui_photo_stack.getPadding();
                     if (padding != null) {
                         height -= padding.getBottom() + padding.getTop();
                     }
+
                     return Math.max(0, height);
                 }, ui_hbox_container.heightProperty(), ui_photo_stack.paddingProperty()));
 
