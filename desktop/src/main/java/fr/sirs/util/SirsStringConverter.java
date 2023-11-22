@@ -24,6 +24,7 @@ import fr.sirs.SIRS;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS_ABREGE;
 
 import fr.sirs.Session;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AmenagementHydrauliqueView;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.BorneDigue;
@@ -117,7 +118,8 @@ public class SirsStringConverter extends StringConverter {
 
         StringBuilder text = new StringBuilder();
         // Start title with element designation
-        if (prefixed) {
+        // Hack-Redmine: 7917 - We never want to show the designation/abrégé of Contact and Organisme.
+        if (prefixed && !(item instanceof Contact) && !(item instanceof Organisme)) {
             text.append(getDesignation(item));
             if (!suffixed) {
                 return convertAndRegister(text, item);
