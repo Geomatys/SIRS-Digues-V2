@@ -26,7 +26,6 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -65,7 +64,9 @@ public class FXPhotoPane extends FXPhotoPaneStub {
                 ui_photo.minWidth(0);
                 ui_photo.minHeight(0);
                 Image image = ui_photo.getImage();
-                isVerticalPhoto = image.getHeight() > image.getWidth();
+                if (image != null) {
+                    isVerticalPhoto = image.getHeight() > image.getWidth();
+                }
                 // Compute height when parent size or padding change.
                 ui_photo.fitHeightProperty().bind(Bindings.createDoubleBinding(() -> {
                     double height = Math.min(ui_hbox_container.getHeight(), getHeight());
