@@ -26,32 +26,6 @@ public interface AvecObservations extends  Element {
     }
 
     /**
-     * Get the degres d'urgence of the last Observation with a degrés d'urgence.
-     * @return
-     */
-    default String getLastDegreUrgence() {
-        if (!(this instanceof Desordre)) {
-            throw new IllegalStateException("Method only valid for Desordre.");
-        }
-
-        final ObservableList<AbstractObservation> observations = FXCollections.observableArrayList(getObservations());
-
-        if (observations == null || observations.isEmpty()) return null;
-        observations.sort(SirsComparator.OBSERVATION_COMPARATOR);
-
-        String lastUrgence = null;
-        for (int i = 0; i < observations.size(); i--) {
-            final String urgenceId = ((Observation) observations.get(i)).getUrgenceId();
-            if (urgenceId != null) {
-                lastUrgence = urgenceId;
-                break;
-            }
-        }
-
-        return lastUrgence;
-    }
-
-    /**
      * Filtre les éléments par la date de leur derniere observation.
      * L'élément est sélectionné si sa dernière observation a été créé à une date comprise dans l'interval donné.
      */
