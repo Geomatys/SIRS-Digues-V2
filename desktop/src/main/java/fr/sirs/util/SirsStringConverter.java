@@ -245,7 +245,8 @@ public class SirsStringConverter extends StringConverter {
                 return (String) method.invoke(source);
             } catch (ReflectiveOperationException | SecurityException e) {
                 SIRS.LOGGER.log(Level.FINE, null, e);
-                // No abrege available, use default method.
+                // No abrege available, use only designation, not the classAbrege.
+                return source.getDesignation();
             }
         }
 
