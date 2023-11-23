@@ -93,13 +93,14 @@ public class ExportTask extends Task<Boolean> {
             final FeatureCollection baseCol;
             String extraLayerName = "";
             if (query != null) {
-                baseCol = new FillCoordCollection(layer.getCollection().subCollection(layer.getQuery()));
+                baseCol = new FillCoordCollection(layer.getCollection().subCollection(query));
                 final Filter filter = query.getFilter();
                 if (filter instanceof DefaultPropertyIsEqualTo) {
                     DefaultPropertyIsEqualTo fil = (DefaultPropertyIsEqualTo) filter;
                     final Expression expression1 = fil.getExpression1();
                     if (expression1 instanceof DesordreUrgenceLayerFunction) {
-                        extraLayerName = "_" + layer.getName().replace(" ", "-");
+                        final String name = layer.getName();
+                        if (name != null) extraLayerName = "_" + name.replace(" ", "-");
                     }
                 }
             } else {
