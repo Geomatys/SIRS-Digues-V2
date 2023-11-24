@@ -214,13 +214,18 @@ public class SirsStringConverter extends StringConverter {
         ArgumentChecks.ensureNonNull("Preview to get designation for", source);
         // Hack redmine 7917 : show abrege for ReferenceType when available.
         // If not available, then only show the designation, not the classAbrege.
-        final String abrege = source.getAbrege();
-        if (abrege != null) {
-            return abrege;
+
+        final String docId = source.getDocId();
+        final boolean isReferenceType = docId != null && docId.startsWith("Ref") && docId.contains(":");
+        if (isReferenceType) {
+            final String abrege = source.getAbrege();
+            if (abrege != null) {
+                return abrege;
+            }
         }
         String prefixedDesignation = "";
-        final String docId = source.getDocId();
-        if (docId != null && !(docId.startsWith("Ref") && docId.contains(":"))) {
+
+        if (!isReferenceType) {
             final LabelMapper labelMapper = source.getElementClass() == null ? null : getLabelMapperForClass(source.getElementClass());
             prefixedDesignation += (labelMapper == null) ? "" : labelMapper.mapPropertyName(BUNDLE_KEY_CLASS_ABREGE);
         }
