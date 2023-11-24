@@ -297,7 +297,7 @@
       <eParameters name="sirsdocument" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
     </eOperations>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//Objet #//AvecObservations #//AvecPrestations #//AvecObservationsAvecUrgences">
+  <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//Objet #//AvecObservations #//AvecPrestations #//AvecObservationsAvecUrgence">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieuDit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
@@ -340,7 +340,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvertureBatardableIds"
         upperBound="-1" eType="#//OuvertureBatardable" eOpposite="#//OuvertureBatardable/desordreIds"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Observation" eSuperTypes="#//AbstractObservation">
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractObservationAvecUrgence" abstract="true" eSuperTypes="#//AbstractObservation">
+    <eOperations name="getUrgenceId" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Observation" eSuperTypes="#//AbstractObservationAvecUrgence">
     <eStructuralFeatures xsi:type="ecore:EReference" name="urgenceId" eType="#//RefUrgence"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nombreDesordres" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
   </eClassifiers>
@@ -1712,7 +1715,7 @@
         eType="#//Prestation" eOpposite="#//Prestation/globalPrestationIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AvecObservations" abstract="true" interface="true"/>
-  <eClassifiers xsi:type="ecore:EClass" name="AvecObservationsAvecUrgences" abstract="true" interface="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AvecObservationsAvecUrgence" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="AvecPrestations" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="AvecGeometrie" abstract="true" interface="true">
     <eOperations name="getGeometry" eType="ecore:EDataType jts.ecore#//Geometry"/>

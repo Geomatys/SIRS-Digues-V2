@@ -1,10 +1,3 @@
-package fr.sirs.util;
-
-import org.geotoolkit.filter.function.AbstractFunctionFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * This file is part of SIRS-Digues 2.
  * <p>
@@ -23,6 +16,14 @@ import java.util.Map;
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
+
+package fr.sirs.util;
+
+import org.geotoolkit.filter.function.AbstractFunctionFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class SirsFunctionFactory
         extends AbstractFunctionFactory {
 
