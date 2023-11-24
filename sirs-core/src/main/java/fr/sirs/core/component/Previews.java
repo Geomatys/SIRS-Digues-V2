@@ -86,8 +86,8 @@ public class Previews extends CouchDbRepositorySupport<Preview> implements Docum
      */
     private final Cache<String, ObservableList<Preview>> byClassCache = new Cache<>(20, 0, CacheRules.cacheElementsOfType(Preview.class));
 
-    public static final String BY_ID = "previewsWithDate";
-    public static final String BY_CLASS = "designationWithDate";
+    public static final String BY_ID = "previewsWithDate2";
+    public static final String BY_CLASS = "designationWithDate2";
     public static final String VALIDATION = "validationWithMajDate";
 
     @Autowired

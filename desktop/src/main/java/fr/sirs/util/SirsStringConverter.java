@@ -101,20 +101,6 @@ public class SirsStringConverter extends StringConverter {
             final Session session = Injector.getBean(Session.class);
             item = session.getRepositoryForClass(BorneDigue.class).get(srb.getBorneId());
         }
-        if (item instanceof Preview) {
-            try {
-                Preview preview = (Preview) item;
-                final String elementClass = preview.getElementClass();
-                final String elementId = preview.getElementId();
-                if (elementClass != null && elementId != null) {
-                    final Session session = Injector.getBean(Session.class);
-                    final AbstractSIRSRepository<Element> repository = session.getRepositoryForType(elementClass);
-                    item = repository.get(elementId);
-                }
-            } catch (RuntimeException e) {
-                SIRS.LOGGER.log(Level.WARNING, "Error while getting element from preview.", e);
-            }
-        }
 
         StringBuilder text = new StringBuilder();
         // Start title with element designation
@@ -226,8 +212,19 @@ public class SirsStringConverter extends StringConverter {
 
     public static String getDesignation(final Preview source) {
         ArgumentChecks.ensureNonNull("Preview to get designation for", source);
-        final LabelMapper labelMapper = source.getElementClass() == null ? null : getLabelMapperForClass(source.getElementClass());
-        String prefixedDesignation = (labelMapper == null) ? "" : labelMapper.mapPropertyName(BUNDLE_KEY_CLASS_ABREGE);
+        // Hack redmine 7917 : show abrege for ReferenceType when available.
+        // If not available, then only show the designation, not the classAbrege.
+        final String abrege = source.getAbrege();
+        if (abrege != null) {
+            return abrege;
+        }
+        String prefixedDesignation = "";
+        final String docId = source.getDocId();
+        if (docId != null && !(docId.startsWith("Ref") && docId.contains(":"))) {
+            final LabelMapper labelMapper = source.getElementClass() == null ? null : getLabelMapperForClass(source.getElementClass());
+            prefixedDesignation += (labelMapper == null) ? "" : labelMapper.mapPropertyName(BUNDLE_KEY_CLASS_ABREGE);
+        }
+
         if (source.getDesignation() != null) {
             if (!"".equals(prefixedDesignation)) {
                 prefixedDesignation += DESIGNATION_SEPARATOR;

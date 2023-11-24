@@ -134,6 +134,21 @@ public class Preview implements AvecFinTemporelle, AvecLibelle, Comparable, Avec
         this.date_fin.set(date_fin);
     }
 
+    @JsonProperty("abrege")
+    private final ObjectProperty<String>  abrege = new SimpleObjectProperty<>();
+
+    public ObjectProperty<String> abregeProperty() {
+        return abrege;
+    }
+
+    public String getAbrege() {
+        return abrege.get();
+    }
+
+    public void setAbrege(String abrege) {
+        this.abrege.set(abrege);
+    }
+
     @JsonProperty("designation")
     public String getDesignation() {
         return designationProperty.get();
