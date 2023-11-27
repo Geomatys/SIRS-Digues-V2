@@ -24,30 +24,18 @@ import fr.sirs.SIRS;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS_ABREGE;
 
 import fr.sirs.Session;
-import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.AmenagementHydrauliqueView;
-import fr.sirs.core.model.AvecLibelle;
-import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.PositionDocument;
-import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.ReferenceType;
-import fr.sirs.core.model.Role;
+import fr.sirs.core.model.*;
 
 import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.GUEST;
 import static fr.sirs.core.model.Role.USER;
 
-import fr.sirs.core.model.SQLQuery;
-import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.index.ElementHit;
 import fr.sirs.util.property.ShowCasePossibility;
 import fr.sirs.util.property.SirsPreferences;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
@@ -69,6 +57,8 @@ public class SirsStringConverter extends StringConverter {
 
     public static final String LABEL_SEPARATOR = " : ";
     public static final String DESIGNATION_SEPARATOR = " - ";
+    private final List<Class> classList = Arrays.asList(Organisme.class, Contact.class, Utilisateur.class);
+
 
     /**
      * Find a simple name for input object.
@@ -104,8 +94,30 @@ public class SirsStringConverter extends StringConverter {
 
         StringBuilder text = new StringBuilder();
         // Start title with element designation
-        // Hack-Redmine: 7917 - We never want to show the designation/abrégé of Contact and Organisme.
-        if (prefixed && !(item instanceof Contact) && !(item instanceof Organisme)) {
+        // Hack-Redmine: 7917 - We never want to show the designation/abrégé for certain classes.
+        // For those classes, we always want to show the libelle only, what ever the user preferences.
+        boolean alwaysShowOnlySuffix = false;
+
+        if (item instanceof Preview) {
+            Preview p = (Preview) item;
+            final String elementClass = p.getElementClass();
+            for (Class aClass : classList) {
+                if (aClass.getName().equals(elementClass)) {
+                    alwaysShowOnlySuffix = true;
+                    break;
+                }
+            }
+        }
+        else {
+            for (Class aClass : classList) {
+                if (aClass.isAssignableFrom(item.getClass())) {
+                    alwaysShowOnlySuffix = true;
+                    break;
+                }
+            }
+        }
+
+        if (prefixed && !alwaysShowOnlySuffix) {
             text.append(getDesignation(item));
             if (!suffixed) {
                 return convertAndRegister(text, item);
@@ -247,7 +259,7 @@ public class SirsStringConverter extends StringConverter {
                 return (String) method.invoke(source);
             } catch (ReflectiveOperationException | SecurityException e) {
                 SIRS.LOGGER.log(Level.FINE, null, e);
-                // No abrege available, use only designation, not the classAbrege.
+                // Hack redmine 7917 : No abrege available, use only designation, not the classAbrege.
                 return source.getDesignation();
             }
         }
