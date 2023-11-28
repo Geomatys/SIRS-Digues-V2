@@ -70,6 +70,7 @@ public class  Helper {
     public static final String SYNTHESE_TABLE_PATH_START_FIELD_NAME = "syntheseTablePathStart";
     public static final String SYNTHESE_TABLE_PATH_END_FIELD_NAME = "syntheseTablePathEnd";
     public static final String DATE_MAJ_FIELD_NAME = "dateMaj";
+    public static final String URGENCE_FIELD_NAME = "urgenceId";
     public static final String DATE_DEBUT_FIELD_NAME = "date_debut";
     public static final String DATE_FIN_FIELD_NAME = "date_fin";
     public static final String DESIGNATION_FIELD_NAME = "designation";
@@ -90,6 +91,7 @@ public class  Helper {
     public static final String AVEC_COMMENTAIRE_INTERFACE_NAME = "AvecCommentaire";
     public static final String AVEC_PHOTOS_INTERFACE_NAME = "AvecPhotos";
     public static final String AVEC_DATE_MAJ_INTERFACE_NAME = "AvecDateMaj";
+    public static final String AVEC_URGENCE_INTERFACE_NAME = "AvecUrgence";
     public static final String AVEC_BORNES_TEMPORELLES_INTERFACE_NAME = "AvecBornesTemporelles";
     public static final String AVEC_FOREIGN_PARENT_INTERFACE_NAME = "AvecForeignParent";
     public static final String AVEC_EVENEMENT_HYDRAULIQUE_INTERFACE_NAME = "AvecEvenementHydraulique";

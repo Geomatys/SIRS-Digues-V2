@@ -471,6 +471,7 @@ public class ModelHelper extends Helper {
         return getAvecLibelleInterface()
                 + getAvecCommentaireInterface()
                 + getAvecDateMajInterface()
+                + getAvecUrgenceInterface()
                 + getAvecBornesTemporellesInterface()
                 + getAvecForeignParentInterface()
                 + getAvecPhotosInterface()
@@ -527,6 +528,14 @@ public class ModelHelper extends Helper {
     public String getAvecDateMajInterface() {
         if (eClass.getEStructuralFeature(DATE_MAJ_FIELD_NAME) != null) {
             return ", " + AVEC_DATE_MAJ_INTERFACE_NAME;
+        } else {
+            return "";
+        }
+    }
+
+    public String getAvecUrgenceInterface() {
+        if (eClass.getEStructuralFeature(URGENCE_FIELD_NAME) != null) {
+            return ", " + AVEC_URGENCE_INTERFACE_NAME;
         } else {
             return "";
         }
