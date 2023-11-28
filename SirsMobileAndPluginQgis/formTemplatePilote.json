@@ -20424,7 +20424,7 @@
       "containment": false
     }
   },
-  "AbstractAmenagementHydraulique": {
+  "ObjetDependance": {
     "author": {
       "name": "author",
       "type": "EString",

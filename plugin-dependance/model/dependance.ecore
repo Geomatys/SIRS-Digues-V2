@@ -34,7 +34,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="RefDestinationDependance" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PrestationAmenagementHydraulique" eSuperTypes="#//AbstractAmenagementHydraulique">
+  <eClassifiers xsi:type="ecore:EClass" name="PrestationAmenagementHydraulique" eSuperTypes="#//ObjetDependanceAh">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="coutMetre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="coutGlobal" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
@@ -61,7 +61,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="#//ObservationDependance" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="OrganeProtectionCollective" eSuperTypes="#//AbstractAmenagementHydraulique">
+  <eClassifiers xsi:type="ecore:EClass" name="OrganeProtectionCollective" eSuperTypes="#//ObjetDependanceAh">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cote" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
@@ -76,7 +76,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeOrganeProtectionCollective" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="StructureAmenagementHydraulique" eSuperTypes="#//AbstractAmenagementHydraulique">
+  <eClassifiers xsi:type="ecore:EClass" name="StructureAmenagementHydraulique" eSuperTypes="#//ObjetDependanceAh">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
@@ -92,7 +92,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageAssocieAmenagementHydraulique"
-      eSuperTypes="#//AbstractAmenagementHydraulique">
+      eSuperTypes="#//ObjetDependanceAh">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="superficie" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
@@ -140,7 +140,7 @@
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Contact"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Organisme"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//AbstractAmenagementHydraulique">
+  <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//ObjetDependanceAh">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="dependanceId" eType="#//AbstractDependance"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieuDit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -183,7 +183,7 @@
       <eAnnotations source="photoType" references="#//PhotoDependance"/>
     </eStructuralFeatures>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationDependance">
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationDependance" eSuperTypes="../../sirs-core/model/sirs.ecore#//IObservationAvecUrgence">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="evolution" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
@@ -240,7 +240,7 @@
     </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="AbstractAmenagementHydraulique" abstract="true"
+  <eClassifiers xsi:type="ecore:EClass" name="ObjetDependanceAh" abstract="true"
       eSuperTypes="../../sirs-core/model/sirs.ecore#//AvecSettableGeometrie">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>

@@ -27,7 +27,7 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
-import fr.sirs.core.model.AbstractAmenagementHydraulique;
+import fr.sirs.core.model.ObjetDependanceAh;
 import fr.sirs.core.model.AbstractDependance;
 import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.DesordreDependance;
@@ -92,16 +92,16 @@ import javafx.scene.control.ChoiceDialog;
  *
  * @author Maxime Gavens (Geomatys)
  */
-public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigationHandler {
+public class ObjetDependanceAhEditHandler extends AbstractNavigationHandler {
     private final MouseListen mouseInputListener = new MouseListen();
     private final FXGeometryLayer decorationLayer = new FXGeometryLayer();
     private Stage creationDependanceAHObjectStage;
     private ComboBox<Preview> dependanceAhBox;
 
     /**
-     * La abstractAmenagementHydraulique en cours.
+     * Le ObjetDependanceAh en cours.
      */
-    private AbstractAmenagementHydraulique abstractAmenagement;
+    private ObjetDependanceAh abstractAmenagement;
 
     /**
      * Outil d'aide pour éditer une {@linkplain #editGeometry géométrie} existante.
@@ -143,11 +143,11 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
     private FeatureMapLayer prestationsLayer;
     private FeatureMapLayer organeProtectionCollectivesLayer;
 
-    public AbstractAmenagementHydrauliqueEditHandler() {
+    public ObjetDependanceAhEditHandler() {
         super();
     }
 
-    public AbstractAmenagementHydrauliqueEditHandler(final AbstractAmenagementHydraulique abstractAmenagement) {
+    public ObjetDependanceAhEditHandler(final ObjetDependanceAh abstractAmenagement) {
         this();
         this.abstractAmenagement = abstractAmenagement;
         newDescription = true;
@@ -210,7 +210,7 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
         private MouseButton pressed;
 
         public MouseListen() {
-            super(AbstractAmenagementHydrauliqueEditHandler.this);
+            super(ObjetDependanceAhEditHandler.this);
         }
 
         @Override
@@ -229,8 +229,8 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
                         @Override
                         public void visit(ProjectedFeature graphic, RenderingContext2D context, SearchAreaJ2D area) {
                             final Object candidate = graphic.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
-                            if(candidate instanceof AbstractAmenagementHydraulique){
-                                abstractAmenagement = (AbstractAmenagementHydraulique)candidate;
+                            if(candidate instanceof ObjetDependanceAh){
+                                abstractAmenagement = (ObjetDependanceAh)candidate;
                                 // On récupère la géométrie de cet objet pour passer en mode édition
                                 editGeometry.geometry.set((Geometry)abstractAmenagement.getGeometry().clone());
                                 // Ajout de cette géométrie dans la couche d'édition sur la carte.
@@ -436,7 +436,7 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
                 helper = new EditionHelper(map, organeProtectionCollectivesLayer);
                 return OrganeProtectionCollective.class;
             } else {
-                throw new IllegalArgumentException("Unexpected subclass of AbstractAmenagementHydraulique.");
+                throw new IllegalArgumentException("Unexpected subclass of ObjetDependanceAh.");
             }
         }
         return null;
@@ -517,7 +517,7 @@ public class AbstractAmenagementHydrauliqueEditHandler extends AbstractNavigatio
                     helper = new EditionHelper(map, desordresLayer);
             }
 
-            abstractAmenagement = (AbstractAmenagementHydraulique) repo.create();
+            abstractAmenagement = (ObjetDependanceAh) repo.create();
             newDescription = true;
 
             final Preview dependanceAhPreview = dependanceAhBox.getSelectionModel().getSelectedItem();
