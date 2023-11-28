@@ -67,6 +67,7 @@ public class SirsStringConverter extends StringConverter {
      */
     @Override
     public String toString(Object item) {
+        if (item == null) return null;
         final ShowCasePossibility currentShowcase = SirsPreferences.INSTANCE.getShowCase();
         switch (currentShowcase) {
             case BOTH: //"Abstract : Designation" attendu
@@ -98,6 +99,7 @@ public class SirsStringConverter extends StringConverter {
         // For those classes, we always want to show the libelle only, what ever the user preferences.
         boolean alwaysShowOnlySuffix = false;
 
+        final Class<?> itemClass = item.getClass();
         if (item instanceof Preview) {
             Preview p = (Preview) item;
             final String elementClass = p.getElementClass();
@@ -110,7 +112,7 @@ public class SirsStringConverter extends StringConverter {
         }
         else {
             for (Class aClass : classList) {
-                if (aClass.isAssignableFrom(item.getClass())) {
+                if (aClass.isAssignableFrom(itemClass)) {
                     alwaysShowOnlySuffix = true;
                     break;
                 }
@@ -161,7 +163,7 @@ public class SirsStringConverter extends StringConverter {
             } else {
                 text.append(((Class) item).getSimpleName());
             }
-        } else if (item != null && item.getClass().isEnum()) {
+        } else if (itemClass.isEnum()) {
             text.append(((Enum) item).name());
         } else if (item instanceof Character) {
             text.append(item);
