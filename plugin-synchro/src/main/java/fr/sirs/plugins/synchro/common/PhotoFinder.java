@@ -3,7 +3,7 @@ package fr.sirs.plugins.synchro.common;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.AbstractObservation;
+import fr.sirs.core.model.IObservation;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.AvecObservations;
@@ -173,7 +173,7 @@ public class PhotoFinder implements Supplier<Stream<PhotosTronconWrapper>> {
     /**
      * Compare observations by date, descending order (most recent to oldest).
      */
-    private static int compare(final AbstractObservation o1, final AbstractObservation o2) {
+    private static int compare(final IObservation o1, final IObservation o2) {
         final LocalDate date1 = o1.getDate();
         final LocalDate date2 = o2.getDate();
 
@@ -301,7 +301,7 @@ public class PhotoFinder implements Supplier<Stream<PhotosTronconWrapper>> {
 
 //        private final Optional<String> tronconId;
         private final OC source;
-        private final List<? extends AbstractObservation> observations;
+        private final List<? extends IObservation> observations;
 
         public ObservationContainerWrapper(final OC source) {
             super(source);
