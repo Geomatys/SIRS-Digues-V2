@@ -19,12 +19,7 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.SIRS;
-import fr.sirs.core.model.AbstractObservation;
-import fr.sirs.core.model.AbstractPhoto;
-import fr.sirs.core.model.AvecCommentaire;
-import fr.sirs.core.model.AvecObservations;
-import fr.sirs.core.model.AvecPhotos;
-import fr.sirs.core.model.Element;
+import fr.sirs.core.model.*;
 
 import java.lang.reflect.Method;
 import java.nio.file.Paths;
@@ -153,8 +148,8 @@ public class FXCommentPhotoView extends SplitPane {
 
         if ( (!filledPhoto) &&(newValue instanceof AvecObservations) ) {
             final AvecObservations tmpObserved = (AvecObservations) newValue;
-            AbstractObservation target = null;
-            List<? extends AbstractObservation> assessedObservations = tmpObserved.getObservations();
+            IObservation target = null;
+            List<? extends IObservation> assessedObservations = tmpObserved.getObservations();
             if (assessedObservations != null && !assessedObservations.isEmpty()) {
                 assessedObservations.sort(observationComparator);
                 target = assessedObservations.get(0);
@@ -180,9 +175,9 @@ public class FXCommentPhotoView extends SplitPane {
                 else return o2.getDate().compareTo(o1.getDate());  //Rappel : >0 si date de o2 > date de o1
             };
 
-    private final Comparator<AbstractObservation> observationComparator = (o1, o2) -> {
-        final boolean o1WithPhoto = !(o1 == null || o1.getDate() == null || o1.photos == null || o1.photos.isEmpty());
-        final boolean o2WithPhoto = !(o2 == null || o2.getDate() == null || o2.photos == null || o2.photos.isEmpty());
+    private final Comparator<IObservation> observationComparator = (o1, o2) -> {
+        final boolean o1WithPhoto = !(o1 == null || o1.getDate() == null || o1.getPhotos() == null || o1.getPhotos().isEmpty());
+        final boolean o2WithPhoto = !(o2 == null || o2.getDate() == null || o2.getPhotos() == null || o2.getPhotos().isEmpty());
 
         if (!o1WithPhoto && !o2WithPhoto) {
             return 0;
