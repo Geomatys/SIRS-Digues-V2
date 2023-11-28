@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -27,6 +27,7 @@ import static fr.sirs.SIRS.SIRSDOCUMENT_REFERENCE;
 import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.TronconDigueRepository;
@@ -69,6 +70,7 @@ import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.RapportEtude;
+import fr.sirs.core.model.RefUrgence;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
@@ -98,6 +100,7 @@ import fr.sirs.theme.GlobalPrestationTheme;
 import fr.sirs.theme.PositionDocumentTheme;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.TronconTheme;
+import fr.sirs.util.DesordreUrgenceLayerFunction;
 import fr.sirs.util.FXFreeTab;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -468,6 +471,14 @@ public class CorePlugin extends Plugin {
             desordresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(desordresLayer);
 
+            final MapItem desordreUrgencesGroup = MapBuilder.createItem();
+            desordreUrgencesGroup.setName("Degrés d'urgence");
+            final AbstractSIRSRepository<RefUrgence> refUrgenceRepo = getSession().getRepositoryForClass(RefUrgence.class);
+            desordreUrgencesGroup.items().addAll(buildUrgenceLayers(Desordre.class, desordreStore, createDefaultSelectionStyle(), false, refUrgenceRepo));
+            desordreUrgencesGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            desordresLayer.items().add(desordreUrgencesGroup);
+
+
             // Prestations
             final BeanStore prestaStore = new BeanStore(suppliers.get(Prestation.class));
             final MapItem prestaLayer = MapBuilder.createItem();
@@ -635,6 +646,42 @@ public class CorePlugin extends Plugin {
 
             layers.add(fml);
             i++;
+        }
+        return layers;
+    }
+
+    public static List<MapLayer> buildUrgenceLayers(final Class beanClass, BeanStore store, MutableStyle selectionStyle, boolean visible, final AbstractSIRSRepository<RefUrgence> refUrgenceRepo) throws DataStoreException {
+        final List<MapLayer> layers = new ArrayList<>();
+        final org.geotoolkit.data.session.Session symSession = store.createSession(false);
+        //une couche pour chaque type d'urgence.
+        for (RefUrgence ref : refUrgenceRepo.getAll()) {
+            final String id = ref.getId();
+            final Filter filter = FF.equals(
+                    FF.function(DesordreUrgenceLayerFunction.NAME, FF.literal(beanClass.getCanonicalName()), FF.literal(id)),
+                    FF.literal(true)
+            );
+            final FeatureCollection col = symSession.getFeatureCollection(
+                    QueryBuilder.all(store.getNames().iterator().next()));
+            final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col);
+            fml.setQuery(QueryBuilder.filtered(col.getFeatureType().getName(), filter));
+            fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            if (col.getFeatureType().getDescriptor(DATE_DEBUT_FIELD) != null && col.getFeatureType().getDescriptor(DATE_FIN_FIELD) != null) {
+                final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
+                        CommonCRS.Temporal.JAVA.crs(),
+                        GO2Utilities.FILTER_FACTORY.property(DATE_DEBUT_FIELD),
+                        GO2Utilities.FILTER_FACTORY.property(DATE_FIN_FIELD)
+                );
+                fml.getExtraDimensions().add(datefilter);
+            }
+
+            final MutableStyle baseStyle = createDefaultStyle(UrgenceLayerColors.getColorByRefId(id));
+            final MutableStyle style = (baseStyle == null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
+            fml.setStyle(style);
+            fml.setName(ref.getLibelle());
+            fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            fml.setVisible(visible);
+            if (selectionStyle != null) fml.setSelectionStyle(selectionStyle);
+            layers.add(0, fml);
         }
         return layers;
     }
@@ -1500,5 +1547,38 @@ public class CorePlugin extends Plugin {
         ArgumentChecks.ensureNonNull("context layers", layers);
 
         return layers;
+    }
+
+    public enum UrgenceLayerColors {
+        REF1("RefUrgence:1", new Color(255, 255, 0)),
+        REF2("RefUrgence:2", new Color(255, 150, 0)),
+        REF3("RefUrgence:3", new Color(255, 0, 0)),
+        REF4("RefUrgence:4", new Color(180, 0, 250)),
+        REF99("RefUrgence:99", new Color(255, 255, 255));
+
+        private String refId;
+        private Color color;
+
+        UrgenceLayerColors(String refId, Color color) {
+            this.refId = refId;
+            this.color = color;
+        }
+
+        public static Color getColorByRefId(final String refId) {
+            for (UrgenceLayerColors e : UrgenceLayerColors.values()) {
+                if (e.getRefId().equals(refId)) {
+                    return e.getColor();
+                }
+            }
+            return RandomStyleBuilder.randomColor();
+        }
+
+        public String getRefId() {
+            return refId;
+        }
+
+        public Color getColor() {
+            return color;
+        }
     }
 }
