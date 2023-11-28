@@ -33,7 +33,7 @@ import fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique;
  */
 @View(name=BY_AMENAGEMENT_HYDRAULIQUE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique') {emit(doc.amenagementHydrauliqueId, doc._id)}}")
 @Component("fr.sirs.core.component.OuvrageAssocieAmenagementHydrauliqueRepository")
-public class OuvrageAssocieAmenagementHydrauliqueRepository extends AbstractAmenagementHydrauliqueRepository<OuvrageAssocieAmenagementHydraulique> {
+public class OuvrageAssocieAmenagementHydrauliqueRepository extends ObjetDependanceAhRepository<OuvrageAssocieAmenagementHydraulique> {
 
     @Autowired
     private OuvrageAssocieAmenagementHydrauliqueRepository ( CouchDbConnector db) {

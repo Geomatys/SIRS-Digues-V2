@@ -46,7 +46,7 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
 
     // Propriétés de AvecSettableGeometrie
 
-    // Propriétés de AbstractAmenagementHydraulique
+    // Propriétés de ObjetDependanceAh
     @FXML protected ComboBox ui_amenagementHydrauliqueId;
     @FXML protected Button ui_amenagementHydrauliqueId_link;
 
@@ -121,7 +121,7 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
             ui_commentaire.setText(null);
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
-            // Propriétés de AbstractAmenagementHydraulique
+            // Propriétés de ObjetDependanceAh
         }
 
         final Session session = Injector.getBean(Session.class);
@@ -151,7 +151,7 @@ public class FXOrganeProtectionCollectivePane extends AbstractFXElementPane<Orga
             SIRS.initCombo(ui_etatId, SIRS.observableList(etatRepo.getAll()), newElement.getEtatId() == null? null : etatRepo.get(newElement.getEtatId()));
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
-            // Propriétés de AbstractAmenagementHydraulique
+            // Propriétés de ObjetDependanceAh
             Preview linearPreview = newElement.getAmenagementHydrauliqueId() == null ? null : previewRepository.get(newElement.getAmenagementHydrauliqueId());
             final List<Preview> byClass = previewRepository.getByClass(linearPreview == null ? AmenagementHydraulique.class : linearPreview.getJavaClassOr(AmenagementHydraulique.class));
             final List<Preview> withoutEmptyPreview = byClass.stream().filter(p -> p.getElementId() != null).collect(Collectors.toList());

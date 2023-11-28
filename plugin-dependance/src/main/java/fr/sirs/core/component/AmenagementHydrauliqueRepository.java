@@ -21,7 +21,7 @@ package fr.sirs.core.component;
 import fr.sirs.Injector;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
-import fr.sirs.core.model.AbstractAmenagementHydraulique;
+import fr.sirs.core.model.ObjetDependanceAh;
 import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.DesordreDependance;
 import fr.sirs.core.model.OrganeProtectionCollective;
@@ -61,7 +61,7 @@ public class AmenagementHydrauliqueRepository extends AbstractSIRSRepository<Ame
         super.remove(amenagement);
         final String ID = amenagement.getId();
 
-        // Get all AbstractAmenagementHydraulique subclasses
+        // Get all ObjetDependanceAh subclasses
         final Class[] abstractAh = {
             OrganeProtectionCollective.class,
             DesordreDependance.class,
@@ -73,8 +73,8 @@ public class AmenagementHydrauliqueRepository extends AbstractSIRSRepository<Ame
         // For all, we retrieve all elements that have the current AH id
         // then we remove the link between the two, so that these elements can appear in orphelins list of their pojotable
         for (Class c: abstractAh) {
-            final AbstractAmenagementHydrauliqueRepository repo = (AbstractAmenagementHydrauliqueRepository) Injector.getSession().getRepositoryForClass(c);
-            List<AbstractAmenagementHydraulique> aahList = repo.getByAmenagementHydrauliqueId(ID);
+            final ObjetDependanceAhRepository repo = (ObjetDependanceAhRepository) Injector.getSession().getRepositoryForClass(c);
+            List<ObjetDependanceAh> aahList = repo.getByAmenagementHydrauliqueId(ID);
 
             aahList.forEach(aah -> aah.setAmenagementHydrauliqueId(null));
             repo.executeBulk(aahList);

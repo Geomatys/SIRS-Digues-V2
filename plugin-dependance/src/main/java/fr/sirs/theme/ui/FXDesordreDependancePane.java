@@ -248,7 +248,7 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
             SIRS.initCombo(ui_typeDesordreId, SIRS.observableList(typeDesordreIdRepo.getAll()), newElement.getTypeDesordreId() == null? null : typeDesordreIdRepo.get(newElement.getTypeDesordreId()));
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
-            // Propriétés de AbstractAmenagementHydraulique
+            // Propriétés de ObjetDependanceAh
             Preview amenagementOrDependancePreview = null;
             if (newElement.getDependanceId() != null) {
                 amenagementOrDependancePreview = previewRepository.get(newElement.getDependanceId());

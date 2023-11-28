@@ -21,7 +21,7 @@ package fr.sirs.plugin.dependance.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.model.AbstractAmenagementHydraulique;
+import fr.sirs.core.model.ObjetDependanceAh;
 import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
@@ -103,7 +103,7 @@ public class FXDependanceThemePane extends BorderPane {
         return new BorderPane(table, topPane, null, null, null);
     }
 
-    protected class DependanceThemePojoTable<T extends AbstractAmenagementHydraulique> extends PojoTable{
+    protected class DependanceThemePojoTable<T extends ObjetDependanceAh> extends PojoTable{
 
         protected final StringProperty ahIdProperty = new SimpleStringProperty();
         private final AbstractTheme.ThemeManager<T> group;

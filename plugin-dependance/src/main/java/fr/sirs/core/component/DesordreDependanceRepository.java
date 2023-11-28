@@ -42,7 +42,7 @@ import static fr.sirs.core.component.DesordreDependanceRepository.*;
         @View(name = ALL_OPEN_BY_AH_ID, map = "classpath:DesordreDependance-by-ah-id.js")
 })
 @Component("fr.sirs.core.component.DesordreDependanceRepository")
-public class DesordreDependanceRepository extends AbstractAmenagementHydrauliqueRepository<DesordreDependance> {
+public class DesordreDependanceRepository extends ObjetDependanceAhRepository<DesordreDependance> {
 
     public static final String BY_DEPENDANCE_ID = "byDependanceId";
     public static final String ALL_OPEN_BY_AH_ID = "allOpenByAHId";

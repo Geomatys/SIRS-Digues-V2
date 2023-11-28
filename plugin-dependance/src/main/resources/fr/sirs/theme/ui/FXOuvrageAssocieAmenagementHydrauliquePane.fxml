@@ -29,7 +29,7 @@
 
                                     <FXValidityPeriodPane fx:id="uiValidityPeriod"/>
 
-                                    <!-- AbstractAmenagementHydraulique -->
+                                    <!-- ObjetDependanceAh -->
                                     <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
                                         <columnConstraints>
                                             <ColumnConstraints hgrow="NEVER" />
@@ -156,4 +156,3 @@
     </center>
 
 </fx:root>
-

@@ -28,21 +28,21 @@ import org.geotoolkit.gui.javafx.render2d.FXMapAction;
  * @author Cédric Briançon (Geomatys)
  * @author Maxime Gavens (Geomatys)
  */
-public class AbstractAmenagementHydrauliqueEditAction extends FXMapAction {
-    public AbstractAmenagementHydrauliqueEditAction(FXMap map) {
+public class ObjetDependanceAhEditAction extends FXMapAction {
+    public ObjetDependanceAhEditAction(FXMap map) {
         super(map,"Objet de dépendance ou AH","Création/modification d'un objet lié au AH ou dépendance", SIRS.ICON_WARNING);
 
         this.disabledProperty().bind(Injector.getSession().geometryEditionProperty().not());
 
         map.getHandlerProperty().addListener((observable, oldValue, newValue) -> {
-            selectedProperty().set(newValue instanceof AbstractAmenagementHydrauliqueEditHandler);
+            selectedProperty().set(newValue instanceof ObjetDependanceAhEditHandler);
         });
     }
 
     @Override
     public void accept(ActionEvent event) {
-        if (map != null && !(map.getHandler() instanceof AbstractAmenagementHydrauliqueEditHandler)) {
-            map.setHandler(new AbstractAmenagementHydrauliqueEditHandler());
+        if (map != null && !(map.getHandler() instanceof ObjetDependanceAhEditHandler)) {
+            map.setHandler(new ObjetDependanceAhEditHandler());
         }
     }
 }

@@ -25,15 +25,11 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.model.AbstractDependance;
-import fr.sirs.core.model.AireStockageDependance;
-import fr.sirs.core.model.AvecGeometrie;
-import fr.sirs.core.model.AvecSettableGeometrie;
-import fr.sirs.core.model.CheminAccesDependance;
-import fr.sirs.core.model.AbstractAmenagementHydraulique;
+import fr.sirs.core.model.*;
+import fr.sirs.core.model.ObjetDependanceAh;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.plugin.dependance.map.DependanceEditHandler;
-import fr.sirs.plugin.dependance.map.AbstractAmenagementHydrauliqueEditHandler;
+import fr.sirs.plugin.dependance.map.ObjetDependanceAhEditHandler;
 import fr.sirs.ui.Growl;
 import static fr.sirs.util.SIRSAreaComputer.getGeometryInfo;
 import javafx.application.Platform;
@@ -160,8 +156,8 @@ public class FXPositionDependancePane<T extends AvecSettableGeometrie> extends B
         }
         if(dependance.get() instanceof AbstractDependance){
             tab.getMap().getUiMap().setHandler(new DependanceEditHandler((AbstractDependance) dependance.get()));
-        }else if(dependance.get() instanceof AbstractAmenagementHydraulique){
-            tab.getMap().getUiMap().setHandler(new AbstractAmenagementHydrauliqueEditHandler((AbstractAmenagementHydraulique) dependance.get()));
+        }else if(dependance.get() instanceof ObjetDependanceAh){
+            tab.getMap().getUiMap().setHandler(new ObjetDependanceAhEditHandler((ObjetDependanceAh) dependance.get()));
         }
     }
 
