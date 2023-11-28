@@ -14,12 +14,12 @@ import java.util.function.Predicate;
 
 public interface AvecObservations extends  Element {
 
-    List<? extends AbstractObservation> getObservations();
+    List<? extends IObservation> getObservations();
 
-    default Optional<? extends AbstractObservation> getLastObservation() {
-        List<? extends AbstractObservation> observations = getObservations();
+    default Optional<? extends IObservation> getLastObservation() {
+        List<? extends IObservation> observations = getObservations();
         if (observations == null) return Optional.empty();
-        return getObservations().stream()
+        return observations.stream()
                 .min(SirsComparator.OBSERVATION_COMPARATOR);
     }
 
@@ -47,10 +47,10 @@ public interface AvecObservations extends  Element {
 
         @Override
         public boolean test(AvecObservations t) {
-            final List<? extends AbstractObservation> observations = t.getObservations();
+            final List<? extends IObservation> observations = t.getObservations();
 
             if ((observations!=null) && (observations.size() > 0)) {
-                final AbstractObservation lastObservation = Collections.min(observations, SirsComparator.OBSERVATION_COMPARATOR);
+                final IObservation lastObservation = Collections.min(observations, SirsComparator.OBSERVATION_COMPARATOR);
                 final LocalDate ld = lastObservation.getDate();
 
                 if (ld != null) {

@@ -20,9 +20,10 @@
 
 package fr.sirs.util;
 
-import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.IObservation;
+
 import java.util.Comparator;
 
 /**
@@ -31,10 +32,10 @@ import java.util.Comparator;
  */
 public class SirsComparator {
     /**
-     * Pour le classement des observations de la plus récente à la plus
+     * Pour le classement des Elements with a "date" attribut (LocalDate) de la plus récente à la plus
      * ancienne.
      */
-    public static final Comparator<AbstractObservation> OBSERVATION_COMPARATOR = (o1, o2) -> {
+    public static final Comparator<IObservation> OBSERVATION_COMPARATOR = (o1, o2) -> {
         if (o1 == null && o2 == null) {
             return 0;
         } else if (o1 == null || o2 == null) {
