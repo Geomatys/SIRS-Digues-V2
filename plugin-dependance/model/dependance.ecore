@@ -140,7 +140,7 @@
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Contact"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Organisme"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//ObjetDependanceAh">
+  <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//ObjetDependanceAh ../../sirs-core/model/sirs.ecore#//AvecObservationsAvecUrgence">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="dependanceId" eType="#//AbstractDependance"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieuDit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>

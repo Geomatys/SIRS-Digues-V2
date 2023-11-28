@@ -24,6 +24,8 @@ import static fr.sirs.CorePlugin.createDefaultLongRule;
 import static fr.sirs.CorePlugin.createSelectionLongRule;
 import static fr.sirs.CorePlugin.createDefaultPlanRule;
 import static fr.sirs.CorePlugin.createSelectionPlanRule;
+
+import fr.sirs.CorePlugin;
 import fr.sirs.Plugin;
 import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
@@ -31,19 +33,8 @@ import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.DATE_DEBUT_FIELD;
 import static fr.sirs.core.SirsCore.DATE_FIN_FIELD;
 import fr.sirs.core.SirsCoreRuntimeException;
-import fr.sirs.core.model.AireStockageDependance;
-import fr.sirs.core.model.AmenagementHydraulique;
-import fr.sirs.core.model.AutreDependance;
-import fr.sirs.core.model.CheminAccesDependance;
-import fr.sirs.core.model.DesordreDependance;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.OuvrageVoirieDependance;
-import fr.sirs.core.model.TraitAmenagementHydraulique;
-import fr.sirs.core.model.PrestationAmenagementHydraulique;
-import fr.sirs.core.model.StructureAmenagementHydraulique;
-import fr.sirs.core.model.OuvrageAssocieAmenagementHydraulique;
-import fr.sirs.core.model.OrganeProtectionCollective;
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.*;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.dependance.map.DependanceToolBar;
 import java.awt.Color;
@@ -59,6 +50,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import org.apache.sis.measure.Units;
@@ -73,15 +65,14 @@ import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.style.MutableFeatureTypeStyle;
-import org.geotoolkit.style.MutableRule;
-import org.geotoolkit.style.MutableStyle;
-import org.geotoolkit.style.MutableStyleFactory;
+import org.geotoolkit.style.*;
+
 import static org.geotoolkit.style.StyleConstants.DEFAULT_DESCRIPTION;
 import static org.geotoolkit.style.StyleConstants.LITERAL_ONE_FLOAT;
 import static org.geotoolkit.style.StyleConstants.LITERAL_ZERO_FLOAT;
 import static org.geotoolkit.style.StyleConstants.STROKE_CAP_SQUARE;
 import static org.geotoolkit.style.StyleConstants.STROKE_JOIN_BEVEL;
+
 import org.opengis.filter.FilterFactory2;
 import org.opengis.style.LineSymbolizer;
 import org.opengis.style.Stroke;
@@ -187,13 +178,31 @@ public class PluginDependance extends Plugin {
                     suppliers.get(AutreDependance.class),
                     suppliers.get(AireStockageDependance.class),
                     suppliers.get(AmenagementHydraulique.class),
-                    suppliers.get(DesordreDependance.class),
                     suppliers.get(PrestationAmenagementHydraulique.class),
                     suppliers.get(StructureAmenagementHydraulique.class),
                     suppliers.get(OuvrageAssocieAmenagementHydraulique.class),
                     suppliers.get(OrganeProtectionCollective.class)
             );
             depGroup.items().addAll(buildLayers(otherStore, nameMap, colors, false));
+
+            // Désordres
+            final BeanStore desordreStore = new BeanStore(suppliers.get(DesordreDependance.class));
+            final MapItem desordresLayer = MapBuilder.createItem();
+            final String desordreDependanceClassName = DesordreDependance.class.getSimpleName();
+            final String str = nameMap.get(desordreDependanceClassName);
+            desordresLayer.setName(str!=null ? str : desordreDependanceClassName);
+            desordresLayer.items().addAll( buildLayers(desordreStore, nameMap, colors, false) );
+            desordresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            depGroup.items().add(desordresLayer);
+
+            final MapItem desordreUrgencesGroup = MapBuilder.createItem();
+            desordreUrgencesGroup.setName("Degrés d'urgence");
+            final AbstractSIRSRepository<RefUrgence> refUrgenceRepo = getSession().getRepositoryForClass(RefUrgence.class);
+            desordreUrgencesGroup.items().addAll(CorePlugin.buildUrgenceLayers(DesordreDependance.class, desordreStore, attributeSelectionStyle(DesordreDependance.class.getSimpleName()), false, refUrgenceRepo));
+            desordreUrgencesGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            desordresLayer.items().add(desordreUrgencesGroup);
+
+
             depGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             return Collections.singletonList(depGroup);
         } catch (DataStoreException ex) {
