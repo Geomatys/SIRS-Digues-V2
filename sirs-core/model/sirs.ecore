@@ -297,7 +297,7 @@
       <eParameters name="sirsdocument" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EReference"/>
     </eOperations>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//Objet #//AvecObservations #//AvecPrestations">
+  <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//Objet #//AvecObservationsAvecUrgence #//AvecPrestations">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieuDit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
@@ -340,7 +340,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvertureBatardableIds"
         upperBound="-1" eType="#//OuvertureBatardable" eOpposite="#//OuvertureBatardable/desordreIds"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Observation" eSuperTypes="#//AbstractObservation">
+  <eClassifiers xsi:type="ecore:EClass" name="Observation" eSuperTypes="#//AbstractObservation #//IObservationAvecUrgence">
     <eStructuralFeatures xsi:type="ecore:EReference" name="urgenceId" eType="#//RefUrgence"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nombreDesordres" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
   </eClassifiers>
@@ -1619,7 +1619,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageHydrauliqueAssocie" eSuperTypes="#//AbstractObservationReseauEtOuvrage">
     <eStructuralFeatures xsi:type="ecore:EReference" name="urgenceId" eType="#//RefUrgence"/>
     </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="AbstractObservation" abstract="true">
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractObservation" abstract="true" eSuperTypes="#//IObservation">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
       <eAnnotations source="localDate"/>
     </eStructuralFeatures>
@@ -1711,7 +1711,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/globalPrestationIds"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="IObservation" abstract="true" interface="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="IObservationAvecUrgence" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="AvecObservations" abstract="true" interface="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AvecObservationsAvecUrgence" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="AvecPrestations" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="AvecGeometrie" abstract="true" interface="true">
     <eOperations name="getGeometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
