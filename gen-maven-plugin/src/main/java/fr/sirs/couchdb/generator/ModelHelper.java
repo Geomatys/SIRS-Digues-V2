@@ -201,6 +201,10 @@ public class ModelHelper extends Helper {
         for (final EReference att : eClass.getEReferences()) {
             return true;
         }
+        // If one of the implemented interface has a eReference.
+        for (EReference eReference : getEReferencesToImplement()) {
+            return true;
+        }
         return false;
     }
 
