@@ -707,7 +707,7 @@ accessor methods specified by implemented interfaces.
     
     @Override
     @Reference(ref=<%= helper.getType(eRef)%>)
-    public List<String> <%= helper.getter(eRef) %>(){
+    public ObservableList<String> <%= helper.getter(eRef) %>(){
         return this.<%= helper.lcFirst(eRef) %>;
     }
 
@@ -1091,4 +1091,3 @@ if (!helper.isAbstract()) {
 %>
 
 }
-
