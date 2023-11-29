@@ -140,25 +140,17 @@
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Contact"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Organisme"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//ObjetDependanceAh ../../sirs-core/model/sirs.ecore#//AvecObservationsAvecUrgence">
+  <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance" eSuperTypes="#//ObjetDependanceAh ../../sirs-core/model/sirs.ecore#//IDesordre">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="dependanceId" eType="#//AbstractDependance"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieuDit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cote" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="categorieDesordreId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefCategorieDesordre"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeDesordreId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefTypeDesordre"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
+   <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="#//ObservationDependance" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//EvenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageAssocieIds" upperBound="-1"
         eType="#//OuvrageAssocieAmenagementHydraulique" eOpposite="#//OuvrageAssocieAmenagementHydraulique/desordreDependanceAssocieIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
         eType="#//PrestationAmenagementHydraulique"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="articleIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//ArticleJournal"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AbstractDependance" abstract="true"
       eSuperTypes="../../sirs-core/model/sirs.ecore#//AotCotAssociable ../../sirs-core/model/sirs.ecore#//AvecSettableGeometrie">
