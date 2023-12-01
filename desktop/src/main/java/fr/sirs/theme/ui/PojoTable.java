@@ -89,8 +89,10 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
@@ -510,10 +512,10 @@ public class PojoTable extends BorderPane implements Printable {
                 uiPositionVisibility.setSelected(false);// Force to change.
                 searchEditionToolbar.getChildren().add(uiPositionVisibility);
             }
-            if (Desordre.class.isAssignableFrom(pojoClass)) {
+            if (IDesordre.class.isAssignableFrom(pojoClass)) {
                 final LinkedHashMap<String, PropertyDescriptor> observationProp = listSimpleProperties(Observation.class);
                 final Set<String> observationKeys = observationProp.keySet();
-                final List<String> acceptedKeys = Arrays.asList("nombreDesordres", "urgenceId", "suiteApporterId", "observateurId", "date");
+                final List<String> acceptedKeys = Arrays.asList(DESIGNATION_FIELD, "nombreDesordres", "urgenceId", "suiteApporterId", "observateurId", "date");
                 observationKeys.removeIf(key -> !acceptedKeys.contains(key));
                 final List<TableColumn> observationColumns = new ArrayList<>();
 
@@ -643,7 +645,7 @@ public class PojoTable extends BorderPane implements Printable {
                 } else {
                     final List<Preview> previews = session.getPreviews().getByClass(pojoClass);
                     final List<String> allValuesIds = allValues.stream().map(Identifiable::getId).collect(Collectors.toList());
-                    final List<Preview> possiblePreviews = new ArrayList<>();
+//                    final List<Preview> possiblePreviews = new ArrayList<>();
                     // Keep only Previews not present in the table yet.
                     previews.removeIf(preview -> allValuesIds.contains(preview.getElementId()));
                     choices = SIRS.observableList(previews).sorted();
@@ -1120,6 +1122,15 @@ public class PojoTable extends BorderPane implements Printable {
                 }
             }
         });
+
+        if (IDesordre.class.isAssignableFrom(pojoClass)) {
+            uiTable.getItems().forEach(desordre -> {
+                ((IDesordre) desordre).getObservations().addListener((ListChangeListener<IObservationAvecUrgence>) change -> {
+                    System.out.println("here1");
+                    uiTable.refresh();
+                });
+            });
+        }
     }
 
     final protected void applyPreferences() {
@@ -1514,15 +1525,17 @@ public class PojoTable extends BorderPane implements Printable {
                         allValues = FXCollections.observableArrayList();
                     } else {
                         allValues = newSupplier.get();
-                        if (Desordre.class.isAssignableFrom(pojoClass)) {
-                            allValues.forEach(value -> {
-                                final ObservableList<Observation> observations = ((Desordre) value).getObservations();
-//                                observations.addListener( ->  {
-//
+//                        if (AvecObservationsAvecUrgence.class.isAssignableFrom(pojoClass)) {
+//                            final FilteredList<TableColumn<Element, ?>> filtered = uiTable.getColumns()
+//                                    .filtered(col -> ObservationPropertyColumn.class.isAssignableFrom(col.getClass()));
+//                            allValues.forEach(value -> {
+//                                final ObservableList<? extends IObservationAvecUrgence> observations = ((AvecObservationsAvecUrgence) value).getObservations();
+//                                Collections.sort(observations, OBSERVATION_COMPARATOR);
+//                                observations.addListener((ListChangeListener<IObservationAvecUrgence>) change -> {
+//                                    System.out.println("here2");
 //                                });
-                                Collections.sort(observations, OBSERVATION_COMPARATOR);
-                            });
-                        }
+//                            });
+//                        }
                     }
                 } catch (Throwable ex) {
                     allValues = FXCollections.observableArrayList();
@@ -1616,6 +1629,7 @@ public class PojoTable extends BorderPane implements Printable {
         });
 
         tableUpdaterProperty.set(TaskManager.INSTANCE.submit("Recherche...", updater));
+        uiTable.refresh();
     }
 
     /**
@@ -1730,7 +1744,7 @@ public class PojoTable extends BorderPane implements Printable {
             final Object source = event.getSource();
             if (source != null && source instanceof ObservationPropertyColumn) {
                 final ObservationPropertyColumn obsColumn = (ObservationPropertyColumn) source;
-                final AbstractObservation observation = ((AvecObservations) obj).getObservations().get(obsColumn.getObsOrder());
+                final IObservation observation = ((AvecObservations) obj).getObservations().get(obsColumn.getObsOrder());
                 try {
                     obsColumn.writterMethod.invoke(observation, event.getNewValue());
                 } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2275,12 +2289,15 @@ public class PojoTable extends BorderPane implements Printable {
                         if (param != null && param.getValue() != null && propertyAccessor != null) {
                             final Element value = param.getValue();
                             // The Observation we want to display info for.
-                            final Observation observation = getObservation(value, obsOrder);
+                            final IObservationAvecUrgence observation = getObservation(value, obsOrder);
+                            observation.dateProperty().addListener((obs, o, n) -> {
+                                System.out.println("here3");
+                            });
                             try {
                                 // Get from the Desordre's observations list. Then get the desired observation from the list.
                                 // Finally get the value corresponding to the desc.
-                                if (Desordre.class.isAssignableFrom(value.getClass())) {
-                                    return new SimpleObjectProperty(propertyAccessor.invoke(observation));
+                                if (AvecObservationsAvecUrgence.class.isAssignableFrom(value.getClass())) {
+                                    return (ObservableValue) propertyAccessor.invoke(observation);
 
                                 } else {
                                     throw new IllegalArgumentException("Type of Element not supported in  ObservationPropertyColumn : " + param.getClass());
@@ -2372,7 +2389,7 @@ public class PojoTable extends BorderPane implements Printable {
             final Class<? extends Element> pojoClass = param.getClass();
             try {
                 if (Desordre.class.isAssignableFrom(pojoClass)) {
-                    final Observation observation = getObservation(param, obsOrder);
+                    final IObservationAvecUrgence observation = getObservation(param, obsOrder);
                     return new SimpleObjectProperty(observation == null ? null : readMethod.invoke(observation));
                 } else {
                     throw new IllegalArgumentException("Type of Element not supported in  ObservationPropertyColumn : " + param.getClass());
@@ -2383,12 +2400,18 @@ public class PojoTable extends BorderPane implements Printable {
             }
         }
 
-        private Observation getObservation(final Element value, final int obsOrder) {
+        private IObservationAvecUrgence getObservation(final Element value, final int obsOrder) {
             ArgumentChecks.ensureNonNull("value", value);
             final Class<? extends Element> pojoClass = value.getClass();
-            if (Desordre.class.isAssignableFrom(pojoClass)) {
-                final Desordre desordre = (Desordre) value;
-                final ObservableList<Observation> observations = desordre.getObservations();
+            if (IDesordre.class.isAssignableFrom(pojoClass)) {
+                final IDesordre desordre = (IDesordre) value;
+                final ObservableList<? extends IObservationAvecUrgence> observations = desordre.getObservations();
+                observations.addListener((ListChangeListener<IObservationAvecUrgence>) change -> {
+                    System.out.println("columnCell");
+//                    ObservationPropertyColumn.this.setVisible(visibleProperty().not().get());
+//                    ObservationPropertyColumn.this.setVisible(visibleProperty().not().get());
+                });
+                Collections.sort(observations, OBSERVATION_COMPARATOR);
                 final int size = observations.size();
 
                 if (size == 0 || obsOrder > size - 1) return null;
@@ -2470,67 +2493,66 @@ public class PojoTable extends BorderPane implements Printable {
                 ((WritableValue) value).setValue(newValue);
                 final Class<?> rowClass = rowElement.getClass();
 
-//                if (col instanceof PojoTable.ObservationPropertyColumn) {
-//                    // TODO modify way to edit value
-//                    elementEdited(event);
-//                } else {
-                    //On recalcule les coordonnées si la colonne modifiée correspond à une des propriétées de coordonnées géo ou linéaire.
-                    String modifiedPropretieName = ((PojoTable.AbstractPropertyColumn) col).getName();
-                    if ((rowElement != null) && (Positionable.class.isAssignableFrom(rowClass))) {
+                //On recalcule les coordonnées si la colonne modifiée correspond à une des propriétées de coordonnées géo ou linéaire.
+                String modifiedPropretieName = ((PojoTable.AbstractPropertyColumn) col).getName();
+                if ((rowElement != null) && (Positionable.class.isAssignableFrom(rowClass))) {
 
-                        ConvertPositionableCoordinates.computeForModifiedPropertie((Positionable) rowElement, modifiedPropretieName);
+                    ConvertPositionableCoordinates.computeForModifiedPropertie((Positionable) rowElement, modifiedPropretieName);
 
-                    }
+                }
 
-                    if (rowElement instanceof Prestation) {
+                if (rowElement instanceof Prestation) {
 
-                        Prestation prestation = (Prestation) rowElement;
-                        // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
-                        if ("typePrestationId".equals(modifiedPropretieName)
-                                && (newValue instanceof String && !newValue.equals(oldValue))) {
-                            FXPrestationPane.autoSelectRegistre(prestation, (String) newValue);
-                        } else if (SirsCore.DATE_FIN_FIELD.equals(modifiedPropretieName)) {
-                            // REDMINE 7782 - when changing prestation's end validity date, check the end timestamp date and show warnings if necessary.
-                            final String refHoroId = prestation.getHorodatageStatusId();
+                    Prestation prestation = (Prestation) rowElement;
+                    // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
+                    if ("typePrestationId".equals(modifiedPropretieName)
+                            && (newValue instanceof String && !newValue.equals(oldValue))) {
+                        FXPrestationPane.autoSelectRegistre(prestation, (String) newValue);
+                    } else if (SirsCore.DATE_FIN_FIELD.equals(modifiedPropretieName)) {
+                        // REDMINE 7782 - when changing prestation's end validity date, check the end timestamp date and show warnings if necessary.
+                        final String refHoroId = prestation.getHorodatageStatusId();
 
-                            // prestation in the SE's registre :
-                            // - if "Non horodaté" -> no message, no effect
-                            // - if "En attente" -> message to warn the user it is "En attente" and ask if reset status to "Non horodaté"
-                            // - if "Horodaté" and "date d'horodatage de fin" not null -> message to warn the user it has already been timestamped for the end date
-                            //   and ask if reset status to "Non horodaté"
-                            if (prestation.getRegistreAttribution() && !HorodatageReference.getRefNonTimeStampedStatus().equals(refHoroId)) {
-                                final StringBuilder message = FXPrestationPane.constructMessage(refHoroId, prestation.getHorodatageEndDate());
+                        // prestation in the SE's registre :
+                        // - if "Non horodaté" -> no message, no effect
+                        // - if "En attente" -> message to warn the user it is "En attente" and ask if reset status to "Non horodaté"
+                        // - if "Horodaté" and "date d'horodatage de fin" not null -> message to warn the user it has already been timestamped for the end date
+                        //   and ask if reset status to "Non horodaté"
+                        if (prestation.getRegistreAttribution() && !HorodatageReference.getRefNonTimeStampedStatus().equals(refHoroId)) {
+                            final StringBuilder message = FXPrestationPane.constructMessage(refHoroId, prestation.getHorodatageEndDate());
 
-                                final Optional optional = PropertiesFileUtilities.showConfirmationDialog(message.toString(), "Modification date de fin", 600, 450, true);
-                                if (optional.isPresent()) {
-                                    final Object result = optional.get();
-                                    if (ButtonType.YES.equals(result)) {
-                                        prestation.setHorodatageStatusId(HorodatageReference.getRefNonTimeStampedStatus());
-                                    } else if (ButtonType.NO.equals(result)) {
-                                        // do nothing
-                                    } else if (ButtonType.CANCEL.equals(result)) {
-                                        prestation.setDate_fin((LocalDate) oldValue);
-                                    }
+                            final Optional optional = PropertiesFileUtilities.showConfirmationDialog(message.toString(), "Modification date de fin", 600, 450, true);
+                            if (optional.isPresent()) {
+                                final Object result = optional.get();
+                                if (ButtonType.YES.equals(result)) {
+                                    prestation.setHorodatageStatusId(HorodatageReference.getRefNonTimeStampedStatus());
+                                } else if (ButtonType.NO.equals(result)) {
+                                    // do nothing
+                                } else if (ButtonType.CANCEL.equals(result)) {
+                                    prestation.setDate_fin((LocalDate) oldValue);
                                 }
                             }
                         }
-//                    }
-                }
-                    if (rowElement instanceof AvecObservations) {
-                        AvecObservations avecObs = (AvecObservations) rowElement;
-                        // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
-                        if ("date".equals(modifiedPropretieName)
-                                && (newValue instanceof String && !newValue.equals(oldValue))) {
-
-                        }
                     }
+                }
+                if (rowElement instanceof AvecObservations) {
+                    AvecObservations avecObs = (AvecObservations) rowElement;
+                    // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
+                    if ("date".equals(modifiedPropretieName)
+                            && (newValue instanceof String && !newValue.equals(oldValue))) {
+
+                    }
+                }
+                final Element cont = container == null ? null : container.get();
+//                if (IObservationAvecUrgence.class.isAssignableFrom(pojoClass) && "date".equals(modifiedPropretieName) && AvecObservationsAvecUrgence.class.isAssignableFrom(cont.getClass())) {
+//                    AvecObservationsAvecUrgence avecObs = (AvecObservationsAvecUrgence) cont;
+//                    Collections.sort(avecObs.getObservations(), OBSERVATION_COMPARATOR);
+//                }
                 // HACK - Redmine 6449 : Deal with the 1-n relation.
                 // For now, in the app, this type of relation only exists between the EvenementHydraulique and :
                 // - MonteeEaux
                 // - LigneEau
                 // - LaisseCrue
                 // TODO - find a way to make it generic for each Class containing a 1-n relation.
-                final Element cont = container == null ? null : container.get();
                 if (cont != null && EvenementHydraulique.class.isAssignableFrom(cont.getClass()) && ObjetMesure.class.isAssignableFrom(pojoClass)) {
                     if ("evenementHydrauliqueId".equalsIgnoreCase(modifiedPropretieName)) {
                         // The link with the previous EH will be removed during the update of the Element.

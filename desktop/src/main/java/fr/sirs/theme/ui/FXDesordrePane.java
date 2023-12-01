@@ -20,17 +20,17 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.AbstractObservation;
-import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Observation;
-import fr.sirs.core.model.RefCategorieDesordre;
-import fr.sirs.core.model.RefTypeDesordre;
-import fr.sirs.core.model.Role;
+import fr.sirs.core.model.*;
 import fr.sirs.theme.ui.pojotable.PojoTableExternalAddable;
+import fr.sirs.util.SirsComparator;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+
+import java.util.Collections;
 
 /**
  *
@@ -95,5 +95,17 @@ public class FXDesordrePane extends FXDesordrePaneStub {
 //            return observationsTable;
 //        });
 
+    }
+
+    @Override
+    public void preSave() {
+        super.preSave();
+//        final Desordre element = elementProperty().get();
+//        ObservableList<Observation> list = FXCollections.observableArrayList();
+//        for(Observation obs: element.getObservations()){
+//            list.add(obs);
+//        }
+//        element.setObservations(list);
+//        Collections.sort(element.getObservations(), SirsComparator.OBSERVATION_COMPARATOR);
     }
 }
