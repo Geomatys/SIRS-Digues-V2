@@ -221,6 +221,7 @@ public class PluginLit extends Plugin {
                 ilesLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
                 container.items().add(ilesLayer);
 
+                // Désordres
                 final BeanStore desordreStore = new BeanStore(suppliers.get(DesordreLit.class));
                 final MapItem desordreLayer = MapBuilder.createItem();
                 desordreLayer.setName("Désordres (lit)");
@@ -228,12 +229,7 @@ public class PluginLit extends Plugin {
                 desordreLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
                 container.items().add(desordreLayer);
 
-                final MapItem desordreUrgencesGroup = MapBuilder.createItem();
-                desordreUrgencesGroup.setName("Degrés d'urgence");
-                final AbstractSIRSRepository<RefUrgence> refUrgenceRepo = getSession().getRepositoryForClass(RefUrgence.class);
-                desordreUrgencesGroup.items().addAll(CorePlugin.buildUrgenceLayers(DesordreLit.class, desordreStore, createDefaultSelectionStyle(), false, refUrgenceRepo));
-                desordreUrgencesGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-                desordreLayer.items().add(desordreUrgencesGroup);
+                desordreLayer.items().add(CorePlugin.createAndAddUrgenceGroup(DesordreLit.class, desordreStore, null, createDefaultSelectionStyle()));
 
                 final MapItem otherLayer = MapBuilder.createItem();
                 otherLayer.setName("Autre (lit)");

@@ -31,59 +31,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.AbstractPositionDocument;
-import fr.sirs.core.model.AbstractPositionDocumentAssociable;
-import fr.sirs.core.model.ArticleJournal;
-import fr.sirs.core.model.AvecGeometrie;
-import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Crete;
-import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Deversoir;
-import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.DocumentGrandeEchelle;
-import fr.sirs.core.model.EchelleLimnimetrique;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Epi;
-import fr.sirs.core.model.Fondation;
-import fr.sirs.core.model.GardeTroncon;
-import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.LaisseCrue;
-import fr.sirs.core.model.LargeurFrancBord;
-import fr.sirs.core.model.LigneEau;
-import fr.sirs.core.model.Marche;
-import fr.sirs.core.model.MonteeEaux;
-import fr.sirs.core.model.OuvertureBatardable;
-import fr.sirs.core.model.OuvrageFranchissement;
-import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.OuvrageParticulier;
-import fr.sirs.core.model.OuvrageRevanche;
-import fr.sirs.core.model.OuvrageTelecomEnergie;
-import fr.sirs.core.model.OuvrageVoirie;
-import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.PiedDigue;
-import fr.sirs.core.model.PositionDocument;
-import fr.sirs.core.model.PositionProfilTravers;
-import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.Prestation;
-import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.ProfilLong;
-import fr.sirs.core.model.ProfilTravers;
-import fr.sirs.core.model.ProprieteTroncon;
-import fr.sirs.core.model.RapportEtude;
-import fr.sirs.core.model.RefUrgence;
-import fr.sirs.core.model.RefTypeDesordre;
-import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauTelecomEnergie;
-import fr.sirs.core.model.SIRSDocument;
-import fr.sirs.core.model.SommetRisberme;
-import fr.sirs.core.model.StationPompage;
-import fr.sirs.core.model.SystemeEndiguement;
-import fr.sirs.core.model.TalusDigue;
-import fr.sirs.core.model.TalusRisberme;
-import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.model.VoieAcces;
-import fr.sirs.core.model.VoieDigue;
+import fr.sirs.core.model.*;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.map.FXMapTab;
@@ -122,6 +70,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
+
+import fr.sirs.util.UrgenceLayerColors;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
@@ -471,12 +421,7 @@ public class CorePlugin extends Plugin {
             desordresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(desordresLayer);
 
-            final MapItem desordreUrgencesGroup = MapBuilder.createItem();
-            desordreUrgencesGroup.setName("Degrés d'urgence");
-            final AbstractSIRSRepository<RefUrgence> refUrgenceRepo = getSession().getRepositoryForClass(RefUrgence.class);
-            desordreUrgencesGroup.items().addAll(buildUrgenceLayers(Desordre.class, desordreStore, createDefaultSelectionStyle(), false, refUrgenceRepo));
-            desordreUrgencesGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            desordresLayer.items().add(desordreUrgencesGroup);
+            desordresLayer.items().add(createAndAddUrgenceGroup(Desordre.class, desordreStore, null, createDefaultSelectionStyle()));
 
 
             // Prestations
@@ -527,6 +472,14 @@ public class CorePlugin extends Plugin {
         }
 
         return items;
+    }
+
+    public static MapItem createAndAddUrgenceGroup(final Class<? extends IDesordre> beanClass, final BeanStore desordreStore, final Map<String, MutableStyle> urgenceStylesMap, final MutableStyle selectionStyle) throws DataStoreException {
+        final MapItem desordreUrgencesGroup = MapBuilder.createItem();
+        desordreUrgencesGroup.setName("Degrés d'urgence");
+        desordreUrgencesGroup.items().addAll(buildUrgenceLayers(beanClass, desordreStore, urgenceStylesMap, selectionStyle, false));
+        desordreUrgencesGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+        return desordreUrgencesGroup;
     }
 
     @Override
@@ -650,9 +603,11 @@ public class CorePlugin extends Plugin {
         return layers;
     }
 
-    public static List<MapLayer> buildUrgenceLayers(final Class beanClass, BeanStore store, MutableStyle selectionStyle, boolean visible, final AbstractSIRSRepository<RefUrgence> refUrgenceRepo) throws DataStoreException {
+    public static List<MapLayer> buildUrgenceLayers(final Class<? extends IDesordre> beanClass, BeanStore store, final Map<String, MutableStyle> urgenceStylesMap, MutableStyle selectionStyle, boolean visible) throws DataStoreException {
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
+
+        final AbstractSIRSRepository<RefUrgence> refUrgenceRepo = Injector.getSession().getRepositoryForClass(RefUrgence.class);
         //une couche pour chaque type d'urgence.
         for (RefUrgence ref : refUrgenceRepo.getAll()) {
             final String id = ref.getId();
@@ -662,10 +617,13 @@ public class CorePlugin extends Plugin {
             );
             final FeatureCollection col = symSession.getFeatureCollection(
                     QueryBuilder.all(store.getNames().iterator().next()));
-            final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col);
-            fml.setQuery(QueryBuilder.filtered(col.getFeatureType().getName(), filter));
+
+            final FeatureType featureType = col.getFeatureType();
+            final MutableStyle style = urgenceStylesMap != null ? urgenceStylesMap.get(id): createDefaultStyle(UrgenceLayerColors.getColorByRefId(id));
+            final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
+            fml.setQuery(QueryBuilder.filtered(featureType.getName(), filter));
             fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            if (col.getFeatureType().getDescriptor(DATE_DEBUT_FIELD) != null && col.getFeatureType().getDescriptor(DATE_FIN_FIELD) != null) {
+            if (featureType.getDescriptor(DATE_DEBUT_FIELD) != null && featureType.getDescriptor(DATE_FIN_FIELD) != null) {
                 final FeatureMapLayer.DimensionDef datefilter = new FeatureMapLayer.DimensionDef(
                         CommonCRS.Temporal.JAVA.crs(),
                         GO2Utilities.FILTER_FACTORY.property(DATE_DEBUT_FIELD),
@@ -674,9 +632,6 @@ public class CorePlugin extends Plugin {
                 fml.getExtraDimensions().add(datefilter);
             }
 
-            final MutableStyle baseStyle = createDefaultStyle(UrgenceLayerColors.getColorByRefId(id));
-            final MutableStyle style = (baseStyle == null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
-            fml.setStyle(style);
             fml.setName(ref.getLibelle());
             fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             fml.setVisible(visible);
@@ -1547,38 +1502,5 @@ public class CorePlugin extends Plugin {
         ArgumentChecks.ensureNonNull("context layers", layers);
 
         return layers;
-    }
-
-    public enum UrgenceLayerColors {
-        REF1("RefUrgence:1", new Color(255, 255, 0)),
-        REF2("RefUrgence:2", new Color(255, 150, 0)),
-        REF3("RefUrgence:3", new Color(255, 0, 0)),
-        REF4("RefUrgence:4", new Color(180, 0, 250)),
-        REF99("RefUrgence:99", new Color(255, 255, 255));
-
-        private String refId;
-        private Color color;
-
-        UrgenceLayerColors(String refId, Color color) {
-            this.refId = refId;
-            this.color = color;
-        }
-
-        public static Color getColorByRefId(final String refId) {
-            for (UrgenceLayerColors e : UrgenceLayerColors.values()) {
-                if (e.getRefId().equals(refId)) {
-                    return e.getColor();
-                }
-            }
-            return RandomStyleBuilder.randomColor();
-        }
-
-        public String getRefId() {
-            return refId;
-        }
-
-        public Color getColor() {
-            return color;
-        }
     }
 }

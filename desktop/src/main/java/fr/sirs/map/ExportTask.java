@@ -30,6 +30,7 @@ import fr.sirs.util.DesordreUrgenceLayerFunction;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.apache.sis.storage.DataStoreException;
+import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.ArraysExt;
 import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.data.*;
@@ -72,6 +73,10 @@ public class ExportTask extends Task<Boolean> {
     private final FileFeatureStoreFactory factory;
     private final File folder;
     private final String[] columnsToFilter;
+    public static String removeAccents(String input) {
+        if (input == null) return null;
+        return Normalizer.normalize(input, Normalizer.Form.NFKD).replaceAll("\\p{M}", "");
+    }
 
     /**
      *
@@ -81,6 +86,7 @@ public class ExportTask extends Task<Boolean> {
      * @param columnsToFilter allows to filter the features. Leave to null to keep all columns
      */
     public ExportTask(FeatureMapLayer layer, File folder, FileFeatureStoreFactory factory, String[] columnsToFilter) {
+        ArgumentChecks.ensureNonNull("layer", layer);
         updateTitle("Export de " + layer.getName());
         this.folder = folder;
         this.factory = factory;
@@ -104,9 +110,7 @@ public class ExportTask extends Task<Boolean> {
                         final String name = layer.getName();
                         if (name != null && !name.isEmpty()) {
                             // Force to remove special characters.
-                            final StringBuilder decomposed = new StringBuilder(Normalizer.normalize(name, Normalizer.Form.NFD));
-                            String outputLayerName =  Pattern.compile("\\p{InCombiningDiacriticalMarks}+").matcher(decomposed).replaceAll("");
-                            extraLayerName = "_" + outputLayerName.replace(" ", "-");
+                            extraLayerName = "_" + removeAccents(name).replace(" ", "-");
                         }
                     }
                 }
@@ -165,12 +169,13 @@ public class ExportTask extends Task<Boolean> {
                 FeatureType inType = col.getFeatureType();
                 inType = filterFTByColumns(inType);
                 final String inTypeName = inType.getName().tip().toString();
+                final String filePrefix = inTypeName + extraLayerName;
                 //output file path
-                File file = new File(folder, inTypeName + extraLayerName + factory.getFileExtensions()[0]);
+                File file = new File(folder, filePrefix + factory.getFileExtensions()[0]);
                 //if file exist, add date aside it
                 if (file.exists()) {
                     //generate name + time
-                    String name = inTypeName + " " + TemporalUtilities.toISO8601(new Date()) + factory.getFileExtensions()[0];
+                    String name = filePrefix + " " + TemporalUtilities.toISO8601(new Date()) + factory.getFileExtensions()[0];
                     name = name.replace(':', '_');
                     file = new File(folder, name);
                     //it should not exist, but delete it if there is one in case

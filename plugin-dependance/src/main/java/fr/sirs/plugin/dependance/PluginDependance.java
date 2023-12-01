@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -33,7 +33,6 @@ import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.DATE_DEBUT_FIELD;
 import static fr.sirs.core.SirsCore.DATE_FIN_FIELD;
 import fr.sirs.core.SirsCoreRuntimeException;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.*;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.dependance.map.DependanceToolBar;
@@ -51,6 +50,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import fr.sirs.util.UrgenceLayerColors;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import org.apache.sis.measure.Units;
@@ -195,12 +195,7 @@ public class PluginDependance extends Plugin {
             desordresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             depGroup.items().add(desordresLayer);
 
-            final MapItem desordreUrgencesGroup = MapBuilder.createItem();
-            desordreUrgencesGroup.setName("Degrés d'urgence");
-            final AbstractSIRSRepository<RefUrgence> refUrgenceRepo = getSession().getRepositoryForClass(RefUrgence.class);
-            desordreUrgencesGroup.items().addAll(CorePlugin.buildUrgenceLayers(DesordreDependance.class, desordreStore, attributeSelectionStyle(DesordreDependance.class.getSimpleName()), false, refUrgenceRepo));
-            desordreUrgencesGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            desordresLayer.items().add(desordreUrgencesGroup);
+            desordresLayer.items().add(CorePlugin.createAndAddUrgenceGroup(DesordreDependance.class, desordreStore, attributeStyles(), attributeSelectionStyle(DesordreDependance.class.getSimpleName())));
 
 
             depGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
@@ -327,6 +322,15 @@ public class PluginDependance extends Plugin {
         } else {
             return null;
         }
+    }
+
+    private Map<String, MutableStyle> attributeStyles() {
+        final Map<String, MutableStyle> urgenceStylesMap = new HashMap<>();
+        for (UrgenceLayerColors urgenceLayerColors : UrgenceLayerColors.values()) {
+            urgenceStylesMap.put(urgenceLayerColors.getRefId(), createStyleType3(urgenceLayerColors.getColor()));
+        }
+        return urgenceStylesMap;
+
     }
 
     private MutableStyle attributeStyle(final Color color, final String name) {

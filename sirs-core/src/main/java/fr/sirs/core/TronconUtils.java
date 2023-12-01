@@ -1595,8 +1595,11 @@ public class TronconUtils {
         public PosSR getForSR() {
             String srid = pos.getSystemeRepId();
             if (srid == null) {
+                final TronconDigue troncon = getTroncon();
                 //On utilise le SR du troncon
-                srid = getTroncon().getSystemeRepDefautId();
+                if (troncon != null) {
+                    srid = troncon.getSystemeRepDefautId();
+                }
                 if (srid == null) {
                     return new PosSR();
                 }

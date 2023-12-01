@@ -192,7 +192,6 @@
         eType="#//PhotoDependance" containment="true">
       <eAnnotations source="photoType" references="#//PhotoDependance"/>
     </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="urgenceId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefUrgence"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="suiteApporterId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSuiteApporter"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PhotoDependance" eSuperTypes="../../sirs-core/model/sirs.ecore#//AbstractPhoto">
