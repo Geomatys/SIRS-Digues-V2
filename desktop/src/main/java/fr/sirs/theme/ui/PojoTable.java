@@ -1531,9 +1531,9 @@ public class PojoTable extends BorderPane implements Printable {
 //                            allValues.forEach(value -> {
 //                                final ObservableList<? extends IObservationAvecUrgence> observations = ((AvecObservationsAvecUrgence) value).getObservations();
 //                                Collections.sort(observations, OBSERVATION_COMPARATOR);
-//                                observations.addListener((ListChangeListener<IObservationAvecUrgence>) change -> {
-//                                    System.out.println("here2");
-//                                });
+////                                observations.addListener((ListChangeListener<IObservationAvecUrgence>) change -> {
+////                                    System.out.println("here2");
+////                                });
 //                            });
 //                        }
                     }
@@ -1629,7 +1629,7 @@ public class PojoTable extends BorderPane implements Printable {
         });
 
         tableUpdaterProperty.set(TaskManager.INSTANCE.submit("Recherche...", updater));
-        uiTable.refresh();
+//        uiTable.refresh();
     }
 
     /**
@@ -2406,11 +2406,11 @@ public class PojoTable extends BorderPane implements Printable {
             if (IDesordre.class.isAssignableFrom(pojoClass)) {
                 final IDesordre desordre = (IDesordre) value;
                 final ObservableList<? extends IObservationAvecUrgence> observations = desordre.getObservations();
-                observations.addListener((ListChangeListener<IObservationAvecUrgence>) change -> {
-                    System.out.println("columnCell");
-//                    ObservationPropertyColumn.this.setVisible(visibleProperty().not().get());
-//                    ObservationPropertyColumn.this.setVisible(visibleProperty().not().get());
-                });
+//                observations.addListener((ListChangeListener<IObservationAvecUrgence>) change -> {
+//                    System.out.println("columnCell");
+////                    ObservationPropertyColumn.this.setVisible(visibleProperty().not().get());
+////                    ObservationPropertyColumn.this.setVisible(visibleProperty().not().get());
+//                });
                 Collections.sort(observations, OBSERVATION_COMPARATOR);
                 final int size = observations.size();
 
@@ -2648,6 +2648,15 @@ public class PojoTable extends BorderPane implements Printable {
 
         @Override
         protected void updateItem(Element item, boolean empty) {
+            if (getItem() == null && item != null && IDesordre.class.isAssignableFrom(item.getClass())) {
+                ((IDesordre) item).getObservations().addListener((ListChangeListener<IObservationAvecUrgence>) change -> {
+                    change.next();
+                    if (change.wasUpdated()) {
+                        System.out.println("item updated");
+//                        uiTable.refresh();
+                    }
+                });
+            }
             super.updateItem(item, empty);
 
             if (item != null && !item.getValid()) {
