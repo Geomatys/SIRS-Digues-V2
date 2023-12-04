@@ -619,7 +619,13 @@ public class CorePlugin extends Plugin {
                     QueryBuilder.all(store.getNames().iterator().next()));
 
             final FeatureType featureType = col.getFeatureType();
-            final MutableStyle style = urgenceStylesMap != null ? urgenceStylesMap.get(id): createDefaultStyle(UrgenceLayerColors.getColorByRefId(id));
+            MutableStyle style = null;
+            if (urgenceStylesMap != null) {
+                style = urgenceStylesMap.get(id);
+            }
+            if (style == null) {
+                style = createDefaultStyle(UrgenceLayerColors.getColorByRefId(id));
+            }
             final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
             fml.setQuery(QueryBuilder.filtered(featureType.getName(), filter));
             fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
