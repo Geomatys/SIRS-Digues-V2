@@ -602,8 +602,7 @@ public class PojoTable extends BorderPane implements Printable {
                 } else {
                     final List<Preview> previews = session.getPreviews().getByClass(pojoClass);
                     final List<String> allValuesIds = allValues.stream().map(Identifiable::getId).collect(Collectors.toList());
-                    final List<Preview> possiblePreviews = new ArrayList<>();
-                    // Keep only Previews not present in the table yet.
+                   // Keep only Previews not present in the table yet.
                     previews.removeIf(preview -> allValuesIds.contains(preview.getElementId()));
                     choices = SIRS.observableList(previews).sorted();
                 }
@@ -883,7 +882,7 @@ public class PojoTable extends BorderPane implements Printable {
             //    -> voir aussi col.visibleProperty().addListener ~l.880
             TableColumn<Element, ?> deplacedCol;
             for (int i = uiTable.getColumns().size() - 1; i > 0; i--) {//On ne veut pas déplacer la première colonne (suppression)
-                if ((!uiTable.getColumns().get(i).visibleProperty().get())) {
+                if (!uiTable.getColumns().get(i).visibleProperty().get()) {
                     deplacedCol = uiTable.getColumns().get(i);
                     uiTable.getColumns().remove(i);
                     uiTable.getColumns().add(deplacedCol);
@@ -939,9 +938,10 @@ public class PojoTable extends BorderPane implements Printable {
             SIRS.LOGGER.log(Level.INFO, "Sauvegarde des préférences de la pojoTable {0} pour les colonnes :\n", modifiedColumnsIndices);
 
             //Pour chaque colonne modifiée, on met à jours les préférences.
+            final ObservableList<TableColumn<Element, ?>> columns = uiTable.getColumns();
             modifiedColumnsIndices.forEach(colIndice -> {
 
-                TableColumn<Element, ?> column = uiTable.getColumns().get(colIndice);
+                TableColumn<Element, ?> column = columns.get(colIndice);
                 try {
                     //TODO empêcher la castException -> S'il y a problème de cast on met un nom vide.
                     // ColumnState newState = new ColumnState(((PropertyColumn) column).getName(), column.isVisible(), colIndice, (float) column.widthProperty().get());
@@ -994,8 +994,8 @@ public class PojoTable extends BorderPane implements Printable {
                 // - Les colonnes visibles sont déplacées à l'index 3 de la table
                 //  ( l'index 3 permet de placer les colonnes rendues visibles en
                 //  début de tableau)
-                // - ce traitement n'es pas appliqué au colonnes sans id
-                // (suppression, accès aux fixhes et à la carto).
+                // - ce traitement n'est pas appliqué aux colonnes sans id
+                // (suppression, accès aux fiches et à la carto).
                 if (col.getId() != null) {
                     if ((newVisibility.equals(Boolean.FALSE))) {
                         TableColumn<Element, ?> deplacedColumn = col;
@@ -1362,13 +1362,10 @@ public class PojoTable extends BorderPane implements Printable {
         final TextField textField = new TextField(currentSearch.get());
         popup.getContent().add(textField);
         popup.setAutoHide(true);
-        textField.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                currentSearch.set(textField.getText());
-                popup.hide();
-                updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get());
-            }
+        textField.setOnAction(event -> {
+            currentSearch.set(textField.getText());
+            popup.hide();
+            updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get());
         });
         final Point2D sc = uiSearch.localToScreen(0, 0);
         popup.show(uiSearch, sc.getX(), sc.getY());
@@ -1492,7 +1489,7 @@ public class PojoTable extends BorderPane implements Printable {
             }
 
             // Apply filter on properties
-            final Filter firstFilter = getFilter();
+             final Filter firstFilter = getFilter();
 
             final Thread currentThread = Thread.currentThread();
             if (currentThread.isInterrupted()) {
