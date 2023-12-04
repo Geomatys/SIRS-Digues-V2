@@ -294,7 +294,7 @@ public class FXCommentPhotoView extends SplitPane {
         }
 
         if (manualUpdate) {
-            updateDisplayedPhoto(uiPhotoScroll.valueProperty(), 0, 0);
+            Platform.runLater(() -> updateDisplayedPhoto(uiPhotoScroll.valueProperty(), 0, 0));
         } else {
             uiPhotoScroll.setValue(0);
         }
