@@ -3,13 +3,14 @@
 package fr.sirs.core.model;
 
 import fr.sirs.util.SirsComparator;
+import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public interface AvecObservationsAvecUrgence extends AvecObservations {
 
-    List<? extends IObservationAvecUrgence> getObservations();
+    ObservableList<? extends IObservationAvecUrgence> getObservations();
 
     /**
      * Redmine-ticket : 7727

@@ -36,6 +36,7 @@ import static fr.sirs.SIRS.ID_FIELD;
 import static fr.sirs.SIRS.REVISION_FIELD;
 import static fr.sirs.SIRS.NEW_FIELD;
 import static fr.sirs.core.SirsCore.*;
+import static fr.sirs.util.SirsComparator.OBSERVATION_COMPARATOR;
 
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
@@ -68,6 +69,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -520,6 +522,58 @@ public class PojoTable extends BorderPane implements Printable {
                 uiPositionVisibility.getStyleClass().add(BUTTON_STYLE);
                 uiPositionVisibility.setSelected(false);// Force to change.
                 searchEditionToolbar.getChildren().add(uiPositionVisibility);
+            }
+            if (IDesordre.class.isAssignableFrom(pojoClass)) {
+                final LinkedHashMap<String, PropertyDescriptor> observationProp = listSimpleProperties(Observation.class);
+                final Set<String> observationKeys = observationProp.keySet();
+                final List<String> acceptedKeys = Arrays.asList(DESIGNATION_FIELD, "nombreDesordres", "urgenceId", "suiteApporterId", "suite", "evolution", "observateurId", "date");
+                observationKeys.removeIf(key -> !acceptedKeys.contains(key));
+                final List<TableColumn> observationColumns = new ArrayList<>();
+
+                final LabelMapper obsMapper = LabelMapper.get(Observation.class);
+                final List<String> obsColNames = new ArrayList<>(properties.keySet());
+                final int nLastObservations = 2;
+                for (PropertyDescriptor desc : observationProp.values()) {
+                    for (int i = 0; i <nLastObservations; i++) {
+                        getObservationPropertyColumn(desc, i, obsMapper).ifPresent(column -> {
+                            obsColNames.add(((ObservationPropertyColumn) column).getName());
+                            cols.add(column);
+                        });
+                    }
+                }
+                // Columns sorted in observationColumns to show them sorted when uiObservationVisibility is activated.
+                obsColNames.sort(new AlphaNumComparator());
+                for (String colName : obsColNames) {
+                    final TableColumn column = getColumn(colName, cols);
+                    if (column != null) {
+                        column.setVisible(false);
+                        observationColumns.add(0, column);
+                        colNames.add(colName);
+                    }
+                }
+
+                // On permet de cacher toutes les infos d'observation d'un coup.
+                final ImageView viewOn = new ImageView(SIRS.ICON_EYE_BLACK);
+                final ToggleButton uiObservationVisibility = new ToggleButton(null, viewOn);
+                uiObservationVisibility.setSelected(true); // Prepare to be forced to change.
+                uiObservationVisibility.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                    if (newValue == null) {
+                        return;
+                    }
+                    for (final TableColumn col : observationColumns) {
+                        col.setVisible(newValue);
+                    }
+                    if (newValue) {
+                        uiObservationVisibility.setTooltip(new Tooltip("Cacher les informations des observations n et n-1"));
+                    } else {
+                        uiObservationVisibility.setTooltip(new Tooltip("Afficher les informations des observations n et n-1'"));
+                    }
+                });
+                uiObservationVisibility.visibleProperty().bind(uiFicheMode.selectedProperty().not());
+                uiObservationVisibility.managedProperty().bind(uiObservationVisibility.visibleProperty());
+                uiObservationVisibility.getStyleClass().add(BUTTON_STYLE);
+                uiObservationVisibility.setSelected(false);// Force to change.
+                searchEditionToolbar.getChildren().add(uiObservationVisibility);
             }
 
             for (final PropertyDescriptor desc : properties.values()) {
@@ -1575,11 +1629,11 @@ public class PojoTable extends BorderPane implements Printable {
      */
     private Predicate<Element> getSearchTextInCellsPredicate(final String searched, final StringConverter converter) {
         return element -> uiTable.getColumns().stream()//Search in tableview's cells
-                .filter(col -> col instanceof PropertyColumn)
+                .filter(col -> col instanceof AbstractPropertyColumn)
                 .map(col -> {
                     final Object cellData = col.getCellData(element);
                     if (cellData != null) {
-                        if (((PropertyColumn) col).getReference() == null) {
+                        if (((AbstractPropertyColumn) col).getReference() == null) {
                             final String res = converter.toString(cellData);
                             return ((res == null) || res.isEmpty()) ? cellData.toString() : res; //try to handle not Sirs Object like LocalDate  todo include it in SirsStringConverter?
                         } else if (cellData instanceof String) {
@@ -1877,6 +1931,18 @@ public class PojoTable extends BorderPane implements Printable {
         return Optional.of(col);
     }
 
+    public Optional<TableColumn> getObservationPropertyColumn(final PropertyDescriptor desc, final int obsOrder, final LabelMapper obsMapper) {
+        if (desc == null) {
+            return Optional.empty();
+        }
+
+        final TableColumn col;
+        col = new ObservationPropertyColumn(desc, obsOrder, obsMapper);
+        col.sortableProperty().setValue(Boolean.TRUE);
+        col.setId(((ObservationPropertyColumn) col).getName());
+        return Optional.of(col);
+    }
+
     @Override
     public String getPrintTitle() {
         return titleProperty.get();
@@ -1900,7 +1966,7 @@ public class PojoTable extends BorderPane implements Printable {
         final List<String> propertyNames = new ArrayList<>();
         for (final TableColumn column : getColumns()) {
             if (column.isVisible()) {
-                if (column instanceof PropertyColumn) {
+                if (column instanceof AbstractPropertyColumn) {
                     propertyNames.add(((PropertyColumn) column).name);
                 } else if (column instanceof EnumColumn) {
                     propertyNames.add(((EnumColumn) column).name);
@@ -2023,14 +2089,10 @@ public class PojoTable extends BorderPane implements Printable {
      * Column used to display / edit simple attributes or references of an
      * element.
      */
-    public final class PropertyColumn extends TableColumn<Element, Object> {
+    public final class PropertyColumn extends AbstractPropertyColumn {
 
         private final Reference ref;
         private final String name;
-
-        public String getName() {
-            return name;
-        }
 
         public PropertyColumn(final PropertyDescriptor desc) {
             super();
@@ -2124,10 +2186,198 @@ public class PojoTable extends BorderPane implements Printable {
             }
         }
 
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
         public Reference getReference() {
             return ref;
         }
     }
+
+
+    /**
+     * Column used to display / edit simple attributes or references of an
+     * element.
+     */
+    public abstract class AbstractPropertyColumn extends TableColumn<Element, Object> {
+
+        public AbstractPropertyColumn() {
+            super();
+        }
+
+        public abstract String getName();
+        public abstract Reference getReference();
+    }
+
+    /**
+     * Column used to display / edit simple attributes or references of an AvecObservable element.
+     */
+    public final class ObservationPropertyColumn extends AbstractPropertyColumn {
+
+        private final Reference ref;
+        private final String name;
+
+        private final String descName;
+
+        private final Method readMethod;
+        private final Method writterMethod;
+        private final int obsOrder;
+
+        public ObservationPropertyColumn(final PropertyDescriptor desc, final int obsOrder, final LabelMapper obsMapper) {
+            super();
+            if (!IDesordre.class.isAssignableFrom(pojoClass)) {
+                throw new IllegalStateException("ObservationPropertyColumn only valid for Element implementing IDesordre. : " + pojoClass);
+            }
+            this.obsOrder = obsOrder;
+            final String extraText;
+            final String obsOrderText;
+            if (obsOrder == 0) {
+                extraText = "";
+                obsOrderText = "";
+            } else {
+                extraText = "Minus" + obsOrder;
+                obsOrderText = "-" + obsOrder;
+            }
+            descName = desc.getName();
+            this.name = "obsN" + extraText + descName;
+
+            String pName = obsMapper == null ? name : obsMapper.mapPropertyName(descName);
+            setText("Observation n" + obsOrderText + "\n" + pName);
+
+            readMethod = desc.getReadMethod();
+            writterMethod = desc.getWriteMethod();
+
+            //choix de l'editeur en fonction du type de données
+            boolean isEditable = true;
+            this.ref = desc.getReadMethod().getAnnotation(Reference.class);
+            if (ref != null) {
+                //reference vers un autre objet
+                setCellFactory(SIRS.getOrCreateTableCellFactory(ref));
+                try {
+                    final Method propertyAccessor = ref.ref().getMethod(name + "Property");
+
+                    setCellValueFactory((CellDataFeatures<Element, Object> param) -> {
+                        if (param != null && param.getValue() != null && propertyAccessor != null) {
+                            final Element value = param.getValue();
+                            // The Observation we want to display info for.
+                            // Get the Desordre's observations list. Then get the desired observation from the list.
+                            final IObservationAvecUrgence observation = getObservation((IDesordre) value);
+                            try {
+                                // Finally get the value corresponding to the desc.
+                                return (ObservableValue) propertyAccessor.invoke(observation);
+                            } catch (Exception ex) {
+                                SirsCore.LOGGER.log(Level.WARNING, null, ex);
+                                return null;
+                            }
+                        } else {
+                            return null;
+                        }
+                    });
+                } catch (Exception ex) {
+                    setCellValueFactory(cellData -> getObsSimpleObjectProperty(cellData));
+                }
+
+                // HACK : Needed to avoid comparison on ids.
+                final Previews previews = session.getPreviews();
+                final LabelComparator<Object> labelComparator = new LabelComparator<>(false);
+                setComparator((o1, o2) -> {
+                    if (o1 != null && o2 != null) {
+                        final List<Preview> tmpPreviews = previews.get(new String[]{o1.toString(), o2.toString()});
+                        if (tmpPreviews.size() == 2) {
+                            o1 = tmpPreviews.get(0);
+                            o2 = tmpPreviews.get(1);
+                        }
+                    }
+
+                    return labelComparator.compare(o1, o2);
+                });
+
+            } else {
+                setCellValueFactory(cellData -> getObsSimpleObjectProperty(cellData));
+
+                // On conditionne a priori l'édition au fait que la méthode de lecture n'est pas indiquée comme autocalculée.
+                isEditable = !readMethod.isAnnotationPresent(Computed.class);
+
+                final Class type = readMethod.getReturnType();
+                if (Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)) {
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
+                } else if (String.class.isAssignableFrom(type)) {
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
+                } else if (Integer.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)) {
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(Integer.class));
+                } else if (Float.class.isAssignableFrom(type) || float.class.isAssignableFrom(type)) {
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell.Float());
+                } else if (Double.class.isAssignableFrom(type) || double.class.isAssignableFrom(type)) {
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(Double.class));
+                } else if (LocalDateTime.class.isAssignableFrom(type)) {
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
+                } else if (LocalDate.class.isAssignableFrom(type)) {
+                    if (TIMESTAMP_START_DATE.equalsIgnoreCase(name) || TIMESTAMP_END_DATE.equalsIgnoreCase(name)) {
+                        setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateCell(true));
+                    } else {
+                        setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateCell());
+                    }
+                } else if (Point.class.isAssignableFrom(type)) {
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXPointCell());
+                } else {
+                    setCellFactory((TableColumn<Element, Object> param) -> new SimpleCell());
+                    isEditable = false;
+                }
+            }
+
+            if (isEditable) {
+                editableProperty().bind(cellEditableProperty);
+                setOnEditCommit(PojoTable.this::setOnPropertyCommit);
+            } else {
+                setEditable(false);
+            }
+        }
+
+        private SimpleObjectProperty getObsSimpleObjectProperty(CellDataFeatures<Element, Object> cellData) {
+            final Element param = cellData.getValue();
+            if (param == null) return null;
+            try {
+                final IObservationAvecUrgence observation = getObservation((IDesordre) param);
+                return new SimpleObjectProperty(observation == null ? null : readMethod.invoke(observation));
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.WARNING, null, e);
+                return null;
+            }
+        }
+
+        IObservationAvecUrgence getObservation(final IDesordre desordre) {
+            ArgumentChecks.ensureNonNull("desordre", desordre);
+            final ObservableList<? extends IObservationAvecUrgence> observations = desordre.getObservations();
+            Collections.sort(observations, OBSERVATION_COMPARATOR);
+            final int size = observations.size();
+
+            if (size == 0 || obsOrder > size - 1) return null;
+            else return observations.get(obsOrder);
+        }
+
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public Reference getReference() {
+            return ref;
+        }
+
+        public int getObsOrder() {
+            return obsOrder;
+        }
+
+        public String getdescName() {
+            return descName;
+        }
+    }
+
 
     public void setOnPropertyCommit(final TableColumn.CellEditEvent<Element, Object> event) {
         ArgumentChecks.ensureNonNull("Event event", event);
@@ -2164,7 +2414,7 @@ public class PojoTable extends BorderPane implements Printable {
                 final Class<?> rowClass = rowElement.getClass();
 
                 //On recalcule les coordonnées si la colonne modifiée correspond à une des propriétées de coordonnées géo ou linéaire.
-                String modifiedPropretieName = ((PojoTable.PropertyColumn) col).getName();
+                String modifiedPropretieName = ((PojoTable.AbstractPropertyColumn) col).getName();
                 if ((rowElement != null) && (Positionable.class.isAssignableFrom(rowClass))) {
 
                     ConvertPositionableCoordinates.computeForModifiedPropertie((Positionable) rowElement, modifiedPropretieName);
