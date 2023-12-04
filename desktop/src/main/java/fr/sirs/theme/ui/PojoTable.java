@@ -92,7 +92,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
@@ -1629,7 +1628,7 @@ public class PojoTable extends BorderPane implements Printable {
         });
 
         tableUpdaterProperty.set(TaskManager.INSTANCE.submit("Recherche...", updater));
-//        uiTable.refresh();
+        uiTable.refresh();
     }
 
     /**
