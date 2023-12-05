@@ -71,6 +71,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -173,6 +174,7 @@ import org.geotoolkit.internal.GeotkFX;
 import org.odftoolkit.simple.TextDocument;
 import org.opengis.feature.PropertyType;
 import org.opengis.filter.Filter;
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 /**
  *
@@ -523,8 +525,17 @@ public class PojoTable extends BorderPane implements Printable {
                 uiPositionVisibility.setSelected(false);// Force to change.
                 searchEditionToolbar.getChildren().add(uiPositionVisibility);
             }
-            if (IDesordre.class.isAssignableFrom(pojoClass)) {
-                final LinkedHashMap<String, PropertyDescriptor> observationProp = listSimpleProperties(Observation.class);
+            if (IDesordre.class.isAssignableFrom(pojoClass) && AvecObservationsAvecUrgence.class.isAssignableFrom(pojoClass)) {
+                final Type observationsClass;
+                try {
+                    observationsClass = ((ParameterizedTypeImpl) pojoClass.getMethod("getObservations").getGenericReturnType()).getActualTypeArguments()[0];
+                } catch (NoSuchMethodException e) {
+                    throw new IllegalStateException("Only valid for Desordre containing Observations with urgence.", e);
+                }
+                if (!(observationsClass instanceof Class)) {
+                    throw new IllegalStateException("Type class was expected but was " + observationsClass.getClass() + ".");
+                }
+                final LinkedHashMap<String, PropertyDescriptor> observationProp = listSimpleProperties((Class) observationsClass);
                 final Set<String> observationKeys = observationProp.keySet();
                 final List<String> acceptedKeys = Arrays.asList(DESIGNATION_FIELD, "nombreDesordres", "urgenceId", "suiteApporterId", "suite", "evolution", "observateurId", "date");
                 observationKeys.removeIf(key -> !acceptedKeys.contains(key));
