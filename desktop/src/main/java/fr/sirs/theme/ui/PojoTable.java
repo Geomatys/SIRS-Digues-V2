@@ -613,7 +613,7 @@ public class PojoTable extends BorderPane implements Printable {
         searchEditionToolbar.getStyleClass().add("buttonbar");
 
         uiRefresh.getStyleClass().add(BUTTON_STYLE);
-        uiRefresh.setOnAction((ActionEvent event) -> updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get()));
+        uiRefresh.setOnAction((ActionEvent event) -> updateTableItems());
 
         final EventHandler<ActionEvent> addHandler = event -> {
 
@@ -738,7 +738,7 @@ public class PojoTable extends BorderPane implements Printable {
 
                     if (elementCopier.getAvecForeignParent() || elementCopier.getRapportEtude()) {
                         //On rafraîchie les éléments du tableau.
-                        updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get());
+                        updateTableItems();
                     }
 
                     final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Eléments copiés avec succès");
@@ -841,6 +841,8 @@ public class PojoTable extends BorderPane implements Printable {
             } else {
                 uiTable.getSelectionModel().selectedIndexProperty().removeListener(selectedIndexListener);
                 uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+                // Force refresh the table items in case they have been modified in the Fiche mode.
+                updateTableItems();
             }
             updateView();
         });
@@ -892,7 +894,7 @@ public class PojoTable extends BorderPane implements Printable {
             uiFilterBuilder.managedProperty().bind(filterContent.visibleProperty());
 
             resetFilterBtn.setOnAction(event -> resetFilter(filterContent));
-            applyFilterBtn.setOnAction(event -> updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get()));
+            applyFilterBtn.setOnAction(event -> updateTableItems());
         } catch (Exception e) {
             SIRS.LOGGER.log(Level.WARNING, "Filter panel cannot be initialized !", e);
         }
@@ -1419,7 +1421,7 @@ public class PojoTable extends BorderPane implements Printable {
         textField.setOnAction(event -> {
             currentSearch.set(textField.getText());
             popup.hide();
-            updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get());
+            updateTableItems();
         });
         final Point2D sc = uiSearch.localToScreen(0, 0);
         popup.show(uiSearch, sc.getX(), sc.getY());
@@ -1508,6 +1510,10 @@ public class PojoTable extends BorderPane implements Printable {
      */
     public void setTableItems(Supplier<ObservableList<Element>> producer) {
         dataSupplierProperty.set(producer);
+    }
+
+    public final void updateTableItems() {
+        updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get());
     }
 
     protected final void updateTableItems(
@@ -1619,6 +1625,7 @@ public class PojoTable extends BorderPane implements Printable {
         });
 
         tableUpdaterProperty.set(TaskManager.INSTANCE.submit("Recherche...", updater));
+        uiTable.refresh();
     }
 
     /**

@@ -19,8 +19,10 @@
 package fr.sirs.util;
 
 import fr.sirs.SIRS;
+import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.ui.Growl;
 import java.lang.ref.WeakReference;
+import java.util.Optional;
 import java.util.function.Supplier;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -38,6 +40,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -188,10 +191,48 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
     }
 
     private void supplyContent() {
-        if (isSelected() && getContent() == null && contentSupplier.get() != null) {
-            Node node = contentSupplier.get().get();
-            setContent(node);
+        if (isSelected()) {
+            final Node content = getContent();
+            if (content == null && contentSupplier.get() != null) {
+                Node node = contentSupplier.get().get();
+                setContent(node);
+            } else if (content != null) {
+                // When focus on a tab containing a PojoTable, refresh the uiTable of the PojoTable to be up-to-date in case
+                // some Element have been modified outside the pojoTable.
+                if (PojoTable.class.isAssignableFrom(content.getClass())) {
+                    final PojoTable pojoTable = (PojoTable) content;
+                    (pojoTable).updateTableItems();
+                } else if (BorderPane.class.isAssignableFrom(content.getClass())) {
+                    int i = 0;
+                    Node centre = ((BorderPane) content).getCenter();
+                    while (centre != null && i < 7) {
+                        if (TabPane.class.isAssignableFrom(centre.getClass())) {
+                            // This happens when the Pane is a tabPane : FXOuvrageAssocieAmenagementHydrauliquePane for example.
+                            final Optional<Tab> first = ((TabPane) centre).getTabs().stream().filter(t -> t.isSelected()).findFirst();
+                            if (!first.isPresent()) break;
+                            Node content2 = first.get().getContent();
+                            while (content2 != null) {
+                                content2 = checkNodeUpdateIfPojoOrAndGetNext(content2);
+                            }
+                            break;
+                        } else {
+                            centre = checkNodeUpdateIfPojoOrAndGetNext(centre);
+                            i++;
+                        }
+                    }
+
+                }
+            }
         }
+    }
+
+    private Node checkNodeUpdateIfPojoOrAndGetNext(Node node) {
+        if (!(BorderPane.class.isAssignableFrom(node.getClass()))) return null;
+        if (node instanceof PojoTable) {
+            ((PojoTable) node).updateTableItems();
+            return null;
+        }
+        return ((BorderPane) node).getCenter();
     }
 
     /**
