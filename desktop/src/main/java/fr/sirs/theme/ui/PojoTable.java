@@ -1730,6 +1730,24 @@ public class PojoTable extends BorderPane implements Printable {
             if (obj == null) {
                 return;
             }
+            final Object source = event.getSource();
+            if (source != null && source instanceof ObservationPropertyColumn && IDesordre.class.isAssignableFrom(obj.getClass())) {
+                final ObservationPropertyColumn obsColumn = (ObservationPropertyColumn) source;
+                final IObservation observation = obsColumn.getObservation((IDesordre) obj);
+                try {
+                    obsColumn.writterMethod.invoke(observation, event.getNewValue());
+                    // When an observation's date has been modified, the N and N-1 observations may change.
+                    // The correct solution would be to update only the modified item's row. But didn't find a way to get the row.
+                    // So we update the whole table.
+                    if ("date".equals(obsColumn.getdescName())) {
+                        uiTable.refresh();
+                    }
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    SIRS.fxRun(false, () -> new Growl(Growl.Type.WARNING, "Erreur lors de la mise à jour de l'élément.").showAndFade());
+                    throw new IllegalStateException("Error while updating pojo", e);
+                }
+            }
+
             repo.update(obj);
         }
     }
