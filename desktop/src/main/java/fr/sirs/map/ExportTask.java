@@ -59,8 +59,8 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 
 import static org.geotoolkit.feature.FeatureTypeUtilities.createSubType;
 
@@ -73,6 +73,9 @@ public class ExportTask extends Task<Boolean> {
     private final FileFeatureStoreFactory factory;
     private final File folder;
     private final String[] columnsToFilter;
+    private final BiConsumer<File, List<Object>> extraFunction;
+    private final List<Object> elements;
+
     public static String removeAccents(String input) {
         if (input == null) return null;
         return Normalizer.normalize(input, Normalizer.Form.NFKD).replaceAll("\\p{M}", "");
@@ -86,12 +89,25 @@ public class ExportTask extends Task<Boolean> {
      * @param columnsToFilter allows to filter the features. Leave to null to keep all columns
      */
     public ExportTask(FeatureMapLayer layer, File folder, FileFeatureStoreFactory factory, String[] columnsToFilter) {
+        this(layer, folder, factory, columnsToFilter, null, null);
+    }
+
+    /**
+     *
+     * @param layer data to export
+     * @param folder output location
+     * @param factory handle the data store
+     * @param columnsToFilter allows to filter the features. Leave to null to keep all columns
+     */
+    public ExportTask(FeatureMapLayer layer, File folder, FileFeatureStoreFactory factory, String[] columnsToFilter, BiConsumer<File, List<Object>> extraFunction, final List<Object> elements) {
         ArgumentChecks.ensureNonNull("layer", layer);
         updateTitle("Export de " + layer.getName());
         this.folder = folder;
         this.factory = factory;
         this.layer = layer;
         this.columnsToFilter = columnsToFilter;
+        this.extraFunction = extraFunction;
+        this.elements = elements;
     }
 
     @Override
@@ -193,6 +209,9 @@ public class ExportTask extends Task<Boolean> {
                 session.addFeatures(outName, col);
                 //close store
                 store.close();
+                if (extraFunction != null) {
+                    extraFunction.accept(file, elements);
+                }
             }
             if (allColsEmpty) {
                 Platform.runLater(() ->

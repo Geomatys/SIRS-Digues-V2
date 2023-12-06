@@ -68,10 +68,12 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -81,12 +83,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -158,6 +159,7 @@ import org.apache.sis.util.ArgumentChecks;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.geotoolkit.data.csv.CSVFeatureStoreFactory;
 import org.geotoolkit.feature.FeatureTypeBuilder;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
@@ -871,7 +873,7 @@ public class PojoTable extends BorderPane implements Printable {
 
         uiExport.getStyleClass().add(BUTTON_STYLE);
         uiExport.disableProperty().bind(Bindings.isNull(uiTable.getSelectionModel().selectedItemProperty()));
-        uiExport.setOnAction(new ExportAction(getStructBeanSupplier(), getColumns()));
+        uiExport.setOnAction(exportAction(getStructBeanSupplier(), getColumns()));
 
         if (PointZ.class.isAssignableFrom(pojoClass)) {
             uiTable.getColumns().add(new DistanceComputedPropertyColumn(DOUBLE_CELL_FACTORY, parentElementProperty, uiTable));
@@ -1156,6 +1158,106 @@ public class PojoTable extends BorderPane implements Printable {
     //==========================================================================
     protected StructBeanSupplier getStructBeanSupplier() {
         return new StructBeanSupplier(pojoClass, () -> new ArrayList(uiTable.getSelectionModel().getSelectedItems()));
+    }
+
+    private ExportAction exportAction(final StructBeanSupplier structBeanSupplier, final ObservableList<TableColumn<Element, ?>> columns) {
+        if (IDesordre.class.isAssignableFrom(pojoClass)) {
+            return new ExportAction(structBeanSupplier, getColumns(), completeObservationColumns(columns));
+        }
+        return new ExportAction(structBeanSupplier, getColumns());
+    }
+
+    public BiConsumer<File, List<Object>> completeObservationColumns(final ObservableList<TableColumn<Element, ?>> columns) {
+        return (file, elements) -> {
+            ArgumentChecks.ensureNonNull("file", file);
+            if (elements == null || elements.isEmpty()) return;
+
+            final Class<?> aClass = elements.get(0).getClass();
+            if (!IDesordre.class.isAssignableFrom(aClass)) {
+                throw new IllegalStateException("Only valid for IDesordre elements. Class not supported : " + aClass);
+            }
+            final List<TableColumn<Element, ?>> visibleColumns = ExportAction.extractVisibleColumnNames(columns);
+
+            if (file.exists()) {
+                try (Stream<String> lines = Files.lines(file.toPath())) {
+                    final String separator = CSVFeatureStoreFactory.SEPARATOR.getDefaultValue().toString();
+                    int firstFileIncr = 0;
+                    final List<String> header = new ArrayList<>();
+                    final List<String> headerRaw = new ArrayList<>();
+                    final Iterator<String> linesIter = lines.iterator();
+
+                    // Read the header and remove the unit in between brackets to get the column descriptor name only.
+                    if (linesIter.hasNext()) {
+                        // Get the current header.
+                        headerRaw.addAll(Arrays.asList(linesIter.next().split(separator)));
+                        for (int i = 0; i < headerRaw.size(); i++) {
+                            final String h = headerRaw.get(i);
+                            header.add(i, h.substring(0, h.lastIndexOf("(")));
+                        }
+                    }
+
+                    // The list of the columns that should be in the final file, in the correct order.
+                    final List<TableColumn<Element, ?>> finalHeaderColumns = new ArrayList<>();
+
+                    // List to store the final lines to save into the file.
+                    final List<String> newLines = new ArrayList<>();
+
+                    // Get the list of the final columns that should be present in the final file.
+                    final List<String> finalHeader = new ArrayList<>();
+                    int k = 0;
+                    boolean columnToAdd = false;
+                    for (TableColumn<Element, ?> c : visibleColumns) {
+                        if (!header.isEmpty() && (c instanceof PropertyColumn && header.get(firstFileIncr).equals(((PropertyColumn) c).getName()))
+                                || (c instanceof EnumColumn && header.get(firstFileIncr).equals(((EnumColumn) c).getName()))) {
+                            finalHeaderColumns.add(c);
+                            finalHeader.add(headerRaw.get(firstFileIncr));
+                            firstFileIncr++;
+                            k++;
+                        } else if (c instanceof ObservationPropertyColumn) {
+                            columnToAdd = true;
+                            finalHeaderColumns.add(c);
+                            finalHeader.add(((ObservationPropertyColumn) c).getName() + "(String)");
+                            k++;
+                        }
+
+                    }
+
+                    if (!columnToAdd) return;
+
+                    final Previews previews = Injector.getSession().getPreviews();
+
+                    // Add new header to final lines
+                    newLines.add(String.join(separator, finalHeader));
+
+
+                    // Iterate through the file lines and complete the missing columns values for each line.
+                    int i = 0;
+                    while (linesIter.hasNext()) {
+                        // We make the assumption that the file should have as many lines as the amount of Element selected in the table.
+                        if (i >= elements.size()) {
+                            throw new IllegalStateException("There are less elements to export than lines in the files");
+                        }
+                        // Get observations of the IDesordre and sort them.
+                        final IDesordre desordre = (IDesordre) elements.get(i);
+
+                        final List<String> line = new ArrayList<>(Arrays.asList(linesIter.next().split(separator)));
+                        for (int j = 0; j < finalHeaderColumns.size(); j ++) {
+                            TableColumn<Element, ?> c = finalHeaderColumns.get(j);
+                            // If the column is an ObservationPropertyColumn, then we collect the associated value for the current element
+                            // and we add it to the current line at the proper index.
+                            if (c instanceof ObservationPropertyColumn) {
+                                line.add(j, getObservationValue((ObservationPropertyColumn) c, previews).apply(desordre));
+                            }
+                        }
+                        newLines.add(String.join(separator, line));
+                        i++;
+                    }
+                    Files.write(file.toPath(), newLines, StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    throw new IllegalStateException("Error while reading file " + file + ".", e);
+                }
+            }
+        };
     }
 
     public StringProperty titleProperty() {
@@ -2014,6 +2116,20 @@ public class PojoTable extends BorderPane implements Printable {
 
     protected Map<String, Function<Element, String>> getPrintMapping() {
         return Collections.emptyMap();
+    }
+
+    private Function<Element, String> getObservationValue(final ObservationPropertyColumn c, final Previews previews) {
+        return element -> {
+            final Object cellObservableValue = c.getCellObservableValue(element).getValue();
+            if (cellObservableValue == null) {
+                return "";
+            } else if (c.ref != null) {
+                final Preview preview = previews.get(cellObservableValue.toString());
+                return preview.getLibelle();
+            } else {
+                return cellObservableValue.toString();
+            }
+        };
     }
 
     @Override

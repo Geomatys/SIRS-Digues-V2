@@ -24,6 +24,9 @@ import fr.sirs.theme.ui.PojoTable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -51,10 +54,16 @@ public class ExportAction implements EventHandler<ActionEvent> {
 
     private final BeanFeatureSupplier featureSupplier;
     private final ObservableList<TableColumn<Element, ?>> currentColumns;
+    private final BiConsumer<File, List<Object>> extraFunction;
 
     public ExportAction(BeanFeatureSupplier sup, final ObservableList<TableColumn<Element, ?>> currentColumns) {
+        this(sup, currentColumns, null);
+    }
+
+    public ExportAction(BeanFeatureSupplier sup, final ObservableList<TableColumn<Element, ?>> currentColumns, final BiConsumer<File, List<Object>> extraFunction) {
         this.featureSupplier = sup;
         this.currentColumns = currentColumns;
+        this.extraFunction = extraFunction;
     }
 
     @Override
@@ -71,7 +80,17 @@ public class ExportAction implements EventHandler<ActionEvent> {
                 layer.setName(store.getNames().iterator().next().tip().toString());
 
                 FileFeatureStoreFactory factory = (FileFeatureStoreFactory) DataStores.getFactoryById("csv");
-                TaskManager.INSTANCE.submit(new ExportTask(layer, folder, factory, extractVisibleColumnNames()));
+                if (extraFunction != null) {
+                    // Copy all the elements otherwise the selectedElement can be modified by the user during the call of the extraFucntion
+                    // with the consequence of losing the list of the elements.
+                    final List<Object> elements = layer.getCollection().stream()
+                            .map(b -> b.getUserData())
+                            .map(map -> map.get("bean"))
+                            .collect(Collectors.toList());
+                    TaskManager.INSTANCE.submit(new ExportTask(layer, folder, factory, extractVisibleColumnNames(), extraFunction, elements));
+                } else
+                    TaskManager.INSTANCE.submit(new ExportTask(layer, folder, factory, extractVisibleColumnNames()));
+
             } catch (Exception ex) {
                 Dialog d = new Alert(Alert.AlertType.ERROR, "Impossible de créer le fichier CSV", ButtonType.OK);
                 d.setResizable(true);
@@ -84,7 +103,7 @@ public class ExportAction implements EventHandler<ActionEvent> {
     protected String[] extractVisibleColumnNames() {
         final List<String> propertyNames = new ArrayList<>();
 
-        for (final TableColumn column : currentColumns) {
+        for (final TableColumn column : extractVisibleColumnNames(currentColumns)) {
             if (column.isVisible()) {
                 if (column instanceof PojoTable.PropertyColumn) {
                     propertyNames.add(((PojoTable.PropertyColumn) column).getName());
@@ -95,4 +114,20 @@ public class ExportAction implements EventHandler<ActionEvent> {
         }
         return propertyNames.toArray(new String[propertyNames.size()]);
     }
+
+    public static List<TableColumn<Element, ?>> extractVisibleColumnNames(final ObservableList<TableColumn<Element, ?>> currentColumns) {
+        final List<TableColumn<Element, ?>> propertyNames = new ArrayList<>();
+
+        for (final TableColumn column : currentColumns) {
+            if (column.isVisible()) {
+                if (column instanceof PojoTable.PropertyColumn
+                || column instanceof PojoTable.EnumColumn
+                || column instanceof PojoTable.ObservationPropertyColumn) {
+                    propertyNames.add(column);
+                }
+            }
+        }
+        return propertyNames;
+    }
+
 }
