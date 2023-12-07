@@ -2112,7 +2112,7 @@ public class PojoTable extends BorderPane implements Printable {
         for (final TableColumn column : getColumns()) {
             if (column.isVisible()) {
                 if (column instanceof AbstractPropertyColumn) {
-                    propertyNames.add(((PropertyColumn) column).name);
+                    propertyNames.add(((AbstractPropertyColumn) column).getName());
                 } else if (column instanceof EnumColumn) {
                     propertyNames.add(((EnumColumn) column).name);
                 }
@@ -2122,7 +2122,21 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     protected Map<String, Function<Element, String>> getPrintMapping() {
-        return Collections.emptyMap();
+        if (IDesordre.class.isAssignableFrom(pojoClass)) {
+            final List<ObservationPropertyColumn> obsColumns = uiTable.getColumns().stream()
+                    .filter(c -> c instanceof ObservationPropertyColumn)
+                    .map(c -> (ObservationPropertyColumn) c)
+                    .collect(Collectors.toList());
+            Map<String, Function<Element, String>> map = new HashMap<>();
+            final Previews previews = session.getPreviews();
+
+            for (ObservationPropertyColumn c : obsColumns) {
+                map.put(c.getName(), getObservationValue(c, previews));
+            }
+            return map;
+        } else {
+            return Collections.emptyMap();
+        }
     }
 
     private Function<Element, String> getObservationValue(final ObservationPropertyColumn c, final Previews previews) {

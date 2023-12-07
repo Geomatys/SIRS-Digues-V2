@@ -1322,20 +1322,7 @@ public class ODTUtils {
 
         // Fill first line
         final Row dataRow_1 = table.appendRow();
-        for (int i = 0; i < headers.size(); i++) {
-            final String propertyName = headers.get(i);
-            final PropertyDescriptor desc = elementProperties.get(propertyName);
-            final PropertyPrinter printer = Printers.getPrinter(propertyName);
-            if (desc != null) {
-                dataRow_1.getCellByIndex(i).addParagraph(printer.print(element, desc));
-            }
-            else if(printMapping.get(propertyName)!=null){
-                dataRow_1.getCellByIndex(i).addParagraph(printer.print(element, propertyName, printMapping.get(propertyName)));
-            }
-            else {
-                SirsCore.LOGGER.log(Level.INFO, "Cannot hangle {0} column (first line)", propertyName);
-            }
-        }
+        fillInRow(printMapping, element, elementProperties, headers, dataRow_1);
 
         // Fill remaining lines
         while (data.hasNext()) {
@@ -1365,19 +1352,26 @@ public class ODTUtils {
 
             // Fill data
             final Row dataRow = table.appendRow();
-            for (int i = 0; i < headers.size(); i++) {
-                final String propertyName = headers.get(i);
-                final PropertyDescriptor desc = elementProperties.get(propertyName);
-                final PropertyPrinter printer = Printers.getPrinter(propertyName);
-                if (desc != null) {
-                    dataRow.getCellByIndex(i).addParagraph(printer.print(element, desc));
-                }
-                else if(printMapping.get(propertyName)!=null){
+            fillInRow(printMapping, element, elementProperties, headers, dataRow);
+        }
+    }
+
+    private static void fillInRow(Map<String, Function<Element, String>> printMapping, Element element, Map<String, PropertyDescriptor> elementProperties, List<String> headers, Row dataRow) throws ReflectiveOperationException {
+        for (int i = 0; i < headers.size(); i++) {
+            final String propertyName = headers.get(i);
+            final PropertyDescriptor desc = elementProperties.get(propertyName);
+            final PropertyPrinter printer = Printers.getPrinter(propertyName);
+            if (desc != null) {
+                dataRow.getCellByIndex(i).addParagraph(printer.print(element, desc));
+            } else if (printMapping.get(propertyName) != null) {
+                if (propertyName.startsWith("obsN")) {
+                    dataRow.getCellByIndex(i).addParagraph(printMapping.get(propertyName).apply(element));
+                } else {
                     dataRow.getCellByIndex(i).addParagraph(printer.print(element, propertyName, printMapping.get(propertyName)));
                 }
-                else {
-                    SirsCore.LOGGER.log(Level.INFO, "Cannot handle {0} column", propertyName);
-                }
+            }
+            else {
+                SirsCore.LOGGER.log(Level.INFO, "Cannot hangle {0} column (first line)", propertyName);
             }
         }
     }
