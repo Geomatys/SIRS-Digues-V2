@@ -1854,6 +1854,13 @@ public class PojoTable extends BorderPane implements Printable {
             if (source != null && source instanceof ObservationPropertyColumn && IDesordre.class.isAssignableFrom(obj.getClass())) {
                 final ObservationPropertyColumn obsColumn = (ObservationPropertyColumn) source;
                 final IObservation observation = obsColumn.getObservation((IDesordre) obj);
+                if (observation == null) {
+                    final int obsOrder = obsColumn.obsOrder;
+                    final String order = obsOrder == 0 ? "n" : "n-" + obsOrder;
+                    SIRS.fxRun(false, () -> new Growl(Growl.Type.WARNING, "Ce désordre ne contient pas d'observation " + order + ".").showAndFade());
+                    throw new IndexOutOfBoundsException("Ce désordre ne contient pas d'observation " + order + ".");
+                }
+
                 try {
                     obsColumn.writterMethod.invoke(observation, event.getNewValue());
                     // When an observation's date has been modified, the N and N-1 observations may change.
@@ -2540,6 +2547,7 @@ public class PojoTable extends BorderPane implements Printable {
          * or not.
          */
         Exception tmpError = null;
+        String specialMessage = null;
         final Object rowElement = event.getRowValue();
         if (rowElement == null) {
             return;
@@ -2637,6 +2645,9 @@ public class PojoTable extends BorderPane implements Printable {
                 // rollback value in case of error.
                 ((WritableValue) value).setValue(oldValue);
                 event.getTableView().refresh(); // To ensure cell rendering is aware we've rollbacked data.
+                if (e instanceof IndexOutOfBoundsException) {
+                    specialMessage = e.getMessage();
+                }
             }
         } else {
             tmpError = new IllegalStateException(new StringBuilder("Cannot affect read-only property in column ").append(col.getText()).append("from table ").append(titleProperty.get()).toString());
@@ -2644,9 +2655,11 @@ public class PojoTable extends BorderPane implements Printable {
 
         // Inform user
         final Exception error = tmpError;
-        final String message = (error == null)
+        final String message = specialMessage == null ?
+                ((error == null)
                 ? "Le champs " + event.getTableColumn().getText() + " a été modifié avec succès"
-                : "Erreur pendant la mise à jour du champs " + event.getTableColumn().getText();
+                : "Erreur pendant la mise à jour du champs " + event.getTableColumn().getText())
+                : specialMessage;
         final ImageView graphic = new ImageView(error == null ? SIRS.ICON_CHECK_CIRCLE : SIRS.ICON_EXCLAMATION_TRIANGLE);
         final Label messageLabel = new Label(message, graphic);
         if (error == null) {
