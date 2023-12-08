@@ -138,7 +138,7 @@ import javafx.scene.control.TableColumn;
      */
     public static String getColumnRef(TableColumn<Element, ?> column) {
         try {
-            return ((PojoTable.PropertyColumn) column).getName();
+            return ((PojoTable.AbstractPropertyColumn) column).getName();
         } catch (ClassCastException cce) {
             return column.getClass().toString();
         }
