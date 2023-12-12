@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.sirs.util.CheckboxMenuButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<fx:root prefWidth="400.0" stylesheets="@/fr/sirs/theme.css" type="VBox"
+         xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+    <padding>
+        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0"/>
+    </padding>
+
+    <Label text="%optionSubtitleObservationSuiteAApporter" underline="true">
+        <font>
+            <Font name="System Bold Italic" size="13.0"/>
+        </font>
+    </Label>
+    <GridPane hgap="20.0" vgap="20.0" prefWidth="300">
+        <columnConstraints>
+            <ColumnConstraints hgrow="NEVER" minWidth="150.0" prefWidth="150"/>
+            <ColumnConstraints hgrow="NEVER" minWidth="150.0" prefWidth="150"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+        </rowConstraints>
+        <padding>
+            <Insets left="20.0" right="20.0"/>
+        </padding>
+        <Label text="%suiteApporterOption"/>
+        <CheckboxMenuButton fx:id="uiOptionSuiteAApporter" GridPane.columnIndex="1" prefHeight="26.0" prefWidth="150"/>
+    </GridPane>
+</fx:root>
