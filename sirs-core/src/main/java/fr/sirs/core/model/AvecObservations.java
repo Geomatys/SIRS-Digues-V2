@@ -4,12 +4,10 @@ package fr.sirs.core.model;
 
 import fr.sirs.util.SirsComparator;
 import org.apache.sis.measure.Range;
+import org.apache.sis.util.ArgumentChecks;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 public interface AvecObservations extends  Element {
@@ -94,6 +92,41 @@ public interface AvecObservations extends  Element {
                         .map(obs -> obs.getUrgenceId() != null && acceptedIds.contains(obs.getUrgenceId()))
                         .orElse(false);
             } else throw new IllegalStateException("This Element's observation has no urgence level");
+        }
+    }
+
+    /**
+     * Filtre les éléments par la "suite à apporter" de leur dernière observation ayant une "suite à apporter" non nulle.
+     * L'élément est sélectionné si la "suite à apporter" de sa dernière observation ayant une "suite à apporter" non nulle correspond à la "suite à apporter" donnée.
+     */
+    final class LastObservationSuiteApporterPredicate implements Predicate<AvecObservations> {
+
+        final List<String> suiteApporterIds;
+
+        public LastObservationSuiteApporterPredicate(final List<String> suiteApporterIds) {
+            ArgumentChecks.ensureNonNull("suiteApporterIds", suiteApporterIds);
+            this.suiteApporterIds = suiteApporterIds;
+        }
+
+        @Override
+        public boolean test(AvecObservations t) {
+            if (this.suiteApporterIds.isEmpty()) return true;
+            final List<? extends IObservation> observations = new ArrayList<>(t.getObservations());
+
+            if (!observations.isEmpty()) {
+                observations.sort(SirsComparator.OBSERVATION_COMPARATOR);
+
+                // find the last observation with a suiteApporterId not null
+                // and return the test for this value.
+                for (IObservation observation : observations) {
+                    final String suiteApporterId = observation.getSuiteApporterId();
+                    if (suiteApporterId != null) {
+                        return suiteApporterIds.contains(suiteApporterId);
+                    }
+                }
+
+            }
+            return false;
         }
     }
 }
