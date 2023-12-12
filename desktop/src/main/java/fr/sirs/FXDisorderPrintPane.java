@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -22,9 +22,7 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.*;
 import fr.sirs.core.model.AvecObservations.LastObservationPredicate;
 import fr.sirs.ui.Growl;
-import fr.sirs.util.ClosingDaemon;
-import fr.sirs.util.ConvertPositionableCoordinates;
-import fr.sirs.util.PrinterUtilities;
+import fr.sirs.util.*;
 import fr.sirs.util.property.SirsPreferences;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -71,6 +69,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
     @FXML private Button uiCancel;
     @FXML private Label uiCountLabel;
     @FXML private ProgressIndicator uiCountProgress;
+    @FXML private FXSuiteApporterPredicater uiSuiteApporterPredicater;
 
     private final TypeChoicePojoTable disordreTypesTable = new TypeChoicePojoTable(RefTypeDesordre.class, "Types de désordres");
     private final TypeChoicePojoTable urgenceTypesTable = new TypeChoicePojoTable(RefUrgence.class, "Types d'urgences");
@@ -138,6 +137,8 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
 
         uiCountProgress.setVisible(false);
         updateCount(null);
+
+        uiSuiteApporterPredicater.addListener(parameterListener);
     }
 
     @FXML
@@ -206,10 +207,11 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                 // /!\ It's important that pr filtering is done AFTER linear filtering.
                 .and(new PRPredicate<>())
                 .and(new AvecObservations.UrgencePredicate(urgenceTypesTable.getSelectedItems().stream()
-                        .map(e -> e.getId())
+                        .map(Identifiable::getId)
                         .collect(Collectors.toSet())))
                 .and(uiPrestationPredicater.getPredicate())
-                .and(new LastObservationPredicate(uiOptionDebutLastObservation.getValue(), uiOptionFinLastObservation.getValue()));
+                .and(new LastObservationPredicate(uiOptionDebutLastObservation.getValue(), uiOptionFinLastObservation.getValue()))
+                .and(new AvecObservations.LastObservationSuiteApporterPredicate(uiSuiteApporterPredicater.getCheckedItems()));
 
         // HACK-REDMINE-4408 : remove elements on archived Troncons
         if (SirsPreferences.getHideArchivedProperty()) {
@@ -226,7 +228,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                 .filter(userOptions)
                 .peek(p -> ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test((Positionable) p));
 
-        dataStream.onClose(() -> it.close());
+        dataStream.onClose(it::close);
         ClosingDaemon.watchResource(dataStream, it);
 
         return dataStream;
@@ -253,9 +255,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         */
         t.setOnRunning(  evt -> uiCountLabel.setText(null));
         t.setOnSucceeded(evt -> uiCountLabel.setText(String.valueOf(t.getValue())));
-        t.setOnFailed(   evt -> Platform.runLater(() -> {
-            new Growl(Growl.Type.ERROR, "Impossible de déterminer le nombre de désordres à imprimer.").showAndFade();
-        }));
+        t.setOnFailed(   evt -> Platform.runLater(() -> new Growl(Growl.Type.ERROR, "Impossible de déterminer le nombre de désordres à imprimer.").showAndFade()));
 
         countTask.set(t);
         TaskManager.INSTANCE.submit(t);
@@ -272,7 +272,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
 
         TypePredicate() {
             acceptedIds = disordreTypesTable.getSelectedItems().stream()
-                    .map(e -> e.getId())
+                    .map(Identifiable::getId)
                     .collect(Collectors.toSet());
         }
 
