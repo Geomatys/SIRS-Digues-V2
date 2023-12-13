@@ -580,89 +580,89 @@ else if (helper.isParcelleVegetation()){
 <%
     if (!helper.hasDocument()) {
 %>
-        originalParent = newElement.getParent();
-        if (originalParent == null && newElement.getDocumentId()!=null) {
-            final Preview preview = previewRepository.get(newElement.getDocumentId());
-            final AbstractSIRSRepository<Element> repository = session.getRepositoryForType(preview.getElementClass());
-            originalParent = repository.get(newElement.getDocumentId());
-        }
-
-        /* Try to build a list of possible parents. If parent element is not the CouchDb document (depth level > 1),
-         * we will just display current parent, and won't allow user to change it, because it's too unpredictible.
-         */
-        final String documentId = newElement.getDocumentId();
-        if (originalParent != null && !originalParent.getId().equals(documentId)) {
-            ui_parent_choice.disableProperty().unbind();
-            ui_parent_choice.setDisable(true);
-            SIRS.initCombo(ui_parent_choice, FXCollections.singletonObservableList(originalParent), originalParent);
-
-        } else if (documentId != null) {
-            final Preview parentLabel = previewRepository.get(documentId);
-            SIRS.initCombo(ui_parent_choice, SIRS.observableList(previewRepository.getByClass(parentLabel.getElementClass())).sorted(), parentLabel);
-        } else if (Objet.class.isAssignableFrom(newElement.getClass())
-                    || <%=Helper.POSITION_DOCUMENT_CLASS_NAME%>.class.isAssignableFrom(newElement.getClass())) {
-            SIRS.initCombo(ui_parent_choice, SIRS.observableList(previewRepository.getByClass(TronconDigue.class)).sorted(), null);
-        }
-        // Prepare parent edition. If we've got a list of potential parents, we display combobox, and notify edited element on selection change.
-        ObservableList items = ui_parent_choice.getItems();
-        if (items == null || items.isEmpty()) {
-            ui_parent_box.setVisible(false);
-        } else {
-            if (newElement.parentProperty() != null) {
-                ui_parent_choice.getSelectionModel().selectedItemProperty().addListener(
-                        (ObservableValue observable, Object oldValue, Object newValue) -> {
-                            if (newValue == null) {
-                                newElement.setParent(null);
-                            } else if (newValue instanceof Element) {
-                                newElement.setParent((Element) newValue);
-                            } else if (newValue instanceof Preview) {
-                                final Preview tmpLabel = (Preview) newValue;
-                                newElement.setParent((Element) session.getRepositoryForType(tmpLabel.getElementClass())
-                                        .get(tmpLabel.getElementId()));
-                            }
-                        });
+            originalParent = newElement.getParent();
+            if (originalParent == null && newElement.getDocumentId()!=null) {
+                final Preview preview = previewRepository.get(newElement.getDocumentId());
+                final AbstractSIRSRepository<Element> repository = session.getRepositoryForType(preview.getElementClass());
+                originalParent = repository.get(newElement.getDocumentId());
             }
-            ui_parent_box.setVisible(true);
 
-            // We've got a non-null parent list, we'll try display a more precise label.
-            Object tmpParent = ui_parent_choice.getSelectionModel().getSelectedItem();
-            if (tmpParent == null) {
-                tmpParent = items.get(0);
+            /* Try to build a list of possible parents. If parent element is not the CouchDb document (depth level > 1),
+             * we will just display current parent, and won't allow user to change it, because it's too unpredictible.
+             */
+            final String documentId = newElement.getDocumentId();
+            if (originalParent != null && (originalParent.getId() == null || !originalParent.getId().equals(documentId))) {
+                ui_parent_choice.disableProperty().unbind();
+                ui_parent_choice.setDisable(true);
+                SIRS.initCombo(ui_parent_choice, FXCollections.singletonObservableList(originalParent), originalParent);
+
+            } else if (documentId != null) {
+                final Preview parentLabel = previewRepository.get(documentId);
+                SIRS.initCombo(ui_parent_choice, SIRS.observableList(previewRepository.getByClass(parentLabel.getElementClass())).sorted(), parentLabel);
+            } else if (Objet.class.isAssignableFrom(newElement.getClass())
+                        || <%=Helper.POSITION_DOCUMENT_CLASS_NAME%>.class.isAssignableFrom(newElement.getClass())) {
+                SIRS.initCombo(ui_parent_choice, SIRS.observableList(previewRepository.getByClass(TronconDigue.class)).sorted(), null);
             }
-            final String parentType = Injector.getSession().getElementType(tmpParent);
-            if (parentType != null) {
-                try {
-                    ui_parent_label.setText(LabelMapper.get(Class.forName(parentType)).mapClassName());
-                } catch (ClassNotFoundException e) {
-                    SIRS.LOGGER.log(Level.WARNING, "No class for input type " + parentType, e);
+            // Prepare parent edition. If we've got a list of potential parents, we display combobox, and notify edited element on selection change.
+            ObservableList items = ui_parent_choice.getItems();
+            if (items == null || items.isEmpty()) {
+                ui_parent_box.setVisible(false);
+            } else {
+                if (newElement.parentProperty() != null) {
+                    ui_parent_choice.getSelectionModel().selectedItemProperty().addListener(
+                            (ObservableValue observable, Object oldValue, Object newValue) -> {
+                                if (newValue == null) {
+                                    newElement.setParent(null);
+                                } else if (newValue instanceof Element) {
+                                    newElement.setParent((Element) newValue);
+                                } else if (newValue instanceof Preview) {
+                                    final Preview tmpLabel = (Preview) newValue;
+                                    newElement.setParent((Element) session.getRepositoryForType(tmpLabel.getElementClass())
+                                            .get(tmpLabel.getElementId()));
+                                }
+                            });
+                }
+                ui_parent_box.setVisible(true);
+
+                // We've got a non-null parent list, we'll try display a more precise label.
+                Object tmpParent = ui_parent_choice.getSelectionModel().getSelectedItem();
+                if (tmpParent == null) {
+                    tmpParent = items.get(0);
+                }
+                final String parentType = Injector.getSession().getElementType(tmpParent);
+                if (parentType != null) {
+                    try {
+                        ui_parent_label.setText(LabelMapper.get(Class.forName(parentType)).mapClassName());
+                    } catch (ClassNotFoundException e) {
+                        SIRS.LOGGER.log(Level.WARNING, "No class for input type " + parentType, e);
+                    }
                 }
             }
-        }
 <%
     }
  %>
 
-        /*
-         * Bind control properties to Element ones.
-         */
+            /*
+             * Bind control properties to Element ones.
+             */
 <%
     for(EClass eClass: helper.getTypeTree() ) {
 %>
-        // Propriétés de <%= eClass.getName() %>
+            // Propriétés de <%= eClass.getName() %>
 <%
         for(EAttribute eAtt: managedAttributes.get(eClass) ) {
             final String attEditorName = helper.getXControl(eAtt);
 %>
-        // * <%= eAtt.getName()  %>
+            // * <%= eAtt.getName()  %>
 <%
             if ("HTMLEditor".equals(attEditorName) ){
 %>
-        ui_<%= eAtt.getName()  %>.setHtmlText(newElement.<%= helper.getter(eAtt) %>());
+            ui_<%= eAtt.getName()  %>.setHtmlText(newElement.<%= helper.getter(eAtt) %>());
 <%
             }
             else if ("CheckBox".equals(attEditorName)) {
 %>
-        ui_<%= eAtt.getName()  %>.selectedProperty().bindBidirectional(newElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+            ui_<%= eAtt.getName()  %>.selectedProperty().bindBidirectional(newElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
 <%
             }
             else if ("TextField".equals(attEditorName)
@@ -671,16 +671,16 @@ else if (helper.isParcelleVegetation()){
                     || "FXFileWithoutRefTextField".equals(attEditorName)
                     || "FXDirectoryTextField".equals(attEditorName)) {
 %>
-        ui_<%= eAtt.getName()  %>.textProperty().bindBidirectional(newElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+            ui_<%= eAtt.getName()  %>.textProperty().bindBidirectional(newElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
 <%
             } else if ("Spinner".equals(attEditorName)) {
 %>
-        ui_<%= eAtt.getName()  %>.getValueFactory().valueProperty().bindBidirectional(newElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+            ui_<%= eAtt.getName()  %>.getValueFactory().valueProperty().bindBidirectional(newElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
 <%
             }
             else if(attEditorName!=null) {
 %>
-        ui_<%= eAtt.getName()  %>.valueProperty().bindBidirectional(newElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+            ui_<%= eAtt.getName()  %>.valueProperty().bindBidirectional(newElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
 <%
             }
         }
@@ -689,16 +689,16 @@ else if (helper.isParcelleVegetation()){
         for(EReference eRef: comboReferences.get(eClass) ) {
             if(eRef.getEReferenceType().isInterface()){
 %>
-        SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(
-            previewRepository.getByClass(<%= helper.getClassName(eRef) %>.class)).sorted(),
-            newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null ? null : previewRepository.get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>()));
+            SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(
+                previewRepository.getByClass(<%= helper.getClassName(eRef) %>.class)).sorted(),
+                newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null ? null : previewRepository.get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>()));
 <%
                 //Cas de la liste des SR/dZ des profils en long : on n'affiche pas de combobox pour cette r�f�rence qui est trait�e � part dans la pojoTable
             } else if(helper.isProfilLong() && Helper.SYSTEME_REP_DZ_PROFIL_EN_LONG_REF.equals(eRef.getName())
                     || helper.isLigneEau() && Helper.SYSTEME_REP_DZ_LIGNE_EAU_REF.equals(eRef.getName())){
 %>
-        SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinearId(newElement.getLinearId())),
-            newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null ? null : session.getRepositoryForClass(SystemeReperage.class).get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>()));
+            SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinearId(newElement.getLinearId())),
+                newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null ? null : session.getRepositoryForClass(SystemeReperage.class).get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>()));
 <%
                 } else if (ModelHelper.isReferenceType(eRef.getEReferenceType())) {
 %>
@@ -712,34 +712,34 @@ else if (helper.isParcelleVegetation()){
         rester sur un tronçon de digue si on était sur un tronçon de digue, un tronçon de lit si on était sur un tronçon de lit,
         un tronçon de berge si on était sur un tronçon de berge etc.*/
 %>
-        {
-            final Preview linearPreview = newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null ? null : previewRepository.get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>());
-            // HACK-REDMINE-4408 : hide archived troncons from selection lists
-            SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(
-                previewRepository.getByClass(linearPreview == null ? <%= helper.getClassName(eRef) %>.class : linearPreview.getJavaClassOr(<%= helper.getClassName(eRef) %>.class))).sorted(),
-                linearPreview, SirsPreferences.getHideArchivedProperty(), true);
-        }
+            {
+                final Preview linearPreview = newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null ? null : previewRepository.get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>());
+                // HACK-REDMINE-4408 : hide archived troncons from selection lists
+                SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(
+                    previewRepository.getByClass(linearPreview == null ? <%= helper.getClassName(eRef) %>.class : linearPreview.getJavaClassOr(<%= helper.getClassName(eRef) %>.class))).sorted(),
+                    linearPreview, SirsPreferences.getHideArchivedProperty(), true);
+            }
 <%
                 }
         }
 
         for (EReference eRef : containedSingleReferences.get(eClass)){
 %>
-        ui_<%= eRef.getName()%>.setParent(newElement, newElement.<%= eRef.getName()%>);
+            ui_<%= eRef.getName()%>.setParent(newElement, newElement.<%= eRef.getName()%>);
 <%
         }
     }
 
     if(helper.isSIRSDocument()){
 %>
-        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table.setPropertyToListen("<%=Helper.SIRSDOCUMENT_REFERENCE_NAME%>Property", elementProperty().get().getId());
-        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table.setTableItems(()-> (ObservableList) AbstractPositionDocumentRepository.getPositionDocumentByDocumentId(elementProperty().get().getId(), Injector.getSession()));
+            <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table.setPropertyToListen("<%=Helper.SIRSDOCUMENT_REFERENCE_NAME%>Property", elementProperty().get().getId());
+            <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table.setTableItems(()-> (ObservableList) AbstractPositionDocumentRepository.getPositionDocumentByDocumentId(elementProperty().get().getId(), Injector.getSession()));
 <%
     }
     else if(helper.isParcelleVegetation()){
 %>
-        <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table.setPropertyToListen("<%=Helper.PARCELLE_ID_REFERENCE_NAME%>Property", elementProperty().get().getId());
-        <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table.setTableItems(()-> (ObservableList) AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(elementProperty().get().getId(), Injector.getSession()));
+            <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table.setPropertyToListen("<%=Helper.PARCELLE_ID_REFERENCE_NAME%>Property", elementProperty().get().getId());
+            <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table.setTableItems(()-> (ObservableList) AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(elementProperty().get().getId(), Injector.getSession()));
 <%
     }
 %>
@@ -861,7 +861,7 @@ else if (helper.isParcelleVegetation()){
         }
 
         // If parent has changed, we have to dereference our object from the old one, and
-        if (originalParent == null || !originalParent.getId().equals(newParent.getId())) {
+        if (originalParent == null || originalParent.getId() == null || !originalParent.getId().equals(newParent.getId())) {
             newParent.addChild(element);
             if (originalParent != null) {
                 originalParent.removeChild(element);
