@@ -2,6 +2,7 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
+import fr.sirs.PropertiesFileUtilities;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -10,7 +11,7 @@ import fr.sirs.core.model.*;
 import fr.sirs.theme.ui.pojotable.PojoTableExternalAddable;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.FXFreeTab;
-import fr.sirs.util.StreamingIterable;
+import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.javafx.FloatSpinnerValueFactory;
 import fr.sirs.util.property.SirsPreferences;
 import javafx.beans.value.ChangeListener;
@@ -19,14 +20,17 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import org.geotoolkit.internal.GeotkFX;
-import org.geotoolkit.util.collection.CloseableIterator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -77,8 +81,7 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
 
     // Propriétés de Objet
     @FXML protected TextArea ui_commentaire;
-    @FXML protected ComboBox ui_linearId;
-    @FXML protected Button ui_linearId_link;
+    @FXML protected ListView<Preview> uiListTroncon;
 
     // Propriétés de ObjetPhotographiable
 //    @FXML protected FXFreeTab ui_photos;
@@ -96,8 +99,6 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
         previewRepository = session.getPreviews();
         elementProperty().addListener(this::initFields);
 
-//        uiPositionable.disableFieldsProperty().bind(disableFieldsProperty());
-//        uiPositionable.positionableProperty().bind(elementProperty());
         uiValidityPeriod.disableFieldsProperty().bind(disableFieldsProperty());
         uiValidityPeriod.targetProperty().bind(elementProperty());
 
@@ -182,10 +183,6 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
 
         ui_commentaire.setWrapText(true);
         ui_commentaire.editableProperty().bind(disableFieldsProperty().not());
-        ui_linearId.disableProperty().bind(disableFieldsProperty());
-        ui_linearId_link.disableProperty().bind(ui_linearId.getSelectionModel().selectedItemProperty().isNull());
-        ui_linearId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
-        ui_linearId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_linearId.getSelectionModel().getSelectedItem()));
 
 //        ui_photos.setContent(() -> {
 //            photosTable = new PojoTable(Photo.class, null, elementProperty());
@@ -195,13 +192,11 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
 //        });
 //        ui_photos.setClosable(false);
 
-        // Prise en compte du changement de tronçon.
-//        ui_linearId.setOnAction((event) -> uiPositionable.updateLinear(ui_linearId.getValue()));
-
         // The Prestation shall automatically be added to the SE registre depending on the type of Prestation.
         ui_typePrestationId.valueProperty().addListener(autoSelectRegistreListener());
 
-        this.elementProperty().set(new Prestation());
+        final AbstractSIRSRepository<Prestation> repo = Injector.getSession().getRepositoryForClass(Prestation.class);
+        this.elementProperty().set(repo.create());
     }
 
     /**
@@ -234,13 +229,9 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
             ui_realisationInterne.setSelected(false);
             ui_registreAttribution.selectedProperty().unbindBidirectional(oldElement.registreAttributionProperty());
             ui_registreAttribution.setSelected(false);
-        // Propriétés de AvecGeometrie
-        // Propriétés de AvecSettableGeometrie
         // Propriétés de Objet
             ui_commentaire.textProperty().unbindBidirectional(oldElement.commentaireProperty());
             ui_commentaire.setText(null);
-        // Propriétés de ObjetPhotographiable
-        // Propriétés de AvecObservations
         }
 
         final Session session = Injector.getBean(Session.class);
@@ -252,9 +243,7 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
             ui_sourceId.setItems(null);
             ui_typePrestationId.setItems(null);
             ui_marcheId.setItems(null);
-            ui_linearId.setItems(null);
         } else {
-
 
             /*
              * Bind control properties to Element ones.
@@ -280,28 +269,45 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
             SIRS.initCombo(ui_sourceId, SIRS.observableList(sourceIdRepo.getAll()), (newElement.getSourceId() == null || newElement.getSourceId().trim().isEmpty()) ? null : sourceIdRepo.get(newElement.getSourceId()));
             final AbstractSIRSRepository<RefPrestation> typePrestationIdRepo = session.getRepositoryForClass(RefPrestation.class);
             SIRS.initCombo(ui_typePrestationId, SIRS.observableList(typePrestationIdRepo.getAll()), (newElement.getTypePrestationId() == null || newElement.getTypePrestationId().trim().isEmpty()) ? null : typePrestationIdRepo.get(newElement.getTypePrestationId()));
+
+            final boolean hideArchivedProperty = SirsPreferences.getHideArchivedProperty();
             {
                 final Preview linearPreview = newElement.getMarcheId() == null ? null : previewRepository.get(newElement.getMarcheId());
                 // HACK-REDMINE-4408 : hide archived troncons from selection lists
                 SIRS.initCombo(ui_marcheId, SIRS.observableList(
                     previewRepository.getByClass(linearPreview == null ? Marche.class : linearPreview.getJavaClassOr(Marche.class))).sorted(),
-                    linearPreview, SirsPreferences.getHideArchivedProperty(), true);
+                    linearPreview, hideArchivedProperty, true);
             }
 
-            // Propriétés de AvecGeometrie
-            // Propriétés de AvecSettableGeometrie
-            // Propriétés de Objet
             // * commentaire
             ui_commentaire.textProperty().bindBidirectional(newElement.commentaireProperty());
+
+            // Set the available troncons list.
             {
-                final Preview linearPreview = newElement.getLinearId() == null ? null : previewRepository.get(newElement.getLinearId());
-                // HACK-REDMINE-4408 : hide archived troncons from selection lists
-                SIRS.initCombo(ui_linearId, SIRS.observableList(
-                    previewRepository.getByClass(linearPreview == null ? TronconDigue.class : linearPreview.getJavaClassOr(TronconDigue.class))).sorted(),
-                    linearPreview, SirsPreferences.getHideArchivedProperty(), true);
+                // TODO find a way to get the type of Troncon : TronconDigue, Berge or Lit
+                List<Preview> tronconsPreviews = previewRepository.getByClass(TronconDigue.class);
+
+                // Filter archived troncons depending on user's preferences.
+                if (hideArchivedProperty && !tronconsPreviews.isEmpty()) {
+                    final Preview item = tronconsPreviews.get(0);
+
+                    if (item instanceof AvecFinTemporelle) {
+                        // List of classes that are not TronconDigue children and are impacted by the "hide archived element" option in the SIRS app.
+                        List<String> classesToFilterArchived = Arrays.asList("fr.sirs.core.model.TronconLit");
+
+                        final Class clazz = item.getJavaClassOr(null);
+                        final String className = item.getElementClass();
+
+                        if ((clazz != null) && (TronconDigue.class.isAssignableFrom(clazz)) || (classesToFilterArchived.contains(className))) {
+                            tronconsPreviews = tronconsPreviews.stream().filter(new AvecFinTemporelle.IsNotArchivedPredicate()).collect(Collectors.toList());
+                        }
+                    }
+                }
+
+                uiListTroncon.setItems(SIRS.observableList(tronconsPreviews).sorted(Comparator.comparing(new SirsStringConverter()::toString)));
+                uiListTroncon.setCellFactory(TextFieldListCell.forListView(new SirsStringConverter()));
+                uiListTroncon.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
             }
-            // Propriétés de ObjetPhotographiable
-            // Propriétés de AvecObservations
         }
 
         updateEvenementHydrauliqueIdsTable(session, newElement);
@@ -422,6 +428,7 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
     public void preSave() {
         final Session session = Injector.getBean(Session.class);
         final Prestation element = elementProperty.get();
+
         element.setCommentaire(ui_commentaire.getText());
 
 //        uiPositionable.preSave();
@@ -492,44 +499,14 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
 
         }
         if (rapportEtudeIdsTable != null) {
-            final AbstractSIRSRepository<RapportEtude> rapportEtudeRepository = session.getRepositoryForClass(RapportEtude.class);
-
-
             // Manage opposite references for RapportEtude...
             /*
-            * En cas de reference opposee on se prepare a stocker les objets
-            * "opposes" pour les mettre � jour.
-            */
-            final List<RapportEtude> currentRapportEtudeList = new ArrayList<>();
-            final List<String> currentRapportEtudeIdsList = new ArrayList<>();
-            for (final Element elt : rapportEtudeIdsTable.getAllValues()) {
-                final RapportEtude rapportEtude = (RapportEtude) elt;
-
-                currentRapportEtudeIdsList.add(rapportEtude.getId());
-                currentRapportEtudeList.add(rapportEtude);
-
-                // Addition
-                if(!rapportEtude.getPrestationIds().contains(element.getId())){
-                    rapportEtude.getPrestationIds().add(element.getId());
-                }
-            }
-            rapportEtudeRepository.executeBulk(currentRapportEtudeList);
-            element.setRapportEtudeIds(currentRapportEtudeIdsList);
-
-            // Deletion
-            final StreamingIterable<RapportEtude> listRapportEtude = rapportEtudeRepository.getAllStreaming();
-            try (final CloseableIterator<RapportEtude> it = listRapportEtude.iterator()) {
-                while (it.hasNext()) {
-                    final RapportEtude i = it.next();
-                    if(i.getPrestationIds().contains(element.getId())
-                        || element.getRapportEtudeIds().contains(i.getId())){
-                        if(!rapportEtudeIdsTable.getAllValues().contains(i)){
-                            element.getRapportEtudeIds().remove(i.getId()); //Normalement inutile du fait du  clear avant les op�rations d'ajout
-                            i.getPrestationIds().remove(element.getId());
-                            rapportEtudeRepository.update(i);
-                        }
-                    }
-                }
+             * Add the RapportEtudes' ids to the prestation.
+             * The opposite relation will be done in the save() method.
+             */
+            final ObservableList<Element> rapportEtudes = rapportEtudeIdsTable.getAllValues();
+            if (!rapportEtudes.isEmpty()) {
+                element.setRapportEtudeIds(rapportEtudes.stream().map(re -> re.getId()).collect(Collectors.toList()));
             }
         }
         if (documentGrandeEchelleIdsTable != null) {
@@ -545,81 +522,91 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
 
         }
         if (globalPrestationIdsTable != null) {
-            final AbstractSIRSRepository<GlobalPrestation> globalPrestationRepository = session.getRepositoryForClass(GlobalPrestation.class);
-
-
             // Manage opposite references for GlobalPrestation...
             /*
-            * En cas de reference opposee on se prepare a stocker les objets
-            * "opposes" pour les mettre � jour.
+            * Add the GlobalPrestations' ids to the prestation.
+            * The opposite relation will be done in the save() method.
             */
-            final List<GlobalPrestation> currentGlobalPrestationList = new ArrayList<>();
-            final List<String> currentGlobalPrestationIdsList = new ArrayList<>();
-            for (final Element elt : globalPrestationIdsTable.getAllValues()) {
-                final GlobalPrestation globalPrestation = (GlobalPrestation) elt;
-
-                currentGlobalPrestationIdsList.add(globalPrestation.getId());
-                currentGlobalPrestationList.add(globalPrestation);
-
-                // Addition
-                if(!globalPrestation.getPrestationIds().contains(element.getId())){
-                    globalPrestation.getPrestationIds().add(element.getId());
-                }
+            final ObservableList<Element> globalPrestations = globalPrestationIdsTable.getAllValues();
+            if (!globalPrestations.isEmpty()) {
+                element.setGlobalPrestationIds(globalPrestations.stream().map(re -> re.getId()).collect(Collectors.toList()));
             }
-            globalPrestationRepository.executeBulk(currentGlobalPrestationList);
-            element.setGlobalPrestationIds(currentGlobalPrestationIdsList);
-
-            // Deletion
-            final StreamingIterable<GlobalPrestation> listGlobalPrestation = globalPrestationRepository.getAllStreaming();
-            try (final CloseableIterator<GlobalPrestation> it = listGlobalPrestation.iterator()) {
-                while (it.hasNext()) {
-                    final GlobalPrestation i = it.next();
-                    if(i.getPrestationIds().contains(element.getId())
-                        || element.getGlobalPrestationIds().contains(i.getId())){
-                        if(!globalPrestationIdsTable.getAllValues().contains(i)){
-                            element.getGlobalPrestationIds().remove(i.getId()); //Normalement inutile du fait du  clear avant les op�rations d'ajout
-                            i.getPrestationIds().remove(element.getId());
-                            globalPrestationRepository.update(i);
-                        }
-                    }
-                }
-            }
-        }
-        cbValue = ui_linearId.getValue();
-        if (cbValue instanceof Preview) {
-            element.setLinearId(((Preview)cbValue).getElementId());
-        } else if (cbValue instanceof Element) {
-            element.setLinearId(((Element)cbValue).getId());
-        } else if (cbValue == null) {
-            element.setLinearId(null);
         }
     }
 
     public void save() {
-        final AbstractSIRSRepository<Prestation> repo = Injector.getSession().getRepositoryForClass(Prestation.class);
+
+        final ObservableList<Preview> selectedtroncons = uiListTroncon.getSelectionModel().getSelectedItems();
+        if (selectedtroncons.isEmpty()) {
+            PropertiesFileUtilities.showErrorDialog("L'élément ne peut être enregistré sans élément parent. \nVeuillez sélectionner au moins un tronçon de la liste.", "Erreur lors de l'enregistrement", 0, 150);
+            return;
+        }
+        final Session session = Injector.getSession();
+        final AbstractSIRSRepository<Prestation> repo = session.getRepositoryForClass(Prestation.class);
         final List<Prestation> createdPrestations = new ArrayList<>();
+        final List<Element> globalPrestationList = globalPrestationIdsTable != null ? globalPrestationIdsTable.getAllValues() : null;
+        final List<Element> rapportEtudeList = rapportEtudeIdsTable != null ? rapportEtudeIdsTable.getAllValues() : null;
+
+        this.preSave();
+
+        final Prestation prestation = elementProperty.get();
 
         try {
-            final Prestation prestation = repo.create();
-            prestation.setLinearId(((Preview)ui_linearId.getValue()).getElementId());
-            repo.add(prestation);
+            for (Preview tronconP : selectedtroncons) {
 
-            final Prestation presta = elementProperty.get();
-            presta.setId(prestation.getId());
-            presta.setRevision(prestation.getRevision());
-            presta.setValid(prestation.getValid());
-            presta.setDocumentId(prestation.getDocumentId());
-            presta.setHorodatageStatusId(prestation.getHorodatageStatusId());
-            presta.setAuthor(prestation.getAuthor());
+                final Prestation copy = prestation.copy();
+                copy.setLinearId(tronconP.getElementId());
+                repo.add(copy);
 
-            this.preSave();
+                createdPrestations.add(copy);
 
-            createdPrestations.add(presta);
+                repo.update(copy);
 
-            repo.update(presta);
+                final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
+                growlInfo.showAndFade();
+            }
 
-            final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
-            growlInfo.showAndFade();
+            // Update n-n relations
+            /* GlobalPrestation */
+            if (globalPrestationList != null) {
+                final AbstractSIRSRepository<GlobalPrestation> globalPrestationRepository = session.getRepositoryForClass(GlobalPrestation.class);
+                final List<GlobalPrestation> gbToUpdate = new ArrayList<>();
+                for (final Element elt : globalPrestationList) {
+                    final GlobalPrestation globalPrestation = (GlobalPrestation) elt;
+
+                    for (Prestation presta : createdPrestations) {
+                        // Addition
+                        final ObservableList<String> prestationIds = globalPrestation.getPrestationIds();
+                        if (!prestationIds.contains(presta.getId())) {
+                            prestationIds.add(presta.getId());
+                        }
+                        gbToUpdate.add(globalPrestation);
+                    }
+
+                }
+                globalPrestationRepository.executeBulk(gbToUpdate);
+            }
+
+            /* RapportEtude */
+            if (rapportEtudeList != null) {
+                final AbstractSIRSRepository<RapportEtude> rapportEtudeRepository = session.getRepositoryForClass(RapportEtude.class);
+                final List<RapportEtude> reToUpdate = new ArrayList<>();
+                for (final Element elt : rapportEtudeList) {
+                    final RapportEtude rapportEtude = (RapportEtude) elt;
+
+                    for (Prestation presta : createdPrestations) {
+                        // Addition
+                        final ObservableList<String> prestationIds = rapportEtude.getPrestationIds();
+                        if (!prestationIds.contains(presta.getId())) {
+                            prestationIds.add(presta.getId());
+                        }
+                        reToUpdate.add(rapportEtude);
+                    }
+
+                }
+                rapportEtudeRepository.executeBulk(reToUpdate);
+            }
+
         } catch (Exception e) {
             final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
             growlError.showAndFade();
