@@ -589,6 +589,31 @@ public class PojoTable extends BorderPane implements Printable {
                 searchEditionToolbar.getChildren().add(uiObservationVisibility);
             }
 
+            if (Prestation.class.isAssignableFrom(pojoClass)) {
+                // On permet de cacher toutes les infos d'observation d'un coup.
+                final ImageView viewOn = new ImageView(SIRS.ICON_EYE_WHITE);
+                final Button uiCreateMultiplePrestations = new Button(null, viewOn);
+
+                uiCreateMultiplePrestations.setTooltip(new Tooltip("Créer des prestations sur plusieurs tronçons."));
+
+                uiCreateMultiplePrestations.visibleProperty().bind(createNewProperty);
+                uiCreateMultiplePrestations.managedProperty().bind(uiCreateMultiplePrestations.visibleProperty());
+                uiCreateMultiplePrestations.disableProperty().bind(editableProperty.not());
+                uiCreateMultiplePrestations.getStyleClass().add(BUTTON_STYLE);
+                searchEditionToolbar.getChildren().add(uiCreateMultiplePrestations);
+                uiCreateMultiplePrestations.setOnAction((ActionEvent event) -> {
+                    if (createNewProperty.get()) {
+                        if (openEditorOnNewProperty.get()) {
+                            final FXFreeTab tab = new FXFreeTab();
+                            tab.setTextAbrege("Prestations sur plusieurs tronçons");
+                            final FXPrestationsOnTronconsPane fxPrestationsOnTronconsPane = new FXPrestationsOnTronconsPane();
+                            tab.setContent(fxPrestationsOnTronconsPane);
+                            session.getFrame().addTab(tab);
+                        }
+                    }
+                });
+            }
+
             for (final PropertyDescriptor desc : properties.values()) {
                 getPropertyColumn(desc).ifPresent(cols::add);
             }
