@@ -2600,7 +2600,7 @@ public class PojoTable extends BorderPane implements Printable {
                     // REDMINE 7782 - Update prestation's registreAttribution value depending on the typePrestationId.
                     if ("typePrestationId".equals(modifiedPropretieName)
                             && (newValue instanceof String && !newValue.equals(oldValue))) {
-                        FXPrestationPane.autoSelectRegistre(prestation, (String) newValue);
+                        prestation.setRegistreAttribution(FXPrestationPane.isAutoSelectedRegistre((String) newValue));
                     } else if (SirsCore.DATE_FIN_FIELD.equals(modifiedPropretieName)) {
                         // REDMINE 7782 - when changing prestation's end validity date, check the end timestamp date and show warnings if necessary.
                         final String refHoroId = prestation.getHorodatageStatusId();

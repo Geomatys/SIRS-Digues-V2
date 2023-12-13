@@ -235,7 +235,7 @@ public class FXPrestationPane extends FXPrestationPaneStub {
         return (obs, oldValue, newValue) -> {
             if (newValue != null) {
                 final String id = newValue.getId();
-                autoSelectRegistre(this.prestation, id);
+                this.prestation.setRegistreAttribution(isAutoSelectedRegistre(id));
             }
         };
     }
@@ -267,15 +267,15 @@ public class FXPrestationPane extends FXPrestationPaneStub {
 
     /**
      * Update prestation's registreAttribution value depending on the typePrestationId.
-     * @param prestation the prestation to update.
      * @param refTypeId a prestation's type reference id with the format : "RefPrestation:2"
      */
-    static void autoSelectRegistre(final Prestation prestation, final String refTypeId) {
+    static boolean isAutoSelectedRegistre(final String refTypeId) {
         final int length = "RefPrestation:".length();
         if (refTypeId != null && refTypeId.length() > length) {
             final String refTypeIdShort = refTypeId.substring(length);
-            prestation.setRegistreAttribution(typeInRegistreIds.contains(Integer.parseInt(refTypeIdShort)));
+            return typeInRegistreIds.contains(Integer.parseInt(refTypeIdShort));
         }
+        return false;
     }
 
     /**
