@@ -24,11 +24,8 @@ import fr.sirs.SIRS;
 import static fr.sirs.SIRS.createFXPaneForElement;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.AvecDateMaj;
-import fr.sirs.core.model.AvecGeometrie;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.*;
+
 import static fr.sirs.core.model.Role.ADMIN;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.ui.Growl;
@@ -134,7 +131,14 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
                 originCouchDbDocument = elementDocument;
             }
 
-            repo.update(originCouchDbDocument);
+            // Hack- redmine 8043 -> we want to add observations to a temporary Prestation that has not been added yet to the database and thus has no id yet.
+            // This temporary Prestation should not be added to the database when adding observations to its list.
+            // It will be saved only once the user will Save the Prestation itself via the @FXPrestationsOnTronconsPane and not via its children's panes.
+            if (!(this.getCenter() instanceof FXObservationPrestationPane
+                    && Prestation.class.isAssignableFrom(originCouchDbDocument.getClass())
+                    && originCouchDbDocument.getId() == null)) {
+                repo.update(originCouchDbDocument);
+            }
 
             final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
             growlInfo.showAndFade();
