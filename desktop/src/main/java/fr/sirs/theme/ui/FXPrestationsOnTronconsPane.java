@@ -5,6 +5,7 @@ import fr.sirs.Injector;
 import fr.sirs.PropertiesFileUtilities;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.*;
@@ -23,13 +24,15 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.internal.GeotkFX;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -89,12 +92,20 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
 
     // Propriétés de AvecObservations
 
+    private final Class<? extends TronconDigue> tronconClass;
+
+
+    protected FXPrestationsOnTronconsPane() {
+        this(TronconDigue.class);
+    }
     /**
      * Constructor. Initialize part of the UI which will not require update when
      * element edited change.
      */
-    protected FXPrestationsOnTronconsPane() {
+    protected FXPrestationsOnTronconsPane(final Class<? extends TronconDigue> tronconClass) {
+        ArgumentChecks.ensureNonNull("tronconClass", tronconClass);
         SIRS.loadFXML(this, Prestation.class);
+        this.tronconClass = tronconClass;
         final Session session = Injector.getBean(Session.class);
         previewRepository = session.getPreviews();
         elementProperty().addListener(this::initFields);
@@ -285,23 +296,11 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
             // Set the available troncons list.
             {
                 // TODO find a way to get the type of Troncon : TronconDigue, Berge or Lit
-                List<Preview> tronconsPreviews = previewRepository.getByClass(TronconDigue.class);
+                List<Preview> tronconsPreviews = previewRepository.getByClass(tronconClass);
 
                 // Filter archived troncons depending on user's preferences.
                 if (hideArchivedProperty && !tronconsPreviews.isEmpty()) {
-                    final Preview item = tronconsPreviews.get(0);
-
-                    if (item instanceof AvecFinTemporelle) {
-                        // List of classes that are not TronconDigue children and are impacted by the "hide archived element" option in the SIRS app.
-                        List<String> classesToFilterArchived = Arrays.asList("fr.sirs.core.model.TronconLit");
-
-                        final Class clazz = item.getJavaClassOr(null);
-                        final String className = item.getElementClass();
-
-                        if ((clazz != null) && (TronconDigue.class.isAssignableFrom(clazz)) || (classesToFilterArchived.contains(className))) {
-                            tronconsPreviews = tronconsPreviews.stream().filter(new AvecFinTemporelle.IsNotArchivedPredicate()).collect(Collectors.toList());
-                        }
-                    }
+                    tronconsPreviews = tronconsPreviews.stream().filter(new AvecFinTemporelle.IsNotArchivedPredicate()).collect(Collectors.toList());
                 }
 
                 uiListTroncon.setItems(SIRS.observableList(tronconsPreviews).sorted(Comparator.comparing(new SirsStringConverter()::toString)));
@@ -551,11 +550,46 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
 
         final Prestation prestation = elementProperty.get();
 
+        prestation.setGeometryMode(FXPositionableLinearMode.MODE);
+        prestation.setEditedGeoCoordinate(false);
+
+        final AbstractSIRSRepository<? extends TronconDigue> tronconRepo = session.getRepositoryForClass(tronconClass);
+        final AbstractSIRSRepository<BorneDigue> borneRepo = session.getRepositoryForClass(BorneDigue.class);
+        final Map<TronconDigue, String> errorForTroncon = new HashMap<>();
         try {
             for (Preview tronconP : selectedtroncons) {
 
                 final Prestation copy = prestation.copy();
                 copy.setLinearId(tronconP.getElementId());
+                final TronconDigue tronconDigue = tronconRepo.get(tronconP.getElementId());
+                copy.setSystemeRepId(tronconDigue.getSystemeRepDefautId());
+                final ObservableList<String> borneIds = tronconDigue.getBorneIds();
+                final List<BorneDigue> borneDigues = borneRepo.get(borneIds);
+
+                // The prestations must be on the whole TronconDigue.
+                // So we get the bornes corresponding to the Troncon's start and end bornes.
+                // PRs are automatically set to 0 so no need to update the values.
+                boolean foundStart = false;
+                boolean foundEnd = false;
+                for (BorneDigue borneDigue : borneDigues) {
+                    final String libelle = borneDigue.getLibelle();
+                    if (libelle != null && SirsCore.SR_ELEMENTAIRE_START_BORNE.equals(libelle)) {
+                        copy.setBorneDebutId(borneDigue.getId());
+                        foundStart = true;
+                    } else if (libelle != null && SirsCore.SR_ELEMENTAIRE_END_BORNE.equals(libelle)) {
+                        copy.setBorneFinId(borneDigue.getId());
+                        foundEnd = true;
+                    }
+                    if (foundStart && foundEnd) break;
+                }
+
+                if (!foundStart || !foundEnd) {
+                    final String s = foundStart ? "fin"
+                            : foundEnd ? "debut" : "début ni de fin";
+                    errorForTroncon.put(tronconDigue, "Le tronçon ne possède pas de borne de " + s + ".");
+                    continue;
+                }
+
                 repo.add(copy);
 
                 createdPrestations.add(copy);
