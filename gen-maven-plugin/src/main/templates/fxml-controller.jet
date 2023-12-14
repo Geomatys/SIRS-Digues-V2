@@ -861,11 +861,11 @@ else if (helper.isParcelleVegetation()){
         }
 
         // If parent has changed, we have to dereference our object from the old one, and
-        if (originalParent == null || originalParent.getId() == null || !originalParent.getId().equals(newParent.getId())) {
-            newParent.addChild(element);
+        if (originalParent == null || (originalParent.getId() != null && !originalParent.getId().equals(newParent.getId()))) {
             if (originalParent != null) {
                 originalParent.removeChild(element);
             }
+            newParent.addChild(element);
             originalParent = newParent;
         }
 <% }
