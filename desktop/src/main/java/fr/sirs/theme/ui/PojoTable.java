@@ -79,6 +79,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -590,8 +591,7 @@ public class PojoTable extends BorderPane implements Printable {
             }
 
             if (Prestation.class.isAssignableFrom(pojoClass)) {
-                // On permet de cacher toutes les infos d'observation d'un coup.
-                final ImageView viewOn = new ImageView(SIRS.ICON_EYE_WHITE);
+                final ImageView viewOn = new ImageView(SIRS.ICON_ADD_MULTIPLE_WHITE);
                 final Button uiCreateMultiplePrestations = new Button(null, viewOn);
 
                 uiCreateMultiplePrestations.setTooltip(new Tooltip("Créer des prestations sur plusieurs tronçons."));
@@ -600,7 +600,8 @@ public class PojoTable extends BorderPane implements Printable {
                 uiCreateMultiplePrestations.managedProperty().bind(uiCreateMultiplePrestations.visibleProperty());
                 uiCreateMultiplePrestations.disableProperty().bind(editableProperty.not());
                 uiCreateMultiplePrestations.getStyleClass().add(BUTTON_STYLE);
-                searchEditionToolbar.getChildren().add(uiCreateMultiplePrestations);
+                final ObservableList<Node> children = searchEditionToolbar.getChildren();
+                children.add(children.indexOf(uiAdd) + 1, uiCreateMultiplePrestations);
                 uiCreateMultiplePrestations.setOnAction((ActionEvent event) -> {
                     if (createNewProperty.get()) {
                         if (openEditorOnNewProperty.get()) {
