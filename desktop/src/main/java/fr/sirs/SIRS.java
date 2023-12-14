@@ -31,6 +31,7 @@ import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementContainerPane;
 import fr.sirs.theme.ui.columns.TableColumnsPreferences;
 import fr.sirs.util.FXPreferenceEditor;
+import fr.sirs.util.ObjectDataSource;
 import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.Reference;
@@ -67,9 +68,9 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InvalidClassException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -107,6 +108,8 @@ public final class SIRS extends SirsCore {
     public static final Image ICON = new Image(SirsCore.class.getResource("/fr/sirs/icon.png").toString());
 
     public static final Image ICON_ADD_WHITE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.WHITE),null);
+    public static final Image ICON_ADD_MULTIPLE_WHITE    = getIconFromUri("/fr/sirs/images/plus-box-multiple-white.png", 22);
+    public static final Image ICON_ADD_MULTIPLE_BLACK    = getIconFromUri("/fr/sirs/images/plus-box-multiple.png", 22);
     public static final Image ICON_CHAIN_WHITE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CHAIN_ALIAS,22,Color.WHITE),null);
     public static final Image ICON_COPY_WHITE   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COPY_ALIAS,22,Color.WHITE),null);
     public static final Image ICON_ADD_BLACK    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,16,Color.BLACK),null);
@@ -673,6 +676,27 @@ public final class SIRS extends SirsCore {
             throw ex;
         } catch (Exception e) {
             throw new SirsCoreRuntimeException("Unloadable image", e);
+        }
+    }
+
+    /**
+     * Load icon pointed by given path and resize it to the given size.
+     *
+     * @param uri Path to the icon file.
+     * @param size The icon desired size.
+     * @return Loaded icon.
+     * @throws RuntimeException If loading fails.
+     */
+    private static Image getIconFromUri(final String uri, final int size) {
+        try {
+            final BufferedImage iconImage = javax.imageio.ImageIO.read(ObjectDataSource.class.getResource(uri));
+            final BufferedImage resized = new BufferedImage(size, size, 2);
+            Graphics2D g = resized.createGraphics();
+            g.drawImage(iconImage, 0, 0, size, size, null);
+            g.dispose();
+            return SwingFXUtils.toFXImage(resized, null);
+        } catch (IOException e) {
+            throw new IllegalStateException("Can't find icon " + uri + ".", e);
         }
     }
 }
