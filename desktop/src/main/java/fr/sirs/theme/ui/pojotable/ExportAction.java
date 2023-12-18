@@ -54,6 +54,10 @@ public class ExportAction implements EventHandler<ActionEvent> {
 
     private final BeanFeatureSupplier featureSupplier;
     private final ObservableList<TableColumn<Element, ?>> currentColumns;
+
+    // The extraFunction is used to update the created file in case some columns must be added to the file but can't via this process.
+    // Example : the list of a désordre's observations is not part of its FeatureType.
+    // Thus, the need of an extraFunction that will allow to add those attributes to the file.
     private final BiConsumer<File, List<Object>> extraFunction;
 
     public ExportAction(BeanFeatureSupplier sup, final ObservableList<TableColumn<Element, ?>> currentColumns) {
@@ -81,7 +85,7 @@ public class ExportAction implements EventHandler<ActionEvent> {
 
                 FileFeatureStoreFactory factory = (FileFeatureStoreFactory) DataStores.getFactoryById("csv");
                 if (extraFunction != null) {
-                    // Copy all the elements otherwise the selectedElement can be modified by the user during the call of the extraFucntion
+                    // Copy all the elements otherwise the selectedElement can be modified by the user during the call of the extraFunction
                     // with the consequence of losing the list of the elements.
                     final List<Object> elements = layer.getCollection().stream()
                             .map(b -> b.getUserData())

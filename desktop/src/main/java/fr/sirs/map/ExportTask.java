@@ -73,7 +73,15 @@ public class ExportTask extends Task<Boolean> {
     private final FileFeatureStoreFactory factory;
     private final File folder;
     private final String[] columnsToFilter;
+
+    // The extraFunction is used to update the created file in case some columns must be added to the file but can't via this process.
+    // Example : the list of a désordre's observations is not part of its FeatureType.
+    // Thus, the need of an extraFunction that will allow to add those attributes to the file.
     private final BiConsumer<File, List<Object>> extraFunction;
+
+    // The exportTask being performed outside of the main thread, the user can modify the selected element in the PojoTable after launching the export process.C
+    // The consequence is the loss of the inital selected elements.
+    // Thus, the copy all the elements as they were at the beginning of the process.
     private final List<Object> elements;
 
     public static String removeAccents(String input) {
@@ -98,6 +106,8 @@ public class ExportTask extends Task<Boolean> {
      * @param folder output location
      * @param factory handle the data store
      * @param columnsToFilter allows to filter the features. Leave to null to keep all columns
+     * @param extraFunction a function to add columns to the created file.
+     * @param elements the list of the elements present in the file. Used for the extraFunction.
      */
     public ExportTask(FeatureMapLayer layer, File folder, FileFeatureStoreFactory factory, String[] columnsToFilter, BiConsumer<File, List<Object>> extraFunction, final List<Object> elements) {
         ArgumentChecks.ensureNonNull("layer", layer);
@@ -209,7 +219,7 @@ public class ExportTask extends Task<Boolean> {
                 session.addFeatures(outName, col);
                 //close store
                 store.close();
-                if (extraFunction != null) {
+                if (extraFunction != null && elements != null) {
                     extraFunction.accept(file, elements);
                 }
             }
