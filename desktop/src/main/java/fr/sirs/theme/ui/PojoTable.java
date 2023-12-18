@@ -568,7 +568,7 @@ public class PojoTable extends BorderPane implements Printable {
                 }
 
                 // On permet de cacher toutes les infos d'observation d'un coup.
-                final ImageView viewOn = new ImageView(SIRS.ICON_EYE_BLACK);
+                final ImageView viewOn = new ImageView(SIRS.ICON_EYE_WHITE);
                 final ToggleButton uiObservationVisibility = new ToggleButton(null, viewOn);
                 uiObservationVisibility.setSelected(true); // Prepare to be forced to change.
                 uiObservationVisibility.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
