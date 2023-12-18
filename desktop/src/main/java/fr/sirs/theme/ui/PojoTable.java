@@ -118,6 +118,7 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -605,9 +606,26 @@ public class PojoTable extends BorderPane implements Printable {
                 uiCreateMultiplePrestations.setOnAction((ActionEvent event) -> {
                     if (createNewProperty.get()) {
                         if (openEditorOnNewProperty.get()) {
+                            if (!FXAbstractTronconThemePane.TronconThemePojoTable.class.isAssignableFrom(this.getClass())) {
+                                throw new IllegalStateException("The button uiCreateMultiplePrestations is only valid in Prestation pojoTable " +
+                                        "of type FXAbstractTronconThemePane.TronconThemePojoTable.");
+                            }
+                            Parent parent = this.getParent();
+                            while (true) {
+                                if (!BorderPane.class.isAssignableFrom(parent.getClass())) {
+                                    throw new IllegalStateException("The button uiCreateMultiplePrestations is only valid in Prestation pojoTable " +
+                                            "inside a FXAbstractTronconThemePane.");
+                                }
+                                if (FXAbstractTronconThemePane.class.isAssignableFrom(parent.getClass())) {
+                                    break;
+                                }
+                                parent = parent.getParent();
+                            }
+
+                            final FXPrestationsOnTronconsPane fxPrestationsOnTronconsPane = new FXPrestationsOnTronconsPane(((FXAbstractTronconThemePane) parent).getTronconClass());
+
                             final FXFreeTab tab = new FXFreeTab();
                             tab.setTextAbrege("Prestations sur plusieurs tronçons");
-                            final FXPrestationsOnTronconsPane fxPrestationsOnTronconsPane = new FXPrestationsOnTronconsPane();
                             tab.setContent(fxPrestationsOnTronconsPane);
                             session.getFrame().addTab(tab);
                         }
