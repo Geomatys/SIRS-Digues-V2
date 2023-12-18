@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -238,21 +238,30 @@ public class FXPositionablePane extends BorderPane {
             if (preview.getElementId() != null && preview.getElementClass() != null) {
 
                 // On prévient les éventuels problèmes de chargement de classe qui ne devraient pas se produire
+                // The method "Class.forName("name")" throws a ClassNotFoundException for plugins classes. To avoid throwing an error for plugins,
+                // we try to get the repository by the class name.
+                Identifiable identifiable;
                 try {
                     final Class elementClass = Class.forName(preview.getElementClass());
-                    final Identifiable identifiable = Injector.getSession().getRepositoryForClass(elementClass).get(preview.getElementId());
-
-                    // On s'assure qu'on obtient bien un tronçon de digue et on opère le changement
-                    if (identifiable instanceof TronconDigue) {
-                        changeTroncon((TronconDigue) identifiable);
-                    } else {
-                        SIRS.LOGGER.log(Level.WARNING, "type de linéaire inattendu pour {0}", identifiable);
-                    }
+                    identifiable = Injector.getSession().getRepositoryForClass(elementClass).get(preview.getElementId());
                 } catch (ClassNotFoundException ex) {
-                    // On loggue ET on propage cette exception importante
-                    SIRS.LOGGER.log(Level.WARNING, "impossible de trouver la classe correspondant à {0}", preview);
-                    throw new IllegalStateException(ex);
+                    // Check first that the class is not available in plugins
+                    final AbstractSIRSRepository repositoryForType = Injector.getSession().getRepositoryForType(preview.getElementClass());
+                    if (repositoryForType == null) {
+                        // On loggue ET on propage cette exception importante
+                        SIRS.LOGGER.log(Level.WARNING, "impossible de trouver la classe correspondant à {0}", preview);
+                        throw new IllegalStateException(ex);
+                    }
+                    identifiable = Injector.getSession().getRepositoryForType(preview.getElementClass()).get(preview.getElementId());
                 }
+
+                // On s'assure qu'on obtient bien un tronçon de digue et on opère le changement
+                if (identifiable instanceof TronconDigue) {
+                    changeTroncon((TronconDigue) identifiable);
+                } else {
+                    SIRS.LOGGER.log(Level.WARNING, "type de linéaire inattendu pour {0}", identifiable);
+                }
+
             } else {
                 SIRS.LOGGER.log(Level.WARNING, "tous les éléments ne sont pas disponibles pour un changement de linéaire : {0}", preview);
             }
