@@ -27,12 +27,8 @@ import javafx.scene.layout.BorderPane;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.internal.GeotkFX;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +39,8 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
 
     protected final Previews previewRepository;
     protected LabelMapper labelMapper;
+
+    @FXML private Button uiSave;
 
     // Propriétés de Positionable
     @FXML private BorderPane uiPositionable;
@@ -534,15 +532,33 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
     }
 
     public void save() {
-
         final ObservableList<Preview> selectedtroncons = uiListTroncon.getSelectionModel().getSelectedItems();
         if (selectedtroncons.isEmpty()) {
             PropertiesFileUtilities.showErrorDialog("L'élément ne peut être enregistré sans élément parent. \nVeuillez sélectionner au moins un tronçon de la liste.", "Erreur lors de l'enregistrement", 0, 150);
             return;
         }
+
+        final StringBuilder tronconsList = new StringBuilder();
+        final Map<Preview, String> tronconsText = new HashMap<>();
+        selectedtroncons.forEach(t -> {
+            final String s = "\n    - " + t.getDesignation() + " : " + t.getLibelle();
+            tronconsList.append(s);
+            tronconsText.put(t, s);
+        });
+
+        final Optional dialog = PropertiesFileUtilities.showConfirmationDialog("Souhaitez-vous créer cette prestation sur les tronçons suivants : \n" + tronconsList, "Confirmation de créaion multiple", 500, 500, true);
+
+        if (dialog.isPresent()) {
+            final Object result = dialog.get();
+            if (!ButtonType.YES.equals(result)) {
+                return;
+            }
+        }
+
         final Session session = Injector.getSession();
         final AbstractSIRSRepository<Prestation> repo = session.getRepositoryForClass(Prestation.class);
         final List<Prestation> createdPrestations = new ArrayList<>();
+        final StringBuilder tronconsOk = new StringBuilder();
         final List<Element> globalPrestationList = globalPrestationIdsTable != null ? globalPrestationIdsTable.getAllValues() : null;
         final List<Element> rapportEtudeList = rapportEtudeIdsTable != null ? rapportEtudeIdsTable.getAllValues() : null;
 
@@ -555,15 +571,15 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
 
         final AbstractSIRSRepository<? extends TronconDigue> tronconRepo = session.getRepositoryForClass(tronconClass);
         final AbstractSIRSRepository<BorneDigue> borneRepo = session.getRepositoryForClass(BorneDigue.class);
-        final Map<TronconDigue, String> errorForTroncon = new HashMap<>();
+        final StringBuilder errorForTroncon = new StringBuilder();
         try {
             for (Preview tronconP : selectedtroncons) {
 
                 final Prestation copy = prestation.copy();
                 copy.setLinearId(tronconP.getElementId());
-                final TronconDigue tronconDigue = tronconRepo.get(tronconP.getElementId());
-                copy.setSystemeRepId(tronconDigue.getSystemeRepDefautId());
-                final ObservableList<String> borneIds = tronconDigue.getBorneIds();
+                final TronconDigue troncon = tronconRepo.get(tronconP.getElementId());
+                copy.setSystemeRepId(troncon.getSystemeRepDefautId());
+                final ObservableList<String> borneIds = troncon.getBorneIds();
                 final List<BorneDigue> borneDigues = borneRepo.get(borneIds);
 
                 // The prestations must be on the whole TronconDigue.
@@ -586,18 +602,14 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
                 if (!foundStart || !foundEnd) {
                     final String s = foundStart ? "fin"
                             : foundEnd ? "debut" : "début ni de fin";
-                    errorForTroncon.put(tronconDigue, "Le tronçon ne possède pas de borne de " + s + ".");
+                    errorForTroncon.append(tronconsText.get(troncon) + "Le tronçon ne possède pas de borne de " + s + ".");
                     continue;
                 }
 
                 repo.add(copy);
 
                 createdPrestations.add(copy);
-
-                repo.update(copy);
-
-                final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
-                growlInfo.showAndFade();
+                tronconsOk.append(tronconsText.get(tronconP));
             }
 
             // Update n-n relations
@@ -641,10 +653,24 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
                 rapportEtudeRepository.executeBulk(reToUpdate);
             }
 
+            if (tronconsOk.length() != 0) {
+                PropertiesFileUtilities.showInformationDialog(
+                        "Les prestations ont été créées sur les tronçons suivants : \n" + tronconsOk,
+                        "Succès", 500, 300);
+            }
+            if (errorForTroncon.length() != 0) {
+                PropertiesFileUtilities.showWarningDialog(
+                        "Une erreur est survenue lors de la création des prestations sur les tronçons suivants : \n" + errorForTroncon,
+                        "Erreur lors de l'enregistrement", 500, 300);
+            }
+
         } catch (Exception e) {
+            for (Prestation createdPrestation : createdPrestations) {
+                repo.remove(createdPrestation);
+            }
             final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
             growlError.showAndFade();
-            GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
+            GeotkFX.newExceptionDialog("Les éléments ne peuvent être sauvegardés.", e).show();
             SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
             createdPrestations.forEach(p -> repo.remove(p));
         }
