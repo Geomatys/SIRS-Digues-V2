@@ -48,6 +48,7 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
 
     // Propriétés de Prestation
     @FXML private TextField uiDesignation;
+    @FXML protected Label linearId;
     @FXML protected TextField ui_libelle;
     @FXML protected Spinner ui_coutMetre;
     @FXML protected Spinner ui_coutGlobal;
@@ -92,6 +93,13 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
 
     private final Class<? extends TronconDigue> tronconClass;
 
+    private static final Map<String, String> linearIdLabel = new HashMap<>();
+    static {
+        linearIdLabel.put("TronconDigue", "Tronçons");
+        linearIdLabel.put("Berge", "Berges");
+        linearIdLabel.put("TronconLit", "Lits");
+    }
+
 
     protected FXPrestationsOnTronconsPane() {
         this(TronconDigue.class);
@@ -104,6 +112,10 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
         ArgumentChecks.ensureNonNull("tronconClass", tronconClass);
         SIRS.loadFXML(this, Prestation.class);
         this.tronconClass = tronconClass;
+
+        final String tronconLabel = linearIdLabel.get(tronconClass.getSimpleName());
+        linearId.setText(tronconLabel != null ? tronconLabel : "Tronçons");
+
         final Session session = Injector.getBean(Session.class);
         previewRepository = session.getPreviews();
         elementProperty().addListener(this::initFields);

@@ -81,7 +81,7 @@
                                     <HBox fx:id="ui_parent_box" spacing="20.0" alignment="CENTER_LEFT"
                                           styleClass="gray-light">
                                         <children>
-                                            <Label fx:id="linearId" text="%linearId" maxHeight="-Infinity"
+                                            <Label fx:id="linearId" maxHeight="-Infinity"
                                                    maxWidth="-Infinity"/>
                                             <ListView fx:id="uiListTroncon" prefHeight="232.0" prefWidth="533.0" />
                                         </children>
