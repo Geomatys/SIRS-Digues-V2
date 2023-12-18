@@ -2081,10 +2081,9 @@ public class PojoTable extends BorderPane implements Printable {
             return Optional.empty();
         }
 
-        final TableColumn col;
-        col = new ObservationPropertyColumn(desc, obsOrder, obsMapper);
+        final ObservationPropertyColumn col = new ObservationPropertyColumn(desc, obsOrder, obsMapper);
         col.sortableProperty().setValue(Boolean.TRUE);
-        col.setId(((ObservationPropertyColumn) col).getName());
+        col.setId(col.getName());
         return Optional.of(col);
     }
 

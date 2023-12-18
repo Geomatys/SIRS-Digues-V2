@@ -1371,7 +1371,7 @@ public class ODTUtils {
                 }
             }
             else {
-                SirsCore.LOGGER.log(Level.INFO, "Cannot hangle {0} column (first line)", propertyName);
+                SirsCore.LOGGER.log(Level.INFO, "Cannot handle {0} column (first line)", propertyName);
             }
         }
     }

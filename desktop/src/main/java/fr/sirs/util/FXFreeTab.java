@@ -192,11 +192,14 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
 
     private void supplyContent() {
         if (isSelected()) {
-            final Node content = getContent();
-            if (content == null && contentSupplier.get() != null) {
-                Node node = contentSupplier.get().get();
-                setContent(node);
-            } else if (content != null) {
+            Node content = getContent();
+            if (content == null) {
+                Supplier<Node> supplier = contentSupplier.get();
+                if (supplier != null) {
+                    content = supplier.get();
+                    setContent(content);
+                }
+            } else {
                 // When focus on a tab containing a PojoTable, refresh the uiTable of the PojoTable to be up-to-date in case
                 // some Element have been modified outside the pojoTable.
                 if (PojoTable.class.isAssignableFrom(content.getClass())) {
@@ -205,6 +208,7 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
                 } else if (BorderPane.class.isAssignableFrom(content.getClass())) {
                     int i = 0;
                     Node centre = ((BorderPane) content).getCenter();
+                    // Arbitrary value 7, to avoid infinity loop.
                     while (centre != null && i < 7) {
                         if (TabPane.class.isAssignableFrom(centre.getClass())) {
                             // This happens when the Pane is a tabPane : FXOuvrageAssocieAmenagementHydrauliquePane for example.
