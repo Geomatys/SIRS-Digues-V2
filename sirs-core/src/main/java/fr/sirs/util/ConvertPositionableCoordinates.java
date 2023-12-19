@@ -378,6 +378,9 @@ public class ConvertPositionableCoordinates {
         } else {
             //Si le positionable n'a pas de SR renseigné, on prend celui par défaut du tronçon.
             final TronconDigue troncon = getTronconFromPositionable(positionable);
+            if (troncon == null) {
+                throw new RuntimeException("Failed to retrieve troncon from positionable (id, designation, class) : (" + positionable.getId() + ", " + positionable.getDesignation()+ ", " + positionable.getClass() + ")");
+            }
             sr = InjectorCore.getBean(SessionCore.class).getRepositoryForClass(SystemeReperage.class).get(troncon.getSystemeRepDefautId());
         }
 
