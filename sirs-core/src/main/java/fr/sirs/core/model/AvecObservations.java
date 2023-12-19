@@ -9,6 +9,7 @@ import org.apache.sis.util.ArgumentChecks;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public interface AvecObservations extends  Element {
 
@@ -103,9 +104,10 @@ public interface AvecObservations extends  Element {
 
         final List<String> suiteApporterIds;
 
-        public LastObservationSuiteApporterPredicate(final List<String> suiteApporterIds) {
-            ArgumentChecks.ensureNonNull("suiteApporterIds", suiteApporterIds);
-            this.suiteApporterIds = suiteApporterIds;
+        public LastObservationSuiteApporterPredicate(final List<Preview> suiteApporterPreviews) {
+            ArgumentChecks.ensureNonNull("suiteApporterPreviews", suiteApporterPreviews);
+
+            this.suiteApporterIds = suiteApporterPreviews.stream().map(p -> p.getElementId()).collect(Collectors.toList());
         }
 
         @Override
