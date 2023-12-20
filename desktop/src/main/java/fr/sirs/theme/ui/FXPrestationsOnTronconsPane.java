@@ -1,6 +1,10 @@
 
 package fr.sirs.theme.ui;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.PropertiesFileUtilities;
 import fr.sirs.SIRS;
@@ -25,11 +29,16 @@ import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import org.apache.sis.util.ArgumentChecks;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.internal.GeotkFX;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+
+import static fr.sirs.core.SirsCore.BUNDLE_KEY_CLASS_ABREGE;
 
 /**
  *
@@ -435,12 +444,9 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
 
     @Override
     public void preSave() {
-        final Session session = Injector.getBean(Session.class);
         final Prestation element = elementProperty.get();
 
         element.setCommentaire(ui_commentaire.getText());
-
-//        uiPositionable.preSave();
 
         Object cbValue;
         cbValue = ui_coteId.getValue();
@@ -515,7 +521,7 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
              */
             final ObservableList<Element> rapportEtudes = rapportEtudeIdsTable.getAllValues();
             if (!rapportEtudes.isEmpty()) {
-                element.setRapportEtudeIds(rapportEtudes.stream().map(re -> re.getId()).collect(Collectors.toList()));
+                element.setRapportEtudeIds(rapportEtudes.stream().map(Identifiable::getId).collect(Collectors.toList()));
             }
         }
         if (documentGrandeEchelleIdsTable != null) {
@@ -538,7 +544,7 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
             */
             final ObservableList<Element> globalPrestations = globalPrestationIdsTable.getAllValues();
             if (!globalPrestations.isEmpty()) {
-                element.setGlobalPrestationIds(globalPrestations.stream().map(re -> re.getId()).collect(Collectors.toList()));
+                element.setGlobalPrestationIds(globalPrestations.stream().map(Identifiable::getId).collect(Collectors.toList()));
             }
         }
     }
@@ -550,13 +556,20 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
             return;
         }
 
+        final LabelMapper labelMapper = LabelMapper.get(tronconClass);
+        final String classAbrege = (labelMapper == null) ? "" : labelMapper.mapPropertyName(BUNDLE_KEY_CLASS_ABREGE) + " - ";
+
         final StringBuilder tronconsList = new StringBuilder();
         final Map<Preview, String> tronconsText = new HashMap<>();
-        selectedtroncons.forEach(t -> {
-            final String s = "\n    - " + t.getDesignation() + " : " + t.getLibelle();
+        String designation;
+        String s;
+        for (Preview t : selectedtroncons) {
+            designation = t.getDesignation();
+            designation = designation == null ? "" : designation;
+            s = "\n    - " + classAbrege + designation + " : " + t.getLibelle();
             tronconsList.append(s);
             tronconsText.put(t, s);
-        });
+        }
 
         final Optional dialog = PropertiesFileUtilities.showConfirmationDialog("Souhaitez-vous créer cette prestation sur les tronçons suivants : \n" + tronconsList, "Confirmation de créaion multiple", 500, 500, true);
 
@@ -571,25 +584,26 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
         final AbstractSIRSRepository<Prestation> repo = session.getRepositoryForClass(Prestation.class);
         final List<Prestation> createdPrestations = new ArrayList<>();
         final StringBuilder tronconsOk = new StringBuilder();
+        final Map<String, Exception> tronconsNotOk = new HashMap<>();
+        final StringBuilder errorForTroncon = new StringBuilder();
         final List<Element> globalPrestationList = globalPrestationIdsTable != null ? globalPrestationIdsTable.getAllValues() : null;
         final List<Element> rapportEtudeList = rapportEtudeIdsTable != null ? rapportEtudeIdsTable.getAllValues() : null;
 
         this.preSave();
 
-        final Prestation prestation = elementProperty.get();
-
-        prestation.setGeometryMode(FXPositionableLinearMode.MODE);
-        prestation.setEditedGeoCoordinate(false);
-
         final AbstractSIRSRepository<? extends TronconDigue> tronconRepo = session.getRepositoryForClass(tronconClass);
         final AbstractSIRSRepository<BorneDigue> borneRepo = session.getRepositoryForClass(BorneDigue.class);
-        final StringBuilder errorForTroncon = new StringBuilder();
-        try {
-            for (Preview tronconP : selectedtroncons) {
+        final CoordinateReferenceSystem crs = session.getProjection();
 
-                final Prestation copy = prestation.copy();
+        final Prestation prestation = elementProperty.get();
+
+        Prestation copy = null;
+        for (Preview tronconP : selectedtroncons) {
+            try {
+                copy = prestation.copy();
                 copy.setLinearId(tronconP.getElementId());
                 final TronconDigue troncon = tronconRepo.get(tronconP.getElementId());
+
                 copy.setSystemeRepId(troncon.getSystemeRepDefautId());
                 final ObservableList<String> borneIds = troncon.getBorneIds();
                 final List<BorneDigue> borneDigues = borneRepo.get(borneIds);
@@ -597,94 +611,123 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
                 // The prestations must be on the whole TronconDigue.
                 // So we get the bornes corresponding to the Troncon's start and end bornes.
                 // PRs are automatically set to 0 so no need to update the values.
-                boolean foundStart = false;
-                boolean foundEnd = false;
+                String borneStartId = null;
+                String borneEndId = null;
                 for (BorneDigue borneDigue : borneDigues) {
                     final String libelle = borneDigue.getLibelle();
-                    if (libelle != null && SirsCore.SR_ELEMENTAIRE_START_BORNE.equals(libelle)) {
-                        copy.setBorneDebutId(borneDigue.getId());
-                        foundStart = true;
-                    } else if (libelle != null && SirsCore.SR_ELEMENTAIRE_END_BORNE.equals(libelle)) {
-                        copy.setBorneFinId(borneDigue.getId());
-                        foundEnd = true;
+                    if (SirsCore.SR_ELEMENTAIRE_START_BORNE.equals(libelle)) {
+                        borneStartId = borneDigue.getId();
+                    } else if (SirsCore.SR_ELEMENTAIRE_END_BORNE.equals(libelle)) {
+                        borneEndId = borneDigue.getId();
                     }
-                    if (foundStart && foundEnd) break;
+                    if (borneStartId != null && borneEndId != null) break;
                 }
 
-                if (!foundStart || !foundEnd) {
-                    final String s = foundStart ? "fin"
-                            : foundEnd ? "debut" : "début ni de fin";
-                    errorForTroncon.append(tronconsText.get(troncon) + "Le tronçon ne possède pas de borne de " + s + ".");
-                    continue;
+                if (borneStartId != null && borneEndId != null) {
+                    prestation.setGeometryMode(FXPositionableLinearMode.MODE);
+                    prestation.setEditedGeoCoordinate(false);
+                    copy.setBorneDebutId(borneStartId);
+                    copy.setBorneFinId(borneEndId);
+
+                } else {
+                    final Geometry geometry = troncon.getGeometry();
+                    // If we can't save the prestation on its troncon geometry, the prestation is still created but with no location.
+                    // A warning will pop at the end of the process to inform the user.
+                    if (!(geometry instanceof LineString)) {
+                        errorForTroncon.append(tronconsText.get(tronconP));
+                    } else {
+                        final Coordinate[] coordinates = geometry.getCoordinates();
+
+                        final Point positionDebut = EditionHelper.createPoint(coordinates[0]);
+                        JTS.setCRS(positionDebut, crs);
+
+                        final Point positionFin = EditionHelper.createPoint(coordinates[coordinates.length - 1]);
+                        JTS.setCRS(positionFin, crs);
+
+                        copy.setPositionDebut(positionDebut);
+                        copy.setPositionFin(positionFin);
+                        prestation.setGeometryMode(FXPositionableCoordMode.MODE);
+                        prestation.setEditedGeoCoordinate(true);
+                    }
+
                 }
+
 
                 repo.add(copy);
 
                 createdPrestations.add(copy);
                 tronconsOk.append(tronconsText.get(tronconP));
-            }
 
-            // Update n-n relations
-            /* GlobalPrestation */
-            if (globalPrestationList != null) {
-                final AbstractSIRSRepository<GlobalPrestation> globalPrestationRepository = session.getRepositoryForClass(GlobalPrestation.class);
-                final List<GlobalPrestation> gbToUpdate = new ArrayList<>();
-                for (final Element elt : globalPrestationList) {
-                    final GlobalPrestation globalPrestation = (GlobalPrestation) elt;
-
-                    for (Prestation presta : createdPrestations) {
-                        // Addition
-                        final ObservableList<String> prestationIds = globalPrestation.getPrestationIds();
-                        if (!prestationIds.contains(presta.getId())) {
-                            prestationIds.add(presta.getId());
-                        }
-                        gbToUpdate.add(globalPrestation);
-                    }
-
+            } catch (Exception e) {
+                tronconsNotOk.put(tronconsText.get(tronconP), e);
+                if (copy != null && copy.getId() != null) {
+                    repo.remove(copy);
                 }
-                globalPrestationRepository.executeBulk(gbToUpdate);
             }
+        }
 
-            /* RapportEtude */
-            if (rapportEtudeList != null) {
-                final AbstractSIRSRepository<RapportEtude> rapportEtudeRepository = session.getRepositoryForClass(RapportEtude.class);
-                final List<RapportEtude> reToUpdate = new ArrayList<>();
-                for (final Element elt : rapportEtudeList) {
-                    final RapportEtude rapportEtude = (RapportEtude) elt;
+        // Update n-n relations
+        /* GlobalPrestation */
+        if (globalPrestationList != null) {
+            final AbstractSIRSRepository<GlobalPrestation> globalPrestationRepository = session.getRepositoryForClass(GlobalPrestation.class);
+            final List<GlobalPrestation> gbToUpdate = new ArrayList<>();
+            for (final Element elt : globalPrestationList) {
+                final GlobalPrestation globalPrestation = (GlobalPrestation) elt;
 
-                    for (Prestation presta : createdPrestations) {
-                        // Addition
-                        final ObservableList<String> prestationIds = rapportEtude.getPrestationIds();
-                        if (!prestationIds.contains(presta.getId())) {
-                            prestationIds.add(presta.getId());
-                        }
-                        reToUpdate.add(rapportEtude);
+                for (Prestation presta : createdPrestations) {
+                    // Addition
+                    final ObservableList<String> prestationIds = globalPrestation.getPrestationIds();
+                    if (!prestationIds.contains(presta.getId())) {
+                        prestationIds.add(presta.getId());
                     }
-
+                    gbToUpdate.add(globalPrestation);
                 }
-                rapportEtudeRepository.executeBulk(reToUpdate);
-            }
 
-            if (tronconsOk.length() != 0) {
-                PropertiesFileUtilities.showInformationDialog(
-                        "Les prestations ont été créées sur les tronçons suivants : \n" + tronconsOk,
-                        "Succès", 500, 300);
             }
-            if (errorForTroncon.length() != 0) {
-                PropertiesFileUtilities.showWarningDialog(
-                        "Une erreur est survenue lors de la création des prestations sur les tronçons suivants : \n" + errorForTroncon,
-                        "Erreur lors de l'enregistrement", 500, 300);
-            }
+            globalPrestationRepository.executeBulk(gbToUpdate);
+        }
 
-        } catch (Exception e) {
-            for (Prestation createdPrestation : createdPrestations) {
-                repo.remove(createdPrestation);
+        /* RapportEtude */
+        if (rapportEtudeList != null) {
+            final AbstractSIRSRepository<RapportEtude> rapportEtudeRepository = session.getRepositoryForClass(RapportEtude.class);
+            final List<RapportEtude> reToUpdate = new ArrayList<>();
+            for (final Element elt : rapportEtudeList) {
+                final RapportEtude rapportEtude = (RapportEtude) elt;
+
+                for (Prestation presta : createdPrestations) {
+                    // Addition
+                    final ObservableList<String> prestationIds = rapportEtude.getPrestationIds();
+                    if (!prestationIds.contains(presta.getId())) {
+                        prestationIds.add(presta.getId());
+                    }
+                    reToUpdate.add(rapportEtude);
+                }
+
             }
-            final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
+            rapportEtudeRepository.executeBulk(reToUpdate);
+        }
+
+        if (tronconsOk.length() != 0) {
+            PropertiesFileUtilities.showInformationDialog(
+                    "Les prestations ont été créées sur les tronçons suivants : \n" + tronconsOk,
+                    "Succès", 500, 300);
+        }
+        if (errorForTroncon.length() != 0) {
+            errorForTroncon.insert(0, "Prestations créées mais incomplètes. La géométrie n'a pas pu être renseignée pour les tronçons suivants : \n");
+            errorForTroncon.append("Raison : La géométrie du tronçon n'est pas un lineString.");
+
+            final Growl growlError = new Growl(Growl.Type.ERROR, "Erreurs survenues pendant l'enregistrement.");
             growlError.showAndFade();
-            GeotkFX.newExceptionDialog("Les éléments ne peuvent être sauvegardés.", e).show();
-            SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
-            createdPrestations.forEach(p -> repo.remove(p));
+
+            PropertiesFileUtilities.showWarningDialog(
+                    errorForTroncon.toString(),
+                    "Erreur lors de l'enregistrement", 500, 300);
+        }
+        if (!tronconsNotOk.isEmpty()) {
+            tronconsNotOk.forEach((t, e) -> {
+                GeotkFX.newExceptionDialog("La prestation sur le tronçon "  + t + " \nn'a pas pu être créée.", e).show();
+                SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
+            });
         }
 
     }
