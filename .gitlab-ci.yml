@@ -16,7 +16,6 @@ variables:
   NEXUS_CREDENTIALS: '$NEXUS_USER:$NEXUS_PASSWORD'
   SONAR_HOST_URL: 'https://sonar.geomatys.com'
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-  SONAR_HOST_URL: 'https://sonar.geomatys.com'
   GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
 
 build-linux:
@@ -102,3 +101,11 @@ quality:
   only:
     variables:
       - $SONAR_TOKEN
+
+build-quality:
+  stage: quality
+  tags:
+    - powershell
+  script:
+    #- keytool -importcert -file $CERTIFICATE -alias certificate -storepass changeit -noprompt
+    - mvn clean install $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS -DskipTests -Pall
