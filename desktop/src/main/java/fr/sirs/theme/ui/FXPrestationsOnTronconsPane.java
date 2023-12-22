@@ -15,6 +15,7 @@ import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.*;
 import fr.sirs.theme.ui.pojotable.PojoTableExternalAddable;
 import fr.sirs.ui.Growl;
+import fr.sirs.util.DesignationIncrementer;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.javafx.FloatSpinnerValueFactory;
@@ -222,7 +223,7 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
 //        });
 //        ui_photos.setClosable(false);
 
-        // The Prestation shall automatically be added to the SE registre depending on the type of Prestation.
+        // The Prestation shall automatically be added to the SE register depending on the type of Prestation.
         ui_typePrestationId.valueProperty().addListener(autoSelectRegistreListener());
 
         final AbstractSIRSRepository<Prestation> repo = Injector.getSession().getRepositoryForClass(Prestation.class);
@@ -236,7 +237,10 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
     private ChangeListener<RefPrestation> autoSelectRegistreListener() {
         return (obs, oldValue, newValue) -> {
             if (newValue != null) {
-                elementProperty().get().setRegistreAttribution(FXPrestationPane.isAutoSelectedRegistre(newValue.getId()));
+                final Prestation prestation = elementProperty().get();
+                if (prestation != null) {
+                    prestation.setRegistreAttribution(FXPrestationPane.isAutoSelectedRegistre(newValue.getId()));
+                }
             }
         };
     }
@@ -598,12 +602,30 @@ public class FXPrestationsOnTronconsPane extends AbstractFXElementPane<Prestatio
         final Prestation prestation = elementProperty.get();
 
         Prestation copy = null;
+        boolean tryAutoIncrement = Boolean.parseBoolean(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DESIGNATION_AUTO_INCREMENT)) && DesignationIncrementer.designationAsInt(prestation) != 0; //do not increment if the user has manually set a designation that is not a number
+        boolean notFirst = false;
+
+
+        final ElementCreator elementCreator;
+        if (tryAutoIncrement) {
+            elementCreator = Injector.getSession().getElementCreator();
+        } else {
+            elementCreator = null;
+        }
+
         for (Preview tronconP : selectedtroncons) {
             try {
                 copy = prestation.copy();
                 copy.setLinearId(tronconP.getElementId());
                 final TronconDigue troncon = tronconRepo.get(tronconP.getElementId());
 
+                if (tryAutoIncrement && notFirst) {
+
+                    // Determine an auto-incremented value for designation
+                    elementCreator.tryAutoIncrementDesignation(copy);
+                } else {
+                    notFirst = true;
+                }
                 copy.setSystemeRepId(troncon.getSystemeRepDefautId());
                 final ObservableList<String> borneIds = troncon.getBorneIds();
                 final List<BorneDigue> borneDigues = borneRepo.get(borneIds);
