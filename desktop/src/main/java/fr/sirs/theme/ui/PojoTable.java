@@ -579,9 +579,9 @@ public class PojoTable extends BorderPane implements Printable {
                         col.setVisible(newValue);
                     }
                     if (newValue) {
-                        uiObservationVisibility.setTooltip(new Tooltip("Cacher les informations des observations n et n-1"));
+                        uiObservationVisibility.setTooltip(new Tooltip("Cacher les informations des 2 dernières observations"));
                     } else {
-                        uiObservationVisibility.setTooltip(new Tooltip("Afficher les informations des observations n et n-1'"));
+                        uiObservationVisibility.setTooltip(new Tooltip("Afficher les informations des 2 dernières observations'"));
                     }
                 });
                 uiObservationVisibility.visibleProperty().bind(uiFicheMode.selectedProperty().not());
@@ -2448,20 +2448,19 @@ public class PojoTable extends BorderPane implements Printable {
                 throw new IllegalStateException("ObservationPropertyColumn only valid for Element implementing IDesordre. : " + pojoClass);
             }
             this.obsOrder = obsOrder;
-            final String extraText;
-            final String obsOrderText;
+            final String obsName;
             if (obsOrder == 0) {
-                extraText = "";
-                obsOrderText = "";
+                obsName = "Dernière observation";
+            } else  if (obsOrder == 1) {
+                obsName = "Avant-dernière observation";
             } else {
-                extraText = "Minus" + obsOrder;
-                obsOrderText = "-" + obsOrder;
+                obsName = "Observation n - " + obsOrder;
             }
             descName = desc.getName();
-            this.name = "obsN" + extraText + descName;
+            this.name = obsName + descName;
 
             String pName = obsMapper == null ? name : obsMapper.mapPropertyName(descName);
-            setText("Observation n" + obsOrderText + "\n" + pName);
+            setText(obsName + "\n" + pName);
 
             readMethod = desc.getReadMethod();
             writterMethod = desc.getWriteMethod();
