@@ -21,7 +21,7 @@
 
 ############## DEFAULT VALUES TO USE FOR RELEASE VERSION 								 ##############
 ############## WARNING : DO NOT AFFECT THOSE VARIABLES IN ANOTHER PLACE OF THIS SCRIPT ! ##############
-defaultMinor=47
+defaultMinor=48
 defaultMajor=2
 
 
