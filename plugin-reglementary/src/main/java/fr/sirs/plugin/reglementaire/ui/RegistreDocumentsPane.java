@@ -353,8 +353,6 @@ public final class RegistreDocumentsPane extends GridPane {
                     return;
                 }
 
-                Files.copy(f.toPath(), newFile.toPath());
-
                 final Optional confirmOpt = showConfirmationDialog("Souhaitez-vous mettre automatiquement à jour les prestations du tableau?" +
                         "\n\nLes éléments suivants seront mis à jour pour chaque prestation :" +
                         "\n\n    - la date d'horodatage : " + timeStampDate + ";" +
@@ -374,8 +372,15 @@ public final class RegistreDocumentsPane extends GridPane {
                     }
                 }
 
-                if (!extractElementsInFile(newFile, timeStampDate, updatePrestations)) return;
+                Files.copy(f.toPath(), newFile.toPath());
+
+                if (!extractElementsInFile(newFile, timeStampDate, updatePrestations)) {
+                    newFile.delete();
+                    return;
+                }
                 setProperty(newFile, TIMESTAMP_DATE, timeStampDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            } else {
+                Files.copy(f.toPath(), newFile.toPath());
             }
 
             // refresh tree
