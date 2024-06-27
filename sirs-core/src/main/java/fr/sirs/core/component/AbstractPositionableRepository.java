@@ -70,7 +70,11 @@ public abstract class AbstractPositionableRepository<T extends Positionable> ext
         boolean toSave = checkAndAdaptOnload(loaded);
 
         if (toSave) {
-            update(loaded);
+            try {
+                update(loaded);
+            } catch (RuntimeException re) {
+                SirsCore.LOGGER.log(Level.WARNING, "Failed to update loaded element with id : "+loaded.getId(), re);
+            }
         }
 
         return loaded;

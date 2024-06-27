@@ -34,6 +34,8 @@ import fr.sirs.couchdb2.Couchdb2ReplicationTask;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.util.ClosingDaemon;
 import fr.sirs.util.property.SirsPreferences;
+
+import static fr.sirs.core.SirsCore.LOGGER;
 import static fr.sirs.util.property.SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR;
 import static fr.sirs.util.property.SirsPreferences.PROPERTIES.NODE_NAME;
 import java.io.BufferedReader;
@@ -934,9 +936,13 @@ public class DatabaseRegistry {
 
         for (ModuleDescription.Layer l1: layers1) {
             boolean found = false;
+            if(l1 == null || l1.getTitle() == null) {
+                LOGGER.warning("The following layer is null or doesn't have a title, it is excluded from layers' merge.\n"+l1);
+                continue;
+            }
 
             for (ModuleDescription.Layer l2: layers2) {
-                if (l1.getTitle() != null && l1.getTitle().equals(l2.getTitle())) {
+                if (l1.getTitle().equals(l2.getTitle())) {
                     found = true;
                     mergeLayers(l1.children, l2.children);
                 }

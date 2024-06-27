@@ -134,6 +134,15 @@ public class ModuleDescription {
         public void setFilterValue(final String value) {
             filterValue.set(value);
         }
+
+        @Override
+        public String toString() {
+            return "Layer{" +
+                    "title=" + getTitle() +
+                    ", fieldToFilterOn=" + getFieldToFilterOn() +
+                    ", filterValue=" + getFilterValue() +
+                    '}';
+        }
     }
 
     public static Optional<Layer> getLayerDescription(final MapItem item) {
@@ -177,5 +186,14 @@ public class ModuleDescription {
             currentLayer.title.set(item.getName());
             return Optional.of(currentLayer);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "ModuleDescription{" +
+                "name=" + getName() +
+                ", version=" + getVersion() +
+                ", title=" + getTitle() +
+                '}';
     }
 }

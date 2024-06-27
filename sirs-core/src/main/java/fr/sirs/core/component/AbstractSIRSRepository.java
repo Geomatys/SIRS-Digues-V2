@@ -155,7 +155,8 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
     private void checkIntegrity(T entity){
         if(entity instanceof AvecForeignParent){
-            if(((AvecForeignParent) entity).getForeignParentId()==null) throw new IllegalArgumentException("L'élément ne peut être enregistré sans élement parent.");
+            if(((AvecForeignParent) entity).getForeignParentId()==null)
+                throw new IllegalArgumentException("L'élément "+entity.getId()+" ne peut être enregistré sans élement parent.");
         }
 //        if(entity instanceof Positionable) {
 //            ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test((Positionable) entity);
