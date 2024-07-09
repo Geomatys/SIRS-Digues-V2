@@ -88,7 +88,7 @@ release:
     - curl -k --fail -u $NEXUS_CREDENTIALS --upload-file macos.tar.gz $UPLOAD_URL
 
 quality:
-  image: images.geomatys.com/ci/maven:3-jdk-8-openjfx
+  image: maven:3.8-jdk-8
   stage: quality
   script:
     - mvn sonar:sonar $MAVEN_CLI_OPTS -s $MAVEN_SETTINGS
