@@ -418,11 +418,11 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="globalPrestationIds" upperBound="-1"
         eType="#//GlobalPrestation" eOpposite="#//GlobalPrestation/prestationIds"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="registreAttribution" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-     <eStructuralFeatures xsi:type="ecore:EReference" name="horodatageStatusId" eType="#//RefHorodatageStatus"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="horodatageStatusId" eType="#//RefHorodatageStatus"/>
         <eStructuralFeatures xsi:type="ecore:EAttribute" name="horodatageStartDate" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-        <eAnnotations source="localDate"/>
+    <eAnnotations source="localDate"/>
     </eStructuralFeatures>
-   <eStructuralFeatures xsi:type="ecore:EAttribute" name="syntheseTablePathStart" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="syntheseTablePathStart" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="horodatageDateDebutStart" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
         <eAnnotations source="localDate"/>
     </eStructuralFeatures>
@@ -436,6 +436,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="horodatageDateFinEnd" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
         <eAnnotations source="localDate"/>
     </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="planificationTravauxId" eType="#//RefPlanificationTravaux"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PositionDocument" eSuperTypes="#//AbstractPositionDocumentAssociable">
     <eAnnotations source="couchDBDocument"/>
@@ -1742,13 +1743,17 @@
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-   <eClassifiers xsi:type="ecore:EClass" name="RefHorodatageStatus" eSuperTypes="#//ReferenceType">
-      <eAnnotations source="couchDBDocument"/>
-      <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefHorodatageStatus" eSuperTypes="#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypologieTroncon" eSuperTypes="#//ReferenceType">
     <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefPlanificationTravaux" eSuperTypes="#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
 </ecore:EPackage>
