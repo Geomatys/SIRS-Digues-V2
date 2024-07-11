@@ -49,6 +49,8 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
     @FXML protected Button ui_typePrestationId_link;
     @FXML protected ComboBox ui_marcheId;
     @FXML protected Button ui_marcheId_link;
+    @FXML protected ComboBox ui_planificationTravauxId;
+    @FXML protected Button ui_planificationTravauxId_link;
     @FXML protected FXFreeTab ui_desordreIds;
     protected ListeningPojoTable desordreIdsTable;
     @FXML protected FXFreeTab ui_ouvrageAssocieAmenagementHydrauliqueIds;
@@ -114,6 +116,8 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
         ui_marcheId_link.disableProperty().bind(ui_marcheId.getSelectionModel().selectedItemProperty().isNull());
         ui_marcheId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
         ui_marcheId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_marcheId.getSelectionModel().getSelectedItem()));
+        ui_planificationTravauxId.disableProperty().bind(disableFieldsProperty());
+        ui_planificationTravauxId_link.setVisible(false);
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
 
         uiPosition.dependanceProperty().bind(elementProperty);
@@ -223,6 +227,7 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
             ui_sourceId.setItems(null);
             ui_typePrestationId.setItems(null);
             ui_marcheId.setItems(null);
+            ui_planificationTravauxId.setItems(null);
             ui_amenagementHydrauliqueId.setItems(null);
         } else {
 
@@ -254,6 +259,8 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
                 SIRS.initCombo(ui_marcheId, SIRS.observableList(
                         previewRepository.getByClass(linearPreview == null ? Marche.class : linearPreview.getJavaClassOr(Marche.class))).sorted(), linearPreview);
             }
+            final AbstractSIRSRepository<RefPlanificationTravaux> planificationTravauxIdRepo = session.getRepositoryForClass(RefPlanificationTravaux.class);
+            SIRS.initCombo(ui_planificationTravauxId, SIRS.observableList(planificationTravauxIdRepo.getAll()), (newElement.getPlanificationTravauxId() == null || newElement.getPlanificationTravauxId().trim().isEmpty()) ? null : planificationTravauxIdRepo.get(newElement.getPlanificationTravauxId()));
             // Propriétés de AvecGeometrie
             // Propriétés de AvecSettableGeometrie
             // Propriétés de ObjetDependanceAh
@@ -410,6 +417,14 @@ public class FXPrestationAmenagementHydrauliquePane extends AbstractFXElementPan
             element.setMarcheId(((Element)cbValue).getId());
         } else if (cbValue == null) {
             element.setMarcheId(null);
+        }
+        cbValue = ui_planificationTravauxId.getValue();
+        if (cbValue instanceof Preview) {
+            element.setPlanificationTravauxId(((Preview)cbValue).getElementId());
+        } else if (cbValue instanceof Element) {
+            element.setPlanificationTravauxId(((Element)cbValue).getId());
+        } else if (cbValue == null) {
+            element.setPlanificationTravauxId(null);
         }
         if (desordreIdsTable != null) {
             final List<DesordreDependance> currentDesordreList = new ArrayList<>();

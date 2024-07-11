@@ -60,6 +60,7 @@
         upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//EvenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="#//ObservationDependance" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="planificationTravauxId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefPlanificationTravaux"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OrganeProtectionCollective" eSuperTypes="#//ObjetDependanceAh">
     <eAnnotations source="couchDBDocument"/>
