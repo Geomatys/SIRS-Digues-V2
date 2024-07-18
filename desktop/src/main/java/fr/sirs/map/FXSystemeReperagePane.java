@@ -271,6 +271,9 @@ public class FXSystemeReperagePane extends FXAbstractEditOnTronconPane {
             if (b1.getLibelle() == null) {
                 return 1;
             }
+            if (b2.getLibelle() == null) {
+                return -1;
+            }
             return b1.getLibelle().compareToIgnoreCase(b2.getLibelle());
         });
 
