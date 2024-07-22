@@ -82,7 +82,7 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
 
         closeAllTabsAction = new MenuItem();
         closeAllTabsAction.setText(CLOSE_ALL);
-        closeAllTabsAction.setOnAction(this::closeAllTabs);
+        closeAllTabsAction.setOnAction(event -> Injector.getSession().getFrame().closeAllTabs(event));
 
         bindAction = new MenuItem();
 
@@ -92,9 +92,11 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
             if (tp == null || tp.equals(getTabPane())) {
                 bindAction.setText(UNBIND);
                 bindAction.setOnAction(this::unbind);
+                closeAllTabsAction.setVisible(true);
             } else {
                 bindAction.setText(BIND);
                 bindAction.setOnAction(this::bind);
+                closeAllTabsAction.setVisible(false);
             }
         });
 
@@ -187,10 +189,6 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
             this.getTabPane().getTabs().remove(FXFreeTab.this);
             oldPane.getTabs().add(FXFreeTab.this);
         }
-    }
-
-    public void closeAllTabs(final ActionEvent evt) {
-        Injector.getSession().getFrame().getUiTabs().getTabs().clear();
     }
 
     private void supplierChanged(final ObservableValue<? extends Supplier<Node>> obs, final Supplier<Node> oldSupplier, final Supplier<Node> newSupplier) {

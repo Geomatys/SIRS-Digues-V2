@@ -391,6 +391,11 @@ public class FXMainFrame extends BorderPane {
         return mapTab;
     }
 
+    public void closeAllTabs(final ActionEvent evt) {
+        // All tabs are being closed except the Carte tab. The Carte tab is always at index 0.
+        uiTabs.getTabs().remove(1, uiTabs.getTabs().size());
+    }
+
     public synchronized DiguesTab getDiguesTab() {
         if(diguesTab==null){
             diguesTab = new DiguesTab(uiTabs);
