@@ -278,6 +278,16 @@ public class BookMark
        return author;
     }
     /**
+    * JavaFX property for lastUpdateAuthor.
+    */
+    private final StringProperty  lastUpdateAuthor = new SimpleStringProperty();
+    /**
+    * @return JavaFX observable property for lastUpdateAuthor.
+    */
+    public StringProperty lastUpdateAuthorProperty() {
+       return lastUpdateAuthor;
+    }
+    /**
     * JavaFX property for valid.
     */
     private final BooleanProperty  valid = new SimpleBooleanProperty();
@@ -362,6 +372,15 @@ public class BookMark
         this.author.set(author);
     }
 
+    public String getLastUpdateAuthor(){
+        return this.lastUpdateAuthor.get();
+    }
+
+
+    public void setLastUpdateAuthor(String lastUpdateAuthor){
+        this.lastUpdateAuthor.set(lastUpdateAuthor);
+    }
+
     public boolean getValid(){
         return this.valid.get();
     }
@@ -392,6 +411,7 @@ public class BookMark
         bookMark.setMotDePasse(getMotDePasse());
         bookMark.setDesignation(getDesignation());
         bookMark.setAuthor(getAuthor());
+        bookMark.setLastUpdateAuthor(getLastUpdateAuthor());
         bookMark.setValid(getValid());
         bookMark.setTypeService(getTypeService());
 
@@ -442,6 +462,9 @@ public class BookMark
         builder.append("author: ");
         builder.append(getAuthor());
         builder.append(", ");
+        builder.append("lastUpdateAuthor: ");
+        builder.append(getLastUpdateAuthor());
+        builder.append(", ");
         builder.append("valid: ");
         builder.append(getValid());
         builder.append(", ");
@@ -465,6 +488,7 @@ public class BookMark
             if ((this.getMotDePasse()==null ^ other.getMotDePasse()==null) || ( (this.getMotDePasse()!=null && other.getMotDePasse()!=null) && !this.getMotDePasse().equals(other.getMotDePasse()))) return false;
             if ((this.getDesignation()==null ^ other.getDesignation()==null) || ( (this.getDesignation()!=null && other.getDesignation()!=null) && !this.getDesignation().equals(other.getDesignation()))) return false;
             if ((this.getAuthor()==null ^ other.getAuthor()==null) || ( (this.getAuthor()!=null && other.getAuthor()!=null) && !this.getAuthor().equals(other.getAuthor()))) return false;
+            if ((this.getLastUpdateAuthor()==null ^ other.getLastUpdateAuthor()==null) || ( (this.getLastUpdateAuthor()!=null && other.getLastUpdateAuthor()!=null) && !this.getLastUpdateAuthor().equals(other.getLastUpdateAuthor()))) return false;
             if (this.getValid() != other.getValid()) return false;
             if ((this.getTypeService()==null ^ other.getTypeService()==null) || ( (this.getTypeService()!=null && other.getTypeService()!=null) && !this.getTypeService().equals(other.getTypeService()))) return false;
             return true;
@@ -493,4 +517,3 @@ public class BookMark
     }
 
 }
-
