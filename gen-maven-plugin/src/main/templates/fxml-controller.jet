@@ -138,6 +138,7 @@ for(EClass eClass: helper.getTypeTree() ) {
         if (eAtt.getName().equalsIgnoreCase(Helper.DESIGNATION_FIELD_NAME)) continue;
         if (eAtt.getName().equalsIgnoreCase(Helper.VALID_FIELD_NAME)) continue;
         if (eAtt.getName().equalsIgnoreCase(Helper.AUTHOR_FIELD_NAME)) continue;
+        if (eAtt.getName().equalsIgnoreCase(Helper.LAST_UPDATE_AUTHOR_FIELD_NAME)) continue;
         if (ModelHelper.isManaged(eAtt)) {
             attributes.add(eAtt);
         }

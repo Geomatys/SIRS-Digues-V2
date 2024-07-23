@@ -75,6 +75,7 @@ public class  Helper {
     public static final String DESIGNATION_FIELD_NAME = "designation";
     public static final String VALID_FIELD_NAME = "valid";
     public static final String AUTHOR_FIELD_NAME = "author";
+    public static final String LAST_UPDATE_AUTHOR_FIELD_NAME = "lastUpdateAuthor";
     public static final String SUITE_FIELD_NAME = "suite";
     public static final String EVOLUTION_FIELD_NAME = "evolution";
 
