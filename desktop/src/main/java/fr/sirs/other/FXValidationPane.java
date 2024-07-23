@@ -31,6 +31,8 @@ import static fr.sirs.SIRS.PREVIEW_BUNDLE_KEY_LIBELLE;
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
+import static fr.sirs.core.SirsCore.PREVIEW_BUNDLE_KEY_LAST_UPDATE_AUTHOR;
+
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.TronconDigueRepository;
@@ -200,6 +202,14 @@ public class FXValidationPane extends BorderPane {
             });
         authorColumn.setCellFactory((TableColumn<Preview, String> param) -> new ReferenceTableCell(Utilisateur.class));
         table.getColumns().add(authorColumn);
+
+        // Colonne de l'auteur de la dernière modification.
+        final TableColumn<Preview, String> lastUpatdeAuthorColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_LAST_UPDATE_AUTHOR));
+        lastUpatdeAuthorColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
+                return new SimpleObjectProperty(param.getValue().getLastUpdateAuthor());
+            });
+        lastUpatdeAuthorColumn.setCellFactory((TableColumn<Preview, String> param) -> new ReferenceTableCell(Utilisateur.class));
+        table.getColumns().add(lastUpatdeAuthorColumn);
 
         // SYM-1941 : Ajout Colonne tronçon
         final TableColumn<Preview, String> tronconColumn = new TableColumn<>("Tronçon - document : designation");
