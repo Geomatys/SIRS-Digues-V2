@@ -210,6 +210,7 @@ public class SirsCore {
     public static final String DESIGNATION_FIELD = "designation";
     public static final String VALID_FIELD = "valid";
     public static final String AUTHOR_FIELD = "author";
+    public static final String LAST_UPDATE_AUTHOR_FIELD = "lastUpdateAuthor";
 
     public static final String DOCUMENT_ID_FIELD = "documentId";
     public static final String ID_FIELD = "id";
@@ -291,6 +292,7 @@ public class SirsCore {
     public static final String PREVIEW_BUNDLE_KEY_LIBELLE = "libelle";
     public static final String PREVIEW_BUNDLE_KEY_DESIGNATION = "designation";
     public static final String PREVIEW_BUNDLE_KEY_AUTHOR = "author";
+    public static final String PREVIEW_BUNDLE_KEY_LAST_UPDATE_AUTHOR = "lastUpdateAuthor";
 
     // Méthodes utilisées pour les références
     public static final String REFERENCE_GET_ID = "getId";

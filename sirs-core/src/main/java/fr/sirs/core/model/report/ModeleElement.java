@@ -109,6 +109,12 @@ public class ModeleElement extends CouchDbDocument
        return author;
     }
 
+    private final StringProperty  lastUpdateAuthor = new SimpleStringProperty();
+    @Override
+    public StringProperty lastUpdateAuthorProperty() {
+       return lastUpdateAuthor;
+    }
+
     private final StringProperty  targetClass = new SimpleStringProperty();
     public StringProperty targetClassProperty() {
        return targetClass;
@@ -151,6 +157,15 @@ public class ModeleElement extends CouchDbDocument
         this.author.set(author);
     }
 
+    public String getLastUpdateAuthor(){
+        return this.lastUpdateAuthor.get();
+    }
+
+
+    public void setLastUpdateAuthor(String lastUpdateAuthor){
+        this.lastUpdateAuthor.set(lastUpdateAuthor);
+    }
+
     public String getTargetClass(){
         return this.targetClass.get();
     }
@@ -186,6 +201,7 @@ public class ModeleElement extends CouchDbDocument
         templateOdt.setDesignation(getDesignation());
         templateOdt.setValid(getValid());
         templateOdt.setAuthor(getAuthor());
+        templateOdt.setLastUpdateAuthor(getLastUpdateAuthor());
         templateOdt.setTargetClass(getTargetClass());
         templateOdt.setLibelle(getLibelle());
         templateOdt.setOdt(getOdt());
@@ -228,6 +244,9 @@ public class ModeleElement extends CouchDbDocument
         builder.append("author: ");
         builder.append(getAuthor());
         builder.append(", ");
+        builder.append("lastUpdateAuthor: ");
+        builder.append(getLastUpdateAuthor());
+        builder.append(", ");
         builder.append("fichier: ");
         builder.append(getTargetClass());
         builder.append(", ");
@@ -250,6 +269,7 @@ public class ModeleElement extends CouchDbDocument
             if ((this.getDesignation()==null ^ other.getDesignation()==null) || ( (this.getDesignation()!=null && other.getDesignation()!=null) && !this.getDesignation().equals(other.getDesignation()))) return false;
             if (this.getValid() != other.getValid()) return false;
             if ((this.getAuthor()==null ^ other.getAuthor()==null) || ( (this.getAuthor()!=null && other.getAuthor()!=null) && !this.getAuthor().equals(other.getAuthor()))) return false;
+            if ((this.getLastUpdateAuthor()==null ^ other.getLastUpdateAuthor()==null) || ( (this.getLastUpdateAuthor()!=null && other.getLastUpdateAuthor()!=null) && !this.getLastUpdateAuthor().equals(other.getLastUpdateAuthor()))) return false;
             if ((this.getTargetClass()==null ^ other.getTargetClass()==null) || ( (this.getTargetClass()!=null && other.getTargetClass()!=null) && !this.getTargetClass().equals(other.getTargetClass()))) return false;
             if ((this.getLibelle()==null ^ other.getLibelle()==null) || ( (this.getLibelle()!=null && other.getLibelle()!=null) && !this.getLibelle().equals(other.getLibelle()))) return false;
             return !((this.getOdt()==null ^ other.getOdt()==null) || ( (this.getOdt()!=null && other.getOdt()!=null) && !Arrays.equals(this.getOdt(), other.getOdt())));
@@ -278,4 +298,3 @@ public class ModeleElement extends CouchDbDocument
     }
 
 }
-

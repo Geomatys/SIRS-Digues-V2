@@ -180,10 +180,20 @@ public class ParametreHydrauliqueProfilTravers
     */
     private final StringProperty  author = new SimpleStringProperty();
     /**
-    * @return JavaFX observable property for author.
-    */
+     * @return JavaFX observable property for author.
+     */
     public StringProperty authorProperty() {
-       return author;
+        return author;
+    }
+    /**
+    * JavaFX property for lastUpdateAuthor.
+    */
+    private final StringProperty  lastUpdateAuthor = new SimpleStringProperty();
+    /**
+     * @return JavaFX observable property for lastUpdateAuthor.
+     */
+    public StringProperty lastUpdateAuthorProperty() {
+        return lastUpdateAuthor;
     }
     /**
     * JavaFX property for designation.
@@ -289,9 +299,16 @@ public class ParametreHydrauliqueProfilTravers
         return this.author.get();
     }
 
-
     public void setAuthor(String author){
         this.author.set(author);
+    }
+
+    public String getLastUpdateAuthor(){
+        return this.lastUpdateAuthor.get();
+    }
+
+    public void setLastUpdateAuthor(String lastUpdateAuthor){
+        this.lastUpdateAuthor.set(lastUpdateAuthor);
     }
 
     public String getDesignation(){
@@ -332,6 +349,7 @@ public class ParametreHydrauliqueProfilTravers
         parametreHydrauliqueProfilTravers.setCoteEau(getCoteEau());
         parametreHydrauliqueProfilTravers.setCommentaire(getCommentaire());
         parametreHydrauliqueProfilTravers.setAuthor(getAuthor());
+        parametreHydrauliqueProfilTravers.setLastUpdateAuthor(getLastUpdateAuthor());
         parametreHydrauliqueProfilTravers.setDesignation(getDesignation());
         parametreHydrauliqueProfilTravers.setValid(getValid());
         parametreHydrauliqueProfilTravers.setEvenementHydrauliqueId(getEvenementHydrauliqueId());
@@ -380,6 +398,9 @@ public class ParametreHydrauliqueProfilTravers
         builder.append("author: ");
         builder.append(getAuthor());
         builder.append(", ");
+        builder.append("lastUpdateAuthor: ");
+        builder.append(getLastUpdateAuthor());
+        builder.append(", ");
         builder.append("designation: ");
         builder.append(getDesignation());
         builder.append(", ");
@@ -402,6 +423,7 @@ public class ParametreHydrauliqueProfilTravers
             if (this.getCoteEau() != other.getCoteEau()) return false;
             if ((this.getCommentaire()==null ^ other.getCommentaire()==null) || ( (this.getCommentaire()!=null && other.getCommentaire()!=null) && !this.getCommentaire().equals(other.getCommentaire()))) return false;
             if ((this.getAuthor()==null ^ other.getAuthor()==null) || ( (this.getAuthor()!=null && other.getAuthor()!=null) && !this.getAuthor().equals(other.getAuthor()))) return false;
+            if ((this.getLastUpdateAuthor()==null ^ other.getLastUpdateAuthor()==null) || ( (this.getLastUpdateAuthor()!=null && other.getLastUpdateAuthor()!=null) && !this.getLastUpdateAuthor().equals(other.getLastUpdateAuthor()))) return false;
             if ((this.getDesignation()==null ^ other.getDesignation()==null) || ( (this.getDesignation()!=null && other.getDesignation()!=null) && !this.getDesignation().equals(other.getDesignation()))) return false;
             if (this.getValid() != other.getValid()) return false;
             if ((this.getEvenementHydrauliqueId()==null ^ other.getEvenementHydrauliqueId()==null) || ( (this.getEvenementHydrauliqueId()!=null && other.getEvenementHydrauliqueId()!=null) && !this.getEvenementHydrauliqueId().equals(other.getEvenementHydrauliqueId()))) return false;
@@ -439,4 +461,3 @@ public class ParametreHydrauliqueProfilTravers
     }
 
 }
-

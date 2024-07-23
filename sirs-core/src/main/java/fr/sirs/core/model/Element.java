@@ -94,6 +94,16 @@ public interface Element extends Identifiable, Serializable {
     String getAuthor();
     StringProperty authorProperty();
     void setAuthor(String author);
+
+    /**
+     * Manage the author of the last update of an element. This piece of information is used for
+     * validation of documents created by external members.
+     *
+     * @return Identifier of this object lastUpdateAuthor.
+     */
+    String getLastUpdateAuthor();
+    StringProperty lastUpdateAuthorProperty();
+    void setLastUpdateAuthor(String lastUpdateAuthor);
     
     /**
      * Manage the validity of an element.

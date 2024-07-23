@@ -187,6 +187,12 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
        return author;
     }
 
+    private final StringProperty  lastUpdateAuthor = new SimpleStringProperty();
+    @Override
+    public StringProperty lastUpdateAuthorProperty() {
+        return lastUpdateAuthor;
+    }
+
     private final BooleanProperty  valid = new SimpleBooleanProperty();
     @Override
     public BooleanProperty validProperty() {
@@ -220,6 +226,16 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
     @Override
     public void setAuthor(String author){
         this.author.set(author);
+    }
+
+    @Override
+    public String getLastUpdateAuthor(){
+        return this.lastUpdateAuthor.get();
+    }
+
+    @Override
+    public void setLastUpdateAuthor(String lastUpdateAuthor){
+        this.lastUpdateAuthor.set(lastUpdateAuthor);
     }
 
     @Override
@@ -294,6 +310,9 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
         builder.append("author: ");
         builder.append(getAuthor());
         builder.append(", ");
+        builder.append("lastUpatdeAuthor: ");
+        builder.append(getLastUpdateAuthor());
+        builder.append(", ");
         builder.append("valid: ");
         builder.append(getValid());
         builder.append(", ");
@@ -316,6 +335,7 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
                 if (other.getId() != null) return false;
             } else if (!getId().equals(other.getId())) return false;
             if ((this.getAuthor()==null ^ other.getAuthor()==null) || ( (this.getAuthor()!=null && other.getAuthor()!=null) && !this.getAuthor().equals(other.getAuthor()))) return false;
+            if ((this.getLastUpdateAuthor()==null ^ other.getLastUpdateAuthor()==null) || ( (this.getLastUpdateAuthor()!=null && other.getLastUpdateAuthor()!=null) && !this.getLastUpdateAuthor().equals(other.getLastUpdateAuthor()))) return false;
             if (this.getValid() != other.getValid()) return false;
             if ((this.getDesignation()==null ^ other.getDesignation()==null) || ( (this.getDesignation()!=null && other.getDesignation()!=null) && !this.getDesignation().equals(other.getDesignation()))) return false;
             if ((this.getLibelle()==null ^ other.getLibelle()==null) || ( (this.getLibelle()!=null && other.getLibelle()!=null) && !this.getLibelle().equals(other.getLibelle()))) return false;
@@ -331,6 +351,7 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
      */
     protected void copy(final AbstractSectionRapport target) {
         target.setAuthor(getAuthor());
+        target.setLastUpdateAuthor(getLastUpdateAuthor());
         target.setValid(getValid());
         target.setDesignation(getDesignation());
         target.setLibelle(getLibelle());
@@ -586,4 +607,3 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
                 .collect(Collectors.toList());
     }
 }
-

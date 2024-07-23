@@ -102,6 +102,12 @@ public class ModeleRapport  extends CouchDbDocument
        return author;
     }
 
+    private final StringProperty  lastUpdateAuthor = new SimpleStringProperty();
+    @Override
+    public StringProperty lastUpdateAuthorProperty() {
+       return lastUpdateAuthor;
+    }
+
     private final BooleanProperty  valid = new SimpleBooleanProperty();
     @Override
     public BooleanProperty validProperty() {
@@ -153,6 +159,16 @@ public class ModeleRapport  extends CouchDbDocument
     }
 
     @Override
+    public String getLastUpdateAuthor() {
+        return this.lastUpdateAuthor.get();
+    }
+
+    @Override
+    public void setLastUpdateAuthor(String lastUpdateAuthor) {
+        this.lastUpdateAuthor.set(lastUpdateAuthor);
+    }
+
+    @Override
     public boolean getValid(){
         return this.valid.get();
     }
@@ -192,6 +208,7 @@ public class ModeleRapport  extends CouchDbDocument
 
         copy.setDesignation(getDesignation());
         copy.setAuthor(getAuthor());
+        copy.setLastUpdateAuthor(getLastUpdateAuthor());
         copy.setValid(getValid());
         copy.setLibelle(getLibelle());
 
@@ -236,6 +253,9 @@ public class ModeleRapport  extends CouchDbDocument
         builder.append("author: ");
         builder.append(getAuthor());
         builder.append(", ");
+        builder.append("lastUpdateAuthor: ");
+        builder.append(getLastUpdateAuthor());
+        builder.append(", ");
         builder.append("valid: ");
         builder.append(getValid());
         builder.append(", ");
@@ -254,6 +274,7 @@ public class ModeleRapport  extends CouchDbDocument
             } else if (!getId().equals(other.getId())) return false;
             if ((this.getDesignation()==null ^ other.getDesignation()==null) || ( (this.getDesignation()!=null && other.getDesignation()!=null) && !this.getDesignation().equals(other.getDesignation()))) return false;
             if ((this.getAuthor()==null ^ other.getAuthor()==null) || ( (this.getAuthor()!=null && other.getAuthor()!=null) && !this.getAuthor().equals(other.getAuthor()))) return false;
+            if ((this.getLastUpdateAuthor()==null ^ other.getLastUpdateAuthor()==null) || ( (this.getLastUpdateAuthor()!=null && other.getLastUpdateAuthor()!=null) && !this.getLastUpdateAuthor().equals(other.getLastUpdateAuthor()))) return false;
             if (this.getValid() != other.getValid()) return false;
             if ((this.getLibelle()==null ^ other.getLibelle()==null) || ( (this.getLibelle()!=null && other.getLibelle()!=null) && !this.getLibelle().equals(other.getLibelle()))) return false;
             return true;
@@ -292,4 +313,3 @@ public class ModeleRapport  extends CouchDbDocument
     }
 
 }
-
