@@ -245,6 +245,16 @@ public class ObligationReglementaire
        return author;
     }
     /**
+    * JavaFX property for lastUpdateAuthor.
+    */
+    private final StringProperty  lastUpdateAuthor = new SimpleStringProperty();
+    /**
+    * @return JavaFX observable property for lastUpdateAuthor.
+    */
+    public StringProperty lastUpdateAuthorProperty() {
+       return lastUpdateAuthor;
+    }
+    /**
     * JavaFX property for valid.
     */
     private final BooleanProperty  valid = new SimpleBooleanProperty();
@@ -314,6 +324,15 @@ public class ObligationReglementaire
         
     public void setAuthor(String author){
         this.author.set(author);
+    }
+
+    public String getLastUpdateAuthor(){
+        return this.lastUpdateAuthor.get();
+    }
+
+
+    public void setLastUpdateAuthor(String lastUpdateAuthor){
+        this.lastUpdateAuthor.set(lastUpdateAuthor);
     }
     
     public boolean getValid(){
@@ -404,6 +423,7 @@ public class ObligationReglementaire
         obligationReglementaire.setCommentaire(getCommentaire());
         obligationReglementaire.setDesignation(getDesignation());
         obligationReglementaire.setAuthor(getAuthor());
+        obligationReglementaire.setLastUpdateAuthor(getLastUpdateAuthor());
         obligationReglementaire.setValid(getValid());
         obligationReglementaire.setAnnee(getAnnee());
         obligationReglementaire.setSystemeEndiguementId(getSystemeEndiguementId());
@@ -448,6 +468,9 @@ public class ObligationReglementaire
         builder.append("author: ");
         builder.append(getAuthor());
         builder.append(", ");
+        builder.append("lastUpdateAuthor: ");
+        builder.append(getLastUpdateAuthor());
+        builder.append(", ");
         builder.append("valid: ");
         builder.append(getValid());
         builder.append(", ");
@@ -468,6 +491,7 @@ public class ObligationReglementaire
             if ((this.getCommentaire()==null ^ other.getCommentaire()==null) || ( (this.getCommentaire()!=null && other.getCommentaire()!=null) && !this.getCommentaire().equals(other.getCommentaire()))) return false;
             if ((this.getDesignation()==null ^ other.getDesignation()==null) || ( (this.getDesignation()!=null && other.getDesignation()!=null) && !this.getDesignation().equals(other.getDesignation()))) return false;
             if ((this.getAuthor()==null ^ other.getAuthor()==null) || ( (this.getAuthor()!=null && other.getAuthor()!=null) && !this.getAuthor().equals(other.getAuthor()))) return false;
+            if ((this.getLastUpdateAuthor()==null ^ other.getLastUpdateAuthor()==null) || ( (this.getLastUpdateAuthor()!=null && other.getLastUpdateAuthor()!=null) && !this.getLastUpdateAuthor().equals(other.getLastUpdateAuthor()))) return false;
             if (this.getValid() != other.getValid()) return false;
             if (this.getAnnee() != other.getAnnee()) return false;
             if ((this.getSystemeEndiguementId()==null ^ other.getSystemeEndiguementId()==null) || ( (this.getSystemeEndiguementId()!=null && other.getSystemeEndiguementId()!=null) && !this.getSystemeEndiguementId().equals(other.getSystemeEndiguementId()))) return false;
@@ -523,4 +547,3 @@ public class ObligationReglementaire
     }
 
 }
-
