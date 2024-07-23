@@ -94,6 +94,7 @@ public class ElementCreator {
             final Utilisateur utilisateur = ownableSession.getUtilisateur();
             if (ownableSession.getUtilisateur() != null) {
                 element.setAuthor(utilisateur.getId());
+                element.setLastUpdateAuthor(utilisateur.getId());
             }
 
             if (tryAutoIncrement) {

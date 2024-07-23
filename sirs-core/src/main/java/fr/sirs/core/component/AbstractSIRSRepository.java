@@ -21,6 +21,7 @@ package fr.sirs.core.component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import fr.sirs.core.CacheRules;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.*;
@@ -101,6 +102,10 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
     @Autowired
     protected GlobalRepository globalRepo;
+
+
+    @Autowired
+    private SessionCore ownableSession;
 
     private StreamingViewIterable allStreaming;
 
@@ -309,6 +314,13 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         checkIntegrity(entity);
         if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
             ((AvecDateMaj) entity).setDateMaj(LocalDate.now());
+            if (entity instanceof Element) {
+                final Utilisateur utilisateur = ownableSession.getUtilisateur();
+                if (utilisateur != null) {
+                    final Element element = ((Element) entity);
+                    element.setLastUpdateAuthor(utilisateur.getId());
+                }
+            }
         }
         // Update the 1-n relations in case there are some.
         update1NRelations(entity);

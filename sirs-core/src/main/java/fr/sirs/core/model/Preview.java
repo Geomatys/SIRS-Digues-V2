@@ -55,6 +55,9 @@ public class Preview implements AvecFinTemporelle, AvecLibelle, Comparable, Avec
     @JsonProperty("author")
     private String author;
 
+    @JsonProperty("lastUpdateAuthor")
+    private String lastUpdateAuthor;
+
     @JsonProperty("valid")
     private boolean valid;
 
@@ -107,6 +110,14 @@ public class Preview implements AvecFinTemporelle, AvecLibelle, Comparable, Avec
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public String getLastUpdateAuthor() {
+        return lastUpdateAuthor;
+    }
+
+    public void setLastUpdateAuthor(String lastUpdateAuthor) {
+        this.lastUpdateAuthor = lastUpdateAuthor;
     }
 
     public boolean getValid() {
@@ -184,6 +195,7 @@ public class Preview implements AvecFinTemporelle, AvecLibelle, Comparable, Avec
                 ", elementId='" + elementId + '\'' +
                 ", elementClass='" + elementClass + '\'' +
                 ", author='" + author + '\'' +
+                ", lastUpdateAuthor='" + lastUpdateAuthor + '\'' +
                 ", valid=" + valid +
                 ", date_fin=" + date_fin +
                 ", designationProperty=" + designationProperty +
