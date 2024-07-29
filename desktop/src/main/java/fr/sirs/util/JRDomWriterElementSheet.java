@@ -394,8 +394,12 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
                 valueField = document.createCDATASection("$F{"+field+"}==null ? \""+NULL_REPLACEMENT+"\" : ($F{"+field+"} ? \""+TRUE_REPLACEMENT+"\" : \""+FALSE_REPLACEMENT+"\")");
             }
         }
-        else{
-            valueField = document.createCDATASection("$F{"+field+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+field+"}");
+        else {
+            if ("lastUpdateAuthor".equals(field)) {
+                valueField = document.createCDATASection("fr.sirs.util.JRXMLUtil.displayLogin($F{" + field + "})");
+            } else {
+                valueField = document.createCDATASection("$F{" + field + "}==null ? \"" + NULL_REPLACEMENT + "\" : $F{" + field + "}");
+            }
         }
 
         // Builds the DOM tree.-------------------------------------------------
