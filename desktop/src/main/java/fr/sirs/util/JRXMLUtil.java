@@ -22,7 +22,12 @@ import fr.sirs.Injector;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
-import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.component.UtilisateurRepository;
+import fr.sirs.core.model.*;
+import org.apache.sis.util.ArgumentChecks;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDate;
@@ -33,11 +38,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 
-import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.component.UtilisateurRepository;
-import fr.sirs.core.model.*;
-import org.apache.sis.util.ArgumentChecks;
+import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
 
 /**
  * Classe utilitaire réservée aux méthodes utilisées depuis les fichiers JRXML.
@@ -62,6 +63,7 @@ import org.apache.sis.util.ArgumentChecks;
 public class JRXMLUtil {
 
     private static final NumberFormat PR_FORMAT = new DecimalFormat("#.##");
+    private static final SirsStringConverter converter = new SirsStringConverter();
 
     private JRXMLUtil(){}
 
@@ -296,7 +298,7 @@ public class JRXMLUtil {
      * @param fieldClass class of the item to display libelle for.
      * @return the libelle of the item.
      */
-    public static String displayLibelleFromId(final String fieldId, final String fieldClass){
+    public static String displayLibelleFromId(final String fieldId, final String fieldClass) {
         if (RefPrestation.class.getSimpleName().equals(fieldClass)) {
             AbstractSIRSRepository<RefPrestation> typeRepo = Injector.getSession().getRepositoryForClass(RefPrestation.class);
             final RefPrestation refPrestation = typeRepo.get(fieldId);
@@ -307,10 +309,20 @@ public class JRXMLUtil {
             final TronconDigue tronconDigue = tronconRepo.get(fieldId);
             if (tronconDigue == null) return "";
             return tronconDigue.getLibelle();
-
         }
-
         return "";
+    }
+
+    /**
+     * Method to get the libelle of an item.
+     *
+     * @param fieldId id of the item to display libelle for.
+     * @return the libelle of the item.
+     */
+    public static String displayFromPreviewId(final String fieldId) {
+        Preview preview = InjectorCore.getBean(SessionCore.class).getPreviews().get(fieldId);
+        if (preview == null) return "";
+        return converter.toString(preview);
     }
 
     /**

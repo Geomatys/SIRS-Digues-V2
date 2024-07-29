@@ -242,7 +242,11 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
 
             // Writes the field.--------------------------------------------
             if(avoidFields==null || !avoidFields.contains(fieldName)){
-                writeDetailField(fieldName, fieldClass, i, markup, resourceBundle);
+                if (TronconDigue.class.isAssignableFrom(classToMap) && "amenagementHydrauliqueId".equals(fieldName)) {
+                    writeDetailField(fieldName, fieldClass, i, markup, resourceBundle, true);
+                } else {
+                    writeDetailField(fieldName, fieldClass, i, markup, resourceBundle);
+                }
                 i++;
             }
         }
@@ -258,10 +262,25 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
     /**
      * <p>This method writes the variable of a given field.</p>
      * @param field
+     * @param fieldClass
      * @param order
-     * @param heightMultiplicator
+     * @param markup
+     * @param resourceBundle
      */
-    private void writeDetailField(final String field, final Class fieldClass, final int order, final Markup markup, final LabelMapper resourceBundle){
+    private void writeDetailField(final String field, final Class fieldClass, final int order, final Markup markup, final LabelMapper resourceBundle) {
+        writeDetailField(field, fieldClass, order, markup, resourceBundle, false);
+    }
+
+        /**
+         * <p>This method writes the variable of a given field.</p>
+         * @param field
+         * @param fieldClass
+         * @param order
+         * @param markup
+         * @param resourceBundle
+         * @param searchIdInPreviews used to force fetch an element in Previews in case the class in not accessible from the core/the plugin
+         */
+    private void writeDetailField(final String field, final Class fieldClass, final int order, final Markup markup, final LabelMapper resourceBundle, final boolean searchIdInPreviews){
 
         // Looks for the band element.------------------------------------------
         final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
@@ -397,6 +416,8 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
         else {
             if ("lastUpdateAuthor".equals(field)) {
                 valueField = document.createCDATASection("fr.sirs.util.JRXMLUtil.displayLogin($F{" + field + "})");
+            } else if (searchIdInPreviews) {
+                valueField = document.createCDATASection("fr.sirs.util.JRXMLUtil.displayFromPreviewId($F{" + field + "})");
             } else {
                 valueField = document.createCDATASection("$F{" + field + "}==null ? \"" + NULL_REPLACEMENT + "\" : $F{" + field + "}");
             }
