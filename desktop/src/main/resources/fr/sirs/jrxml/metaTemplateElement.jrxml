@@ -33,6 +33,6 @@
 		<band height="2" splitType="Stretch"/>
 	</columnHeader>
 	<detail>
-		<band height="2" splitType="Stretch"/>
+		<band height="2" splitType="Immediate"/>
 	</detail>
 </jasperReport>

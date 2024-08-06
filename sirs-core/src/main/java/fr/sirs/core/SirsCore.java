@@ -275,6 +275,10 @@ public class SirsCore {
 
         // Prestations
         public static final String PRESTATION_REFERENCE = "prestationIds";
+        public static final String PRESTATION_HORODATAGE_DEBUT_START = "horodatageDateDebutStart";
+        public static final String PRESTATION_HORODATAGE_FIN_START = "horodatageDateFinStart";
+        public static final String PRESTATION_HORODATAGE_DEBUT_END = "horodatageDateDebutEnd";
+        public static final String PRESTATION_HORODATAGE_FIN_END = "horodatageDateFinEnd";
 
 
         public static final String ARTICLE_REFERENCE = "articleIds";

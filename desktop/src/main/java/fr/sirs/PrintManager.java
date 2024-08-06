@@ -21,11 +21,8 @@ package fr.sirs;
 import com.sun.javafx.stage.StageHelper;
 import static fr.sirs.core.SirsCore.*;
 import static fr.sirs.core.SirsCore.DesordreFields.*;
-import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.TronconDigue;
+
+import fr.sirs.core.model.*;
 import fr.sirs.util.JRColumnParameter;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
@@ -242,6 +239,12 @@ public class PrintManager {
         for(final Element element : elementsToPrint){
             if(element instanceof TronconDigue){
                 if(!avoidFields.contains(BORNE_IDS_REFERENCE)) avoidFields.add(BORNE_IDS_REFERENCE);
+
+            } else if (element instanceof Prestation) {
+                if (!avoidFields.contains(PRESTATION_HORODATAGE_DEBUT_START)) avoidFields.add(PRESTATION_HORODATAGE_DEBUT_START);
+                if (!avoidFields.contains(PRESTATION_HORODATAGE_FIN_START)) avoidFields.add(PRESTATION_HORODATAGE_FIN_START);
+                if (!avoidFields.contains(PRESTATION_HORODATAGE_DEBUT_END)) avoidFields.add(PRESTATION_HORODATAGE_DEBUT_END);
+                if (!avoidFields.contains(PRESTATION_HORODATAGE_FIN_END)) avoidFields.add(PRESTATION_HORODATAGE_FIN_END);
             }
         }
 
