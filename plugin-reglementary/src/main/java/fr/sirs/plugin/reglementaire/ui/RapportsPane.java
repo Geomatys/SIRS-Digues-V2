@@ -61,7 +61,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javafx.application.Platform;
@@ -337,7 +336,7 @@ public class RapportsPane extends BorderPane {
                 updateMessage("Recherche des objets du rapport...");
                 final ObservableList<TronconDigue> troncons = uiTroncons.getSelectionModel().getSelectedItems();
                 final Collection<AbstractPositionableRepository<Objet>> repos = (Collection) session.getRepositoriesForClass(Objet.class);
-                final ArrayList<Objet> elements = new ArrayList<>();
+                final ArrayList<Element> elements = new ArrayList<>();
                 for (TronconDigue troncon : troncons) {
                     if (troncon == null)
                         continue;
@@ -362,6 +361,22 @@ public class RapportsPane extends BorderPane {
                                 }
 
                                 elements.add(next);
+                            }
+                        }
+                    }
+
+                    // HACk redmine-8080 - allows to generate a "Fiche" for the SEs or Digues of the selected Troncons.
+                    final String digueId = troncon.getDigueId();
+                    if (digueId != null) {
+                        final Digue digue = session.getRepositoryForClass(Digue.class).get(digueId);
+                        if (digue != null) {
+                            elements.add(digue);
+                            final String seId = digue.getSystemeEndiguementId();
+                            if (seId != null) {
+                                final SystemeEndiguement se = session.getRepositoryForClass(SystemeEndiguement.class).get(seId);
+                                if (se != null) {
+                                    elements.add(se);
+                                }
                             }
                         }
                     }
