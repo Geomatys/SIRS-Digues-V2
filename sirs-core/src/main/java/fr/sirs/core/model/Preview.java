@@ -29,8 +29,11 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  *
@@ -61,6 +64,7 @@ public class Preview implements AvecFinTemporelle, AvecLibelle, Comparable, Avec
     private final SimpleStringProperty designationProperty = new SimpleStringProperty();
 
     private final SimpleStringProperty libelleProperty = new SimpleStringProperty();
+    private final ObservableList<String> prestationIds = FXCollections.observableArrayList();
 
     /**
      * @return the ID of the current element if its a document, or the Id of its
@@ -162,6 +166,15 @@ public class Preview implements AvecFinTemporelle, AvecLibelle, Comparable, Avec
         return designationProperty;
     }
 
+    public ObservableList<String> getPrestationIds(){
+        return this.prestationIds;
+    }
+
+    public void setPrestationIds(List<String> prestationIds){
+        this.prestationIds.clear();
+        this.prestationIds.addAll(prestationIds);
+    }
+
     /**
      * Récupération de la classe de l'élément, ou bien en cas de problème (ClassNotFoundException) la classe indiquée en paramètre.
      * @param defaultClass
@@ -189,6 +202,7 @@ public class Preview implements AvecFinTemporelle, AvecLibelle, Comparable, Avec
                 ", designationProperty=" + designationProperty +
                 ", libelleProperty=" + libelleProperty +
                 ", dateMaj=" + dateMaj +
+                ", prestationIds=" + prestationIds +
                 '}';
     }
 

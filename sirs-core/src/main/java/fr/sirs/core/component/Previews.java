@@ -25,6 +25,7 @@ import fr.sirs.core.SirsCoreRuntimeException;
 import static fr.sirs.core.component.Previews.BY_CLASS;
 import static fr.sirs.core.component.Previews.BY_ID;
 import static fr.sirs.core.component.Previews.VALIDATION;
+import static fr.sirs.core.component.Previews.BY_PRESTATION_ID;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Element;
@@ -71,6 +72,7 @@ import org.springframework.stereotype.Component;
 @Views({
     @View(name = BY_ID, map="classpath:Preview-by-id-map.js"),
     @View(name = BY_CLASS, map="classpath:Preview-by-class-map.js"),
+    @View(name = BY_PRESTATION_ID, map="classpath:Preview-by-prestation-id-map.js"),
     @View(name = VALIDATION, map="classpath:Preview-by-validation-map.js")})
 @Component
 public class Previews extends CouchDbRepositorySupport<Preview> implements DocumentListener {
@@ -88,6 +90,7 @@ public class Previews extends CouchDbRepositorySupport<Preview> implements Docum
 
     public static final String BY_ID = "previewsWithDate2";
     public static final String BY_CLASS = "designationWithDate2";
+    public static final String BY_PRESTATION_ID = "previewsByPrestation";
     public static final String VALIDATION = "validationWithMajDate";
 
     @Autowired
@@ -248,6 +251,17 @@ public class Previews extends CouchDbRepositorySupport<Preview> implements Docum
         final List<Preview> previews = db.queryView(viewQuery, Preview.class);
         filterExistClass(previews);
         return previews;
+    }
+
+    public List<Preview> getAllByPrestationId(final String prestationId) {
+        final ViewQuery viewQuery = createQuery(BY_PRESTATION_ID).includeDocs(false);
+        final List<Preview> result = db.queryView(viewQuery, Preview.class);
+
+        return result == null ? result : result.stream()
+                .filter(preview ->
+                        preview.getPrestationIds() != null && preview.getPrestationIds().contains(prestationId))
+                .collect(Collectors.toList());
+
     }
 
     private void filterExistClass(final List<Preview> previews) {
