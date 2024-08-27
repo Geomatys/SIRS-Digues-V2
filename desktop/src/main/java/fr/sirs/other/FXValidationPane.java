@@ -34,12 +34,7 @@ import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.SQLQuery;
-import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.model.Utilisateur;
+import fr.sirs.core.model.*;
 import fr.sirs.util.FXPreviewToElementTableColumn;
 import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.SirsStringConverter;
@@ -439,6 +434,119 @@ public class FXValidationPane extends BorderPane {
                 element = document.getChildById(item.getElementId());
             }
             element.setValid(valid);
+
+            if (valid && Prestation.class.isAssignableFrom(element.getClass())) {
+                final Prestation prestation = (Prestation) element;
+                // look for all objects having a link with the prestation
+                final List<Preview> previews = session.getPreviews().getAllByPrestationId(element.getId());
+                previews.forEach(preview -> {
+                    final Class clazz;
+                    try {
+                        clazz = Class.forName(preview.getElementClass());
+                        if (Desordre.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> desordreIds = prestation.getDesordreIds();
+                            if (!desordreIds.contains(preview.getElementId())) {
+                                prestation.getDesordreIds().add(preview.getElementId());
+                            }
+                        }
+                        if (RapportEtude.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> rapportEtudeIds = prestation.getRapportEtudeIds();
+                            if (!rapportEtudeIds.contains(preview.getElementId())) {
+                                prestation.getRapportEtudeIds().add(preview.getElementId());
+                            }
+                        }
+                        if (StationPompage.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> stationPompageIds = prestation.getStationPompageIds();
+                            if (!stationPompageIds.contains(preview.getElementId())) {
+                                prestation.getStationPompageIds().add(preview.getElementId());
+                            }
+                        }
+                        if (ReseauHydrauliqueFerme.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> reseauHydrauliqueFermeIds = prestation.getReseauHydrauliqueFermeIds();
+                            if (!reseauHydrauliqueFermeIds.contains(preview.getElementId())) {
+                                prestation.getReseauHydrauliqueFermeIds().add(preview.getElementId());
+                            }
+                        }
+                        if (OuvrageHydrauliqueAssocie.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> ouvrageHydrauliqueAssocieIds = prestation.getOuvrageHydrauliqueAssocieIds();
+                            if (!ouvrageHydrauliqueAssocieIds.contains(preview.getElementId())) {
+                                prestation.getOuvrageHydrauliqueAssocieIds().add(preview.getElementId());
+                            }
+                        }
+                        if (ReseauTelecomEnergie.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> reseauTelecomEnergieIds = prestation.getReseauTelecomEnergieIds();
+                            if (!reseauTelecomEnergieIds.contains(preview.getElementId())) {
+                                prestation.getReseauTelecomEnergieIds().add(preview.getElementId());
+                            }
+                        }
+                        if (OuvrageTelecomEnergie.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> ouvrageTelecomEnergieIds = prestation.getOuvrageTelecomEnergieIds();
+                            if (!ouvrageTelecomEnergieIds.contains(preview.getElementId())) {
+                                prestation.getOuvrageTelecomEnergieIds().add(preview.getElementId());
+                            }
+                        }
+                        if (ReseauHydrauliqueCielOuvert.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> reseauHydrauliqueCielOuvertIds = prestation.getReseauHydrauliqueCielOuvertIds();
+                            if (!reseauHydrauliqueCielOuvertIds.contains(preview.getElementId())) {
+                                prestation.getReseauHydrauliqueCielOuvertIds().add(preview.getElementId());
+                            }
+                        }
+                        if (OuvrageParticulier.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> ouvrageParticulierIds = prestation.getOuvrageParticulierIds();
+                            if (!ouvrageParticulierIds.contains(preview.getElementId())) {
+                                prestation.getOuvrageParticulierIds().add(preview.getElementId());
+                            }
+                        }
+                        if (EchelleLimnimetrique.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> echelleLimnimetriqueIds = prestation.getEchelleLimnimetriqueIds();
+                            if (!echelleLimnimetriqueIds.contains(preview.getElementId())) {
+                                prestation.getEchelleLimnimetriqueIds().add(preview.getElementId());
+                            }
+                        }
+                        if (VoieAcces.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> voieAccesIds = prestation.getVoieAccesIds();
+                            if (!voieAccesIds.contains(preview.getElementId())) {
+                                prestation.getVoieAccesIds().add(preview.getElementId());
+                            }
+                        }
+                        if (OuvrageFranchissement.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> ouvrageFranchissementIds = prestation.getOuvrageFranchissementIds();
+                            if (!ouvrageFranchissementIds.contains(preview.getElementId())) {
+                                prestation.getOuvrageFranchissementIds().add(preview.getElementId());
+                            }
+                        }
+                        if (OuvertureBatardable.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> ouvertureBatardableIds = prestation.getOuvertureBatardableIds();
+                            if (!ouvertureBatardableIds.contains(preview.getElementId())) {
+                                prestation.getOuvertureBatardableIds().add(preview.getElementId());
+                            }
+                        }
+                        if (VoieDigue.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> voieDigueIds = prestation.getVoieDigueIds();
+                            if (!voieDigueIds.contains(preview.getElementId())) {
+                                prestation.getVoieDigueIds().add(preview.getElementId());
+                            }
+                        }
+                        if (OuvrageVoirie.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> ouvrageVoirieIds = prestation.getOuvrageVoirieIds();
+                            if (!ouvrageVoirieIds.contains(preview.getElementId())) {
+                                prestation.getOuvrageVoirieIds().add(preview.getElementId());
+                            }
+                        }
+                        if (GlobalPrestation.class.isAssignableFrom(clazz)) {
+                            final ObservableList<String> globalPrestationIds = prestation.getGlobalPrestationIds();
+                            if (!globalPrestationIds.contains(preview.getElementId())) {
+                                prestation.getGlobalPrestationIds().add(preview.getElementId());
+                            }
+                        }
+                    } catch (ClassNotFoundException ex) {
+                        SIRS.LOGGER.log(Level.WARNING, null, ex);
+                    }
+
+                });
+
+            }
+
             if (valid && (element.getDesignation() == null || element.getDesignation().isEmpty())) {
                 final Optional<Task<Integer>> incrementTask = session.getElementCreator().tryAutoIncrement(element.getClass());
                 incrementTask.ifPresent(task -> {
