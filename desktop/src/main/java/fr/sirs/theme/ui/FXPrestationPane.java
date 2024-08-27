@@ -72,7 +72,7 @@ public class FXPrestationPane extends FXPrestationPaneStub {
      * 39	Capture de lapins
      */
     private static final List<Integer> typeInRegistreIds = Arrays.asList(1, 2, 3, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
-            22, 23, 24, 25, 26, 27, 28, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39);
+            22, 23, 24, 25, 26, 27, 28, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39, 42, 43, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59);
 
     // hack because if user select "Cancel" in datePicker changelistener -> reset date to oldValue and goes back into changeListener again
     // and creates an infinity loop.
