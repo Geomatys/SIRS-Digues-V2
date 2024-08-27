@@ -163,22 +163,13 @@ public class ExtractionDocumentsPane extends BorderPane {
         });
 
         uiGenerateBtn.disableProperty().bind(Bindings.createBooleanBinding(() -> {
-                    final boolean isValidityDebutNull = uiPeriodeValidityDebut.valueProperty().isNull().get();
-                    final boolean isValidityFinNull = uiPeriodeValidityFin.valueProperty().isNull().get();
-                    final boolean isHorodatageDebutNull = uiPeriodeHorodatageDebut.valueProperty().isNull().get();
-                    final boolean isHorodatageFinNull = uiPeriodeHorodatageFin.valueProperty().isNull().get();
                     final boolean isExternalPage = uiIsExternalPage.isSelected();
                     return disableProperty().get()
-                            || (isValidityDebutNull && isValidityFinNull && isHorodatageDebutNull && isHorodatageFinNull)
                             || uiSECombo.getValue() == null
                             || (isExternalPage && uiCoverPath.getText().trim().isEmpty())
                             || (!isExternalPage && uiTitle.getText().trim().isEmpty());
                 },
                 disableProperty(),
-                uiPeriodeValidityDebut.valueProperty(),
-                uiPeriodeValidityFin.valueProperty(),
-                uiPeriodeHorodatageDebut.valueProperty(),
-                uiPeriodeHorodatageFin.valueProperty(),
                 uiSECombo.valueProperty(),
                 uiIsExternalPage.selectedProperty(),
                 uiCoverPath.textProperty(),
@@ -212,11 +203,6 @@ public class ExtractionDocumentsPane extends BorderPane {
         /*
         A- INPUT FIELDS VERIFICATIONS
         ======================================================*/
-        if (uiPeriodeValidityDebut.getValue() == null && uiPeriodeValidityFin.getValue() == null
-                && uiPeriodeHorodatageDebut.getValue() == null && uiPeriodeHorodatageFin.getValue() == null) {
-            showErrorDialog("Vous devez renseigner au moins une date");
-            return;
-        }
         final String coverPath = uiCoverPath.getText().trim();
         final File coverFile;
         String title = uiTitle.getText().trim();
