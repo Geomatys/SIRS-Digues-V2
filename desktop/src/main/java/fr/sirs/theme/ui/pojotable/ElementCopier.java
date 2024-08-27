@@ -22,6 +22,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.*;
+import fr.sirs.theme.ui.FXPrestationPane;
 import fr.sirs.theme.ui.PojoTableChoiceStage;
 import fr.sirs.ui.Growl;
 
@@ -223,6 +224,18 @@ public class ElementCopier {
                 try {
 
                     AvecForeignParent copiedPojo = (AvecForeignParent) pojo.copy();
+                    if (Prestation.class.isAssignableFrom(copiedPojo.getClass())) {
+                        Prestation prestation = (Prestation) copiedPojo;
+                        prestation.setHorodatageStatusId(HorodatageReference.getRefNonTimeStampedStatus());
+                        prestation.setHorodatageStartDate(null);
+                        prestation.setHorodatageEndDate(null);
+                        prestation.setHorodatageDateDebutStart(null);
+                        prestation.setHorodatageDateDebutEnd(null);
+                        prestation.setHorodatageDateFinEnd(null);
+                        prestation.setRegistreAttribution(FXPrestationPane.isAutoSelectedRegistre(prestation.getTypePrestationId()));
+                        prestation.setSyntheseTablePathStart(null);
+                        prestation.setSyntheseTablePathEnd(null);
+                    }
                     copiedPojo.setForeignParentId(targetedForeignParent.getId());
                     copiedPojo.setDesignation(null);
                     session.getElementCreator().tryAutoIncrementDesignation(copiedPojo);
