@@ -36,12 +36,8 @@ import static fr.sirs.core.SirsCore.PREVIEW_BUNDLE_KEY_LAST_UPDATE_AUTHOR;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.SQLQuery;
-import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.model.Utilisateur;
+import fr.sirs.core.model.*;
+import fr.sirs.theme.ui.FXPrestationPane;
 import fr.sirs.util.FXPreviewToElementTableColumn;
 import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.SirsStringConverter;
@@ -449,6 +445,12 @@ public class FXValidationPane extends BorderPane {
                 element = document.getChildById(item.getElementId());
             }
             element.setValid(valid);
+
+            if (valid && Prestation.class.isAssignableFrom(element.getClass())) {
+                final Prestation prestation = (Prestation) element;
+                prestation.setRegistreAttribution(FXPrestationPane.isAutoSelectedRegistre(prestation.getTypePrestationId()));
+            }
+
             if (valid && (element.getDesignation() == null || element.getDesignation().isEmpty())) {
                 final Optional<Task<Integer>> incrementTask = session.getElementCreator().tryAutoIncrement(element.getClass());
                 incrementTask.ifPresent(task -> {

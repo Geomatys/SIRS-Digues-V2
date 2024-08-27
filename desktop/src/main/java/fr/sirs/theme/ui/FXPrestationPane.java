@@ -269,7 +269,7 @@ public class FXPrestationPane extends FXPrestationPaneStub {
      * Update prestation's registreAttribution value depending on the typePrestationId.
      * @param refTypeId a prestation's type reference id with the format : "RefPrestation:2"
      */
-    static boolean isAutoSelectedRegistre(final String refTypeId) {
+    public static boolean isAutoSelectedRegistre(final String refTypeId) {
         final int length = "RefPrestation:".length();
         if (refTypeId != null && refTypeId.length() > length) {
             final String refTypeIdShort = refTypeId.substring(length);
