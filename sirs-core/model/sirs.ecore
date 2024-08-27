@@ -601,7 +601,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/echelleLimnimetriqueIds"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="OuvertureBatardable" eSuperTypes="#//ObjetReseau">
+  <eClassifiers xsi:type="ecore:EClass" name="OuvertureBatardable" eSuperTypes="#//ObjetReseau #//AvecPrestations">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
@@ -631,7 +631,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/ouvertureBatardableIds"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="OuvrageFranchissement" eSuperTypes="#//ObjetReseau">
+  <eClassifiers xsi:type="ecore:EClass" name="OuvrageFranchissement" eSuperTypes="#//ObjetReseau #//AvecPrestations">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionHautId" eType="#//RefPosition"/>
@@ -659,7 +659,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/ouvrageFranchissementIds"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="VoieAcces" eSuperTypes="#//ObjetReseau">
+  <eClassifiers xsi:type="ecore:EClass" name="VoieAcces" eSuperTypes="#//ObjetReseau #//AvecPrestations">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numeroSecteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
@@ -679,7 +679,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageVoirieIds" upperBound="-1"
         eType="#//OuvrageVoirie" eOpposite="#//OuvrageVoirie/voieAccesIds"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="VoieDigue" eSuperTypes="#//ObjetReseau">
+  <eClassifiers xsi:type="ecore:EClass" name="VoieDigue" eSuperTypes="#//ObjetReseau #//AvecPrestations">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
@@ -697,7 +697,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/voieDigueIds"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="OuvrageVoirie" eSuperTypes="#//ObjetReseau">
+  <eClassifiers xsi:type="ecore:EClass" name="OuvrageVoirie" eSuperTypes="#//ObjetReseau #//AvecPrestations">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageVoirieId" eType="#//RefOuvrageVoirie"/>
@@ -1002,7 +1002,7 @@
         eType="#//MaitreOeuvreMarche" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="maitreOuvrageId" eType="#//Organisme"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RapportEtude" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
+  <eClassifiers xsi:type="ecore:EClass" name="RapportEtude" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference #//AvecPrestations">
     <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
