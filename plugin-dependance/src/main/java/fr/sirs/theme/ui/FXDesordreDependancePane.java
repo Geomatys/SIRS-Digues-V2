@@ -472,24 +472,34 @@ public class FXDesordreDependancePane extends AbstractFXElementPane<DesordreDepe
             element.setArticleIds(currentArticleJournalIdsList);
         }
         cbValue = ui_abstractDependanceId.getValue();
+        boolean elementIsAH = false;
+        final String id;
         if (cbValue instanceof Preview) {
             final Preview preview = (Preview) cbValue;
+            id = preview.getElementId();
             final String clazz = preview.getElementClass();
             if ("fr.sirs.core.model.AmenagementHydraulique".equals(clazz)) {
-                element.setAmenagementHydrauliqueId(preview.getElementId());
-            } else {
-                element.setDependanceId(preview.getElementId());
+                elementIsAH = true;
             }
         } else if (cbValue instanceof Element) {
             final Element elem = (Element) cbValue;
+            id = elem.getId();
             if (elem instanceof AmenagementHydraulique) {
-                element.setAmenagementHydrauliqueId(elem.getId());
-            } else {
-                element.setDependanceId(elem.getId());
+                elementIsAH = true;
             }
         } else if (cbValue == null) {
-            element.setAmenagementHydrauliqueId(null);
+            id = null;
+        } else {
+            return;
+        }
+
+        // A DesordreDependance can be linked to an AH or to a Dependance, not both.
+        if (elementIsAH) {
+            element.setAmenagementHydrauliqueId(id);
             element.setDependanceId(null);
+        } else {
+            element.setDependanceId(id);
+            element.setAmenagementHydrauliqueId(null);
         }
     }
 }
