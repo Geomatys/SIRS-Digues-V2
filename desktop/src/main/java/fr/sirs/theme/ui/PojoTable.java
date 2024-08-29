@@ -54,6 +54,7 @@ import fr.sirs.theme.ui.pojotable.Deletor;
 import fr.sirs.theme.ui.pojotable.DistanceComputedPropertyColumn;
 import fr.sirs.theme.ui.pojotable.EditColumn;
 import fr.sirs.theme.ui.pojotable.ElementCopier;
+import fr.sirs.theme.ui.pojotable.AbstractElementCopier;
 import fr.sirs.theme.ui.pojotable.ExportAction;
 import fr.sirs.theme.ui.pojotable.ImportAction;
 import fr.sirs.theme.ui.pojotable.ShowOnMapColumn;
@@ -339,7 +340,7 @@ public class PojoTable extends BorderPane implements Printable {
     // Default deletor
     private Consumer deletor;
 
-    protected ElementCopier elementCopier;
+    protected AbstractElementCopier elementCopier;
 
     //---------------------------------------------
     // Attributs pour les préférences utilisateur :
@@ -798,7 +799,7 @@ public class PojoTable extends BorderPane implements Printable {
                         updateTableItems();
                     }
 
-                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Eléments copiés avec succès");
+                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Elément(s) copié(s) avec succès");
                     alert.setResizable(true);
                     alert.showAndWait();
 

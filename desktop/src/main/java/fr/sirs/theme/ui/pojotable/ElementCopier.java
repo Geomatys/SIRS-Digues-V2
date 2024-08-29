@@ -40,35 +40,21 @@ import org.apache.sis.util.ArgumentChecks;
  *
  * @author Matthieu Bastianelli (Geomatys)
  */
-public class ElementCopier {
+public class ElementCopier extends AbstractElementCopier{
 
     // Repository
     protected AbstractSIRSRepository currentPojoRepo;
-    protected AbstractSIRSRepository targetRepo;
-    final protected Session session;
-
-    // Classe des éléments de la pojotable associée
-    final private Class pojoClass;
 
     final protected Boolean avecForeignParent;
     final protected Boolean isAbstractObservation;
     final protected Boolean isRapportEtude;
 
-    ObjectProperty<? extends Element> container;
-
-    //Class vers laquelle on souhaite faire la copie des éléments sélectionnés.
-    private Optional<Class> targetClass;
-
     public ElementCopier(Class pojoClass, ObjectProperty<? extends Element> container, Session session, AbstractSIRSRepository pojoRepo) {
-        ArgumentChecks.ensureNonNull("Pojo class", pojoClass);
-        ArgumentChecks.ensureNonNull("Session", session);
+        super(pojoClass, container, session);
 
-        this.pojoClass = pojoClass;
         this.avecForeignParent = AvecForeignParent.class.isAssignableFrom(pojoClass);
         this.isAbstractObservation = AbstractObservation.class.isAssignableFrom(pojoClass);
         this.isRapportEtude = RapportEtude.class.isAssignableFrom(pojoClass);
-        this.container = container;
-        this.session = session;
 
         //Identification de la classe vers laquelle on permet la copie.
         if (avecForeignParent) {
@@ -96,9 +82,7 @@ public class ElementCopier {
         }
 
         //Si on a trouvé une classe cible, on récupère son repositorie.
-        if (targetClass.isPresent()) {
-            this.targetRepo = session.getRepositoryForClass(targetClass.get());
-        }
+        targetClass.ifPresent(aClass -> this.targetRepo = session.getRepositoryForClass(aClass));
     }
 
     public ElementCopier(Class pojoClass, ObjectProperty<? extends Element> container, Session session, AbstractSIRSRepository pojoRepo, Class targetClass) {
@@ -111,15 +95,13 @@ public class ElementCopier {
     }
 
     /**
-     * Méthode permettant à l'utilisateur de choisir l'élément vers lequel il
-     * veut faire une copie.
+     * Méthode permettant d'obtenir la liste des éléments vers qui la copie est possible.
      *
-     * @return target : élément ciblé.
+     * @return choices : élément ciblé.
      * @throws CopyElementException
      */
-    public Element askForCopyTarget() throws CopyElementException {
-
-        final Element target;
+    @Override
+    protected ObservableList<Preview> getChoices() throws CopyElementException {
         final ObservableList<Preview> choices;
 
         //-------------------------Test si ces cas particuliers se produisent----------------------
@@ -150,21 +132,12 @@ public class ElementCopier {
             throw new CopyElementException("Copie impossible pour ce type d'élément.");
         }
 
-        final PojoTableChoiceStage<Element> stage = new ChoiceStage(targetRepo, choices, null, "Copier les éléments vers...", "Copier");
-        stage.showAndWait();
-        target = stage.getRetrievedElement().get();
-
-        if (target != null) {
-            return target;
-        } else {
-            throw new CopyElementException("Copie annulée ou aucun élément sélectionné comme cible de la copie.");
-        }
-
+        return choices;
     }
 
     /**
      * Copie d'un ensemble d'éléments sélectionnés vers un élément cible.
-     *
+     * <p>
      * Cette méthode vise à être redéfinie dans les PojoTables spécifiques
      * (Classe extends PojoTable) en fonction du comportement souhaité de la
      * 'copie'. Par défaut, cette méthode informe l'utilisateur que la copie est
@@ -175,6 +148,7 @@ public class ElementCopier {
      * @param pojosToCopy : éléments à copier.
      * @return
      */
+    @Override
     public List<? extends Element> copyPojosTo(final Element targetedElement, final Element... pojosToCopy) {
 
         if (this.avecForeignParent) {
@@ -217,7 +191,7 @@ public class ElementCopier {
         if (session.editionAuthorized(targetedForeignParent)) {
 
             List<AvecForeignParent> copiedPojos = new ArrayList<>();
-            Boolean completSuccess = true;
+            boolean completSuccess = true;
 
             for (Element pojo : pojosToCopy) {
 
@@ -246,7 +220,7 @@ public class ElementCopier {
                 } catch (ClassCastException e) {
 
                     completSuccess = false;
-                    SIRS.LOGGER.log(Level.FINE, "Echec de la copie de l'élément :\n" + pojo.toString(), e);
+                    SIRS.LOGGER.log(Level.FINE, "Echec de la copie de l'élément :\n" + pojo, e);
                 }
 
             }
@@ -270,7 +244,7 @@ public class ElementCopier {
 
     /**
      * Copie des éléments sélectionnés vers un container ciblé.
-     *
+     * <p>
      * Cette méthode est utilisée pour copier des éléments héritant de la classe
      * AbstractObservation. Note : elle peut servir de base si la demande de
      * l'utilisateur évolue pour permettre la copie d'autres type d'éléments
@@ -287,7 +261,7 @@ public class ElementCopier {
         // la copie. -> s'assurer que la copie n'est pas réalisable pour les
         // utilisateurs externes disposant des droits sur l'élément cible.
         if (this.session.editionAuthorized(targetedContainer)) {
-            Boolean completSuccess = true;
+            boolean completSuccess = true;
 
             List<Element> copiedPojos = new ArrayList<>();
 
@@ -382,33 +356,18 @@ public class ElementCopier {
     }
 
     //Getters
-    public AbstractSIRSRepository getTargetRepo() {
-        return targetRepo;
-    }
 
-    public Session getSession() {
-        return session;
-    }
-
-    public Class getPojoClass() {
-        return pojoClass;
-    }
-
+    @Override
     public Boolean getAvecForeignParent() {
         return avecForeignParent;
     }
 
+    @Override
     public Boolean getRapportEtude() {
         return isRapportEtude;
     }
 
-    public Boolean getIsAbstractObservation() {
-        return isAbstractObservation;
-    }
-
-    public ObjectProperty<? extends Element> getContainer() {
-        return container;
-    }
+}
 
     public Optional<Class> getTargetClass() {
         return targetClass;

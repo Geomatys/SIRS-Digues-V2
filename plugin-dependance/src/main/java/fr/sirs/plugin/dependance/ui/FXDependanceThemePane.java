@@ -21,11 +21,12 @@ package fr.sirs.plugin.dependance.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.model.ObjetDependanceAh;
 import fr.sirs.core.model.AmenagementHydraulique;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.ObjetDependanceAh;
 import fr.sirs.core.model.Preview;
 import fr.sirs.theme.AbstractTheme;
+import fr.sirs.theme.ui.ObjetDependanceAhElementCopier;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SimpleFXEditMode;
 import fr.sirs.util.property.SirsPreferences;
@@ -127,6 +128,7 @@ public class FXDependanceThemePane extends BorderPane {
             if (ahIdProperty.get() == null) {
                 updateTable(null, null, null);
             }
+            this.elementCopier = new ObjetDependanceAhElementCopier(this.pojoClass, container, this.session, this.repo);
         }
 
         private void updateTable(ObservableValue<? extends String> observable, String oldValue, String newValue){
