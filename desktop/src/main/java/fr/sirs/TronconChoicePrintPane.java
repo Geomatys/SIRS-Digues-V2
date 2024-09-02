@@ -203,14 +203,10 @@ public abstract class TronconChoicePrintPane extends BorderPane {
 
             setEditable(false);
 
-            setCellFactory(new Callback<TableColumn<TronconDigue, Number>, TableCell<TronconDigue, Number>>() {
-
-                @Override
-                public TableCell<TronconDigue, Number> call(TableColumn<TronconDigue, Number> param) {
-                    final TableCell<TronconDigue, Number> tableCell = new FXNumberCell(Float.class);
-                    tableCell.setEditable(false);
-                    return tableCell;
-                }
+            setCellFactory((Callback<TableColumn<TronconDigue, Number>, TableCell<TronconDigue, Number>>) param -> {
+                final TableCell<TronconDigue, Number> tableCell = new FXNumberCell(Float.class);
+                tableCell.setEditable(false);
+                return tableCell;
             });
 
             setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TronconDigue, Number>, ObservableValue<Number>>() {
@@ -332,7 +328,7 @@ public abstract class TronconChoicePrintPane extends BorderPane {
         final Set<String> acceptedIds;
 
         public LinearPredicate() {
-            acceptedIds = tronconsTable.getSelectedItems().stream().map(input -> input.getId()).collect(Collectors.toSet());
+            acceptedIds = tronconsTable.getSelectedItems().stream().map(Identifiable::getId).collect(Collectors.toSet());
         }
 
         @Override
@@ -373,11 +369,10 @@ public abstract class TronconChoicePrintPane extends BorderPane {
         @Override
         public boolean test(Element t) {
             if (t.getValid()) {
-                if (!uiOptionExcludeValid.isSelected()) return true;
+                return !uiOptionExcludeValid.isSelected();
             } else {
-                if (!uiOptionExcludeInvalid.isSelected()) return true;
+                return !uiOptionExcludeInvalid.isSelected();
             }
-            return false;
         }
     }
 
