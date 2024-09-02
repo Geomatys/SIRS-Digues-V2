@@ -415,7 +415,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
     @Override
     public void preSave() {
         final Session session = Injector.getBean(Session.class);
-        final AmenagementHydraulique element = (AmenagementHydraulique) elementProperty().get();
+        final AmenagementHydraulique element = elementProperty().get();
 
         element.setCommentaire(ui_commentaire.getText());
 
@@ -504,11 +504,9 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
                 currentTronconDigueList.add(tronconDigue);
 
                 //clean the troncon list of the opposite AHs
-                if (previousAhId != null) {
+                if (previousAhId != null && !previousAhId.equals(element.getId())) {
                     AmenagementHydraulique ah = ahRepository.get(previousAhId);
-                    ObservableList<String> tronconIds = ah.getTronconIds();
-                    tronconIds.removeIf(s -> s.equals(tronconId));
-                    ah.setTronconIds(tronconIds);
+                    ah.getTronconIds().removeIf(s -> s.equals(tronconId));
                     currentOppositeAhList.add(ah);
                 }
             }
@@ -519,7 +517,7 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
             // reference when it's no more linked with
             List<String> toRemoveIds = element.getTronconIds().stream().filter(id -> !currentTronconDigueIdsList.contains(id)).collect(Collectors.toList());
             List<TronconDigue> toRemoveTroncons = tronconDigueRepository.get(toRemoveIds);
-            toRemoveTroncons.stream().forEach(tr -> tr.setAmenagementHydrauliqueId(null));
+            toRemoveTroncons.forEach(tr -> tr.setAmenagementHydrauliqueId(null));
             tronconDigueRepository.executeBulk(toRemoveTroncons);
             element.setTronconIds(currentTronconDigueIdsList);
         }
@@ -538,7 +536,6 @@ public class FXAmenagementHydrauliquePane extends AbstractFXElementPane<Amenagem
         public TronconTable(String title, final ObjectProperty<AmenagementHydraulique> container) {
             super(TronconDigue.class, title, container);
 
-            final SirsStringConverter converter = new SirsStringConverter();
             final AbstractSIRSRepository<AmenagementHydraulique> repo = Injector.getSession().getRepositoryForClass(AmenagementHydraulique.class);
 
             // On supprime la colonne des aménagements hydrauliques courantes
