@@ -22,20 +22,7 @@ import com.sun.javafx.property.PropertyReference;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.*;
 
-import static fr.sirs.SIRS.AUTHOR_FIELD;
-import static fr.sirs.SIRS.COMMENTAIRE_FIELD;
-import static fr.sirs.SIRS.DATE_MAJ_FIELD;
-import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
-import static fr.sirs.SIRS.GEOMETRY_MODE_FIELD;
-import static fr.sirs.SIRS.LATITUDE_MAX_FIELD;
-import static fr.sirs.SIRS.LATITUDE_MIN_FIELD;
-import static fr.sirs.SIRS.LONGITUDE_MAX_FIELD;
-import static fr.sirs.SIRS.LONGITUDE_MIN_FIELD;
-import static fr.sirs.SIRS.VALID_FIELD;
-import static fr.sirs.SIRS.ID_FIELD;
-import static fr.sirs.SIRS.REVISION_FIELD;
-import static fr.sirs.SIRS.NEW_FIELD;
-import static fr.sirs.core.SirsCore.*;
+import static fr.sirs.SIRS.*;
 import static fr.sirs.util.SirsComparator.OBSERVATION_COMPARATOR;
 
 import fr.sirs.core.Repository;
@@ -2346,21 +2333,42 @@ public class PojoTable extends BorderPane implements Printable {
                     setCellValueFactory(SIRS.getOrCreateCellValueFactory(name));
                 }
 
-                // HACK : Needed to avoid comparison on ids.
-                final Previews previews = session.getPreviews();
-                final LabelComparator<Object> labelComparator = new LabelComparator<>(false);
-                setComparator((o1, o2) -> {
-                    if (o1 != null && o2 != null) {
-                        final List<Preview> tmpPreviews = previews.get(new String[]{o1.toString(), o2.toString()});
-                        if (tmpPreviews.size() == 2) {
-                            o1 = tmpPreviews.get(0);
-                            o2 = tmpPreviews.get(1);
+                setLabelComparator();
+
+            } else if (TronconDigue.class.equals(pojoClass) && "amenagementHydrauliqueId".equals(name)) {
+                setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
+                try {
+                    final Method propertyAccessor = TronconDigue.class.getMethod(name+"Property");
+                    setCellValueFactory((CellDataFeatures<Element, Object> param) -> {
+                        if (param != null && param.getValue() != null) {
+                            try {
+                                final ObservableValue invoke = (ObservableValue) propertyAccessor.invoke(param.getValue());
+                                if (invoke instanceof SimpleStringProperty) {
+                                    final String ahId = ((SimpleStringProperty) invoke).getValue();
+                                    if (ahId == null || ahId.isEmpty()) return invoke;
+                                    try {
+                                        final Preview tmpPreview = Injector.getSession().getPreviews().get(ahId);
+                                        if (tmpPreview != null) {
+                                            return new SimpleObjectProperty<>(new SirsStringConverter().toString(tmpPreview));
+                                        }
+                                    } catch (Exception e) {
+                                        LOGGER.log(Level.INFO, "Failed to convert input value to cell text; return input value;", e);
+                                    }
+                                }
+                                return invoke;
+                            } catch (Exception ex) {
+                                SirsCore.LOGGER.log(Level.WARNING, null, ex);
+                                return null;
+                            }
+                        } else {
+                            return null;
                         }
-                    }
+                    });
+                } catch (Exception ex) {
+                    setCellValueFactory(SIRS.getOrCreateCellValueFactory(name));
+                }
 
-                    return labelComparator.compare(o1, o2);
-                });
-
+                setLabelComparator();
             } else {
                 setCellValueFactory(SIRS.getOrCreateCellValueFactory(name));
                 final Method readMethod = desc.getReadMethod();
@@ -2427,6 +2435,23 @@ public class PojoTable extends BorderPane implements Printable {
 
         public abstract String getName();
         public abstract Reference getReference();
+
+        // HACK : Needed to avoid comparison on ids.
+        protected void setLabelComparator() {
+            final Previews previews = session.getPreviews();
+            final LabelComparator<Object> labelComparator = new LabelComparator<>(false);
+            setComparator((o1, o2) -> {
+                if (o1 != null && o2 != null) {
+                    final List<Preview> tmpPreviews = previews.get(new String[]{o1.toString(), o2.toString()});
+                    if (tmpPreviews.size() == 2) {
+                        o1 = tmpPreviews.get(0);
+                        o2 = tmpPreviews.get(1);
+                    }
+                }
+
+                return labelComparator.compare(o1, o2);
+            });
+        }
     }
 
     /**
@@ -2496,20 +2521,7 @@ public class PojoTable extends BorderPane implements Printable {
                     setCellValueFactory(cellData -> getObsSimpleObjectProperty(cellData));
                 }
 
-                // HACK : Needed to avoid comparison on ids.
-                final Previews previews = session.getPreviews();
-                final LabelComparator<Object> labelComparator = new LabelComparator<>(false);
-                setComparator((o1, o2) -> {
-                    if (o1 != null && o2 != null) {
-                        final List<Preview> tmpPreviews = previews.get(new String[]{o1.toString(), o2.toString()});
-                        if (tmpPreviews.size() == 2) {
-                            o1 = tmpPreviews.get(0);
-                            o2 = tmpPreviews.get(1);
-                        }
-                    }
-
-                    return labelComparator.compare(o1, o2);
-                });
+                setLabelComparator();
 
             } else {
                 setCellValueFactory(cellData -> getObsSimpleObjectProperty(cellData));
