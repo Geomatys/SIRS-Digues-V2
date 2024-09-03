@@ -29,7 +29,7 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 public class LitBorneEditHandler extends BorneEditHandler {
 
     public LitBorneEditHandler(FXMap map) {
-        super(map, "berge");
+        super(map, "lit");
         this.TRONCON_LAYER_NAME = PluginLit.LAYER_NAME;
     }
 }
