@@ -323,7 +323,10 @@ public class ExtractionDocumentsPane extends BorderPane {
         /*
          C.3- Add Synthese table pdf files
         ======================================================*/
-        final Map<String, List<PrestationWithPage>> syntheseTablePrestationsMap = new HashMap<>();
+        final LinkedHashMap<String, List<PrestationWithPage>> syntheseTablePrestationsMap = new LinkedHashMap<>();
+        // The orderedSyntheseTableList is used to keep the sorted order of the horodatage date.
+        // The Map alone does not keep the order of the syntheseTablePath by date, leading to
+        // non-sorted table files in the final output documents.
         // Gathers prestations by synthese table.
         prestationsWithPage.forEach(prestaWithPage -> {
             final String syntheseTablePath = prestaWithPage.getSyntheseTablePath();
