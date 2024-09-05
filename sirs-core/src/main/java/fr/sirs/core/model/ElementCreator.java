@@ -92,9 +92,10 @@ public class ElementCreator {
 
             element.setValid(ownableSession.createValidDocuments().get());
             final Utilisateur utilisateur = ownableSession.getUtilisateur();
-            if (ownableSession.getUtilisateur() != null) {
-                element.setAuthor(utilisateur.getId());
-                element.setLastUpdateAuthor(utilisateur.getId());
+            if (utilisateur != null) {
+                final String userId = utilisateur.getId();
+                element.setAuthor(userId);
+                element.setLastUpdateAuthor(userId);
             }
 
             if (tryAutoIncrement) {
