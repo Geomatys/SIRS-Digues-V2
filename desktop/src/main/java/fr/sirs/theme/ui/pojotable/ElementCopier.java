@@ -18,6 +18,7 @@
  */
 package fr.sirs.theme.ui.pojotable;
 
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -49,8 +50,8 @@ public class ElementCopier extends AbstractElementCopier{
     final protected Boolean isAbstractObservation;
     final protected Boolean isRapportEtude;
 
-    public ElementCopier(Class pojoClass, ObjectProperty<? extends Element> container, Session session, AbstractSIRSRepository pojoRepo) {
-        super(pojoClass, container, session);
+    public ElementCopier(Class pojoClass, ObjectProperty<? extends Element> container, AbstractSIRSRepository pojoRepo) {
+        super(pojoClass, container);
 
         this.avecForeignParent = AvecForeignParent.class.isAssignableFrom(pojoClass);
         this.isAbstractObservation = AbstractObservation.class.isAssignableFrom(pojoClass);
@@ -82,16 +83,16 @@ public class ElementCopier extends AbstractElementCopier{
         }
 
         //Si on a trouvé une classe cible, on récupère son repositorie.
-        targetClass.ifPresent(aClass -> this.targetRepo = session.getRepositoryForClass(aClass));
+        targetClass.ifPresent(aClass -> this.targetRepo = Injector.getSession().getRepositoryForClass(aClass));
     }
 
-    public ElementCopier(Class pojoClass, ObjectProperty<? extends Element> container, Session session, AbstractSIRSRepository pojoRepo, Class targetClass) {
-        this(pojoClass, container, session, pojoRepo);
+    public ElementCopier(Class pojoClass, ObjectProperty<? extends Element> container, AbstractSIRSRepository pojoRepo, Class targetClass) {
+        this(pojoClass, container, pojoRepo);
 
         ArgumentChecks.ensureNonNull("Target class", targetClass);
 
         this.targetClass = Optional.of(targetClass);
-        this.targetRepo = session.getRepositoryForClass(targetClass);
+        this.targetRepo = Injector.getSession().getRepositoryForClass(targetClass);
     }
 
     /**
@@ -124,7 +125,7 @@ public class ElementCopier extends AbstractElementCopier{
 
             if (targetClass.isPresent()) {
                 // récupération de tous les éléments de la classe identifiée
-                choices = SIRS.observableList(new ArrayList<>(session.getPreviews().getByClass(targetClass.get())));
+                choices = SIRS.observableList(new ArrayList<>(Injector.getSession().getPreviews().getByClass(targetClass.get())));
             } else {
                 throw new CopyElementException("Copie impossible, aucune cible identifiée pour la copie.");
             }
@@ -184,10 +185,13 @@ public class ElementCopier extends AbstractElementCopier{
      * @return
      */
     public List<AvecForeignParent> copyPojosToForeignParent(final Element targetedForeignParent, final Element... pojosToCopy) {
-
+        if (currentPojoRepo == null) {
+            throw new IllegalStateException("CurrentPojoRepo must not be null when with foreignParent");
+        }
         // Si l'utilisateur est un externe, on court-circuite
         // la copie. -> s'assurer que la copie n'est pas réalisable pour les
         // utilisateurs externes disposant des droits sur l'élément cible.
+        final Session session = Injector.getSession();
         if (session.editionAuthorized(targetedForeignParent)) {
 
             List<AvecForeignParent> copiedPojos = new ArrayList<>();
@@ -220,15 +224,12 @@ public class ElementCopier extends AbstractElementCopier{
                 } catch (ClassCastException e) {
 
                     completSuccess = false;
-                    SIRS.LOGGER.log(Level.FINE, "Echec de la copie de l'élément :\n" + pojo, e);
+                    SIRS.LOGGER.log(Level.INFO, "Echec de la copie de l'élément :\n" + pojo, e);
                 }
 
             }
-            try {
-                currentPojoRepo.executeBulk(copiedPojos);
-            } catch (NullPointerException e) {
-                SIRS.LOGGER.log(Level.FINE, "Repository introuvable", e);
-            }
+
+            currentPojoRepo.executeBulk(copiedPojos);
 
             if (!completSuccess) {
                 new Growl(Growl.Type.WARNING, "Certains éléments n'ont pas pu être copiés.").showAndFade();
@@ -260,7 +261,8 @@ public class ElementCopier extends AbstractElementCopier{
         // Si l'utilisateur est un externe, on court-circuite
         // la copie. -> s'assurer que la copie n'est pas réalisable pour les
         // utilisateurs externes disposant des droits sur l'élément cible.
-        if (this.session.editionAuthorized(targetedContainer)) {
+        final Session session = Injector.getSession();
+        if (session.editionAuthorized(targetedContainer)) {
             boolean completSuccess = true;
 
             List<Element> copiedPojos = new ArrayList<>();
@@ -278,7 +280,7 @@ public class ElementCopier extends AbstractElementCopier{
                 } catch (ClassCastException e) {
 
                     completSuccess = false;
-                    SIRS.LOGGER.log(Level.FINE, "Echec de la copie de l'élément car il n'implémente pas la classe AbstractObservation :\n" + pojo.toString(), e);
+                    SIRS.LOGGER.log(Level.FINE, "Echec de la copie de l'élément car il n'implémente pas la classe AbstractObservation :\n" + pojo, e);
                 }
 
             }
@@ -320,6 +322,7 @@ public class ElementCopier extends AbstractElementCopier{
         // Si l'utilisateur est un externe, on court-circuite
         // la copie. -> s'assurer que la copie n'est pas réalisable pour les
         // utilisateurs externes disposant des droits sur l'élément cible.
+        final Session session = Injector.getSession();
         if (session.editionAuthorized(targetedSystemeEndiguement)) {
 
             List<RapportEtude> copiedPojos = new ArrayList<>();
@@ -366,11 +369,4 @@ public class ElementCopier extends AbstractElementCopier{
     public Boolean getRapportEtude() {
         return isRapportEtude;
     }
-
-}
-
-    public Optional<Class> getTargetClass() {
-        return targetClass;
-    }
-
 }

@@ -128,7 +128,7 @@ public class FXDependanceThemePane extends BorderPane {
             if (ahIdProperty.get() == null) {
                 updateTable(null, null, null);
             }
-            this.elementCopier = new ObjetDependanceAhElementCopier(this.pojoClass, container, this.session, this.repo);
+            this.elementCopier = new ObjetDependanceAhElementCopier(this.pojoClass, container, this.repo);
         }
 
         private void updateTable(ObservableValue<? extends String> observable, String oldValue, String newValue){

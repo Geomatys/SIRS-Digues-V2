@@ -779,7 +779,7 @@ public class PojoTable extends BorderPane implements Printable {
         uiAdd.setOnAction(addHandler);
         uiAdd.disableProperty().bind(editableProperty.not());
 
-        elementCopier = new ElementCopier(pojoClass, container, session, this.repo);
+        elementCopier = new ElementCopier(pojoClass, container, this.repo);
 
         // Copie des éléments sélectionnés.
         uiCopyTo.getStyleClass().add(BUTTON_STYLE);

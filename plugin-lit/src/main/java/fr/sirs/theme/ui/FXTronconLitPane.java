@@ -344,7 +344,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
             super(group.getDataClass(), group.getTableTitle(), container);
             foreignParentIdProperty.addListener(this::updateTable);
             this.group = group;
-            this.elementCopier = new ElementCopier(this.pojoClass, container, this.session, this.repo, TronconLit.class);
+            this.elementCopier = new ElementCopier(this.pojoClass, container, this.repo, TronconLit.class);
         }
 
         private void updateTable(ObservableValue<? extends String> observable, String oldValue, String newValue){

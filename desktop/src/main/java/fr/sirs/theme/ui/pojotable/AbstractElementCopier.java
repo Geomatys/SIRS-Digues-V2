@@ -37,7 +37,6 @@ import java.util.Optional;
 public abstract class AbstractElementCopier {
 
     protected AbstractSIRSRepository targetRepo;
-    final protected Session session;
 
     // Classe des éléments de la pojotable associée
     final protected Class pojoClass;
@@ -47,13 +46,11 @@ public abstract class AbstractElementCopier {
     //Class vers laquelle on souhaite faire la copie des éléments sélectionnés.
     protected Optional<Class> targetClass;
 
-    public AbstractElementCopier(Class pojoClass, ObjectProperty<? extends Element> container, Session session) {
+    public AbstractElementCopier(Class pojoClass, ObjectProperty<? extends Element> container) {
         ArgumentChecks.ensureNonNull("Pojo class", pojoClass);
-        ArgumentChecks.ensureNonNull("Session", session);
 
         this.pojoClass = pojoClass;
         this.container = container;
-        this.session = session;
     }
 
     /**
@@ -100,10 +97,6 @@ public abstract class AbstractElementCopier {
         return targetRepo;
     }
 
-    public Session getSession() {
-        return session;
-    }
-
     public Class getPojoClass() {
         return pojoClass;
     }
@@ -112,12 +105,13 @@ public abstract class AbstractElementCopier {
         return container;
     }
 
-    public Boolean getAvecForeignParent() {
-        return false;
-    }
+    /**
+     * Used to determine wether the object can be copied or not on a parent objet.
+     * Example : a Desordre must be copied on a Troncon Digue. A DesordreDependance on a Dependance or an AH.
+     * @return
+     */
+    public abstract Boolean getAvecForeignParent();
 
-    public Boolean getRapportEtude() {
-        return false;
-    }
+    public abstract Boolean getRapportEtude();
 
 }

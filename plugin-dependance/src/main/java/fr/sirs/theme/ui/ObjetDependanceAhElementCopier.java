@@ -18,6 +18,7 @@
  */
 package fr.sirs.theme.ui;
 
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -43,8 +44,8 @@ public class ObjetDependanceAhElementCopier extends AbstractElementCopier {
     protected Boolean isDesordreDependance;
 
 
-    public ObjetDependanceAhElementCopier(Class pojoClass, ObjectProperty<? extends Element> container, Session session, AbstractSIRSRepository pojoRepo) {
-        super(pojoClass, container, session);
+    public ObjetDependanceAhElementCopier(Class pojoClass, ObjectProperty<? extends Element> container, AbstractSIRSRepository pojoRepo) {
+        super(pojoClass, container);
 
         if (!ObjetDependanceAh.class.isAssignableFrom(pojoClass)) {
             throw new IllegalStateException("pojoClass " + pojoClass.getSimpleName() + " is not an ObjectDependanceAh");
@@ -61,7 +62,7 @@ public class ObjetDependanceAhElementCopier extends AbstractElementCopier {
             targetClass = Optional.of(AmenagementHydraulique.class);
         }
 
-        this.targetRepo = session.getRepositoryForClass(targetClass.get());
+        this.targetRepo = Injector.getSession().getRepositoryForClass(targetClass.get());
     }
 
     /**
@@ -72,7 +73,7 @@ public class ObjetDependanceAhElementCopier extends AbstractElementCopier {
     @Override
     protected ObservableList<Preview> getChoices() {
         final ObservableList<Preview> choices;
-
+        final Session session = Injector.getSession();
         // Les ObjetDependance peuvent être liés à un Aménagement Hydraulique.
         // Les DesordreDependance sont un cas particulier car ils peuvent également être liés à des Dépendances.
         if (isDesordreDependance) {
@@ -98,6 +99,7 @@ public class ObjetDependanceAhElementCopier extends AbstractElementCopier {
         // Si l'utilisateur est un externe, on court-circuite
         // la copie. -> s'assurer que la copie n'est pas réalisable pour les
         // utilisateurs externes disposant des droits sur l'élément cible.
+        final Session session = Injector.getSession();
         if (session.editionAuthorized(targetedDependanceOrAh)) {
 
             List<ObjetDependanceAh> copiedPojos = new ArrayList<>();
@@ -153,5 +155,10 @@ public class ObjetDependanceAhElementCopier extends AbstractElementCopier {
     @Override
     public Boolean getAvecForeignParent() {
         return true;
+    }
+
+    @Override
+    public Boolean getRapportEtude() {
+        return false;
     }
 }

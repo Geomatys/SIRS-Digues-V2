@@ -164,7 +164,7 @@ public abstract class FXAbstractTronconThemePane<T extends TronconDigue> extends
             super(group.getDataClass(), group.getTableTitle(), container);
             foreignParentIdProperty.addListener(this::updateTable);
             this.group = group;
-            this.elementCopier = new ElementCopier(this.pojoClass, container, this.session, this.repo, tronconClass);
+            this.elementCopier = new ElementCopier(this.pojoClass, container, this.repo, tronconClass);
         }
 
         protected void updateTable(ObservableValue<? extends String> observable, String oldValue, String newValue) {
