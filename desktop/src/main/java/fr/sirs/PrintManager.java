@@ -27,9 +27,8 @@ import fr.sirs.util.JRColumnParameter;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -236,17 +235,21 @@ public class PrintManager {
         avoidFields.add(COUCH_DB_DOCUMENT_FIELD);
         avoidFields.add(GEOMETRY_MODE_FIELD);
 
+        // Set can contain no duplicate.
+        final Set<String> tmpAvoidFields = new HashSet<>();
         for(final Element element : elementsToPrint){
             if(element instanceof TronconDigue){
-                if(!avoidFields.contains(BORNE_IDS_REFERENCE)) avoidFields.add(BORNE_IDS_REFERENCE);
+                tmpAvoidFields.add(BORNE_IDS_REFERENCE);
 
             } else if (element instanceof Prestation) {
-                if (!avoidFields.contains(PRESTATION_HORODATAGE_DEBUT_START)) avoidFields.add(PRESTATION_HORODATAGE_DEBUT_START);
-                if (!avoidFields.contains(PRESTATION_HORODATAGE_FIN_START)) avoidFields.add(PRESTATION_HORODATAGE_FIN_START);
-                if (!avoidFields.contains(PRESTATION_HORODATAGE_DEBUT_END)) avoidFields.add(PRESTATION_HORODATAGE_DEBUT_END);
-                if (!avoidFields.contains(PRESTATION_HORODATAGE_FIN_END)) avoidFields.add(PRESTATION_HORODATAGE_FIN_END);
+                tmpAvoidFields.add(PRESTATION_HORODATAGE_DEBUT_START);
+                tmpAvoidFields.add(PRESTATION_HORODATAGE_FIN_START);
+                tmpAvoidFields.add(PRESTATION_HORODATAGE_DEBUT_END);
+                tmpAvoidFields.add(PRESTATION_HORODATAGE_FIN_END);
             }
         }
+
+        avoidFields.addAll(tmpAvoidFields);
 
         final File fileToPrint = PrinterUtilities.print(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), elementsToPrint);
         SIRS.openFile(fileToPrint);
