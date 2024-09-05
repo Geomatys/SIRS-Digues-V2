@@ -35,6 +35,8 @@ import static fr.sirs.util.JRUtils.ATT_WIDTH;
 import static fr.sirs.util.JRUtils.ATT_X;
 import static fr.sirs.util.JRUtils.ATT_Y;
 import static fr.sirs.util.JRUtils.BOOLEAN_PRIMITIVE_NAME;
+
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.JRUtils.Markup;
 import fr.sirs.util.JRUtils.Mode;
 import fr.sirs.util.JRUtils.PositionType;
