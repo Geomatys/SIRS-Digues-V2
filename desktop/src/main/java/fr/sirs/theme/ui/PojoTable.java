@@ -2335,6 +2335,9 @@ public class PojoTable extends BorderPane implements Printable {
                 setLabelComparator();
 
             } else if (TronconDigue.class.equals(pojoClass) && "amenagementHydrauliqueId".equals(name)) {
+                // AmenagementHydraulique is not available within the CORE. The amenagementHydrauliqueId attribut present within
+                // a TronconDigue has no Reference annotation and thus the automatic link between amenagementHydrauliqueId and its
+                // corresponding AH does not work.
                 setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
                 try {
                     final Method propertyAccessor = TronconDigue.class.getMethod(name+"Property");
@@ -2364,6 +2367,7 @@ public class PojoTable extends BorderPane implements Printable {
                         }
                     });
                 } catch (Exception ex) {
+                    SIRS.LOGGER.log(Level.INFO, "Failed to set CellValueFactory for amenagementHydrauliqueId type of param. Use SIRS default CellValueFactory", ex );
                     setCellValueFactory(SIRS.getOrCreateCellValueFactory(name));
                 }
 
