@@ -153,12 +153,12 @@ public class ObjetDependanceAhElementCopier extends AbstractElementCopier {
 
     // Allow to refresh the pojoTable after the copy.
     @Override
-    public Boolean getAvecForeignParent() {
+    public boolean hasForeignParent() {
         return true;
     }
 
     @Override
-    public Boolean getRapportEtude() {
+    public boolean isRapportEtude() {
         return false;
     }
 }

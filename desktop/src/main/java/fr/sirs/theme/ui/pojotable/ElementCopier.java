@@ -361,12 +361,12 @@ public class ElementCopier extends AbstractElementCopier{
     //Getters
 
     @Override
-    public Boolean getAvecForeignParent() {
+    public boolean hasForeignParent() {
         return avecForeignParent;
     }
 
     @Override
-    public Boolean getRapportEtude() {
+    public boolean isRapportEtude() {
         return isRapportEtude;
     }
 }

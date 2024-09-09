@@ -18,7 +18,6 @@
  */
 package fr.sirs.theme.ui.pojotable;
 
-import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
@@ -110,8 +109,8 @@ public abstract class AbstractElementCopier {
      * Example : a Desordre must be copied on a Troncon Digue. A DesordreDependance on a Dependance or an AH.
      * @return
      */
-    public abstract Boolean getAvecForeignParent();
+    public abstract boolean hasForeignParent();
 
-    public abstract Boolean getRapportEtude();
+    public abstract boolean isRapportEtude();
 
 }
