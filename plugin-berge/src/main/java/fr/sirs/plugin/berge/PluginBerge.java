@@ -27,16 +27,13 @@ import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.Berge;
-import fr.sirs.core.model.CreteBerge;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.EpiBerge;
-import fr.sirs.core.model.FondationBerge;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.OuvrageRevancheBerge;
 import fr.sirs.core.model.PiedBerge;
 import fr.sirs.core.model.SommetBerge;
 import fr.sirs.core.model.TalusBerge;
-import fr.sirs.core.model.TalusRisbermeBerge;
 import fr.sirs.core.model.TraitBerge;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.berge.map.BergeToolBar;
@@ -144,11 +141,8 @@ public class PluginBerge extends Plugin {
         suppliers.put(PiedBerge.class, getDefaultSupplierForClass.apply(PiedBerge.class));
         suppliers.put(SommetBerge.class, getDefaultSupplierForClass.apply(SommetBerge.class));
         suppliers.put(EpiBerge.class, getDefaultSupplierForClass.apply(EpiBerge.class));
-        suppliers.put(FondationBerge.class, getDefaultSupplierForClass.apply(FondationBerge.class));
-        suppliers.put(TalusRisbermeBerge.class, getDefaultSupplierForClass.apply(TalusRisbermeBerge.class));
         suppliers.put(TalusBerge.class, getDefaultSupplierForClass.apply(TalusBerge.class));
         suppliers.put(OuvrageRevancheBerge.class, getDefaultSupplierForClass.apply(OuvrageRevancheBerge.class));
-        suppliers.put(CreteBerge.class, getDefaultSupplierForClass.apply(CreteBerge.class));
     }
 
 
@@ -178,11 +172,8 @@ public class PluginBerge extends Plugin {
             final BeanStore otherStore = new BeanStore(suppliers.get(PiedBerge.class),
                     suppliers.get(SommetBerge.class),
                     suppliers.get(EpiBerge.class),
-                    suppliers.get(FondationBerge.class),
-                    suppliers.get(TalusRisbermeBerge.class),
                     suppliers.get(TalusBerge.class),
-                    suppliers.get(OuvrageRevancheBerge.class),
-                    suppliers.get(CreteBerge.class));
+                    suppliers.get(OuvrageRevancheBerge.class));
             structLayer.items().addAll(buildLayers(otherStore, nameMap, colors, createDefaultSelectionStyle(), false));
             structLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             container.items().add(structLayer);
