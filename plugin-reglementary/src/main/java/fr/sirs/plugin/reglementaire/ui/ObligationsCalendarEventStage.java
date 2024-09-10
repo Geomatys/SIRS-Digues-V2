@@ -51,7 +51,7 @@ import org.geotoolkit.font.IconBuilder;
 
 
 /**
- * Popup affichée lorsque l'utilisateur clique sur un évènement de calendrier.
+ * Popup affichée lorsque l'utilisateur clique sur un événement de calendrier.
  *
  * @author Cédric Briançon (Geomatys)
  */
@@ -67,9 +67,9 @@ public final class ObligationsCalendarEventStage extends Stage {
             FontAwesomeIcons.DEFAULT_COLOR), null);
 
     /**
-     * Prépare une popup pour afficher les choix possibles au clic sur un évènement du calendrier.
+     * Prépare une popup pour afficher les choix possibles au clic sur un événement du calendrier.
      *
-     * @param calendarEvent Evènement du calendrier concerné
+     * @param calendarEvent Evénement du calendrier concerné
      * @param etapes Liste des étapes d'obligations.
      */
     public ObligationsCalendarEventStage(final CalendarEvent calendarEvent, final ObservableList<EtapeObligationReglementaire> etapes) {
@@ -121,9 +121,9 @@ public final class ObligationsCalendarEventStage extends Stage {
     }
 
     /**
-     * Supprime un évènement du calendrier ou une alerte de rappel.
+     * Supprime un événement du calendrier ou une alerte de rappel.
      *
-     * @param calendarEvent Evènement du calendrier concerné.
+     * @param calendarEvent Evénement du calendrier concerné.
      * @param etapes Liste des obligations.
      */
     private void delete(final CalendarEvent calendarEvent, final ObservableList<EtapeObligationReglementaire> etapes) {
@@ -160,7 +160,7 @@ public final class ObligationsCalendarEventStage extends Stage {
      * Modifie la popup actuellement affichée pour montrer un {@linkplain DatePicker calendrier} permettant
      * de modifier la date de réalisation de l'obligation.
      *
-     * @param event L'évènement du calendrier concerné.
+     * @param event L'événement du calendrier concerné.
      */
     private void switchToDateStage(final CalendarEvent event) {
         final VBox vbox = new VBox();
@@ -210,9 +210,9 @@ public final class ObligationsCalendarEventStage extends Stage {
 
     /**
      * Modifie la popup actuellement affichée pour montrer une liste déroulante des choix possibles de
-     * rappels d'échéance pour l'obligation pointée par l'évènement.
+     * rappels d'échéance pour l'obligation pointée par l'événement.
      *
-     * @param event L'évènement du calendrier concerné.
+     * @param event L'événement du calendrier concerné.
      */
     private void switchToEcheanceListStage(final CalendarEvent event) {
         final VBox vbox = new VBox();

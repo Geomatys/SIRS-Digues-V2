@@ -203,7 +203,7 @@ public class ObjetDependanceAhEditHandler extends AbstractNavigationHandler {
     }
 
     /**
-     * Ecoute les évènements lancés par la souris.
+     * Ecoute les événements lancés par la souris.
      */
     private class MouseListen extends FXPanMouseListen {
         private final ContextMenu popup = new ContextMenu();

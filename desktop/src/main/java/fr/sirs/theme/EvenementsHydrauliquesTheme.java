@@ -37,7 +37,7 @@ import javafx.scene.layout.Priority;
 public class EvenementsHydrauliquesTheme extends Theme {
 
     public EvenementsHydrauliquesTheme() {
-        super("Evènements hydrauliques", Type.UNLOCALIZED);
+        super("Evénements hydrauliques", Type.UNLOCALIZED);
     }
 
     @Override

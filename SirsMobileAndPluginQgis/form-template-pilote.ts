@@ -864,7 +864,7 @@ export const formTemplatePilote = {
         "evenementHydrauliqueIds": {
             "name": "evenementHydrauliqueIds",
             "type": "EvenementHydraulique",
-            "label": "Evènements hydrauliques",
+            "label": "Evénements hydrauliques",
             "reference": true,
             "multiple": -1,
             "containment": false

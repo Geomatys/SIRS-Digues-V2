@@ -387,7 +387,7 @@ public class FXImportParametreHydrauliqueProfilTravers extends BorderPane {
         }
         // check evenenement hydraulique
         if (uiEvenementHydraulique.getValue() == null || uiEvenementHydraulique.valueProperty().get() == null) {
-            alert("Vous devez sélectionner un évènement hydraulique.", Alert.AlertType.INFORMATION);
+            alert("Vous devez sélectionner un événement hydraulique.", Alert.AlertType.INFORMATION);
             return false;
         }
         return true;

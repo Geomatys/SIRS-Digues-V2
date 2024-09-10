@@ -56,7 +56,7 @@
                      <Label text="Vitesse" GridPane.rowIndex="3" />
                      <ComboBox fx:id="uiAttDebit" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                      <ComboBox fx:id="uiAttVitesse" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                     <Label text="Evènement Hydraulique *" GridPane.rowIndex="4" />
+                     <Label text="Evénement Hydraulique *" GridPane.rowIndex="4" />
                      <ComboBox fx:id="uiEvenementHydraulique" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                      <Label text="Côte" GridPane.rowIndex="1" />
                      <ComboBox fx:id="uiAttCote" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />

@@ -257,7 +257,7 @@ public class CorePlugin extends Plugin {
         // Prestations
         suppliers.put(Prestation.class, getDefaultSupplierForClass.apply(Prestation.class));
 
-        // Mesures d'évènements
+        // Mesures d'événements
         suppliers.put(LaisseCrue.class, getDefaultSupplierForClass.apply(LaisseCrue.class));
         suppliers.put(MonteeEaux.class, getDefaultSupplierForClass.apply(MonteeEaux.class));
         suppliers.put(LigneEau.class, getDefaultSupplierForClass.apply(LigneEau.class));
@@ -432,13 +432,13 @@ public class CorePlugin extends Plugin {
             prestaLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(prestaLayer);
 
-            // Mesures d'évènements
+            // Mesures d'événements
             final BeanStore mesuresStore = new BeanStore(
                     suppliers.get(LaisseCrue.class),
                     suppliers.get(MonteeEaux.class),
                     suppliers.get(LigneEau.class));
             final MapItem mesuresLayer = MapBuilder.createItem();
-            mesuresLayer.setName("Mesures d'évènements");
+            mesuresLayer.setName("Mesures d'événements");
             mesuresLayer.items().addAll( buildLayers(mesuresStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             mesuresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(mesuresLayer);

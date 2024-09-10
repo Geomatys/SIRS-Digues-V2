@@ -49,7 +49,7 @@ import java.time.LocalDate;
 import java.util.logging.Level;
 
 /**
- * Vue calendrier présentant les évènements construits à partir des obligations réglementaires.
+ * Vue calendrier présentant les événements construits à partir des obligations réglementaires.
  *
  * @author Cédric Briançon (Geomatys)
  */
@@ -89,7 +89,7 @@ public final class ObligationsCalendarView extends CalendarView {
     };
 
     /**
-     * Vue calendrier pour les obligations réglementaires, permettant d'afficher les évènements.
+     * Vue calendrier pour les obligations réglementaires, permettant d'afficher les événements.
      *
      * @param etapes propriété pointant sur la liste des obligations réglementaires filtrées pour le calendrier.
      */
@@ -128,7 +128,7 @@ public final class ObligationsCalendarView extends CalendarView {
     }
 
     /**
-     * Met à jour les évènements sur le calendrier.
+     * Met à jour les événements sur le calendrier.
      */
     private void update() {
         getCalendarEvents().clear();
@@ -204,7 +204,7 @@ public final class ObligationsCalendarView extends CalendarView {
                         }
                     }
 
-                    // Création de l'évènement sur le calendrier pour cette obligation
+                    // Création de l'événement sur le calendrier pour cette obligation
                     getCalendarEvents().add(new CalendarEvent(etape, eventDate, sb.toString(), image));
 
                     // Si l'obligation a une date de rappel d'échéance de configurée, on ajoute une alerte à cette date
@@ -221,9 +221,9 @@ public final class ObligationsCalendarView extends CalendarView {
     }
 
     /**
-     * Affiche une fenêtre présentant les choix possibles pour cet évènement sur le calendrier.
+     * Affiche une fenêtre présentant les choix possibles pour cet événement sur le calendrier.
      *
-     * @param calendarEvent Evènement du calendrier concerné.
+     * @param calendarEvent Evénement du calendrier concerné.
      * @param parent Noeud parent sur lequel la fenêtre sera accrochée.
      */
     @Override

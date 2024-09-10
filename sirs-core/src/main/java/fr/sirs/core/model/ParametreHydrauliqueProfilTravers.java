@@ -232,9 +232,9 @@ public class ParametreHydrauliqueProfilTravers
                         if (ph != ParametreHydrauliqueProfilTravers.this) {
                             if (newValue.equals(ph.evenementHydrauliqueIdProperty().get())) {
                                 if (ph.getDesignation() != null)
-                                    throw new IllegalArgumentException("L'évènement hydraulique défini est déjà référencé par le paramètre hydraulique "+ph.getDesignation());
+                                    throw new IllegalArgumentException("L'événement hydraulique défini est déjà référencé par le paramètre hydraulique "+ph.getDesignation());
                                 else
-                                    throw new IllegalArgumentException("Impossible d'associer l'évènement hydraulique : un autre paramètre hydraulique l'utilise");
+                                    throw new IllegalArgumentException("Impossible d'associer l'événement hydraulique : un autre paramètre hydraulique l'utilise");
                             }
                         }
                     }
