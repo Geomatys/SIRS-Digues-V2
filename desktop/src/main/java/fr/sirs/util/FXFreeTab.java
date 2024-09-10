@@ -92,7 +92,7 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
             if (tp == null || tp.equals(getTabPane())) {
                 bindAction.setText(UNBIND);
                 bindAction.setOnAction(this::unbind);
-                closeAllTabsAction.setVisible(true);
+                closeAllTabsAction.setVisible(this.isClosable());
             } else {
                 bindAction.setText(BIND);
                 bindAction.setOnAction(this::bind);
