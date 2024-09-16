@@ -78,7 +78,7 @@ public abstract class FXAbstractTronconThemePane<T extends TronconDigue> extends
         ArgumentChecks.ensureNonNull("tronconClass", tronconClass);
         // Load the fxml of FXAbstractTronconThemePane only if the uiLinearChoice is null -> the loading will be done in another class.
         if (uiLinearChoice == null) {
-            SIRS.loadFXML(this, this.getClass(), null);
+            SIRS.loadFXML(this, FXTronconThemePane.class, null);
         }
         this.tronconClass = tronconClass;
         if (groups.length == 1) {
