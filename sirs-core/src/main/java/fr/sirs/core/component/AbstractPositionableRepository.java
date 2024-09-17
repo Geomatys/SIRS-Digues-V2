@@ -18,12 +18,10 @@
  */
 package fr.sirs.core.component;
 
-import fr.sirs.core.InjectorCore;
-import fr.sirs.core.SessionCore;
-import fr.sirs.core.SirsCore;
-import fr.sirs.core.TronconUtils;
-import fr.sirs.core.model.Desordre;
+import com.vividsolutions.jts.geom.LineString;
+import fr.sirs.core.*;
 import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import fr.sirs.util.StreamingIterable;
@@ -31,6 +29,8 @@ import java.util.List;
 import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.DocumentNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A repository to access the view giving positionable objects by
@@ -40,6 +40,9 @@ import org.ektorp.CouchDbConnector;
  * @param <T> Type of object managed by this repository.
  */
 public abstract class AbstractPositionableRepository<T extends Positionable> extends AbstractSIRSRepository<T> {
+
+    @Autowired
+    private SystemeReperageRepository srRepo;
 
     public AbstractPositionableRepository(Class<T> type, CouchDbConnector db) {
         super(type, db);
@@ -83,9 +86,41 @@ public abstract class AbstractPositionableRepository<T extends Positionable> ext
     protected boolean checkAndAdaptOnload(T loaded) {
         boolean toSave = false;
         try {
-            toSave = ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test(loaded);
-        } catch (RuntimeException cce) {
-            SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément chargé : \n" + loaded.toString(), cce);
+            if (loaded.getSystemeRepId() != null) {
+                try {
+                    srRepo.get(loaded.getSystemeRepId());
+                } catch (DocumentNotFoundException e) {
+                    // HACK redmine-8127 : Sometimes when removing a SR from a troncon, some positionables'SRs are not updated properly
+                    // and keep pointing to the removed SR leading to a @DocumentNotFoundException.
+                    final TronconDigue troncon = ConvertPositionableCoordinates.getTronconFromPositionable(loaded);
+
+                    if (troncon != null && troncon.getSystemeRepDefautId() != null) {
+                        loaded.setSystemeRepId(troncon.getSystemeRepDefautId());
+                        toSave = true;
+                        SirsCore.LOGGER.log(Level.INFO, "Système de repérage absent de la base de données pour le positionable " + loaded.getId() + ". Modification vers le système " +
+                                "de repérage par défaut du Tronçon.");
+                        // If there are geographical coords, we can force recomputing the linear coords from them.
+                        if (loaded.getPositionDebut() != null && loaded.getPositionFin() != null) {
+                            loaded.setBorneDebutId(null);
+                            loaded.setBorneFinId(null);
+                            loaded.setBorne_debut_distance(0);
+                            loaded.setBorne_fin_distance(0);
+                            loaded.setGeometryMode("COORD");
+                            loaded.setEditedGeoCoordinate(true);
+                            LineString geometry = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), loaded.getPositionDebut(), loaded.getPositionFin());
+                            loaded.setGeometry(geometry);
+                            ConvertPositionableCoordinates.computePositionableLinearCoordinate(loaded);
+                        }
+                    } else {
+                        SirsCore.LOGGER.log(Level.WARNING, "Système de repérage absent de la base de données pour le positionable " + loaded.getId() + ". " +
+                                "Aucun système de repérage disponible sur le tronçon pour remplacer.");
+                    }
+                }
+            } else {
+                toSave = ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test(loaded);
+            }
+        } catch (RuntimeException e) {
+            SirsCore.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées pour l'élément chargé : \n" + loaded.toString(), e);
         }
 
         if (loaded.getGeometry() == null) {
