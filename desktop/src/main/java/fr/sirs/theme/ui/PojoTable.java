@@ -580,6 +580,7 @@ public class PojoTable extends BorderPane implements Printable {
             }
 
             if (Prestation.class.isAssignableFrom(pojoClass)) {
+                // Add button to create multiple prestations at once.
                 final ImageView viewOn = new ImageView(SIRS.ICON_ADD_MULTIPLE_WHITE);
                 final Button uiCreateMultiplePrestations = new Button(null, viewOn);
 
