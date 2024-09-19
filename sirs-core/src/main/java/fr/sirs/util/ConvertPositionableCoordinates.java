@@ -24,6 +24,7 @@ import fr.sirs.core.*;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.*;
 import org.apache.sis.util.ArgumentChecks;
+import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.referencing.LinearReferencing;
 
 import java.util.function.Predicate;
@@ -460,5 +461,49 @@ public class ConvertPositionableCoordinates {
             }
         }
         return candidate;
+    }
+
+    /**
+     * Hack redmine 8127 where some positionable were still pointing to a deleted SR after their troncon'SR has been deleted.
+     *
+     * @param positionable the positionable to check the presence of the SR for.
+     * @return whether the positionable has been modified. Used to detect whether the positionable has to be updated in DB.
+     */
+    public static boolean testAndFixPositionableSR(final Positionable positionable) {
+        ArgumentChecks.ensureNonNull("positionable", positionable);
+        try {
+            final AbstractSIRSRepository srRepo = InjectorCore.getBean(SessionCore.class).getRepositoryForClass(SystemeReperage.class);
+            srRepo.get(positionable.getSystemeRepId());
+            return ConvertPositionableCoordinates.COMPUTE_MISSING_COORD.test(positionable);
+        } catch (DocumentNotFoundException e) {
+            // HACK redmine-8127 : Sometimes when removing a SR from a troncon, some positionables'SRs are not updated properly
+            // and keep pointing to the removed SR leading to a @DocumentNotFoundException.
+            final TronconDigue troncon = ConvertPositionableCoordinates.getTronconFromPositionable(positionable);
+
+            if (troncon != null && troncon.getSystemeRepDefautId() != null) {
+                SirsCore.LOGGER.log(Level.INFO, "Système de repérage absent de la base de données pour le positionable " + positionable.getId() + ". Modification vers le système " +
+                        "de repérage par défaut du Tronçon.");
+
+                positionable.setSystemeRepId(troncon.getSystemeRepDefautId());
+
+                // If there are geographical coords, we can force recomputing the linear coords from them.
+                if (positionable.getPositionDebut() != null && positionable.getPositionFin() != null) {
+                    positionable.setBorneDebutId(null);
+                    positionable.setBorneFinId(null);
+                    positionable.setBorne_debut_distance(0);
+                    positionable.setBorne_fin_distance(0);
+                    positionable.setGeometryMode("COORD");
+                    positionable.setEditedGeoCoordinate(true);
+                    LineString geometry = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), positionable.getPositionDebut(), positionable.getPositionFin());
+                    positionable.setGeometry(geometry);
+                    ConvertPositionableCoordinates.computePositionableLinearCoordinate(positionable);
+                }
+                return true;
+            } else {
+                SirsCore.LOGGER.log(Level.WARNING, "Système de repérage absent de la base de données pour le positionable " + positionable.getId() + ". " +
+                        "Aucun système de repérage disponible sur le tronçon pour remplacer.");
+                return false;
+            }
+        }
     }
 }
