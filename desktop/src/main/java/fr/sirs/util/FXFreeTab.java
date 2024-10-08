@@ -18,7 +18,6 @@
  */
 package fr.sirs.util;
 
-import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.ui.Growl;
@@ -58,7 +57,6 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
 
     private static final String UNBIND = "Détacher";
     private static final String BIND = "Rattacher";
-    private static final String CLOSE_ALL = "Fermer tous les onglets";
 
     public ChangeListener<String> hack;
     /**
@@ -66,7 +64,6 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
      */
     private WeakReference<TabPane> previous;
     private final MenuItem bindAction;
-    private final MenuItem closeAllTabsAction;
 
     /**
      * We use a supplier to get the content of the tab. It allows us to lazily
@@ -80,23 +77,17 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
         setNbAffichable(nbAffichable);
         setTextAbrege(text);
 
-        closeAllTabsAction = new MenuItem();
-        closeAllTabsAction.setText(CLOSE_ALL);
-        closeAllTabsAction.setOnAction(event -> Injector.getSession().getFrame().closeAllTabs(event));
-
         bindAction = new MenuItem();
 
-        setContextMenu(new ContextMenu(bindAction, closeAllTabsAction));
+        setContextMenu(new ContextMenu(bindAction));
         getContextMenu().setOnShowing(evt -> {
             final TabPane tp = previous == null? null : previous.get();
             if (tp == null || tp.equals(getTabPane())) {
                 bindAction.setText(UNBIND);
                 bindAction.setOnAction(this::unbind);
-                closeAllTabsAction.setVisible(this.isClosable());
             } else {
                 bindAction.setText(BIND);
                 bindAction.setOnAction(this::bind);
-                closeAllTabsAction.setVisible(false);
             }
         });
 

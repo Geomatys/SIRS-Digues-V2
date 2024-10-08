@@ -121,6 +121,13 @@
     -fx-background-radius: 5 5 5 5;
 }
 
+.tab-button {
+    -fx-border-color: #a1a1a1;
+    -fx-border-radius: 2;
+    -fx-background-color: rgb(240,240,240);
+    -fx-content-display: graphic-only;
+}
+
 .state-button-left {
     -fx-focus-color: transparent;
     -fx-background-color: linear-gradient(to bottom, -sirs-color-bright, -sirs-color-bright);
