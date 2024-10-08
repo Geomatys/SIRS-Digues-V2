@@ -374,7 +374,7 @@ public class RapportsPane extends BorderPane {
                             final String seId = digue.getSystemeEndiguementId();
                             if (seId != null) {
                                 final SystemeEndiguement se = session.getRepositoryForClass(SystemeEndiguement.class).get(seId);
-                                if (se != null) {
+                                if (se != null && !elements.contains(se)) {
                                     elements.add(se);
                                 }
                             }
