@@ -56,11 +56,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javafx.application.Platform;
@@ -364,30 +360,19 @@ public class RapportsPane extends BorderPane {
                             }
                         }
                     }
-
-                    // HACk redmine-8080 - allows to generate a "Fiche" for the SEs or Digues of the selected Troncons.
-                    final String digueId = troncon.getDigueId();
-                    if (digueId != null) {
-                        final Digue digue = session.getRepositoryForClass(Digue.class).get(digueId);
-                        if (digue != null) {
-                            elements.add(digue);
-                            final String seId = digue.getSystemeEndiguementId();
-                            if (seId != null) {
-                                final SystemeEndiguement se = session.getRepositoryForClass(SystemeEndiguement.class).get(seId);
-                                if (se != null && !elements.contains(se)) {
-                                    elements.add(se);
-                                }
-                            }
-                        }
-                    }
                 }
 
+                // HACk redmine-8080 - allows to generate a "Fiche" for the SEs or Digues of the selected Troncons.
+                final SystemeEndiguement se = session.getRepositoryForClass(SystemeEndiguement.class).get(sysEndi.getElementId());
+                if (se != null && !elements.contains(se)) {
+                    elements.add(se);
+                }
 
                 /*
                 2- génération du rapport
                 -----------------------*/
 
-                final Task reportGenerator = ODTUtils.generateReport(report, troncons.isEmpty()? null : elements, output, titre);
+                final Task reportGenerator = ODTUtils.generateReport(report, troncons.isEmpty()? Arrays.asList(se) : elements, output, titre);
                 Platform.runLater(() -> {
                     reportGenerator.messageProperty().addListener((obs, oldValue, newValue) -> updateMessage(newValue));
                     reportGenerator.workDoneProperty().addListener((obs, oldValue, newValue) -> updateProgress(newValue.doubleValue(), reportGenerator.getTotalWork()));
