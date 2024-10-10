@@ -140,7 +140,7 @@
                 <AnchorPane>
                     <children>
                         <TabPane fx:id="uiTabs" BorderPane.alignment="CENTER" AnchorPane.topAnchor="1.0" AnchorPane.leftAnchor="1.0" AnchorPane.bottomAnchor="1.0" AnchorPane.rightAnchor="1.0"/>
-                        <HBox AnchorPane.topAnchor="5.0" AnchorPane.rightAnchor="5.0">
+                        <HBox AnchorPane.topAnchor="3.0" AnchorPane.rightAnchor="5.0" >
                             <Button fx:id="uiCloseAllTabsButton" styleClass="tab-button" onAction="#closeAllTabs" >
                                 <tooltip>
                                     <Tooltip text="Fermer tous les onglets"/>
