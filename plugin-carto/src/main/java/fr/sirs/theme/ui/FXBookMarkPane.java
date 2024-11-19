@@ -241,7 +241,7 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
             if (layers.isEmpty())
                 ui_table.setPlaceholder(new Label("Aucune donnée trouvée pour le service parametré."));
 
-            ui_table.setItems(FXCollections.observableList(layers));
+            ui_table.setItems(FXCollections.observableList(layers).sorted());
         }));
 
         loader.setOnCancelled(evt -> Platform.runLater(() -> {
