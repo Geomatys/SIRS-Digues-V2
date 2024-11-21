@@ -30,6 +30,7 @@ import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.feature.type.GeometryDescriptor;
+import org.geotoolkit.filter.DefaultPropertyName;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
@@ -149,7 +150,7 @@ public class LocationInsertUtilities {
                                     styleModified = true;
                                     copiedSymbolizers[i] = increasePointSymbolizerSize((PointSymbolizer) sym, multiplier);
                                 }
-                                if (sym instanceof LineSymbolizer) {
+                                else if (sym instanceof LineSymbolizer) {
                                     styleModified = true;
                                     copiedSymbolizers[i] = increaseLineSymbolizerSize((LineSymbolizer) sym, multiplier);
 
@@ -230,6 +231,8 @@ public class LocationInsertUtilities {
     private static TextSymbolizer increaseTextSymbolizerSize(final TextSymbolizer sym, final double multiplier) {
         ArgumentChecks.ensureNonNull("TextSymbolizer to modify", sym);
         Font font = sym.getFont();
+        final DefaultPropertyName label = (DefaultPropertyName) sym.getLabel();
+        final String property = label == null ? "" : label.getPropertyName();
         return SF.textSymbolizer(sym.getFill(),
                 new DefaultFont(font.getFamily(),
                         font.getStyle(),
@@ -237,7 +240,7 @@ public class LocationInsertUtilities {
                         FF.literal(Double.parseDouble(font.getSize().toString()) * multiplier)),
                 SF.halo(sym.getHalo().getFill(),
                         FF.literal(Double.parseDouble(sym.getHalo().getRadius().toString()) * multiplier)),
-                FF.property("libelle"),
+                FF.property(property),
                 sym.getLabelPlacement(), null);
     }
 
