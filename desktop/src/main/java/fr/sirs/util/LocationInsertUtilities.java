@@ -234,15 +234,16 @@ public class LocationInsertUtilities {
         Font font = sym.getFont();
         final DefaultPropertyName label = (DefaultPropertyName) sym.getLabel();
         final String property = label == null ? "" : label.getPropertyName();
-        return SF.textSymbolizer(sym.getFill(),
+        return SF.textSymbolizer(sym.getName(), sym.getGeometry(),
+                sym.getDescription(), sym.getUnitOfMeasure(), FF.property(property),
                 new DefaultFont(font.getFamily(),
                         font.getStyle(),
                         font.getWeight(),
                         FF.literal(Double.parseDouble(font.getSize().toString()) * multiplier)),
+                sym.getLabelPlacement(),
                 SF.halo(sym.getHalo().getFill(),
                         FF.literal(Double.parseDouble(sym.getHalo().getRadius().toString()) * multiplier)),
-                FF.property(property),
-                sym.getLabelPlacement(), null);
+                sym.getFill());
     }
 
     /**
