@@ -31,6 +31,7 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.feature.type.GeometryDescriptor;
 import org.geotoolkit.filter.DefaultPropertyName;
+import org.geotoolkit.map.CollectionMapLayer;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
@@ -268,6 +269,9 @@ public class LocationInsertUtilities {
         if (backUpSelectionStyle != null) {
             final MapLayer layer = CorePlugin.getMapLayerForElement(e);
             layer.setSelectionStyle(backUpSelectionStyle);
+            if (layer instanceof CollectionMapLayer) {
+                ((CollectionMapLayer) layer).setSelectionFilter(null);
+            }
         }
     }
 
