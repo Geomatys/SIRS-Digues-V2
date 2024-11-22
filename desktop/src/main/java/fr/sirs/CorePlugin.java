@@ -18,12 +18,16 @@
  */
 package fr.sirs;
 
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Geometry;
+
 import static fr.sirs.SIRS.CRS_WGS84;
 import static fr.sirs.SIRS.DATE_DEBUT_FIELD;
 import static fr.sirs.SIRS.DATE_FIN_FIELD;
 import static fr.sirs.SIRS.DEFAULT_TRONCON_GEOM_WGS84;
 import static fr.sirs.SIRS.SIRSDOCUMENT_REFERENCE;
+
 import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.TronconUtils;
@@ -35,6 +39,7 @@ import fr.sirs.core.model.*;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.map.FXMapTab;
+import fr.sirs.map.MapItemViewRealPositionColumn;
 import fr.sirs.migration.HtmlRemoval;
 import fr.sirs.migration.RemoveOldDependanceConf;
 import fr.sirs.migration.upgrade.v2.UpgradeEvenementHydrauliqueLinkWithMesureH;
@@ -1331,8 +1336,25 @@ public class CorePlugin extends Plugin {
                 return null;
             }
 
-            FeatureCollection subCollection = fLayer.getCollection().subCollection(queryBuilder.buildQuery());
-            Envelope tmpEnvelope = subCollection.getEnvelope();
+            final FeatureCollection subCollection = fLayer.getCollection().subCollection(queryBuilder.buildQuery());
+            final Envelope tmpEnvelope;
+            if (MapItemViewRealPositionColumn.isLayerRealPositionVisible(fLayer) && e instanceof Positionable) {
+                final Positionable pos = (Positionable) e;
+                final Point positionDebut = pos.getPositionDebut();
+                final Point positionFin = pos.getPositionFin();
+                final double startX = positionDebut.getX();
+                final double endX = positionFin.getX();
+                final double startY = positionDebut.getY();
+                final double endY = positionFin.getY();
+                tmpEnvelope = new JTSEnvelope2D(Math.min(startX, endX),
+                        Math.max(startX, endX),
+                        Math.min(startY, endY),
+                        Math.max(startY, endY),
+                        subCollection.getFeatureType().getCoordinateReferenceSystem());
+            } else {
+                tmpEnvelope = subCollection.getEnvelope();
+            }
+
             if (tmpEnvelope == null) {
                 // Récupération de l'enveloppe impossible
                 return null;

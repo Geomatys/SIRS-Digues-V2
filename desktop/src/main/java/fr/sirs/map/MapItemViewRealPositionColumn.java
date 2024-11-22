@@ -212,6 +212,10 @@ public class MapItemViewRealPositionColumn extends TreeTableColumn <MapItem, Boo
         }
     }
 
+    public static boolean isLayerRealPositionVisible (final MapLayer maplayer) {
+        return LAYERS_IN_REALPOSITION.contains(maplayer.getName());
+    }
+
     /**
      * Try to find colors used to define the input {@link Style}.
      * Only rgb components are assesd here.
