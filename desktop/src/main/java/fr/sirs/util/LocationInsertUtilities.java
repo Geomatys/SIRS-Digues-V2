@@ -24,6 +24,7 @@ import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.map.MapItemViewRealPositionColumn;
 import fr.sirs.util.property.SirsPreferences;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.query.Query;
@@ -136,34 +137,38 @@ public class LocationInsertUtilities {
         boolean styleModified = false;
         if (currentStyle != null && currentStyle.featureTypeStyles() != null && !currentStyle.featureTypeStyles().isEmpty()) {
             Symbolizer sym;
-            Symbolizer[] copiedSymbolizers;
+            List<Symbolizer> finalSym;
             backupStyle = currentStyle;
             for (final FeatureTypeStyle ftStyle : currentStyle.featureTypeStyles()) {
                 if (ftStyle != null && ftStyle.rules() != null && !ftStyle.rules().isEmpty()) {
                     for (int ri = 0; ri < ftStyle.rules().size(); ri++) {
                         final List<? extends Symbolizer> rSym = ftStyle.rules().get(ri).symbolizers();
                         if (rSym != null && !rSym.isEmpty()) {
-                            copiedSymbolizers = rSym.toArray(new Symbolizer[rSym.size()]);
+                            finalSym = new ArrayList<>();
                             for (int i = 0; i < rSym.size(); i++) {
                                 sym = rSym.get(i);
-
+                                // Allows to hide the non-real position that is automatically highlighted
+                                // when the element is selected even though the real position option is at true.
+                                if (selectionStyle && sym.getGeometry() == null
+                                        && MapItemViewRealPositionColumn.isLayerRealPositionVisible(layer)) {
+                                    continue;
+                                }
                                 if (sym instanceof PointSymbolizer) {
                                     styleModified = true;
-                                    copiedSymbolizers[i] = increasePointSymbolizerSize((PointSymbolizer) sym, multiplier);
+                                    finalSym.add(increasePointSymbolizerSize((PointSymbolizer) sym, multiplier));
                                 }
                                 else if (sym instanceof LineSymbolizer) {
                                     styleModified = true;
-                                    copiedSymbolizers[i] = increaseLineSymbolizerSize((LineSymbolizer) sym, multiplier);
-
-                                } else if (sym instanceof TextSymbolizer) {
+                                    finalSym.add(increaseLineSymbolizerSize((LineSymbolizer) sym, multiplier));
+                               } else if (sym instanceof TextSymbolizer) {
                                     styleModified = true;
-                                    copiedSymbolizers[i] = increaseTextSymbolizerSize((TextSymbolizer) sym, multiplier);
-                                } else {
+                                    finalSym.add(increaseTextSymbolizerSize((TextSymbolizer) sym, multiplier * 1.5));
+                               } else {
                                     // we only want the log for debugging purpose
                                     LOG.log(Level.FINER, "This type of Symbolizer is not modified : " + sym.getClass().getSimpleName());
                                 }
                             }
-                            newFts.rules().add(SF.rule(copiedSymbolizers));
+                            newFts.rules().add(SF.rule(finalSym.toArray(new Symbolizer[finalSym.size()])));
                         }
                     }
                 }
