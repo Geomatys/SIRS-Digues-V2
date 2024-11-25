@@ -1346,10 +1346,12 @@ public class CorePlugin extends Plugin {
                 final double endX = positionFin.getX();
                 final double startY = positionDebut.getY();
                 final double endY = positionFin.getY();
-                tmpEnvelope = new JTSEnvelope2D(Math.min(startX, endX),
-                        Math.max(startX, endX),
-                        Math.min(startY, endY),
-                        Math.max(startY, endY),
+                final double minX = Math.min(startX, endX);
+                final double minY = Math.min(startY, endY);
+                tmpEnvelope = new JTSEnvelope2D(minX,
+                        minX == startX ? endX : startX,
+                        minY,
+                        minY == startY ? endY : startY,
                         subCollection.getFeatureType().getCoordinateReferenceSystem());
             } else {
                 tmpEnvelope = subCollection.getEnvelope();

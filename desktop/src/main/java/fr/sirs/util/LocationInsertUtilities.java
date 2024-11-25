@@ -162,6 +162,7 @@ public class LocationInsertUtilities {
                                     finalSym.add(increaseLineSymbolizerSize((LineSymbolizer) sym, multiplier));
                                } else if (sym instanceof TextSymbolizer) {
                                     styleModified = true;
+                                    // increase multiplier for text symbolizer to let it be readable
                                     finalSym.add(increaseTextSymbolizerSize((TextSymbolizer) sym, multiplier * 1.5));
                                } else {
                                     // we only want the log for debugging purpose
@@ -276,6 +277,7 @@ public class LocationInsertUtilities {
             final MapLayer layer = CorePlugin.getMapLayerForElement(e);
             layer.setSelectionStyle(backUpSelectionStyle);
             if (layer instanceof CollectionMapLayer) {
+                // At the end of the print location process, the last selected element is unselected.
                 ((CollectionMapLayer) layer).setSelectionFilter(null);
             }
         }
