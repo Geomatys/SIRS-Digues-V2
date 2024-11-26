@@ -59,6 +59,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -118,6 +119,7 @@ public class ExtractionDocumentsPane extends BorderPane {
 
     private final String COVER_JRXML_PATH = "/fr/sirs/jrxml/metaTemplateHorodatageCoverPage.jrxml";
     private final String SUMMARY_JRXML_PATH = "/fr/sirs/jrxml/metaTemplatePrestationSummaryTable.jrxml";
+    private final String SYNTHESE_LIST_PAGE_JRXML_PATH = "/fr/sirs/jrxml/metaTemplateHorodatageFilesListPage.jrxml";
     // Used to compute the page in the final report where to get each Tableau de Synthèse.
     private int pageIncrement;
 
@@ -350,6 +352,7 @@ public class ExtractionDocumentsPane extends BorderPane {
         final Map<String, List<PrestationWithPage>> tablesNotFound = new HashMap<>();
         final Map<String, List<PrestationWithPage>> tablesNotPdf = new HashMap<>();
         final List<PrestationWithPage> noTable = new ArrayList<>();
+        final List<SyntheseTableLink> syntheseTableLinks = new ArrayList<>();
         syntheseTablePrestationsMap.forEach((tablePath, prestationsList) -> {
             if (tablePath == null || tablePath.isEmpty()) {
                 noTable.addAll(prestationsList);
@@ -368,6 +371,7 @@ public class ExtractionDocumentsPane extends BorderPane {
                 });
                 pageIncrement = pageIncrement + getDocPageNumber(new File(tablePath));
                 filesToMerge.add(table);
+                syntheseTableLinks.add(new SyntheseTableLink(tablePath));
             }
         });
 
@@ -376,8 +380,16 @@ public class ExtractionDocumentsPane extends BorderPane {
         ======================================================*/
         addPageToFiles(filesToMerge, SUMMARY_JRXML_PATH, prestationsWithPage, null);
 
+         /*
+         C.5- Add a list of the synthese files url.
+         This was added because some timestamping software don't allow to keep the certification
+         when merging different timestamped PDF files.
+        ======================================================*/
+
+        filesToMerge.add(generateUrlsListPage(syntheseTableLinks));
+
         /*
-         C.5- Add conclusion page to final PDF.
+         C.6- Add conclusion page to final PDF.
         ======================================================*/
         if (conclusionFile != null) filesToMerge.add(conclusionFile);
 
@@ -569,6 +581,46 @@ public class ExtractionDocumentsPane extends BorderPane {
             throw new IllegalStateException("Error while creating summary page.", e);
         } catch (FileNotFoundException e) {
             throw new IllegalStateException("Can't find file " + summaryTmpPath, e);
+        } catch (IOException e) {
+            throw new IllegalStateException("Error while creating inputStream.", e);
+        }
+    }
+
+    /**
+     * Generate a temporary file for the synthese table files'urls.
+     * @param syntheseTableLinks the list of the synthese table files' urls.
+     * @return the created temporary file.
+     * @throws IOException if error when creating the temporary file.
+     * @throws JRException if error when creating the PDF file from the JRXML template.
+     */
+    private File generateUrlsListPage(final List<SyntheseTableLink> syntheseTableLinks) {
+        ArgumentChecks.ensureNonNull("syntheseTableLinks", syntheseTableLinks);
+        JRBeanCollectionDataSource beanColDataSource    = new JRBeanCollectionDataSource(syntheseTableLinks);
+        Map<String, Object> parameters                  = new HashMap<>();
+        // set report parameters
+        parameters.put("collectionBeanParam", beanColDataSource);
+
+        Path syntheseTableLinksTmpPath;
+        try {
+            syntheseTableLinksTmpPath = Files.createTempFile("syntheseTableLinksPage", ".pdf");
+        } catch (IOException e) {
+            throw new IllegalStateException("Error while creating tempory file for syntheseTableLinksPage", e);
+        }
+
+        JasperDesign jasperDesign;
+        try (InputStream input          = PrinterUtilities.class.getResourceAsStream(SYNTHESE_LIST_PAGE_JRXML_PATH);
+             OutputStream outputStream  = new FileOutputStream(syntheseTableLinksTmpPath.toFile())){
+
+            jasperDesign                = JRXmlLoader.load(input);
+            JasperReport jasperReport   = JasperCompileManager.compileReport(jasperDesign);
+            JasperPrint jasperPrint     = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+
+            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+            return syntheseTableLinksTmpPath.toFile();
+        } catch (JRException e) {
+            throw new IllegalStateException("Error while creating syntheseTableLinks page.", e);
+        } catch (FileNotFoundException e) {
+            throw new IllegalStateException("Can't find file " + syntheseTableLinksTmpPath, e);
         } catch (IOException e) {
             throw new IllegalStateException("Error while creating inputStream.", e);
         }
@@ -767,6 +819,28 @@ public class ExtractionDocumentsPane extends BorderPane {
 
                 return (periodeDebut == null || horodatageDate.isAfter(periodeDebut)) && (periodeFin == null || horodatageDate.isBefore(periodeFin));
             }).collect(Collectors.toList());
+        }
+    }
+
+    /**
+     * Class created to add page column to the metaTemplatePrestationSummaryTable.jrxml report for the summary table.
+     */
+    public class SyntheseTableLink {
+
+        private String filePath;
+        private String fileName;
+
+        public SyntheseTableLink(String filePath) {
+            ArgumentChecks.ensureNonNull("filePath", filePath);
+            this.filePath = filePath;
+            fileName = Paths.get(filePath).getFileName().toString();
+        }
+
+        public String getFilePath() {
+            return filePath;
+        }
+        public String getFileName() {
+            return fileName;
         }
     }
 
