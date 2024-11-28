@@ -595,25 +595,29 @@ public class ExtractionDocumentsPane extends BorderPane {
      */
     private File generateUrlsListPage(final List<SyntheseTableLink> syntheseTableLinks) {
         ArgumentChecks.ensureNonNull("syntheseTableLinks", syntheseTableLinks);
-        JRBeanCollectionDataSource beanColDataSource    = new JRBeanCollectionDataSource(syntheseTableLinks);
-        Map<String, Object> parameters                  = new HashMap<>();
+        final int size = syntheseTableLinks.size();
+        final int halfIndex = (size + 1) / 2;
+        // Split the data into two columns to avoid having many pages for big registres.
+        final JRBeanCollectionDataSource leftPathsDataSource    = new JRBeanCollectionDataSource(new ArrayList<>(syntheseTableLinks.subList(0, halfIndex)));
+        final JRBeanCollectionDataSource rightPathsDataSource   = new JRBeanCollectionDataSource(new ArrayList<>(syntheseTableLinks.subList(halfIndex, size)));
+        final Map<String, Object> parameters                  = new HashMap<>();
         // set report parameters
-        parameters.put("collectionBeanParam", beanColDataSource);
+        parameters.put("leftPathsDataSource", leftPathsDataSource);
+        parameters.put("rightPathsDataSource", rightPathsDataSource);
 
-        Path syntheseTableLinksTmpPath;
+        final Path syntheseTableLinksTmpPath;
         try {
             syntheseTableLinksTmpPath = Files.createTempFile("syntheseTableLinksPage", ".pdf");
         } catch (IOException e) {
             throw new IllegalStateException("Error while creating tempory file for syntheseTableLinksPage", e);
         }
 
-        JasperDesign jasperDesign;
         try (InputStream input          = PrinterUtilities.class.getResourceAsStream(SYNTHESE_LIST_PAGE_JRXML_PATH);
              OutputStream outputStream  = new FileOutputStream(syntheseTableLinksTmpPath.toFile())){
 
-            jasperDesign                = JRXmlLoader.load(input);
-            JasperReport jasperReport   = JasperCompileManager.compileReport(jasperDesign);
-            JasperPrint jasperPrint     = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+            final JasperDesign jasperDesign = JRXmlLoader.load(input);
+            final JasperReport jasperReport       = JasperCompileManager.compileReport(jasperDesign);
+            final JasperPrint jasperPrint         = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
 
             JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
             return syntheseTableLinksTmpPath.toFile();
