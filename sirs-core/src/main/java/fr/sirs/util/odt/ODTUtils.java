@@ -85,10 +85,14 @@ import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.sis.measure.Units;
 import org.apache.sis.util.ArgumentChecks;
+import org.apache.xerces.dom.ParentNode;
 import org.geotoolkit.data.FeatureIterator;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.image.io.XImageIO;
 import org.odftoolkit.odfdom.dom.OdfSchemaDocument;
+import org.odftoolkit.odfdom.dom.element.style.StyleFooterElement;
+import org.odftoolkit.odfdom.dom.element.style.StyleFooterLeftElement;
+import org.odftoolkit.odfdom.dom.element.style.StyleMasterPageElement;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclElement;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclsElement;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldGetElement;
@@ -115,6 +119,7 @@ import org.odftoolkit.simple.table.Cell;
 import org.odftoolkit.simple.table.Row;
 import org.odftoolkit.simple.table.Table;
 import org.odftoolkit.simple.table.TableContainer;
+import org.odftoolkit.simple.text.Footer;
 import org.odftoolkit.simple.text.Paragraph;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
@@ -781,7 +786,43 @@ public class ODTUtils {
             }
 
         } else if (candidate instanceof TextDocument) {
+            final Footer footer = ((TextDocument) candidate).getFooter();
+            final Footer headFooter = ((TextDocument) candidate).getFooter(true);
             holder.insertContentFromDocumentAfter((TextDocument) candidate, holder.addParagraph(""), true);
+            final MasterPage custom20Droite = MasterPage.getOrCreateMasterPage((TextDocument) candidate, "custom_20_droite");
+//            StyleFooterLeftElement footerElement = OdfElement.findFirstChildNode(StyleFooterLeftElement.class, smpe);
+            StyleMasterPageElement cust = ((TextDocument) candidate).getOfficeMasterStyles().getMasterPage("custom_20_droite");
+            List<Node> list = new ArrayList<>();
+            Node node = ((ParentNode) cust).getFirstChild();
+            while (node != null) {
+                list.add(node);
+                node = node.getNextSibling();
+            }
+
+            final MasterPage custom20Droite1 = MasterPage.getOrCreateMasterPage((TextDocument) holder, "custom_20_droite");
+            final StyleMasterPageElement holderCustom = holder.getOfficeMasterStyles().getMasterPage("custom_20_droite");
+            final StyleFooterElement styleFooterElement = holderCustom.newStyleFooterElement();
+            StyleFooterElement candidateFooter = OdfElement.findFirstChildNode(StyleFooterElement.class, cust);
+            Node firstChild = candidateFooter.getFirstChild();
+            list = new ArrayList<>();
+            while (firstChild != null) {
+                list.add(firstChild);
+                firstChild = firstChild.getNextSibling();
+                styleFooterElement.insertBefore(firstChild, null);
+            }
+
+            //            final Footer holderFooter = holder.getFooter();
+//            System.out.println(holderFooter);
+////            footer.
+//            footer.getOdfElement().getNextSibling().getNodeName();
+//            OdfOfficeStyles styles = ((TextDocument) candidate).getOrCreateDocumentStyles();
+//            List<OdfStyle> list = new ArrayList<>();
+//            for (OdfStyle e : styles.getStylesForFamily(OdfStyleFamily.Paragraph)) {
+//                System.out.println(e.getStyleNameAttribute());
+//                list.add(e);
+//            }
+//            list.stream().filter(e -> "Heading_20_1".equals(e.getStyleNameAttribute())).collect(Collectors.toList());
+
         } else if (candidate instanceof PDDocument) {
             appendPDF(holder, (PDDocument) candidate);
         } else if (candidate instanceof PDPage) {

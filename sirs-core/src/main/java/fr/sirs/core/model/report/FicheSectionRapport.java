@@ -34,6 +34,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -209,25 +210,32 @@ public class FicheSectionRapport extends AbstractSectionRapport {
 
     private static void printPhotos(final TextDocument holder, final Element source, int nbPhotosToPrint) {
         if (nbPhotosToPrint > 0) {
-            final Stream<? extends AbstractPhoto> photos;
+            final List<? extends AbstractPhoto> photos;
             if (source instanceof AvecPhotos) {
-                photos = ((AvecPhotos<? extends AbstractPhoto>) source).getPhotos().stream()
-                        ;
+                photos = ((AvecPhotos<? extends AbstractPhoto>) source).getPhotos();
             } else if (source instanceof Desordre) {
                 photos = ((Desordre) source).observations.stream()
-                        .flatMap(obs -> obs.getPhotos() == null? Stream.empty() : obs.getPhotos().stream());
+                        .flatMap(obs -> obs.getPhotos() == null? Stream.empty() : obs.getPhotos().stream()).collect(Collectors.toList());
             } else {
                 return;
             }
 
-            photos
+            if (photos.isEmpty()) {
+                holder.addParagraph("Pas de photo");
+            }
+            photos.stream()
                     .sorted(new PhotoComparator())
                     .limit(nbPhotosToPrint)
                     .forEachOrdered(photo -> {
                         try {
                             ODTUtils.appendImage(holder, null, photo, false);
                         } catch (IllegalArgumentException e) {
-                            holder.addParagraph("Impossible de retrouver l'image ".concat(photo.getChemin()));
+                            final String chemin = photo.getChemin();
+                            if (chemin != null) {
+                                holder.addParagraph("Impossible de retrouver l'image ".concat(chemin));
+                            } else {
+                                holder.addParagraph("lien vide");
+                            }
                         }
                     });
         }
