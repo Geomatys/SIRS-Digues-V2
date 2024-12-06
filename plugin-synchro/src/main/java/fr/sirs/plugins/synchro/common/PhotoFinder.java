@@ -3,30 +3,11 @@ package fr.sirs.plugins.synchro.common;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.IObservation;
-import fr.sirs.core.model.AbstractPhoto;
-import fr.sirs.core.model.AvecBornesTemporelles;
-import fr.sirs.core.model.AvecObservations;
-import fr.sirs.core.model.AvecPhotos;
-import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.EchelleLimnimetrique;
-import fr.sirs.core.model.OuvertureBatardable;
-import fr.sirs.core.model.OuvrageFranchissement;
-import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.OuvrageParticulier;
-import fr.sirs.core.model.OuvrageTelecomEnergie;
-import fr.sirs.core.model.OuvrageVoirie;
-import fr.sirs.core.model.Prestation;
-import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauTelecomEnergie;
-import fr.sirs.core.model.StationPompage;
-import fr.sirs.core.model.VoieAcces;
-import fr.sirs.core.model.VoieDigue;
+import fr.sirs.core.model.*;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -128,8 +109,10 @@ public class PhotoFinder implements Supplier<Stream<PhotosTronconWrapper>> {
                                     .map(VoieAccesWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, VoieDigue.class)
                                     .map(VoieDigueWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
-                            stream(source, AvecPhotos.class).map(PhotoContainerTronconWrapper::new)
-                            )))))))))))))));
+                            Stream.concat(stream(source, AvecPhotos.class).map(PhotoContainerTronconWrapper::new),
+                            session.getRepositoryForClass(TronconDigue.class).get(tronconIds).stream()
+                                    .map(PhotoContainerTronconWrapper::new)
+                            ))))))))))))))));
                 });
     }
 
