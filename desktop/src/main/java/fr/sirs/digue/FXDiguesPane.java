@@ -22,7 +22,6 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractTronconDigueRepository;
 import fr.sirs.core.component.DigueRepository;
-import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SystemeEndiguement;
@@ -40,6 +39,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -141,9 +142,11 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
             final Comparator<Element> comparator = new DefaultElementComparator();
             final List<SystemeEndiguement> sds = FXCollections.observableArrayList(session.getRepositoryForClass(SystemeEndiguement.class).getAll()).sorted((Comparator)comparator);
             final List<Digue> digues = new ArrayList<>(session.getRepositoryForClass(Digue.class).getAll());
-            Collections.sort(digues, comparator);
-            final List<TronconDigue> troncons = new ArrayList<>(((TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getAll());
-            Collections.sort(troncons, comparator);
+            sortList(digues, comparator);
+            final List<TronconDigue> troncons = new ArrayList<>((session.getRepositoryForClass(TronconDigue.class)).getAll());
+            // Correction bug base Sdea
+            sortList(troncons, comparator);
+
             final Set<Digue> diguesFound = new HashSet<>();
             final Set<TronconDigue> tronconsFound = new HashSet<>();
 
@@ -188,6 +191,46 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
                 }
                 uiSearch.setGraphic(searchNone);
             });
+        });
+    }
+
+    /**
+     * As the comparator compares designations either by Integer.compareTo() or String.compareTo(),
+     * this can sometimes lead to "IllegalArgumentException: Comparison method violates its general contract!"
+     * in TimSort.jav:899.
+     * <p>
+     * Example :<p>
+     *         - "9" < "123" ->  Integer.compareTo()<p>
+     *         - "123" < "8 : SE_SER1" -> String.compareTo()<p>
+     *     So : "9" < "123" < "8 : SE_SER1"<p>
+     *     But "8 : SE_SER1" < "9" -> String.compareTo()<p>
+     * @param listToSort
+     * @param comparator
+     */
+    private void sortList(final List<? extends Element> listToSort, final Comparator<Element> comparator) {
+        int i = 0;
+        // When the first sort throws an error, we try one more time as the first list's order has already been modified
+        // and thus the second sort will most likely pass.
+        while (i < 2) {
+            try {
+                Collections.sort(listToSort, comparator);
+                return;
+            } catch (IllegalArgumentException e) {
+                // This situation rarely happens but still can happen. This is due to a mix of Integer and String used as designation
+                // in the DefaultElementComparator.
+                if (i < 1) {
+                    SIRS.LOGGER.log(Level.INFO, "Error while sorting troncons list. Try one more time");
+                } else {
+                    SIRS.LOGGER.log(Level.WARNING, "Error while sorting troncons list. Sort list by comparing designations as String.");
+                }
+                i++;
+            }
+        }
+
+        Collections.sort(listToSort, (o1, o2) -> {
+            final String d1 = o1.getDesignation();
+            final String d2 = o2.getDesignation();
+            return d1 == d2 ? 0 : d1 == null ? 1 : d2 == null ? -1 : d1.compareTo(d2);
         });
     }
 
