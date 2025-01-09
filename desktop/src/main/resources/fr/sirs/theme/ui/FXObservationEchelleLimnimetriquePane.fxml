@@ -58,20 +58,26 @@
                    <!-- EDate -->                 
                    <Label text="%date" GridPane.rowIndex="0" />
                    <DatePicker fx:id="ui_date" GridPane.columnIndex="1" GridPane.rowIndex="0"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <!-- EString -->                 
-                   <Label text="%evolution" GridPane.rowIndex="1" />
-                   <TextArea fx:id="ui_evolution" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
 
-                   <Label text="%suiteApporterId" GridPane.rowIndex="2" />
-                   <ComboBox fx:id="ui_suiteApporterId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                   <Button fx:id="ui_suiteApporterId_link" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                   <!-- EString -->                 
-                   <Label text="%suite" GridPane.rowIndex="3" />
-                   <TextArea fx:id="ui_suite" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- Hauteur d'eau -->
+                   <Label text="%hauteurEau" GridPane.rowIndex="1"/>
+                   <Spinner fx:id="ui_hauteurEau" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                           maxHeight="-Infinity" maxWidth="-Infinity"/>
 
-                   <Label text="%observateurId" GridPane.rowIndex="4" />
-                   <ComboBox fx:id="ui_observateurId" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                   <Button fx:id="ui_observateurId_link" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                  <!-- EString -->
+                   <Label text="%evolution" GridPane.rowIndex="2" />
+                   <TextArea fx:id="ui_evolution" GridPane.columnIndex="1" GridPane.rowIndex="2"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+
+                   <Label text="%suiteApporterId" GridPane.rowIndex="3" />
+                   <ComboBox fx:id="ui_suiteApporterId" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                   <Button fx:id="ui_suiteApporterId_link" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                   <!-- EString -->                 
+                   <Label text="%suite" GridPane.rowIndex="4" />
+                   <TextArea fx:id="ui_suite" GridPane.columnIndex="1" GridPane.rowIndex="4"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+
+                   <Label text="%observateurId" GridPane.rowIndex="5" />
+                   <ComboBox fx:id="ui_observateurId" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                   <Button fx:id="ui_observateurId_link" GridPane.columnIndex="2" GridPane.rowIndex="5" />
 
               </children>
               <padding>
@@ -153,4 +159,3 @@
   </center>
 
 </fx:root>
-

@@ -619,7 +619,6 @@
         eType="#//Prestation" eOpposite="#//Prestation/echelleLimnimetriqueIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueIds" upperBound="-1"
         eType="#//EvenementHydraulique" eOpposite="#//EvenementHydraulique/echelleLimnimetriqueIds"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteurEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvertureBatardable" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -1686,7 +1685,9 @@
   <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageTelecomEnergie" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauTelecomEnergie" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageParticulier" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationEchelleLimnimetrique" eSuperTypes="#//AbstractObservationReseauEtOuvrage"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationEchelleLimnimetrique" eSuperTypes="#//AbstractObservationReseauEtOuvrage">
+     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteurEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageVoirie" eSuperTypes="#//AbstractObservationReseauVoirie"/>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationVoieDigue" eSuperTypes="#//AbstractObservationReseauVoirie"/>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvertureBatardable" eSuperTypes="#//AbstractObservationReseauVoirie"/>
