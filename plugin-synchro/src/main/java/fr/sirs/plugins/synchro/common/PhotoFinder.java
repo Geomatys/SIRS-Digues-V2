@@ -78,6 +78,14 @@ public class PhotoFinder implements Supplier<Stream<PhotosTronconWrapper>> {
     private Stream<PhotoContainerTronconWrapper> getPhotoContainers() {
         return Stream.of(session)
                 .flatMap((Session source) -> {
+                    final Stream<PhotoContainerTronconWrapper> tronconsPhotos;
+                    final AbstractSIRSRepository<TronconDigue> tronconRepo = session.getRepositoryForClass(TronconDigue.class);
+                    if (tronconIds == null) {
+                        tronconsPhotos = tronconRepo.getAll().stream().map(PhotoContainerTronconWrapper::new);
+                    } else {
+                        tronconsPhotos = tronconRepo.get(tronconIds).stream()
+                                .map(PhotoContainerTronconWrapper::new);
+                    }
                     return
                             Stream.concat(stream(source, OuvrageHydrauliqueAssocie.class)
                                     .map(OuvrageHydrauliqueAssocieWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
@@ -110,8 +118,7 @@ public class PhotoFinder implements Supplier<Stream<PhotosTronconWrapper>> {
                             Stream.concat(stream(source, VoieDigue.class)
                                     .map(VoieDigueWrapper::new).map(e -> new PhotoContainerTronconWrapper(e,e.tronconId)),
                             Stream.concat(stream(source, AvecPhotos.class).map(PhotoContainerTronconWrapper::new),
-                            session.getRepositoryForClass(TronconDigue.class).get(tronconIds).stream()
-                                    .map(PhotoContainerTronconWrapper::new)
+                                    tronconsPhotos
                             ))))))))))))))));
                 });
     }
