@@ -32,10 +32,7 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.feature.type.GeometryDescriptor;
 import org.geotoolkit.filter.DefaultPropertyName;
-import org.geotoolkit.map.CollectionMapLayer;
-import org.geotoolkit.map.FeatureMapLayer;
-import org.geotoolkit.map.MapItem;
-import org.geotoolkit.map.MapLayer;
+import org.geotoolkit.map.*;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.style.DefaultFont;
 import org.geotoolkit.style.MutableFeatureTypeStyle;
@@ -111,7 +108,8 @@ public class LocationInsertUtilities {
         final List<MapLayer> layers = CorePlugin.getMapLayers();
         final Map<MapLayer, MutableStyle> backUpStyles = new HashMap<>();
 
-        layers.stream().filter(MapItem::isVisible).forEach(l ->
+        // CoverageMapLayer must not be modified during printing.
+        layers.stream().filter(l -> l.isVisible() && l instanceof FeatureMapLayer).forEach(l ->
             backUpStyles.put(l, modifyLayerSymbolsSizeAndGetBackUpStyle(l, multiplier, false)));
         return backUpStyles;
     }
