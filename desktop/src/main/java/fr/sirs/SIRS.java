@@ -712,6 +712,7 @@ public final class SIRS extends SirsCore {
      * @throws ImageProcessingException
      */
     public static ImageInformation readImageInformation(final File imageFile)  throws IOException, MetadataException, ImageProcessingException {
+        ArgumentChecks.ensureNonNull("imageFile", imageFile);
         final Metadata metadata = ImageMetadataReader.readMetadata(imageFile);
         final Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
         final JpegDirectory jpegDirectory = metadata.getFirstDirectoryOfType(JpegDirectory.class);
