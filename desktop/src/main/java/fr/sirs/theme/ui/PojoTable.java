@@ -1209,7 +1209,7 @@ public class PojoTable extends BorderPane implements Printable {
             if (!IDesordre.class.isAssignableFrom(aClass)) {
                 throw new IllegalStateException("Only valid for IDesordre elements. Class not supported : " + aClass);
             }
-            final List<TableColumn<Element, ?>> visibleColumns = ExportAction.extractVisibleColumnNames(columns);
+            final List<TableColumn<Element, ?>> visibleColumns = ExportAction.extractVisibleColumns(columns);
 
             if (file.exists()) {
                 try (Stream<String> lines = Files.lines(file.toPath())) {
