@@ -105,15 +105,15 @@ public class OwcExtensionSirs extends OwcExtension {
         String pluginName = null;
         String sqlQuery = null;
         Filter filter = null;
-        for(Object field : fields){
-            if(field instanceof JAXBElement){
-                field = ((JAXBElement)field).getValue();
+        for (Object field : fields) {
+            if (field instanceof JAXBElement) {
+                field = ((JAXBElement) field).getValue();
             }
-            if(field instanceof Element){
+            if (field instanceof Element) {
                 final Element content = (Element) field;
-                if(content.getAttribute(ATT_KEY_EXTRA_DIMENSIONS)!=null){
-                    if(content.getAttribute(ATT_KEY_LOWER_EXTRA_DIMENSION)!=null
-                        && content.getAttribute(ATT_KEY_UPPER_EXTRA_DIMENSION)!=null){
+                if (content.getAttribute(ATT_KEY_EXTRA_DIMENSIONS) != null) {
+                    if (content.getAttribute(ATT_KEY_LOWER_EXTRA_DIMENSION) != null
+                            && content.getAttribute(ATT_KEY_UPPER_EXTRA_DIMENSION) != null) {
                         dateFilter = new FeatureMapLayer.DimensionDef(
                         CommonCRS.Temporal.JAVA.crs(),
                         GO2Utilities.FILTER_FACTORY.property(content.getAttribute(ATT_KEY_LOWER_EXTRA_DIMENSION)),
@@ -130,7 +130,7 @@ public class OwcExtensionSirs extends OwcExtension {
                 } else if (KEY_LAYER_NAME.equals(param.getKey())) {
                     layerName = param.getValue();
                     // HACK_REDMINE_7732 - Allow the upload of old contextes carto created before a layerName change of name
-                    layerName= Plugin.MigrationNames.migrate(layerName);
+                    layerName = Plugin.MigrationNames.migrate(layerName);
                 } else if (KEY_SQLQUERY.equals(param.getKey())) {
                     sqlQuery = param.getValue();
                 }
@@ -152,12 +152,17 @@ public class OwcExtensionSirs extends OwcExtension {
             }
             mapLayer = getLayerByName(plugin.getMapItems(), layerName);
             if (mapLayer == null) {
+                // Allows to load old contexts carto containing Object that have been removed since.
+                // Names are taken from the key "class" from the corresponding .properties files
+                if ("Fondation de berge".equals(layerName) || "Talus Risberme Berge".equals(layerName) || "Crête de berge".equals(layerName)) {
+                    return mapLayer;
+                }
                 throw new DataStoreException("No layer named "+layerName+" found in plugin "+pluginName);
             } else {
                 mapLayer.getUserProperties().put(Plugin.PLUGIN_FLAG, pluginName);
             }
 
-        }else if(sqlQuery!=null){
+        } else if (sqlQuery != null) {
             final Session session = Injector.getSession();
             try {
                 final FeatureStore h2Store = session.getH2Helper().getStore().get();
@@ -168,7 +173,7 @@ public class OwcExtensionSirs extends OwcExtension {
             } catch (Exception ex) {
                 throw new DataStoreException(ex.getMessage(),ex);
             }
-        }else{
+        } else {
             throw new DataStoreException("Invalid configuration, missing plugin source or sql query");
         }
 
