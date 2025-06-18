@@ -109,7 +109,7 @@ public class LocationInsertUtilities {
         final Map<MapLayer, MutableStyle> backUpStyles = new HashMap<>();
 
         // CoverageMapLayer must not be modified during printing.
-        layers.stream().filter(l -> l.isVisible() && l instanceof FeatureMapLayer).forEach(l ->
+        layers.stream().filter(l -> l instanceof FeatureMapLayer && l.isVisible()).forEach(l ->
             backUpStyles.put(l, modifyLayerSymbolsSizeAndGetBackUpStyle(l, multiplier, false)));
         return backUpStyles;
     }
