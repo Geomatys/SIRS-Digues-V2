@@ -20,13 +20,14 @@ package fr.sirs.owc;
 
 import fr.sirs.Injector;
 import fr.sirs.Plugin;
-import fr.sirs.Plugin.MigrationNames;
 import fr.sirs.Plugins;
-import javafx.scene.control.TableColumn;
 import org.geotoolkit.owc.xml.OwcExtension;
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -84,9 +85,19 @@ public class OwcExtensionSirs extends OwcExtension {
     public static final String ATT_KEY_UPPER_EXTRA_DIMENSION = "upper";
 
     private static final StyleXmlIO STYLE_XML_IO = new StyleXmlIO();
+    private final List<String> oldLayersNames = new ArrayList<>();
 
     public OwcExtensionSirs() {
         super(CODE, 10);
+        // Load old layers names that have been deleted from SIRS but can still be present in old context carto.
+        try (final BufferedReader br = new BufferedReader(new InputStreamReader(OwcExtensionSirs.class.getResourceAsStream("oldLayersNames.csv")))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                oldLayersNames.addAll(Arrays.stream(line.split(";")).collect(Collectors.toList()));
+            }
+        } catch (IOException e) {
+            SirsCore.LOGGER.log(Level.WARNING, "Error while loading oldLayersNames.csv file", e);
+        }
     }
 
     @Override
@@ -154,7 +165,7 @@ public class OwcExtensionSirs extends OwcExtension {
             if (mapLayer == null) {
                 // Allows to load old contexts carto containing Object that have been removed since.
                 // Names are taken from the key "class" from the corresponding .properties files
-                if ("Peupleraie".equals(layerName) || "Fondation de berge".equals(layerName) || "Talus Risberme Berge".equals(layerName) || "Crête de berge".equals(layerName)) {
+                if (oldLayersNames.contains(layerName)) {
                     return mapLayer;
                 }
                 throw new DataStoreException("No layer named "+layerName+" found in plugin "+pluginName);
