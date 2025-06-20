@@ -154,7 +154,7 @@ public class OwcExtensionSirs extends OwcExtension {
             if (mapLayer == null) {
                 // Allows to load old contexts carto containing Object that have been removed since.
                 // Names are taken from the key "class" from the corresponding .properties files
-                if ("Fondation de berge".equals(layerName) || "Talus Risberme Berge".equals(layerName) || "Crête de berge".equals(layerName)) {
+                if ("Peupleraie".equals(layerName) || "Fondation de berge".equals(layerName) || "Talus Risberme Berge".equals(layerName) || "Crête de berge".equals(layerName)) {
                     return mapLayer;
                 }
                 throw new DataStoreException("No layer named "+layerName+" found in plugin "+pluginName);
