@@ -18,7 +18,6 @@
  */
 package fr.sirs;
 
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -357,7 +356,7 @@ public class CorePlugin extends Plugin {
 
             // Special request to add a layer for the photos of the 'troncon'
             final BeanStore photoTronconStore = new BeanStore(photoTronconSupplier());
-            sirsGroup.items().addAll(buildLayers(photoTronconStore, PHOTO_TRONCON_LAYER_NAME, createPhotoTronconStyle(), createDefaultSelectionStyle(),true));
+            sirsGroup.items().addAll(buildLayers(photoTronconStore, PHOTO_TRONCON_LAYER_NAME, createDefaultStyle(colors[0]), createDefaultSelectionStyle(),true));
 
             //bornes
             final BeanStore borneStore = new BeanStore(suppliers.get(BorneDigue.class));
@@ -528,7 +527,7 @@ public class CorePlugin extends Plugin {
             if(SIRSDocument.class.isAssignableFrom(clazz)
                     && beanFeature.getProperty(SIRSDOCUMENT_REFERENCE)!=null){
                 final Object documentId = beanFeature.getPropertyValue(SIRSDOCUMENT_REFERENCE);
-                if(documentId!=null && documentId instanceof String){
+                if (documentId instanceof String) {
                     return clazz.getName().equals(cache.get((String) documentId));
                 }
             }
@@ -840,36 +839,6 @@ public class CorePlugin extends Plugin {
         }
         return super.getThemes();
     }
-
-    private static MutableStyle createPhotoTronconStyle() throws URISyntaxException {
-        //the visual element
-        final Expression size = GO2Utilities.FILTER_FACTORY.literal(16);
-
-        final List<GraphicalSymbol> symbols = new ArrayList<>();
-        final Stroke stroke = null;
-        final Fill fill = SF.fill(Color.BLACK);
-        final Mark mark = SF.mark(StyleConstants.MARK_TRIANGLE, fill, stroke);
-        symbols.add(mark);
-        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
-                size, LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
-
-        final PointSymbolizer pointSymbolizer = SF.pointSymbolizer("symbol",(String) null,DEFAULT_DESCRIPTION,Units.POINT,graphic);
-
-        final MutableRule ruleSmallObjects = SF.rule(pointSymbolizer);
-        ruleSmallObjects.setFilter(
-                FF.lessOrEqual(
-                        FF.function("length", FF.property("geometry")),
-                        FF.literal(SirsCore.LINE_MIN_LENGTH)
-                )
-        );
-
-        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
-        fts.rules().add(ruleSmallObjects);
-        final MutableStyle style = SF.style();
-        style.featureTypeStyles().add(fts);
-        return style;
-    }
-
 
     private static MutableStyle createBorneStyle() throws URISyntaxException{
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(10);
