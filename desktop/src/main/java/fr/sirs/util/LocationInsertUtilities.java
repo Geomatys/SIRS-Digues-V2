@@ -140,11 +140,12 @@ public class LocationInsertUtilities {
             for (final FeatureTypeStyle ftStyle : currentStyle.featureTypeStyles()) {
                 if (ftStyle != null && ftStyle.rules() != null && !ftStyle.rules().isEmpty()) {
                     for (int ri = 0; ri < ftStyle.rules().size(); ri++) {
-                        final List<? extends Symbolizer> rSym = ftStyle.rules().get(ri).symbolizers();
+                        final Rule rulei = ftStyle.rules().get(ri);
+                        final List<? extends Symbolizer> rSym = rulei.symbolizers();
                         if (rSym != null && !rSym.isEmpty()) {
                             finalSym = new ArrayList<>();
-                            for (int i = 0; i < rSym.size(); i++) {
-                                sym = rSym.get(i);
+                            for (Symbolizer symbolizer : rSym) {
+                                sym = symbolizer;
                                 // Allows to hide the non-real position that is automatically highlighted
                                 // when the element is selected even though the real position option is at true.
                                 if (selectionStyle && sym.getGeometry() == null
@@ -154,20 +155,21 @@ public class LocationInsertUtilities {
                                 if (sym instanceof PointSymbolizer) {
                                     styleModified = true;
                                     finalSym.add(increasePointSymbolizerSize((PointSymbolizer) sym, multiplier));
-                                }
-                                else if (sym instanceof LineSymbolizer) {
+                                } else if (sym instanceof LineSymbolizer) {
                                     styleModified = true;
                                     finalSym.add(increaseLineSymbolizerSize((LineSymbolizer) sym, multiplier));
-                               } else if (sym instanceof TextSymbolizer) {
+                                } else if (sym instanceof TextSymbolizer) {
                                     styleModified = true;
                                     // increase multiplier for text symbolizer to let it be readable
                                     finalSym.add(increaseTextSymbolizerSize((TextSymbolizer) sym, multiplier * 1.5));
-                               } else {
+                                } else {
                                     // we only want the log for debugging purpose
                                     LOG.log(Level.FINER, "This type of Symbolizer is not modified : " + sym.getClass().getSimpleName());
                                 }
                             }
-                            newFts.rules().add(SF.rule(finalSym.toArray(new Symbolizer[finalSym.size()])));
+                            final MutableRule rule = SF.rule(finalSym.toArray(new Symbolizer[finalSym.size()]));
+                            rule.setFilter(rulei.getFilter());
+                            newFts.rules().add(rule);
                         }
                     }
                 }
