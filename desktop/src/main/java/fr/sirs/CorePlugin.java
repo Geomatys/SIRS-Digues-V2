@@ -1251,11 +1251,14 @@ public class CorePlugin extends Plugin {
      * with a buffer of 50 meters around the element, then the image are resized with the
      * given dimensions.
      * Return null, if the element is null. Use a the default dimension, if dim is null.
+     *
      * @param e
      * @param dim
+     * @param selectionOverlayLayer     The layer created for the picture to get the selected element on top of all other elements.
      * @return BufferedImage image of the element
      */
-    public static java.awt.Image takePictureOfElement(Element e, Dimension dim) {
+    public static java.awt.Image takePictureOfElement(Element e, Dimension dim, final FeatureMapLayer selectionOverlayLayer) {
+        ArgumentChecks.ensureNonNull("Selection overlay layer", selectionOverlayLayer);
         final double BUFFER_DISTANCE = 100;
         final double DEFAULT_BUFFER_DISTANCE = 100;
 
@@ -1288,8 +1291,11 @@ public class CorePlugin extends Plugin {
             final FeatureMapLayer fLayer = (FeatureMapLayer) container;
 
             final Id idFilter = GO2Utilities.FILTER_FACTORY.id(Collections.singleton(new DefaultFeatureId(e.getId())));
-            fLayer.setSelectionFilter(idFilter);
-            fLayer.setVisible(true);
+
+            // Select element in the selection overlay layer
+            selectionOverlayLayer.setSelectionFilter(idFilter);
+            selectionOverlayLayer.setVisible(true);
+            fLayer.setSelectionFilter(null);
 
             // Envelope spatiale
             final FeatureType fType = fLayer.getCollection().getFeatureType();

@@ -32,12 +32,14 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.feature.type.GeometryDescriptor;
 import org.geotoolkit.filter.DefaultPropertyName;
+import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.map.*;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.style.DefaultFont;
 import org.geotoolkit.style.MutableFeatureTypeStyle;
 import org.geotoolkit.style.MutableStyle;
 import org.geotoolkit.style.MutableStyleFactory;
+import org.geotoolkit.style.MutableRule;
 import org.geotoolkit.util.NamesExt;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
@@ -371,5 +373,67 @@ public class LocationInsertUtilities {
                 if (toRestore != null) ((FeatureMapLayer) layer).setQuery(toRestore);
             }
         }
+    }
+
+    /**
+     *  Creates a selection overlay layer that renders the selected element on top of all other layers.
+     *  This ensures that the selected item is always visible, even if it would normally be rendered
+     *  below other features in the same layer.
+     * @param e                 the element used to create the selection layer
+     * @param multiplier        how much the symbols size should be modified by
+     * @return the created selection overlay layer
+     */
+    protected static FeatureMapLayer createSelectionOverlayLayer(final Element e, final double multiplier) {
+        ArgumentChecks.ensureNonNull("Element", e);
+
+        final MapLayer originalLayer = CorePlugin.getMapLayerForElement(e);
+        if (!(originalLayer instanceof FeatureMapLayer)) {
+            LOG.log(Level.WARNING, "Cannot create selection overlay: original layer is not a FeatureMapLayer");
+            return null;
+        }
+
+        final FeatureMapLayer fml = (FeatureMapLayer) originalLayer;
+        final FeatureCollection originalCollection = fml.getCollection();
+
+        // Create new style with no rule => the originalLayer will be used for the style.
+        final MutableFeatureTypeStyle newFts = SF.featureTypeStyle();
+        final MutableStyle style = SF.style();
+        style.featureTypeStyles().add(newFts);
+
+        // Create overlay layer with the created style and the original layer's collection.
+        final FeatureMapLayer overlayLayer = MapBuilder.createFeatureLayer(originalCollection, style);
+        // Copy selection style from original
+        overlayLayer.setSelectionStyle(fml.getSelectionStyle());
+        // Modify selectionStyle to increase its visibility
+        modifyLayerSymbolsSizeAndGetBackUpStyle(overlayLayer, multiplier, true);
+
+        overlayLayer.setName("Selection Overlay");
+        overlayLayer.setVisible(true);
+        overlayLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+
+        // Add the overlay layer at the top of the map context
+        final MapContext context = Injector.getSession().getMapContext();
+        final List<MapLayer> layers = context.layers();
+        layers.add(layers.size(), overlayLayer);
+
+        LOG.log(Level.FINE, "Created selection overlay layer for class: {0}", e.getClass().getSimpleName());
+
+        return overlayLayer;
+    }
+
+    /**
+     * Removes the selection overlay layer from the map context.
+     *
+     * @param overlayLayer the overlay layer to remove
+     */
+    protected static void removeSelectionOverlayLayer(final FeatureMapLayer overlayLayer) {
+        if (overlayLayer == null) {
+            return;
+        }
+
+        final MapContext context = Injector.getSession().getMapContext();
+        context.layers().remove(overlayLayer);
+
+        LOG.log(Level.FINE, "Removed selection overlay layer");
     }
 }
