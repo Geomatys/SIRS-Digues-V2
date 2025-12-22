@@ -177,13 +177,13 @@ public class LocationInsertUtilities {
         }
 
         if (styleModified) {
-        final MutableStyle style = SF.style();
-        style.featureTypeStyles().add(newFts);
+            final MutableStyle style = SF.style();
+            style.featureTypeStyles().add(newFts);
 
-        if (selectionStyle) layer.setSelectionStyle(style);
-        else layer.setStyle(style);
+            if (selectionStyle) layer.setSelectionStyle(style);
+            else layer.setStyle(style);
 
-        // if the layer's style has not been modified, it's removed from the returned Map
+            // if the layer's style has not been modified, it's removed from the returned Map
             return backupStyle;
         } else
             return null;
