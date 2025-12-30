@@ -1,18 +1,18 @@
 /**
  * This file is part of SIRS-Digues 2.
- *
+ * <p>
  * Copyright (C) 2016, FRANCE-DIGUES,
- *
+ * <p>
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
@@ -377,6 +377,9 @@ public class TronconUtils {
         Geometry originalGeometry;
         Positionable copied;
         final LocalDate now = LocalDate.now();
+        // Map to store the link between original objets ids and created ones ids.
+        final Map<String, String> mapOldandNewIds= new HashMap<>();
+        AbstractSIRSRepository<Positionable> repo;
         while (posIt.hasNext()) {
             original = posIt.next();
 
@@ -435,6 +438,7 @@ public class TronconUtils {
             if (copied instanceof AvecForeignParent) {
                 ((AvecForeignParent) copied).setForeignParentId(tronconCp.getId());
             }
+            // TODO understand why this line. If it is not a document, then it is not added to the database, so why keep going ?
             if (isDocument) {
                 newPositions.add(copied);
             }
@@ -478,7 +482,16 @@ public class TronconUtils {
                 copied.setBorne_fin_distance((float) posSr.distanceEndBorne);
                 copied.setBorne_fin_aval(posSr.endAval);
             }
+
+            repo = (AbstractSIRSRepository<Positionable>) session.getRepositoryForClass(copied.getClass());
+            // Add to repo to get an id for the newly created positionable.
+            repo.add(copied);
+            // Store the old and new Ids to use later on to update the links between positionables.
+            mapOldandNewIds.put(original.getId(), copied.getId());
         }
+
+        // Update links between positionables.
+        newPositions.forEach(pos -> pos.updatePositionableRefs(mapOldandNewIds));
 
         // Et on termine par la sérialisation des objets positionés sur le nouveau tronçon.
         final List<DocumentOperationResult> bulkErrors = session.executeBulk((Collection) newPositions);
