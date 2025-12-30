@@ -150,29 +150,7 @@ public class TronconUtils {
         }
 
         // On ajoute les structures du tronçon paramètre.
-        final List<Positionable> toSave = new ArrayList<>();
-        for (final Positionable objet : getPositionableList(original)) {
-            // Si on a un objet imbriqué dans un document, on le passe. Il sera
-            // mis à jour via son parent.
-            if (!objet.getId().equals(objet.getDocumentId())) {
-                continue;
-            }
-
-            final Positionable copy = objet.copy();
-            toSave.add(copy);
-            if (copy instanceof AvecForeignParent) {
-                ((AvecForeignParent) copy).setForeignParentId(tdCopy.getId());
-            }
-            if (copy.getSystemeRepId() != null) {
-                copy.setSystemeRepId(srMapping.get(copy.getSystemeRepId()));
-            }
-        }
-
-        // On sauvegarde les changements.
-        final List<DocumentOperationResult> failures = session.executeBulk((Collection) toSave);
-        for (final DocumentOperationResult failure : failures) {
-            SirsCore.LOGGER.log(Level.WARNING, "Update failed : ".concat(failure.getError()));
-        }
+        copyElementsOnNewTroncon(tdCopy, original, session, srMapping);
 
         return tdCopy;
     }
@@ -727,7 +705,25 @@ public class TronconUtils {
         }
 
         // On ajoute les structures du tronçon paramètre.
-        final List<Positionable> toSave = new ArrayList<>();
+        copyElementsOnNewTroncon(mergeResult, mergeParam, session, modifiedSRs);
+
+        return mergeResult;
+    }
+
+    /**
+     * Copy Positionables linked to the mergeParam troncon onto the mergeResult troncon.
+     * Update links between positionable objects with new Ids.
+     *
+     * @param mergeResult   The troncon used as a base for the fusion. The troncon that is being updated.
+     * @param mergeParam    The troncon containing the properties to be copied onto mergeResult.
+     * @param session       The applicative session to create the copies of the mergeParam properties.
+     * @param modifiedSRs   The SRs to be used for the copies.
+     */
+    private static void copyElementsOnNewTroncon(TronconDigue mergeResult, TronconDigue mergeParam, SessionCore session, Map<String, String> modifiedSRs) {
+        final List<Positionable> toUpdate = new ArrayList<>();
+        // Map to store the link between original objets ids and created ones ids.
+        final Map<String, String> mapOldandNewIds= new HashMap<>();
+        AbstractSIRSRepository<Positionable> repo;
         for (final Positionable objet : getPositionableList(mergeParam)) {
             // Si on a un objet imbriqué dans un document, on le passe. Il sera
             // mis à jour via son parent.
@@ -735,23 +731,29 @@ public class TronconUtils {
                 continue;
             }
 
-            final Positionable copy = objet.copy();
-            toSave.add(copy);
-            if (copy instanceof AvecForeignParent) {
-                ((AvecForeignParent) copy).setForeignParentId(mergeResult.getId());
+            final Positionable positionable = objet.copy();
+            if (positionable instanceof AvecForeignParent) {
+                ((AvecForeignParent) positionable).setForeignParentId(mergeResult.getId());
             }
-            if (copy.getSystemeRepId() != null) {
-                copy.setSystemeRepId(modifiedSRs.get(copy.getSystemeRepId()));
+            if (positionable.getSystemeRepId() != null) {
+                positionable.setSystemeRepId(modifiedSRs.get(positionable.getSystemeRepId()));
             }
+            // Add to repo to get an id for the newly created positionable.
+            repo = (AbstractSIRSRepository<Positionable>) session.getRepositoryForClass(objet.getClass());
+            repo.add(positionable);
+            // Store the old and new Ids to use later on to update the links between positionables.
+            mapOldandNewIds.put(objet.getId(), positionable.getId());
+            toUpdate.add(positionable);
         }
 
-        // On sauvegarde les changements.
-        final List<DocumentOperationResult> failures = session.executeBulk((Collection) toSave);
+        // Update link between positionables.
+        toUpdate.forEach(pos -> pos.updatePositionableRefs(mapOldandNewIds));
+
+        // We save the changes.
+        final List<DocumentOperationResult> failures = session.executeBulk((Collection) toUpdate);
         for (final DocumentOperationResult failure : failures) {
             SirsCore.LOGGER.log(Level.WARNING, "Update failed : ".concat(failure.getError()));
         }
-
-        return mergeResult;
     }
 
     /**
