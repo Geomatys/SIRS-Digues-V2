@@ -172,6 +172,7 @@ public class ModelHelper extends Helper {
 
         if (isPositionable() || POSITIONABLE_CLASS_NAME.equals(getClassName())) {
             imports.add("java.util.Map");
+            imports.add("java.util.HashMap");
         }
 
         if (hasDocument()) {

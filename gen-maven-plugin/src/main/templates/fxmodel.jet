@@ -815,8 +815,14 @@ accessor methods specified by implemented interfaces.
         if (helper.isPositionable()) {
 %>
 
+    /**
+     * Method to update the n-relation between positionables after a split/fusion of tronçon(s)
+     *
+     * @param mapOldandNewIds map containing the old id and new id of a positionable after a split/fusion of tronçon(s)
+     */
     @Override
-    public void updatePositionableRefs(final Map<String, String> mapOldandNewIds) {
+    public Map<String, String> updatePositionableRefs(final Map<String, String> mapOldandNewIds) {
+        final Map<String, String> idsNotfound = new HashMap<>();
 <%
             // Copy each reference
             for (EReference att : helper.getEAllReferences()) {
@@ -839,6 +845,8 @@ accessor methods specified by implemented interfaces.
                     final String newId = mapOldandNewIds.get(id);
                     if (newId != null) {
                         newIds.add(newId);
+                    } else {
+                    idsNotfound.put(id, "<%= helper.getClassName(att) %>");
                     }
                 });
                 <%= helper.setter(att) %>(newIds);
@@ -854,6 +862,8 @@ accessor methods specified by implemented interfaces.
                 final String newId = mapOldandNewIds.get(oldId);
                 if (newId != null) {
                    <%= helper.setter(att) %>(newId);
+                } else {
+                    idsNotfound.put(id, "<%= helper.getClassName(att) %>");
                 }
             }
         }
@@ -862,6 +872,7 @@ accessor methods specified by implemented interfaces.
                 }
             }
 %>
+        return idsNotfound;
     }
 
 <%
@@ -884,7 +895,7 @@ accessor methods specified by implemented interfaces.
 <%
             }
 %>
-    public abstract void updatePositionableRefs(final Map<String, String> mapOldandNewIds);
+    public abstract Map<String, String> updatePositionableRefs(final Map<String, String> mapOldandNewIds);
 
 <%
         }

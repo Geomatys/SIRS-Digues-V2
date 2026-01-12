@@ -491,7 +491,7 @@ public class TronconUtils {
         }
 
         // Update links between positionables.
-        newPositions.forEach(pos -> pos.updatePositionableRefs(mapOldandNewIds));
+        updatePositionablesRefs(newPositions, mapOldandNewIds);
 
         // Et on termine par la sérialisation des objets positionés sur le nouveau tronçon.
         final List<DocumentOperationResult> bulkErrors = session.executeBulk((Collection) newPositions);
@@ -760,12 +760,20 @@ public class TronconUtils {
         }
 
         // Update link between positionables.
-        toUpdate.forEach(pos -> pos.updatePositionableRefs(mapOldandNewIds));
+        updatePositionablesRefs(toUpdate, mapOldandNewIds);
 
         // We save the changes.
         final List<DocumentOperationResult> failures = session.executeBulk((Collection) toUpdate);
         for (final DocumentOperationResult failure : failures) {
             SirsCore.LOGGER.log(Level.WARNING, "Update failed : ".concat(failure.getError()));
+        }
+    }
+
+    private static void updatePositionablesRefs(List<Positionable> toUpdate, Map<String, String> mapOldandNewIds) {
+        final Map<String, String> updatePosIdsFailures = new HashMap<>();
+        toUpdate.forEach(pos -> updatePosIdsFailures.putAll(pos.updatePositionableRefs(mapOldandNewIds)));
+        for (final Map.Entry<String, String> idsNotfound : updatePosIdsFailures.entrySet()) {
+            SirsCore.LOGGER.log(Level.WARNING, "Positionable id update failed for : ".concat(idsNotfound.getValue()).concat(" with id ").concat(idsNotfound.getKey()));
         }
     }
 
