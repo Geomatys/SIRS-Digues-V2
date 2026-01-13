@@ -819,6 +819,8 @@ accessor methods specified by implemented interfaces.
      * Method to update the n-relation between positionables after a split/fusion of tronçon(s)
      *
      * @param mapOldandNewIds map containing the old id and new id of a positionable after a split/fusion of tronçon(s)
+     * @return The map containing the old ids and their respective classes that were not found in the database,
+     * and thus not updated in the Positionable.
      */
     @Override
     public Map<String, String> updatePositionableRefs(final Map<String, String> mapOldandNewIds) {
