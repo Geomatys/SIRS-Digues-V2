@@ -23,6 +23,7 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.*;
 
 import static fr.sirs.SIRS.*;
+import static fr.sirs.core.model.AvecObservationsAvecUrgence.*;
 import static fr.sirs.util.SirsComparator.OBSERVATION_COMPARATOR;
 
 import fr.sirs.core.Repository;
@@ -2481,11 +2482,11 @@ public class PojoTable extends BorderPane implements Printable {
             this.obsOrder = obsOrder;
             final String obsName;
             if (obsOrder == 0) {
-                obsName = "Dernière observation";
+                obsName = LAST_OBS;
             } else  if (obsOrder == 1) {
-                obsName = "Avant-dernière observation";
+                obsName = BEFORE_LAST_OBS;
             } else {
-                obsName = "Observation n - " + obsOrder;
+                obsName = N_LAST_OBS + obsOrder;
             }
             descName = desc.getName();
             this.name = obsName + descName;
