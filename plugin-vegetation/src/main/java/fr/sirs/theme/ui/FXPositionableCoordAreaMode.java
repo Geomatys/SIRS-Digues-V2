@@ -30,6 +30,8 @@ import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import fr.sirs.util.ConvertPositionableCoordinates;
 import java.util.stream.Stream;
+
+import fr.sirs.util.javafx.SpinnerUtils;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -96,6 +98,11 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         uiStartFar.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
         uiEndNear.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
         uiEndFar.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
+
+        SpinnerUtils.commitOnFocusLost(uiStartNear);
+        SpinnerUtils.commitOnFocusLost(uiStartFar);
+        SpinnerUtils.commitOnFocusLost(uiEndNear);
+        SpinnerUtils.commitOnFocusLost(uiEndFar);
 
         final ChangeListener chgListener = (ObservableValue observable, Object oldValue, Object newValue) -> coordChange();
         uiStartNear.valueProperty().addListener(chgListener);

@@ -40,6 +40,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Stream;
+
+import fr.sirs.util.javafx.SpinnerUtils;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -139,6 +141,10 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         uiLatitudeStart.disableProperty().bind(disableProperty);
         uiLongitudeEnd.disableProperty().bind(disableProperty);
         uiLatitudeEnd.disableProperty().bind(disableProperty);
+        SpinnerUtils.commitOnFocusLost(uiLongitudeStart);
+        SpinnerUtils.commitOnFocusLost(uiLatitudeStart);
+        SpinnerUtils.commitOnFocusLost(uiLongitudeEnd);
+        SpinnerUtils.commitOnFocusLost(uiLatitudeEnd);
 
         //liste par défaut des systemes de coordonnées
         ObservableList<CoordinateReferenceSystem> crss = FXCollections.unmodifiableObservableList(
