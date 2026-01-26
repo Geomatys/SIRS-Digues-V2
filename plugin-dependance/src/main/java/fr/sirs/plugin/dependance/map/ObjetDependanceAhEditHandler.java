@@ -361,6 +361,8 @@ public class ObjetDependanceAhEditHandler extends AbstractNavigationHandler {
                         } else {
                             repo.add(abstractAmenagement);
                         }
+                        // Open the sheet of the created element
+                        Injector.getSession().showEditionTab(abstractAmenagement, element -> true);
                         // On quitte le mode d'édition.
                         reset();
                     });
