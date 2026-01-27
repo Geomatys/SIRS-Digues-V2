@@ -171,10 +171,7 @@ final class MonthView extends DatePane {
                 // HACK -redmine 7611 : Allow to get even row height even
                 // when many events are on a date.
                 // The scrollPane contained in the grid will allow to see all events.
-                grid.maxHeightProperty().bind(Bindings.createIntegerBinding(() -> {
-                    double height = this.heightProperty().get();
-                    return (int) Math.round(height / numberOfRows);
-                }, this.heightProperty()));
+                grid.maxHeightProperty().bind(this.heightProperty().divide(numberOfRows));
 
                 grid.getStyleClass().add(CSS_CALENDAR_DAY);
                 final ColumnConstraints eventColCstr = new ColumnConstraints(0, USE_COMPUTED_SIZE, Double.MAX_VALUE, Priority.ALWAYS, HPos.LEFT, true);
