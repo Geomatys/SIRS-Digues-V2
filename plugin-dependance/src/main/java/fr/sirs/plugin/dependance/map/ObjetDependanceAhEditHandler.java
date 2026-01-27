@@ -292,8 +292,9 @@ public class ObjetDependanceAhEditHandler extends AbstractNavigationHandler {
                         // Dans le cas d'un ponctuel, le simple clic gauche permet de déplacer le point.
                         final Geometry tempEditGeom = editGeometry.geometry.get();
                         if (Point.class.isAssignableFrom(tempEditGeom.getClass())) {
-                            editGeometry.geometry.set(EditionHelper.createPoint(helper.toCoord(x,y)));
-                            JTS.setCRS(editGeometry.geometry.get(), map.getCanvas().getObjectiveCRS2D());
+                            final Point point = EditionHelper.createPoint(helper.toCoord(x, y));
+                            JTS.setCRS(point, map.getCanvas().getObjectiveCRS2D());
+                            editGeometry.geometry.set(point);
                             decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
                         } else if (e.getClickCount() >= 2) {
                             final Geometry result;
