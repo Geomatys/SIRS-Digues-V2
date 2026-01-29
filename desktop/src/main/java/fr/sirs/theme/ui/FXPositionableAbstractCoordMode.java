@@ -114,6 +114,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
     private final Button uiImport;
 
     private boolean reseting = false;
+    private boolean updatePosAfterCrsChange = false;
 
     public void setReseting(boolean reseting) {
         this.reseting = reseting;
@@ -422,7 +423,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
     }
 
     protected void coordChange() {
-        if (reseting) {
+        if (reseting || updatePosAfterCrsChange) {
             return;
         }
         reseting = true;
@@ -485,17 +486,15 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
 
                 if (ptStart != null) {
                     final Point tmpStart = (Point) JTS.transform(ptStart, conversion);
-                    Platform.runLater(() -> {
-                        uiLongitudeStart.getValueFactory().valueProperty().set(tmpStart.getX());
-                        uiLatitudeStart.getValueFactory().valueProperty().set(tmpStart.getY());
-                    });
+                    updatePosAfterCrsChange = true;
+                    uiLongitudeStart.getValueFactory().valueProperty().set(tmpStart.getX());
+                    uiLatitudeStart.getValueFactory().valueProperty().set(tmpStart.getY());
                 }
                 if (ptEnd != null) {
                     final Point tmpEnd = (Point) JTS.transform(ptEnd, conversion);
-                    Platform.runLater(() -> {
-                        uiLongitudeEnd.getValueFactory().valueProperty().set(tmpEnd.getX());
-                        uiLatitudeEnd.getValueFactory().valueProperty().set(tmpEnd.getY());
-                    });
+                    updatePosAfterCrsChange = true;
+                    uiLongitudeEnd.getValueFactory().valueProperty().set(tmpEnd.getX());
+                    uiLatitudeEnd.getValueFactory().valueProperty().set(tmpEnd.getY());
                 }
             } catch (Exception ex) {
                 GeotkFX.newExceptionDialog("La conversion des positions a échoué.", ex).show();
@@ -503,6 +502,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             }
         }
 
+        updatePosAfterCrsChange = false;
         buildGeometry();
         reseting = false;
     }
