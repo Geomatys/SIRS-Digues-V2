@@ -38,6 +38,7 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
@@ -190,6 +191,8 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
                 newValue.positionFinProperty().addListener(pointListener);
                 newValue.editedGeoCoordinateProperty().addListener(updateEditedGeoCoordinatesDisplay);
                 setCoordinatesLabel(null, newValue.getEditedGeoCoordinate());
+                // Init crs if stored in the positionable, otherwise use the base CRS.
+                initCrsFromPos(newValue);
                 updateFields();
             }
         });
@@ -201,6 +204,16 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         uiLatitudeEnd.valueProperty().addListener(valListener);
 
         uiCRSs.valueProperty().addListener(this::crsChange);
+    }
+
+    protected void initCrsFromPos(Positionable newValue) {
+        final String crsName = newValue.getCrsName();
+        if (crsName != null && !crsName.equals(baseCrs.getName().toString())) {
+            final Optional<CoordinateReferenceSystem> uiCrs = uiCRSs.getItems().stream().filter(crs -> crsName.equals(crs.getName().toString())).findFirst();
+            uiCrs.ifPresent(coordinateReferenceSystem -> uiCRSs.getSelectionModel().select(coordinateReferenceSystem));
+        } else {
+            uiCRSs.getSelectionModel().select(baseCrs);
+        }
     }
 
     /**
@@ -267,6 +280,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
 
     @Override
     public void updateFields() {
+        if (updatePosAfterCrsChange) return;
         reseting = true;
 
         final Positionable pos = posProperty.get();
@@ -416,6 +430,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         positionable.setPositionFin(endPoint);
         positionable.geometryModeProperty().set(getID());
         positionable.setGeometry(geometry);
+        positionable.setCrsName(uiCRSs.getValue().getName().toString());
 
         ConvertPositionableCoordinates.computePositionableLinearCoordinate(positionable);
 
@@ -507,8 +522,8 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             }
         }
 
-        updatePosAfterCrsChange = false;
         buildGeometry();
+        updatePosAfterCrsChange = false;
         reseting = false;
     }
 
