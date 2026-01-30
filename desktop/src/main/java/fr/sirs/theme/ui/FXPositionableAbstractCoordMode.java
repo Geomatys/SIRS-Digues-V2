@@ -92,7 +92,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
     private static final StringConverter<Double> SEVEN_DIGITS_CONVERTER = new FormattedDoubleConverter(new DecimalFormat("#.#######"));
     private static final StringConverter<Double> TWO_DIGITS_CONVERTER = new FormattedDoubleConverter(new DecimalFormat("#.##"));
 
-    private final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
+    protected final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
 
     private final ObjectProperty<Positionable> posProperty = new SimpleObjectProperty<>();
     protected final BooleanProperty disableProperty = new SimpleBooleanProperty(true);
@@ -114,7 +114,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
     private final Button uiImport;
 
     private boolean reseting = false;
-    private boolean updatePosAfterCrsChange = false;
+    protected boolean updatePosAfterCrsChange = false;
 
     public void setReseting(boolean reseting) {
         this.reseting = reseting;
@@ -308,6 +308,11 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             }
         }
 
+        getCoordsForSelectedCrsAndUpdateSpinners(startPoint, endPoint);
+        reseting = false;
+    }
+
+    protected void getCoordsForSelectedCrsAndUpdateSpinners(Point startPoint, Point endPoint) {
         final CoordinateReferenceSystem crs = uiCRSs.getValue();
         if (baseCrs != crs && (startPoint != null || endPoint != null)) {
             try {
@@ -326,7 +331,6 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         }
 
         updateLatLongFor(startPoint, endPoint);
-        reseting = false;
     }
 
     /**
