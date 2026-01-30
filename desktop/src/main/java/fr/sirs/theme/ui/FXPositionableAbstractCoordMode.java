@@ -42,7 +42,6 @@ import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import fr.sirs.util.javafx.SpinnerUtils;
-import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -459,6 +458,12 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         reseting = true;
 
         final Point ptStart, ptEnd;
+        // Check whether the coordinates have been set or the Positionable is being created :
+        if (uiLongitudeStart.valueProperty().get().equals(0.0) && uiLatitudeStart.valueProperty().get().equals(0.0)
+        && uiLongitudeEnd.valueProperty().get().equals(0.0) && uiLatitudeEnd.valueProperty().get().equals(0.0)) {
+            reseting = false;
+            return;
+        }
         // On a un point de début valide
         if (uiLongitudeStart.valueProperty().get() != null && uiLatitudeStart.valueProperty().get() != null) {
             ptStart = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
