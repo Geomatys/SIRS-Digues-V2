@@ -18,17 +18,12 @@
  */
 package fr.sirs;
 
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Geometry;
-
-import static fr.sirs.SIRS.CRS_WGS84;
-import static fr.sirs.SIRS.DATE_DEBUT_FIELD;
-import static fr.sirs.SIRS.DATE_FIN_FIELD;
-import static fr.sirs.SIRS.DEFAULT_TRONCON_GEOM_WGS84;
-import static fr.sirs.SIRS.SIRSDOCUMENT_REFERENCE;
-
+import com.vividsolutions.jts.geom.Point;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
-import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
@@ -45,43 +40,15 @@ import fr.sirs.migration.upgrade.v2.UpgradeEvenementHydrauliqueLinkWithMesureH;
 import fr.sirs.migration.upgrade.v2and23.UpgradeLink1NtoNN;
 import fr.sirs.migration.upgrade.v2and23.UpgradePrestationsCoordinates;
 import fr.sirs.migration.upgrade.v2and23.Upgrades1NtoNNSupported;
-import fr.sirs.theme.ContactsTheme;
-import fr.sirs.theme.DocumentTheme;
-import fr.sirs.theme.EvenementsHydrauliquesTheme;
-import fr.sirs.theme.GlobalPrestationTheme;
-import fr.sirs.theme.PositionDocumentTheme;
-import fr.sirs.theme.Theme;
-import fr.sirs.theme.TronconTheme;
+import fr.sirs.theme.*;
 import fr.sirs.util.DesordreUrgenceLayerFunction;
 import fr.sirs.util.FXFreeTab;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.RenderingHints;
-import java.awt.geom.Rectangle2D;
-import java.beans.PropertyDescriptor;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.logging.Level;
-
 import fr.sirs.util.UrgenceLayerColors;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
-import javax.swing.SwingConstants;
 import org.apache.sis.measure.Units;
 import org.apache.sis.referencing.CRS;
 import org.apache.sis.referencing.CommonCRS;
@@ -95,6 +62,7 @@ import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.bean.BeanStore;
+import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display.PortrayalException;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -103,11 +71,7 @@ import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
 import org.geotoolkit.display2d.ext.northarrow.GraphicNorthArrowJ2D;
 import org.geotoolkit.display2d.ext.scalebar.GraphicScaleBarJ2D;
-import org.geotoolkit.display2d.service.CanvasDef;
-import org.geotoolkit.display2d.service.DefaultPortrayalService;
-import org.geotoolkit.display2d.service.PortrayalExtension;
-import org.geotoolkit.display2d.service.SceneDef;
-import org.geotoolkit.display2d.service.ViewDef;
+import org.geotoolkit.display2d.service.*;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.GeometryDescriptor;
@@ -116,24 +80,8 @@ import org.geotoolkit.filter.identity.DefaultFeatureId;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.geometry.jts.JTSEnvelope2D;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
-import org.geotoolkit.map.FeatureMapLayer;
-import org.geotoolkit.map.MapBuilder;
-import org.geotoolkit.map.MapContext;
-import org.geotoolkit.map.MapItem;
-import org.geotoolkit.map.MapLayer;
+import org.geotoolkit.map.*;
 import org.geotoolkit.style.*;
-import static org.geotoolkit.style.StyleConstants.DEFAULT_ANCHOR_POINT;
-import static org.geotoolkit.style.StyleConstants.DEFAULT_DESCRIPTION;
-import static org.geotoolkit.style.StyleConstants.DEFAULT_DISPLACEMENT;
-import static org.geotoolkit.style.StyleConstants.DEFAULT_FILL_COLOR;
-import static org.geotoolkit.style.StyleConstants.DEFAULT_FONT;
-import static org.geotoolkit.style.StyleConstants.DEFAULT_GRAPHIC_ROTATION;
-import static org.geotoolkit.style.StyleConstants.LITERAL_ONE_FLOAT;
-import static org.geotoolkit.style.StyleConstants.LITERAL_ZERO_FLOAT;
-import static org.geotoolkit.style.StyleConstants.STROKE_CAP_BUTT;
-import static org.geotoolkit.style.StyleConstants.STROKE_CAP_ROUND;
-import static org.geotoolkit.style.StyleConstants.STROKE_CAP_SQUARE;
-import static org.geotoolkit.style.StyleConstants.STROKE_JOIN_BEVEL;
 import org.geotoolkit.util.NamesExt;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
@@ -144,8 +92,28 @@ import org.opengis.geometry.Envelope;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.style.*;
+import org.opengis.style.Stroke;
 import org.opengis.util.FactoryException;
 import org.opengis.util.GenericName;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.List;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+
+import static fr.sirs.SIRS.*;
+import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
+import static org.geotoolkit.style.StyleConstants.*;
 
 /**
  *
@@ -214,9 +182,8 @@ public class CorePlugin extends Plugin {
         suppliers.clear();
         final TronconDigueRepository repository = (TronconDigueRepository) getSession().getRepositoryForClass(TronconDigue.class);
 
-        final Function<Class<? extends Element>, StructBeanSupplier> getDefaultSupplierForClass = (Class<? extends Element> c) ->{
-            return new StructBeanSupplier(c, () -> getSession().getRepositoryForClass(c).getAllStreaming());
-        };
+        final Function<Class<? extends Element>, StructBeanSupplier> getDefaultSupplierForClass =
+                (Class<? extends Element> c) -> new StructBeanSupplier(c, () -> getSession().getRepositoryForClass(c).getAllStreaming());
 
         //troncons
         suppliers.put(TronconDigue.class, new StructBeanSupplier(TronconDigue.class,() -> repository::getAllLightIterator));
@@ -291,32 +258,7 @@ public class CorePlugin extends Plugin {
                 final LabelMapper mapper = LabelMapper.get(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
-            final Map<Class<? extends AbstractPositionDocument>, List<Class>> mapDesTypesDeDocs = new HashMap<>();
-            final List<Class> positionDocumentList = new ArrayList<>();
-            positionDocumentList.add(ArticleJournal.class);
-            positionDocumentList.add(Marche.class);
-            positionDocumentList.add(RapportEtude.class);
-            positionDocumentList.add(DocumentGrandeEchelle.class);
-
-            for(final Class elementClass : positionDocumentList){
-                final LabelMapper mapper = LabelMapper.get(elementClass);
-                nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
-            }
-            final List<Class> positionProfilTraversList = new ArrayList<>();
-            positionProfilTraversList.add(ProfilTravers.class);
-            for(final Class elementClass : positionProfilTraversList){
-                final LabelMapper mapper = LabelMapper.get(elementClass);
-                nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
-            }
-            final List<Class> profilLongList = new ArrayList<>();
-            profilLongList.add(ProfilLong.class);
-            for(final Class elementClass : profilLongList){
-                final LabelMapper mapper = LabelMapper.get(elementClass);
-                nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
-            }
-            mapDesTypesDeDocs.put(PositionDocument.class, positionDocumentList);
-            mapDesTypesDeDocs.put(PositionProfilTravers.class, positionProfilTraversList);
-            mapDesTypesDeDocs.put(ProfilLong.class, profilLongList);
+            final Map<Class<? extends AbstractPositionDocument>, List<Class>> mapDesTypesDeDocs = getTypesDeDocsMap(nameMap);
 
             final Color[] colors = new Color[]{
                 Color.BLACK,
@@ -353,6 +295,19 @@ public class CorePlugin extends Plugin {
             }
             final BeanStore tronconStore = new BeanStore(tronconFeatureSupplier);
             sirsGroup.items().addAll(buildLayers(tronconStore,TRONCON_LAYER_NAME,createTronconStyle(),createTronconSelectionStyle(false),true));
+
+            // HACK - redmine 7631 : show only for TronconDigue and not for Berge nor Lit.
+            Filter filter = null;
+            TronconDigueRepository repo = (TronconDigueRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(TronconDigue.class);
+            final List<String> tronconsIds = repo.getAllLight().stream().map(TronconDigue::getId).collect(Collectors.toList());
+            if (!tronconsIds.isEmpty()) {
+                filter = FF.equals(FF.property("linearId"), FF.literal(tronconsIds.get(0)));
+                for (int j = 1; j < tronconsIds.size(); j++) {
+                    filter = FF.or(
+                            FF.equals(FF.property("linearId"), FF.literal(tronconsIds.get(j))),
+                            filter);
+                }
+            }
 
             // Special request to add a layer for the photos of the 'troncon'
             final BeanStore photoTronconStore = new BeanStore(photoTronconSupplier());
@@ -397,7 +352,7 @@ public class CorePlugin extends Plugin {
                     suppliers.get(OuvrageVoirie.class));
             final MapItem rvLayer = MapBuilder.createItem();
             rvLayer.setName("Réseaux de voirie");
-            rvLayer.items().addAll( buildLayers(rvStore, nameMap, colors, createDefaultSelectionStyle(),false) );
+            rvLayer.items().addAll( buildLayers(rvStore, nameMap, colors, createDefaultSelectionStyle(),false, filter) );
             rvLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(rvLayer);
 
@@ -413,7 +368,7 @@ public class CorePlugin extends Plugin {
                     suppliers.get(EchelleLimnimetrique.class));
             final MapItem roLayer = MapBuilder.createItem();
             roLayer.setName("Réseaux et ouvrages");
-            roLayer.items().addAll( buildLayers(roStore, nameMap, colors, createDefaultSelectionStyle(),false) );
+            roLayer.items().addAll( buildLayers(roStore, nameMap, colors, createDefaultSelectionStyle(),false, filter) );
             roLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(roLayer);
 
@@ -421,7 +376,7 @@ public class CorePlugin extends Plugin {
             final BeanStore desordreStore = new BeanStore(suppliers.get(Desordre.class));
             final MapItem desordresLayer = MapBuilder.createItem();
             desordresLayer.setName("Désordres");
-            desordresLayer.items().addAll( buildLayers(desordreStore, nameMap, colors, createDefaultSelectionStyle(),false) );
+            desordresLayer.items().addAll( buildLayers(desordreStore, nameMap, colors, createDefaultSelectionStyle(),false, filter) );
             desordresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(desordresLayer);
 
@@ -432,7 +387,7 @@ public class CorePlugin extends Plugin {
             final BeanStore prestaStore = new BeanStore(suppliers.get(Prestation.class));
             final MapItem prestaLayer = MapBuilder.createItem();
             prestaLayer.setName("Prestations");
-            prestaLayer.items().addAll( buildLayers(prestaStore, nameMap, colors, createDefaultSelectionStyle(),false) );
+            prestaLayer.items().addAll( buildLayers(prestaStore, nameMap, colors, createDefaultSelectionStyle(),false, filter) );
             prestaLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(prestaLayer);
 
@@ -443,7 +398,7 @@ public class CorePlugin extends Plugin {
                     suppliers.get(LigneEau.class));
             final MapItem mesuresLayer = MapBuilder.createItem();
             mesuresLayer.setName("Mesures d'événements");
-            mesuresLayer.items().addAll( buildLayers(mesuresStore, nameMap, colors, createDefaultSelectionStyle(),false) );
+            mesuresLayer.items().addAll( buildLayers(mesuresStore, nameMap, colors, createDefaultSelectionStyle(),false, filter) );
             mesuresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(mesuresLayer);
 
@@ -454,7 +409,7 @@ public class CorePlugin extends Plugin {
                     suppliers.get(ProfilLong.class));
             final MapItem documentsLayer = MapBuilder.createItem();
             documentsLayer.setName("Documents");
-            documentsLayer.items().addAll(buildLayers(documentsStore, mapDesTypesDeDocs, nameMap, colors, createDefaultSelectionStyle(),false) );
+            documentsLayer.items().addAll(buildLayers(documentsStore, mapDesTypesDeDocs, nameMap, colors, createDefaultSelectionStyle(),false, filter) );
             documentsLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(documentsLayer);
 
@@ -476,6 +431,42 @@ public class CorePlugin extends Plugin {
         }
 
         return items;
+    }
+
+    /**
+     * Build the map of documents types available and add values to the nameMap.
+     *
+     * @param nameMap map to add the document types to.
+     * @return the map containing the documents classes.
+     */
+    public static Map<Class<? extends AbstractPositionDocument>, List<Class>> getTypesDeDocsMap(Map<String, String> nameMap) {
+        final Map<Class<? extends AbstractPositionDocument>, List<Class>> mapDesTypesDeDocs = new HashMap<>();
+        final List<Class> positionDocumentList = new ArrayList<>();
+        positionDocumentList.add(ArticleJournal.class);
+        positionDocumentList.add(Marche.class);
+        positionDocumentList.add(RapportEtude.class);
+        positionDocumentList.add(DocumentGrandeEchelle.class);
+
+        for(final Class elementClass : positionDocumentList){
+            final LabelMapper mapper = LabelMapper.get(elementClass);
+            nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
+        }
+        final List<Class> positionProfilTraversList = new ArrayList<>();
+        positionProfilTraversList.add(ProfilTravers.class);
+        for(final Class elementClass : positionProfilTraversList){
+            final LabelMapper mapper = LabelMapper.get(elementClass);
+            nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
+        }
+        final List<Class> profilLongList = new ArrayList<>();
+        profilLongList.add(ProfilLong.class);
+        for(final Class elementClass : profilLongList){
+            final LabelMapper mapper = LabelMapper.get(elementClass);
+            nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
+        }
+        mapDesTypesDeDocs.put(PositionDocument.class, positionDocumentList);
+        mapDesTypesDeDocs.put(PositionProfilTravers.class, positionProfilTraversList);
+        mapDesTypesDeDocs.put(ProfilLong.class, profilLongList);
+        return mapDesTypesDeDocs;
     }
 
     public static MapItem createAndAddUrgenceGroup(final Class<? extends IDesordre> beanClass, final BeanStore desordreStore, final Map<String, MutableStyle> urgenceStylesMap, final MutableStyle selectionStyle) throws DataStoreException {
@@ -574,12 +565,30 @@ public class CorePlugin extends Plugin {
         return layers;
     }
 
-    public static List<MapLayer> buildLayers(BeanStore store, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
+    public static List<MapLayer> buildLayers(BeanStore store, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException {
+        return buildLayers(store, nameMap, colors, selectionStyle, visible, null);
+    }
+
+    /**
+     * Allow to filter collection.
+     *
+     * @param store
+     * @param nameMap
+     * @param colors
+     * @param selectionStyle
+     * @param visible
+     * @param filter filter to apply to the query.
+     * @return
+     * @throws DataStoreException
+     */
+    public static List<MapLayer> buildLayers(BeanStore store, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible, final Filter filter) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
         int i=0;
         for(GenericName name : store.getNames()){
-            final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.all(name));
+            final Query queryBuilder = filter == null ? QueryBuilder.all(name) : QueryBuilder.filtered(name, filter);
+
+            final FeatureCollection col = symSession.getFeatureCollection(queryBuilder);
             final int d = (int)((i%colors.length)*1.5);
             final MutableStyle baseStyle = createDefaultStyle(colors[i%colors.length]);
             final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
@@ -662,7 +671,7 @@ public class CorePlugin extends Plugin {
      * @return List of created map layers.
      * @throws DataStoreException If an error occcurs while reading in input store.
      */
-    public static List<MapLayer> buildLayers(BeanStore store, Map<Class<? extends AbstractPositionDocument>, List<Class>> documentClasses, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
+    public static List<MapLayer> buildLayers(BeanStore store, Map<Class<? extends AbstractPositionDocument>, List<Class>> documentClasses, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible, final Filter filter) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
         int i=0;
@@ -671,7 +680,8 @@ public class CorePlugin extends Plugin {
             try {
                 positionDocumentClass = (Class<? extends AbstractPositionDocument>) Class.forName(MODEL_PACKAGE+"."+name.tip().toString(), true, Thread.currentThread().getContextClassLoader());
                 for(final Class documentClass : documentClasses.get(positionDocumentClass)){
-                    final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.filtered(name, new DocumentFilter(documentClass)));
+                    Filter filterFinal = filter == null ? new DocumentFilter(documentClass) : FF.and(filter, new DocumentFilter(documentClass));
+                    final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.filtered(name, filterFinal));
                     if(col.getFeatureType()!=null){
                         final MutableStyle baseStyle = createDefaultStyle(colors[i%colors.length]);
                         final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
@@ -1422,10 +1432,27 @@ public class CorePlugin extends Plugin {
             return getMapLayerForElement(mapper.mapClassName());
 
         } else {
+        // HACK : redmine7631 - Common layers between Core and plugins Berge and Lit not having their own layer on the map
+        // Allows to get the proper layer from the proper plugin.
+            String pluginName = null;
+            if (Objet.class.isAssignableFrom(element.getClass())) {
+                final TronconDigue tronconDigue = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(((Objet) element).getLinearId());
+                if (tronconDigue != null) {
+                    final String className = tronconDigue.getClass().getSimpleName();
+                    if (className.equalsIgnoreCase("TronconDigue")) {
+                        pluginName = "core";
+                    } else if (className.equalsIgnoreCase("Berge")) {
+                        pluginName = "plugin-berge";
+                    } else if (className.equalsIgnoreCase("TronconLit")) {
+                        pluginName = "plugin-lit";
+                    }
+                }
+            }
             final LabelMapper mapper = LabelMapper.get(element.getClass());
-            final MapLayer foundLayer = getMapLayerForElement(mapper.mapClassName());
+
+            final MapLayer foundLayer = getMapLayerForElement(mapper.mapClassName(), pluginName);
             if (foundLayer == null) {
-                return getMapLayerForElement(mapper.mapClassNamePlural());
+                return getMapLayerForElement(mapper.mapClassNamePlural(), pluginName);
             } else {
                 return foundLayer;
             }
@@ -1443,6 +1470,29 @@ public class CorePlugin extends Plugin {
         for (MapLayer layer : context.layers()) {
             if (layer.getName().equalsIgnoreCase(layerName)) {
                 return layer;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * // HACK redmine7631
+     * Try to get the map layer using its name and the plugin where it shall be present.
+     * @param layerName Identifier of the map layer to retrieve
+     * @param pluginName Plugin where the layer shall be found. Can be null.
+     * @return The matching map layer, or null.
+     */
+    public static MapLayer getMapLayerForElement(String layerName, final String pluginName) {
+        final MapContext context = Injector.getSession().getMapContext();
+        if (context == null) return null;
+        final List<MapLayer> layers = context.layers().stream().filter(l -> l.getName().equalsIgnoreCase(layerName)).collect(Collectors.toList());
+        if (layers.size() == 1) {
+            return layers.get(0);
+        } else if (layers.size() > 1 && pluginName != null) {
+            final List<MapLayer> pluginLayer = layers.stream().filter(l -> l.getUserProperty("pluginSirs").equals(pluginName)).collect(Collectors.toList());
+            if (!pluginLayer.isEmpty()) {
+                // A plugin should not have more than one layer with the same name.
+                return pluginLayer.get(0);
             }
         }
         return null;
