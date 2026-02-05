@@ -43,6 +43,7 @@ import fr.sirs.migration.upgrade.v2and23.Upgrades1NtoNNSupported;
 import fr.sirs.theme.*;
 import fr.sirs.util.DesordreUrgenceLayerFunction;
 import fr.sirs.util.FXFreeTab;
+import fr.sirs.util.LinearIdFilterFunction;
 import fr.sirs.util.UrgenceLayerColors;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -296,18 +297,12 @@ public class CorePlugin extends Plugin {
             final BeanStore tronconStore = new BeanStore(tronconFeatureSupplier);
             sirsGroup.items().addAll(buildLayers(tronconStore,TRONCON_LAYER_NAME,createTronconStyle(),createTronconSelectionStyle(false),true));
 
-            // HACK - redmine 7631 : show only for TronconDigue and not for Berge nor Lit.
-            Filter filter = null;
-            TronconDigueRepository repo = (TronconDigueRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(TronconDigue.class);
-            final List<String> tronconsIds = repo.getAllLight().stream().map(TronconDigue::getId).collect(Collectors.toList());
-            if (!tronconsIds.isEmpty()) {
-                filter = FF.equals(FF.property("linearId"), FF.literal(tronconsIds.get(0)));
-                for (int j = 1; j < tronconsIds.size(); j++) {
-                    filter = FF.or(
-                            FF.equals(FF.property("linearId"), FF.literal(tronconsIds.get(j))),
-                            filter);
-                }
-            }
+            // Redmine 7631 : show positionables for TronconDigue that are common types of Objects as for Berge or TronconLit.
+            // Use dynamic filter that evaluates at render time to include newly created TronconDigue objects.
+            final Filter filter = FF.equals(
+                    FF.function(LinearIdFilterFunction.NAME, FF.literal(TronconDigue.class.getCanonicalName())),
+                    FF.literal(true)
+            );
 
             // Special request to add a layer for the photos of the 'troncon'
             final BeanStore photoTronconStore = new BeanStore(photoTronconSupplier());

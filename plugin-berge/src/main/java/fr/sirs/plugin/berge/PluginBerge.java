@@ -22,11 +22,9 @@ import fr.sirs.CorePlugin;
 import fr.sirs.Plugin;
 import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
-import fr.sirs.core.InjectorCore;
-import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCoreRuntimeException;
-import fr.sirs.core.component.BergeRepository;
 import fr.sirs.core.model.*;
+import fr.sirs.util.LinearIdFilterFunction;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.berge.map.BergeToolBar;
 import java.awt.Color;
@@ -35,7 +33,6 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
@@ -194,18 +191,12 @@ public class PluginBerge extends Plugin {
 
             final Map<Class<? extends AbstractPositionDocument>, List<Class>> mapDesTypesDeDocs = getTypesDeDocsMap(nameMap);
 
-            // HACK - redmine 7631 : show positionable for Berge that are same type of Objects as for TronconDigue.
-            Filter filter = null;
-            final BergeRepository repo = (BergeRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(Berge.class);
-            final List<String> bergeIds = repo.getAll().stream().map(Berge::getId).collect(Collectors.toList());
-            if (!bergeIds.isEmpty()) {
-                filter = FF.equals(FF.property("linearId"), FF.literal(bergeIds.get(0)));
-                for (int j = 1; j < bergeIds.size(); j++) {
-                    filter = FF.or(
-                            FF.equals(FF.property("linearId"), FF.literal(bergeIds.get(j))),
-                            filter);
-                }
-            }
+            // Redmine 7631 : show positionable for Berge that are same type of Objects as for TronconDigue.
+            // Use dynamic filter that evaluates at render time to include newly created Berge objects.
+            final Filter filter = FF.equals(
+                    FF.function(LinearIdFilterFunction.NAME, FF.literal(Berge.class.getCanonicalName())),
+                    FF.literal(true)
+            );
 
             final MapItem structLayer = MapBuilder.createItem();
             structLayer.setName("Autre (berge)");

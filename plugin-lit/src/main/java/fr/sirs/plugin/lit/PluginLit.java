@@ -45,6 +45,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import fr.sirs.util.LinearIdFilterFunction;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import org.apache.sis.measure.Units;
@@ -216,18 +217,12 @@ public class PluginLit extends Plugin {
 
             final Map<Class<? extends AbstractPositionDocument>, List<Class>> mapDesTypesDeDocs = getTypesDeDocsMap(nameMap);
 
-            // HACK - redmine 7631 : show positionable for TronconLit that are same type of Objects as for TronconDigue.
-            Filter filter = null;
-            final TronconLitRepository repo = (TronconLitRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(TronconLit.class);
-            final List<String> LitIds = repo.getAll().stream().map(TronconLit::getId).collect(Collectors.toList());
-            if (!LitIds.isEmpty()) {
-                filter = FF.equals(FF.property("linearId"), FF.literal(LitIds.get(0)));
-                for (int j = 1; j < LitIds.size(); j++) {
-                    filter = FF.or(
-                            FF.equals(FF.property("linearId"), FF.literal(LitIds.get(j))),
-                            filter);
-                }
-            }
+            // Redmine 7631 : show positionable for TronconLit that are same type of Objects as for TronconDigue.
+            // Use dynamic filter that evaluates at render time to include newly created TronconLit objects.
+            final Filter filter = FF.equals(
+                    FF.function(LinearIdFilterFunction.NAME, FF.literal(TronconLit.class.getCanonicalName())),
+                    FF.literal(true)
+            );
 
             try {
                 final MapItem structLayer = MapBuilder.createItem();
