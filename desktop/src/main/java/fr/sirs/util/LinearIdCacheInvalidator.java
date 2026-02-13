@@ -71,7 +71,7 @@ public class LinearIdCacheInvalidator implements DocumentListener {
             final DocumentChangeEmiter emiter = session.getApplicationContext().getBean(DocumentChangeEmiter.class);
             emiter.addListener(this);
         } catch (NoSuchBeanDefinitionException e) {
-            SIRS.LOGGER.log(Level.FINE, "No document change emitter registered.", e);
+            SIRS.LOGGER.log(Level.WARNING, "No document change emitter registered.", e);
         }
     }
 
@@ -92,8 +92,6 @@ public class LinearIdCacheInvalidator implements DocumentListener {
 
     @Override
     public void documentDeleted(Set<String> deleted) {
-        // On deletion, we don't know the types from the IDs alone.
-        // We invalidate all caches to be safe. This is a rare operation.
-        LinearIdFilterFunction.invalidateCache(null);
+        LinearIdFilterFunction.invalidateCacheByObjectId(deleted);
     }
 }

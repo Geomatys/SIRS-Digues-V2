@@ -1484,7 +1484,10 @@ public class CorePlugin extends Plugin {
         if (layers.size() == 1) {
             return layers.get(0);
         } else if (layers.size() > 1 && pluginName != null) {
-            final List<MapLayer> pluginLayer = layers.stream().filter(l -> l.getUserProperty("pluginSirs").equals(pluginName)).collect(Collectors.toList());
+            final List<MapLayer> pluginLayer = layers.stream().filter(l -> {
+                final Object userProperty = l.getUserProperty(Plugin.PLUGIN_FLAG);
+                return userProperty != null && userProperty.equals(pluginName);
+            }).collect(Collectors.toList());
             if (!pluginLayer.isEmpty()) {
                 // A plugin should not have more than one layer with the same name.
                 return pluginLayer.get(0);

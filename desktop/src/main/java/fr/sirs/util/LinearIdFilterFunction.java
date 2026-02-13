@@ -20,6 +20,7 @@
 package fr.sirs.util;
 
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Identifiable;
@@ -33,6 +34,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
@@ -93,8 +95,6 @@ public class LinearIdFilterFunction extends AbstractFunction {
      */
     @Override
     public Object evaluate(Object object) {
-        if (object == null) return false;
-
         if (!(object instanceof BeanFeature)) {
             return false;
         }
@@ -137,6 +137,7 @@ public class LinearIdFilterFunction extends AbstractFunction {
                     .collect(Collectors.toSet());
 
         } catch (Exception e) {
+            SIRS.LOGGER.log(Level.WARNING, "Error while recovering ids from database for the linear type : " + canonicalName, e);
             return Collections.emptySet();
         }
     }
@@ -152,6 +153,23 @@ public class LinearIdFilterFunction extends AbstractFunction {
             cache.clear();
         } else {
             cache.remove(canonicalName);
+        }
+    }
+
+    /**
+     * On deletion, we don't have the class of the deleted element.
+     * Look for deleted ids in cache and invalidate corresponding cache.
+     * @param ids : ids of the deleted elements.
+     */
+    public static void invalidateCacheByObjectId(Set<String> ids) {
+        for (Map.Entry<String, Set<String>> stringSetEntry : cache.entrySet()) {
+            final Set<String> cacheValues = stringSetEntry.getValue();
+            final String className = stringSetEntry.getKey();
+            for (String id : ids) {
+                if (cacheValues != null && cacheValues.contains(id)) {
+                    invalidateCache(className);
+                }
+            }
         }
     }
 }
