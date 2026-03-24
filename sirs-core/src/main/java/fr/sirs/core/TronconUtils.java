@@ -376,22 +376,15 @@ public class TronconUtils {
         Positionable original;
         Geometry originalGeometry;
         Positionable copied;
-        final LocalDate now = LocalDate.now();
+
         // Map to store the link between original objets ids and created ones ids.
         final Map<String, String> mapOldandNewIds= new HashMap<>();
         AbstractSIRSRepository<Positionable> repo;
         while (posIt.hasNext()) {
             original = posIt.next();
 
-            // Do not update archived data.
-            if (original instanceof AvecBornesTemporelles) {
-                LocalDate date = ((AvecBornesTemporelles) original).getDate_fin();
-                if (date != null && date.isBefore(now)) {
-                    continue;
-                }
-            }
-
-            final boolean isDocument = ((Element) original).getParent() == null;
+            // Redmine 8196 : We keep archived objects
+            final boolean isDocument = original.getParent() == null;
 
             //on vérifie que cet objet intersecte le segment
             originalGeometry = original.getGeometry();
