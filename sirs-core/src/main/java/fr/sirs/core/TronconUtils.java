@@ -478,7 +478,13 @@ public class TronconUtils {
 
             repo = (AbstractSIRSRepository<Positionable>) session.getRepositoryForClass(copied.getClass());
             // Add to repo to get an id for the newly created positionable.
-            repo.add(copied);
+            if (repo == null) {
+                // Photo is a Positionable and is located based on the parent's SR. But it is not an Objet and thus has no linearId.
+                // It will be copied directly through its parent : the Observation.
+                SirsCore.LOGGER.log(Level.WARNING, "Repository null for class : " + copied.getClass());
+            } else {
+                repo.add(copied);
+            }
             // Store the old and new Ids to use later on to update the links between positionables.
             mapOldandNewIds.put(original.getId(), copied.getId());
         }
