@@ -342,7 +342,6 @@ public class ElementCopier extends AbstractElementCopier{
                 setAttributes(isExtern, copiedPojo, userId, session);
 
                 copiedPojo.setSystemeEndiguementId(targetedSystemeEndiguement.getId());
-                copiedPojo.setDesignation(null);
 
                 //CHECK BORNES TEMPORELLES Parent ET BORNES TEMPORELLLES copiedPojo
                 copiedPojos.add(copiedPojo);
