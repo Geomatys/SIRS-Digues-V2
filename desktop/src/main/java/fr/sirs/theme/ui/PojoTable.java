@@ -805,7 +805,11 @@ public class PojoTable extends BorderPane implements Printable {
                 alert.showAndWait();
             }
         });
-        uiCopyTo.disableProperty().bind(editableProperty.not());
+
+        // An user with Extern role cannot select element other than the ones he is the author of,
+        // and thus when in editing mode, he can't copy elements created by other users.
+        // This is a hack to allow the extern user to copy any element.
+        uiCopyTo.disableProperty().bind(editableProperty.not().and(Injector.getSession().roleBinding().isNotEqualTo(Role.EXTERN)));
 
         uiDelete.getStyleClass().add(BUTTON_STYLE);
         uiDelete.setOnAction((ActionEvent event) -> {
